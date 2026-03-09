@@ -793,10 +793,31 @@ Tu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver lo
   const handleSaveGuest = async (e) => {
     e.preventDefault();
     const nuevoId = Date.now().toString();
+    const pNum = Number(newGuest.passes) || 1;
+    
+    // 🔴 MAGIA 1: Creamos los lugares de los acompañantes desde el momento cero
+    const initSubGuests = Array(pNum).fill(null).map((_, i) => ({
+      id: `usr_${nuevoId}_${i}`,
+      name: i === 0 ? newGuest.name : `Acompañante ${i+1}`,
+      isChild: false,
+      entered: false
+    }));
+
     const datosInvitado = {
-      name: newGuest.name, passes: Number(newGuest.passes), childrenPasses: Number(newGuest.childrenPasses),
-      phone: newGuest.phone, status: newGuest.status, side: addModal.side, entered: 0, tableId: null, sent: false, subGuests: [], extraRequested: 0, originalPasses: Number(newGuest.passes)
+      name: newGuest.name, 
+      passes: pNum, 
+      childrenPasses: Number(newGuest.childrenPasses) || 0,
+      phone: newGuest.phone, 
+      status: newGuest.status, 
+      side: addModal.side, 
+      entered: 0, 
+      tableId: null, 
+      sent: false, 
+      subGuests: initSubGuests, // Aquí insertamos los acompañantes vacíos
+      extraRequested: 0, 
+      originalPasses: pNum
     };
+    
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", nuevoId), datosInvitado);
     setAddModal({ open: false, side: 'general' });
   };
@@ -8985,8 +9006,32 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                         {sg.willAttend && (
                           <div className="space-y-3 mt-3 pt-3 border-t-4 animate-in fade-in" style={{ borderColor: `${t_txt}20` }}>
                             <input type="text" required placeholder="Nombre del jugador..." value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)} style={themeInput} className="w-full p-3 border-4 rounded-lg text-lg font-bold outline-none" />
+                            {/* 🔴 MAGIA 2: Botón para indicar si es niño */}
+                            <label className="flex items-center space-x-3 cursor-pointer pt-2">
+                               <input 
+                                 type="checkbox" 
+                                 checked={sg.isChild || false} 
+                                 onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} 
+                                 className="w-5 h-5 accent-indigo-600" 
+                               />
+                               <span className="text-sm font-bold uppercase tracking-widest opacity-80">
+                                 Es un Niño (Menor)
+                               </span>
+                            </label>
                             <label className="flex items-center space-x-2 cursor-pointer pt-1">
                                <input type="checkbox" checked={sg.isChild} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-6 h-6 accent-blue-600" />
+                               {/* 🔴 MAGIA 2: Botón para indicar si es niño */}
+                            <label className="flex items-center space-x-3 cursor-pointer pt-2">
+                               <input 
+                                 type="checkbox" 
+                                 checked={sg.isChild || false} 
+                                 onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} 
+                                 className="w-5 h-5 accent-indigo-600" 
+                               />
+                               <span className="text-sm font-bold uppercase tracking-widest opacity-80">
+                                 Es un Niño (Menor)
+                               </span>
+                            </label>
                                <span className="text-lg font-bold uppercase tracking-widest opacity-80 text-blue-800">Es un Niño (Menor)</span>
                             </label>
                           </div>
