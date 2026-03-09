@@ -1300,13 +1300,12 @@ const InvitacionView = ({ guests, setGuests, addNotification }) => {
     setIsConfirming(false);
   }, [selectedGuestId]);
 
-  // 🔴 CORRECCIÓN: Rescatamos el formulario independientemente del estatus.
   const handleOpenEdit = () => {
     if (!guest) return;
     setExtraRequested(guest.extraRequested || 0);
     
     const isFirstTime = guest.status === 'pendiente' || guest.status === 'por_invitar';
-    const totalLimit = guest.originalPasses || guest.passes; // Usa los pases originales para que puedan recuperar lugares cancelados
+    const totalLimit = guest.originalPasses || guest.passes; 
     const currentSubs = guest.subGuests || [];
     
     const newTemp = Array(totalLimit).fill(null).map((_, i) => {
@@ -1318,7 +1317,7 @@ const InvitacionView = ({ guests, setGuests, addNotification }) => {
     });
     
     setTempSubGuests(newTemp);
-    setIsConfirming(true); // Abrir formulario!
+    setIsConfirming(true); 
   };
 
   const handleSubGuestChange = (index, field, value) => {
@@ -1416,7 +1415,6 @@ const InvitacionView = ({ guests, setGuests, addNotification }) => {
               <p className="text-[9px] text-slate-500 uppercase tracking-widest mb-1">Pase Exclusivo Para</p>
               <h3 className="text-lg font-bold text-slate-800 mb-5 leading-tight">{guest.name}</h3>
 
-              {/* 🔴 CORRECCIÓN: EL FORMULARIO (isConfirming) AHORA TIENE LA PRIORIDAD ABSOLUTA EN PANTALLA */}
               {isConfirming ? (
                  <div className="bg-white p-4 rounded-xl shadow-lg border border-slate-100 mb-6 text-left animate-in slide-in-from-bottom-4">
                   <h4 className="font-bold text-slate-800 text-xs mb-1 text-center">Confirmación de Pases</h4>
@@ -1433,11 +1431,18 @@ const InvitacionView = ({ guests, setGuests, addNotification }) => {
                           </label>
                         </div>
                         {sg.willAttend && (
-                          <input 
-                            type="text" placeholder="Nombre de la persona..." 
-                            value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)}
-                            className="w-full p-2 border border-slate-200 rounded-md text-[10px] outline-none focus:border-indigo-400 bg-white"
-                          />
+                          <div className="space-y-2">
+                             <input 
+                               type="text" placeholder="Nombre de la persona..." 
+                               value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)}
+                               className="w-full p-2 border border-slate-200 rounded-md text-[10px] outline-none focus:border-indigo-400 bg-white"
+                             />
+                             {/* 🔴 CHECKBOX LIMPIO Y PERFECTO */}
+                             <label className="flex items-center space-x-2 cursor-pointer pt-1">
+                                <input type="checkbox" checked={sg.isChild || false} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-4 h-4 accent-indigo-600" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">Es un Niño (Menor)</span>
+                             </label>
+                          </div>
                         )}
                       </div>
                     ))}
@@ -1471,7 +1476,7 @@ const InvitacionView = ({ guests, setGuests, addNotification }) => {
                       {guest.subGuests && guest.subGuests.length > 0 ? (
                         guest.subGuests.map((sg, idx) => (
                           <li key={idx} className="text-xs font-semibold text-slate-700 flex items-center justify-between border-b border-slate-200 pb-1 last:border-0">
-                            <span className="truncate mr-2">{sg.name}</span>
+                            <span className="truncate mr-2">{sg.name} {sg.isChild && <span className="text-[8px] text-indigo-500 bg-indigo-50 px-1 ml-1 rounded uppercase tracking-widest">Niño</span>}</span>
                           </li>
                         ))
                       ) : <li className="text-[10px] text-slate-500 text-center italic">Sin nombres</li>}
@@ -8848,7 +8853,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
 
   const urlParams = new URLSearchParams(window.location.search);
   
-  // 🔴 1. DETECTAMOS SI ESTAMOS FLOTANDO SOBRE LA INVITACIÓN
   const isIframe = urlParams.get('iframe') === 'true';
   
   const t_bg = urlParams.get('bg') ? `#${urlParams.get('bg')}` : '#f8fafc'; 
@@ -8857,7 +8861,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const t_txt = urlParams.get('txt') ? `#${urlParams.get('txt')}` : '#1c1917'; 
   const t_font = urlParams.get('font') || '';
 
-  // 🔴 2. SI ES IFRAME, EL FONDO SE VUELVE TOTALMENTE TRANSPARENTE
   const themeContainer = { 
     backgroundColor: isIframe ? 'transparent' : t_bg, 
     fontFamily: t_font ? `"${t_font}", sans-serif` : 'inherit', 
@@ -8934,11 +8937,8 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
       }
       setRsvpStatus('success');
 
-      // 🔴 3. MAGIA DE COMUNICACIÓN: Le avisamos al HTML que ya terminamos para que cierre la ventana
       if (isIframe) {
-        setTimeout(() => {
-          window.parent.postMessage('rsvp_success', '*');
-        }, 2000); // Espera 2 segundos para que vean la palomita verde y se cierra
+        setTimeout(() => { window.parent.postMessage('rsvp_success', '*'); }, 2000); 
       }
 
     } catch (error) { alert("Hubo un error al confirmar. Intenta de nuevo."); setRsvpStatus('idle'); }
@@ -8965,7 +8965,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
 
       {showRSVP && (
         <div className="w-full max-w-md mx-auto z-50 animate-in slide-in-from-bottom-8 duration-500">
-          {/* 🔴 Aquí también le quitamos la sombra si es iframe para que se funda mejor */}
           <div style={themeCard} className={`w-full rounded-2xl p-6 border-4 max-h-[90vh] overflow-y-auto custom-scrollbar ${isIframe ? 'shadow-[8px_8px_0_rgba(0,0,0,0.5)]' : 'shadow-2xl'}`}>
             
             <div className="text-center mb-6 border-b-4 pb-4" style={{ borderColor: `${t_txt}20` }}>
@@ -9005,34 +9004,21 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                         
                         {sg.willAttend && (
                           <div className="space-y-3 mt-3 pt-3 border-t-4 animate-in fade-in" style={{ borderColor: `${t_txt}20` }}>
-                            <input type="text" required placeholder="Nombre del jugador..." value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)} style={themeInput} className="w-full p-3 border-4 rounded-lg text-lg font-bold outline-none" />
-                            {/* 🔴 MAGIA 2: Botón para indicar si es niño */}
-                            <label className="flex items-center space-x-3 cursor-pointer pt-2">
+                            <input 
+                              type="text" required placeholder="Nombre de la persona..." 
+                              value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)} 
+                              style={themeInput} className="w-full p-3 border-4 rounded-lg text-lg font-bold outline-none" 
+                            />
+                            {/* 🔴 CHECKBOX LIMPIO Y PERFECTO PARA EL INVITADO */}
+                            <label className="flex items-center space-x-3 cursor-pointer pt-1">
                                <input 
-                                 type="checkbox" 
-                                 checked={sg.isChild || false} 
+                                 type="checkbox" checked={sg.isChild || false} 
                                  onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} 
                                  className="w-5 h-5 accent-indigo-600" 
                                />
                                <span className="text-sm font-bold uppercase tracking-widest opacity-80">
                                  Es un Niño (Menor)
                                </span>
-                            </label>
-                            <label className="flex items-center space-x-2 cursor-pointer pt-1">
-                               <input type="checkbox" checked={sg.isChild} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-6 h-6 accent-blue-600" />
-                               {/* 🔴 MAGIA 2: Botón para indicar si es niño */}
-                            <label className="flex items-center space-x-3 cursor-pointer pt-2">
-                               <input 
-                                 type="checkbox" 
-                                 checked={sg.isChild || false} 
-                                 onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} 
-                                 className="w-5 h-5 accent-indigo-600" 
-                               />
-                               <span className="text-sm font-bold uppercase tracking-widest opacity-80">
-                                 Es un Niño (Menor)
-                               </span>
-                            </label>
-                               <span className="text-lg font-bold uppercase tracking-widest opacity-80 text-blue-800">Es un Niño (Menor)</span>
                             </label>
                           </div>
                         )}
