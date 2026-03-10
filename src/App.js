@@ -8570,253 +8570,281 @@ const GuestProyectorView = ({ eventId }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA.COM) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA BENTO-DESIGN) ---
 // ==========================================
 const LandingPageView = () => {
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-amber-500 selection:text-white">
-      {/* NAVEGACIÓN */}
-      {/* NAVEGACIÓN */}
-      <nav className="fixed w-full z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+    <div className="min-h-screen bg-[#0a0f1c] font-sans text-slate-200 selection:bg-amber-500 selection:text-slate-900 overflow-x-hidden">
+      
+      {/* 🔴 LUCES DE AMBIENTE (GLOW EFECT) */}
+      <div className="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-600/10 blur-[150px] rounded-full pointer-events-none z-0"></div>
+      <div className="fixed bottom-[-20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0"></div>
+
+      {/* 🔴 NAVEGACIÓN FLOTANTE */}
+      <nav className="fixed w-full z-50 top-0 pt-6 px-4 md:px-8 pointer-events-none">
+        <div className="max-w-6xl mx-auto bg-slate-900/60 backdrop-blur-xl border border-white/10 h-16 rounded-full flex items-center justify-between px-6 shadow-[0_10px_40px_rgba(0,0,0,0.5)] pointer-events-auto">
           <div className="flex items-center gap-3">
-            <BauliaLogo size={32} />
-            <span className="text-2xl font-black text-white tracking-widest">BAULIA</span>
+            <BauliaLogo size={28} />
+            <span className="text-xl font-black text-white tracking-widest uppercase">Baulia</span>
           </div>
-          <div className="hidden md:flex gap-8 text-sm font-bold text-slate-300">
-            <a href="#caracteristicas" className="hover:text-amber-400 transition-colors">Invitaciones</a>
-            <a href="#panel" className="hover:text-amber-400 transition-colors">Panel VIP</a>
-            <a href="#planes" className="hover:text-amber-400 transition-colors">Planes</a>
-            <a href="#planners" className="hover:text-amber-400 transition-colors">Para Planners</a>
+          <div className="hidden md:flex gap-8 text-xs font-bold uppercase tracking-widest text-slate-400">
+            <a href="#experiencia" className="hover:text-amber-400 transition-colors">La Experiencia</a>
+            <a href="#boveda" className="hover:text-amber-400 transition-colors">El Panel</a>
+            <a href="#planes" className="hover:text-amber-400 transition-colors">Colección</a>
           </div>
-          <button onClick={() => window.location.href = 'https://panel.baulia.com'} className="px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-900 font-black rounded-full transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 active:scale-95">
-            Iniciar Sesión
+          <button onClick={() => window.location.href = 'https://panel.baulia.com'} className="text-xs font-black uppercase tracking-widest text-slate-900 bg-gradient-to-r from-amber-400 to-yellow-600 px-6 py-2.5 rounded-full hover:scale-105 transition-transform shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+            Entrar
           </button>
         </div>
       </nav>
 
-      {/* HERO SECTION */}
-      <section className="relative pt-40 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-slate-900">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')] bg-cover bg-center opacity-20"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent"></div>
+      {/* 🔴 HERO SECTION (CINEMÁTICO) */}
+      <section className="relative min-h-[90vh] flex flex-col items-center justify-center pt-32 pb-20 px-6 z-10 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-amber-400 text-[10px] font-black uppercase tracking-widest mb-8 backdrop-blur-md">
+          <Star size={12} className="fill-amber-400"/> Tecnología Premium para Eventos
+        </div>
         
-        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
-          <span className="px-4 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-amber-400 text-xs font-black uppercase tracking-widest mb-6 inline-block shadow-lg">
-            El Software Premium para Eventos
-          </span>
-          <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight leading-tight">
-            La bóveda digital de <br className="hidden md:block"/> tus mejores momentos.
-          </h1>
-          <p className="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl mx-auto font-medium leading-relaxed">
-            Desde invitaciones interactivas espectaculares hasta el control absoluto de accesos, mesas y presupuesto. Todo en un solo lugar.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="#planes" className="px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-900 rounded-full font-black text-lg hover:scale-105 transition-transform shadow-[0_10px_30px_rgba(245,158,11,0.3)]">
-              Ver Planes y Precios
-            </a>
-            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20quiero%20una%20demo%20de%20Baulia', '_blank')} className="px-8 py-4 bg-slate-800 text-white border border-slate-700 rounded-full font-bold text-lg hover:bg-slate-700 transition-colors flex items-center justify-center">
-              <MessageCircle size={20} className="mr-2 text-amber-400"/> Agendar Demo
-            </button>
-          </div>
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tighter leading-[1.1]">
+          El nuevo <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-600 drop-shadow-sm">estándar</span><br className="hidden md:block"/> 
+          para celebrar.
+        </h1>
+        
+        <p className="text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto font-medium leading-relaxed">
+          Baulia es la bóveda digital que fusiona invitaciones interactivas de lujo con el software de gestión más poderoso del mercado.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
+          <a href="#planes" className="px-10 py-5 bg-white text-slate-900 rounded-[2rem] font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+            Ver Colección <ArrowRight size={18} className="ml-2"/>
+          </a>
+          <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20quiero%20una%20demo%20de%20Baulia', '_blank')} className="px-10 py-5 bg-transparent border border-white/20 text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:bg-white/5 transition-colors flex items-center justify-center">
+            <MessageCircle size={18} className="mr-2 text-amber-400"/> Hablar con Ventas
+          </button>
         </div>
       </section>
 
-      {/* SECCIÓN: INVITACIONES */}
-      <section id="caracteristicas" className="py-24 bg-white relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black text-slate-900 mb-4">Invitaciones que roban el aliento</h2>
-            <p className="text-slate-500 text-lg">No es un PDF, es una experiencia interactiva completa en el celular de tus invitados.</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {[
-              { i: <ImageIcon/>, t: 'Galerías y Portadas', d: 'Fotos de alta calidad de los novios o festejados.' },
-              { i: <Clock/>, t: 'Cuenta Regresiva', d: 'Temporizador en vivo hasta el gran día.' },
-              { i: <MapPin/>, t: 'Mapas GPS', d: 'Rutas directas a la ceremonia y recepción.' },
-              { i: <CheckCircle/>, t: 'RSVP Inteligente', d: 'Confirmación de asistencia vinculada a tu panel.' },
-              { i: <PlayCircle/>, t: 'Música de Fondo', d: 'Reproductor integrado con tu canción especial.' },
-              { i: <CalendarDays/>, t: 'Itinerario', d: 'Cronograma visual para que nadie llegue tarde.' },
-              { i: <Hexagon/>, t: 'Mesa de Regalos', d: 'Enlaces directos a Amazon, Liverpool o cuenta bancaria.' },
-              { i: <Globe/>, t: 'Dominio Propio', d: 'Tu evento en baulia.com/tu-nombre.' },
-              { i: <Smartphone/>, t: 'Filtro de IG', d: 'Enlace directo a tu filtro personalizado.' },
-              { i: <Building/>, t: 'Hospedaje', d: 'Recomendaciones de hoteles y códigos de descuento.' },
-              { i: <Type/>, t: 'Dress Code', d: 'Guía de vestimenta clara e ilustrada.' },
-              { i: <Wand2/>, t: 'Monogramas', d: 'Diseño heráldico único para tu evento.' }
-            ].map((f, i) => (
-              <div key={i} className="p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:border-amber-300 hover:shadow-lg transition-all group">
-                <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-amber-600 mb-4 group-hover:scale-110 transition-transform">
-                  {f.i}
-                </div>
-                <h4 className="font-bold text-slate-800 mb-2">{f.t}</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">{f.d}</p>
-              </div>
-            ))}
-          </div>
+      {/* 🔴 BENTO BOX: INVITACIONES */}
+      <section id="experiencia" className="py-24 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
+        <div className="mb-16">
+          <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">Más que una invitación.<br/>Una experiencia táctil.</h2>
         </div>
-      </section>
 
-      {/* SECCIÓN: PANEL VIP */}
-      <section id="panel" className="py-24 bg-slate-900 text-white relative border-y border-amber-500/20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[250px]">
+          
+          {/* Bento Item 1: Grande */}
+          <div className="md:col-span-2 md:row-span-2 bg-gradient-to-br from-slate-900 to-slate-950 rounded-[3rem] p-10 border border-white/10 flex flex-col relative overflow-hidden group hover:border-amber-500/50 transition-colors">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-[80px] group-hover:bg-amber-500/20 transition-colors"></div>
+            <ImageIcon size={40} className="text-amber-400 mb-6" />
+            <h3 className="text-3xl font-black text-white mb-4">Diseño Inmersivo</h3>
+            <p className="text-slate-400 text-lg leading-relaxed max-w-md">Galerías de alta resolución, monogramas heráldicos personalizados y paletas de color que reflejan el alma de tu evento. Todo adaptado perfectamente a la pantalla del celular.</p>
+          </div>
+
+          {/* Bento Item 2 */}
+          <div className="md:col-span-2 bg-slate-900 rounded-[3rem] p-8 border border-white/10 flex items-center gap-6 relative overflow-hidden">
+            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 border border-white/10"><Clock size={28} className="text-white"/></div>
             <div>
-              <span className="text-amber-400 font-bold tracking-widest uppercase text-sm mb-2 block">Exclusivo Plan Diamante</span>
-              <h2 className="text-4xl md:text-5xl font-black mb-6 leading-tight">El Centro de Comando <br/> de tu Evento.</h2>
-              <p className="text-slate-400 text-lg mb-8">Olvídate de los excels desordenados y libretas perdidas. Toma el control absoluto desde tu iPad o computadora.</p>
-              
-              <ul className="space-y-6">
+              <h3 className="text-xl font-black text-white mb-1">Cuenta Regresiva</h3>
+              <p className="text-slate-400 text-sm">El latido de tu evento en tiempo real, creando expectativa desde el día 1.</p>
+            </div>
+          </div>
+
+          {/* Bento Item 3 */}
+          <div className="bg-amber-500 rounded-[3rem] p-8 text-slate-900 flex flex-col justify-between relative overflow-hidden transform hover:scale-[1.02] transition-transform">
+             <div>
+               <CheckCircle size={32} className="mb-4 text-amber-900"/>
+               <h3 className="text-2xl font-black leading-tight mb-2">RSVP<br/>Inteligente</h3>
+             </div>
+             <p className="text-amber-900 font-bold text-sm">Control exacto de invitados y pases extra.</p>
+          </div>
+
+          {/* Bento Item 4 */}
+          <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/10 flex flex-col justify-between">
+             <MapPin size={32} className="text-indigo-400 mb-4"/>
+             <div>
+               <h3 className="text-xl font-black text-white mb-2">Logística GPS</h3>
+               <p className="text-slate-400 text-sm">Rutas a la ceremonia, hospedaje y dress code.</p>
+             </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 🔴 SECCIÓN: EL PANEL (BÓVEDA) */}
+      <section id="boveda" className="py-24 relative z-10 border-y border-white/5 bg-slate-950/50">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex flex-col lg:flex-row gap-16 items-center">
+            
+            {/* Texto */}
+            <div className="lg:w-1/2">
+              <span className="text-amber-500 font-black tracking-widest uppercase text-xs mb-4 block flex items-center"><Lock size={16} className="mr-2"/> La Bóveda de Control</span>
+              <h2 className="text-4xl md:text-5xl font-black text-white mb-8 tracking-tight leading-tight">Tu evento, bajo tu dominio absoluto.</h2>
+              <div className="space-y-6">
                 {[
-                  { title: 'Acomodo de Mesas Drag & Drop', desc: 'Dibuja el croquis del salón y arrastra a tus invitados a sus sillas visualmente.' },
-                  { title: 'Escáner QR de Puerta', desc: 'Cada invitado recibe un código único. Tu staff lo escanea en la entrada para un acceso seguro y rápido.' },
-                  { title: 'Muro Social (Proyector)', desc: 'Tus invitados suben fotos sin descargar apps, y aparecen en vivo en las pantallas del evento.' },
-                  { title: 'Control Financiero', desc: 'Registra proveedores, abonos, fechas límite y presupuestos con reportes en PDF.' }
+                  { i: <LayoutGrid/>, t: 'Acomodo de Mesas Visual', d: 'Dibuja tu croquis y arrastra invitados a sus sillas.' },
+                  { i: <Scan/>, t: 'Check-in con Escáner QR', d: 'Tus accesos son blindados. El staff escanea la pulsera digital en la entrada.' },
+                  { i: <Wallet/>, t: 'Inteligencia Financiera', d: 'Controla pagos, abonos a proveedores y fechas límite.' },
+                  { i: <Camera/>, t: 'Muro Social en Vivo', d: 'Las fotos de tus invitados se proyectan en las pantallas gigantes del evento.' }
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 mr-4 shrink-0 mt-1">
-                      <CheckSquare size={16} />
+                  <div key={idx} className="flex items-start">
+                    <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-amber-400 shrink-0 mr-5">
+                      {item.i}
                     </div>
-                    <div>
-                      <h4 className="font-bold text-lg text-slate-100">{item.title}</h4>
-                      <p className="text-slate-400 text-sm mt-1">{item.desc}</p>
+                    <div className="pt-1">
+                      <h4 className="font-bold text-lg text-slate-200 mb-1">{item.t}</h4>
+                      <p className="text-slate-500 text-sm">{item.d}</p>
                     </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="relative">
-              <div className="absolute inset-0 bg-amber-500/20 blur-[100px] rounded-full"></div>
-              <div className="bg-slate-800 rounded-2xl border border-slate-700 p-2 shadow-2xl relative z-10 transform rotate-2 hover:rotate-0 transition-transform duration-500">
-                <img src="https://images.unsplash.com/photo-1555244162-803834f70033?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Dashboard" className="rounded-xl opacity-80" />
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-slate-600 text-center shadow-2xl">
-                   <Lock size={32} className="mx-auto text-amber-400 mb-3"/>
-                   <p className="font-black text-xl tracking-widest">PANEL BAULIA</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECCIÓN: PRECIOS */}
-      <section id="planes" className="py-24 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black text-slate-900 mb-4">Elige tu Nivel de Experiencia</h2>
-            <p className="text-slate-500 text-lg">Planes diseñados para adaptarse a la magnitud de tu celebración.</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Básica */}
-            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Básica</h3>
-              <p className="text-slate-500 text-sm mb-6 h-10">La esencia digital para eventos íntimos.</p>
-              <ul className="space-y-3 mb-8 flex-1 text-sm text-slate-600">
-                <li className="flex items-center"><CheckCircle size={16} className="text-emerald-500 mr-2"/> Invitación Web</li>
-                <li className="flex items-center"><CheckCircle size={16} className="text-emerald-500 mr-2"/> Galería de Fotos</li>
-                <li className="flex items-center"><CheckCircle size={16} className="text-emerald-500 mr-2"/> Cuenta Regresiva</li>
-                <li className="flex items-center"><CheckCircle size={16} className="text-emerald-500 mr-2"/> Mapas y GPS</li>
-                <li className="flex items-center"><CheckCircle size={16} className="text-emerald-500 mr-2"/> Confirmación Simple</li>
-              </ul>
-              <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Básica', '_blank')} className="w-full py-3 bg-slate-100 text-slate-800 font-bold rounded-xl hover:bg-slate-200 transition-colors">Elegir Básica</button>
-            </div>
-
-            {/* Plata */}
-            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Plata</h3>
-              <p className="text-slate-500 text-sm mb-6 h-10">Ideal para bodas con invitados foráneos.</p>
-              <ul className="space-y-3 mb-8 flex-1 text-sm text-slate-600">
-                <li className="font-bold text-slate-800 border-b pb-2 mb-2">Todo lo de Básica, más:</li>
-                <li className="flex items-center"><CheckCircle size={16} className="text-emerald-500 mr-2"/> Itinerario (Timeline)</li>
-                <li className="flex items-center"><CheckCircle size={16} className="text-emerald-500 mr-2"/> Mesa de Regalos</li>
-                <li className="flex items-center"><CheckCircle size={16} className="text-emerald-500 mr-2"/> Recomendación Hoteles</li>
-                <li className="flex items-center"><CheckCircle size={16} className="text-emerald-500 mr-2"/> Dress Code Ilustrado</li>
-              </ul>
-              <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Plata', '_blank')} className="w-full py-3 bg-slate-100 text-slate-800 font-bold rounded-xl hover:bg-slate-200 transition-colors">Elegir Plata</button>
-            </div>
-
-            {/* Oro */}
-            <div className="bg-white p-8 rounded-3xl border border-amber-200 shadow-xl flex flex-col relative transform lg:-translate-y-4">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-900 text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-b-lg">Más Popular</div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2 mt-2">Oro</h3>
-              <p className="text-slate-500 text-sm mb-6 h-10">Organización profesional y pases QR.</p>
-              <ul className="space-y-3 mb-8 flex-1 text-sm text-slate-600">
-                <li className="font-bold text-slate-800 border-b pb-2 mb-2">Todo lo de Plata, más:</li>
-                <li className="flex items-start"><CheckCircle size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <span className="font-bold text-amber-700">Pases con Código QR</span></li>
-                <li className="flex items-start"><CheckCircle size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <span>RSVP con control de pases exactos</span></li>
-                <li className="flex items-start"><CheckCircle size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <span>Panel de Presupuesto</span></li>
-                <li className="flex items-start"><CheckCircle size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <span>Agenda y Proveedores</span></li>
-              </ul>
-              <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Oro', '_blank')} className="w-full py-3 bg-amber-500 text-slate-900 font-black rounded-xl hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/30">Elegir Oro</button>
-            </div>
-
-            {/* Diamante */}
-            <div className="bg-slate-900 p-8 rounded-3xl border border-slate-700 shadow-2xl flex flex-col relative text-white">
-              <h3 className="text-xl font-black text-amber-400 mb-2 mt-2">Diamante VIP</h3>
-              <p className="text-slate-400 text-sm mb-6 h-10">La suite tecnológica completa. Cero estrés.</p>
-              <ul className="space-y-3 mb-8 flex-1 text-sm text-slate-300">
-                <li className="font-bold text-white border-b border-slate-700 pb-2 mb-2">Todo lo de Oro, más:</li>
-                <li className="flex items-start"><Star size={16} className="text-amber-400 mr-2 shrink-0 mt-0.5"/> <span className="font-bold text-white">Acomodo de Mesas 3D</span></li>
-                <li className="flex items-start"><Star size={16} className="text-amber-400 mr-2 shrink-0 mt-0.5"/> <span className="font-bold text-white">Muro Social (Proyector)</span></li>
-                <li className="flex items-start"><Star size={16} className="text-amber-400 mr-2 shrink-0 mt-0.5"/> <span className="font-bold text-white">Escáner de Puerta App</span></li>
-                <li className="flex items-start"><Star size={16} className="text-amber-400 mr-2 shrink-0 mt-0.5"/> <span>Diseñador de Decoración</span></li>
-              </ul>
-              <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Diamante', '_blank')} className="w-full py-3 bg-white text-slate-900 font-black rounded-xl hover:bg-slate-200 transition-colors shadow-lg">Elegir Diamante</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECCIÓN: B2B PLANNERS */}
-      <section id="planners" className="py-24 bg-white relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="bg-slate-900 rounded-[3rem] p-10 md:p-16 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-hidden border border-slate-800">
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-            
-            <div className="md:w-1/2 mb-10 md:mb-0 relative z-10">
-              <h2 className="text-4xl font-black text-white mb-6 leading-tight">¿Eres Wedding Planner <br/> o Agencia?</h2>
-              <p className="text-slate-400 text-lg mb-8 leading-relaxed">
-                Ofrece la tecnología de Baulia a tus clientes bajo tu propia marca. Panel de control White-Label, gestión multievento y valor agregado para tus servicios.
-              </p>
-              <ul className="space-y-4 text-slate-300 mb-8 font-medium">
-                <li className="flex items-center"><CheckCircle size={20} className="text-amber-500 mr-3"/> Tu logo y colores en el panel de los novios</li>
-                <li className="flex items-center"><CheckCircle size={20} className="text-amber-500 mr-3"/> Visualización en tiempo real de todos tus eventos</li>
-                <li className="flex items-center"><CheckCircle size={20} className="text-amber-500 mr-3"/> Exportación de guiones y croquis para staff</li>
-              </ul>
-              <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20soy%20Planner%20y%20quiero%20usar%20Baulia', '_blank')} className="px-8 py-4 bg-amber-500 text-slate-900 font-black rounded-full hover:bg-amber-400 transition-colors shadow-lg">
-                Solicitar Licencia Planner
-              </button>
-            </div>
-            
-            <div className="md:w-5/12 relative z-10">
-              <div className="bg-slate-800 p-6 rounded-3xl border border-slate-700 shadow-2xl transform rotate-3">
-                <div className="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
-                  <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-amber-500"><Building size={20}/></div>
-                  <div>
-                    <p className="text-white font-bold">Tu Agencia Bodas</p>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-widest">Panel Maestro</p>
                   </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="h-12 bg-slate-700/50 rounded-xl border border-slate-700 flex items-center px-4"><div className="w-3 h-3 bg-emerald-500 rounded-full mr-3"></div><div className="h-2 w-24 bg-slate-600 rounded"></div></div>
-                  <div className="h-12 bg-slate-700/50 rounded-xl border border-slate-700 flex items-center px-4"><div className="w-3 h-3 bg-emerald-500 rounded-full mr-3"></div><div className="h-2 w-32 bg-slate-600 rounded"></div></div>
-                  <div className="h-12 bg-slate-700/50 rounded-xl border border-slate-700 flex items-center px-4"><div className="w-3 h-3 bg-rose-500 rounded-full mr-3"></div><div className="h-2 w-20 bg-slate-600 rounded"></div></div>
+                ))}
+              </div>
+            </div>
+
+            {/* Gráfico Abstracto del Panel */}
+            <div className="lg:w-1/2 w-full relative">
+              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-amber-500/20 blur-[100px] rounded-full"></div>
+              <div className="bg-[#0a0f1c] rounded-[3rem] border border-white/10 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative z-10 transform md:rotate-2 hover:rotate-0 transition-all duration-700">
+                <div className="bg-slate-900 rounded-[2.5rem] border border-white/5 h-[500px] w-full overflow-hidden flex flex-col">
+                   <div className="h-14 border-b border-white/5 flex items-center px-6 gap-2">
+                     <div className="w-3 h-3 rounded-full bg-rose-500/50"></div>
+                     <div className="w-3 h-3 rounded-full bg-amber-500/50"></div>
+                     <div className="w-3 h-3 rounded-full bg-emerald-500/50"></div>
+                   </div>
+                   <div className="flex-1 p-6 flex flex-col gap-4">
+                     <div className="flex gap-4">
+                       <div className="h-24 w-1/3 bg-white/5 rounded-2xl border border-white/5"></div>
+                       <div className="h-24 w-1/3 bg-white/5 rounded-2xl border border-white/5"></div>
+                       <div className="h-24 w-1/3 bg-white/5 rounded-2xl border border-white/5"></div>
+                     </div>
+                     <div className="flex-1 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-center">
+                        <BauliaLogo size={60} className="opacity-20" />
+                     </div>
+                   </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-slate-950 text-slate-500 py-12 text-center border-t border-slate-900">
-        <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center mx-auto mb-6">
-          <Lock size={20} className="text-slate-600" />
+      {/* 🔴 SECCIÓN: COLECCIÓN DE PLANES */}
+      <section id="planes" className="py-24 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
+        <div className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">Colección Baulia</h2>
+          <p className="text-slate-400 text-lg">Inversiones a la medida de tu celebración.</p>
         </div>
-        <h2 className="text-xl font-black text-slate-300 mb-2 tracking-widest">BAULIA</h2>
-        <p className="text-sm mb-6">Software Premium para la Gestión de Eventos</p>
-        <p className="text-xs">&copy; {new Date().getFullYear()} Baulia Tech. Todos los derechos reservados.</p>
+
+        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6 items-center">
+          
+          {/* BÁSICA */}
+          <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-white/5 hover:border-white/20 transition-colors">
+            <h3 className="text-white font-bold text-xl mb-1">Básica</h3>
+            <p className="text-slate-500 text-xs mb-6 h-8">La esencia digital para eventos íntimos.</p>
+            <div className="space-y-4 text-sm text-slate-400 font-medium mb-8">
+              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Invitación Interactiva</p>
+              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Confirmación Simple</p>
+              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-600"/> Cuenta Regresiva</p>
+              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-600"/> Mapas y Enlaces</p>
+            </div>
+            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Básica', '_blank')} className="w-full py-4 rounded-full bg-white/5 text-white font-bold hover:bg-white/10 transition-colors text-sm">Elegir Básica</button>
+          </div>
+
+          {/* PLATA */}
+          <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-white/5 hover:border-white/20 transition-colors">
+            <h3 className="text-white font-bold text-xl mb-1">Plata</h3>
+            <p className="text-slate-500 text-xs mb-6 h-8">Ideal para bodas con invitados foráneos.</p>
+            <div className="space-y-4 text-sm text-slate-400 font-medium mb-8">
+              <p className="text-white font-bold border-b border-white/10 pb-2">Todo en Básica, más:</p>
+              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Itinerario Visual</p>
+              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Mesa de Regalos</p>
+              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-600"/> Hospedaje</p>
+              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-600"/> Dress Code</p>
+            </div>
+            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Plata', '_blank')} className="w-full py-4 rounded-full bg-white/5 text-white font-bold hover:bg-white/10 transition-colors text-sm">Elegir Plata</button>
+          </div>
+
+          {/* ORO (DESTACADO) */}
+          <div className="bg-gradient-to-b from-amber-500 to-yellow-600 rounded-[3rem] p-1 shadow-[0_0_40px_rgba(245,158,11,0.2)] transform lg:-translate-y-4 relative z-10">
+            <div className="bg-[#0a0f1c] rounded-[2.8rem] p-8 h-full flex flex-col relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/20 rounded-full blur-[40px]"></div>
+              <span className="bg-amber-500 text-slate-900 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full w-max mb-4">El más popular</span>
+              <h3 className="text-amber-400 font-black text-2xl mb-1">Plan Oro</h3>
+              <p className="text-slate-400 text-xs mb-6 h-8">Control total para anfitriones organizados.</p>
+              
+              <div className="space-y-4 text-sm text-slate-300 font-medium mb-8 flex-1">
+                <p className="text-white font-bold border-b border-white/10 pb-2">Todo en Plata, más:</p>
+                <p className="flex items-start"><Star size={14} className="mr-3 text-amber-400 shrink-0 mt-0.5"/> <span className="text-white font-bold">Pases QR Personalizados</span></p>
+                <p className="flex items-start"><Star size={14} className="mr-3 text-amber-400 shrink-0 mt-0.5"/> <span>RSVP con control estricto</span></p>
+                <p className="flex items-start"><CheckCircle size={14} className="mr-3 text-slate-600 shrink-0 mt-0.5"/> <span>Panel de Presupuesto</span></p>
+                <p className="flex items-start"><CheckCircle size={14} className="mr-3 text-slate-600 shrink-0 mt-0.5"/> <span>Agenda y Proveedores</span></p>
+              </div>
+              <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Oro', '_blank')} className="w-full py-4 rounded-full bg-amber-500 text-slate-900 font-black text-sm hover:bg-amber-400 transition-colors shadow-lg">Elegir Oro</button>
+            </div>
+          </div>
+
+          {/* DIAMANTE */}
+          <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-white/5 hover:border-white/20 transition-colors">
+            <h3 className="text-white font-black text-xl mb-1">Diamante VIP</h3>
+            <p className="text-slate-500 text-xs mb-6 h-8">La suite tecnológica extrema. Cero estrés.</p>
+            <div className="space-y-4 text-sm text-slate-400 font-medium mb-8">
+              <p className="text-white font-bold border-b border-white/10 pb-2">Todo en Oro, más:</p>
+              <p className="flex items-start"><Hexagon size={14} className="mr-3 text-white shrink-0 mt-0.5"/> <span className="text-slate-200">Acomodo de Mesas 3D</span></p>
+              <p className="flex items-start"><Hexagon size={14} className="mr-3 text-white shrink-0 mt-0.5"/> <span className="text-slate-200">Muro Social (Proyector)</span></p>
+              <p className="flex items-start"><Hexagon size={14} className="mr-3 text-slate-600 shrink-0 mt-0.5"/> <span>Escáner de Puerta App</span></p>
+              <p className="flex items-start"><Hexagon size={14} className="mr-3 text-slate-600 shrink-0 mt-0.5"/> <span>Bocetador Decorativo</span></p>
+            </div>
+            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Diamante', '_blank')} className="w-full py-4 rounded-full bg-white/10 text-white font-bold hover:bg-white/20 transition-colors text-sm">Elegir Diamante</button>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 🔴 SECCIÓN B2B: PLANNERS */}
+      <section id="planners" className="py-24 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <div className="bg-slate-900 rounded-[3rem] p-10 md:p-16 border border-white/10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between">
+             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+             
+             <div className="md:w-1/2 relative z-10 mb-10 md:mb-0">
+               <span className="text-indigo-400 font-black tracking-widest uppercase text-xs mb-4 block">Alianza B2B</span>
+               <h2 className="text-4xl font-black text-white mb-6 leading-tight">¿Eres Wedding Planner <br/> o Agencia?</h2>
+               <p className="text-slate-400 text-lg mb-8 leading-relaxed">
+                 Ofrece el software de Baulia a tus clientes bajo <b className="text-white">tu propia marca</b>. Panel White-Label, gestión multievento y valor tecnológico añadido para tus servicios.
+               </p>
+               <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20soy%20Planner%20y%20quiero%20usar%20Baulia', '_blank')} className="px-8 py-4 bg-white text-slate-900 font-black rounded-full hover:bg-slate-200 transition-colors text-sm uppercase tracking-widest">
+                 Solicitar Licencia Planner
+               </button>
+             </div>
+
+             <div className="md:w-5/12 relative z-10 flex justify-center">
+                <div className="w-full max-w-sm bg-[#0a0f1c] rounded-[2rem] border border-white/10 p-6 shadow-2xl transform md:rotate-3">
+                   <div className="flex items-center gap-4 mb-8 border-b border-white/5 pb-6">
+                      <div className="w-12 h-12 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center text-white font-black">
+                        T
+                      </div>
+                      <div>
+                        <p className="text-white font-bold text-lg">TuAgencia Bodas</p>
+                        <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest">Panel Maestro Pro</p>
+                      </div>
+                   </div>
+                   <div className="space-y-4">
+                      <div className="h-10 bg-white/5 rounded-lg border border-white/5 w-full"></div>
+                      <div className="h-10 bg-white/5 rounded-lg border border-white/5 w-4/5"></div>
+                      <div className="h-10 bg-white/5 rounded-lg border border-white/5 w-5/6"></div>
+                   </div>
+                </div>
+             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 🔴 FOOTER VIP */}
+      <footer className="border-t border-white/5 py-12 text-center relative z-10">
+        <BauliaLogo size={40} className="mx-auto mb-4 opacity-50 hover:opacity-100 transition-opacity" />
+        <h2 className="text-xl font-black text-slate-500 mb-2 tracking-widest uppercase">Baulia</h2>
+        <p className="text-xs text-slate-600 mb-6">Plataforma Premium de Gestión de Eventos</p>
+        <p className="text-[10px] text-slate-700 uppercase tracking-widest">&copy; {new Date().getFullYear()} Baulia Tech. Todos los derechos reservados.</p>
       </footer>
+
     </div>
   );
 };
