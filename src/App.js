@@ -8570,9 +8570,11 @@ const GuestProyectorView = ({ eventId }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 4.0) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 4.1 - FOOTER ACTIVO) ---
 // ==========================================
 const LandingPageView = () => {
+  const [legalModal, setLegalModal] = useState(null); // 'terms' | 'privacy' | null
+
   return (
     <div className="min-h-screen bg-[#0a0f1c] font-sans text-slate-200 selection:bg-amber-500 selection:text-slate-900 overflow-x-hidden">
       
@@ -8581,7 +8583,7 @@ const LandingPageView = () => {
       <div className="fixed bottom-[-20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0"></div>
 
       {/* 🔴 NAVEGACIÓN FLOTANTE */}
-      <nav className="fixed w-full z-50 top-0 pt-4 md:pt-6 px-4 md:px-8 pointer-events-none">
+      <nav className="fixed w-full z-40 top-0 pt-4 md:pt-6 px-4 md:px-8 pointer-events-none">
         <div className="max-w-6xl mx-auto bg-slate-900/80 backdrop-blur-2xl border border-white/10 h-16 md:h-20 rounded-full flex items-center justify-between px-6 shadow-[0_10px_40px_rgba(0,0,0,0.5)] pointer-events-auto">
           <div className="flex items-center gap-3">
             <BauliaLogo size={32} />
@@ -8716,7 +8718,6 @@ const LandingPageView = () => {
             <div className="lg:w-1/2 w-full relative perspective-[1000px]">
               <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-amber-500/20 blur-[120px] rounded-full pointer-events-none"></div>
               
-              {/* Fake UI Panel Mockup */}
               <div className="bg-[#0a0f1c] rounded-[3rem] border border-white/10 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.8)] relative z-10 transform md:rotate-y-[-10deg] md:rotate-x-[5deg] hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-700">
                 <div className="bg-slate-900 rounded-[2.5rem] border border-white/5 h-[600px] w-full overflow-hidden flex flex-col relative">
                    <div className="h-16 border-b border-white/5 flex items-center px-6 gap-2 bg-slate-950/50 shrink-0">
@@ -8726,14 +8727,12 @@ const LandingPageView = () => {
                      <div className="ml-auto w-1/3 h-6 bg-white/5 rounded-full border border-white/10"></div>
                    </div>
                    <div className="flex-1 p-6 flex gap-6">
-                     {/* Sidebar fake */}
                      <div className="w-1/4 h-full bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-3 p-4">
                         <div className="w-full h-8 bg-white/10 rounded-lg mb-4"></div>
                         <div className="w-3/4 h-4 bg-white/5 rounded-full"></div>
                         <div className="w-full h-4 bg-white/5 rounded-full"></div>
                         <div className="w-5/6 h-4 bg-white/5 rounded-full"></div>
                      </div>
-                     {/* Content fake */}
                      <div className="flex-1 flex flex-col gap-6">
                        <div className="flex gap-4 h-24 shrink-0">
                          <div className="flex-1 bg-amber-500/10 rounded-2xl border border-amber-500/20 flex items-center justify-center text-amber-500"><Users size={24}/></div>
@@ -8808,16 +8807,15 @@ const LandingPageView = () => {
         </div>
 
         <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6 items-end">
-          
           {/* BÁSICA */}
           <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/5 hover:border-white/20 transition-colors h-max">
             <h3 className="text-white font-black text-2xl mb-2">Básica</h3>
             <p className="text-slate-500 text-xs mb-8 h-10">La esencia digital para eventos íntimos o casuales.</p>
             <div className="space-y-4 text-sm text-slate-400 font-medium mb-10">
-              <p className="flex items-center text-slate-200"><CheckCircle size={16} className="mr-3 text-emerald-500"/> Invitación Interactiva</p>
-              <p className="flex items-center text-slate-200"><CheckCircle size={16} className="mr-3 text-emerald-500"/> Confirmación Simple</p>
-              <p className="flex items-center"><CheckCircle size={16} className="mr-3 text-slate-600"/> Cuenta Regresiva</p>
-              <p className="flex items-center"><CheckCircle size={16} className="mr-3 text-slate-600"/> Mapas GPS</p>
+              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Invitación Interactiva</p>
+              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Confirmación Simple</p>
+              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-600"/> Cuenta Regresiva</p>
+              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-600"/> Mapas GPS</p>
             </div>
             <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Básica', '_blank')} className="w-full py-4 rounded-full bg-white/5 text-white font-bold hover:bg-white/10 transition-colors text-sm">Adquirir Básica</button>
           </div>
@@ -8828,9 +8826,9 @@ const LandingPageView = () => {
             <p className="text-slate-500 text-xs mb-8 h-10">Ideal para bodas medianas y control de regalos.</p>
             <div className="space-y-4 text-sm text-slate-400 font-medium mb-10">
               <p className="text-white font-bold border-b border-white/10 pb-3 mb-3">Todo en Básica, más:</p>
-              <p className="flex items-center text-slate-200"><CheckCircle size={16} className="mr-3 text-emerald-500"/> Itinerario Visual</p>
-              <p className="flex items-center text-slate-200"><CheckCircle size={16} className="mr-3 text-emerald-500"/> Mesa de Regalos</p>
-              <p className="flex items-center"><CheckCircle size={16} className="mr-3 text-slate-600"/> Hospedaje y Dress Code</p>
+              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Itinerario Visual</p>
+              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Mesa de Regalos</p>
+              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-600"/> Hospedaje y Dress Code</p>
             </div>
             <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Plata', '_blank')} className="w-full py-4 rounded-full bg-white/5 text-white font-bold hover:bg-white/10 transition-colors text-sm">Adquirir Plata</button>
           </div>
@@ -8879,14 +8877,14 @@ const LandingPageView = () => {
          </div>
          <div className="space-y-4">
             {[
-               { q: '¿Mis invitados tienen que descargar alguna App?', a: 'No, cero descargas. Las invitaciones, el Muro Social y el Escáner de puerta funcionan directamente desde el navegador de cualquier celular inteligente.' },
-               { q: '¿Qué significa que el pase QR es estricto en el Plan Oro?', a: 'Significa que si tú asignaste 2 pases a la Familia Pérez, la invitación solo les permitirá registrar 2 nombres. El código QR que se genere en su celular solo será válido para esas 2 personas en la entrada, evitando "colados".' },
-               { q: '¿Por cuánto tiempo tendré acceso a mi panel?', a: 'Tu pago es único por evento. Tendrás acceso total a tu panel desde el día de tu compra hasta 30 días después de la fecha de tu evento (para que puedas descargar las fotos del Muro Social tranquilamente).' },
-               { q: '¿Soy Planner, puedo usar el mismo panel para varias bodas?', a: '¡Sí! Contamos con licencias B2B. Te crearemos una cuenta de Agencia donde podrás gestionar ilimitadas bodas al mismo tiempo, cada una con su propio panel y bajo tus propios colores corporativos.' },
-               { q: '¿Puedo cambiar de plan si ya compré el Básico?', a: 'Por supuesto. En cualquier momento de tu planeación puedes pagar la diferencia y te activaremos los módulos del plan Plata, Oro o Diamante inmediatamente.' }
+               { q: '¿Mis invitados tienen que descargar alguna App?', a: 'No, cero descargas. Las invitaciones, el Muro Social y el Escáner de puerta funcionan directamente desde el navegador de cualquier celular inteligente (Safari o Chrome).' },
+               { q: '¿Qué significa que el pase QR es estricto en el Plan Oro?', a: 'Significa que si tú asignaste 2 pases a la Familia Pérez, la invitación solo les permitirá registrar 2 nombres. El código QR que se genere en su celular solo será válido para esas 2 personas en la entrada, evitando "colados" de manera automática.' },
+               { q: '¿Por cuánto tiempo tendré acceso a mi panel?', a: 'Tu pago es único por evento. Tendrás acceso total a tu panel desde el día de tu compra hasta 30 días naturales después de la fecha de tu evento (para que puedas descargar las fotos del Muro Social y exportar tus finanzas tranquilamente).' },
+               { q: '¿Soy Planner, puedo usar el mismo panel para varias bodas?', a: '¡Sí! Contamos con licencias B2B. Te crearemos una cuenta de Agencia donde podrás gestionar ilimitadas bodas al mismo tiempo, cada una con su propia base de datos aislada y bajo tus propios colores corporativos (White-Label).' },
+               { q: '¿Puedo cambiar de plan si ya compré el Básico?', a: 'Por supuesto. En cualquier momento de tu planeación puedes pagar la diferencia de precio y te activaremos los módulos del plan Plata, Oro o Diamante de forma inmediata sin perder tu información.' }
             ].map((faq, idx) => (
-               <details key={idx} className="group bg-slate-900 border border-white/5 rounded-3xl p-6 open:bg-slate-800 transition-colors duration-300">
-                 <summary className="font-bold text-lg text-white cursor-pointer list-none flex justify-between items-center select-none">
+               <details key={idx} className="group bg-slate-900 border border-white/5 rounded-3xl p-6 open:bg-slate-800 transition-colors duration-300 cursor-pointer">
+                 <summary className="font-bold text-lg text-white list-none flex justify-between items-center select-none outline-none">
                    {faq.q}
                    <span className="text-amber-500 group-open:rotate-45 transition-transform duration-300"><Plus size={24} /></span>
                  </summary>
@@ -8898,7 +8896,7 @@ const LandingPageView = () => {
          </div>
       </section>
 
-      {/* 🔴 FOOTER VIP */}
+      {/* 🔴 FOOTER VIP ACTIVO */}
       <footer className="border-t border-white/5 bg-slate-950 pt-20 pb-10 relative z-10">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
            <div className="md:col-span-2">
@@ -8920,9 +8918,10 @@ const LandingPageView = () => {
            <div>
               <h4 className="text-white font-bold mb-6 tracking-widest uppercase text-xs">Legal y Soporte</h4>
               <ul className="space-y-4 text-sm text-slate-400">
-                 <li><a href="#" className="hover:text-white transition-colors">Términos de Servicio</a></li>
-                 <li><a href="#" className="hover:text-white transition-colors">Aviso de Privacidad</a></li>
-                 <li><button onClick={() => window.open('https://wa.me/525512345678', '_blank')} className="text-amber-500 font-bold hover:text-amber-400 transition-colors">Soporte WhatsApp</button></li>
+                 {/* 🔴 BOTONES LEGALES ACTIVADOS */}
+                 <li><button onClick={() => setLegalModal('terms')} className="hover:text-white transition-colors">Términos de Servicio</button></li>
+                 <li><button onClick={() => setLegalModal('privacy')} className="hover:text-white transition-colors">Aviso de Privacidad</button></li>
+                 <li><button onClick={() => window.open('https://wa.me/525500000000', '_blank')} className="text-amber-500 font-bold hover:text-amber-400 transition-colors">Soporte WhatsApp</button></li>
               </ul>
            </div>
         </div>
@@ -8931,6 +8930,93 @@ const LandingPageView = () => {
            <p className="text-[10px] text-slate-600">Hecho con tecnología de vanguardia.</p>
         </div>
       </footer>
+
+      {/* 🔴 MODALES LEGALES (OVERLAYS) */}
+      {legalModal && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/90 backdrop-blur-md flex justify-center items-center p-4 md:p-8 animate-in fade-in duration-200">
+          <div className="bg-[#0a0f1c] border border-white/10 w-full max-w-4xl h-[85vh] rounded-[2rem] shadow-2xl flex flex-col relative overflow-hidden animate-in zoom-in-95">
+            
+            <div className="p-6 md:p-8 border-b border-white/5 flex justify-between items-center bg-slate-900/50 shrink-0">
+              <div className="flex items-center gap-3">
+                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                   <FileText size={18} className="text-amber-500"/>
+                 </div>
+                 <h2 className="text-xl md:text-2xl font-black text-white tracking-wide">
+                   {legalModal === 'terms' ? 'Términos de Servicio' : 'Aviso de Privacidad'}
+                 </h2>
+              </div>
+              <button onClick={() => setLegalModal(null)} className="p-3 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-full transition-colors text-slate-400">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 md:p-10 overflow-y-auto flex-1 text-slate-400 text-sm md:text-base leading-relaxed space-y-6 custom-scrollbar">
+              {legalModal === 'terms' ? (
+                <>
+                  <p><strong>Última actualización:</strong> {new Date().toLocaleDateString('es-MX')}</p>
+                  <p>Bienvenido a Baulia. Estos Términos de Servicio ("Términos") regulan el uso de nuestra plataforma web, panel de control y servicios relacionados (colectivamente, el "Servicio"). Al acceder o utilizar Baulia, usted ("el Usuario", "el Cliente" o "el Planner") acepta estar sujeto a estos Términos.</p>
+                  
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">1. Descripción del Servicio</h3>
+                  <p>Baulia provee un entorno digital (Software as a Service) para la gestión y logística de eventos, que incluye pero no se limita a: creación de invitaciones web, gestión de confirmaciones (RSVP), acomodo de mesas, control financiero, muros sociales interactivos y escaneo de pases QR.</p>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">2. Pagos y Suscripciones</h3>
+                  <p><strong>Para Clientes Finales (Novios/Festejados):</strong> El pago del Servicio consiste en una tarifa única por evento. La licencia otorga acceso al panel de control desde el momento del pago hasta 30 días naturales posteriores a la fecha del evento programado.</p>
+                  <p><strong>Para Agencias y Planners:</strong> Las cuentas de Planner operan bajo un modelo de suscripción mensual o anual, o mediante paquetes de eventos prepagados, según se acuerde comercialmente.</p>
+                  <p><strong>Política de Reembolsos:</strong> Debido a la naturaleza digital e inmediata del servicio, no se ofrecen reembolsos una vez que el panel de control ha sido aprovisionado y entregado al usuario, ni si el evento es cancelado o pospuesto.</p>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">3. Responsabilidad del Contenido</h3>
+                  <p>El Usuario es el único responsable de toda la información, datos, textos, fotografías o cualquier otro material ("Contenido") que suba, publique o transmita a través de Baulia.</p>
+                  <p>Baulia no revisa el Contenido subido de forma proactiva, sin embargo, nos reservamos el derecho (pero no la obligación) de eliminar cualquier Contenido que viole estos Términos, incluyendo material inapropiado, ilegal o que infrinja derechos de autor. En el caso específico del "Muro Social", el administrador del evento tiene las herramientas para moderar el contenido de sus propios invitados.</p>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">4. Disponibilidad del Sistema</h3>
+                  <p>Baulia se esfuerza por garantizar que la plataforma esté disponible el 99.9% del tiempo, utilizando infraestructura en la nube de nivel mundial (como Vercel y Google Firebase). Sin embargo, no somos responsables por interrupciones derivadas de fallas en la red de internet del usuario, caídas globales de servidores de terceros o fuerza mayor.</p>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">5. Modificaciones al Servicio</h3>
+                  <p>Nos reservamos el derecho de modificar o descontinuar temporalmente alguna función del Servicio con o sin previo aviso. Los usuarios serán notificados de cambios significativos que afecten directamente la operatividad de sus eventos activos.</p>
+                </>
+              ) : (
+                <>
+                  <p><strong>Última actualización:</strong> {new Date().toLocaleDateString('es-MX')}</p>
+                  <p>En cumplimiento con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) de México, <strong>Baulia Technologies</strong> ("Baulia", "nosotros" o "nuestro") expide el presente Aviso de Privacidad.</p>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">1. Datos Recabados</h3>
+                  <p>Para la correcta prestación de nuestros servicios de gestión de eventos, Baulia recaba los siguientes datos personales:</p>
+                  <ul className="list-disc pl-6 space-y-2 mt-2">
+                    <li><strong>Del Administrador (Cliente/Planner):</strong> Nombre completo, correo electrónico, número de teléfono, datos de facturación e información general del evento.</li>
+                    <li><strong>De los Invitados:</strong> Nombres, números de teléfono (para envío de accesos), registros de asistencia (RSVP) y fotografías subidas voluntariamente a la plataforma "Muro Social".</li>
+                  </ul>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">2. Finalidad del Tratamiento de Datos</h3>
+                  <p>Los datos personales recabados serán utilizados exclusivamente para las siguientes finalidades principales:</p>
+                  <ul className="list-disc pl-6 space-y-2 mt-2">
+                    <li>Creación, mantenimiento y soporte de la cuenta ("Panel de Control").</li>
+                    <li>Generación de códigos QR únicos para control de acceso al evento.</li>
+                    <li>Envío de notificaciones operativas vía WhatsApp o Correo Electrónico.</li>
+                    <li>Visualización y almacenamiento temporal de fotografías y mensajes durante la ejecución del evento (Muro Social).</li>
+                  </ul>
+                  <p className="mt-4"><strong>Baulia NO vende, alquila, ni cede sus bases de datos a terceros para fines publicitarios.</strong></p>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">3. Almacenamiento y Seguridad</h3>
+                  <p>Su información es procesada y almacenada en infraestructuras de nube de alta seguridad proporcionadas por Google Cloud Platform (Firebase). Implementamos medidas de seguridad técnicas, administrativas y físicas para proteger sus datos contra daño, pérdida, alteración, destrucción o el uso no autorizado.</p>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">4. Retención de los Datos</h3>
+                  <p>La información de los eventos (incluyendo listas de invitados y galerías fotográficas) se mantendrá en nuestros servidores activos hasta 30 días posteriores a la fecha del evento. Transcurrido este periodo de gracia, los datos de los invitados y galerías pueden ser depurados permanentemente de nuestra base de datos para proteger su privacidad y optimizar el almacenamiento.</p>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">5. Derechos ARCO</h3>
+                  <p>Usted tiene derecho a conocer qué datos personales tenemos de usted (Acceso), solicitar la corrección de su información personal (Rectificación), que la eliminemos de nuestros registros (Cancelación), así como oponerse al uso de sus datos personales para fines específicos (Oposición). Para ejercer sus derechos ARCO, envíe un correo a la dirección de soporte especificada en su contrato o a través de nuestros canales oficiales.</p>
+                </>
+              )}
+            </div>
+            
+            <div className="p-6 border-t border-white/5 bg-slate-900/30 shrink-0 text-center">
+              <button onClick={() => setLegalModal(null)} className="px-8 py-3 bg-amber-500 text-slate-900 rounded-full font-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">
+                Aceptar y Cerrar
+              </button>
+            </div>
+            
+          </div>
+        </div>
+      )}
 
     </div>
   );
