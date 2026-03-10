@@ -6604,7 +6604,7 @@ const GaleriaView = ({ photos, addNotification }) => {
 // ==========================================
 // --- COMPONENTE: VISTA PÚBLICA DEL INVITADO (W/ CÁMARA CUADRADA TIPO SUPERMERCADO) ---
 // ==========================================
-const GuestCameraView = () => {
+const GuestCameraView = ({ eventId }) => {
   const [config, setConfig] = useState({ modoPublico: true, hashtag: '', moderacion: false, marcoUrl: '' });
   const [isUploading, setIsUploading] = useState(false);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
@@ -6736,7 +6736,8 @@ const GuestCameraView = () => {
           if (parts.length >= 3) parentId = parts[1]; 
        }
        try {
-         const docSnap = await getDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", parentId));
+         // 🔴 BLINDAJE: Usa el eventId correcto, no el de prueba
+         const docSnap = await getDoc(doc(db, "eventos", eventId, "invitados", parentId));
          if (docSnap.exists()) {
            const gData = docSnap.data();
            if (docSnap.id.toLowerCase() === code) foundUser = { id: docSnap.id, name: gData.name };
@@ -6755,10 +6756,9 @@ const GuestCameraView = () => {
       localStorage.setItem('eventmaster_authGuestId', foundUser.id);
       localStorage.setItem('eventmaster_guestName', foundUser.name);
       setIsScanning(false);
-      window.history.replaceState({}, document.title, window.location.pathname + "?modo=camara&e=" + ID_DEL_EVENTO);
+      window.history.replaceState({}, document.title, window.location.pathname + "?modo=camara&e=" + eventId);
     } else {
       showToast("Código no reconocido. Revisa tu pulsera.", "error");
-      // Si falla, reactivamos el escaneo en 2 segundos
       setTimeout(() => { if (!authGuest) startLoginScanner(); }, 2000);
     }
   };
@@ -6784,7 +6784,7 @@ const GuestCameraView = () => {
              qrbox: function(width, height) { return { width: width * 0.95, height: height * 0.95 }; }
           },
           (decodedText) => {
-             // Detiene el escáner al instante de encontrar CUALQUIER código
+             // Detiene el escáner al instante de encontrar un código
              if (scannerRef.current) {
                 scannerRef.current.stop().then(() => scannerRef.current.clear()).catch(e=>e);
              }
@@ -6804,7 +6804,7 @@ const GuestCameraView = () => {
              
              if (code === 'null' || code === 'undefined') { 
                 showToast("Código inválido", "error"); 
-                setTimeout(() => startLoginScanner(), 2000); // Reactivamos si era basura
+                setTimeout(() => startLoginScanner(), 2000); 
                 return; 
              }
 
@@ -6821,6 +6821,7 @@ const GuestCameraView = () => {
   };
 
   useEffect(() => {
+    setGlobalEventId(eventId);
     if (!window.Html5QrcodeScanner) {
       const script = document.createElement('script');
       script.src = "https://unpkg.com/html5-qrcode";
@@ -6828,11 +6829,12 @@ const GuestCameraView = () => {
       document.body.appendChild(script);
     }
 
-    const unsubConfig = onSnapshot(doc(db, "eventos", ID_DEL_EVENTO, "configuracion", "galeria"), (docSnap) => {
+    // 🔴 BLINDAJE: Ahora todas las consultas apuntan directo a eventId
+    const unsubConfig = onSnapshot(doc(db, "eventos", eventId, "configuracion", "galeria"), (docSnap) => {
       if (docSnap.exists()) setConfig(docSnap.data());
     });
 
-    const unsubFotos = onSnapshot(collection(db, "eventos", ID_DEL_EVENTO, "fotos"), (snap) => {
+    const unsubFotos = onSnapshot(collection(db, "eventos", eventId, "fotos"), (snap) => {
       const fotosOrdenadas = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => b.id - a.id);
       setFeedFotos(fotosOrdenadas);
       if (activePostComments) {
@@ -6841,11 +6843,11 @@ const GuestCameraView = () => {
       }
     });
 
-    const unsubGuests = onSnapshot(collection(db, "eventos", ID_DEL_EVENTO, "invitados"), (snap) => {
+    const unsubGuests = onSnapshot(collection(db, "eventos", eventId, "invitados"), (snap) => {
       setAllGuests(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
-    const unsubActivity = onSnapshot(collection(db, "eventos", ID_DEL_EVENTO, "actividad_social"), (snap) => {
+    const unsubActivity = onSnapshot(collection(db, "eventos", eventId, "actividad_social"), (snap) => {
       setSocialActivity(snap.docs.map(doc => doc.data()).sort((a, b) => b.timestamp - a.timestamp));
     });
 
@@ -6856,7 +6858,7 @@ const GuestCameraView = () => {
     }
 
     return () => { unsubConfig(); unsubFotos(); unsubGuests(); unsubActivity(); };
-  }, [activePostComments]);
+  }, [activePostComments, eventId]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -6873,7 +6875,6 @@ const GuestCameraView = () => {
     if (uid && allGuests.length > 0 && !authGuest) ejecutarLogin(uid);
   }, [allGuests]);
 
-  // AUTO INICIO DE ESCÁNER
   useEffect(() => {
      let timer;
      if (!config.modoPublico && !authGuest) {
@@ -6890,7 +6891,7 @@ const GuestCameraView = () => {
   const notifySocial = async (tipo, targetUser, fotoId, textoExtra = '', fotoUrl = '') => {
     if (!targetUser || !currentUserName || targetUser === currentUserName) return; 
     const id = Date.now().toString() + Math.random().toString(36).substring(2);
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "actividad_social", id), {
+    await setDoc(doc(db, "eventos", eventId, "actividad_social", id), {
       id, tipo, actorName: currentUserName, actorAvatar: guestAvatar, targetUser, fotoId: String(fotoId), textoExtra, fotoUrl, timestamp: Date.now()
     });
   };
@@ -6930,7 +6931,7 @@ const GuestCameraView = () => {
                 return newC;
               });
             }
-            if (changesMade) return setDoc(doc(db, "eventos", ID_DEL_EVENTO, "fotos", foto.id), updatedFoto);
+            if (changesMade) return setDoc(doc(db, "eventos", eventId, "fotos", foto.id), updatedFoto);
             return Promise.resolve();
           });
           await Promise.all(promesasUpdate);
@@ -7013,7 +7014,7 @@ const GuestCameraView = () => {
         status: config.moderacion ? 'pending' : 'approved'
       };
       
-      await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "fotos", nuevaFoto.id), nuevaFoto);
+      await setDoc(doc(db, "eventos", eventId, "fotos", nuevaFoto.id), nuevaFoto);
       setPostDraft(null);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
@@ -7042,7 +7043,7 @@ const GuestCameraView = () => {
     } else {
       likesArray = likesArray.filter(name => name !== currentUserName);
     }
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "fotos", foto.id), { ...foto, likes: likesArray });
+    await setDoc(doc(db, "eventos", eventId, "fotos", foto.id), { ...foto, likes: likesArray });
   };
 
   const toggleCommentLike = async (foto, isReply = false, commentId, replyId = null) => {
@@ -7074,7 +7075,7 @@ const GuestCameraView = () => {
         replies[rIndex].likes = likes;
       }
     }
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "fotos", foto.id), { ...foto, comentarios: updatedComments });
+    await setDoc(doc(db, "eventos", eventId, "fotos", foto.id), { ...foto, comentarios: updatedComments });
   };
 
   const handleAddComment = async () => {
@@ -7101,7 +7102,7 @@ const GuestCameraView = () => {
       notifySocial('comment_foto', foto.autor, foto.id, finalComment, coverUrl); 
     }
     
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "fotos", foto.id), { ...foto, comentarios: updatedComments });
+    await setDoc(doc(db, "eventos", eventId, "fotos", foto.id), { ...foto, comentarios: updatedComments });
     setCommentText(''); setReplyingTo(null);
   };
 
@@ -7596,43 +7597,44 @@ const GuestCameraView = () => {
 };
 
 // ==========================================
-// --- COMPONENTE: MODO PROYECTOR (ADAPTATIVO 4K VERTICAL/HORIZONTAL + EFECTOS + AUTO-HIDE) ---
+// --- COMPONENTE: MODO PROYECTOR (CÓDIGO DE EVENTO DINÁMICO) ---
 // ==========================================
-const GuestProyectorView = () => {
+const GuestProyectorView = ({ eventId }) => {
   const [photos, setPhotos] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentSubIndex, setCurrentSubIndex] = useState(0); 
   const [config, setConfig] = useState({ hashtag: '', moderacion: false, marcoUrl: '' });
   const [isHallOfFame, setIsHallOfFame] = useState(false); 
   
-  // Estados para efectos en vivo
   const [flyingHearts, setFlyingHearts] = useState([]);
   const [liveComments, setLiveComments] = useState([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
-  // ESTADOS DE VISTA (TEMA Y ROTACIÓN DE PANTALLA)
   const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('proyector_theme') !== 'light');
   const [screenRotation, setScreenRotation] = useState(() => Number(localStorage.getItem('proyector_rotation')) || 0);
 
-  // Detector de pantalla nativamente vertical
   const [windowPortrait, setWindowPortrait] = useState(window.innerHeight > window.innerWidth);
 
-  // 🔴 NUEVO: ESTADOS PARA AUTO-OCULTAR CONTROLES (ESTILO NETFLIX)
   const [showControls, setShowControls] = useState(true);
   const controlsTimeoutRef = useRef(null);
 
   const lastPhotoCount = useRef(0);
 
-  const guestLink = window.location.origin + window.location.pathname + '?modo=camara';
+  const getCleanBaseUrl = () => {
+    let base = window.location.href.split('?')[0];
+    if (base.endsWith('/')) base = base.slice(0, -1);
+    return base;
+  };
+  const guestLink = `${getCleanBaseUrl()}/?modo=camara&e=${eventId}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(guestLink)}&margin=0`;
 
-  // 1. CARGA DE FOTOS Y CONFIGURACIÓN
+  // 🔴 BLINDAJE: Ahora todas las consultas apuntan directo a eventId
   useEffect(() => {
-    const unsubConfig = onSnapshot(doc(db, "eventos", ID_DEL_EVENTO, "configuracion", "galeria"), (docSnap) => {
+    const unsubConfig = onSnapshot(doc(db, "eventos", eventId, "configuracion", "galeria"), (docSnap) => {
       if (docSnap.exists()) setConfig(docSnap.data());
     });
 
-    const unsubFotos = onSnapshot(collection(db, "eventos", ID_DEL_EVENTO, "fotos"), (snap) => {
+    const unsubFotos = onSnapshot(collection(db, "eventos", eventId, "fotos"), (snap) => {
       let fotosLimpias = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       fotosLimpias = fotosLimpias.sort((a, b) => b.id - a.id);
       
@@ -7647,12 +7649,11 @@ const GuestProyectorView = () => {
     });
 
     return () => { unsubConfig(); unsubFotos(); };
-  }, []);
+  }, [eventId]);
 
-  // 2. ESCUCHA EXACTA DE REACCIONES EN VIVO
   useEffect(() => {
     const timeOnLoad = Date.now(); 
-    const unsubActivity = onSnapshot(collection(db, "eventos", ID_DEL_EVENTO, "actividad_social"), (snap) => {
+    const unsubActivity = onSnapshot(collection(db, "eventos", eventId, "actividad_social"), (snap) => {
       snap.docChanges().forEach((change) => {
         if (change.type === "added") {
           const data = change.doc.data();
@@ -7664,9 +7665,8 @@ const GuestProyectorView = () => {
       });
     });
     return () => unsubActivity();
-  }, []);
+  }, [eventId]);
 
-  // Monitor de Pantalla Completa y Resize
   useEffect(() => {
     const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
     const handleResize = () => setWindowPortrait(window.innerHeight > window.innerWidth);
@@ -7680,17 +7680,16 @@ const GuestProyectorView = () => {
     };
   }, []);
 
-  // 🔴 NUEVO: SISTEMA DETECTOR DE INACTIVIDAD
   useEffect(() => {
     const resetActivityTimer = () => {
       setShowControls(true);
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
       controlsTimeoutRef.current = setTimeout(() => {
         setShowControls(false);
-      }, 3000); // 3 Segundos y desaparecen
+      }, 3000); 
     };
 
-    resetActivityTimer(); // Iniciar al cargar
+    resetActivityTimer(); 
 
     window.addEventListener('mousemove', resetActivityTimer);
     window.addEventListener('touchstart', resetActivityTimer);
@@ -7708,7 +7707,6 @@ const GuestProyectorView = () => {
 
   const displayPhotos = config.moderacion ? photos.filter(f => f.status !== 'pending' && f.status !== 'rejected') : photos;
 
-  // Lluvia automática al cambiar de foto
   useEffect(() => {
     if (displayPhotos[currentIndex]) {
       const likesCount = displayPhotos[currentIndex].likes?.length || 0;
@@ -7716,7 +7714,6 @@ const GuestProyectorView = () => {
     }
   }, [currentIndex, isHallOfFame]);
 
-  // 3. MOTOR DEL CARRUSEL DINÁMICO (8s Normal / 3s Múltiples)
   useEffect(() => {
     if (displayPhotos.length <= 1 && (!displayPhotos[0]?.urls || displayPhotos[0].urls.length <= 1)) return;
 
@@ -7749,7 +7746,6 @@ const GuestProyectorView = () => {
     return () => clearTimeout(timer);
   }, [displayPhotos, currentIndex, currentSubIndex, isHallOfFame]);
 
-  // 4. FUNCIONES DE ANIMACIÓN
   const triggerHearts = (cantidad) => {
     const newHearts = Array(cantidad).fill(null).map(() => ({
       id: Math.random().toString(36).substr(2, 9),
@@ -7816,7 +7812,6 @@ const GuestProyectorView = () => {
   const safeSubIndex = isHallOfFame ? 0 : (currentSubIndex >= urls.length ? 0 : currentSubIndex);
   const imageUrl = urls[safeSubIndex];
 
-  // LOGICA DE DISEÑO ADAPTATIVO
   const tBg = isDarkMode ? 'bg-black' : 'bg-slate-200';
   const tAmbilight = isDarkMode ? 'from-black/95 via-black/40 to-black/80' : 'from-slate-200/95 via-white/40 to-slate-200/80';
   const tCard = isDarkMode ? 'bg-black/60 border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]' : 'bg-white/80 border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.1)]';
@@ -7836,7 +7831,6 @@ const GuestProyectorView = () => {
         .animate-float-comment { animation: floatComment linear forwards; }
       `}</style>
 
-      {/* 🔴 BOTONES DE CONTROL MAESTRO (CON AUTO-HIDE) */}
       <div className={`absolute top-6 right-6 z-[999] flex gap-3 transition-opacity duration-500 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <button onClick={cycleRotation} className={`p-3 rounded-full backdrop-blur-md border shadow-lg transition-all ${isDarkMode ? 'bg-white/10 hover:bg-white/20 text-white border-white/20' : 'bg-black/10 hover:bg-black/20 text-slate-800 border-black/10'}`} title="Rotar Pantalla LED">
            <RotateCw size={24} className={!isDarkMode ? 'text-slate-800' : ''} />
@@ -7853,7 +7847,6 @@ const GuestProyectorView = () => {
         </button>
       </div>
 
-      {/* LIENZO FLEXIBLE UNIVERSAL */}
       <div 
         className="absolute bg-transparent overflow-hidden"
         style={{
@@ -7866,13 +7859,11 @@ const GuestProyectorView = () => {
         }}
       >
         
-        {/* FONDO AMBILIGHT */}
         <div className="absolute inset-0 z-0">
            <img src={imageUrl} className="w-full h-full object-cover blur-[100px] opacity-50 transform scale-110 transition-all duration-1000" />
            <div className={`absolute inset-0 bg-gradient-to-t ${tAmbilight} transition-colors duration-1000`}></div>
         </div>
 
-        {/* IMAGEN PRINCIPAL */}
         <div className={`absolute inset-0 z-10 flex items-center justify-center ${isPortraitMode ? 'p-6 pb-72' : 'p-12'}`}>
           <div 
              className="relative shadow-2xl rounded-2xl overflow-hidden bg-black/10 animate-in fade-in zoom-in-95 duration-700 flex justify-center items-center"
@@ -7887,7 +7878,6 @@ const GuestProyectorView = () => {
           </div>
         </div>
 
-        {/* ALERTA: SALÓN DE LA FAMA */}
         {isHallOfFame && (
            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 text-center animate-in slide-in-from-top-10 duration-1000 w-[90%]">
               <div className="bg-gradient-to-r from-amber-400 to-yellow-600 text-white px-6 md:px-10 py-3 rounded-full shadow-[0_0_40px_rgba(251,191,36,0.6)] inline-flex items-center justify-center border-2 border-yellow-200">
@@ -7902,10 +7892,8 @@ const GuestProyectorView = () => {
            </div>
         )}
 
-        {/* CONTENEDOR INFERIOR ADAPTATIVO */}
         <div className={`absolute inset-x-0 bottom-0 z-20 pointer-events-none flex ${isPortraitMode ? 'flex-col items-center justify-end gap-6 p-6 pb-8' : 'flex-row items-end justify-between gap-6 p-12'}`}>
-            
-           {/* TARJETA DE INFORMACIÓN */}
+           
            <div className={`w-[280px] sm:w-[320px] max-w-[85vw] pointer-events-auto ${tCard} backdrop-blur-2xl px-6 pb-6 pt-12 rounded-[2rem] animate-in slide-in-from-bottom-12 duration-700 flex flex-col items-center text-center relative max-h-[50vh] sm:max-h-[60vh] shrink-0`}>
               
               {!isHallOfFame && urls.length > 1 && (
@@ -7930,7 +7918,6 @@ const GuestProyectorView = () => {
                  </div>
               )}
 
-              {/* CONTENEDOR INTERNO DE COMENTARIOS (SCROLLABLE) */}
               <div className="w-full overflow-y-auto hide-scrollbar flex-1 min-h-0 pt-2">
                 {currentPhoto.mensaje && <p className={`text-sm ${tTextMain} font-medium italic leading-snug drop-shadow-sm px-2 mb-4`}>"{currentPhoto.mensaje}"</p>}
 
@@ -7947,7 +7934,6 @@ const GuestProyectorView = () => {
               </div>
            </div>
 
-           {/* CÓDIGO QR PREMIUM */}
            <div className={`flex flex-col items-center pointer-events-auto animate-in slide-in-from-right-12 duration-1000 shrink-0 ${isPortraitMode ? 'mt-2' : ''}`}>
               <div className={`backdrop-blur-xl p-4 rounded-[2rem] border-4 shadow-2xl mb-4 transform hover:scale-105 transition-transform ${isDarkMode ? 'bg-white/95 border-white/50' : 'bg-white border-white'}`}>
                 <img src={qrUrl} alt="QR" className="w-24 h-24 sm:w-32 sm:h-32 mix-blend-multiply" />
@@ -7960,7 +7946,6 @@ const GuestProyectorView = () => {
 
         </div>
 
-        {/* CAPA DE EFECTOS */}
         <div className="absolute inset-0 z-[100] pointer-events-none overflow-hidden">
           {flyingHearts.map(h => (
             <div key={h.id} className="absolute animate-fly drop-shadow-[0_5px_15px_rgba(225,29,72,0.8)]" style={{ left: `${h.left}%`, animationDuration: `${h.duration}s` }}>
