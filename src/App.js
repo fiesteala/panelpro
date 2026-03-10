@@ -8570,10 +8570,10 @@ const GuestProyectorView = ({ eventId }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 4.1 - FOOTER ACTIVO) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 4.2 - FOOTER & NOSOTROS) ---
 // ==========================================
 const LandingPageView = () => {
-  const [legalModal, setLegalModal] = useState(null); // 'terms' | 'privacy' | null
+  const [legalModal, setLegalModal] = useState(null); // 'terms' | 'privacy' | 'about' | null
 
   return (
     <div className="min-h-screen bg-[#0a0f1c] font-sans text-slate-200 selection:bg-amber-500 selection:text-slate-900 overflow-x-hidden">
@@ -8648,7 +8648,6 @@ const LandingPageView = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[280px]">
-          
           <div className="md:col-span-2 md:row-span-2 bg-gradient-to-br from-slate-900 to-slate-950 rounded-[3rem] p-10 md:p-12 border border-white/10 flex flex-col justify-end relative overflow-hidden group hover:border-amber-500/50 transition-colors">
             <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-[80px] group-hover:bg-amber-500/20 transition-colors"></div>
             <div className="absolute top-10 left-10 bg-white/10 backdrop-blur p-4 rounded-3xl border border-white/10"><ImageIcon size={40} className="text-amber-400" /></div>
@@ -8681,7 +8680,6 @@ const LandingPageView = () => {
                <p className="text-slate-400 text-sm">Rutas precisas a la ceremonia, recepción y hospedaje.</p>
              </div>
           </div>
-
         </div>
       </section>
 
@@ -8689,7 +8687,6 @@ const LandingPageView = () => {
       <section id="boveda" className="py-32 relative z-10 border-y border-white/5 bg-slate-950/50">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex flex-col lg:flex-row gap-16 items-center">
-            
             <div className="lg:w-1/2">
               <span className="text-amber-500 font-black tracking-widest uppercase text-xs mb-4 block flex items-center"><Lock size={16} className="mr-2"/> Fase 2: La Ejecución</span>
               <h2 className="text-4xl md:text-5xl font-black text-white mb-8 tracking-tight leading-tight">Tu evento, bajo tu dominio absoluto.</h2>
@@ -8717,7 +8714,6 @@ const LandingPageView = () => {
 
             <div className="lg:w-1/2 w-full relative perspective-[1000px]">
               <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-amber-500/20 blur-[120px] rounded-full pointer-events-none"></div>
-              
               <div className="bg-[#0a0f1c] rounded-[3rem] border border-white/10 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.8)] relative z-10 transform md:rotate-y-[-10deg] md:rotate-x-[5deg] hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-700">
                 <div className="bg-slate-900 rounded-[2.5rem] border border-white/5 h-[600px] w-full overflow-hidden flex flex-col relative">
                    <div className="h-16 border-b border-white/5 flex items-center px-6 gap-2 bg-slate-950/50 shrink-0">
@@ -8750,7 +8746,6 @@ const LandingPageView = () => {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -8780,9 +8775,7 @@ const LandingPageView = () => {
              <div className="md:w-5/12 relative z-10 flex justify-center w-full">
                 <div className="w-full max-w-sm bg-[#0a0f1c] rounded-[2.5rem] border border-white/10 p-8 shadow-2xl transform md:rotate-3 hover:rotate-0 transition-transform duration-500">
                    <div className="flex items-center gap-5 mb-10 border-b border-white/5 pb-8">
-                      <div className="w-16 h-16 bg-slate-800 rounded-2xl border border-white/10 flex items-center justify-center text-white font-black text-2xl shadow-inner">
-                        E
-                      </div>
+                      <div className="w-16 h-16 bg-slate-800 rounded-2xl border border-white/10 flex items-center justify-center text-white font-black text-2xl shadow-inner">E</div>
                       <div>
                         <p className="text-white font-black text-xl mb-1">Elite Bodas</p>
                         <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest">Panel Maestro Pro</p>
@@ -8807,7 +8800,6 @@ const LandingPageView = () => {
         </div>
 
         <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6 items-end">
-          {/* BÁSICA */}
           <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/5 hover:border-white/20 transition-colors h-max">
             <h3 className="text-white font-black text-2xl mb-2">Básica</h3>
             <p className="text-slate-500 text-xs mb-8 h-10">La esencia digital para eventos íntimos o casuales.</p>
@@ -8820,7 +8812,6 @@ const LandingPageView = () => {
             <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Básica', '_blank')} className="w-full py-4 rounded-full bg-white/5 text-white font-bold hover:bg-white/10 transition-colors text-sm">Adquirir Básica</button>
           </div>
 
-          {/* PLATA */}
           <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/5 hover:border-white/20 transition-colors h-max">
             <h3 className="text-white font-black text-2xl mb-2">Plata</h3>
             <p className="text-slate-500 text-xs mb-8 h-10">Ideal para bodas medianas y control de regalos.</p>
@@ -8833,7 +8824,6 @@ const LandingPageView = () => {
             <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Plata', '_blank')} className="w-full py-4 rounded-full bg-white/5 text-white font-bold hover:bg-white/10 transition-colors text-sm">Adquirir Plata</button>
           </div>
 
-          {/* ORO (DESTACADO) */}
           <div className="bg-gradient-to-b from-amber-500 to-yellow-600 rounded-[3rem] p-[3px] shadow-[0_0_50px_rgba(245,158,11,0.2)] transform lg:-translate-y-8 relative z-10 h-max">
             <div className="bg-[#0a0f1c] rounded-[2.8rem] p-8 h-full flex flex-col relative overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/20 rounded-full blur-[50px]"></div>
@@ -8852,7 +8842,6 @@ const LandingPageView = () => {
             </div>
           </div>
 
-          {/* DIAMANTE */}
           <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/5 hover:border-white/20 transition-colors h-max">
             <h3 className="text-white font-black text-2xl mb-2">Diamante VIP</h3>
             <p className="text-slate-500 text-xs mb-8 h-10">La suite tecnológica extrema para no dejar nada al azar.</p>
@@ -8896,42 +8885,62 @@ const LandingPageView = () => {
          </div>
       </section>
 
-      {/* 🔴 FOOTER VIP ACTIVO */}
+      {/* 🔴 FOOTER VIP ACTIVO Y EXPANDIDO */}
       <footer className="border-t border-white/5 bg-slate-950 pt-20 pb-10 relative z-10">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
            <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
                  <BauliaLogo size={32} />
                  <span className="text-2xl font-black text-white tracking-widest uppercase">Baulia</span>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-sm">La Bóveda Premium de Gestión de Eventos. Elegancia en la invitación, poder en la ejecución.</p>
+              <p className="text-slate-400 text-sm leading-relaxed max-w-sm mb-6">La Bóveda Premium de Gestión de Eventos. Elegancia en la invitación, poder en la ejecución.</p>
+              
+              {/* REDES SOCIALES BÁSICAS */}
+              <div className="flex space-x-4">
+                 <button onClick={() => window.open('#', '_blank')} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-colors" title="Instagram">
+                   <ImageIcon size={18} />
+                 </button>
+                 <button onClick={() => window.open('https://wa.me/525500000000', '_blank')} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-colors" title="Contactar por WhatsApp">
+                   <MessageCircle size={18} />
+                 </button>
+              </div>
            </div>
+           
            <div>
               <h4 className="text-white font-bold mb-6 tracking-widest uppercase text-xs">Plataforma</h4>
               <ul className="space-y-4 text-sm text-slate-400">
                  <li><a href="#experiencia" className="hover:text-amber-400 transition-colors">Características</a></li>
                  <li><a href="#planes" className="hover:text-amber-400 transition-colors">Planes y Precios</a></li>
                  <li><a href="#planners" className="hover:text-amber-400 transition-colors">Agencias y Planners</a></li>
-                 <li><button onClick={() => window.location.href = 'https://panel.baulia.com'} className="hover:text-amber-400 transition-colors">Login Clientes</button></li>
+                 <li><button onClick={() => window.location.href = 'https://panel.baulia.com'} className="hover:text-amber-400 transition-colors text-amber-500 font-bold">Login Clientes</button></li>
               </ul>
            </div>
+           
+           <div>
+              <h4 className="text-white font-bold mb-6 tracking-widest uppercase text-xs">Compañía</h4>
+              <ul className="space-y-4 text-sm text-slate-400">
+                 <li><button onClick={() => setLegalModal('about')} className="hover:text-white transition-colors">Acerca de Baulia</button></li>
+                 <li><button onClick={() => window.open('mailto:hola@baulia.com')} className="hover:text-white transition-colors flex items-center"><Mail size={14} className="mr-2"/> hola@baulia.com</button></li>
+              </ul>
+           </div>
+
            <div>
               <h4 className="text-white font-bold mb-6 tracking-widest uppercase text-xs">Legal y Soporte</h4>
               <ul className="space-y-4 text-sm text-slate-400">
-                 {/* 🔴 BOTONES LEGALES ACTIVADOS */}
                  <li><button onClick={() => setLegalModal('terms')} className="hover:text-white transition-colors">Términos de Servicio</button></li>
                  <li><button onClick={() => setLegalModal('privacy')} className="hover:text-white transition-colors">Aviso de Privacidad</button></li>
-                 <li><button onClick={() => window.open('https://wa.me/525500000000', '_blank')} className="text-amber-500 font-bold hover:text-amber-400 transition-colors">Soporte WhatsApp</button></li>
+                 <li><button onClick={() => window.open('https://wa.me/525500000000', '_blank')} className="text-slate-400 hover:text-white transition-colors">Soporte y Ayuda</button></li>
               </ul>
            </div>
         </div>
+        
         <div className="max-w-7xl mx-auto px-6 border-t border-white/5 pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
            <p className="text-[10px] text-slate-500 uppercase tracking-widest">&copy; {new Date().getFullYear()} Baulia Technologies. Todos los derechos reservados.</p>
-           <p className="text-[10px] text-slate-600">Hecho con tecnología de vanguardia.</p>
+           <p className="text-[10px] text-slate-600 font-bold flex items-center">Diseñado con <Heart size={10} className="mx-1.5 fill-rose-500 text-rose-500"/> en México 🇲🇽 para el mundo.</p>
         </div>
       </footer>
 
-      {/* 🔴 MODALES LEGALES (OVERLAYS) */}
+      {/* 🔴 MODALES LEGALES Y ACERCA DE (OVERLAYS) */}
       {legalModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/90 backdrop-blur-md flex justify-center items-center p-4 md:p-8 animate-in fade-in duration-200">
           <div className="bg-[#0a0f1c] border border-white/10 w-full max-w-4xl h-[85vh] rounded-[2rem] shadow-2xl flex flex-col relative overflow-hidden animate-in zoom-in-95">
@@ -8939,10 +8948,10 @@ const LandingPageView = () => {
             <div className="p-6 md:p-8 border-b border-white/5 flex justify-between items-center bg-slate-900/50 shrink-0">
               <div className="flex items-center gap-3">
                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                   <FileText size={18} className="text-amber-500"/>
+                   {legalModal === 'about' ? <Star size={18} className="text-amber-500"/> : <FileText size={18} className="text-amber-500"/>}
                  </div>
                  <h2 className="text-xl md:text-2xl font-black text-white tracking-wide">
-                   {legalModal === 'terms' ? 'Términos de Servicio' : 'Aviso de Privacidad'}
+                   {legalModal === 'terms' ? 'Términos de Servicio' : legalModal === 'privacy' ? 'Aviso de Privacidad' : 'Acerca de Baulia'}
                  </h2>
               </div>
               <button onClick={() => setLegalModal(null)} className="p-3 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-full transition-colors text-slate-400">
@@ -8970,11 +8979,8 @@ const LandingPageView = () => {
 
                   <h3 className="text-lg font-bold text-white mt-8 mb-2">4. Disponibilidad del Sistema</h3>
                   <p>Baulia se esfuerza por garantizar que la plataforma esté disponible el 99.9% del tiempo, utilizando infraestructura en la nube de nivel mundial (como Vercel y Google Firebase). Sin embargo, no somos responsables por interrupciones derivadas de fallas en la red de internet del usuario, caídas globales de servidores de terceros o fuerza mayor.</p>
-
-                  <h3 className="text-lg font-bold text-white mt-8 mb-2">5. Modificaciones al Servicio</h3>
-                  <p>Nos reservamos el derecho de modificar o descontinuar temporalmente alguna función del Servicio con o sin previo aviso. Los usuarios serán notificados de cambios significativos que afecten directamente la operatividad de sus eventos activos.</p>
                 </>
-              ) : (
+              ) : legalModal === 'privacy' ? (
                 <>
                   <p><strong>Última actualización:</strong> {new Date().toLocaleDateString('es-MX')}</p>
                   <p>En cumplimiento con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) de México, <strong>Baulia Technologies</strong> ("Baulia", "nosotros" o "nuestro") expide el presente Aviso de Privacidad.</p>
@@ -8997,20 +9003,59 @@ const LandingPageView = () => {
                   <p className="mt-4"><strong>Baulia NO vende, alquila, ni cede sus bases de datos a terceros para fines publicitarios.</strong></p>
 
                   <h3 className="text-lg font-bold text-white mt-8 mb-2">3. Almacenamiento y Seguridad</h3>
-                  <p>Su información es procesada y almacenada en infraestructuras de nube de alta seguridad proporcionadas por Google Cloud Platform (Firebase). Implementamos medidas de seguridad técnicas, administrativas y físicas para proteger sus datos contra daño, pérdida, alteración, destrucción o el uso no autorizado.</p>
+                  <p>Su información es procesada y almacenada en infraestructuras de nube de alta seguridad. Implementamos medidas de seguridad técnicas, administrativas y físicas para proteger sus datos contra daño, pérdida, alteración, destrucción o el uso no autorizado.</p>
 
                   <h3 className="text-lg font-bold text-white mt-8 mb-2">4. Retención de los Datos</h3>
                   <p>La información de los eventos (incluyendo listas de invitados y galerías fotográficas) se mantendrá en nuestros servidores activos hasta 30 días posteriores a la fecha del evento. Transcurrido este periodo de gracia, los datos de los invitados y galerías pueden ser depurados permanentemente de nuestra base de datos para proteger su privacidad y optimizar el almacenamiento.</p>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col items-center text-center mb-10 mt-4">
+                    <BauliaLogo size={64} className="mb-6 drop-shadow-[0_0_15px_rgba(245,158,11,0.4)]" />
+                    <h3 className="text-3xl font-black text-white tracking-widest uppercase">El Estándar de Oro</h3>
+                  </div>
 
-                  <h3 className="text-lg font-bold text-white mt-8 mb-2">5. Derechos ARCO</h3>
-                  <p>Usted tiene derecho a conocer qué datos personales tenemos de usted (Acceso), solicitar la corrección de su información personal (Rectificación), que la eliminemos de nuestros registros (Cancelación), así como oponerse al uso de sus datos personales para fines específicos (Oposición). Para ejercer sus derechos ARCO, envíe un correo a la dirección de soporte especificada en su contrato o a través de nuestros canales oficiales.</p>
+                  <div className="bg-white/5 border border-white/10 p-8 rounded-3xl mb-8 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-[40px]"></div>
+                    <h4 className="text-xl font-bold text-amber-400 mb-4 relative z-10">Nuestra Misión</h4>
+                    <p className="text-lg leading-relaxed relative z-10 text-white">
+                      Transformar la gestión de eventos mediante tecnología premium, brindando a anfitriones y <i>planners</i> el <b>control absoluto</b>, y a los invitados una <b>experiencia interactiva inolvidable</b>.
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl mb-8">
+                    <h4 className="text-xl font-bold text-indigo-400 mb-4">Nuestra Visión</h4>
+                    <p className="text-lg leading-relaxed">
+                      Ser el ecosistema global definitivo (SaaS) para la industria de celebraciones de lujo, eliminando el estrés de la planeación y elevando la forma en que el mundo se reúne para crear recuerdos.
+                    </p>
+                  </div>
+
+                  <h4 className="text-lg font-bold text-white mt-12 mb-6">Lo que nos define (Valores)</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-5 border border-white/5 rounded-2xl bg-white/5">
+                      <span className="text-amber-500 font-black tracking-widest uppercase text-[10px] block mb-1">01. Cero Caos</span>
+                      <p className="text-sm">Diseñamos interfaces que reducen la ansiedad de los organizadores al mínimo.</p>
+                    </div>
+                    <div className="p-5 border border-white/5 rounded-2xl bg-white/5">
+                      <span className="text-indigo-400 font-black tracking-widest uppercase text-[10px] block mb-1">02. Lujo Digital</span>
+                      <p className="text-sm">Creemos que el software de tu evento debe ser tan elegante como el evento mismo.</p>
+                    </div>
+                    <div className="p-5 border border-white/5 rounded-2xl bg-white/5">
+                      <span className="text-emerald-400 font-black tracking-widest uppercase text-[10px] block mb-1">03. Privacidad Absoluta</span>
+                      <p className="text-sm">Tus recuerdos y los datos de tus invitados son sagrados y están blindados.</p>
+                    </div>
+                    <div className="p-5 border border-white/5 rounded-2xl bg-white/5">
+                      <span className="text-rose-400 font-black tracking-widest uppercase text-[10px] block mb-1">04. Empoderamiento B2B</span>
+                      <p className="text-sm">Ayudamos a que las agencias y planners brillen bajo su propia marca.</p>
+                    </div>
+                  </div>
                 </>
               )}
             </div>
             
             <div className="p-6 border-t border-white/5 bg-slate-900/30 shrink-0 text-center">
               <button onClick={() => setLegalModal(null)} className="px-8 py-3 bg-amber-500 text-slate-900 rounded-full font-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">
-                Aceptar y Cerrar
+                Cerrar Documento
               </button>
             </div>
             
