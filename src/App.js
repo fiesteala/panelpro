@@ -9354,7 +9354,7 @@ const SuperAdminView = () => {
                          <div>
                             <div className="flex items-center gap-2 mb-1">
                                <h4 className="font-black text-slate-900">{resena.authorName}</h4>
-                               <button onClick={() => editResenaAuthor(resena)} className="text-slate-400 hover:text-indigo-600"><Edit3 size={14}/></button>
+                               <button onClick={() => editResenaAuthor(resena)} className="text-slate-400 hover:text-indigo-600"><Edit2 size={14}/></button>
                             </div>
                             <p className="text-[10px] text-slate-500 uppercase tracking-widest">{resena.authorType} • Evento: {resena.eventId}</p>
                          </div>
