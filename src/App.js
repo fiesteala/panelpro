@@ -8570,10 +8570,16 @@ const GuestProyectorView = ({ eventId }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 4.2 - FOOTER & NOSOTROS) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 4.3 - REDES OFICIALES) ---
 // ==========================================
 const LandingPageView = () => {
-  const [legalModal, setLegalModal] = useState(null); // 'terms' | 'privacy' | 'about' | null
+  const [legalModal, setLegalModal] = useState(null);
+
+  // 🔴 ICONOS VECTORIALES OFICIALES
+  const IconFB = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>;
+  const IconIG = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 1.727-6.98 6.077-.058 1.28-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 1.718 6.781 6.077 6.98 1.28.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-1.718 6.979-6.077.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-1.717-6.78-6.077-6.98-1.28-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>;
+  const IconWA = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.88-.653-1.473-1.46-1.646-1.757-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>;
+  const IconTK = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v7.2c0 1.63-.31 3.23-1.11 4.6-1.18 2.01-3.21 3.44-5.5 3.86-2.5.46-5.22-.09-7.25-1.67-1.95-1.52-3.13-3.87-3.2-6.38-.08-2.82 1.25-5.61 3.54-7.24 1.48-1.06 3.32-1.5 5.12-1.37v4.03c-1.04-.15-2.15.02-3.05.62-.92.6-1.53 1.57-1.64 2.66-.1 1.05.28 2.11 1.02 2.85.76.76 1.86 1.1 2.92 1.03 1.16-.08 2.21-.71 2.78-1.7.35-.61.54-1.32.55-2.03V.02z"/></svg>;
 
   return (
     <div className="min-h-screen bg-[#0a0f1c] font-sans text-slate-200 selection:bg-amber-500 selection:text-slate-900 overflow-x-hidden">
@@ -8648,6 +8654,7 @@ const LandingPageView = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[280px]">
+          
           <div className="md:col-span-2 md:row-span-2 bg-gradient-to-br from-slate-900 to-slate-950 rounded-[3rem] p-10 md:p-12 border border-white/10 flex flex-col justify-end relative overflow-hidden group hover:border-amber-500/50 transition-colors">
             <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-[80px] group-hover:bg-amber-500/20 transition-colors"></div>
             <div className="absolute top-10 left-10 bg-white/10 backdrop-blur p-4 rounded-3xl border border-white/10"><ImageIcon size={40} className="text-amber-400" /></div>
@@ -8680,6 +8687,7 @@ const LandingPageView = () => {
                <p className="text-slate-400 text-sm">Rutas precisas a la ceremonia, recepción y hospedaje.</p>
              </div>
           </div>
+
         </div>
       </section>
 
@@ -8687,6 +8695,7 @@ const LandingPageView = () => {
       <section id="boveda" className="py-32 relative z-10 border-y border-white/5 bg-slate-950/50">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex flex-col lg:flex-row gap-16 items-center">
+            
             <div className="lg:w-1/2">
               <span className="text-amber-500 font-black tracking-widest uppercase text-xs mb-4 block flex items-center"><Lock size={16} className="mr-2"/> Fase 2: La Ejecución</span>
               <h2 className="text-4xl md:text-5xl font-black text-white mb-8 tracking-tight leading-tight">Tu evento, bajo tu dominio absoluto.</h2>
@@ -8714,6 +8723,8 @@ const LandingPageView = () => {
 
             <div className="lg:w-1/2 w-full relative perspective-[1000px]">
               <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-amber-500/20 blur-[120px] rounded-full pointer-events-none"></div>
+              
+              {/* Fake UI Panel Mockup */}
               <div className="bg-[#0a0f1c] rounded-[3rem] border border-white/10 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.8)] relative z-10 transform md:rotate-y-[-10deg] md:rotate-x-[5deg] hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-700">
                 <div className="bg-slate-900 rounded-[2.5rem] border border-white/5 h-[600px] w-full overflow-hidden flex flex-col relative">
                    <div className="h-16 border-b border-white/5 flex items-center px-6 gap-2 bg-slate-950/50 shrink-0">
@@ -8746,6 +8757,7 @@ const LandingPageView = () => {
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
@@ -8775,7 +8787,9 @@ const LandingPageView = () => {
              <div className="md:w-5/12 relative z-10 flex justify-center w-full">
                 <div className="w-full max-w-sm bg-[#0a0f1c] rounded-[2.5rem] border border-white/10 p-8 shadow-2xl transform md:rotate-3 hover:rotate-0 transition-transform duration-500">
                    <div className="flex items-center gap-5 mb-10 border-b border-white/5 pb-8">
-                      <div className="w-16 h-16 bg-slate-800 rounded-2xl border border-white/10 flex items-center justify-center text-white font-black text-2xl shadow-inner">E</div>
+                      <div className="w-16 h-16 bg-slate-800 rounded-2xl border border-white/10 flex items-center justify-center text-white font-black text-2xl shadow-inner">
+                        E
+                      </div>
                       <div>
                         <p className="text-white font-black text-xl mb-1">Elite Bodas</p>
                         <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest">Panel Maestro Pro</p>
@@ -8800,30 +8814,34 @@ const LandingPageView = () => {
         </div>
 
         <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6 items-end">
+          
+          {/* BÁSICA */}
           <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/5 hover:border-white/20 transition-colors h-max">
             <h3 className="text-white font-black text-2xl mb-2">Básica</h3>
             <p className="text-slate-500 text-xs mb-8 h-10">La esencia digital para eventos íntimos o casuales.</p>
             <div className="space-y-4 text-sm text-slate-400 font-medium mb-10">
-              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Invitación Interactiva</p>
-              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Confirmación Simple</p>
-              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-600"/> Cuenta Regresiva</p>
-              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-600"/> Mapas GPS</p>
+              <p className="flex items-center text-slate-200"><CheckCircle size={16} className="mr-3 text-emerald-500"/> Invitación Interactiva</p>
+              <p className="flex items-center text-slate-200"><CheckCircle size={16} className="mr-3 text-emerald-500"/> Confirmación Simple</p>
+              <p className="flex items-center"><CheckCircle size={16} className="mr-3 text-slate-600"/> Cuenta Regresiva</p>
+              <p className="flex items-center"><CheckCircle size={16} className="mr-3 text-slate-600"/> Mapas GPS</p>
             </div>
             <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Básica', '_blank')} className="w-full py-4 rounded-full bg-white/5 text-white font-bold hover:bg-white/10 transition-colors text-sm">Adquirir Básica</button>
           </div>
 
+          {/* PLATA */}
           <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/5 hover:border-white/20 transition-colors h-max">
             <h3 className="text-white font-black text-2xl mb-2">Plata</h3>
             <p className="text-slate-500 text-xs mb-8 h-10">Ideal para bodas medianas y control de regalos.</p>
             <div className="space-y-4 text-sm text-slate-400 font-medium mb-10">
               <p className="text-white font-bold border-b border-white/10 pb-3 mb-3">Todo en Básica, más:</p>
-              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Itinerario Visual</p>
-              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Mesa de Regalos</p>
-              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-600"/> Hospedaje y Dress Code</p>
+              <p className="flex items-center text-slate-200"><CheckCircle size={16} className="mr-3 text-emerald-500"/> Itinerario Visual</p>
+              <p className="flex items-center text-slate-200"><CheckCircle size={16} className="mr-3 text-emerald-500"/> Mesa de Regalos</p>
+              <p className="flex items-center"><CheckCircle size={16} className="mr-3 text-slate-600"/> Hospedaje y Dress Code</p>
             </div>
             <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Plata', '_blank')} className="w-full py-4 rounded-full bg-white/5 text-white font-bold hover:bg-white/10 transition-colors text-sm">Adquirir Plata</button>
           </div>
 
+          {/* ORO (DESTACADO) */}
           <div className="bg-gradient-to-b from-amber-500 to-yellow-600 rounded-[3rem] p-[3px] shadow-[0_0_50px_rgba(245,158,11,0.2)] transform lg:-translate-y-8 relative z-10 h-max">
             <div className="bg-[#0a0f1c] rounded-[2.8rem] p-8 h-full flex flex-col relative overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/20 rounded-full blur-[50px]"></div>
@@ -8842,6 +8860,7 @@ const LandingPageView = () => {
             </div>
           </div>
 
+          {/* DIAMANTE */}
           <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/5 hover:border-white/20 transition-colors h-max">
             <h3 className="text-white font-black text-2xl mb-2">Diamante VIP</h3>
             <p className="text-slate-500 text-xs mb-8 h-10">La suite tecnológica extrema para no dejar nada al azar.</p>
@@ -8885,7 +8904,7 @@ const LandingPageView = () => {
          </div>
       </section>
 
-      {/* 🔴 FOOTER VIP ACTIVO Y EXPANDIDO */}
+      {/* 🔴 FOOTER VIP ACTIVO Y EXPANDIDO CON LOGOS OFICIALES */}
       <footer className="border-t border-white/5 bg-slate-950 pt-20 pb-10 relative z-10">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
            <div className="md:col-span-2">
@@ -8895,13 +8914,19 @@ const LandingPageView = () => {
               </div>
               <p className="text-slate-400 text-sm leading-relaxed max-w-sm mb-6">La Bóveda Premium de Gestión de Eventos. Elegancia en la invitación, poder en la ejecución.</p>
               
-              {/* REDES SOCIALES BÁSICAS */}
-              <div className="flex space-x-4">
+              {/* 🔴 REDES SOCIALES OFICIALES (Reemplaza los '#' con tus links reales) */}
+              <div className="flex space-x-3">
                  <button onClick={() => window.open('#', '_blank')} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-colors" title="Instagram">
-                   <ImageIcon size={18} />
+                   <IconIG />
                  </button>
-                 <button onClick={() => window.open('https://wa.me/525500000000', '_blank')} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-colors" title="Contactar por WhatsApp">
-                   <MessageCircle size={18} />
+                 <button onClick={() => window.open('#', '_blank')} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-colors" title="Facebook">
+                   <IconFB />
+                 </button>
+                 <button onClick={() => window.open('#', '_blank')} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-colors" title="TikTok">
+                   <IconTK />
+                 </button>
+                 <button onClick={() => window.open('https://wa.me/525500000000', '_blank')} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-colors" title="WhatsApp">
+                   <IconWA />
                  </button>
               </div>
            </div>
@@ -8920,6 +8945,7 @@ const LandingPageView = () => {
               <h4 className="text-white font-bold mb-6 tracking-widest uppercase text-xs">Compañía</h4>
               <ul className="space-y-4 text-sm text-slate-400">
                  <li><button onClick={() => setLegalModal('about')} className="hover:text-white transition-colors">Acerca de Baulia</button></li>
+                 {/* 🔴 PON TU CORREO REAL AQUÍ */}
                  <li><button onClick={() => window.open('mailto:hola@baulia.com')} className="hover:text-white transition-colors flex items-center"><Mail size={14} className="mr-2"/> hola@baulia.com</button></li>
               </ul>
            </div>
@@ -8929,6 +8955,7 @@ const LandingPageView = () => {
               <ul className="space-y-4 text-sm text-slate-400">
                  <li><button onClick={() => setLegalModal('terms')} className="hover:text-white transition-colors">Términos de Servicio</button></li>
                  <li><button onClick={() => setLegalModal('privacy')} className="hover:text-white transition-colors">Aviso de Privacidad</button></li>
+                 {/* 🔴 PON TU NÚMERO DE WHATSAPP AQUÍ */}
                  <li><button onClick={() => window.open('https://wa.me/525500000000', '_blank')} className="text-slate-400 hover:text-white transition-colors">Soporte y Ayuda</button></li>
               </ul>
            </div>
@@ -9055,7 +9082,7 @@ const LandingPageView = () => {
             
             <div className="p-6 border-t border-white/5 bg-slate-900/30 shrink-0 text-center">
               <button onClick={() => setLegalModal(null)} className="px-8 py-3 bg-amber-500 text-slate-900 rounded-full font-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">
-                Cerrar Documento
+                Aceptar y Cerrar
               </button>
             </div>
             
