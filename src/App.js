@@ -9436,6 +9436,48 @@ const AdminDashboard = ({ authData }) => {
 };
 
 // ==========================================
+// --- COMPONENTE: VISTA INDEPENDIENTE PARA EL CADENERO (STAFF) ---
+// ==========================================
+const HostessStandaloneView = ({ eventId }) => {
+  const [guests, setGuests] = useState([]);
+  const [tables, setTables] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Sistema de notificaciones silencioso para no causar errores de consola
+  const addNotification = (title, msg, type) => console.log(title, msg);
+
+  useEffect(() => {
+    setGlobalEventId(eventId);
+    
+    // El cadenero necesita conectarse a la base de datos de invitados y mesas de este evento
+    const unsubGuests = onSnapshot(collection(db, "eventos", eventId, "invitados"), (snap) => {
+      setGuests(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    
+    const unsubMesas = onSnapshot(collection(db, "eventos", eventId, "mesas"), (snap) => {
+      setTables(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    });
+
+    return () => { unsubGuests(); unsubMesas(); };
+  }, [eventId]);
+
+  if (loading) {
+    return (
+      <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center text-emerald-400 font-bold">
+        <RefreshCw size={40} className="animate-spin mb-4" /> Conectando a la Puerta...
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-screen w-screen bg-slate-50 p-2 sm:p-4 overflow-y-auto">
+       <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={true} addNotification={addNotification} />
+    </div>
+  );
+};
+
+// ==========================================
 // 3. EL ENRUTADOR PRINCIPAL (App)
 // ==========================================
 export default function App() {
