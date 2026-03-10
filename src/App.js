@@ -852,6 +852,594 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 };
 
 // ==========================================
+// --- COMPONENTE: INVITADOS (UI PERFECCIONADA CON FORMATO PULSERA 25X19) ---
+// ==========================================
+const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
+  const [isWeddingMode, setIsWeddingMode] = useState(true); 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filtroLado, setFiltroLado] = useState('Todos');
+
+  const [addModal, setAddModal] = useState({ open: false, side: 'general' });
+  const [newGuest, setNewGuest] = useState({ name: '', passes: 1, childrenPasses: 0, phone: '', status: 'por_invitar' });
+  const [editModal, setEditModal] = useState({ open: false, guest: null });
+  const [deleteModal, setDeleteModal] = useState(null);
+  
+  const [qrModal, setQrModal] = useState(null); 
+
+  const [exportViewOpen, setExportViewOpen] = useState(false);
+  const [qrStudioOpen, setQrStudioOpen] = useState(false);
+  const [separateLists, setSeparateLists] = useState(true);
+  const [exportCols, setExportCols] = useState({ nombre: true, pases: true, estatus: true, telefono: true, mesa: true });
+
+  const [isPreparingListPrint, setIsPreparingListPrint] = useState(false);
+  const [isPreparingQRPrint, setIsPreparingQRPrint] = useState(false);
+
+  const handleOpenAdd = (side) => {
+    setNewGuest({ name: '', passes: 1, childrenPasses: 0, phone: '', status: 'por_invitar' });
+    setAddModal({ open: true, side });
+  };
+
+  const handleOpenEdit = (guest) => {
+    setEditModal({ open: true, guest: { ...guest } });
+  };
+
+  const totalPases = guests.reduce((sum, g) => sum + g.passes, 0);
+  const totalNinos = guests.reduce((sum, g) => sum + (g.childrenPasses || 0), 0);
+  const totalConfirmados = guests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').reduce((sum, g) => sum + g.passes, 0);
+  const totalPendientes = guests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').reduce((sum, g) => sum + g.passes, 0);
+  const totalIngresos = guests.reduce((sum, g) => sum + (g.entered || 0), 0); 
+  
+  const totalCancelados = guests.reduce((sum, g) => {
+    const pasesOriginales = g.originalPasses || g.passes;
+    const pasesConfirmados = g.subGuests?.length || 0;
+    if (g.status === 'cancelado') return sum + pasesOriginales;
+    if (g.status === 'confirmado' || g.status === 'ingreso') return sum + Math.max(0, pasesOriginales - pasesConfirmados);
+    return sum;
+  }, 0);
+
+  const pasesNovia = guests.filter(g => g.side === 'novia').reduce((sum, g) => sum + g.passes, 0);
+  const pasesNovio = guests.filter(g => g.side === 'novio').reduce((sum, g) => sum + g.passes, 0);
+
+  const invitadosFiltrados = guests.filter(g => {
+    const term = searchTerm.toLowerCase();
+    const matchesSide = filtroLado === 'Todos' ? true : g.side === filtroLado.toLowerCase();
+    if (!term) return matchesSide;
+
+    const name = g.name.toLowerCase();
+    const status = g.status.toLowerCase();
+    const side = g.side ? g.side.toLowerCase() : ''; 
+    const subGuestsNames = g.subGuests ? g.subGuests.map(sg => sg.name.toLowerCase()).join(' ') : '';
+    const tableObj = tables?.find(t => t.id === g.tableId);
+    const tableName = tableObj ? tableObj.name.toLowerCase() : '';
+
+    return (name.includes(term) || status.includes(term) || subGuestsNames.includes(term) || tableName.includes(term) || side.includes(term)) && matchesSide;
+  });
+
+  const getFlattenedGuests = (guestList) => {
+    const flattened = [];
+    guestList.forEach(guest => {
+      if (!guest.subGuests || guest.subGuests.length === 0) {
+        flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.passes, isMain: true, isChild: false, pin: null });
+      } else {
+        guest.subGuests.forEach((sg, idx) => {
+          flattened.push({ _rowId: sg.id, parentGuest: guest, displayName: sg.name, passes: guest.passes, isMain: idx === 0, isChild: sg.isChild, pin: sg.id });
+        });
+        const faltantes = guest.passes - guest.subGuests.length;
+        if (faltantes > 0 && (guest.status === 'pendiente' || guest.status === 'por_invitar')) {
+          flattened.push({ _rowId: `${guest.id}_faltantes`, parentGuest: guest, displayName: `Lugares sin confirmar (${faltantes})`, passes: faltantes, isMain: false, isChild: false, pin: null, isMissing: true });
+        }
+      }
+    });
+    return flattened;
+  };
+
+  const flattenedList = getFlattenedGuests(invitadosFiltrados);
+
+  const handleSendWhatsApp = async (parentGuest) => {
+    const nuevoStatus = parentGuest.status === 'por_invitar' ? 'pendiente' : parentGuest.status;
+    const updatedGuest = { ...parentGuest, sent: true, status: nuevoStatus };
+    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", parentGuest.id), updatedGuest);
+    const domain = window.location.origin; 
+    const linkPersonalizado = `${domain}/?modo=invitacion&id=${ID_DEL_EVENTO}&uid=${parentGuest.id}`;
+    const msg = `✨ ¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n🔗 ${linkPersonalizado}\n\n¡No faltes!`;
+
+    const phone = parentGuest.phone ? parentGuest.phone.replace(/\D/g,'') : '';
+    if (phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  const handleSaveGuest = async (e) => {
+    e.preventDefault();
+    const nuevoId = Date.now().toString();
+    const pNum = Number(newGuest.passes) || 1;
+    
+    const initSubGuests = Array(pNum).fill(null).map((_, i) => ({
+      id: `usr_${nuevoId}_${i}`,
+      name: i === 0 ? newGuest.name : `Acompañante ${i+1}`,
+      isChild: false,
+      entered: false
+    }));
+
+    const datosInvitado = {
+      name: newGuest.name, 
+      passes: pNum, 
+      childrenPasses: Number(newGuest.childrenPasses) || 0,
+      phone: newGuest.phone, 
+      status: newGuest.status, 
+      side: addModal.side, 
+      entered: 0, 
+      tableId: null, 
+      sent: false, 
+      subGuests: initSubGuests,
+      extraRequested: 0, 
+      originalPasses: pNum
+    };
+    
+    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", nuevoId), datosInvitado);
+    setAddModal({ open: false, side: 'general' });
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    const updatedGuest = { ...editModal.guest, extraRequested: 0 };
+    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", updatedGuest.id), updatedGuest);
+    setEditModal({ open: false, guest: null });
+  };
+
+  const executeDeleteGuest = async () => {
+    if(deleteModal) {
+      await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", deleteModal.id));
+      setDeleteModal(null);
+    }
+  };
+
+  const toggleCol = (col) => setExportCols(prev => ({ ...prev, [col]: !prev[col] }));
+
+  const triggerListPdfDownload = async () => {
+    setIsPreparingListPrint(true);
+    setTimeout(async () => {
+      try {
+        const { jsPDF } = await import('jspdf');
+        const html2canvas = (await import('html2canvas')).default;
+        const pages = document.querySelectorAll('.list-pdf-page');
+        const pdf = new jsPDF('p', 'mm', 'letter');
+
+        for (let i = 0; i < pages.length; i++) {
+           const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+           const imgData = canvas.toDataURL('image/jpeg', 0.95);
+           if (i > 0) pdf.addPage();
+           pdf.addImage(imgData, 'JPEG', 0, 0, 215.9, 279.4);
+        }
+        pdf.save('Lista-Invitados.pdf');
+        if(addNotification) addNotification('¡PDF Guardado!', 'Revisa tu carpeta de descargas.', 'success');
+      } catch (error) {
+        if(addNotification) addNotification('Error', 'Hubo un fallo al generar el archivo PDF.', 'error');
+      }
+      setIsPreparingListPrint(false);
+      setExportViewOpen(false);
+    }, 500);
+  };
+
+  // 🔴 MOTOR PDF EXACTO A 25cm x 19cm (Horizontal Landscape)
+  const triggerQRPdfDownload = async () => {
+    setIsPreparingQRPrint(true);
+    setTimeout(async () => {
+      try {
+        const { jsPDF } = await import('jspdf');
+        const html2canvas = (await import('html2canvas')).default;
+        const pages = document.querySelectorAll('.qr-pdf-page');
+        
+        // Orientación Landscape con tamaño exacto de la lámina: 19cm de alto, 25cm de ancho
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'cm', format: [19, 25] });
+
+        for (let i = 0; i < pages.length; i++) {
+           const canvas = await html2canvas(pages[i], { scale: 3, useCORS: true, backgroundColor: '#ffffff' });
+           const imgData = canvas.toDataURL('image/jpeg', 1.0);
+           if (i > 0) pdf.addPage([19, 25], 'landscape');
+           pdf.addImage(imgData, 'JPEG', 0, 0, 25, 19);
+        }
+        pdf.save('Pulseras-VIP.pdf');
+        if(addNotification) addNotification('¡PDF Guardado!', 'Revisa tu carpeta de descargas.', 'success');
+      } catch (error) {
+        if(addNotification) addNotification('Error', 'Hubo un fallo al generar el archivo PDF.', 'error');
+      }
+      setIsPreparingQRPrint(false);
+      setQrStudioOpen(false);
+    }, 500);
+  };
+
+  if (exportViewOpen) {
+    const allList = getFlattenedGuests(invitadosFiltrados);
+    const PAGE_1_LIMIT = 26;
+    const PAGE_N_LIMIT = 36;
+    
+    let filteredChunks = [];
+    if (isWeddingMode && separateLists) {
+       filteredChunks = [allList]; 
+    } else {
+       filteredChunks = [allList];
+    }
+
+    const firstPageItems = allList.slice(0, PAGE_1_LIMIT);
+    const extraItems = allList.slice(PAGE_1_LIMIT);
+    const extraPages = [];
+    for(let i=0; i<extraItems.length; i+=PAGE_N_LIMIT) extraPages.push(extraItems.slice(i, i+PAGE_N_LIMIT));
+
+    const renderTableRows = (rows) => (
+      <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap border-collapse">
+        <thead>
+          <tr className="bg-slate-100/50">
+            {exportCols.nombre && <th className="py-2 border-b border-slate-300 font-bold text-slate-700 w-1/3">Nombre del Asistente</th>}
+            {exportCols.pases && <th className="px-2 py-2 border-b border-slate-300 font-bold text-slate-700 text-center">Pase</th>}
+            {exportCols.estatus && <th className="px-2 py-2 border-b border-slate-300 font-bold text-slate-700 text-center">Estatus</th>}
+            {exportCols.telefono && <th className="px-2 py-2 border-b border-slate-300 font-bold text-slate-700">Teléfono (Titular)</th>}
+            {exportCols.mesa && <th className="px-2 py-2 border-b border-slate-300 font-bold text-slate-700">Mesa</th>}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-200">
+          {rows.map(row => (
+            <tr key={`print_${row._rowId}`}>
+              {exportCols.nombre && (
+                <td className="py-2"><span className="font-bold">{row.displayName}</span> {row.isChild ? '(Niño)' : ''}</td>
+              )}
+              {exportCols.pases && <td className="px-2 py-2 text-center font-bold">{row.isMain ? row.passes : ''}</td>}
+              {exportCols.estatus && <td className="px-2 py-2 text-center uppercase text-[10px]">{row.parentGuest.status.replace('_', ' ')}</td>}
+              {exportCols.telefono && <td className="px-2 py-2">{row.isMain ? (row.parentGuest.phone || 'N/A') : '-'}</td>}
+              {exportCols.mesa && <td className="px-2 py-2">{row.parentGuest.tableId ? (tables?.find(t => t.id === row.parentGuest.tableId)?.name || row.parentGuest.tableId) : '-'}</td>}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+
+    return (
+      <div className="fixed inset-0 z-[120] bg-slate-200 flex flex-col overflow-hidden">
+        <div className="bg-slate-900 text-white p-4 flex flex-col sm:flex-row items-center justify-between shadow-lg print:hidden z-10 gap-4">
+          <div className="flex items-center space-x-4">
+            <button onClick={() => setExportViewOpen(false)} className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X size={24}/></button>
+            <div><h3 className="font-bold text-sm">Estudio de Impresión</h3><p className="text-[10px] text-slate-400">Listas formateadas a Tamaño Carta.</p></div>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-2 justify-center">
+            <div className="h-6 w-px bg-slate-700 mx-2"></div>
+            <button onClick={() => toggleCol('nombre')} className={`text-xs px-2 py-1 rounded transition-colors ${exportCols.nombre ? 'text-white bg-slate-700' : 'text-slate-500'}`}>Nombre</button>
+            <button onClick={() => toggleCol('pases')} className={`text-xs px-2 py-1 rounded transition-colors ${exportCols.pases ? 'text-white bg-slate-700' : 'text-slate-500'}`}>Pases</button>
+            <button onClick={() => toggleCol('estatus')} className={`text-xs px-2 py-1 rounded transition-colors ${exportCols.estatus ? 'text-white bg-slate-700' : 'text-slate-500'}`}>Estatus</button>
+            <button onClick={() => toggleCol('telefono')} className={`text-xs px-2 py-1 rounded transition-colors ${exportCols.telefono ? 'text-white bg-slate-700' : 'text-slate-500'}`}>Teléfono</button>
+            <button onClick={() => toggleCol('mesa')} className={`text-xs px-2 py-1 rounded transition-colors ${exportCols.mesa ? 'text-white bg-slate-700' : 'text-slate-500'}`}>Mesa</button>
+          </div>
+
+          <button onClick={triggerListPdfDownload} disabled={isPreparingListPrint} className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold flex items-center shadow-md transition-all disabled:bg-slate-600">
+            {isPreparingListPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
+            {isPreparingListPrint ? 'Preparando...' : 'Descargar PDF'}
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col items-center gap-8">
+          
+          <div className="list-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden' }}>
+            <header className="flex justify-between items-start border-b-2 border-slate-800 pb-4 mb-6">
+              <div>
+                <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">{isWeddingMode ? 'Boda Ana & Roberto' : 'Lista de Invitados'}</h1>
+                <p className="text-slate-600 text-xs font-medium mt-1">15 de Noviembre, 2026 | Recepción</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-bold text-slate-400">Total: {totalPases} Pases</p>
+              </div>
+            </header>
+            <main>{renderTableRows(firstPageItems)}</main>
+            <div className="absolute bottom-6 right-6 text-[10px] font-bold text-slate-400">Página 1 de {1 + extraPages.length}</div>
+          </div>
+
+          {extraPages.map((pageRows, pIdx) => (
+            <div key={`extrapage_${pIdx}`} className="list-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden' }}>
+               <header className="border-b-2 border-slate-800 pb-3 mb-6">
+                 <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">Lista de Invitados (Cont.)</h1>
+               </header>
+               <main>{renderTableRows(pageRows)}</main>
+               <div className="absolute bottom-6 right-6 text-[10px] font-bold text-slate-400">Página {pIdx + 2} de {1 + extraPages.length}</div>
+            </div>
+          ))}
+
+        </div>
+      </div>
+    );
+  }
+
+  // --- VISTA 2: ESTUDIO DE PULSERAS QR ---
+  if (qrStudioOpen) {
+    const allIndividuals = guests
+      .filter(g => g.status === 'confirmado' || g.status === 'ingreso')
+      .flatMap(g => (g.subGuests || []).map(sg => ({ ...sg, familyName: g.name, familyId: g.id })));
+
+    const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+    const wristbandPages = chunkArray(allIndividuals, 10);
+
+    return (
+      <div className="fixed inset-0 z-[120] bg-slate-200 flex flex-col overflow-hidden">
+        <div className="bg-slate-900 text-white p-4 flex justify-between items-center shadow-lg print:hidden z-10 shrink-0">
+          <div className="flex items-center space-x-4">
+            <button onClick={() => setQrStudioOpen(false)} className="p-2 hover:bg-slate-800 rounded-full"><X size={24}/></button>
+            <div>
+              <h3 className="font-bold text-sm">Plantillas Comerciales para Pulseras</h3>
+              <p className="text-[10px] text-slate-400">10 pulseras de 25cm x 1.9cm por hoja.</p>
+            </div>
+          </div>
+          <button onClick={triggerQRPdfDownload} disabled={isPreparingQRPrint} className="px-5 py-2.5 bg-pink-600 hover:bg-pink-500 rounded-xl text-sm font-bold flex items-center shadow-lg disabled:bg-slate-500 transition-all">
+            {isPreparingQRPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
+            {isPreparingQRPrint ? 'Preparando...' : 'Descargar PDF (25x19)'}
+          </button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto bg-slate-200 flex flex-col items-center py-8 gap-8">
+           {wristbandPages.length === 0 ? (
+             <div className="text-center py-20 text-slate-400 font-bold">No hay invitados confirmados para generar códigos QR.</div>
+           ) : (
+             wristbandPages.map((page, pageIdx) => (
+               // 🔴 LÁMINA EXACTA 25cm x 19cm
+               <div key={pageIdx} className="qr-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '25cm', height: '19cm', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflow: 'hidden', padding: 0, margin: 0 }}>
+                 {page.map((ind) => {
+                   const link = window.location.origin + window.location.pathname + '?modo=camara&uid=' + ind.id;
+                   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`;
+                   return (
+                     <div key={ind.id} style={{ width: '25cm', height: '1.9cm', borderBottom: '1px dashed #cbd5e1', display: 'flex', boxSizing: 'border-box', backgroundColor: 'white', margin: 0 }}>
+                        <div style={{ width: '2.5cm', height: '100%', backgroundColor: '#f1f5f9', borderRight: '1px dashed #94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontSize: '8px', color: '#94a3b8', transform: 'rotate(-90deg)', letterSpacing: '1px' }}>PEGAMENTO</span>
+                        </div>
+                        <div style={{ flex: 1, padding: '0 1cm', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                          <div style={{ fontSize: '14px', fontWeight: '900', color: '#0f172a', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{ind.name}</div>
+                          <div style={{ fontSize: '10px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>({ind.familyName})</div>
+                        </div>
+                        <div style={{ width: '6cm', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '0.5cm', gap: '10px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            <span style={{ fontSize: '8px', fontWeight: 'bold', color: '#64748b' }}>CÓDIGO MANUAL</span>
+                            <span style={{ fontSize: '14px', fontWeight: '900', fontFamily: 'monospace', color: '#0f172a', backgroundColor: '#f1f5f9', padding: '2px 4px', borderRadius: '4px' }}>{ind.id}</span>
+                          </div>
+                          <img src={qrUrl} alt="QR" style={{ width: '1.5cm', height: '1.5cm', mixBlendMode: 'multiply' }} />
+                        </div>
+                     </div>
+                   )
+                 })}
+                 {Array.from({ length: 10 - page.length }).map((_, i) => (
+                    <div key={`empty_${i}`} style={{ width: '25cm', height: '1.9cm', borderBottom: '1px dashed #e2e8f0', backgroundColor: '#f8fafc', boxSizing: 'border-box', margin: 0 }}></div>
+                 ))}
+               </div>
+             ))
+           )}
+        </div>
+      </div>
+    );
+  }
+
+  // --- VISTA PRINCIPAL (TABLA NORMAL) ---
+  return (
+    <div className="h-full flex flex-col space-y-4 pb-6 relative">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">Gestión de Invitados</h2>
+          <p className="text-slate-500 text-xs mt-1">Control de asistencia, pases y pulseras.</p>
+        </div>
+        
+        <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
+          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mr-2 ml-2">Boda</span>
+            <button onClick={() => setIsWeddingMode(!isWeddingMode)} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-indigo-500' : 'bg-slate-300'}`}>
+              <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
+            </button>
+          </div>
+
+          <button onClick={() => setExportViewOpen(true)} className="flex items-center px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 shadow-sm"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600"/> Reportes PDF</button>
+          <button onClick={() => setQrStudioOpen(true)} className="flex items-center px-3 py-2 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 shadow-sm"><QrCode size={14} className="mr-1.5 text-indigo-600"/> Imprimir QRs</button>
+
+          {isWeddingMode ? (
+            <div className="flex gap-1.5">
+              <button onClick={() => handleOpenAdd('novia')} className="flex items-center px-3 py-2 bg-rose-500 text-white rounded-xl text-xs font-bold hover:bg-rose-600 shadow-sm"><UserPlus size={14} className="mr-1"/> Novia</button>
+              <button onClick={() => handleOpenAdd('novio')} className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-sm"><UserPlus size={14} className="mr-1"/> Novio</button>
+            </div>
+          ) : (
+            <button onClick={() => handleOpenAdd('general')} className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-sm"><UserPlus size={14} className="mr-1"/> Nuevo Asistente</button>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col"><div className="text-slate-500 font-semibold text-[9px] uppercase tracking-wider mb-1"><Users size={12} className="inline mr-1 text-slate-400"/> Pases Totales</div><h3 className="text-xl font-black text-slate-800">{totalPases}</h3></div>
+        <div className="bg-sky-50 p-3 rounded-xl border border-sky-200 shadow-sm flex flex-col"><div className="text-sky-600 font-semibold text-[9px] uppercase tracking-wider mb-1"><Users size={12} className="inline mr-1"/> Niños</div><h3 className="text-xl font-black text-sky-600">{totalNinos}</h3></div>
+        <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 shadow-sm flex flex-col"><div className="text-amber-600 font-semibold text-[9px] uppercase tracking-wider mb-1"><CheckCircle size={12} className="inline mr-1"/> Confirmados</div><h3 className="text-xl font-black text-amber-600">{totalConfirmados}</h3></div>
+        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col"><div className="text-slate-500 font-semibold text-[9px] uppercase tracking-wider mb-1"><Clock size={12} className="inline mr-1"/> Pendientes</div><h3 className="text-xl font-black text-slate-600">{totalPendientes}</h3></div>
+        <div className="bg-rose-50 p-3 rounded-xl border border-rose-200 shadow-sm flex flex-col"><div className="text-rose-600 font-semibold text-[9px] uppercase tracking-wider mb-1"><X size={12} className="inline mr-1"/> Cancelados</div><h3 className="text-xl font-black text-rose-600">{totalCancelados} Pases</h3></div>
+        <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-200 shadow-sm flex flex-col"><div className="text-emerald-600 font-semibold text-[9px] uppercase tracking-wider mb-1"><Scan size={12} className="inline mr-1"/> Ingresaron</div><h3 className="text-xl font-black text-emerald-600">{totalIngresos}</h3></div>
+      </div>
+
+      {isWeddingMode && (
+        <div className="bg-gradient-to-r from-rose-50 to-indigo-50 py-2 px-4 rounded-xl border border-indigo-100 flex items-center justify-around shadow-inner mt-1">
+          <div className="text-center flex items-center gap-2"><p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Pases Novia</p><p className="text-sm font-black text-rose-600">{pasesNovia}</p></div>
+          <div className="h-6 w-px bg-indigo-200"></div>
+          <div className="text-center flex items-center gap-2"><p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Pases Novio</p><p className="text-sm font-black text-indigo-600">{pasesNovio}</p></div>
+        </div>
+      )}
+
+      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+        <div className="p-2.5 border-b border-slate-100 bg-slate-50/50 flex">
+          <div className="relative flex-1">
+            <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+            <input type="text" placeholder="Buscar por nombre, estatus o mesa..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-400" />
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs whitespace-nowrap">
+            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500">
+              <tr>
+                <th className="px-3 py-2 font-bold uppercase tracking-wider text-[9px]">Nombre</th>
+                <th className="px-2 py-2 font-bold uppercase tracking-wider text-[9px] text-center">Tipo</th>
+                <th className="px-2 py-2 font-bold uppercase tracking-wider text-[9px] text-center">Pases</th>
+                <th className="px-2 py-2 font-bold uppercase tracking-wider text-[9px] text-center">Mesa</th>
+                <th className="px-2 py-2 font-bold uppercase tracking-wider text-[9px] text-center">QR Pase</th>
+                <th className="px-2 py-2 font-bold uppercase tracking-wider text-[9px] text-center">Estatus</th>
+                <th className="px-3 py-2 font-bold uppercase tracking-wider text-[9px] text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {flattenedList.map((row) => (
+                <tr key={row._rowId} className={`transition-colors hover:bg-slate-50 ${row.parentGuest.status === 'cancelado' ? 'bg-rose-50/40 opacity-70' : row.isMain ? 'bg-white border-t-2 border-slate-100' : 'bg-slate-50/30'}`}>
+                  <td className="px-3 py-1.5">
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`${row.isMain ? 'font-bold text-slate-800' : 'font-normal text-slate-700'} ${row.isMissing ? 'text-amber-500 italic' : ''} ${row.parentGuest.status === 'cancelado' ? 'line-through' : ''}`}>
+                          {row.displayName}
+                        </span>
+                        {isWeddingMode && !row.isMissing && row.parentGuest.side && (
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest ${row.parentGuest.side === 'novia' ? 'bg-rose-100 text-rose-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                            {row.parentGuest.side}
+                          </span>
+                        )}
+                        {row.isMain && row.parentGuest.extraRequested > 0 && (
+                          <span className="bg-rose-100 text-rose-700 text-[8px] px-1.5 rounded uppercase font-bold ml-1">
+                              +{row.parentGuest.extraRequested} Pases
+                          </span>
+                        )}
+                      </div>
+                      {!row.isMain && !row.isMissing && (
+                        <span className="text-[9px] font-light text-slate-400 mt-0.5 leading-tight">Familia: {row.parentGuest.name}</span>
+                      )}
+                    </div>
+                  </td>
+                  
+                  <td className="px-2 py-1.5 text-center">
+                    {row.isMissing ? <span className="text-slate-300">-</span> : row.isChild ? <span className="text-sky-600 bg-sky-50 px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-widest">Niño</span> : <span className="text-slate-300"></span>}
+                  </td>
+                  
+                  <td className="px-2 py-1.5 text-center">
+                     {row.isMain || row.isMissing ? <span className="font-black text-indigo-600">{row.passes}</span> : <span className="text-slate-300">-</span>}
+                  </td>
+
+                  <td className="px-2 py-1.5 text-center">
+                    {row.parentGuest.tableId ? (
+                      <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[9px] font-bold border border-slate-200">
+                        {tables?.find(t => t.id === row.parentGuest.tableId)?.name || row.parentGuest.tableId}
+                      </span>
+                    ) : <span className="text-[9px] text-slate-400 italic">-</span>}
+                  </td>
+
+                  <td className="px-2 py-1.5 text-center">
+                    {row.pin && row.parentGuest.status !== 'cancelado' ? (
+                      <button onClick={() => setQrModal(row)} className="text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 p-1 rounded transition-colors" title="Ver Pase Individual">
+                        <QrCode size={14} />
+                      </button>
+                    ) : <span className="text-slate-300">-</span>}
+                  </td>
+                  
+                  <td className="px-2 py-1.5 text-center">
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${row.parentGuest.status === 'confirmado' ? 'bg-amber-100 text-amber-700' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700' : row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600' : 'bg-slate-100 text-slate-500'}`}>
+                      {row.parentGuest.status.replace('_', ' ')}
+                    </span>
+                  </td>
+                  
+                  <td className="px-3 py-1.5 text-right">
+                    {row.isMain ? (
+                      <div className="flex justify-end space-x-1">
+                        <button onClick={() => handleSendWhatsApp(row.parentGuest)} className={`p-1.5 rounded-md transition-colors ${row.parentGuest.sent ? 'bg-emerald-50 text-emerald-600' : 'text-slate-400 hover:bg-slate-100'}`}><MessageCircle size={14}/></button>
+                        <button onClick={() => handleOpenEdit(row.parentGuest)} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md"><Edit2 size={14} /></button>
+                        <button onClick={() => setDeleteModal(row.parentGuest)} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md"><Trash2 size={14} /></button>
+                      </div>
+                    ) : <span className="text-[9px] text-slate-300 italic">Vinculado</span>}
+                  </td>
+                </tr>
+              ))}
+              {flattenedList.length === 0 && <tr><td colSpan="8" className="px-4 py-8 text-center text-slate-400">Sin invitados en la lista.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {qrModal && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-[2rem] w-full max-w-xs overflow-hidden shadow-2xl relative border-4 border-slate-200">
+            <button onClick={() => setQrModal(null)} className="absolute top-3 right-3 text-slate-400 hover:text-slate-800 bg-slate-100 p-1.5 rounded-full z-10"><X size={16}/></button>
+            <div className="h-24 bg-slate-800 relative bg-[url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80')] bg-cover bg-center">
+              <div className="absolute inset-0 bg-black/50"></div>
+              <div className="absolute bottom-3 left-0 w-full text-center text-white"><p className="text-[8px] tracking-[0.2em] uppercase">Pase Personal</p></div>
+            </div>
+            <div className="p-6 text-center">
+              <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight leading-tight mb-1">{qrModal.displayName}</h3>
+              <p className="text-[10px] text-slate-500 mb-6">Invitación: {qrModal.parentGuest.name}</p>
+              
+              <div className="inline-block border-2 border-dashed border-slate-300 p-2 rounded-xl mb-4">
+                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin + window.location.pathname + '?modo=camara&uid=' + qrModal.pin)}`} alt="QR" className="w-32 h-32" />
+              </div>
+              
+              <p className="text-[8px] text-slate-400 uppercase tracking-widest mb-1">Código Manual</p>
+              <p className="text-lg font-mono font-black text-indigo-600 bg-indigo-50 py-1 rounded-lg tracking-widest">{qrModal.pin}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {addModal.open && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95">
+            <div className="px-5 py-4 border-b flex justify-between items-center bg-slate-50"><h3 className="font-bold">Nuevo Invitado</h3><button onClick={() => setAddModal({ open: false, side: 'general' })}><X size={18}/></button></div>
+            <form onSubmit={handleSaveGuest} className="p-5 space-y-4">
+              <div><label className="block text-xs font-bold mb-1">Nombre o Familia</label><input type="text" required value={newGuest.name} onChange={e=>setNewGuest({...newGuest, name: e.target.value})} className="w-full p-2.5 border rounded-lg text-sm" /></div>
+              <div><label className="block text-xs font-bold mb-1">Teléfono (WhatsApp) <span className="text-rose-500">*</span></label><input type="text" required value={newGuest.phone} onChange={e=>setNewGuest({...newGuest, phone: e.target.value})} className="w-full p-2.5 border rounded-lg text-sm bg-slate-50 focus:bg-white" placeholder="Ej. 5512345678" /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="block text-xs font-bold mb-1">Pases Totales</label><input type="number" min="1" required value={newGuest.passes} onChange={e=>setNewGuest({...newGuest, passes: e.target.value})} className="w-full p-2.5 border rounded-lg text-sm" /></div>
+                <div><label className="block text-xs font-bold mb-1">Niños Permitidos</label><input type="number" min="0" max={newGuest.passes} required value={newGuest.childrenPasses} onChange={e=>setNewGuest({...newGuest, childrenPasses: e.target.value})} className="w-full p-2.5 border rounded-lg text-sm" /></div>
+              </div>
+              <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors">Guardar Invitado</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {editModal.open && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95">
+            <div className="px-5 py-4 border-b flex justify-between items-center bg-slate-50"><h3 className="font-bold">Editar Familia</h3><button onClick={() => setEditModal({ open: false, guest: null })}><X size={18}/></button></div>
+            <form onSubmit={handleSaveEdit} className="p-5 space-y-4">
+              {editModal.guest.extraRequested > 0 && (
+                <div className="bg-rose-50 text-rose-700 p-3 rounded-lg text-xs font-bold border border-rose-200 flex items-center">
+                  <AlertCircle size={16} className="mr-2"/> ¡Solicita {editModal.guest.extraRequested} pase(s) extra! Edita los pases totales si apruebas la solicitud.
+                </div>
+              )}
+              <div><label className="block text-xs font-bold mb-1">Nombre</label><input type="text" required value={editModal.guest.name} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, name: e.target.value }})} className="w-full p-2.5 border rounded-lg text-sm" /></div>
+              <div><label className="block text-xs font-bold mb-1">Teléfono (WhatsApp)</label><input type="text" required value={editModal.guest.phone || ''} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, phone: e.target.value }})} className="w-full p-2.5 border rounded-lg text-sm" /></div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="block text-xs font-bold mb-1">Mesa</label>
+                  <select value={editModal.guest.tableId || ''} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, tableId: e.target.value }})} className="w-full p-2.5 border rounded-lg text-sm">
+                    <option value="">Sin Mesa</option>
+                    {tables?.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </select>
+                </div>
+                <div><label className="block text-xs font-bold mb-1">Estatus</label>
+                  <select value={editModal.guest.status} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, status: e.target.value }})} className="w-full p-2.5 border rounded-lg text-sm">
+                    <option value="por_invitar">Por Invitar</option><option value="pendiente">Pendiente</option><option value="confirmado">Confirmado</option><option value="cancelado">Canceló</option>
+                  </select>
+                </div>
+                <div><label className="block text-xs font-bold mb-1">Pases Totales</label><input type="number" min="0" required value={editModal.guest.passes} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, passes: Number(e.target.value) }})} className="w-full p-2.5 border rounded-lg text-sm" /></div>
+              </div>
+              <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors">Guardar Cambios</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {deleteModal && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm p-6 text-center animate-in zoom-in-95">
+             <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4"><Trash2 size={32} /></div>
+             <h3 className="font-bold text-xl mb-2">¿Eliminar a {deleteModal.name}?</h3>
+             <p className="text-slate-500 text-sm mb-6">Esta acción liberará sus lugares asignados definitivamente.</p>
+             <div className="flex space-x-3"><button onClick={()=>setDeleteModal(null)} className="flex-1 p-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200">Cancelar</button><button onClick={executeDeleteGuest} className="flex-1 p-3 bg-rose-500 text-white font-bold rounded-xl hover:bg-rose-600">Eliminar</button></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ==========================================
 // --- COMPONENTE: VISTA PREVIA INVITACIÓN (APP) ---
 // ==========================================
 const InvitacionView = ({ guests, setGuests, addNotification }) => {
