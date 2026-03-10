@@ -9152,7 +9152,6 @@ const AdminDashboard = ({ authData }) => {
   const { role: userRole, plan: userPlan, eventId } = authData;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
-  // Dependiendo el rol, la pestaña de inicio cambia
   const [activeTab, setActiveTab] = useState(userRole === 'superadmin' ? 'licencias' : 'dashboard');  
   
   const [tareas, setTareas] = useState([]); 
@@ -9190,10 +9189,8 @@ const AdminDashboard = ({ authData }) => {
   const prevGuestsRef = useRef([]);
 
   useEffect(() => {
-    // Si es superadmin no carga datos de boda, solo la interfaz limpia
     if (userRole === 'superadmin') return;
 
-    // Actualiza la variable global para que todos los componentes escriban en la base correcta
     setGlobalEventId(eventId);
 
     const unsubConfigMain = onSnapshot(doc(db, "eventos", eventId), (docSnap) => {
@@ -9208,8 +9205,36 @@ const AdminDashboard = ({ authData }) => {
       if (docSnap.exists()) setAgencyConfig(docSnap.data());
     });
 
+    // 🔴 MOTOR DE NOTIFICACIONES EN VIVO (RSVP)
     const unsubGuests = onSnapshot(collection(db, "eventos", eventId, "invitados"), (snap) => {
       const newGuests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      // Comparamos los datos nuevos con los viejos para lanzar notificaciones
+      if (prevGuestsRef.current.length > 0) {
+         newGuests.forEach(newG => {
+            const oldG = prevGuestsRef.current.find(g => g.id === newG.id);
+            if (oldG) {
+               // 1. Confirmó Asistencia
+               if ((oldG.status === 'pendiente' || oldG.status === 'por_invitar') && newG.status === 'confirmado') {
+                  addNotification('¡Nueva Confirmación!', `${newG.name} ha confirmado (${newG.passes} lugares).`, 'success', 'invitados');
+               } 
+               // 2. Declinó Invitación
+               else if (oldG.status !== 'cancelado' && newG.status === 'cancelado') {
+                  addNotification('Invitación Declinada', `${newG.name} ha liberado sus lugares.`, 'danger', 'invitados');
+               } 
+               // 3. Modificó y Canceló a un acompañante (Liberó pases)
+               else if (oldG.status === 'confirmado' && newG.status === 'confirmado' && newG.passes < oldG.passes) {
+                  addNotification('Lugares Liberados', `${newG.name} redujo su grupo y liberó ${oldG.passes - newG.passes} lugar(es).`, 'warning', 'invitados');
+               }
+
+               // 4. Solicitó Pases Extra
+               if (newG.extraRequested > (oldG.extraRequested || 0)) {
+                  addNotification('Pases Extra', `${newG.name} solicita ${newG.extraRequested} pase(s) extra.`, 'warning', 'invitados');
+               }
+            }
+         });
+      }
+      
       prevGuestsRef.current = newGuests;
       setGuests(newGuests);
     });
@@ -9224,7 +9249,7 @@ const AdminDashboard = ({ authData }) => {
     const unsubFotos = onSnapshot(collection(db, "eventos", eventId, "fotos"), (snap) => setPhotos(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
 
     return () => { unsubConfigMain(); unsubWhiteLabel(); unsubGuests(); unsubGastos(); unsubProv(); unsubMesas(); unsubTareas(); unsubTiming(); unsubMapa(); unsubDeco(); unsubFotos(); };
-  }, [eventId, userRole]);
+  }, [eventId, userRole, addNotification]);
 
   const renderContent = () => {
     switch(activeTab) {
@@ -9251,9 +9276,9 @@ const AdminDashboard = ({ authData }) => {
       
       <div className="fixed top-4 right-4 z-[999] hidden sm:flex flex-col space-y-2 pointer-events-none">
         {notifications.map(notif => (
-          <div key={notif.id} onClick={() => { if(notif.tab) setActiveTab(notif.tab); setNotifications(prev => prev.filter(n => n.id !== notif.id)); }} className={`w-80 bg-white border-l-4 rounded-xl shadow-2xl p-4 flex items-start transform transition-all duration-300 animate-in slide-in-from-right-8 pointer-events-auto ${notif.type === 'success' ? 'border-emerald-500' : notif.type === 'warning' ? 'border-rose-500' : 'border-indigo-500'} ${notif.tab ? 'cursor-pointer hover:scale-[1.02]' : ''}`}>
-            <div className={`mr-3 mt-0.5 ${notif.type === 'success' ? 'text-emerald-500' : notif.type === 'warning' ? 'text-rose-500' : 'text-indigo-500'}`}>
-              {notif.type === 'success' ? <CheckCircle size={20}/> : notif.type === 'warning' ? <AlertCircle size={20}/> : <Bell size={20}/>}
+          <div key={notif.id} onClick={() => { if(notif.tab) setActiveTab(notif.tab); setNotifications(prev => prev.filter(n => n.id !== notif.id)); }} className={`w-80 bg-white border-l-4 rounded-xl shadow-2xl p-4 flex items-start transform transition-all duration-300 animate-in slide-in-from-right-8 pointer-events-auto ${notif.type === 'success' ? 'border-emerald-500' : notif.type === 'danger' ? 'border-rose-500' : 'border-amber-500'} ${notif.tab ? 'cursor-pointer hover:scale-[1.02]' : ''}`}>
+            <div className={`mr-3 mt-0.5 ${notif.type === 'success' ? 'text-emerald-500' : notif.type === 'danger' ? 'text-rose-500' : 'text-amber-500'}`}>
+              {notif.type === 'success' ? <CheckCircle size={20}/> : notif.type === 'danger' ? <AlertCircle size={20}/> : <Bell size={20}/>}
             </div>
             <div>
               <h4 className="font-bold text-slate-800 text-sm">{notif.title}</h4>
