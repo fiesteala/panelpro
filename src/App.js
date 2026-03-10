@@ -7190,7 +7190,7 @@ const GaleriaView = ({ photos, addNotification }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: VISTA PÚBLICA DEL INVITADO (BLINDADO ANTI-CRASH) ---
+// --- COMPONENTE: VISTA PÚBLICA DEL INVITADO (W/ CÁMARA CUADRADA TIPO SUPERMERCADO) ---
 // ==========================================
 const GuestCameraView = ({ eventId }) => {
   const [config, setConfig] = useState({ modoPublico: true, hashtag: '', moderacion: false, marcoUrl: '' });
@@ -7342,7 +7342,6 @@ const GuestCameraView = ({ eventId }) => {
       setGuestAvatar(localStorage.getItem(`eventmaster_avatar_${foundUser.id}`) || '');
       localStorage.setItem('eventmaster_authGuestId', foundUser.id);
       localStorage.setItem('eventmaster_guestName', foundUser.name);
-      setIsScanning(false);
       window.history.replaceState({}, document.title, window.location.pathname + "?modo=camara&e=" + eventId);
     } else {
       showToast("Código no reconocido. Revisa tu pulsera.", "error");
@@ -7350,6 +7349,7 @@ const GuestCameraView = ({ eventId }) => {
     }
   };
 
+  // 🔴 MOTOR DE ESCÁNER (Blindado contra Pantalla Blanca en Móvil)
   const startLoginScanner = () => {
     if (!window.Html5Qrcode) {
       setTimeout(startLoginScanner, 500);
@@ -7370,10 +7370,10 @@ const GuestCameraView = ({ eventId }) => {
              qrbox: function(width, height) { return { width: width * 0.95, height: height * 0.95 }; }
           },
           (decodedText) => {
-             if (scannerRef.current) {
-                scannerRef.current.stop().then(() => scannerRef.current.clear()).catch(e=>e);
+             // 1. Pausa inmediata para que no lea 2 veces
+             if (scannerRef.current && scannerRef.current.isScanning) {
+                scannerRef.current.pause();
              }
-             setIsScanning(false);
              
              let code = decodedText;
              try {
@@ -7381,14 +7381,34 @@ const GuestCameraView = ({ eventId }) => {
                 code = parsedUrl.searchParams.get('u') || parsedUrl.searchParams.get('usr') || parsedUrl.searchParams.get('uid') || parsedUrl.searchParams.get('invitado') || code;
              } catch(e) {}
              
+             if (!code) {
+                 const match = decodedText.match(/(?:u|usr|invitado)=([^&]+)/i);
+                 if (match && match[1]) code = match[1];
+                 else code = decodedText;
+             }
+             
              if (!code || code === 'null' || code === 'undefined') { 
                 showToast("Código inválido", "error"); 
-                setTimeout(() => startLoginScanner(), 2000); 
+                if (scannerRef.current) scannerRef.current.resume();
                 return; 
              }
 
              setGuestCode(code);
-             ejecutarLogin(code); 
+             
+             // 2. Apagado seguro de la cámara ANTES de cambiar de vista
+             if (scannerRef.current) {
+                scannerRef.current.stop().then(() => {
+                   scannerRef.current.clear();
+                   setIsScanning(false);
+                   ejecutarLogin(code); 
+                }).catch(() => {
+                   setIsScanning(false);
+                   ejecutarLogin(code);
+                });
+             } else {
+                setIsScanning(false);
+                ejecutarLogin(code);
+             }
           },
           (err) => {}
         ).catch(err => {
@@ -7400,6 +7420,15 @@ const GuestCameraView = ({ eventId }) => {
   };
 
   useEffect(() => {
+    // 🔴 INYECCIÓN ANTI-ZOOM PARA SAFARI MÓVIL
+    let meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = "viewport";
+      document.head.appendChild(meta);
+    }
+    meta.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0";
+
     setGlobalEventId(eventId);
     if (!window.Html5QrcodeScanner && !document.getElementById('qr-script')) {
       const script = document.createElement('script');
@@ -7463,7 +7492,9 @@ const GuestCameraView = ({ eventId }) => {
      }
      return () => {
          if (timer) clearTimeout(timer);
-         if (scannerRef.current) scannerRef.current.stop().catch(e=>e);
+         if (scannerRef.current && scannerRef.current.isScanning) {
+            scannerRef.current.stop().catch(e=>e);
+         }
      }
   }, [config, authGuest]);
 
@@ -7785,7 +7816,8 @@ const GuestCameraView = ({ eventId }) => {
           </div>
 
           <div className="flex gap-2">
-            <input type="text" placeholder="Ej. usr_123_0" value={guestCode} onChange={(e) => setGuestCode(e.target.value)} className={`w-full ${tInputBg} border ${tBorder} p-4 rounded-xl outline-none focus:ring-2 focus:ring-pink-500 transition-all text-center font-bold ${tTextMain} text-lg uppercase`} />
+            {/* 🔴 input en text-base para evitar zoom */}
+            <input type="text" placeholder="Ej. usr_123_0" value={guestCode} onChange={(e) => setGuestCode(e.target.value)} className={`w-full ${tInputBg} border ${tBorder} p-4 rounded-xl outline-none focus:ring-2 focus:ring-pink-500 transition-all text-center font-bold ${tTextMain} text-base sm:text-lg uppercase`} />
             <button onClick={() => ejecutarLogin(guestCode)} className="px-5 bg-pink-600 text-white font-bold rounded-xl shadow-lg hover:bg-pink-700 transition-transform active:scale-95"><ArrowRight size={24}/></button>
           </div>
         </div>
@@ -7825,7 +7857,7 @@ const GuestCameraView = ({ eventId }) => {
 
             <div onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="flex items-center gap-2 cursor-pointer">
               <div className={`w-9 h-9 rounded-full ${tBgBase} overflow-hidden border ${tBorder} flex-shrink-0 relative`}>
-                 {isAvatarUploading ? <RefreshCw size={14} className="absolute inset-0 m-auto text-indigo-500 animate-spin"/> : guestAvatar ? <img src={guestAvatar} className="w-full h-full object-cover"/> : <span className={`font-bold ${tTextSub} flex items-center justify-center h-full`}>{currentUserName?.charAt(0) || '?'}</span>}
+                 {isAvatarUploading ? <RefreshCw size={14} className="absolute inset-0 m-auto text-indigo-500 animate-spin"/> : guestAvatar ? <img src={guestAvatar} className="w-full h-full object-cover"/> : <span className={`font-bold ${tTextSub} flex items-center justify-center h-full`}>{(currentUserName || '?').charAt(0).toUpperCase()}</span>}
               </div>
               <span className={`font-black text-sm ${tTextMain} truncate max-w-[120px] tracking-tight`}>{currentUserName}</span>
             </div>
@@ -8045,13 +8077,14 @@ const GuestCameraView = ({ eventId }) => {
                </div>
 
                <div>
-                  <textarea placeholder="Escribe un pie de foto..." value={postDraft.caption} onChange={e=>setPostDraft({...postDraft, caption: e.target.value})} className={`w-full p-4 rounded-2xl ${tInputBg} ${tTextMain} outline-none border ${tBorder} resize-none min-h-[100px] text-sm shadow-inner`} />
+                  {/* 🔴 TEXT-BASE para evitar zoom en iOS */}
+                  <textarea placeholder="Escribe un pie de foto..." value={postDraft.caption} onChange={e=>setPostDraft({...postDraft, caption: e.target.value})} className={`w-full p-4 rounded-2xl ${tInputBg} ${tTextMain} outline-none border ${tBorder} resize-none min-h-[100px] text-base sm:text-sm shadow-inner`} />
                </div>
                
                <div className="grid grid-cols-2 gap-3">
                  <div className={`flex items-center px-3 py-3 rounded-xl ${tInputBg} border ${tBorder}`}>
                    <span className="mr-2 text-lg">😀</span>
-                   <select value={postDraft.emotion} onChange={e=>setPostDraft({...postDraft, emotion: e.target.value})} className={`bg-transparent outline-none w-full ${tTextMain} text-xs font-bold appearance-none`}>
+                   <select value={postDraft.emotion} onChange={e=>setPostDraft({...postDraft, emotion: e.target.value})} className={`bg-transparent outline-none w-full ${tTextMain} text-base sm:text-xs font-bold appearance-none`}>
                      <option value="" className="text-slate-400">¿Cómo te sientes?</option>
                      <option value="Feliz 😊">Feliz 😊</option>
                      <option value="De fiesta 🎉">De fiesta 🎉</option>
@@ -8062,7 +8095,7 @@ const GuestCameraView = ({ eventId }) => {
                  </div>
                  <div className={`flex items-center px-3 py-3 rounded-xl ${tInputBg} border ${tBorder}`}>
                    <MapPin size={16} className={`mr-2 ${tTextSub}`}/>
-                   <input type="text" placeholder="Añadir ubicación..." value={postDraft.location} onChange={e=>setPostDraft({...postDraft, location: e.target.value})} className={`w-full bg-transparent outline-none text-xs font-bold ${tTextMain}`} />
+                   <input type="text" placeholder="Añadir ubicación..." value={postDraft.location} onChange={e=>setPostDraft({...postDraft, location: e.target.value})} className={`w-full bg-transparent outline-none text-base sm:text-xs font-bold ${tTextMain}`} />
                  </div>
                </div>
 
@@ -8160,7 +8193,7 @@ const GuestCameraView = ({ eventId }) => {
                   placeholder={replyingTo ? `Escribe tu respuesta...` : `Agrega un comentario...`}
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  className={`flex-1 bg-transparent outline-none text-sm ${tTextMain} font-medium`}
+                  className={`flex-1 bg-transparent outline-none text-base sm:text-sm ${tTextMain} font-medium`}
                 />
                 <button onClick={handleAddComment} disabled={!commentText.trim()} className="p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:bg-slate-400 disabled:text-slate-200 transition-all active:scale-90 ml-1">
                   <ArrowRight size={16} />
