@@ -8587,11 +8587,11 @@ const GuestProyectorView = ({ eventId }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS ---
+// --- COMPONENTE: CENTRO DE LICENCIAS (CON SOPORTE PARA PLANNERS) ---
 // ==========================================
 const SuperAdminView = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda' });
+  const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente' });
   const [isCreating, setIsCreating] = useState(false);
   const [successData, setSuccessData] = useState(null);
   const [clientPhone, setClientPhone] = useState('');
@@ -8627,7 +8627,6 @@ const SuperAdminView = () => {
     setIsCreating(true);
 
     try {
-      // 🔴 AQUÍ SE CREA LA URL HERMOSA PARA EL CLIENTE
       const slug = formData.nombres.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
       const newEventId = slug; 
       
@@ -8637,10 +8636,11 @@ const SuperAdminView = () => {
       await createUserWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
       await signOut(secondaryAuth); 
 
-      await setDoc(doc(db, "usuarios", newEventId), { email: newEmail, role: 'cliente', plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, nombres: formData.nombres, status: 'activo', createdAt: serverTimestamp() });
+      // 🔴 AQUÍ SE GUARDA EL ROL (CLIENTE O PLANNER)
+      await setDoc(doc(db, "usuarios", newEventId), { email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, nombres: formData.nombres, status: 'activo', createdAt: serverTimestamp() });
       await setDoc(doc(db, "eventos", newEventId), { presupuestoTotal: 150000, nombres: formData.nombres, plan: formData.plan, tipoEvento: formData.tipoEvento });
 
-      setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label });
+      setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role });
       setClientPhone('');
       
     } catch (error) {
@@ -8653,9 +8653,10 @@ const SuperAdminView = () => {
   const handleSendWhatsApp = () => {
     if (clientPhone.length < 10) { setDialog({ isOpen: true, type: 'alert', title: 'Información Incompleta', message: 'Ingresa un número de 10 dígitos.' }); return; }
     
-    // 🔴 FORZAMOS EL DOMINIO DEL PANEL PARA LOS ACCESOS
     const domain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://panel.baulia.com'; 
-    const mensaje = `✨ ¡Hola ${successData.nombres}! Tu Panel de Control Premium para tu ${successData.tipoEvento} está listo.\n\nAccede a tu plataforma privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña temporal: ${successData.password}\n\n¡Guarda estos accesos, te servirán para gestionar todos los detalles!`;
+    const tipoTexto = successData.role === 'planner' ? 'Agencia / Organizador' : successData.tipoEvento;
+    
+    const mensaje = `✨ ¡Hola ${successData.nombres}! Tu Panel de Control Premium para tu ${tipoTexto} está listo.\n\nAccede a tu plataforma privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña temporal: ${successData.password}\n\n¡Guarda estos accesos, te servirán para gestionar todos los detalles!`;
     window.open(`https://wa.me/${clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
@@ -8698,7 +8699,7 @@ const SuperAdminView = () => {
         <div>
           <span className="bg-black/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">Nivel 3: Acceso Maestro</span>
           <h2 className="text-3xl font-black flex items-center mb-2"><Building className="mr-3" size={36}/> Centro de Licencias</h2>
-          <p className="text-amber-100 max-w-lg text-sm">Control global de la plataforma. Crea nuevos eventos, asigna planes y entrega credenciales directamente a tus clientes.</p>
+          <p className="text-amber-100 max-w-lg text-sm">Control global de la plataforma. Crea nuevos eventos, asigna planes y entrega credenciales directamente a tus clientes o Planners.</p>
         </div>
         <div className="hidden md:flex w-24 h-24 bg-white/10 rounded-full items-center justify-center border-4 border-white/20 shadow-inner"><Lock size={40} className="text-white" /></div>
       </div>
@@ -8706,7 +8707,7 @@ const SuperAdminView = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center"><div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-3"><Calendar size={24}/></div><h3 className="text-2xl font-black text-slate-800">{totalEventos}</h3><p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Eventos Activos</p></div>
          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center"><div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mb-3"><Star size={24}/></div><h3 className="text-2xl font-black text-slate-800">{totalDiamante}</h3><p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Planes Diamante</p></div>
-         <div onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda' }); }} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center hover:border-emerald-400 cursor-pointer transition-colors group"><div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><Plus size={24}/></div><h3 className="text-sm font-black text-emerald-600 mt-2">NUEVA LICENCIA</h3><p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Crear Evento</p></div>
+         <div onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente' }); }} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center hover:border-emerald-400 cursor-pointer transition-colors group"><div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><Plus size={24}/></div><h3 className="text-sm font-black text-emerald-600 mt-2">NUEVA LICENCIA</h3><p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Crear Acceso</p></div>
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
@@ -8728,7 +8729,13 @@ const SuperAdminView = () => {
                       
                       return (
                         <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40' : 'hover:bg-slate-50'}`}>
-                          <td className="px-5 py-3"><p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800' : 'text-slate-800'}`}>{lic.nombres || 'Sin Nombre'}</p><p className="text-[10px] text-slate-400 font-mono mt-0.5">{lic.eventId}</p></td>
+                          <td className="px-5 py-3">
+                            <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800' : 'text-slate-800'}`}>
+                              {lic.nombres || 'Sin Nombre'} 
+                              {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
+                            </p>
+                            <p className="text-[10px] text-slate-400 font-mono mt-0.5">{lic.eventId}</p>
+                          </td>
                           <td className="px-5 py-3"><div className="flex items-center text-slate-600 bg-slate-100/70 px-2 py-1.5 rounded-lg w-max border border-slate-200/50"><span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span><button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 hover:text-indigo-600 transition-colors">{correoVisible ? <EyeOff size={14} /> : <Eye size={14} />}</button></div></td>
                           <td className="px-5 py-3 text-center text-slate-500 font-bold text-[10px] uppercase tracking-wider">{etiquetaTipo}</td>
                           <td className="px-5 py-3 text-center"><span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>{lic.plan}</span></td>
@@ -8760,6 +8767,16 @@ const SuperAdminView = () => {
                 </div>
                 
                 <div className="space-y-5 mb-8">
+                  {/* 🔴 NUEVO SELECTOR DE ROL */}
+                  <div>
+                    <label className="block text-xs font-bold text-indigo-600 uppercase tracking-widest mb-2 flex items-center"><Users size={14} className="mr-1"/> Tipo de Cuenta</label>
+                    <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full p-4 bg-indigo-50 border border-indigo-200 text-indigo-900 rounded-xl outline-none focus:border-indigo-500 font-black cursor-pointer">
+                      <option value="cliente">Cliente Final (Novios/Festejados)</option>
+                      <option value="planner">Wedding Planner / Agencia</option>
+                    </select>
+                  </div>
+                  <div className="h-px w-full bg-slate-200 my-2"></div>
+                  
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Tipo de Evento</label>
                     <select value={formData.tipoEvento} onChange={e => setFormData({...formData, tipoEvento: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 cursor-pointer">
@@ -8767,15 +8784,14 @@ const SuperAdminView = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-indigo-500 uppercase tracking-widest mb-2">{eventoSeleccionado.labelNombre}</label>
-                    <input type="text" autoFocus required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} placeholder={eventoSeleccionado.placeholder} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-bold text-indigo-900" />
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">{formData.role === 'planner' ? 'Nombre de la Agencia' : eventoSeleccionado.labelNombre}</label>
+                    <input type="text" autoFocus required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} placeholder={formData.role === 'planner' ? 'Ej. Elite Planners' : eventoSeleccionado.placeholder} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-900" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-indigo-500 uppercase tracking-widest mb-2 flex items-center">
-                      <Mail size={14} className="mr-1.5" /> Correo Real del Cliente
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2 flex items-center">
+                      <Mail size={14} className="mr-1.5" /> Correo de Acceso
                     </label>
-                    <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-bold text-slate-800" />
-                    <p className="text-[10px] text-slate-400 mt-1.5 ml-1">Usado para iniciar sesión y recuperar contraseña de forma segura.</p>
+                    <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-800" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Paquete Contratado</label>
@@ -8789,15 +8805,15 @@ const SuperAdminView = () => {
                 <div className="flex space-x-3">
                   <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">Cancelar</button>
                   <button type="submit" disabled={isCreating} className="flex-1 py-4 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-slate-800 disabled:bg-slate-400 transition-colors">
-                    {isCreating ? 'Fabricando...' : 'Crear Licencia'}
+                    {isCreating ? 'Procesando...' : 'Crear Licencia'}
                   </button>
                 </div>
               </form>
             ) : (
               <div className="p-8 text-center bg-slate-50">
                 <div className="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6"><CheckCircle size={40} /></div>
-                <h3 className="text-2xl font-black text-slate-800 mb-2">¡Plataforma Lista!</h3>
-                <p className="text-sm text-slate-500 mb-6">El evento <b>{successData.nombres}</b> se ha creado exitosamente.</p>
+                <h3 className="text-2xl font-black text-slate-800 mb-2">¡Accesos Creados!</h3>
+                <p className="text-sm text-slate-500 mb-6">La cuenta para <b>{successData.nombres}</b> se ha generado exitosamente.</p>
                 
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 text-left text-sm mb-6 shadow-sm">
                   <p className="mb-3"><span className="text-slate-400 font-bold w-20 inline-block">Usuario:</span> <b className="text-slate-800">{successData.email}</b></p>
@@ -8805,7 +8821,7 @@ const SuperAdminView = () => {
                 </div>
 
                 <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl mb-6 shadow-sm">
-                  <label className="block text-xs font-black text-emerald-700 uppercase tracking-widest mb-3 text-left flex items-center"><MessageCircle size={14} className="mr-1.5"/> Enviar accesos al cliente</label>
+                  <label className="block text-xs font-black text-emerald-700 uppercase tracking-widest mb-3 text-left flex items-center"><MessageCircle size={14} className="mr-1.5"/> Enviar accesos al {successData.role === 'planner' ? 'Planner' : 'Cliente'}</label>
                   <div className="flex space-x-2 mb-4">
                     <span className="bg-emerald-100 text-emerald-700 font-bold p-3 rounded-xl flex items-center justify-center">+52</span>
                     <input type="tel" placeholder="10 dígitos del cliente..." value={clientPhone} onChange={e => setClientPhone(e.target.value)} className="w-full p-3 bg-white border border-emerald-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-800" />
