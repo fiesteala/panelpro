@@ -6286,8 +6286,14 @@ const GaleriaView = ({ photos, addNotification }) => {
   const cloudName = "duy0mcqsh"; 
   const uploadPreset = "ml_default"; 
 
-  const guestLink = window.location.origin + window.location.pathname + '?modo=camara';
-  const proyectorLink = window.location.origin + window.location.pathname + '?modo=proyector'; 
+  // 🔴 CORRECCIÓN: Enlaces con el parámetro &e= blindado
+  const getCleanBaseUrl = () => {
+    let base = window.location.href.split('?')[0];
+    if (base.endsWith('/')) base = base.slice(0, -1);
+    return base;
+  };
+  const guestLink = `${getCleanBaseUrl()}/?modo=camara&e=${ID_DEL_EVENTO}`;
+  const proyectorLink = `${getCleanBaseUrl()}/?modo=proyector&e=${ID_DEL_EVENTO}`; 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(guestLink)}&margin=10`;
 
   useEffect(() => {
@@ -6329,7 +6335,6 @@ const GaleriaView = ({ photos, addNotification }) => {
     if(addNotification) addNotification(approved ? 'Foto Aprobada' : 'Foto Rechazada', approved ? 'Ya se ve en el proyector' : 'Oculta para todos', 'success');
   };
 
-  // 🔴 FUNCIÓN DE DESCARGA DE QR (Corrección del error)
   const forceDownloadQR = async () => {
     try {
       const response = await fetch(qrUrl);
@@ -6405,7 +6410,6 @@ const GaleriaView = ({ photos, addNotification }) => {
   return (
     <div className="h-full flex flex-col space-y-4 pb-6 relative">
       
-      {/* CABECERA ADMINISTRADOR */}
       <div className="bg-white px-4 py-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col xl:flex-row items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-3 w-full xl:w-auto shrink-0">
           <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600"><ImageIcon size={20}/></div>
@@ -6413,7 +6417,6 @@ const GaleriaView = ({ photos, addNotification }) => {
         </div>
 
         <div className="flex flex-wrap items-center justify-end gap-2.5 w-full xl:w-auto">
-          {/* Moderación */}
           <div className="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
              <ShieldCheck size={14} className={`mr-1.5 ${config.moderacion ? 'text-amber-500' : 'text-slate-400'}`}/>
              <span className="text-[10px] font-bold text-slate-600 mr-2">Moderación</span>
@@ -6427,19 +6430,16 @@ const GaleriaView = ({ photos, addNotification }) => {
             <button onClick={() => updateConfig('modoPublico', false)} className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${!config.modoPublico ? 'bg-rose-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-200'}`}>Privado</button>
           </div>
 
-          {/* Hashtag */}
           <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus-within:border-indigo-500 transition-colors w-24 shrink-0">
             <span className="text-slate-400 font-bold mr-1 text-xs">#</span>
             <input type="text" value={config.hashtag?.replace('#', '') || ''} onChange={(e) => setConfig({...config, hashtag: '#' + e.target.value.replace(/\s+/g, '')})} onBlur={(e) => updateConfig('hashtag', config.hashtag)} placeholder="Boda" className="bg-transparent text-slate-800 font-bold text-xs outline-none w-full placeholder:text-slate-400"/>
           </div>
 
-          {/* Subir Marco */}
           <input type="file" accept="image/png" ref={fileInputRef} onChange={handleFrameUpload} className="hidden" />
           <button onClick={() => fileInputRef.current.click()} className="flex items-center px-3 py-1.5 bg-sky-50 text-sky-600 rounded-lg text-xs font-bold hover:bg-sky-100 transition-all shadow-sm">
             <ImageIcon size={14} className="mr-1.5" /> Marco PNG
           </button>
 
-          {/* Descargar ZIP */}
           <button onClick={downloadAllPhotos} disabled={isZipping} className={`flex items-center px-3 py-1.5 text-white rounded-lg text-xs font-bold transition-all shadow-sm ${isZipping ? 'bg-slate-400' : 'bg-emerald-500 hover:bg-emerald-600'}`}>
             {isZipping ? <RefreshCw size={14} className="mr-1.5 animate-spin"/> : <Download size={14} className="mr-1.5"/>} ZIP
           </button>
@@ -6449,7 +6449,6 @@ const GaleriaView = ({ photos, addNotification }) => {
         </div>
       </div>
 
-      {/* CUADRÍCULA DE FOTOS FORZADA A 4 COLUMNAS (Solución Definitiva) */}
       <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 overflow-y-auto bg-slate-50/50 custom-scrollbar">
         {photos.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-slate-400">
@@ -6457,14 +6456,12 @@ const GaleriaView = ({ photos, addNotification }) => {
             <h3 className="text-xl font-bold text-slate-700">Aún no hay fotos</h3>
           </div>
         ) : (
-          /* 🔴 AQUÍ SE FORZARON LAS 4 COLUMNAS EN ESCRITORIO */
           <div className="columns-2 md:columns-4 gap-4 pb-10">
             {photos.map((foto) => {
               const urls = foto.urls || [foto.url];
               const portada = urls[0]; 
               const isPending = config.moderacion && foto.status === 'pending';
               
-              // Contadores
               const likesCount = Array.isArray(foto.likes) ? foto.likes.length : (foto.likes || 0);
               const commentCount = (foto.comentarios || []).length;
               const isCarousel = urls.length > 1;
@@ -6473,12 +6470,9 @@ const GaleriaView = ({ photos, addNotification }) => {
                 <div 
                   key={foto.id} 
                   onClick={() => setViewingPost(foto)} 
-                  // 🔴 TRUCO INFALIBLE: style={ pageBreakInside: 'avoid' } asegura la alineación perfecta
                   style={{ WebkitColumnBreakInside: 'avoid', pageBreakInside: 'avoid', breakInside: 'avoid' }}
                   className={`group mb-4 w-full rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border cursor-pointer ${isPending ? 'border-amber-400 ring-2 ring-amber-200' : 'border-slate-200'}`}
                 >
-                  
-                  {/* 🔴 TRUCO INFALIBLE 2: aspect-[3/4] reserva el bloque de la foto antes de que cargue el internet, EVITANDO EL COLOR BLANCO */}
                   <div className="relative w-full aspect-[3/4] bg-slate-200">
                     <img src={portada} alt="Foto" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                     {config.marcoUrl && <img src={config.marcoUrl} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />}
@@ -6495,7 +6489,6 @@ const GaleriaView = ({ photos, addNotification }) => {
                       </div>
                     )}
 
-                    {/* TARJETA HOVER CON COMENTARIOS Y LIKES */}
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/95 via-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4 z-20">
                       <div className="flex justify-end gap-2">
                         {isPending && (
@@ -6538,7 +6531,6 @@ const GaleriaView = ({ photos, addNotification }) => {
         )}
       </div>
 
-      {/* MODAL VER PUBLICACIÓN Y APROBAR */}
       {viewingPost && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95">
@@ -6572,7 +6564,6 @@ const GaleriaView = ({ photos, addNotification }) => {
         </div>
       )}
 
-      {/* MODAL CREADOR DE LINK PROYECTOR */}
       {showProyectorModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 relative animate-in zoom-in-95">
@@ -6591,7 +6582,6 @@ const GaleriaView = ({ photos, addNotification }) => {
         </div>
       )}
 
-      {/* MODAL QR (CON BOTÓN DE DESCARGAR FUNCIONANDO) */}
       {showQR && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-8 text-center relative animate-in zoom-in-95">
@@ -6612,14 +6602,13 @@ const GaleriaView = ({ photos, addNotification }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: VISTA PÚBLICA DEL INVITADO (INSTAGRAM PRO + RETOS VIP + MARCO + MODERACIÓN) ---
+// --- COMPONENTE: VISTA PÚBLICA DEL INVITADO (W/ CÁMARA CUADRADA TIPO SUPERMERCADO) ---
 // ==========================================
 const GuestCameraView = () => {
   const [config, setConfig] = useState({ modoPublico: true, hashtag: '', moderacion: false, marcoUrl: '' });
   const [isUploading, setIsUploading] = useState(false);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   
-  // SISTEMA DE NOTIFICACIONES INTEGRADAS (TOASTS)
   const [toast, setToast] = useState(null);
   const toastTimerRef = useRef(null);
 
@@ -6629,7 +6618,6 @@ const GuestCameraView = () => {
     toastTimerRef.current = setTimeout(() => setToast(null), 3500);
   };
   
-  // Estados de Autenticación
   const [guestName, setGuestName] = useState(() => localStorage.getItem('eventmaster_guestName') || '');
   const [guestAvatar, setGuestAvatar] = useState(''); 
   const [guestCode, setGuestCode] = useState('');
@@ -6638,12 +6626,10 @@ const GuestCameraView = () => {
 
   const [feedFotos, setFeedFotos] = useState([]);
   
-  // 🔴 ESTADOS PARA LOS RETOS FOTOGRÁFICOS
   const [postDraft, setPostDraft] = useState(null); 
   const [showChallengeModal, setShowChallengeModal] = useState(false);
   const [activeChallenge, setActiveChallenge] = useState(null);
 
-  // 🔴 LISTA MASIVA DE RETOS VIP
   const retos = [
     "¡Selfie con alguien que no conocías! 📸",
     "El mejor paso de baile en la pista 💃",
@@ -6672,12 +6658,10 @@ const GuestCameraView = () => {
     "Captura el abrazo más tierno de la noche 🤗"
   ];
   
-  // Comentarios tipo Instagram
   const [activePostComments, setActivePostComments] = useState(null);
   const [commentText, setCommentText] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
   
-  // UI y Menús
   const [socialActivity, setSocialActivity] = useState([]);
   const [showSocialBell, setShowSocialBell] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -6690,7 +6674,6 @@ const GuestCameraView = () => {
   const cloudName = "duy0mcqsh"; 
   const uploadPreset = "ml_default"; 
 
-  // MODO NOCTURNO INTELIGENTE
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('eventmaster_theme');
     if (saved === 'dark') return true;
@@ -6716,7 +6699,6 @@ const GuestCameraView = () => {
 
   const currentUserName = !config.modoPublico ? authGuest?.name : guestName.trim();
 
-  // 🔴 ÍCONO NATIVO DE DADO (Transparente con puntos sólidos)
   const DiceIcon = ({ className, size = 24 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <rect x="3" y="3" width="18" height="18" rx="4" ry="4"></rect>
@@ -6728,7 +6710,116 @@ const GuestCameraView = () => {
     </svg>
   );
 
-  // CARGAR DATOS
+  const allGuestsRef = useRef([]);
+  useEffect(() => { allGuestsRef.current = allGuests; }, [allGuests]);
+  
+  const scannerRef = useRef(null);
+
+  const ejecutarLogin = async (codigoIngresado) => {
+    const code = (codigoIngresado || '').trim().toLowerCase();
+    if (!code) return;
+    
+    let foundUser = null;
+    
+    for (const g of allGuestsRef.current) {
+      if (g.id && g.id.toLowerCase() === code) { foundUser = { id: g.id, name: g.name }; break; }
+      if (g.subGuests && g.subGuests.length > 0) {
+        const sub = g.subGuests.find(sg => (sg.id || '').toLowerCase() === code);
+        if (sub) { foundUser = { id: sub.id, name: sub.name }; break; }
+      }
+    }
+
+    if (!foundUser) {
+       let parentId = code;
+       if (code.startsWith('usr_')) {
+          const parts = code.split('_');
+          if (parts.length >= 3) parentId = parts[1]; 
+       }
+       try {
+         const docSnap = await getDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", parentId));
+         if (docSnap.exists()) {
+           const gData = docSnap.data();
+           if (docSnap.id.toLowerCase() === code) foundUser = { id: docSnap.id, name: gData.name };
+           else if (gData.subGuests) {
+             const sub = gData.subGuests.find(sg => (sg.id || '').toLowerCase() === code);
+             if (sub) foundUser = { id: sub.id, name: sub.name };
+           }
+         }
+       } catch(e) {}
+    }
+
+    if (foundUser) {
+      setAuthGuest(foundUser);
+      setGuestName(foundUser.name);
+      setGuestAvatar(localStorage.getItem(`eventmaster_avatar_${foundUser.id}`) || '');
+      localStorage.setItem('eventmaster_authGuestId', foundUser.id);
+      localStorage.setItem('eventmaster_guestName', foundUser.name);
+      setIsScanning(false);
+      window.history.replaceState({}, document.title, window.location.pathname + "?modo=camara&e=" + ID_DEL_EVENTO);
+    } else {
+      showToast("Código no reconocido. Revisa tu pulsera.", "error");
+      // Si falla, reactivamos el escaneo en 2 segundos
+      setTimeout(() => { if (!authGuest) startLoginScanner(); }, 2000);
+    }
+  };
+
+  // 🔴 MOTOR DE ESCÁNER CUADRADO AUTOMÁTICO (Un solo uso)
+  const startLoginScanner = () => {
+    if (!window.Html5Qrcode) {
+      setTimeout(startLoginScanner, 500);
+      return;
+    }
+    setIsScanning(true);
+    
+    setTimeout(() => {
+      try {
+        const html5QrCode = new window.Html5Qrcode("qr-reader-login");
+        scannerRef.current = html5QrCode;
+        
+        html5QrCode.start(
+          { facingMode: "environment" },
+          { 
+             fps: 15, 
+             aspectRatio: 1.0, // CUADRADO PERFECTO
+             qrbox: function(width, height) { return { width: width * 0.95, height: height * 0.95 }; }
+          },
+          (decodedText) => {
+             // Detiene el escáner al instante de encontrar CUALQUIER código
+             if (scannerRef.current) {
+                scannerRef.current.stop().then(() => scannerRef.current.clear()).catch(e=>e);
+             }
+             setIsScanning(false);
+             
+             let code = decodedText;
+             try {
+                const parsedUrl = new URL(decodedText);
+                code = parsedUrl.searchParams.get('u') || parsedUrl.searchParams.get('usr') || parsedUrl.searchParams.get('invitado');
+             } catch(e) {}
+             
+             if (!code) {
+                 const match = decodedText.match(/(?:u|usr|invitado)=([^&]+)/i);
+                 if (match && match[1]) code = match[1];
+                 else code = decodedText;
+             }
+             
+             if (code === 'null' || code === 'undefined') { 
+                showToast("Código inválido", "error"); 
+                setTimeout(() => startLoginScanner(), 2000); // Reactivamos si era basura
+                return; 
+             }
+
+             setGuestCode(code);
+             ejecutarLogin(code); 
+          },
+          (err) => {}
+        ).catch(err => {
+           setIsScanning(false);
+           showToast("Debes Permitir el uso de la Cámara para acceder.", "error");
+        });
+      } catch(e) { setIsScanning(false); }
+    }, 200);
+  };
+
   useEffect(() => {
     if (!window.Html5QrcodeScanner) {
       const script = document.createElement('script');
@@ -6778,52 +6869,23 @@ const GuestCameraView = () => {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const uid = urlParams.get('uid'); 
+    let uid = urlParams.get('u') || urlParams.get('usr') || urlParams.get('invitado'); 
     if (uid && allGuests.length > 0 && !authGuest) ejecutarLogin(uid);
   }, [allGuests]);
 
-  const ejecutarLogin = (codigoIngresado) => {
-    const code = codigoIngresado.trim().toLowerCase();
-    let foundUser = null;
-    for (const g of allGuests) {
-      if (g.id.toLowerCase() === code) { foundUser = { id: g.id, name: g.name }; break; }
-      if (g.subGuests && g.subGuests.length > 0) {
-        const sub = g.subGuests.find(sg => sg.id.toLowerCase() === code);
-        if (sub) { foundUser = { id: sub.id, name: sub.name }; break; }
-      }
-    }
-    if (foundUser) {
-      setAuthGuest(foundUser);
-      setGuestName(foundUser.name);
-      setGuestAvatar(localStorage.getItem(`eventmaster_avatar_${foundUser.id}`) || '');
-      localStorage.setItem('eventmaster_authGuestId', foundUser.id);
-      localStorage.setItem('eventmaster_guestName', foundUser.name);
-      setIsScanning(false);
-      window.history.replaceState({}, document.title, window.location.pathname + "?modo=camara");
-    } else {
-      showToast("Código no reconocido. Revisa tu pulsera.", "error");
-    }
-  };
-
-  const startRealScanner = () => {
-    setIsScanning(true);
-    setTimeout(() => {
-      if (window.Html5QrcodeScanner) {
-        const html5QrcodeScanner = new window.Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 }, false);
-        html5QrcodeScanner.render((decodedText) => {
-          html5QrcodeScanner.clear();
-          setIsScanning(false);
-          const urlParams = new URLSearchParams(decodedText.split('?')[1]);
-          const uid = urlParams.get('uid') || decodedText;
-          setGuestCode(uid);
-          ejecutarLogin(uid);
-        }, (errorMessage) => {});
-      } else {
-        showToast("Cargando la cámara... Intenta de nuevo en unos segundos.", "info");
-        setIsScanning(false);
-      }
-    }, 500);
-  };
+  // AUTO INICIO DE ESCÁNER
+  useEffect(() => {
+     let timer;
+     if (!config.modoPublico && !authGuest) {
+         timer = setTimeout(() => {
+             startLoginScanner();
+         }, 1000); 
+     }
+     return () => {
+         if (timer) clearTimeout(timer);
+         if (scannerRef.current) scannerRef.current.stop().catch(e=>e);
+     }
+  }, [config.modoPublico, authGuest]);
 
   const notifySocial = async (tipo, targetUser, fotoId, textoExtra = '', fotoUrl = '') => {
     if (!targetUser || !currentUserName || targetUser === currentUserName) return; 
@@ -6896,7 +6958,6 @@ const GuestCameraView = () => {
     if (files.length === 0) return;
     const previewUrls = files.map(f => URL.createObjectURL(f));
     
-    // Si viene de aceptar un reto, pre-rellenamos el texto
     const initialCaption = activeChallenge ? `¡Reto cumplido! 🎲\n${activeChallenge}` : '';
     
     setPostDraft({ files, previewUrls, caption: initialCaption, emotion: '', location: '' });
@@ -6986,14 +7047,14 @@ const GuestCameraView = () => {
 
   const toggleCommentLike = async (foto, isReply = false, commentId, replyId = null) => {
     if (!currentUserName) return;
-    let updatedComments = [...(foto.comentarios || [])];
+    let updatedComments = Array.isArray(foto.comentarios) ? [...foto.comentarios] : (foto.comentarios ? Object.values(foto.comentarios) : []);
     const cIndex = updatedComments.findIndex(c => c.id === commentId);
     if (cIndex === -1) return;
 
     const coverUrl = foto.urls ? foto.urls[0] : foto.url;
 
     if (!isReply) {
-      let likes = updatedComments[cIndex].likes || [];
+      let likes = Array.isArray(updatedComments[cIndex].likes) ? updatedComments[cIndex].likes : [];
       const isLiking = !likes.includes(currentUserName);
       if (isLiking) {
         likes.push(currentUserName);
@@ -7001,10 +7062,10 @@ const GuestCameraView = () => {
       } else likes = likes.filter(n => n !== currentUserName);
       updatedComments[cIndex].likes = likes;
     } else {
-      let replies = updatedComments[cIndex].replies || [];
+      let replies = Array.isArray(updatedComments[cIndex].replies) ? updatedComments[cIndex].replies : [];
       const rIndex = replies.findIndex(r => r.id === replyId);
       if (rIndex > -1) {
-        let likes = replies[rIndex].likes || [];
+        let likes = Array.isArray(replies[rIndex].likes) ? replies[rIndex].likes : [];
         const isLiking = !likes.includes(currentUserName);
         if (isLiking) {
           likes.push(currentUserName);
@@ -7023,14 +7084,15 @@ const GuestCameraView = () => {
     let finalComment = commentText.trim();
     if (!replyingTo && config.hashtag && !finalComment.toLowerCase().includes(config.hashtag.toLowerCase())) finalComment += ` ${config.hashtag}`;
 
-    let updatedComments = [...(foto.comentarios || [])];
+    let updatedComments = Array.isArray(foto.comentarios) ? [...foto.comentarios] : (foto.comentarios ? Object.values(foto.comentarios) : []);
     const newObj = { id: Date.now(), autor: currentUserName, avatar: guestAvatar, texto: finalComment, likes: [] };
     const coverUrl = foto.urls ? foto.urls[0] : foto.url;
 
     if (replyingTo) {
       const cIndex = updatedComments.findIndex(c => c.id === replyingTo.commentId);
       if (cIndex > -1) {
-        updatedComments[cIndex].replies = [...(updatedComments[cIndex].replies || []), newObj];
+        let currentReplies = Array.isArray(updatedComments[cIndex].replies) ? updatedComments[cIndex].replies : [];
+        updatedComments[cIndex].replies = [...currentReplies, newObj];
         notifySocial('reply_comment', replyingTo.autor, foto.id, finalComment, coverUrl); 
       }
     } else {
@@ -7104,35 +7166,48 @@ const GuestCameraView = () => {
     );
   };
 
-  // PANTALLA DE BLOQUEO (ESCÁNER REAL Y MANUAL)
   if (!config.modoPublico && !authGuest) {
     return (
       <div className={`min-h-screen ${tBgBase} flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans`}>
+        
+        <style>{`
+          #qr-reader-login { width: 100% !important; height: 100% !important; border: none !important; position: absolute !important; inset: 0 !important; }
+          #qr-reader-login video { object-fit: cover !important; width: 100% !important; height: 100% !important; border-radius: 1.5rem !important; }
+          #qr-reader-login canvas { display: none !important; }
+        `}</style>
+
         <ToastOverlay />
         <div className="absolute top-0 w-full h-64 bg-pink-600/10 blur-[100px] rounded-full pointer-events-none"></div>
-        <div className={`w-full max-w-sm ${tBgCard} border ${tBorder} backdrop-blur-xl rounded-3xl shadow-2xl p-8 text-center z-10`}>
+        <div className={`w-full max-w-sm ${tBgCard} border ${tBorder} backdrop-blur-xl rounded-3xl shadow-2xl p-8 text-center z-10 flex flex-col`}>
           <h1 className={`text-2xl font-black ${tTextMain} mb-2 tracking-tight`}>Red Privada</h1>
-          <p className={`${tTextSub} text-xs mb-6`}>Ingresa tu código único de invitación para continuar.</p>
+          <p className={`${tTextSub} text-xs mb-6`}>Apunta a la pulsera para ingresar a la fiesta.</p>
           
-          {isScanning ? (
-            <div className={`mb-6 relative w-full overflow-hidden rounded-2xl border-4 ${tBorder}`}>
-              <div id="qr-reader" className="w-full"></div>
-              <button onClick={() => setIsScanning(false)} className="absolute top-2 right-2 bg-rose-500 text-white p-1 rounded-full"><X size={16}/></button>
-            </div>
-          ) : (
-            <button onClick={startRealScanner} className={`w-full mb-6 py-4 ${tInputBg} ${tTextMain} border-2 ${tBorder} font-bold rounded-2xl shadow-sm hover:border-pink-500 transition-colors flex items-center justify-center flex-col`}>
-               <Scan size={36} className="mb-2 text-pink-500" />
-               Escanear QR de mi Pulsera
-            </button>
-          )}
+          <div className="w-full max-w-[350px] mx-auto bg-slate-900 rounded-3xl overflow-hidden relative shadow-2xl flex-shrink-0 aspect-square mb-6 border-4 border-pink-500/30">
+            {isScanning ? (
+              <>
+                 <div id="qr-reader-login"></div>
+                 <div className="absolute inset-0 border-[30px] border-black/40 pointer-events-none z-10"></div>
+                 <div className="absolute inset-0 border-2 border-pink-400 m-[30px] pointer-events-none z-10 opacity-70">
+                   <div className="w-full h-0.5 bg-pink-400 shadow-[0_0_15px_#f472b6] absolute top-1/2 -translate-y-1/2 opacity-60 animate-pulse"></div>
+                 </div>
+              </>
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-slate-800 p-6 text-center z-50">
+                <Camera size={48} className="text-pink-500 mb-4 animate-pulse"/>
+                <span className="font-bold text-sm text-slate-400">Iniciando cámara...</span>
+              </div>
+            )}
+          </div>
           
-          <div className="relative flex items-center justify-center mb-6">
+          <div className="relative flex items-center justify-center mb-6 mt-auto">
             <div className={`border-t ${tBorder} w-full`}></div>
-            <span className={`${tBgCard} px-3 text-xs ${tTextSub} font-bold uppercase tracking-widest absolute`}>O usa tu código</span>
+            <span className={`${tBgCard} px-3 text-xs ${tTextSub} font-bold uppercase tracking-widest absolute`}>O escribe tu código</span>
           </div>
 
-          <input type="text" placeholder="Ej. usr_123_0" value={guestCode} onChange={(e) => setGuestCode(e.target.value)} className={`w-full ${tInputBg} border ${tBorder} p-4 rounded-xl outline-none focus:ring-2 focus:ring-pink-500 transition-all text-center font-bold ${tTextMain} text-lg mb-4`} />
-          <button onClick={() => ejecutarLogin(guestCode)} className="w-full py-4 bg-pink-600 text-white font-bold rounded-xl shadow-lg hover:bg-pink-700 transition-colors">Entrar al Evento</button>
+          <div className="flex gap-2">
+            <input type="text" placeholder="Ej. usr_123_0" value={guestCode} onChange={(e) => setGuestCode(e.target.value)} className={`w-full ${tInputBg} border ${tBorder} p-4 rounded-xl outline-none focus:ring-2 focus:ring-pink-500 transition-all text-center font-bold ${tTextMain} text-lg uppercase`} />
+            <button onClick={() => ejecutarLogin(guestCode)} className="px-5 bg-pink-600 text-white font-bold rounded-xl shadow-lg hover:bg-pink-700 transition-transform active:scale-95"><ArrowRight size={24}/></button>
+          </div>
         </div>
       </div>
     );
@@ -7144,7 +7219,6 @@ const GuestCameraView = () => {
     <div className={`min-h-screen ${tBgBase} font-sans relative w-full flex flex-col`}>
       <ToastOverlay />
 
-      {/* CABECERA STICKY ESTILO INSTAGRAM */}
       <div className={`sticky top-0 z-[150] w-full ${tBgCard} border-b ${tBorder} shadow-sm flex justify-center transition-colors duration-300`}>
         <div className="w-full max-w-lg px-4 py-3 flex items-center justify-between">
           
@@ -7178,8 +7252,6 @@ const GuestCameraView = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            
-            {/* 🔴 BOTÓN DE DADO (RETOS) CON GLOW ANIMADO EN CABECERA */}
             <button onClick={openChallengeModal} className={`relative p-1 text-amber-500 hover:text-amber-400 hover:scale-110 transition-transform group`} title="Jugar un Reto">
               <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-md animate-pulse"></div>
               <DiceIcon size={24} className="relative z-10 drop-shadow-[0_0_5px_rgba(245,158,11,0.5)]" />
@@ -7239,10 +7311,8 @@ const GuestCameraView = () => {
       </div>
 
       <div className="w-full max-w-lg mx-auto pt-6 px-4 pb-20 flex flex-col items-center">
-        
         <input type="file" accept="image/*" multiple ref={fileInputRef} onChange={initiatePost} className="hidden" />
 
-        {/* MENSAJE DE BIENVENIDA */}
         {!hasPosted && !postDraft && (
            <div className={`w-full ${tBgCard} rounded-3xl shadow-sm p-8 text-center z-10 mb-8 border ${tBorder} flex flex-col items-center`}>
               <div className="w-16 h-16 bg-gradient-to-tr from-pink-500 to-indigo-500 rounded-full flex items-center justify-center text-white mb-4 shadow-lg">
@@ -7255,7 +7325,6 @@ const GuestCameraView = () => {
                  <ImageIcon size={18} className="mr-2"/> Subir foto libre
               </button>
 
-              {/* 🔴 BOTÓN DADO EN BIENVENIDA (VIP) */}
               <button onClick={openChallengeModal} className="relative w-full py-3.5 bg-slate-900 border border-amber-500/50 text-amber-400 font-black rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.2)] transition-all active:scale-95 flex items-center justify-center overflow-hidden">
                  <div className="absolute inset-0 bg-amber-400/10 animate-pulse"></div>
                  <DiceIcon size={20} className="mr-2 relative z-10 drop-shadow-[0_0_5px_rgba(245,158,11,0.8)]" />
@@ -7264,16 +7333,20 @@ const GuestCameraView = () => {
            </div>
         )}
 
-        {/* FEED DE FOTOS */}
         <div className="w-full space-y-8">
           {feedFotos.map((foto) => {
             if (config.moderacion && foto.status === 'pending' && foto.autor !== currentUserName) return null;
             const isPending = config.moderacion && foto.status === 'pending';
 
-            const likesArr = Array.isArray(foto.likes) ? foto.likes : [];
+            const likesArr = Array.isArray(foto.likes) ? foto.likes : (foto.likes ? Object.values(foto.likes) : []);
             const hasLiked = currentUserName && likesArr.includes(currentUserName);
             const urls = foto.urls || [foto.url]; 
-            const commentCount = (foto.comentarios || []).reduce((acc, c) => acc + 1 + (c.replies?.length || 0), 0);
+            
+            const comentariosArr = Array.isArray(foto.comentarios) ? foto.comentarios : (foto.comentarios ? Object.values(foto.comentarios) : []);
+            const commentCount = comentariosArr.reduce((acc, c) => {
+               const repArr = Array.isArray(c.replies) ? c.replies : (c.replies ? Object.values(c.replies) : []);
+               return acc + 1 + repArr.length;
+            }, 0);
             
             return (
               <div id={`post_${foto.id}`} key={foto.id} className={`${tBgCard} rounded-3xl border ${isPending ? 'border-amber-500' : tBorder} shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 transition-colors duration-300 relative`}>
@@ -7294,9 +7367,7 @@ const GuestCameraView = () => {
                    {urls.map((u, idx) => (
                      <div key={idx} className={`w-full flex-shrink-0 snap-center relative border-y ${tBorder}`}>
                        <img src={u} alt={`Post ${idx}`} className={`w-full h-auto object-cover max-h-[70vh] sm:max-h-[600px] ${tBgBase}`} loading="lazy" />
-                       
                        {config.marcoUrl && <img src={config.marcoUrl} className="absolute inset-0 w-full h-full object-cover pointer-events-none z-10" />}
-
                        {urls.length > 1 && <div className="absolute top-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded-full backdrop-blur-md z-20">{idx + 1} / {urls.length}</div>}
                      </div>
                    ))}
@@ -7340,7 +7411,6 @@ const GuestCameraView = () => {
         </div>
       </div>
       
-      {/* 🔴 MODAL MÁGICO DE RETOS VIP */}
       {showChallengeModal && (
         <div className="fixed inset-0 z-[400] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in zoom-in-95 duration-200">
           <div className={`w-full max-w-sm ${tBgCard} border border-amber-500/30 rounded-3xl shadow-[0_0_50px_rgba(245,158,11,0.1)] p-8 text-center flex flex-col items-center relative overflow-hidden`}>
@@ -7372,7 +7442,6 @@ const GuestCameraView = () => {
         </div>
       )}
 
-      {/* MODAL DE PUBLICACIÓN NUEVA */}
       {postDraft && (
         <div className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center sm:p-4 animate-in fade-in duration-200">
            <div className={`w-full sm:max-w-lg h-[95vh] sm:h-auto sm:max-h-[85vh] ${tBgCard} border ${tBorder} flex flex-col rounded-t-3xl sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 sm:zoom-in-95`}>
@@ -7427,7 +7496,6 @@ const GuestCameraView = () => {
         </div>
       )}
 
-      {/* MODAL DE COMENTARIOS */}
       {activePostComments && (
         <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center sm:p-4 animate-in fade-in duration-200">
           <div className={`${tBgCard} w-full sm:max-w-md h-[80vh] sm:h-[600px] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col animate-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 sm:zoom-in-95 border ${tBorder}`}>
@@ -7453,8 +7521,8 @@ const GuestCameraView = () => {
               {(activePostComments.comentarios || []).length === 0 ? (
                 <div className={`text-center ${tTextSub} py-10 text-sm font-medium`}>No hay comentarios aún. ¡Sé el primero!</div>
               ) : (
-                (activePostComments.comentarios || []).map(c => {
-                  const cLiked = c.likes?.includes(currentUserName);
+                (Array.isArray(activePostComments.comentarios) ? activePostComments.comentarios : Object.values(activePostComments.comentarios)).map(c => {
+                  const cLiked = Array.isArray(c.likes) && c.likes.includes(currentUserName);
                   return (
                     <div key={c.id} className="flex flex-col">
                       <div className="flex items-start group">
@@ -7471,10 +7539,10 @@ const GuestCameraView = () => {
                         <button onClick={() => toggleCommentLike(activePostComments, false, c.id)} className={`pt-1 transition-transform active:scale-75 ${cLiked ? 'text-rose-500' : `${tTextSub} hover:text-pink-400`}`}><Heart size={12} className={cLiked ? 'fill-rose-500' : ''}/></button>
                       </div>
 
-                      {c.replies && c.replies.length > 0 && (
+                      {c.replies && (Array.isArray(c.replies) ? c.replies : Object.values(c.replies)).length > 0 && (
                         <div className="ml-11 mt-3 space-y-3">
-                          {c.replies.map(r => {
-                            const rLiked = r.likes?.includes(currentUserName);
+                          {(Array.isArray(c.replies) ? c.replies : Object.values(c.replies)).map(r => {
+                            const rLiked = Array.isArray(r.likes) && r.likes.includes(currentUserName);
                             return (
                               <div key={r.id} className="flex items-start">
                                 <div className={`w-6 h-6 ${tBgBase} rounded-full mr-2 flex-shrink-0 overflow-hidden border ${tBorder}`}>
