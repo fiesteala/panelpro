@@ -7324,7 +7324,6 @@ const GuestCameraView = ({ eventId }) => {
           if (parts.length >= 3) parentId = parts[1]; 
        }
        try {
-         // 🔴 BLINDAJE: Usa el eventId correcto, no el de prueba
          const docSnap = await getDoc(doc(db, "eventos", eventId, "invitados", parentId));
          if (docSnap.exists()) {
            const gData = docSnap.data();
@@ -7351,7 +7350,7 @@ const GuestCameraView = ({ eventId }) => {
     }
   };
 
-  // 🔴 MOTOR DE ESCÁNER CUADRADO AUTOMÁTICO (Un solo uso)
+  // 🔴 MOTOR DE ESCÁNER CUADRADO AUTOMÁTICO CLONADO AL DE PUERTA
   const startLoginScanner = () => {
     if (!window.Html5Qrcode) {
       setTimeout(startLoginScanner, 500);
@@ -7368,29 +7367,23 @@ const GuestCameraView = ({ eventId }) => {
           { facingMode: "environment" },
           { 
              fps: 15, 
-             aspectRatio: 1.0, // CUADRADO PERFECTO
+             aspectRatio: 1.0, 
              qrbox: function(width, height) { return { width: width * 0.95, height: height * 0.95 }; }
           },
           (decodedText) => {
-             // Detiene el escáner al instante de encontrar un código
              if (scannerRef.current) {
                 scannerRef.current.stop().then(() => scannerRef.current.clear()).catch(e=>e);
              }
              setIsScanning(false);
              
+             // 🔴 EXTRACCIÓN CIENTÍFICA DEL CÓDIGO (Igual que en Puerta)
              let code = decodedText;
              try {
                 const parsedUrl = new URL(decodedText);
-                code = parsedUrl.searchParams.get('u') || parsedUrl.searchParams.get('usr') || parsedUrl.searchParams.get('invitado');
+                code = parsedUrl.searchParams.get('u') || parsedUrl.searchParams.get('usr') || parsedUrl.searchParams.get('uid') || parsedUrl.searchParams.get('invitado') || code;
              } catch(e) {}
              
-             if (!code) {
-                 const match = decodedText.match(/(?:u|usr|invitado)=([^&]+)/i);
-                 if (match && match[1]) code = match[1];
-                 else code = decodedText;
-             }
-             
-             if (code === 'null' || code === 'undefined') { 
+             if (!code || code === 'null' || code === 'undefined') { 
                 showToast("Código inválido", "error"); 
                 setTimeout(() => startLoginScanner(), 2000); 
                 return; 
@@ -7417,7 +7410,6 @@ const GuestCameraView = ({ eventId }) => {
       document.body.appendChild(script);
     }
 
-    // 🔴 BLINDAJE: Ahora todas las consultas apuntan directo a eventId
     const unsubConfig = onSnapshot(doc(db, "eventos", eventId, "configuracion", "galeria"), (docSnap) => {
       if (docSnap.exists()) setConfig(docSnap.data());
     });
