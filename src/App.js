@@ -10056,6 +10056,95 @@ const HostessStandaloneView = ({ eventId }) => {
 };
 
 // ==========================================
+// --- COMPONENTE: COSECHADOR DE RESEÑAS VIP (CERO RIESGO) ---
+// ==========================================
+const ReviewHarvester = ({ authData }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [status, setStatus] = useState('idle');
+
+  // Solo se muestra a clientes o planners, NO al superadmin
+  if (!authData || authData.role === 'superadmin') return null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus('loading');
+    try {
+      // Guarda la reseña en una nueva bóveda llamada "resenas"
+      await setDoc(doc(db, "resenas", authData.eventId), {
+        eventId: authData.eventId,
+        rating,
+        comment,
+        status: 'pendiente', // 🔴 Nace oculta. Solo tú podrás hacerla pública.
+        createdAt: serverTimestamp(),
+        authorName: 'Cliente Baulia', // Podrás editar su nombre real
+        authorType: authData.role === 'planner' ? 'Agencia / Planner' : 'Anfitrión del Evento'
+      });
+      setStatus('success');
+      setTimeout(() => setIsOpen(false), 4000);
+    } catch (error) {
+      console.error(error);
+      setStatus('idle');
+    }
+  };
+
+  return (
+    <>
+      {/* BOTÓN FLOTANTE EN LA ESQUINA */}
+      <button onClick={() => setIsOpen(true)} className="fixed bottom-6 right-6 bg-slate-900 dark:bg-white text-amber-500 dark:text-slate-900 px-5 py-3.5 rounded-full shadow-2xl flex items-center gap-2 border border-slate-700 dark:border-slate-200 hover:scale-105 transition-transform z-50 group">
+        <Star size={16} className="fill-amber-500 dark:fill-amber-500 group-hover:animate-spin"/>
+        <span className="font-bold text-[10px] uppercase tracking-widest text-white dark:text-slate-900">Calificar Experiencia</span>
+      </button>
+
+      {/* MODAL DE BÓVEDA PARA CALIFICAR */}
+      {isOpen && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-8 md:p-10 w-full max-w-md shadow-2xl relative transform animate-in zoom-in-95">
+            <button onClick={() => setIsOpen(false)} className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors"><X size={20}/></button>
+            
+            {status === 'success' ? (
+               <div className="text-center py-8">
+                 <div className="w-16 h-16 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.3)]"><CheckCircle size={32}/></div>
+                 <h3 className="text-2xl font-editorial font-bold text-white mb-2">¡Gracias por tu opinión!</h3>
+                 <p className="text-slate-400 font-light text-sm">Tus comentarios nos ayudan a mantener el estándar de oro en cada evento.</p>
+               </div>
+            ) : (
+               <form onSubmit={handleSubmit}>
+                 <div className="text-center mb-8">
+                   <h3 className="text-2xl font-editorial font-bold text-white mb-2">Califica tu Bóveda</h3>
+                   <p className="text-slate-400 font-light text-sm">¿Cómo fue tu experiencia gestionando tu evento con la tecnología de Baulia?</p>
+                 </div>
+
+                 <div className="flex justify-center gap-2 mb-8">
+                   {[1,2,3,4,5].map(star => (
+                     <button key={star} type="button" onClick={() => setRating(star)} className="focus:outline-none transform hover:scale-110 transition-transform">
+                       <Star size={36} className={`${rating >= star ? 'fill-amber-500 text-amber-500' : 'text-slate-700'}`} />
+                     </button>
+                   ))}
+                 </div>
+
+                 <textarea 
+                    required
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Escribe tu reseña aquí... (Ej. Nos ahorró horas de estrés y a los invitados les encantó)." 
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-white text-sm font-light focus:border-amber-500 outline-none min-h-[140px] mb-8 custom-scrollbar resize-none transition-colors"
+                 ></textarea>
+
+                 <button type="submit" disabled={status === 'loading'} className="w-full py-4 bg-amber-500 text-slate-900 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-amber-400 transition-all shadow-lg disabled:opacity-50">
+                   {status === 'loading' ? 'Enviando a Bóveda Segura...' : 'Enviar Reseña Privada'}
+                 </button>
+               </form>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+// ==========================================
 // 3. EL ENRUTADOR PRINCIPAL (App) - CEREBRO MAESTRO
 // ==========================================
 export default function App() {
@@ -10206,6 +10295,11 @@ export default function App() {
   // SI ES EL PANEL (O LOCALHOST) Y NO ESTÁ LOGUEADO
   if (!authData.isAuthenticated) { return <LoginScreen />; }
   
-  // PANEL ADMINISTRADOR
-  return <AdminDashboard authData={authData} />;
+  // PANEL ADMINISTRADOR (CERO INVASIVO)
+  return (
+    <>
+      <AdminDashboard authData={authData} />
+      <ReviewHarvester authData={authData} />
+    </>
+  );
 }
