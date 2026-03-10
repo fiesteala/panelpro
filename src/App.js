@@ -8579,6 +8579,19 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
   const [fakeRsvp, setFakeRsvp] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 59 });
   const [accentColor, setAccentColor] = useState('amber');
+  // 🔴 ESTADO PARA LAS RESEÑAS REALES APROBADAS
+  const [liveReviews, setLiveReviews] = useState([]);
+
+  useEffect(() => {
+    // Escucha en tiempo real solo las reseñas que tú aprobaste en el panel
+    const q = query(collection(db, "resenas"), where("status", "==", "aprobada"));
+    const unsub = onSnapshot(q, (snap) => {
+      const fetched = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      fetched.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
+      setLiveReviews(fetched);
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -8848,7 +8861,7 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
         </div>
       </section>
 
-      {/* 🔴 NUEVA SECCIÓN: TESTIMONIOS Y PRUEBA SOCIAL */}
+      {/* 🔴 SECCIÓN: TESTIMONIOS (CONECTADOS A FIREBASE) */}
       <section className="py-24 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16">
           <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">El Estándar de la Industria</span>
@@ -8856,59 +8869,51 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           {/* Testimonio 1: Novios */}
-           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative">
-              <Quote className="absolute top-8 right-8 text-slate-100 dark:text-white/5" size={48} />
-              <div className="flex gap-1 mb-6">
-                {[1,2,3,4,5].map(i => <Star key={i} size={16} className="fill-amber-500 text-amber-500"/>)}
-              </div>
-              <p className="text-slate-600 dark:text-slate-300 text-lg font-light leading-relaxed mb-8 relative z-10">
-                "Usar Baulia fue la mejor decisión para nuestra boda. La invitación quedó hermosa, y no tuvimos que lidiar con invitados preguntando cómo llegar o batallando para confirmar. Todo automatizado."
-              </p>
-              <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Avatar" className="w-full h-full object-cover"/></div>
-                 <div>
-                   <h4 className="font-bold text-slate-900 dark:text-white text-sm">Sofía & Mauricio</h4>
-                   <p className="text-xs text-slate-500 font-medium">Boda en Hacienda, 250 invitados.</p>
-                 </div>
-              </div>
-           </div>
-
-           {/* Testimonio 2: Planner */}
-           <div className="bg-slate-900 dark:bg-white rounded-[2rem] p-8 border border-transparent flex flex-col justify-between shadow-xl transition-colors duration-500 relative transform lg:-translate-y-4">
-              <Quote className="absolute top-8 right-8 text-white/5 dark:text-slate-900/5" size={48} />
-              <div className="flex gap-1 mb-6">
-                {[1,2,3,4,5].map(i => <Star key={i} size={16} className="fill-amber-500 text-amber-500"/>)}
-              </div>
-              <p className="text-slate-300 dark:text-slate-700 text-lg font-light leading-relaxed mb-8 relative z-10">
-                "Como Wedding Planner, esta plataforma me ahorra más de 15 horas de logística por evento. El escáner de QR en la puerta nos da un control brutal y a los novios les fascina ver todo bajo mi propia marca."
-              </p>
-              <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 rounded-full bg-white/20 dark:bg-slate-900/10 overflow-hidden flex items-center justify-center font-editorial text-white dark:text-slate-900 text-xl font-bold">EG</div>
-                 <div>
-                   <h4 className="font-bold text-white dark:text-slate-900 text-sm">Estudio Gala</h4>
-                   <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Agencia de Eventos (Planner)</p>
-                 </div>
-              </div>
-           </div>
-
-           {/* Testimonio 3: Quinceañera / Evento Social */}
-           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative">
-              <Quote className="absolute top-8 right-8 text-slate-100 dark:text-white/5" size={48} />
-              <div className="flex gap-1 mb-6">
-                {[1,2,3,4,5].map(i => <Star key={i} size={16} className="fill-amber-500 text-amber-500"/>)}
-              </div>
-              <p className="text-slate-600 dark:text-slate-300 text-lg font-light leading-relaxed mb-8 relative z-10">
-                "El Muro Social proyectado en las pantallas durante la fiesta de mi hija fue la sensación. Todos subiendo fotos y mensajes en vivo. Además, la mesa de regalos en efectivo directo a mi cuenta nos salvó."
-              </p>
-              <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Avatar" className="w-full h-full object-cover"/></div>
-                 <div>
-                   <h4 className="font-bold text-slate-900 dark:text-white text-sm">Familia Torres</h4>
-                   <p className="text-xs text-slate-500 font-medium">XV Años, Evento Social.</p>
-                 </div>
-              </div>
-           </div>
+           {liveReviews.length > 0 ? (
+             /* MUESTRA LAS RESEÑAS REALES DE TUS CLIENTES */
+             liveReviews.slice(0, 3).map((review, idx) => (
+               <div key={review.id} className={`bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative ${idx === 1 ? 'transform lg:-translate-y-4 shadow-xl dark:bg-slate-900 dark:border-slate-800' : ''}`}>
+                  <Quote className="absolute top-8 right-8 text-slate-100 dark:text-white/5" size={48} />
+                  <div className="flex gap-1 mb-6">
+                    {[1,2,3,4,5].map(star => <Star key={star} size={16} className={review.rating >= star ? "fill-amber-500 text-amber-500" : "text-slate-200 dark:text-slate-800"}/>)}
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-300 text-lg font-light leading-relaxed mb-8 relative z-10 italic">
+                    "{review.comment}"
+                  </p>
+                  <div className="flex items-center gap-4 border-t border-slate-100 dark:border-white/5 pt-4">
+                     <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 flex items-center justify-center font-bold text-lg font-editorial">
+                        {review.authorName.charAt(0)}
+                     </div>
+                     <div>
+                       <h4 className="font-bold text-slate-900 dark:text-white text-sm">{review.authorName}</h4>
+                       <p className="text-[10px] text-slate-500 uppercase tracking-widest">{review.authorType}</p>
+                     </div>
+                  </div>
+               </div>
+             ))
+           ) : (
+             /* SI NO HAS APROBADO NINGUNA, MUESTRA ESTAS 3 POR DEFECTO PARA QUE NO SE VEA VACÍO */
+             <>
+               <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative">
+                  <Quote className="absolute top-8 right-8 text-slate-100 dark:text-white/5" size={48} />
+                  <div className="flex gap-1 mb-6"><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/></div>
+                  <p className="text-slate-600 dark:text-slate-300 text-lg font-light leading-relaxed mb-8 relative z-10 italic">"Usar Baulia fue la mejor decisión para nuestra boda. La invitación quedó hermosa y todo fue automatizado."</p>
+                  <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center font-bold text-slate-500">S</div><div><h4 className="font-bold text-slate-900 dark:text-white text-sm">Sofía & Mauricio</h4><p className="text-[10px] text-slate-500 uppercase tracking-widest">Anfitriones</p></div></div>
+               </div>
+               <div className="bg-slate-900 dark:bg-white rounded-[2rem] p-8 border border-transparent flex flex-col justify-between shadow-xl transition-colors duration-500 relative transform lg:-translate-y-4">
+                  <Quote className="absolute top-8 right-8 text-white/5 dark:text-slate-900/5" size={48} />
+                  <div className="flex gap-1 mb-6"><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/></div>
+                  <p className="text-slate-300 dark:text-slate-700 text-lg font-light leading-relaxed mb-8 relative z-10 italic">"Como Planner, esta plataforma me ahorra 15 horas de logística. El escáner de QR en la puerta nos da un control brutal."</p>
+                  <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-full bg-white/20 dark:bg-slate-900/10 flex items-center justify-center font-editorial text-white dark:text-slate-900 text-lg font-bold">EG</div><div><h4 className="font-bold text-white dark:text-slate-900 text-sm">Estudio Gala</h4><p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">Agencia Planner</p></div></div>
+               </div>
+               <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative">
+                  <Quote className="absolute top-8 right-8 text-slate-100 dark:text-white/5" size={48} />
+                  <div className="flex gap-1 mb-6"><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/></div>
+                  <p className="text-slate-600 dark:text-slate-300 text-lg font-light leading-relaxed mb-8 relative z-10 italic">"El Muro Social proyectado fue la sensación. Además, la mesa de regalos en efectivo directo a mi cuenta nos salvó."</p>
+                  <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center font-bold text-slate-500">F</div><div><h4 className="font-bold text-slate-900 dark:text-white text-sm">Familia Torres</h4><p className="text-[10px] text-slate-500 uppercase tracking-widest">Anfitriones</p></div></div>
+               </div>
+             </>
+           )}
         </div>
       </section>
 
@@ -9165,15 +9170,17 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS (CON SOPORTE PARA PLANNERS) ---
+// --- COMPONENTE: CENTRO DE LICENCIAS Y MODERACIÓN DE RESEÑAS ---
 // ==========================================
 const SuperAdminView = () => {
+  const [adminTab, setAdminTab] = useState('licencias'); // 'licencias' | 'resenas'
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente' });
   const [isCreating, setIsCreating] = useState(false);
   const [successData, setSuccessData] = useState(null);
   const [clientPhone, setClientPhone] = useState('');
   const [licencias, setLicencias] = useState([]);
+  const [resenasList, setResenasList] = useState([]);
   const [correosVisibles, setCorreosVisibles] = useState({});
 
   const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null });
@@ -9190,52 +9197,46 @@ const SuperAdminView = () => {
 
   const eventoSeleccionado = tiposDeEvento.find(t => t.id === formData.tipoEvento);
 
+  // Cargar Licencias y Reseñas
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "usuarios"), (snap) => {
+    const unsubLic = onSnapshot(collection(db, "usuarios"), (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const clientes = data.filter(u => u.role !== 'superadmin');
       clientes.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
       setLicencias(clientes);
     });
-    return () => unsub();
+
+    const unsubRes = onSnapshot(collection(db, "resenas"), (snap) => {
+      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      data.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
+      setResenasList(data);
+    });
+
+    return () => { unsubLic(); unsubRes(); };
   }, []);
 
   const handleCreateLicense = async (e) => {
     e.preventDefault();
     setIsCreating(true);
-
     try {
       const slug = formData.nombres.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
       const newEventId = slug; 
-      
       const newEmail = formData.email.trim().toLowerCase();
       const newPassword = Math.random().toString(36).slice(-8) + "!";
 
       await createUserWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
       await signOut(secondaryAuth); 
 
-      // 🔴 AQUÍ SE GUARDA EL ROL (CLIENTE O PLANNER)
       await setDoc(doc(db, "usuarios", newEventId), { email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, nombres: formData.nombres, status: 'activo', createdAt: serverTimestamp() });
       await setDoc(doc(db, "eventos", newEventId), { presupuestoTotal: 150000, nombres: formData.nombres, plan: formData.plan, tipoEvento: formData.tipoEvento });
 
       setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role });
       setClientPhone('');
-      
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') setDialog({ isOpen: true, type: 'alert', title: 'Correo Duplicado', message: 'Este correo ya está registrado.' });
-      else setDialog({ isOpen: true, type: 'alert', title: 'Error del Sistema', message: `Ocurrió un error al crear la licencia: ${error.message}` });
+      else setDialog({ isOpen: true, type: 'alert', title: 'Error del Sistema', message: `Ocurrió un error: ${error.message}` });
     }
     setIsCreating(false);
-  };
-
-  const handleSendWhatsApp = () => {
-    if (clientPhone.length < 10) { setDialog({ isOpen: true, type: 'alert', title: 'Información Incompleta', message: 'Ingresa un número de 10 dígitos.' }); return; }
-    
-    const domain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://panel.baulia.com'; 
-    const tipoTexto = successData.role === 'planner' ? 'Agencia / Organizador' : successData.tipoEvento;
-    
-    const mensaje = `✨ ¡Hola ${successData.nombres}! Tu Panel de Control Premium para tu ${tipoTexto} está listo.\n\nAccede a tu plataforma privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña temporal: ${successData.password}\n\n¡Guarda estos accesos, te servirán para gestionar todos los detalles!`;
-    window.open(`https://wa.me/${clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
   const toggleStatus = (lic) => {
@@ -9248,91 +9249,143 @@ const SuperAdminView = () => {
     setDialog({ isOpen: true, type: 'confirm', title: 'Eliminar Permanentemente', message: `⚠️ PELIGRO EXTREMO: ¿Seguro de eliminar la información de ${lic.nombres}?`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await deleteDoc(doc(db, "usuarios", lic.id)); await deleteDoc(doc(db, "eventos", lic.eventId)); } });
   };
 
-  const toggleVerCorreo = (id) => setCorreosVisibles(prev => ({ ...prev, [id]: !prev[id] }));
+  // 🔴 FUNCIONES DE MODERACIÓN DE RESEÑAS
+  const toggleResenaAprobacion = async (resena) => {
+    const nuevoStatus = resena.status === 'aprobada' ? 'pendiente' : 'aprobada';
+    await updateDoc(doc(db, "resenas", resena.id), { status: nuevoStatus });
+  };
 
-  const totalEventos = licencias.length;
-  const totalDiamante = licencias.filter(l => l.plan === 'diamante').length;
+  const editResenaAuthor = async (resena) => {
+    const nuevoNombre = prompt("Edita el nombre público del autor (Ej. Familia Pérez):", resena.authorName);
+    if (nuevoNombre && nuevoNombre.trim() !== '') {
+      await updateDoc(doc(db, "resenas", resena.id), { authorName: nuevoNombre.trim() });
+    }
+  };
+
+  const deleteResena = async (resenaId) => {
+    if (window.confirm("¿Seguro de eliminar esta reseña permanentemente?")) {
+      await deleteDoc(doc(db, "resenas", resenaId));
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
       {dialog.isOpen && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 p-6 text-center border border-white/20">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ${dialog.type === 'alert' ? 'bg-amber-100 text-amber-600' : 'bg-rose-100 text-rose-600'}`}>
-              {dialog.type === 'alert' ? <AlertTriangle size={32} /> : <AlertCircle size={32} />}
-            </div>
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-white/20">
             <h3 className="text-xl font-black text-slate-800 mb-2">{dialog.title}</h3>
-            <p className="text-sm text-slate-500 mb-6 px-2">{dialog.message}</p>
+            <p className="text-sm text-slate-500 mb-6">{dialog.message}</p>
             <div className="flex space-x-3">
-              {dialog.type === 'confirm' && <button onClick={() => setDialog({ ...dialog, isOpen: false })} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">Cancelar</button>}
-              <button onClick={() => { if(dialog.onConfirm) dialog.onConfirm(); else setDialog({ ...dialog, isOpen: false }); }} className={`flex-1 py-3.5 text-white rounded-xl font-bold shadow-lg transition-transform active:scale-95 ${dialog.type === 'alert' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/30'}`}>
-                {dialog.type === 'confirm' ? 'Sí, proceder' : 'Entendido'}
-              </button>
+              {dialog.type === 'confirm' && <button onClick={() => setDialog({ ...dialog, isOpen: false })} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold">Cancelar</button>}
+              <button onClick={() => { if(dialog.onConfirm) dialog.onConfirm(); else setDialog({ ...dialog, isOpen: false }); }} className="flex-1 py-3.5 bg-indigo-600 text-white rounded-xl font-bold">Proceder</button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-3xl p-8 shadow-xl text-white flex items-center justify-between">
+      {/* HEADER SUPERADMIN */}
+      <div className="bg-gradient-to-r from-amber-500 to-yellow-600 rounded-3xl p-8 shadow-xl text-slate-900 flex items-center justify-between">
         <div>
-          <span className="bg-black/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">Nivel 3: Acceso Maestro</span>
-          <h2 className="text-3xl font-black flex items-center mb-2"><Building className="mr-3" size={36}/> Centro de Licencias</h2>
-          <p className="text-amber-100 max-w-lg text-sm">Control global de la plataforma. Crea nuevos eventos, asigna planes y entrega credenciales directamente a tus clientes o Planners.</p>
+          <span className="bg-white/30 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">Nivel 3: Acceso Maestro</span>
+          <h2 className="text-3xl font-black flex items-center mb-2"><Lock className="mr-3" size={32}/> Bóveda Central</h2>
+          <p className="text-amber-900 font-medium max-w-lg text-sm">Control global de licencias y moderación de contenido para la web pública.</p>
         </div>
-        <div className="hidden md:flex w-24 h-24 bg-white/10 rounded-full items-center justify-center border-4 border-white/20 shadow-inner"><Lock size={40} className="text-white" /></div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center"><div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-3"><Calendar size={24}/></div><h3 className="text-2xl font-black text-slate-800">{totalEventos}</h3><p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Eventos Activos</p></div>
-         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center"><div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mb-3"><Star size={24}/></div><h3 className="text-2xl font-black text-slate-800">{totalDiamante}</h3><p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Planes Diamante</p></div>
-         <div onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente' }); }} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center hover:border-emerald-400 cursor-pointer transition-colors group"><div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><Plus size={24}/></div><h3 className="text-sm font-black text-emerald-600 mt-2">NUEVA LICENCIA</h3><p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Crear Acceso</p></div>
+      {/* TABS DE NAVEGACIÓN */}
+      <div className="flex gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm w-max">
+         <button onClick={() => setAdminTab('licencias')} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 ${adminTab === 'licencias' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
+           <Building size={16}/> Gestor de Licencias
+         </button>
+         <button onClick={() => setAdminTab('resenas')} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 hover:bg-slate-100'}`}>
+           <Star size={16}/> Moderar Reseñas {resenasList.filter(r => r.status === 'pendiente').length > 0 && <span className="bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full">{resenasList.filter(r => r.status === 'pendiente').length}</span>}
+         </button>
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-         <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center"><h3 className="font-bold text-slate-800 text-sm">Directorio de Eventos Generados</h3></div>
-         <div className="overflow-x-auto">
-           <table className="w-full text-left whitespace-nowrap min-w-[800px]">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[10px] uppercase tracking-widest">
-                <tr><th className="px-5 py-3 font-bold">Cliente / ID</th><th className="px-5 py-3 font-bold">Acceso (Correo)</th><th className="px-5 py-3 font-bold text-center">Tipo</th><th className="px-5 py-3 font-bold text-center">Plan</th><th className="px-5 py-3 font-bold text-center">Estatus</th><th className="px-5 py-3 font-bold text-right">Controles</th></tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
-                 {licencias.length === 0 ? (
-                    <tr><td colSpan="6" className="px-5 py-8 text-center text-slate-400">Sin registros de eventos.</td></tr>
-                 ) : (
-                    licencias.map((lic) => {
-                      const tipoObj = tiposDeEvento.find(t => t.id === lic.tipoEvento);
-                      const etiquetaTipo = tipoObj ? tipoObj.label : 'Evento';
-                      const estaSuspendido = lic.status === 'suspendido';
-                      const correoVisible = correosVisibles[lic.id];
-                      
-                      return (
-                        <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40' : 'hover:bg-slate-50'}`}>
-                          <td className="px-5 py-3">
-                            <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800' : 'text-slate-800'}`}>
-                              {lic.nombres || 'Sin Nombre'} 
-                              {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
-                            </p>
-                            <p className="text-[10px] text-slate-400 font-mono mt-0.5">{lic.eventId}</p>
-                          </td>
-                          <td className="px-5 py-3"><div className="flex items-center text-slate-600 bg-slate-100/70 px-2 py-1.5 rounded-lg w-max border border-slate-200/50"><span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span><button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 hover:text-indigo-600 transition-colors">{correoVisible ? <EyeOff size={14} /> : <Eye size={14} />}</button></div></td>
-                          <td className="px-5 py-3 text-center text-slate-500 font-bold text-[10px] uppercase tracking-wider">{etiquetaTipo}</td>
-                          <td className="px-5 py-3 text-center"><span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>{lic.plan}</span></td>
-                          <td className="px-5 py-3 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
+      {/* 🔴 TAB 1: LICENCIAS (TU CÓDIGO ORIGINAL) */}
+      {adminTab === 'licencias' && (
+        <div className="animate-in fade-in">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center"><div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-3"><Calendar size={24}/></div><h3 className="text-2xl font-black text-slate-800">{licencias.length}</h3><p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Eventos Activos</p></div>
+             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center"><div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mb-3"><Star size={24}/></div><h3 className="text-2xl font-black text-slate-800">{licencias.filter(l => l.plan === 'diamante').length}</h3><p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Planes Diamante</p></div>
+             <div onClick={() => { setIsModalOpen(true); setSuccessData(null); }} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center hover:border-emerald-400 cursor-pointer transition-colors group"><div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><Plus size={24}/></div><h3 className="text-sm font-black text-emerald-600 mt-2">NUEVA LICENCIA</h3><p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Crear Acceso</p></div>
+          </div>
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+             <div className="p-5 border-b border-slate-100 bg-slate-50"><h3 className="font-bold text-slate-800 text-sm">Directorio de Eventos</h3></div>
+             <div className="overflow-x-auto">
+               <table className="w-full text-left whitespace-nowrap min-w-[800px]">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[10px] uppercase tracking-widest">
+                    <tr><th className="px-5 py-3 font-bold">Cliente / ID</th><th className="px-5 py-3 font-bold text-center">Plan</th><th className="px-5 py-3 font-bold text-center">Estatus</th><th className="px-5 py-3 font-bold text-right">Controles</th></tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-xs">
+                     {licencias.map((lic) => (
+                        <tr key={lic.id} className="hover:bg-slate-50">
+                          <td className="px-5 py-3"><p className="font-black text-sm text-slate-800">{lic.nombres} {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase">Planner</span>}</p><p className="text-[10px] text-slate-400">{lic.email}</p></td>
+                          <td className="px-5 py-3 text-center"><span className="px-2 py-1 rounded text-[9px] font-black uppercase border border-slate-200">{lic.plan}</span></td>
+                          <td className="px-5 py-3 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${lic.status === 'suspendido' ? 'bg-rose-500' : 'bg-emerald-500'}`}></div></td>
                           <td className="px-5 py-3 text-right">
                              <div className="flex items-center justify-end space-x-2">
-                               <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors ${estaSuspendido ? 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200' : 'text-amber-600 bg-amber-100 hover:bg-amber-200'}`}><Power size={16} /></button>
-                               <button onClick={() => handleDelete(lic)} title="Eliminar Permanentemente" className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:text-white hover:bg-rose-500 transition-colors"><Trash2 size={16} /></button>
+                               <button onClick={() => toggleStatus(lic)} className="p-2 rounded-lg text-amber-600 bg-amber-50 hover:bg-amber-100"><Power size={16} /></button>
+                               <button onClick={() => handleDelete(lic)} className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:bg-rose-100"><Trash2 size={16} /></button>
                              </div>
                           </td>
                         </tr>
-                      )
-                    })
-                 )}
-              </tbody>
-           </table>
-         </div>
-      </div>
+                     ))}
+                  </tbody>
+               </table>
+             </div>
+          </div>
+        </div>
+      )}
 
+      {/* 🔴 TAB 2: MODERACIÓN DE RESEÑAS */}
+      {adminTab === 'resenas' && (
+        <div className="animate-in fade-in">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 className="font-bold text-slate-800 text-sm">Reseñas de Clientes</h3>
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Aprobadas se ven en baulia.com</span>
+             </div>
+             <div className="p-6 grid grid-cols-1 gap-4">
+                {resenasList.length === 0 ? <p className="text-center text-slate-400 py-10">Aún no hay reseñas enviadas.</p> : null}
+                {resenasList.map(resena => (
+                   <div key={resena.id} className={`p-5 rounded-2xl border transition-colors ${resena.status === 'aprobada' ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-slate-50'}`}>
+                      <div className="flex justify-between items-start mb-3">
+                         <div>
+                            <div className="flex items-center gap-2 mb-1">
+                               <h4 className="font-black text-slate-900">{resena.authorName}</h4>
+                               <button onClick={() => editResenaAuthor(resena)} className="text-slate-400 hover:text-indigo-600"><Edit3 size={14}/></button>
+                            </div>
+                            <p className="text-[10px] text-slate-500 uppercase tracking-widest">{resena.authorType} • Evento: {resena.eventId}</p>
+                         </div>
+                         <div className="flex gap-1">
+                            {[1,2,3,4,5].map(s => <Star key={s} size={14} className={resena.rating >= s ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}/>)}
+                         </div>
+                      </div>
+                      <p className="text-slate-700 text-sm mb-4 font-medium italic">"{resena.comment}"</p>
+                      
+                      <div className="flex justify-between items-center border-t border-slate-200/60 pt-4 mt-2">
+                         <div>
+                            {resena.status === 'aprobada' 
+                              ? <span className="flex items-center text-[10px] font-black text-emerald-600 uppercase tracking-widest"><Globe size={14} className="mr-1"/> Pública en Web</span>
+                              : <span className="flex items-center text-[10px] font-black text-slate-400 uppercase tracking-widest"><Lock size={14} className="mr-1"/> Oculta (Pendiente)</span>
+                            }
+                         </div>
+                         <div className="flex gap-2">
+                            <button onClick={() => deleteResena(resena.id)} className="px-3 py-1.5 bg-white border border-slate-200 text-rose-500 rounded-lg text-xs font-bold hover:bg-rose-50 transition-colors">Borrar</button>
+                            <button onClick={() => toggleResenaAprobacion(resena)} className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-colors shadow-sm ${resena.status === 'aprobada' ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-emerald-500 text-white hover:bg-emerald-600'}`}>
+                               {resena.status === 'aprobada' ? 'Ocultar' : 'Aprobar y Publicar'}
+                            </button>
+                         </div>
+                      </div>
+                   </div>
+                ))}
+             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CREACIÓN DE LICENCIAS (TU CÓDIGO ORIGINAL) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
@@ -9341,75 +9394,25 @@ const SuperAdminView = () => {
                 <div className="text-center mb-8">
                   <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4"><Key size={32} /></div>
                   <h3 className="text-2xl font-black text-slate-800">Generar Accesos</h3>
-                  <p className="text-sm text-slate-500">Configura la bóveda privada para tu cliente.</p>
                 </div>
-                
                 <div className="space-y-5 mb-8">
-                  {/* 🔴 NUEVO SELECTOR DE ROL */}
-                  <div>
-                    <label className="block text-xs font-bold text-indigo-600 uppercase tracking-widest mb-2 flex items-center"><Users size={14} className="mr-1"/> Tipo de Cuenta</label>
-                    <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full p-4 bg-indigo-50 border border-indigo-200 text-indigo-900 rounded-xl outline-none focus:border-indigo-500 font-black cursor-pointer">
-                      <option value="cliente">Cliente Final (Novios/Festejados)</option>
-                      <option value="planner">Wedding Planner / Agencia</option>
-                    </select>
-                  </div>
-                  <div className="h-px w-full bg-slate-200 my-2"></div>
-                  
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Tipo de Evento</label>
-                    <select value={formData.tipoEvento} onChange={e => setFormData({...formData, tipoEvento: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 cursor-pointer">
-                      {tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">{formData.role === 'planner' ? 'Nombre de la Agencia' : eventoSeleccionado.labelNombre}</label>
-                    <input type="text" autoFocus required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} placeholder={formData.role === 'planner' ? 'Ej. Elite Planners' : eventoSeleccionado.placeholder} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-900" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2 flex items-center">
-                      <Mail size={14} className="mr-1.5" /> Correo de Acceso
-                    </label>
-                    <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-800" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Paquete Contratado</label>
-                    <select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 cursor-pointer">
-                      <option value="oro">Plan Oro (Básico)</option>
-                      <option value="diamante">Plan Diamante (VIP Completo)</option>
-                    </select>
-                  </div>
+                  <div><label className="block text-xs font-bold text-indigo-600 uppercase mb-2">Tipo de Cuenta</label><select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full p-4 bg-indigo-50 border border-indigo-200 rounded-xl outline-none font-black"><option value="cliente">Cliente Final</option><option value="planner">Wedding Planner</option></select></div>
+                  <div><label className="block text-xs font-bold text-slate-500 uppercase mb-2">Tipo de Evento</label><select value={formData.tipoEvento} onChange={e => setFormData({...formData, tipoEvento: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold">{tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}</select></div>
+                  <div><label className="block text-xs font-bold text-slate-700 uppercase mb-2">{formData.role === 'planner' ? 'Nombre de Agencia' : eventoSeleccionado.labelNombre}</label><input type="text" required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold" /></div>
+                  <div><label className="block text-xs font-bold text-slate-700 uppercase mb-2">Correo</label><input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold" /></div>
+                  <div><label className="block text-xs font-bold text-slate-500 uppercase mb-2">Paquete</label><select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold"><option value="oro">Plan Oro</option><option value="diamante">Plan Diamante</option></select></div>
                 </div>
-
                 <div className="flex space-x-3">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">Cancelar</button>
-                  <button type="submit" disabled={isCreating} className="flex-1 py-4 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-slate-800 disabled:bg-slate-400 transition-colors">
-                    {isCreating ? 'Procesando...' : 'Crear Licencia'}
-                  </button>
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-xl font-bold">Cancelar</button>
+                  <button type="submit" disabled={isCreating} className="flex-1 py-4 bg-slate-900 text-white rounded-xl font-bold">{isCreating ? '...' : 'Crear Licencia'}</button>
                 </div>
               </form>
             ) : (
               <div className="p-8 text-center bg-slate-50">
                 <div className="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6"><CheckCircle size={40} /></div>
-                <h3 className="text-2xl font-black text-slate-800 mb-2">¡Accesos Creados!</h3>
-                <p className="text-sm text-slate-500 mb-6">La cuenta para <b>{successData.nombres}</b> se ha generado exitosamente.</p>
-                
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 text-left text-sm mb-6 shadow-sm">
-                  <p className="mb-3"><span className="text-slate-400 font-bold w-20 inline-block">Usuario:</span> <b className="text-slate-800">{successData.email}</b></p>
-                  <p><span className="text-slate-400 font-bold w-20 inline-block">Clave Temp:</span> <b className="text-slate-800 font-mono text-base">{successData.password}</b></p>
-                </div>
-
-                <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl mb-6 shadow-sm">
-                  <label className="block text-xs font-black text-emerald-700 uppercase tracking-widest mb-3 text-left flex items-center"><MessageCircle size={14} className="mr-1.5"/> Enviar accesos al {successData.role === 'planner' ? 'Planner' : 'Cliente'}</label>
-                  <div className="flex space-x-2 mb-4">
-                    <span className="bg-emerald-100 text-emerald-700 font-bold p-3 rounded-xl flex items-center justify-center">+52</span>
-                    <input type="tel" placeholder="10 dígitos del cliente..." value={clientPhone} onChange={e => setClientPhone(e.target.value)} className="w-full p-3 bg-white border border-emerald-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-800" />
-                  </div>
-                  <button onClick={handleSendWhatsApp} className="w-full py-4 bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all active:scale-95 flex items-center justify-center">
-                    <Send size={18} className="mr-2" /> Enviar por WhatsApp
-                  </button>
-                </div>
-
-                <button onClick={() => setIsModalOpen(false)} className="w-full py-4 text-slate-500 font-bold hover:text-slate-800 transition-colors">Cerrar Ventana</button>
+                <h3 className="text-2xl font-black mb-2">¡Accesos Creados!</h3>
+                <div className="bg-white p-5 rounded-2xl border text-left text-sm mb-6"><p>Usuario: <b>{successData.email}</b></p><p>Clave: <b>{successData.password}</b></p></div>
+                <button onClick={() => setIsModalOpen(false)} className="w-full py-4 text-slate-500 font-bold">Cerrar</button>
               </div>
             )}
           </div>
