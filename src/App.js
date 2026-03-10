@@ -33,6 +33,25 @@ const MOCK_BUDGET = { total: 150000, spent: 45000 };
 export let ID_DEL_EVENTO = "evento_de_prueba";
 export const setGlobalEventId = (id) => { ID_DEL_EVENTO = id; };
 
+// ==========================================
+// --- LOGOTIPO OFICIAL BAULIA ---
+// ==========================================
+const BauliaLogo = ({ size = 32, className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <defs>
+      <linearGradient id="baulia-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#fde68a" />
+        <stop offset="40%" stopColor="#f59e0b" />
+        <stop offset="100%" stopColor="#92400e" />
+      </linearGradient>
+    </defs>
+    <rect x="15" y="30" width="70" height="55" rx="12" stroke="url(#baulia-gold)" strokeWidth="8"/>
+    <path d="M25 30 V20 C25 8 35 4 50 4 C65 4 75 8 75 20 V30" stroke="url(#baulia-gold)" strokeWidth="8" strokeLinecap="round"/>
+    <circle cx="50" cy="52" r="6" fill="url(#baulia-gold)"/>
+    <path d="M50 58 V68" stroke="url(#baulia-gold)" strokeWidth="6" strokeLinecap="round"/>
+  </svg>
+);
+
 // --- COMPONENTES DE ESTRUCTURA ---
 
 const mockGuests = [
@@ -110,93 +129,57 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
+// ==========================================
+// --- COMPONENTE: MENÚ LATERAL (SIDEBAR BAULIA) ---
+// ==========================================
 const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPlan, agencyConfig }) => {
-  
-  // 🔴 MOTOR DE PERMISOS: Oro = Nivel 1 | Diamante = Nivel 2
   const planLevels = { 'oro': 1, 'diamante': 2 };
-  const level = planLevels[userPlan] || 2; // Si es SuperAdmin o Planner, ven todo (Nivel 2)
+  const level = planLevels[userPlan] || 2; 
 
   const menuGroups = [
-    {
-      title: 'Planeación y Finanzas',
-      items: [
-        { id: 'dashboard', icon: LayoutDashboard, label: 'Resumen', minLevel: 1 },
-        { id: 'tareas', icon: CheckSquare, label: 'Checklist', minLevel: 1 },
-        { id: 'presupuesto', icon: Wallet, label: 'Presupuesto', minLevel: 1 },
-        { id: 'proveedores', icon: Store, label: 'Proveedores', minLevel: 1 },
-      ]
-    },
-    {
-      title: 'Gestión de Asistentes',
-      items: [
-        { id: 'invitacion', icon: Smartphone, label: 'Ver Invitación App', minLevel: 1 },
-        { id: 'invitados', icon: Users, label: 'Lista de Invitados', minLevel: 1 },
-        { id: 'mesas', icon: LayoutGrid, label: 'Gestión de Mesas', minLevel: 2 }, // 💎 Solo Diamante
-      ]
-    },
-    {
-      title: 'Diseño Espacial',
-      items: [
-        { id: 'decoracion', icon: Palette, label: 'Visualizador Decor.', minLevel: 2 }, // 💎 Solo Diamante
-        { id: 'mapa', icon: MapIcon, label: 'Croquis del Salón', minLevel: 2 }, // 💎 Solo Diamante
-      ]
-    },
-    {
-      title: 'El Día del Evento',
-      items: [
-        { id: 'timing', icon: Clock, label: 'El Minuto a Minuto', minLevel: 1 }, 
-        { id: 'escaner', icon: Scan, label: 'Control Puerta (QR)', minLevel: 2 }, // 💎 Solo Diamante
-        { id: 'galeria', icon: ImageIcon, label: 'Muro Social (Vivo)', minLevel: 2 }, // 💎 Solo Diamante
-      ]
-    }
+    { title: 'Planeación y Finanzas', items: [ { id: 'dashboard', icon: LayoutDashboard, label: 'Resumen', minLevel: 1 }, { id: 'tareas', icon: CheckSquare, label: 'Checklist', minLevel: 1 }, { id: 'presupuesto', icon: Wallet, label: 'Presupuesto', minLevel: 1 }, { id: 'proveedores', icon: Store, label: 'Proveedores', minLevel: 1 } ] },
+    { title: 'Gestión de Asistentes', items: [ { id: 'invitacion', icon: Smartphone, label: 'Ver Invitación App', minLevel: 1 }, { id: 'invitados', icon: Users, label: 'Lista de Invitados', minLevel: 1 }, { id: 'mesas', icon: LayoutGrid, label: 'Gestión de Mesas', minLevel: 2 } ] },
+    { title: 'Diseño Espacial', items: [ { id: 'decoracion', icon: Palette, label: 'Visualizador Decor.', minLevel: 2 }, { id: 'mapa', icon: MapIcon, label: 'Croquis del Salón', minLevel: 2 } ] },
+    { title: 'El Día del Evento', items: [ { id: 'timing', icon: Clock, label: 'El Minuto a Minuto', minLevel: 1 }, { id: 'escaner', icon: Scan, label: 'Control Puerta (QR)', minLevel: 2 }, { id: 'galeria', icon: ImageIcon, label: 'Muro Social (Vivo)', minLevel: 2 } ] }
   ];
 
   const themeColors = {
-    indigo: 'bg-indigo-600 text-white shadow-indigo-900/20',
-    rose: 'bg-rose-600 text-white shadow-rose-900/20',
-    emerald: 'bg-emerald-600 text-white shadow-emerald-900/20',
-    slate: 'bg-slate-700 text-white shadow-slate-900/20',
-    amber: 'bg-amber-500 text-white shadow-amber-900/20',
-    sky: 'bg-sky-500 text-white shadow-sky-900/20'
+    indigo: 'bg-indigo-600 text-white shadow-indigo-900/20', rose: 'bg-rose-600 text-white shadow-rose-900/20', emerald: 'bg-emerald-600 text-white shadow-emerald-900/20', slate: 'bg-slate-800 text-white shadow-slate-900/20', amber: 'bg-amber-500 text-slate-900 shadow-amber-900/20', sky: 'bg-sky-500 text-white shadow-sky-900/20'
   };
 
-  const activeTheme = themeColors[agencyConfig?.themeColor] || themeColors.indigo;
-  const agencyName = agencyConfig?.name || 'EVENT MASTER';
+  // 🔴 DEFAULT A BAULIA SI NO HAY MARCA BLANCA
+  const activeTheme = agencyConfig?.themeColor ? themeColors[agencyConfig.themeColor] : themeColors.amber;
+  const agencyName = agencyConfig?.name || 'BAULIA';
 
   return (
     <>
       {isOpen && <div className="fixed inset-0 bg-black/50 z-20 xl:hidden" onClick={() => setIsOpen(false)} />}
-      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-slate-900 text-slate-300 transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
+      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-slate-950 text-slate-400 transition-transform duration-300 ease-in-out flex flex-col border-r border-slate-900 shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
         
-        <div className="flex items-center justify-between p-6 border-b border-slate-800 shrink-0 min-h-[88px] relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"></div>
-          <div className="relative z-10 w-full">
+        <div className="flex items-center justify-between p-6 border-b border-slate-900 shrink-0 min-h-[88px] relative overflow-hidden bg-slate-950">
+          <div className="relative z-10 w-full flex items-center gap-3">
             {agencyConfig?.logoUrl && userRole !== 'superadmin' ? (
               <img src={agencyConfig.logoUrl} alt="Agency Logo" className="h-10 object-contain drop-shadow-md mb-1" />
             ) : (
-              <h1 className="text-xl font-bold text-white tracking-wider truncate">{userRole === 'superadmin' ? 'SYSTEM CORE' : agencyName}</h1>
+              <>
+                 <BauliaLogo size={32} />
+                 <div>
+                   <h1 className="text-xl font-black text-white tracking-widest">{userRole === 'superadmin' ? 'BAULIA CORE' : agencyName}</h1>
+                   <p className="text-[8px] text-amber-500 uppercase tracking-widest mt-0.5">
+                     {userRole === 'superadmin' ? 'God Mode' : userRole === 'planner' ? 'Planner Workspace' : 'Panel Premium'}
+                   </p>
+                 </div>
+              </>
             )}
-            <div className="flex items-center justify-between mt-1">
-              <p className="text-[9px] text-slate-400 uppercase tracking-widest">
-                 {userRole === 'superadmin' ? 'God Mode' : userRole === 'planner' ? 'Planner Workspace' : 'Panel de Novios'}
-              </p>
-              {userRole === 'cliente' && (
-                <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded ${userPlan === 'diamante' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-slate-800 text-slate-400 border border-slate-600'}`}>
-                  Plan {userPlan}
-                </span>
-              )}
-            </div>
           </div>
-          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 hover:bg-slate-800 rounded-lg relative z-10">
-            <X size={20} />
-          </button>
+          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 hover:bg-slate-800 rounded-lg relative z-10"><X size={20} /></button>
         </div>
         
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-4 custom-scrollbar">
+        <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-6 custom-scrollbar">
           {userRole === 'superadmin' && (
              <div className="space-y-1">
-               <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold ml-4 mb-2">Administración Global</p>
-               <button onClick={() => { setActiveTab('licencias'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl transition-all ${activeTab === 'licencias' ? 'bg-amber-500 text-slate-900 font-black shadow-lg shadow-amber-500/20 scale-[1.02]' : 'hover:bg-slate-800 hover:text-white text-slate-400'}`}>
+               <p className="text-[10px] text-slate-600 uppercase tracking-widest font-black ml-4 mb-3">SISTEMA</p>
+               <button onClick={() => { setActiveTab('licencias'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'licencias' ? 'bg-amber-500 text-slate-900 font-black shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'hover:bg-slate-900 hover:text-white'}`}>
                  <Building size={18} /><span>Centro de Licencias</span>
                </button>
              </div>
@@ -208,14 +191,14 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
 
             return (
               <div key={gIdx} className="space-y-1">
-                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold ml-4 mb-2">{group.title}</p>
+                <p className="text-[10px] text-slate-600 uppercase tracking-widest font-black ml-4 mb-3">{group.title}</p>
                 {visibleItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
                   return (
-                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20 scale-[1.02]' : `${activeTheme} scale-[1.02]` : 'hover:bg-slate-800 hover:text-white text-slate-400'}`}>
+                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-emerald-500 text-slate-900 font-black shadow-lg shadow-emerald-900/20' : `${activeTheme} font-bold` : 'hover:bg-slate-900 hover:text-white'}`}>
                       <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-                      <span className="font-medium text-sm">{item.label}</span>
+                      <span className="text-sm tracking-wide">{item.label}</span>
                     </button>
                   );
                 })}
@@ -225,10 +208,10 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
         </nav>
 
         {userRole === 'planner' && (
-          <div className="p-4 border-t border-slate-800 shrink-0 bg-slate-900">
-            <button onClick={() => { setActiveTab('configuracion'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all border ${activeTab === 'configuracion' ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-900/20' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700 hover:text-white'}`}>
+          <div className="p-4 border-t border-slate-900 shrink-0 bg-slate-950">
+            <button onClick={() => { setActiveTab('configuracion'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all border ${activeTab === 'configuracion' ? 'bg-slate-800 text-amber-400 border-amber-500/50 shadow-lg' : 'bg-slate-900 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'}`}>
               <Settings2 size={18} strokeWidth={activeTab === 'configuracion' ? 2.5 : 2} />
-              <span className="font-bold text-sm">Marca Blanca</span>
+              <span className="font-bold text-sm tracking-wide">Marca Blanca</span>
             </button>
           </div>
         )}
@@ -8593,13 +8576,12 @@ const LandingPageView = () => {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-amber-500 selection:text-white">
       {/* NAVEGACIÓN */}
+      {/* NAVEGACIÓN */}
       <nav className="fixed w-full z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.4)]">
-              <Lock size={24} className="text-slate-900" />
-            </div>
-            <span className="text-2xl font-black text-white tracking-wider">BAULIA</span>
+          <div className="flex items-center gap-3">
+            <BauliaLogo size={32} />
+            <span className="text-2xl font-black text-white tracking-widest">BAULIA</span>
           </div>
           <div className="hidden md:flex gap-8 text-sm font-bold text-slate-300">
             <a href="#caracteristicas" className="hover:text-amber-400 transition-colors">Invitaciones</a>
@@ -9477,7 +9459,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PANTALLA DE ACCESO BLINDADA (FIREBASE AUTH) ---
+// --- COMPONENTE: PANTALLA DE ACCESO BAULIA ---
 // ==========================================
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -9488,68 +9470,53 @@ const LoginScreen = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setMensajeOk('');
-    
-    try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
-    } catch (err) {
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        setError('Correo o contraseña incorrectos.');
-      } else {
-        setError('Ocurrió un error. Intenta de nuevo.');
-      }
-      setIsLoading(false);
-    }
+    setIsLoading(true); setError(''); setMensajeOk('');
+    try { await signInWithEmailAndPassword(auth, email.trim(), password); } 
+    catch (err) { setError('Credenciales incorrectas o usuario no encontrado.'); setIsLoading(false); }
   };
 
-  // 🔴 NUEVA FUNCIÓN: RECUPERACIÓN DE CONTRASEÑA
   const handleResetPassword = async () => {
-    if (!email) {
-      setError('Por favor escribe tu correo electrónico arriba y presiona "Olvidé mi contraseña" de nuevo.');
-      return;
-    }
-    try {
-      await sendPasswordResetEmail(auth, email.trim());
-      setMensajeOk('Te hemos enviado un enlace al correo para cambiar tu contraseña.');
-      setError('');
-    } catch (err) {
-      setError('Error al enviar el correo. Verifica que esté bien escrito.');
-    }
+    if (!email) { setError('Escribe tu correo arriba y presiona "Recuperar" de nuevo.'); return; }
+    try { await sendPasswordResetEmail(auth, email.trim()); setMensajeOk('Enlace de recuperación enviado al correo.'); setError(''); } 
+    catch (err) { setError('Error al enviar. Verifica el correo.'); }
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-tr from-indigo-900/20 to-purple-900/20 pointer-events-none"></div>
-      <div className="bg-white p-8 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.3)] w-full max-w-sm relative z-10 animate-in zoom-in-95 duration-300 border border-white/10">
-        <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
-          <Lock size={32} />
+    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
+      {/* Luces de fondo estilo Champagne */}
+      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-amber-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-indigo-500/10 blur-[150px] rounded-full pointer-events-none"></div>
+      
+      <div className="bg-slate-900/80 backdrop-blur-xl p-10 rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.6)] w-full max-w-md relative z-10 border border-slate-800">
+        <div className="flex flex-col items-center mb-8">
+           <div className="mb-4 drop-shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+              <BauliaLogo size={64} />
+           </div>
+           <h2 className="text-3xl font-black text-white tracking-widest uppercase">Baulia</h2>
+           <p className="text-amber-500 text-xs font-bold tracking-[0.2em] mt-1">Bóveda Premium</p>
         </div>
-        <h2 className="text-2xl font-black text-center text-slate-800 mb-2 tracking-tight">Acceso Privado</h2>
-        <p className="text-center text-slate-500 text-sm mb-8">Ingresa tus credenciales para administrar el evento.</p>
-        <form onSubmit={handleSubmit} className="space-y-5">
+
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Correo Electrónico</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all font-bold text-slate-800 shadow-sm" placeholder="tu@correo.com" />
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Correo Electrónico</label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all font-bold text-white shadow-inner" placeholder="tu@correo.com" />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Contraseña</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all font-bold text-slate-800 shadow-sm" placeholder="••••••••" />
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Contraseña Segura</label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all font-bold text-white shadow-inner" placeholder="••••••••" />
           </div>
           
-          {error && <div className="bg-rose-50 text-rose-600 p-3 rounded-lg text-xs font-bold text-center border border-rose-100 animate-in shake">{error}</div>}
-          {mensajeOk && <div className="bg-emerald-50 text-emerald-600 p-3 rounded-lg text-xs font-bold text-center border border-emerald-100">{mensajeOk}</div>}
+          {error && <div className="bg-rose-500/10 text-rose-400 p-3 rounded-lg text-xs font-bold text-center border border-rose-500/20 animate-in shake">{error}</div>}
+          {mensajeOk && <div className="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg text-xs font-bold text-center border border-emerald-500/20">{mensajeOk}</div>}
           
-          <button type="submit" disabled={isLoading} className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-indigo-700 transition-all mt-4 disabled:bg-slate-400">
-            {isLoading ? 'Verificando...' : 'Ingresar al Panel'}
+          <button type="submit" disabled={isLoading} className="w-full py-4 bg-amber-500 text-slate-900 rounded-xl font-black text-lg shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:bg-amber-400 hover:scale-[1.02] transition-all mt-4 disabled:opacity-50 disabled:hover:scale-100">
+            {isLoading ? 'Autenticando...' : 'Acceder al Panel'}
           </button>
         </form>
         
-        {/* BOTÓN MAGICO DE RECUPERAR CONTRASEÑA */}
-        <div className="mt-6 text-center">
-          <button onClick={handleResetPassword} type="button" className="text-xs font-bold text-indigo-500 hover:text-indigo-700 transition-colors">
-            ¿Olvidaste tu contraseña?
+        <div className="mt-8 text-center border-t border-slate-800 pt-6">
+          <button onClick={handleResetPassword} type="button" className="text-xs font-bold text-slate-500 hover:text-amber-400 transition-colors">
+            ¿Olvidaste tu contraseña? Recuperar aquí
           </button>
         </div>
       </div>
