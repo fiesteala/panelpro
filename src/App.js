@@ -8570,16 +8570,18 @@ const GuestProyectorView = ({ eventId }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 6.0 - BENTO IRRESISTIBLE) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 7.0 - DÍA/NOCHE & MONOGRAMA) ---
 // ==========================================
-const LandingPageView = () => {
+const LandingPageView = ({ isDarkMode, toggleTheme }) => {
   const [legalModal, setLegalModal] = useState(null);
   
-  // 🔴 ESTADOS PARA MICRO-DEMOS INTERACTIVAS
+  // Estados para Demos Interactivas
   const [fakeRsvp, setFakeRsvp] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 59 });
+  
+  // Estado para el Monograma Adaptativo
+  const [accentColor, setAccentColor] = useState('amber');
 
-  // 🔴 MOTOR DEL RELOJ EN TIEMPO REAL PARA LA DEMO
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft(prev => {
@@ -8594,70 +8596,81 @@ const LandingPageView = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // 🔴 ICONOS VECTORIALES OFICIALES
   const IconFB = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>;
   const IconIG = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 1.727-6.98 6.077-.058 1.28-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 1.718 6.781 6.077 6.98 1.28.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-1.718 6.979-6.077.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-1.717-6.78-6.077-6.98-1.28-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>;
   const IconWA = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.88-.653-1.473-1.46-1.646-1.757-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>;
   const IconTK = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v7.2c0 1.63-.31 3.23-1.11 4.6-1.18 2.01-3.21 3.44-5.5 3.86-2.5.46-5.22-.09-7.25-1.67-1.95-1.52-3.13-3.87-3.2-6.38-.08-2.82 1.25-5.61 3.54-7.24 1.48-1.06 3.32-1.5 5.12-1.37v4.03c-1.04-.15-2.15.02-3.05.62-.92.6-1.53 1.57-1.64 2.66-.1 1.05.28 2.11 1.02 2.85.76.76 1.86 1.1 2.92 1.03 1.16-.08 2.21-.71 2.78-1.7.35-.61.54-1.32.55-2.03V.02z"/></svg>;
 
+  const accentThemes = {
+    amber: { bg: 'bg-amber-500', glow: 'bg-amber-500/20', text: 'text-amber-500', from: 'from-amber-100', to: 'to-amber-500/20' },
+    rose: { bg: 'bg-rose-500', glow: 'bg-rose-500/20', text: 'text-rose-500', from: 'from-rose-100', to: 'to-rose-500/20' },
+    emerald: { bg: 'bg-emerald-500', glow: 'bg-emerald-500/20', text: 'text-emerald-500', from: 'from-emerald-100', to: 'to-emerald-500/20' },
+    indigo: { bg: 'bg-indigo-500', glow: 'bg-indigo-500/20', text: 'text-indigo-500', from: 'from-indigo-100', to: 'to-indigo-500/20' }
+  };
+
   return (
-    <div className="min-h-screen bg-[#0a0f1c] font-sans text-slate-200 selection:bg-amber-500 selection:text-slate-900 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0f1c] font-sans text-slate-800 dark:text-slate-200 selection:bg-amber-500 selection:text-white transition-colors duration-500 overflow-x-hidden">
       
       {/* 🔴 LUCES DE AMBIENTE (GLOW EFECT) */}
-      <div className="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-600/10 blur-[150px] rounded-full pointer-events-none z-0"></div>
-      <div className="fixed bottom-[-20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0"></div>
+      <div className="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 dark:bg-amber-600/10 blur-[100px] dark:blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-500"></div>
+      <div className="fixed bottom-[-20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-500/5 dark:bg-indigo-600/10 blur-[100px] dark:blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-500"></div>
 
       {/* 🔴 NAVEGACIÓN FLOTANTE */}
       <nav className="fixed w-full z-40 top-0 pt-4 md:pt-6 px-4 md:px-8 pointer-events-none">
-        <div className="max-w-6xl mx-auto bg-slate-900/80 backdrop-blur-2xl border border-white/10 h-16 md:h-20 rounded-full flex items-center justify-between px-6 shadow-[0_10px_40px_rgba(0,0,0,0.5)] pointer-events-auto">
+        <div className="max-w-6xl mx-auto bg-white/70 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200 dark:border-white/10 h-16 md:h-20 rounded-full flex items-center justify-between px-6 shadow-lg dark:shadow-[0_10px_40px_rgba(0,0,0,0.5)] pointer-events-auto transition-colors duration-500">
           <div className="flex items-center gap-3">
             <BauliaLogo size={32} />
-            <span className="text-xl md:text-2xl font-black text-white tracking-widest uppercase">Baulia</span>
+            <span className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-widest uppercase">Baulia</span>
           </div>
-          <div className="hidden lg:flex gap-8 text-xs font-bold uppercase tracking-widest text-slate-400">
-            <a href="#experiencia" className="hover:text-amber-400 transition-colors">La Experiencia</a>
-            <a href="#boveda" className="hover:text-amber-400 transition-colors">El Panel</a>
-            <a href="#planes" className="hover:text-amber-400 transition-colors">Planes</a>
-            <a href="#faq" className="hover:text-amber-400 transition-colors">FAQ</a>
+          <div className="hidden lg:flex gap-8 text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+            <a href="#experiencia" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">La Experiencia</a>
+            <a href="#boveda" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">El Panel</a>
+            <a href="#planes" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Planes</a>
+            <a href="#faq" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">FAQ</a>
           </div>
-          <button onClick={() => window.location.href = 'https://panel.baulia.com'} className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-900 bg-gradient-to-r from-amber-400 to-yellow-600 px-5 py-2 md:px-8 md:py-3 rounded-full hover:scale-105 transition-transform shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-            Acceso Clientes
-          </button>
+          <div className="flex items-center gap-4">
+            <button onClick={toggleTheme} className="text-slate-500 hover:text-amber-500 dark:text-slate-400 dark:hover:text-amber-400 transition-colors" title={isDarkMode ? "Cambiar a Modo Día" : "Cambiar a Modo Noche"}>
+              {isDarkMode ? <Moon size={20} /> : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>}
+            </button>
+            <button onClick={() => window.location.href = 'https://panel.baulia.com'} className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-900 bg-gradient-to-r from-amber-400 to-yellow-600 px-5 py-2 md:px-8 md:py-3 rounded-full hover:scale-105 transition-transform shadow-md dark:shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+              Acceso Clientes
+            </button>
+          </div>
         </div>
       </nav>
 
-      {/* 🔴 HERO SECTION (CINEMÁTICO) */}
+      {/* 🔴 HERO SECTION */}
       <section className="relative min-h-[95vh] flex flex-col items-center justify-center pt-32 pb-20 px-4 md:px-6 z-10 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-amber-400 text-[10px] font-black uppercase tracking-widest mb-8 backdrop-blur-md">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-200/50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest mb-8 backdrop-blur-md">
           <div className="flex gap-0.5">
-             {[1,2,3,4,5].map(i => <Star key={i} size={12} className="fill-amber-400"/>)}
+             {[1,2,3,4,5].map(i => <Star key={i} size={12} className="fill-amber-500 dark:fill-amber-400"/>)}
           </div>
-          <span className="text-white opacity-80">La Plataforma #1 para Bodas y Eventos</span>
+          <span className="text-slate-700 dark:text-white opacity-80">La Plataforma #1 para Eventos</span>
         </div>
         
-        <h1 className="text-5xl md:text-7xl lg:text-[6rem] font-black text-white mb-6 tracking-tighter leading-[1.05]">
-          El nuevo <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-600 drop-shadow-sm">estándar</span><br className="hidden md:block"/> 
+        <h1 className="text-5xl md:text-7xl lg:text-[6rem] font-black text-slate-900 dark:text-white mb-6 tracking-tighter leading-[1.05] transition-colors duration-500">
+          El nuevo <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-600 drop-shadow-sm">estándar</span><br className="hidden md:block"/> 
           para celebrar.
         </h1>
         
-        <p className="text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto font-medium leading-relaxed">
+        <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto font-medium leading-relaxed transition-colors duration-500">
           Baulia es la bóveda digital que fusiona invitaciones interactivas de lujo con el software de gestión y control de accesos más poderoso del mercado.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
-          <a href="#planes" className="px-10 py-5 bg-white text-slate-900 rounded-[2rem] font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center shadow-[0_0_40px_rgba(255,255,255,0.2)]">
+          <a href="#planes" className="px-10 py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2rem] font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl dark:shadow-[0_0_40px_rgba(255,255,255,0.2)]">
             Ver Colección <ArrowRight size={18} className="ml-2"/>
           </a>
-          <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20quiero%20una%20demo%20de%20Baulia', '_blank')} className="px-10 py-5 bg-[#121a2f] border border-white/10 text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:bg-white/5 transition-colors flex items-center justify-center">
-            <MessageCircle size={18} className="mr-2 text-amber-400"/> Hablar con Ventas
+          <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20quiero%20una%20demo%20de%20Baulia', '_blank')} className="px-10 py-5 bg-white dark:bg-[#121a2f] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors flex items-center justify-center shadow-md dark:shadow-none">
+            <MessageCircle size={18} className="mr-2 text-amber-500 dark:text-amber-400"/> Hablar con Ventas
           </button>
         </div>
       </section>
 
-      {/* 🔴 CINTA DE MARCAS (TRUST BADGE) */}
-      <div className="border-y border-white/5 bg-white/5 py-6 overflow-hidden relative z-10">
-         <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-center md:justify-between items-center gap-8 opacity-40 grayscale">
-            <h4 className="text-xs font-black uppercase tracking-widest text-white">Eventos Gestionados Por:</h4>
+      {/* 🔴 CINTA DE MARCAS */}
+      <div className="border-y border-slate-200 dark:border-white/5 bg-slate-100/50 dark:bg-white/5 py-6 overflow-hidden relative z-10 transition-colors duration-500">
+         <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-center md:justify-between items-center gap-8 opacity-50 dark:opacity-40 grayscale">
+            <h4 className="text-xs font-black uppercase tracking-widest text-slate-800 dark:text-white">Eventos Gestionados Por:</h4>
             <span className="font-serif text-xl font-bold">Elite Planners</span>
             <span className="font-sans text-xl font-black tracking-tighter">STUDIO.GALA</span>
             <span className="font-mono text-lg font-bold">VANGUARDIA</span>
@@ -8665,51 +8678,60 @@ const LandingPageView = () => {
          </div>
       </div>
 
-      {/* 🔴 BENTO BOX: INVITACIONES INTERACTIVAS (EXTENDIDO) */}
+      {/* 🔴 BENTO BOX: INVITACIONES INTERACTIVAS */}
       <section id="experiencia" className="py-32 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
         <div className="mb-16">
-          <span className="text-amber-500 font-black tracking-widest uppercase text-xs mb-4 block">Fase 1: La Invitación</span>
-          <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">Más que una invitación.<br/>Una experiencia táctil.</h2>
+          <span className="text-amber-600 dark:text-amber-500 font-black tracking-widest uppercase text-xs mb-4 block">Fase 1: La Invitación</span>
+          <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight transition-colors duration-500">Más que una invitación.<br/>Una experiencia táctil.</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[280px]">
           
-          {/* TARJETA 1: GALERÍA INMERSIVA */}
-          <div className="md:col-span-2 md:row-span-2 bg-gradient-to-br from-slate-900 to-slate-950 rounded-[3rem] p-10 md:p-12 border border-white/10 flex flex-col justify-end relative overflow-hidden group hover:border-amber-500/50 transition-colors">
-            <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-[80px] group-hover:bg-amber-500/20 transition-colors"></div>
+          {/* TARJETA 1: MONOGRAMA Y COLORES ADAPTATIVOS */}
+          <div className={`md:col-span-2 md:row-span-2 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 rounded-[3rem] p-10 md:p-12 border border-slate-200 dark:border-white/10 flex flex-col justify-end relative overflow-hidden transition-all duration-700 shadow-xl dark:shadow-none`}>
             
-            <div className="absolute top-10 right-10 w-48 h-64 pointer-events-none perspective-[1000px]">
-               <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 1" className="absolute inset-0 w-full h-full object-cover rounded-2xl border-[6px] border-white/10 transform rotate-[15deg] translate-x-12 translate-y-8 group-hover:rotate-[25deg] group-hover:translate-x-20 shadow-2xl transition-all duration-700 ease-out" />
-               <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 2" className="absolute inset-0 w-full h-full object-cover rounded-2xl border-[6px] border-white/10 transform -rotate-[5deg] group-hover:-rotate-[15deg] group-hover:-translate-x-10 shadow-2xl transition-all duration-700 ease-out z-10" />
+            <div className={`absolute top-0 right-0 w-80 h-80 rounded-full blur-[80px] transition-colors duration-700 ${accentThemes[accentColor].glow}`}></div>
+            
+            {/* MICRO-DEMO: MONOGRAMA */}
+            <div className={`absolute top-12 right-12 w-32 h-32 rounded-full border-2 border-slate-200 dark:border-white/20 flex items-center justify-center backdrop-blur-md bg-white/50 dark:bg-black/30 shadow-2xl transition-all duration-700`}>
+               <span className="font-serif text-4xl font-bold text-slate-800 dark:text-white flex items-center">
+                 A <span className={`mx-1 font-sans font-light text-3xl transition-colors duration-700 ${accentThemes[accentColor].text}`}>&</span> R
+               </span>
             </div>
 
-            <div className="absolute top-10 left-10 bg-white/10 backdrop-blur p-4 rounded-3xl border border-white/10"><ImageIcon size={32} className="text-amber-400" /></div>
+            {/* MICRO-DEMO: PALETA INTERACTIVA */}
+            <div className="absolute top-12 left-10 flex gap-2 p-2 bg-white/80 dark:bg-black/40 backdrop-blur-md rounded-full border border-slate-200 dark:border-white/10 z-20 shadow-md">
+               <button onMouseEnter={()=>setAccentColor('amber')} className={`w-6 h-6 rounded-full bg-amber-500 transition-transform ${accentColor === 'amber' ? 'scale-125 border-2 border-white' : 'hover:scale-110'}`}></button>
+               <button onMouseEnter={()=>setAccentColor('rose')} className={`w-6 h-6 rounded-full bg-rose-500 transition-transform ${accentColor === 'rose' ? 'scale-125 border-2 border-white' : 'hover:scale-110'}`}></button>
+               <button onMouseEnter={()=>setAccentColor('emerald')} className={`w-6 h-6 rounded-full bg-emerald-500 transition-transform ${accentColor === 'emerald' ? 'scale-125 border-2 border-white' : 'hover:scale-110'}`}></button>
+               <button onMouseEnter={()=>setAccentColor('indigo')} className={`w-6 h-6 rounded-full bg-indigo-500 transition-transform ${accentColor === 'indigo' ? 'scale-125 border-2 border-white' : 'hover:scale-110'}`}></button>
+            </div>
             
             <div className="relative z-10 w-3/4">
-               <h3 className="text-4xl font-black text-white mb-4 leading-tight">Diseño <br/> Inmersivo</h3>
-               <p className="text-slate-400 text-lg leading-relaxed">Galerías de alta resolución, monogramas heráldicos y paletas de color que reflejan el alma de tu evento. Adaptado perfectamente al celular.</p>
+               <h3 className="text-4xl font-black text-slate-900 dark:text-white mb-4 leading-tight transition-colors duration-500">Diseño <br/> Inmersivo</h3>
+               <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed transition-colors duration-500">Galerías en alta resolución, monogramas heráldicos y paletas de color <b>adaptativas</b> que reflejan el alma de tu evento. Pasa el cursor por los colores arriba para probar.</p>
             </div>
           </div>
 
-          {/* TARJETA 2: CUENTA REGRESIVA */}
-          <div className="md:col-span-2 bg-[#121a2f] rounded-[3rem] p-8 md:p-10 border border-white/10 flex items-center justify-between relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          {/* TARJETA 2: CUENTA REGRESIVA VIVA */}
+          <div className="md:col-span-2 bg-slate-100 dark:bg-[#121a2f] rounded-[3rem] p-8 md:p-10 border border-slate-200 dark:border-white/10 flex items-center justify-between relative overflow-hidden group shadow-md dark:shadow-none transition-colors duration-500">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 dark:from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div>
-              <h3 className="text-2xl font-black text-white mb-2">Cuenta Regresiva</h3>
-              <p className="text-slate-400 text-sm max-w-[200px]">El latido de tu evento en tiempo real.</p>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 transition-colors">Cuenta Regresiva</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm max-w-[200px] transition-colors">El latido de tu evento en tiempo real.</p>
             </div>
             <div className="flex gap-2 text-center relative z-10">
-              <div className="bg-slate-900/80 backdrop-blur border border-white/10 rounded-xl p-3 w-14 shadow-inner">
-                <span className="block text-xl font-black text-indigo-400">{String(timeLeft.d).padStart(2, '0')}</span>
+              <div className="bg-white dark:bg-slate-900/80 backdrop-blur border border-slate-200 dark:border-white/10 rounded-xl p-3 w-14 shadow-sm dark:shadow-inner transition-colors">
+                <span className="block text-xl font-black text-indigo-600 dark:text-indigo-400">{String(timeLeft.d).padStart(2, '0')}</span>
                 <span className="text-[8px] uppercase tracking-widest text-slate-500 font-bold">Días</span>
               </div>
-              <div className="text-white/30 font-black text-xl mt-2">:</div>
-              <div className="bg-slate-900/80 backdrop-blur border border-white/10 rounded-xl p-3 w-14 shadow-inner">
-                <span className="block text-xl font-black text-indigo-400">{String(timeLeft.h).padStart(2, '0')}</span>
+              <div className="text-slate-300 dark:text-white/30 font-black text-xl mt-2">:</div>
+              <div className="bg-white dark:bg-slate-900/80 backdrop-blur border border-slate-200 dark:border-white/10 rounded-xl p-3 w-14 shadow-sm dark:shadow-inner transition-colors">
+                <span className="block text-xl font-black text-indigo-600 dark:text-indigo-400">{String(timeLeft.h).padStart(2, '0')}</span>
                 <span className="text-[8px] uppercase tracking-widest text-slate-500 font-bold">Hrs</span>
               </div>
-              <div className="text-white/30 font-black text-xl mt-2">:</div>
-              <div className="bg-indigo-600 rounded-xl p-3 w-14 shadow-[0_0_15px_rgba(79,70,229,0.5)] transform scale-110">
+              <div className="text-slate-300 dark:text-white/30 font-black text-xl mt-2">:</div>
+              <div className="bg-indigo-600 rounded-xl p-3 w-14 shadow-[0_5px_15px_rgba(79,70,229,0.4)] transform scale-110">
                 <span className="block text-xl font-black text-white">{String(timeLeft.s).padStart(2, '0')}</span>
                 <span className="text-[8px] uppercase tracking-widest text-indigo-200 font-bold">Seg</span>
               </div>
@@ -8720,14 +8742,14 @@ const LandingPageView = () => {
           <div 
             onMouseEnter={() => setFakeRsvp(true)} 
             onMouseLeave={() => setFakeRsvp(false)}
-            className="bg-gradient-to-tr from-amber-600 to-yellow-400 rounded-[3rem] p-8 text-slate-900 flex flex-col justify-between relative overflow-hidden transform hover:scale-[1.02] transition-transform shadow-[0_20px_40px_rgba(245,158,11,0.2)] cursor-pointer"
+            className="bg-gradient-to-tr from-amber-500 to-yellow-500 dark:from-amber-600 dark:to-yellow-400 rounded-[3rem] p-8 text-slate-900 flex flex-col justify-between relative overflow-hidden transform hover:scale-[1.02] transition-transform shadow-[0_15px_30px_rgba(245,158,11,0.3)] cursor-pointer"
           >
              <div className="flex justify-between items-start">
                <div>
-                 <h3 className="text-3xl font-black leading-tight mb-2">RSVP<br/>Inteligente</h3>
+                 <h3 className="text-3xl font-black leading-tight mb-2 text-slate-900">RSVP<br/>Inteligente</h3>
                  <p className="text-amber-900 font-bold text-sm">Pasa el cursor / Toca</p>
                </div>
-               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center shadow-inner relative overflow-hidden">
+               <div className="w-16 h-16 bg-white/30 dark:bg-white/20 rounded-full flex items-center justify-center shadow-inner relative overflow-hidden">
                  <div className={`absolute inset-0 bg-white transition-transform duration-500 ${fakeRsvp ? 'translate-y-0' : 'translate-y-full'}`}></div>
                  {fakeRsvp ? <CheckCircle size={32} className="text-emerald-500 relative z-10 animate-in zoom-in duration-300"/> : <UserPlus size={32} className="text-slate-900 relative z-10"/>}
                </div>
@@ -8735,8 +8757,9 @@ const LandingPageView = () => {
           </div>
 
           {/* TARJETA 4: MAPA RADAR */}
-          <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/10 flex flex-col justify-between relative overflow-hidden group">
-             <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMWgyMHYyMEgxVjF6IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')] transition-opacity group-hover:opacity-40 duration-700"></div>
+          <div className="bg-slate-50 dark:bg-slate-900 rounded-[3rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-md dark:shadow-none transition-colors duration-500">
+             <div className="absolute inset-0 opacity-10 dark:opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMWgyMHYyMEgxVjF6IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')] transition-opacity group-hover:opacity-30 dark:group-hover:opacity-40 duration-700"></div>
+             
              <div className="absolute right-8 top-8 w-16 h-16 flex items-center justify-center">
                 <span className="absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-20 animate-ping"></span>
                 <span className="absolute inline-flex h-10 w-10 rounded-full bg-rose-500 opacity-40 animate-pulse"></span>
@@ -8744,62 +8767,64 @@ const LandingPageView = () => {
                   <MapPin size={14} className="text-white"/>
                 </div>
              </div>
+
              <div className="relative z-10 mt-auto">
-               <h3 className="text-2xl font-black text-white mb-2">Logística GPS</h3>
-               <p className="text-slate-400 text-sm max-w-[200px]">Rutas precisas a la ceremonia y recepción.</p>
+               <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 transition-colors">Logística GPS</h3>
+               <p className="text-slate-500 dark:text-slate-400 text-sm max-w-[200px] transition-colors">Rutas precisas a la ceremonia y recepción.</p>
              </div>
           </div>
 
-          {/* 🔴 NUEVA TARJETA 5: PASES QR (VIP) */}
-          <div className="md:col-span-2 bg-gradient-to-r from-indigo-900 to-[#0a0f1c] rounded-[3rem] p-8 md:p-10 border border-indigo-500/20 flex items-center justify-between relative overflow-hidden group">
-             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+          {/* TARJETA 5: PASES QR (VIP) */}
+          <div className="md:col-span-2 bg-gradient-to-r from-indigo-100 dark:from-indigo-900 to-white dark:to-[#0a0f1c] rounded-[3rem] p-8 md:p-10 border border-indigo-200 dark:border-indigo-500/20 flex items-center justify-between relative overflow-hidden group shadow-md dark:shadow-none transition-colors duration-500">
+             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] dark:opacity-10"></div>
              <div className="relative z-10 max-w-[200px] md:max-w-[280px]">
-               <h3 className="text-2xl font-black text-white mb-2 flex items-center"><QrCode size={24} className="mr-2 text-indigo-400"/> Accesos QR</h3>
-               <p className="text-indigo-200 text-sm">Cada invitado recibe un boleto digital único e intransferible. Adiós a los colados.</p>
+               <h3 className="text-2xl font-black text-indigo-900 dark:text-white mb-2 flex items-center transition-colors"><QrCode size={24} className="mr-2 text-indigo-600 dark:text-indigo-400"/> Accesos QR</h3>
+               <p className="text-indigo-700 dark:text-indigo-200 text-sm transition-colors">Cada invitado recibe un boleto digital único e intransferible. Adiós a los colados.</p>
              </div>
-             <div className="relative z-10 w-24 h-24 bg-white rounded-3xl p-3 shadow-[0_0_40px_rgba(99,102,241,0.5)] group-hover:scale-110 transition-transform flex items-center justify-center">
+             <div className="relative z-10 w-24 h-24 bg-white rounded-3xl p-3 shadow-[0_10px_25px_rgba(99,102,241,0.2)] dark:shadow-[0_0_40px_rgba(99,102,241,0.5)] group-hover:scale-110 transition-transform flex items-center justify-center border border-slate-100 dark:border-none">
                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VIP-PASS-123`} alt="QR Code VIP" className="w-full h-full mix-blend-multiply opacity-90" />
              </div>
           </div>
 
-          {/* 🔴 NUEVA TARJETA 6: MESA DE REGALOS */}
-          <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/10 flex flex-col justify-between group hover:border-emerald-400/50 transition-colors relative overflow-hidden">
-             <div className="absolute -right-4 -top-4 bg-emerald-500/20 w-32 h-32 rounded-full blur-[40px] group-hover:bg-emerald-500/40 transition-colors"></div>
-             <div className="w-14 h-14 bg-emerald-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:-translate-y-2 transition-transform border border-emerald-500/30">
-               <Wallet size={28} className="text-emerald-400" />
+          {/* TARJETA 6: MESA DE REGALOS */}
+          <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:border-emerald-300 dark:hover:border-emerald-400/50 transition-colors relative overflow-hidden shadow-md dark:shadow-none">
+             <div className="absolute -right-4 -top-4 bg-emerald-500/10 dark:bg-emerald-500/20 w-32 h-32 rounded-full blur-[40px] group-hover:bg-emerald-500/20 dark:group-hover:bg-emerald-500/40 transition-colors"></div>
+             <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:-translate-y-2 transition-transform border border-emerald-100 dark:border-emerald-500/30">
+               <Wallet size={28} className="text-emerald-500 dark:text-emerald-400" />
              </div>
              <div className="relative z-10">
-               <h3 className="text-xl font-black text-white mb-1">Mesa de Regalos</h3>
-               <p className="text-slate-400 text-sm">Recibe regalos o efectivo directo en tus cuentas.</p>
+               <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1 transition-colors">Mesa de Regalos</h3>
+               <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">Recibe regalos o efectivo directo en tus cuentas.</p>
              </div>
           </div>
 
-          {/* 🔴 NUEVA TARJETA 7: ITINERARIO VISUAL */}
-          <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/10 flex flex-col justify-between group hover:border-sky-400/50 transition-colors relative overflow-hidden">
-             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-sky-500/10 to-transparent"></div>
+          {/* TARJETA 7: ITINERARIO VISUAL */}
+          <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:border-sky-300 dark:hover:border-sky-400/50 transition-colors relative overflow-hidden shadow-md dark:shadow-none">
+             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-sky-500/5 dark:from-sky-500/10 to-transparent"></div>
              <div className="space-y-3 mb-6 relative z-10">
-               <div className="flex items-center gap-3"><div className="w-3 h-3 bg-sky-400 rounded-full shadow-[0_0_10px_rgba(56,189,248,0.8)]"></div><div className="h-2 w-20 bg-white/20 rounded-full"></div></div>
-               <div className="flex items-center gap-3"><div className="w-3 h-3 border-2 border-slate-600 rounded-full"></div><div className="h-2 w-16 bg-white/10 rounded-full"></div></div>
-               <div className="flex items-center gap-3"><div className="w-3 h-3 border-2 border-slate-600 rounded-full"></div><div className="h-2 w-24 bg-white/10 rounded-full"></div></div>
+               <div className="flex items-center gap-3"><div className="w-3 h-3 bg-sky-500 dark:bg-sky-400 rounded-full shadow-[0_0_10px_rgba(56,189,248,0.5)] dark:shadow-[0_0_10px_rgba(56,189,248,0.8)]"></div><div className="h-2 w-20 bg-slate-200 dark:bg-white/20 rounded-full"></div></div>
+               <div className="flex items-center gap-3"><div className="w-3 h-3 border-2 border-slate-300 dark:border-slate-600 rounded-full"></div><div className="h-2 w-16 bg-slate-100 dark:bg-white/10 rounded-full"></div></div>
+               <div className="flex items-center gap-3"><div className="w-3 h-3 border-2 border-slate-300 dark:border-slate-600 rounded-full"></div><div className="h-2 w-24 bg-slate-100 dark:bg-white/10 rounded-full"></div></div>
              </div>
              <div className="relative z-10">
-               <h3 className="text-xl font-black text-white mb-1">Itinerario</h3>
-               <p className="text-slate-400 text-sm">El minuto a minuto para que nadie se pierda nada.</p>
+               <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1 transition-colors">Itinerario</h3>
+               <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">El minuto a minuto para que nadie se pierda nada.</p>
              </div>
           </div>
 
         </div>
       </section>
 
+      {/* ... [EL RESTO DE LA PÁGINA: LA BÓVEDA, PLANNERS, PRECIOS, FAQ Y FOOTER SE MANTIENE EXACTAMENTE IGUAL A LA VERSIÓN ANTERIOR, SOLO AGREGO TRANSICIONES DE MODO OSCURO] ... */}
+      
       {/* 🔴 SECCIÓN: EL PANEL (BÓVEDA) */}
-      <section id="boveda" className="py-32 relative z-10 border-y border-white/5 bg-slate-950/50">
+      <section id="boveda" className="py-32 relative z-10 border-y border-slate-200 dark:border-white/5 bg-slate-100/50 dark:bg-slate-950/50 transition-colors duration-500">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex flex-col lg:flex-row gap-16 items-center">
-            
             <div className="lg:w-1/2">
-              <span className="text-amber-500 font-black tracking-widest uppercase text-xs mb-4 block flex items-center"><Lock size={16} className="mr-2"/> Fase 2: La Ejecución</span>
-              <h2 className="text-4xl md:text-5xl font-black text-white mb-8 tracking-tight leading-tight">Tu evento, bajo tu dominio absoluto.</h2>
-              <p className="text-slate-400 text-lg mb-10 leading-relaxed">Olvídate de los excels desordenados y las libretas perdidas. Baulia te entrega el Centro de Comando para administrar cada detalle desde tu iPad o computadora.</p>
+              <span className="text-amber-600 dark:text-amber-500 font-black tracking-widest uppercase text-xs mb-4 block flex items-center"><Lock size={16} className="mr-2"/> Fase 2: La Ejecución</span>
+              <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-8 tracking-tight leading-tight transition-colors">Tu evento, bajo tu dominio absoluto.</h2>
+              <p className="text-slate-600 dark:text-slate-400 text-lg mb-10 leading-relaxed transition-colors">Olvídate de los excels desordenados y las libretas perdidas. Baulia te entrega el Centro de Comando para administrar cada detalle desde tu iPad o computadora.</p>
               
               <div className="space-y-8">
                 {[
@@ -8809,12 +8834,12 @@ const LandingPageView = () => {
                   { i: <Camera/>, t: 'Muro Social en Vivo', d: 'Las fotos que suben tus invitados se proyectan al instante en las pantallas.' }
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-start">
-                    <div className="w-14 h-14 rounded-3xl bg-slate-900 border border-white/10 flex items-center justify-center text-amber-400 shrink-0 mr-6 shadow-inner">
+                    <div className="w-14 h-14 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 flex items-center justify-center text-amber-500 dark:text-amber-400 shrink-0 mr-6 shadow-sm dark:shadow-inner transition-colors">
                       {item.i}
                     </div>
                     <div className="pt-1">
-                      <h4 className="font-bold text-xl text-slate-100 mb-1">{item.t}</h4>
-                      <p className="text-slate-500 text-sm leading-relaxed">{item.d}</p>
+                      <h4 className="font-bold text-xl text-slate-800 dark:text-slate-100 mb-1 transition-colors">{item.t}</h4>
+                      <p className="text-slate-500 dark:text-slate-500 text-sm leading-relaxed transition-colors">{item.d}</p>
                     </div>
                   </div>
                 ))}
@@ -8822,33 +8847,32 @@ const LandingPageView = () => {
             </div>
 
             <div className="lg:w-1/2 w-full relative perspective-[1000px]">
-              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-amber-500/20 blur-[120px] rounded-full pointer-events-none"></div>
-              
-              <div className="bg-[#0a0f1c] rounded-[3rem] border border-white/10 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.8)] relative z-10 transform md:rotate-y-[-10deg] md:rotate-x-[5deg] hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-700">
-                <div className="bg-slate-900 rounded-[2.5rem] border border-white/5 h-[600px] w-full overflow-hidden flex flex-col relative">
-                   <div className="h-16 border-b border-white/5 flex items-center px-6 gap-2 bg-slate-950/50 shrink-0">
-                     <div className="w-3 h-3 rounded-full bg-rose-500"></div>
-                     <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                     <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                     <div className="ml-auto w-1/3 h-6 bg-white/5 rounded-full border border-white/10"></div>
+              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 dark:from-indigo-500/20 to-amber-500/10 dark:to-amber-500/20 blur-[120px] rounded-full pointer-events-none transition-colors"></div>
+              <div className="bg-slate-200 dark:bg-[#0a0f1c] rounded-[3rem] border border-slate-300 dark:border-white/10 p-4 shadow-2xl dark:shadow-[0_30px_80px_rgba(0,0,0,0.8)] relative z-10 transform md:rotate-y-[-10deg] md:rotate-x-[5deg] hover:rotate-y-0 hover:rotate-x-0 transition-all duration-700">
+                <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-white/5 h-[600px] w-full overflow-hidden flex flex-col relative transition-colors">
+                   <div className="h-16 border-b border-slate-100 dark:border-white/5 flex items-center px-6 gap-2 bg-slate-50 dark:bg-slate-950/50 shrink-0 transition-colors">
+                     <div className="w-3 h-3 rounded-full bg-rose-400 dark:bg-rose-500"></div>
+                     <div className="w-3 h-3 rounded-full bg-amber-400 dark:bg-amber-500"></div>
+                     <div className="w-3 h-3 rounded-full bg-emerald-400 dark:bg-emerald-500"></div>
+                     <div className="ml-auto w-1/3 h-6 bg-slate-200 dark:bg-white/5 rounded-full border border-slate-300 dark:border-white/10 transition-colors"></div>
                    </div>
                    <div className="flex-1 p-6 flex gap-6">
-                     <div className="w-1/4 h-full bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-3 p-4">
-                        <div className="w-full h-8 bg-white/10 rounded-lg mb-4"></div>
-                        <div className="w-3/4 h-4 bg-white/5 rounded-full"></div>
-                        <div className="w-full h-4 bg-white/5 rounded-full"></div>
-                        <div className="w-5/6 h-4 bg-white/5 rounded-full"></div>
+                     <div className="w-1/4 h-full bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 flex flex-col gap-3 p-4 transition-colors">
+                        <div className="w-full h-8 bg-slate-200 dark:bg-white/10 rounded-lg mb-4 transition-colors"></div>
+                        <div className="w-3/4 h-4 bg-slate-200 dark:bg-white/5 rounded-full transition-colors"></div>
+                        <div className="w-full h-4 bg-slate-200 dark:bg-white/5 rounded-full transition-colors"></div>
+                        <div className="w-5/6 h-4 bg-slate-200 dark:bg-white/5 rounded-full transition-colors"></div>
                      </div>
                      <div className="flex-1 flex flex-col gap-6">
                        <div className="flex gap-4 h-24 shrink-0">
-                         <div className="flex-1 bg-amber-500/10 rounded-2xl border border-amber-500/20 flex items-center justify-center text-amber-500"><Users size={24}/></div>
-                         <div className="flex-1 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 flex items-center justify-center text-indigo-500"><Wallet size={24}/></div>
-                         <div className="flex-1 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 flex items-center justify-center text-emerald-500"><CheckCircle size={24}/></div>
+                         <div className="flex-1 bg-amber-50 dark:bg-amber-500/10 rounded-2xl border border-amber-200 dark:border-amber-500/20 flex items-center justify-center text-amber-500 transition-colors"><Users size={24}/></div>
+                         <div className="flex-1 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 flex items-center justify-center text-indigo-500 transition-colors"><Wallet size={24}/></div>
+                         <div className="flex-1 bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 flex items-center justify-center text-emerald-500 transition-colors"><CheckCircle size={24}/></div>
                        </div>
-                       <div className="flex-1 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-center relative overflow-hidden">
-                          <BauliaLogo size={100} className="opacity-10 absolute" />
-                          <div className="w-3/4 h-3/4 border-2 border-dashed border-white/10 rounded-full flex items-center justify-center animate-spin-slow">
-                             <div className="w-1/2 h-1/2 bg-indigo-500/20 rounded-lg transform rotate-45 border border-indigo-500/30"></div>
+                       <div className="flex-1 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 flex items-center justify-center relative overflow-hidden transition-colors">
+                          <BauliaLogo size={100} className="opacity-10 dark:opacity-10 absolute text-slate-900 dark:text-white" />
+                          <div className="w-3/4 h-3/4 border-2 border-dashed border-slate-300 dark:border-white/10 rounded-full flex items-center justify-center animate-spin-slow transition-colors">
+                             <div className="w-1/2 h-1/2 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg transform rotate-45 border border-indigo-200 dark:border-indigo-500/30 transition-colors"></div>
                           </div>
                        </div>
                      </div>
@@ -8856,7 +8880,6 @@ const LandingPageView = () => {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -8864,40 +8887,40 @@ const LandingPageView = () => {
       {/* 🔴 SECCIÓN B2B: PLANNERS */}
       <section id="planners" className="py-24 relative z-10 overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="bg-slate-900 rounded-[4rem] p-10 md:p-20 border border-white/10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
-             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+          <div className="bg-white dark:bg-slate-900 rounded-[4rem] p-10 md:p-20 border border-slate-200 dark:border-white/10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between shadow-2xl dark:shadow-[0_20px_60px_rgba(0,0,0,0.5)] transition-colors duration-500">
+             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-100 dark:bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none transition-colors duration-500"></div>
              
              <div className="md:w-1/2 relative z-10 mb-12 md:mb-0">
-               <span className="text-indigo-400 font-black tracking-widest uppercase text-xs mb-4 block">Alianza B2B</span>
-               <h2 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">¿Eres Wedding Planner <br/> o Agencia?</h2>
-               <p className="text-slate-400 text-lg mb-8 leading-relaxed">
-                 Ofrece el software de Baulia a tus clientes bajo <b className="text-white">tu propia marca</b> (White-Label). Tus colores, tu logotipo y gestión multievento para elevar el valor percibido de tus servicios.
+               <span className="text-indigo-600 dark:text-indigo-400 font-black tracking-widest uppercase text-xs mb-4 block transition-colors">Alianza B2B</span>
+               <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 leading-tight transition-colors">¿Eres Wedding Planner <br/> o Agencia?</h2>
+               <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 leading-relaxed transition-colors">
+                 Ofrece el software de Baulia a tus clientes bajo <b className="text-slate-900 dark:text-white">tu propia marca</b> (White-Label). Tus colores, tu logotipo y gestión multievento para elevar el valor percibido de tus servicios.
                </p>
-               <ul className="space-y-4 text-slate-300 mb-10 font-medium">
-                <li className="flex items-center"><CheckCircle size={20} className="text-indigo-400 mr-3"/> Tu logo corporativo en el panel de los novios</li>
-                <li className="flex items-center"><CheckCircle size={20} className="text-indigo-400 mr-3"/> Visualización en tiempo real de todos tus eventos</li>
-                <li className="flex items-center"><CheckCircle size={20} className="text-indigo-400 mr-3"/> Exportación de guiones PDF para tu Staff</li>
+               <ul className="space-y-4 text-slate-700 dark:text-slate-300 mb-10 font-medium transition-colors">
+                <li className="flex items-center"><CheckCircle size={20} className="text-indigo-600 dark:text-indigo-400 mr-3"/> Tu logo corporativo en el panel de los novios</li>
+                <li className="flex items-center"><CheckCircle size={20} className="text-indigo-600 dark:text-indigo-400 mr-3"/> Visualización en tiempo real de todos tus eventos</li>
+                <li className="flex items-center"><CheckCircle size={20} className="text-indigo-600 dark:text-indigo-400 mr-3"/> Exportación de guiones PDF para tu Staff</li>
                </ul>
-               <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20soy%20Planner%20y%20quiero%20usar%20Baulia', '_blank')} className="px-8 py-5 bg-white text-slate-900 font-black rounded-full hover:scale-105 transition-transform text-sm uppercase tracking-widest shadow-[0_10px_30px_rgba(255,255,255,0.2)]">
+               <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20soy%20Planner%20y%20quiero%20usar%20Baulia', '_blank')} className="px-8 py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-full hover:scale-105 transition-all text-sm uppercase tracking-widest shadow-xl dark:shadow-[0_10px_30px_rgba(255,255,255,0.2)]">
                  Solicitar Licencia Planner
                </button>
              </div>
 
              <div className="md:w-5/12 relative z-10 flex justify-center w-full">
-                <div className="w-full max-w-sm bg-[#0a0f1c] rounded-[2.5rem] border border-white/10 p-8 shadow-2xl transform md:rotate-3 hover:rotate-0 transition-transform duration-500">
-                   <div className="flex items-center gap-5 mb-10 border-b border-white/5 pb-8">
-                      <div className="w-16 h-16 bg-slate-800 rounded-2xl border border-white/10 flex items-center justify-center text-white font-black text-2xl shadow-inner">
+                <div className="w-full max-w-sm bg-slate-50 dark:bg-[#0a0f1c] rounded-[2.5rem] border border-slate-200 dark:border-white/10 p-8 shadow-xl dark:shadow-2xl transform md:rotate-3 hover:rotate-0 transition-all duration-500">
+                   <div className="flex items-center gap-5 mb-10 border-b border-slate-200 dark:border-white/5 pb-8 transition-colors">
+                      <div className="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-900 dark:text-white font-black text-2xl shadow-sm dark:shadow-inner transition-colors">
                         E
                       </div>
                       <div>
-                        <p className="text-white font-black text-xl mb-1">Elite Bodas</p>
-                        <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest">Panel Maestro Pro</p>
+                        <p className="text-slate-900 dark:text-white font-black text-xl mb-1 transition-colors">Elite Bodas</p>
+                        <p className="text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest transition-colors">Panel Maestro Pro</p>
                       </div>
                    </div>
                    <div className="space-y-5">
-                      <div className="h-14 bg-white/5 rounded-2xl border border-white/5 w-full flex items-center px-5"><div className="w-4 h-4 rounded-full bg-emerald-500 mr-4"></div><div className="h-3 w-32 bg-white/10 rounded-full"></div></div>
-                      <div className="h-14 bg-white/5 rounded-2xl border border-white/5 w-4/5 flex items-center px-5"><div className="w-4 h-4 rounded-full bg-amber-500 mr-4"></div><div className="h-3 w-24 bg-white/10 rounded-full"></div></div>
-                      <div className="h-14 bg-white/5 rounded-2xl border border-white/5 w-11/12 flex items-center px-5"><div className="w-4 h-4 rounded-full bg-rose-500 mr-4"></div><div className="h-3 w-40 bg-white/10 rounded-full"></div></div>
+                      <div className="h-14 bg-white dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/5 w-full flex items-center px-5 transition-colors"><div className="w-4 h-4 rounded-full bg-emerald-500 mr-4"></div><div className="h-3 w-32 bg-slate-200 dark:bg-white/10 rounded-full transition-colors"></div></div>
+                      <div className="h-14 bg-white dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/5 w-4/5 flex items-center px-5 transition-colors"><div className="w-4 h-4 rounded-full bg-amber-500 mr-4"></div><div className="h-3 w-24 bg-slate-200 dark:bg-white/10 rounded-full transition-colors"></div></div>
+                      <div className="h-14 bg-white dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/5 w-11/12 flex items-center px-5 transition-colors"><div className="w-4 h-4 rounded-full bg-rose-500 mr-4"></div><div className="h-3 w-40 bg-slate-200 dark:bg-white/10 rounded-full transition-colors"></div></div>
                    </div>
                 </div>
              </div>
@@ -8908,62 +8931,62 @@ const LandingPageView = () => {
       {/* 🔴 SECCIÓN: COLECCIÓN DE PLANES */}
       <section id="planes" className="py-24 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">Colección Baulia</h2>
-          <p className="text-slate-400 text-lg max-w-xl mx-auto">Inversiones a la medida de tu celebración. Único pago por evento, el panel es tuyo hasta el día de la fiesta.</p>
+          <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tight transition-colors duration-500">Colección Baulia</h2>
+          <p className="text-slate-600 dark:text-slate-400 text-lg max-w-xl mx-auto transition-colors duration-500">Inversiones a la medida de tu celebración. Único pago por evento, el panel es tuyo hasta el día de la fiesta.</p>
         </div>
 
         <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6 items-end">
-          <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/5 hover:border-white/20 transition-colors h-max">
-            <h3 className="text-white font-black text-2xl mb-2">Básica</h3>
-            <p className="text-slate-500 text-xs mb-8 h-10">La esencia digital para eventos íntimos o casuales.</p>
-            <div className="space-y-4 text-sm text-slate-400 font-medium mb-10">
-              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Invitación Interactiva</p>
-              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Confirmación Simple</p>
-              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-600"/> Cuenta Regresiva</p>
-              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-600"/> Mapas GPS</p>
+          <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-8 border border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20 transition-colors h-max shadow-lg dark:shadow-none">
+            <h3 className="text-slate-900 dark:text-white font-black text-2xl mb-2 transition-colors">Básica</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-xs mb-8 h-10 transition-colors">La esencia digital para eventos íntimos o casuales.</p>
+            <div className="space-y-4 text-sm text-slate-600 dark:text-slate-400 font-medium mb-10 transition-colors">
+              <p className="flex items-center text-slate-800 dark:text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Invitación Interactiva</p>
+              <p className="flex items-center text-slate-800 dark:text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Confirmación Simple</p>
+              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-400 dark:text-slate-600"/> Cuenta Regresiva</p>
+              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-400 dark:text-slate-600"/> Mapas GPS</p>
             </div>
-            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Básica', '_blank')} className="w-full py-4 rounded-full bg-white/5 text-white font-bold hover:bg-white/10 transition-colors text-sm">Adquirir Básica</button>
+            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Básica', '_blank')} className="w-full py-4 rounded-full bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-white font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-sm">Adquirir Básica</button>
           </div>
 
-          <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/5 hover:border-white/20 transition-colors h-max">
-            <h3 className="text-white font-black text-2xl mb-2">Plata</h3>
-            <p className="text-slate-500 text-xs mb-8 h-10">Ideal para bodas medianas y control de regalos.</p>
-            <div className="space-y-4 text-sm text-slate-400 font-medium mb-10">
-              <p className="text-white font-bold border-b border-white/10 pb-3 mb-3">Todo en Básica, más:</p>
-              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Itinerario Visual</p>
-              <p className="flex items-center text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Mesa de Regalos</p>
-              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-600"/> Hospedaje y Dress Code</p>
+          <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-8 border border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20 transition-colors h-max shadow-lg dark:shadow-none">
+            <h3 className="text-slate-900 dark:text-white font-black text-2xl mb-2 transition-colors">Plata</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-xs mb-8 h-10 transition-colors">Ideal para bodas medianas y control de regalos.</p>
+            <div className="space-y-4 text-sm text-slate-600 dark:text-slate-400 font-medium mb-10 transition-colors">
+              <p className="text-slate-900 dark:text-white font-bold border-b border-slate-100 dark:border-white/10 pb-3 mb-3">Todo en Básica, más:</p>
+              <p className="flex items-center text-slate-800 dark:text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Itinerario Visual</p>
+              <p className="flex items-center text-slate-800 dark:text-slate-200"><CheckCircle size={14} className="mr-3 text-emerald-500"/> Mesa de Regalos</p>
+              <p className="flex items-center"><CheckCircle size={14} className="mr-3 text-slate-400 dark:text-slate-600"/> Hospedaje y Dress Code</p>
             </div>
-            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Plata', '_blank')} className="w-full py-4 rounded-full bg-white/5 text-white font-bold hover:bg-white/10 transition-colors text-sm">Adquirir Plata</button>
+            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Plata', '_blank')} className="w-full py-4 rounded-full bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-white font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-sm">Adquirir Plata</button>
           </div>
 
-          <div className="bg-gradient-to-b from-amber-500 to-yellow-600 rounded-[3rem] p-[3px] shadow-[0_0_50px_rgba(245,158,11,0.2)] transform lg:-translate-y-8 relative z-10 h-max">
-            <div className="bg-[#0a0f1c] rounded-[2.8rem] p-8 h-full flex flex-col relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/20 rounded-full blur-[50px]"></div>
-              <span className="bg-amber-500 text-slate-900 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full w-max mb-6 shadow-md">El más popular</span>
-              <h3 className="text-amber-400 font-black text-3xl mb-2">Plan Oro</h3>
-              <p className="text-slate-400 text-sm mb-8 h-10">Organización y control de accesos para anfitriones exigentes.</p>
+          <div className="bg-gradient-to-b from-amber-500 to-yellow-600 rounded-[3rem] p-[3px] shadow-[0_20px_40px_rgba(245,158,11,0.3)] dark:shadow-[0_0_50px_rgba(245,158,11,0.2)] transform lg:-translate-y-8 relative z-10 h-max">
+            <div className="bg-white dark:bg-[#0a0f1c] rounded-[2.8rem] p-8 h-full flex flex-col relative overflow-hidden transition-colors duration-500">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/10 dark:bg-amber-500/20 rounded-full blur-[50px] transition-colors duration-500"></div>
+              <span className="bg-amber-500 text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full w-max mb-6 shadow-md transition-colors duration-500">El más popular</span>
+              <h3 className="text-amber-500 dark:text-amber-400 font-black text-3xl mb-2 transition-colors duration-500">Plan Oro</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 h-10 transition-colors duration-500">Organización y control de accesos para anfitriones exigentes.</p>
               
-              <div className="space-y-4 text-sm text-slate-300 font-medium mb-10 flex-1">
-                <p className="text-white font-bold border-b border-white/10 pb-3 mb-3">Todo en Plata, más:</p>
-                <p className="flex items-start"><Star size={16} className="mr-3 text-amber-400 shrink-0 mt-0.5"/> <span className="text-white font-bold">Pases QR (Escáner Puerta)</span></p>
-                <p className="flex items-start"><Star size={16} className="mr-3 text-amber-400 shrink-0 mt-0.5"/> <span>RSVP Estricto (No colados)</span></p>
-                <p className="flex items-start"><CheckCircle size={16} className="mr-3 text-slate-500 shrink-0 mt-0.5"/> <span>Panel de Presupuesto</span></p>
-                <p className="flex items-start"><CheckCircle size={16} className="mr-3 text-slate-500 shrink-0 mt-0.5"/> <span>Directorio Proveedores</span></p>
+              <div className="space-y-4 text-sm text-slate-600 dark:text-slate-300 font-medium mb-10 flex-1 transition-colors duration-500">
+                <p className="text-slate-900 dark:text-white font-bold border-b border-slate-100 dark:border-white/10 pb-3 mb-3">Todo en Plata, más:</p>
+                <p className="flex items-start"><Star size={16} className="mr-3 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5"/> <span className="text-slate-900 dark:text-white font-bold">Pases QR (Escáner Puerta)</span></p>
+                <p className="flex items-start"><Star size={16} className="mr-3 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5"/> <span>RSVP Estricto (No colados)</span></p>
+                <p className="flex items-start"><CheckCircle size={16} className="mr-3 text-slate-400 dark:text-slate-500 shrink-0 mt-0.5"/> <span>Panel de Presupuesto</span></p>
+                <p className="flex items-start"><CheckCircle size={16} className="mr-3 text-slate-400 dark:text-slate-500 shrink-0 mt-0.5"/> <span>Directorio Proveedores</span></p>
               </div>
-              <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Oro', '_blank')} className="w-full py-5 rounded-full bg-amber-500 text-slate-900 font-black text-sm hover:bg-amber-400 transition-colors shadow-[0_10px_20px_rgba(245,158,11,0.3)]">Adquirir Plan Oro</button>
+              <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Oro', '_blank')} className="w-full py-5 rounded-full bg-amber-500 text-white dark:text-slate-900 font-black text-sm hover:bg-amber-600 dark:hover:bg-amber-400 transition-colors shadow-lg dark:shadow-[0_10px_20px_rgba(245,158,11,0.3)]">Adquirir Plan Oro</button>
             </div>
           </div>
 
-          <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/5 hover:border-white/20 transition-colors h-max">
+          <div className="bg-slate-900 dark:bg-slate-900 rounded-[3rem] p-8 border border-slate-800 dark:border-white/5 hover:border-slate-700 dark:hover:border-white/20 transition-colors h-max shadow-2xl dark:shadow-none">
             <h3 className="text-white font-black text-2xl mb-2">Diamante VIP</h3>
-            <p className="text-slate-500 text-xs mb-8 h-10">La suite tecnológica extrema para no dejar nada al azar.</p>
-            <div className="space-y-4 text-sm text-slate-400 font-medium mb-10">
-              <p className="text-white font-bold border-b border-white/10 pb-3 mb-3">Todo en Oro, más:</p>
-              <p className="flex items-start"><Hexagon size={16} className="mr-3 text-white shrink-0 mt-0.5"/> <span className="text-slate-200">Acomodo de Mesas 3D</span></p>
-              <p className="flex items-start"><Hexagon size={16} className="mr-3 text-white shrink-0 mt-0.5"/> <span className="text-slate-200">Muro Social (Proyector)</span></p>
-              <p className="flex items-start"><Hexagon size={16} className="mr-3 text-slate-600 shrink-0 mt-0.5"/> <span>Exportación a PDF</span></p>
-              <p className="flex items-start"><Hexagon size={16} className="mr-3 text-slate-600 shrink-0 mt-0.5"/> <span>Bocetador Decorativo</span></p>
+            <p className="text-slate-400 dark:text-slate-500 text-xs mb-8 h-10 transition-colors">La suite tecnológica extrema para no dejar nada al azar.</p>
+            <div className="space-y-4 text-sm text-slate-300 dark:text-slate-400 font-medium mb-10 transition-colors">
+              <p className="text-white font-bold border-b border-slate-700 dark:border-white/10 pb-3 mb-3">Todo en Oro, más:</p>
+              <p className="flex items-start"><Hexagon size={16} className="mr-3 text-white shrink-0 mt-0.5"/> <span className="text-white dark:text-slate-200">Acomodo de Mesas 3D</span></p>
+              <p className="flex items-start"><Hexagon size={16} className="mr-3 text-white shrink-0 mt-0.5"/> <span className="text-white dark:text-slate-200">Muro Social (Proyector)</span></p>
+              <p className="flex items-start"><Hexagon size={16} className="mr-3 text-slate-500 dark:text-slate-600 shrink-0 mt-0.5"/> <span>Exportación a PDF</span></p>
+              <p className="flex items-start"><Hexagon size={16} className="mr-3 text-slate-500 dark:text-slate-600 shrink-0 mt-0.5"/> <span>Bocetador Decorativo</span></p>
             </div>
             <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Diamante', '_blank')} className="w-full py-4 rounded-full bg-white/10 text-white font-bold hover:bg-white/20 transition-colors text-sm">Adquirir Diamante</button>
           </div>
@@ -8974,8 +8997,8 @@ const LandingPageView = () => {
       {/* 🔴 PREGUNTAS FRECUENTES (FAQ) */}
       <section id="faq" className="py-24 px-4 md:px-8 max-w-4xl mx-auto relative z-10">
          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-black text-white mb-4">Preguntas Frecuentes</h2>
-            <p className="text-slate-400">Todo lo que necesitas saber antes de adquirir tu bóveda.</p>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 transition-colors">Preguntas Frecuentes</h2>
+            <p className="text-slate-600 dark:text-slate-400 transition-colors">Todo lo que necesitas saber antes de adquirir tu bóveda.</p>
          </div>
          <div className="space-y-4">
             {[
@@ -8985,12 +9008,12 @@ const LandingPageView = () => {
                { q: '¿Soy Planner, puedo usar el mismo panel para varias bodas?', a: '¡Sí! Contamos con licencias B2B. Te crearemos una cuenta de Agencia donde podrás gestionar ilimitadas bodas al mismo tiempo, cada una con su propia base de datos aislada y bajo tus propios colores corporativos (White-Label).' },
                { q: '¿Puedo cambiar de plan si ya compré el Básico?', a: 'Por supuesto. En cualquier momento de tu planeación puedes pagar la diferencia de precio y te activaremos los módulos del plan Plata, Oro o Diamante de forma inmediata sin perder tu información.' }
             ].map((faq, idx) => (
-               <details key={idx} className="group bg-slate-900 border border-white/5 rounded-3xl p-6 open:bg-slate-800 transition-colors duration-300 cursor-pointer">
-                 <summary className="font-bold text-lg text-white list-none flex justify-between items-center select-none outline-none">
+               <details key={idx} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl p-6 shadow-sm dark:shadow-none open:bg-slate-50 dark:open:bg-slate-800 transition-colors duration-300 cursor-pointer">
+                 <summary className="font-bold text-lg text-slate-800 dark:text-white list-none flex justify-between items-center select-none outline-none transition-colors">
                    {faq.q}
                    <span className="text-amber-500 group-open:rotate-45 transition-transform duration-300"><Plus size={24} /></span>
                  </summary>
-                 <p className="mt-4 text-slate-400 leading-relaxed text-sm md:text-base animate-in fade-in">
+                 <p className="mt-4 text-slate-600 dark:text-slate-400 leading-relaxed text-sm md:text-base animate-in fade-in transition-colors">
                    {faq.a}
                  </p>
                </details>
@@ -8998,107 +9021,104 @@ const LandingPageView = () => {
          </div>
       </section>
 
-      {/* 🔴 FOOTER VIP ACTIVO Y EXPANDIDO CON LOGOS OFICIALES */}
-      <footer className="border-t border-white/5 bg-slate-950 pt-20 pb-10 relative z-10">
+      {/* 🔴 FOOTER VIP ACTIVO */}
+      <footer className="border-t border-slate-200 dark:border-white/5 bg-white dark:bg-slate-950 pt-20 pb-10 relative z-10 transition-colors duration-500">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
            <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
                  <BauliaLogo size={32} />
-                 <span className="text-2xl font-black text-white tracking-widest uppercase">Baulia</span>
+                 <span className="text-2xl font-black text-slate-900 dark:text-white tracking-widest uppercase transition-colors">Baulia</span>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-sm mb-6">La Bóveda Premium de Gestión de Eventos. Elegancia en la invitación, poder en la ejecución.</p>
+              <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed max-w-sm mb-6 transition-colors">La Bóveda Premium de Gestión de Eventos. Elegancia en la invitación, poder en la ejecución.</p>
               
-              {/* 🔴 REDES SOCIALES OFICIALES (Reemplaza los '#' con tus links reales) */}
               <div className="flex space-x-3">
-                 <button onClick={() => window.open('#', '_blank')} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-colors" title="Instagram">
+                 <button onClick={() => window.open('#', '_blank')} className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors" title="Instagram">
                    <IconIG />
                  </button>
-                 <button onClick={() => window.open('#', '_blank')} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-colors" title="Facebook">
+                 <button onClick={() => window.open('#', '_blank')} className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors" title="Facebook">
                    <IconFB />
                  </button>
-                 <button onClick={() => window.open('#', '_blank')} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-colors" title="TikTok">
+                 <button onClick={() => window.open('#', '_blank')} className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors" title="TikTok">
                    <IconTK />
                  </button>
-                 <button onClick={() => window.open('https://wa.me/525500000000', '_blank')} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-colors" title="WhatsApp">
+                 <button onClick={() => window.open('https://wa.me/525500000000', '_blank')} className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors" title="WhatsApp">
                    <IconWA />
                  </button>
               </div>
            </div>
            
            <div>
-              <h4 className="text-white font-bold mb-6 tracking-widest uppercase text-xs">Plataforma</h4>
-              <ul className="space-y-4 text-sm text-slate-400">
-                 <li><a href="#experiencia" className="hover:text-amber-400 transition-colors">Características</a></li>
-                 <li><a href="#planes" className="hover:text-amber-400 transition-colors">Planes y Precios</a></li>
-                 <li><a href="#planners" className="hover:text-amber-400 transition-colors">Agencias y Planners</a></li>
-                 <li><button onClick={() => window.location.href = 'https://panel.baulia.com'} className="hover:text-amber-400 transition-colors text-amber-500 font-bold">Login Clientes</button></li>
+              <h4 className="text-slate-900 dark:text-white font-bold mb-6 tracking-widest uppercase text-xs transition-colors">Plataforma</h4>
+              <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-400 transition-colors">
+                 <li><a href="#experiencia" className="hover:text-amber-500 dark:hover:text-amber-400 transition-colors">Características</a></li>
+                 <li><a href="#planes" className="hover:text-amber-500 dark:hover:text-amber-400 transition-colors">Planes y Precios</a></li>
+                 <li><a href="#planners" className="hover:text-amber-500 dark:hover:text-amber-400 transition-colors">Agencias y Planners</a></li>
+                 <li><button onClick={() => window.location.href = 'https://panel.baulia.com'} className="hover:text-amber-500 dark:hover:text-amber-400 transition-colors text-amber-600 dark:text-amber-500 font-bold">Login Clientes</button></li>
               </ul>
            </div>
            
            <div>
-              <h4 className="text-white font-bold mb-6 tracking-widest uppercase text-xs">Compañía</h4>
-              <ul className="space-y-4 text-sm text-slate-400">
-                 <li><button onClick={() => setLegalModal('about')} className="hover:text-white transition-colors">Acerca de Baulia</button></li>
-                 {/* 🔴 PON TU CORREO REAL AQUÍ */}
-                 <li><button onClick={() => window.open('mailto:hola@baulia.com')} className="hover:text-white transition-colors flex items-center"><Mail size={14} className="mr-2"/> hola@baulia.com</button></li>
+              <h4 className="text-slate-900 dark:text-white font-bold mb-6 tracking-widest uppercase text-xs transition-colors">Compañía</h4>
+              <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-400 transition-colors">
+                 <li><button onClick={() => setLegalModal('about')} className="hover:text-slate-900 dark:hover:text-white transition-colors">Acerca de Baulia</button></li>
+                 <li><button onClick={() => window.open('mailto:hola@baulia.com')} className="hover:text-slate-900 dark:hover:text-white transition-colors flex items-center"><Mail size={14} className="mr-2"/> hola@baulia.com</button></li>
               </ul>
            </div>
 
            <div>
-              <h4 className="text-white font-bold mb-6 tracking-widest uppercase text-xs">Legal y Soporte</h4>
-              <ul className="space-y-4 text-sm text-slate-400">
-                 <li><button onClick={() => setLegalModal('terms')} className="hover:text-white transition-colors">Términos de Servicio</button></li>
-                 <li><button onClick={() => setLegalModal('privacy')} className="hover:text-white transition-colors">Aviso de Privacidad</button></li>
-                 {/* 🔴 PON TU NÚMERO DE WHATSAPP AQUÍ */}
-                 <li><button onClick={() => window.open('https://wa.me/525500000000', '_blank')} className="text-slate-400 hover:text-white transition-colors">Soporte y Ayuda</button></li>
+              <h4 className="text-slate-900 dark:text-white font-bold mb-6 tracking-widest uppercase text-xs transition-colors">Legal y Soporte</h4>
+              <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-400 transition-colors">
+                 <li><button onClick={() => setLegalModal('terms')} className="hover:text-slate-900 dark:hover:text-white transition-colors">Términos de Servicio</button></li>
+                 <li><button onClick={() => setLegalModal('privacy')} className="hover:text-slate-900 dark:hover:text-white transition-colors">Aviso de Privacidad</button></li>
+                 <li><button onClick={() => window.open('https://wa.me/525500000000', '_blank')} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Soporte y Ayuda</button></li>
               </ul>
            </div>
         </div>
         
-        <div className="max-w-7xl mx-auto px-6 border-t border-white/5 pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
-           <p className="text-[10px] text-slate-500 uppercase tracking-widest">&copy; {new Date().getFullYear()} Baulia Technologies. Todos los derechos reservados.</p>
-           <p className="text-[10px] text-slate-600 font-bold flex items-center">Diseñado con <Heart size={10} className="mx-1.5 fill-rose-500 text-rose-500"/> en México 🇲🇽 para el mundo.</p>
+        <div className="max-w-7xl mx-auto px-6 border-t border-slate-200 dark:border-white/5 pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4 transition-colors">
+           <p className="text-[10px] text-slate-500 dark:text-slate-500 uppercase tracking-widest transition-colors">&copy; {new Date().getFullYear()} Baulia Technologies. Todos los derechos reservados.</p>
+           <p className="text-[10px] text-slate-600 dark:text-slate-600 font-bold flex items-center transition-colors">Diseñado con <Heart size={10} className="mx-1.5 fill-rose-500 text-rose-500"/> en México 🇲🇽 para el mundo.</p>
         </div>
       </footer>
 
       {/* 🔴 MODALES LEGALES Y ACERCA DE (OVERLAYS) */}
       {legalModal && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/90 backdrop-blur-md flex justify-center items-center p-4 md:p-8 animate-in fade-in duration-200">
-          <div className="bg-[#0a0f1c] border border-white/10 w-full max-w-4xl h-[85vh] rounded-[2rem] shadow-2xl flex flex-col relative overflow-hidden animate-in zoom-in-95">
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-slate-900/90 backdrop-blur-md flex justify-center items-center p-4 md:p-8 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#0a0f1c] border border-slate-200 dark:border-white/10 w-full max-w-4xl h-[85vh] rounded-[2rem] shadow-2xl flex flex-col relative overflow-hidden animate-in zoom-in-95 transition-colors duration-300">
             
-            <div className="p-6 md:p-8 border-b border-white/5 flex justify-between items-center bg-slate-900/50 shrink-0">
+            <div className="p-6 md:p-8 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 shrink-0 transition-colors">
               <div className="flex items-center gap-3">
-                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                 <div className="w-10 h-10 rounded-full bg-white dark:bg-white/5 flex items-center justify-center border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none transition-colors">
                    {legalModal === 'about' ? <Star size={18} className="text-amber-500"/> : <FileText size={18} className="text-amber-500"/>}
                  </div>
-                 <h2 className="text-xl md:text-2xl font-black text-white tracking-wide">
+                 <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-wide transition-colors">
                    {legalModal === 'terms' ? 'Términos de Servicio' : legalModal === 'privacy' ? 'Aviso de Privacidad' : 'Acerca de Baulia'}
                  </h2>
               </div>
-              <button onClick={() => setLegalModal(null)} className="p-3 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 rounded-full transition-colors text-slate-400">
+              <button onClick={() => setLegalModal(null)} className="p-3 bg-slate-200 dark:bg-white/5 hover:bg-rose-100 dark:hover:bg-rose-500/20 hover:text-rose-600 dark:hover:text-rose-400 rounded-full transition-colors text-slate-500 dark:text-slate-400">
                 <X size={20} />
               </button>
             </div>
             
-            <div className="p-6 md:p-10 overflow-y-auto flex-1 text-slate-400 text-sm md:text-base leading-relaxed space-y-6 custom-scrollbar">
+            <div className="p-6 md:p-10 overflow-y-auto flex-1 text-slate-600 dark:text-slate-400 text-sm md:text-base leading-relaxed space-y-6 custom-scrollbar transition-colors">
               {legalModal === 'terms' ? (
                 <>
                   <p><strong>Última actualización:</strong> {new Date().toLocaleDateString('es-MX')}</p>
                   <p>Bienvenido a Baulia. Estos Términos de Servicio ("Términos") regulan el uso de nuestra plataforma web, panel de control y servicios relacionados (colectivamente, el "Servicio"). Al acceder o utilizar Baulia, usted ("el Usuario", "el Cliente" o "el Planner") acepta estar sujeto a estos Términos.</p>
                   
-                  <h3 className="text-lg font-bold text-white mt-8 mb-2">1. Descripción del Servicio</h3>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-8 mb-2 transition-colors">1. Descripción del Servicio</h3>
                   <p>Baulia provee un entorno digital (Software as a Service) para la gestión y logística de eventos, que incluye pero no se limita a: creación de invitaciones web, gestión de confirmaciones (RSVP), acomodo de mesas, control financiero, muros sociales interactivos y escaneo de pases QR.</p>
 
-                  <h3 className="text-lg font-bold text-white mt-8 mb-2">2. Pagos y Suscripciones</h3>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-8 mb-2 transition-colors">2. Pagos y Suscripciones</h3>
                   <p><strong>Para Clientes Finales (Novios/Festejados):</strong> El pago del Servicio consiste en una tarifa única por evento. La licencia otorga acceso al panel de control desde el momento del pago hasta 30 días naturales posteriores a la fecha del evento programado.</p>
                   <p><strong>Para Agencias y Planners:</strong> Las cuentas de Planner operan bajo un modelo de suscripción mensual o anual, o mediante paquetes de eventos prepagados, según se acuerde comercialmente.</p>
                   <p><strong>Política de Reembolsos:</strong> Debido a la naturaleza digital e inmediata del servicio, no se ofrecen reembolsos una vez que el panel de control ha sido aprovisionado y entregado al usuario, ni si el evento es cancelado o pospuesto.</p>
 
-                  <h3 className="text-lg font-bold text-white mt-8 mb-2">3. Responsabilidad del Contenido</h3>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-8 mb-2 transition-colors">3. Responsabilidad del Contenido</h3>
                   <p>El Usuario es el único responsable de toda la información, datos, textos, fotografías o cualquier otro material ("Contenido") que suba, publique o transmita a través de Baulia.</p>
                   <p>Baulia no revisa el Contenido subido de forma proactiva, sin embargo, nos reservamos el derecho (pero no la obligación) de eliminar cualquier Contenido que viole estos Términos, incluyendo material inapropiado, ilegal o que infrinja derechos de autor. En el caso específico del "Muro Social", el administrador del evento tiene las herramientas para moderar el contenido de sus propios invitados.</p>
 
-                  <h3 className="text-lg font-bold text-white mt-8 mb-2">4. Disponibilidad del Sistema</h3>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-8 mb-2 transition-colors">4. Disponibilidad del Sistema</h3>
                   <p>Baulia se esfuerza por garantizar que la plataforma esté disponible el 99.9% del tiempo, utilizando infraestructura en la nube de nivel mundial (como Vercel y Google Firebase). Sin embargo, no somos responsables por interrupciones derivadas de fallas en la red de internet del usuario, caídas globales de servidores de terceros o fuerza mayor.</p>
                 </>
               ) : legalModal === 'privacy' ? (
@@ -9106,14 +9126,14 @@ const LandingPageView = () => {
                   <p><strong>Última actualización:</strong> {new Date().toLocaleDateString('es-MX')}</p>
                   <p>En cumplimiento con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) de México, <strong>Baulia Technologies</strong> ("Baulia", "nosotros" o "nuestro") expide el presente Aviso de Privacidad.</p>
 
-                  <h3 className="text-lg font-bold text-white mt-8 mb-2">1. Datos Recabados</h3>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-8 mb-2 transition-colors">1. Datos Recabados</h3>
                   <p>Para la correcta prestación de nuestros servicios de gestión de eventos, Baulia recaba los siguientes datos personales:</p>
                   <ul className="list-disc pl-6 space-y-2 mt-2">
                     <li><strong>Del Administrador (Cliente/Planner):</strong> Nombre completo, correo electrónico, número de teléfono, datos de facturación e información general del evento.</li>
                     <li><strong>De los Invitados:</strong> Nombres, números de teléfono (para envío de accesos), registros de asistencia (RSVP) y fotografías subidas voluntariamente a la plataforma "Muro Social".</li>
                   </ul>
 
-                  <h3 className="text-lg font-bold text-white mt-8 mb-2">2. Finalidad del Tratamiento de Datos</h3>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-8 mb-2 transition-colors">2. Finalidad del Tratamiento de Datos</h3>
                   <p>Los datos personales recabados serán utilizados exclusivamente para las siguientes finalidades principales:</p>
                   <ul className="list-disc pl-6 space-y-2 mt-2">
                     <li>Creación, mantenimiento y soporte de la cuenta ("Panel de Control").</li>
@@ -9123,50 +9143,50 @@ const LandingPageView = () => {
                   </ul>
                   <p className="mt-4"><strong>Baulia NO vende, alquila, ni cede sus bases de datos a terceros para fines publicitarios.</strong></p>
 
-                  <h3 className="text-lg font-bold text-white mt-8 mb-2">3. Almacenamiento y Seguridad</h3>
-                  <p>Su información es procesada y almacenada en infraestructuras de nube de alta seguridad. Implementamos medidas de seguridad técnicas, administrativas y físicas para proteger sus datos contra daño, pérdida, alteración, destrucción o el uso no autorizado.</p>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-8 mb-2 transition-colors">3. Almacenamiento y Seguridad</h3>
+                  <p>Su información es procesada y almacenada en infraestructuras de nube de alta seguridad proporcionadas por Google Cloud Platform (Firebase). Implementamos medidas de seguridad técnicas, administrativas y físicas para proteger sus datos contra daño, pérdida, alteración, destrucción o el uso no autorizado.</p>
 
-                  <h3 className="text-lg font-bold text-white mt-8 mb-2">4. Retención de los Datos</h3>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-8 mb-2 transition-colors">4. Retención de los Datos</h3>
                   <p>La información de los eventos (incluyendo listas de invitados y galerías fotográficas) se mantendrá en nuestros servidores activos hasta 30 días posteriores a la fecha del evento. Transcurrido este periodo de gracia, los datos de los invitados y galerías pueden ser depurados permanentemente de nuestra base de datos para proteger su privacidad y optimizar el almacenamiento.</p>
                 </>
               ) : (
                 <>
                   <div className="flex flex-col items-center text-center mb-10 mt-4">
                     <BauliaLogo size={64} className="mb-6 drop-shadow-[0_0_15px_rgba(245,158,11,0.4)]" />
-                    <h3 className="text-3xl font-black text-white tracking-widest uppercase">El Estándar de Oro</h3>
+                    <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase transition-colors">El Estándar de Oro</h3>
                   </div>
 
-                  <div className="bg-white/5 border border-white/10 p-8 rounded-3xl mb-8 relative overflow-hidden">
+                  <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-8 rounded-3xl mb-8 relative overflow-hidden transition-colors">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-[40px]"></div>
-                    <h4 className="text-xl font-bold text-amber-400 mb-4 relative z-10">Nuestra Misión</h4>
-                    <p className="text-lg leading-relaxed relative z-10 text-white">
+                    <h4 className="text-xl font-bold text-amber-600 dark:text-amber-400 mb-4 relative z-10 transition-colors">Nuestra Misión</h4>
+                    <p className="text-lg leading-relaxed relative z-10 text-slate-800 dark:text-white transition-colors">
                       Transformar la gestión de eventos mediante tecnología premium, brindando a anfitriones y <i>planners</i> el <b>control absoluto</b>, y a los invitados una <b>experiencia interactiva inolvidable</b>.
                     </p>
                   </div>
 
-                  <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl mb-8">
-                    <h4 className="text-xl font-bold text-indigo-400 mb-4">Nuestra Visión</h4>
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none p-8 rounded-3xl mb-8 transition-colors">
+                    <h4 className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-4 transition-colors">Nuestra Visión</h4>
                     <p className="text-lg leading-relaxed">
                       Ser el ecosistema global definitivo (SaaS) para la industria de celebraciones de lujo, eliminando el estrés de la planeación y elevando la forma en que el mundo se reúne para crear recuerdos.
                     </p>
                   </div>
 
-                  <h4 className="text-lg font-bold text-white mt-12 mb-6">Lo que nos define (Valores)</h4>
+                  <h4 className="text-lg font-bold text-slate-900 dark:text-white mt-12 mb-6 transition-colors">Lo que nos define (Valores)</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-5 border border-white/5 rounded-2xl bg-white/5">
+                    <div className="p-5 border border-slate-200 dark:border-white/5 rounded-2xl bg-white dark:bg-white/5 shadow-sm dark:shadow-none transition-colors">
                       <span className="text-amber-500 font-black tracking-widest uppercase text-[10px] block mb-1">01. Cero Caos</span>
                       <p className="text-sm">Diseñamos interfaces que reducen la ansiedad de los organizadores al mínimo.</p>
                     </div>
-                    <div className="p-5 border border-white/5 rounded-2xl bg-white/5">
-                      <span className="text-indigo-400 font-black tracking-widest uppercase text-[10px] block mb-1">02. Lujo Digital</span>
+                    <div className="p-5 border border-slate-200 dark:border-white/5 rounded-2xl bg-white dark:bg-white/5 shadow-sm dark:shadow-none transition-colors">
+                      <span className="text-indigo-500 dark:text-indigo-400 font-black tracking-widest uppercase text-[10px] block mb-1 transition-colors">02. Lujo Digital</span>
                       <p className="text-sm">Creemos que el software de tu evento debe ser tan elegante como el evento mismo.</p>
                     </div>
-                    <div className="p-5 border border-white/5 rounded-2xl bg-white/5">
-                      <span className="text-emerald-400 font-black tracking-widest uppercase text-[10px] block mb-1">03. Privacidad Absoluta</span>
+                    <div className="p-5 border border-slate-200 dark:border-white/5 rounded-2xl bg-white dark:bg-white/5 shadow-sm dark:shadow-none transition-colors">
+                      <span className="text-emerald-500 dark:text-emerald-400 font-black tracking-widest uppercase text-[10px] block mb-1 transition-colors">03. Privacidad Absoluta</span>
                       <p className="text-sm">Tus recuerdos y los datos de tus invitados son sagrados y están blindados.</p>
                     </div>
-                    <div className="p-5 border border-white/5 rounded-2xl bg-white/5">
-                      <span className="text-rose-400 font-black tracking-widest uppercase text-[10px] block mb-1">04. Empoderamiento B2B</span>
+                    <div className="p-5 border border-slate-200 dark:border-white/5 rounded-2xl bg-white dark:bg-white/5 shadow-sm dark:shadow-none transition-colors">
+                      <span className="text-rose-500 dark:text-rose-400 font-black tracking-widest uppercase text-[10px] block mb-1 transition-colors">04. Empoderamiento B2B</span>
                       <p className="text-sm">Ayudamos a que las agencias y planners brillen bajo su propia marca.</p>
                     </div>
                   </div>
@@ -9174,9 +9194,9 @@ const LandingPageView = () => {
               )}
             </div>
             
-            <div className="p-6 border-t border-white/5 bg-slate-900/30 shrink-0 text-center">
+            <div className="p-6 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/30 shrink-0 text-center transition-colors">
               <button onClick={() => setLegalModal(null)} className="px-8 py-3 bg-amber-500 text-slate-900 rounded-full font-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">
-                Aceptar y Cerrar
+                Cerrar Documento
               </button>
             </div>
             
@@ -10080,7 +10100,7 @@ const HostessStandaloneView = ({ eventId }) => {
 };
 
 // ==========================================
-// 3. EL ENRUTADOR PRINCIPAL (App)
+// 3. EL ENRUTADOR PRINCIPAL (App) - CEREBRO MAESTRO
 // ==========================================
 export default function App() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -10093,9 +10113,56 @@ export default function App() {
   const pathname = window.location.pathname.replace(/^\/+/g, '');
   const isPanel = hostname.startsWith('panel.') || hostname.includes('localhost');
 
-  // Si entra a baulia.com limpio (sin /boda-ana, etc), muestra la Web de Ventas
+  // ==========================================
+  // 🔴 MOTOR GLOBAL DE TEMA BAULIA (OSCURO/CLARO)
+  // ==========================================
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // 1. Prioridad Máxima: Lo que el usuario eligió manualmente antes
+    const savedTheme = localStorage.getItem('baulia_theme');
+    if (savedTheme !== null) return savedTheme === 'dark';
+
+    // 2. Prioridad Media: Lo que dice el sistema operativo (iOS, Windows, Mac)
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return true;
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) return false;
+
+    // 3. Prioridad Baja: La hora local (Modo oscuro de 7 PM a 5:59 AM)
+    const hour = new Date().getHours();
+    return hour >= 19 || hour < 6;
+  });
+
+  // Inyecta la clase 'dark' al HTML raíz para que Tailwind haga la magia
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) root.classList.add('dark');
+    else root.classList.remove('dark');
+  }, [isDarkMode]);
+
+  // Escucha si el usuario cambia el tema de su celular en tiempo real (Ej. bajando la cortinilla del iPhone)
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e) => {
+      // Solo cambia automático si el usuario NO ha forzado un tema manualmente
+      if (localStorage.getItem('baulia_theme') === null) {
+        setIsDarkMode(e.matches);
+      }
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  // Función que le pasaremos a la Landing Page y al Header para alternar
+  const toggleTheme = () => {
+    setIsDarkMode(prev => {
+      const newTheme = !prev;
+      localStorage.setItem('baulia_theme', newTheme ? 'dark' : 'light');
+      return newTheme;
+    });
+  };
+  // ==========================================
+
+  // Si entra a baulia.com limpio (sin /boda-ana, etc), muestra la Web de Ventas PASANDO LOS CONTROLES
   if (!isPanel && !pathname && !eventIdParam) {
-     return <LandingPageView />;
+     return <LandingPageView isDarkMode={isDarkMode} toggleTheme={toggleTheme} />;
   }
 
   // Si entra a baulia.com/boda-ana-y-luis
@@ -10125,6 +10192,8 @@ export default function App() {
           
           if (!querySnapshot.empty) {
             const userData = querySnapshot.docs[0].data();
+            
+            // 🔴 PANTALLA ROJA NATIVA DE SUSPENSIÓN
             if (userData.status === 'suspendido') {
                await signOut(auth);
                setAccountSuspended(true);
@@ -10151,6 +10220,7 @@ export default function App() {
 
   if (isCheckingAuth) return <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center text-amber-500 font-bold"><RefreshCw size={40} className="animate-spin mb-4" /> Bóveda Segura...</div>;
 
+  // PANTALLA NATIVA DE SUSPENSIÓN
   if (accountSuspended) return (
       <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
         <AlertTriangle size={64} className="text-rose-500 mb-4 animate-pulse" />
