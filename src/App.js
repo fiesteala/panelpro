@@ -8570,7 +8570,7 @@ const GuestProyectorView = ({ eventId }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 8.0 - EDITORIAL TECH LUXURY) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - SOCIAL PROOF) ---
 // ==========================================
 const LandingPageView = ({ isDarkMode, toggleTheme }) => {
   const [legalModal, setLegalModal] = useState(null);
@@ -8620,7 +8620,7 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
       <div className="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 dark:bg-amber-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
       <div className="fixed bottom-[-20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-500/5 dark:bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
 
-      {/* 🔴 NAVEGACIÓN FLOTANTE (ESTILO APPLE) */}
+      {/* 🔴 NAVEGACIÓN FLOTANTE */}
       <nav className="fixed w-full z-50 top-0 pt-4 md:pt-6 px-4 md:px-8 pointer-events-none">
         <div className="max-w-6xl mx-auto bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-2xl border border-slate-200/50 dark:border-white/10 h-16 md:h-20 rounded-[2rem] flex items-center justify-between px-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] pointer-events-auto transition-colors duration-700">
           <div className="flex items-center gap-3">
@@ -8643,7 +8643,7 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
         </div>
       </nav>
 
-      {/* 🔴 HERO SECTION (EDITORIAL) */}
+      {/* 🔴 HERO SECTION */}
       <section className="relative min-h-[90vh] flex flex-col items-center justify-center pt-32 pb-20 px-4 md:px-6 z-10 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest mb-8 backdrop-blur-md shadow-sm">
           <Star size={12} className="fill-amber-500 dark:fill-amber-400"/>
@@ -8677,39 +8677,27 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[280px]">
-          
-          {/* TARJETA 1: GALERÍA INMERSIVA Y MONOGRAMA CURSIVO */}
+          {/* TARJETA 1: GALERÍA Y MONOGRAMA */}
           <div className="md:col-span-2 md:row-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-10 md:p-12 border border-slate-200 dark:border-white/10 flex flex-col justify-end relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
-            
-            {/* Fondo dinámico según el color seleccionado */}
             <div className={`absolute inset-0 opacity-5 dark:opacity-10 transition-colors duration-700 ${accentThemes[accentColor].bg}`}></div>
-
-            {/* MICRO-DEMO: Fotografías Flotantes con Monograma */}
             <div className="absolute top-10 right-0 md:right-10 w-full md:w-56 h-64 pointer-events-none perspective-[1000px] flex items-center justify-center">
                <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 1" className="absolute w-40 h-52 object-cover rounded-xl border-[4px] border-white dark:border-[#111] transform rotate-[10deg] translate-x-12 translate-y-4 group-hover:rotate-[20deg] group-hover:translate-x-20 shadow-xl transition-all duration-700 ease-out" />
                <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 2" className="absolute w-40 h-52 object-cover rounded-xl border-[4px] border-white dark:border-[#111] transform -rotate-[5deg] group-hover:-rotate-[12deg] group-hover:-translate-x-8 shadow-xl transition-all duration-700 ease-out z-10" />
-               
-               {/* MONOGRAMA MANUSCRITO QUE CAMBIA DE COLOR */}
-               <div className={`absolute z-20 font-monogram text-5xl md:text-6xl drop-shadow-xl transition-colors duration-700 ${accentThemes[accentColor].text} transform group-hover:scale-110`}>
-                 Ana & Rodrigo
-               </div>
+               <div className={`absolute z-20 font-monogram text-5xl md:text-6xl drop-shadow-xl transition-colors duration-700 ${accentThemes[accentColor].text} transform group-hover:scale-110`}>Ana & Rodrigo</div>
             </div>
-
-            {/* Selector de Color (Interactivo) */}
             <div className="absolute top-10 left-10 flex gap-2 p-2 bg-white/80 dark:bg-black/40 backdrop-blur-md rounded-full border border-slate-200 dark:border-white/10 z-30 shadow-sm">
                <button onMouseEnter={()=>setAccentColor('amber')} className={`w-5 h-5 rounded-full bg-amber-500 transition-all ${accentColor === 'amber' ? 'scale-125 ring-2 ring-offset-2 ring-amber-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
                <button onMouseEnter={()=>setAccentColor('rose')} className={`w-5 h-5 rounded-full bg-rose-500 transition-all ${accentColor === 'rose' ? 'scale-125 ring-2 ring-offset-2 ring-rose-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
                <button onMouseEnter={()=>setAccentColor('emerald')} className={`w-5 h-5 rounded-full bg-emerald-500 transition-all ${accentColor === 'emerald' ? 'scale-125 ring-2 ring-offset-2 ring-emerald-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
                <button onMouseEnter={()=>setAccentColor('indigo')} className={`w-5 h-5 rounded-full bg-indigo-500 transition-all ${accentColor === 'indigo' ? 'scale-125 ring-2 ring-offset-2 ring-indigo-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
             </div>
-            
             <div className="relative z-30 w-full md:w-3/4">
                <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-3 leading-tight transition-colors duration-500">Diseño Inmersivo</h3>
-               <p className="text-slate-600 dark:text-slate-400 text-base leading-relaxed transition-colors duration-500">Galerías fotográficas, logotipos manuscritos y paletas de color <b>adaptativas</b> que reflejan la elegancia de tu evento. Pasa el cursor por los colores para probar.</p>
+               <p className="text-slate-600 dark:text-slate-400 text-base leading-relaxed transition-colors duration-500">Galerías fotográficas, logotipos manuscritos y paletas de color <b>adaptativas</b> que reflejan la elegancia de tu evento.</p>
             </div>
           </div>
 
-          {/* TARJETA 2: CUENTA REGRESIVA VIVA */}
+          {/* TARJETA 2: CUENTA REGRESIVA */}
           <div className="md:col-span-2 bg-slate-100 dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 md:p-10 border border-slate-200 dark:border-white/10 flex items-center justify-between relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
             <div>
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 transition-colors">Cuenta Regresiva</h3>
@@ -8733,12 +8721,8 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
             </div>
           </div>
 
-          {/* TARJETA 3: RSVP INTELIGENTE */}
-          <div 
-            onMouseEnter={() => setFakeRsvp(true)} 
-            onMouseLeave={() => setFakeRsvp(false)}
-            className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[2.5rem] p-8 flex flex-col justify-between relative overflow-hidden transform hover:scale-[1.02] transition-all shadow-sm dark:shadow-none cursor-pointer group"
-          >
+          {/* TARJETA 3: RSVP */}
+          <div onMouseEnter={() => setFakeRsvp(true)} onMouseLeave={() => setFakeRsvp(false)} className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[2.5rem] p-8 flex flex-col justify-between relative overflow-hidden transform hover:scale-[1.02] transition-all shadow-sm dark:shadow-none cursor-pointer group">
              <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
              <div className="flex justify-between items-start relative z-10">
                <div>
@@ -8751,22 +8735,20 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
              </div>
           </div>
 
-          {/* TARJETA 4: MAPA RADAR */}
+          {/* TARJETA 4: MAPA */}
           <div className="bg-slate-50 dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
              <div className="absolute inset-0 opacity-[0.03] dark:opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMWgyMHYyMEgxVjF6IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')]"></div>
-             
              <div className="absolute right-8 top-8 w-12 h-12 flex items-center justify-center">
                 <span className="absolute inline-flex h-full w-full rounded-full bg-slate-400 dark:bg-white opacity-20 animate-ping"></span>
                 <div className="relative w-3 h-3 bg-slate-800 dark:bg-white rounded-full shadow-lg"></div>
              </div>
-
              <div className="relative z-10 mt-auto">
                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 transition-colors">Logística GPS</h3>
                <p className="text-slate-500 dark:text-slate-400 text-sm max-w-[200px] transition-colors">Rutas precisas a la ceremonia y recepción.</p>
              </div>
           </div>
 
-          {/* TARJETA 5: PASES QR (VIP) */}
+          {/* TARJETA 5: PASES QR */}
           <div className="md:col-span-2 bg-slate-900 dark:bg-white rounded-[2.5rem] p-8 md:p-10 border border-transparent flex items-center justify-between relative overflow-hidden group shadow-xl transition-colors duration-700">
              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
              <div className="relative z-10 max-w-[200px] md:max-w-[280px]">
@@ -8778,7 +8760,7 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
              </div>
           </div>
 
-          {/* TARJETA 6: MESA DE REGALOS */}
+          {/* TARJETA 6: MESA REGALOS */}
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:border-slate-300 dark:hover:border-white/20 transition-colors relative overflow-hidden shadow-sm dark:shadow-none">
              <div className="w-12 h-12 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mb-4 group-hover:-translate-y-1 transition-transform border border-slate-100 dark:border-white/5">
                <Wallet size={20} className="text-slate-700 dark:text-slate-300" />
@@ -8789,7 +8771,7 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
              </div>
           </div>
 
-          {/* TARJETA 7: ITINERARIO VISUAL */}
+          {/* TARJETA 7: ITINERARIO */}
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:border-slate-300 dark:hover:border-white/20 transition-colors relative overflow-hidden shadow-sm dark:shadow-none">
              <div className="space-y-3 mb-6 relative z-10 opacity-70 group-hover:opacity-100 transition-opacity">
                <div className="flex items-center gap-3"><div className="w-2 h-2 bg-amber-500 rounded-full"></div><div className="h-1 w-16 bg-slate-200 dark:bg-white/20 rounded-full"></div></div>
@@ -8834,8 +8816,8 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
               </div>
             </div>
 
-            {/* MOCKUP DEL PANEL MINIMALISTA */}
             <div className="lg:w-1/2 w-full relative perspective-[1000px]">
+              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 dark:from-indigo-500/20 to-amber-500/10 dark:to-amber-500/20 blur-[120px] rounded-full pointer-events-none transition-colors"></div>
               <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 p-3 shadow-2xl dark:shadow-[0_30px_80px_rgba(0,0,0,0.8)] relative z-10 transform md:rotate-y-[-5deg] md:rotate-x-[2deg] hover:rotate-y-0 hover:rotate-x-0 transition-all duration-1000">
                 <div className="bg-slate-50 dark:bg-slate-950 rounded-[1.5rem] border border-slate-100 dark:border-white/5 h-[500px] w-full overflow-hidden flex flex-col relative transition-colors">
                    <div className="h-12 border-b border-slate-200 dark:border-white/5 flex items-center px-4 gap-2 bg-white dark:bg-black/50 shrink-0 transition-colors">
@@ -8862,8 +8844,71 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
                 </div>
               </div>
             </div>
-
           </div>
+        </div>
+      </section>
+
+      {/* 🔴 NUEVA SECCIÓN: TESTIMONIOS Y PRUEBA SOCIAL */}
+      <section className="py-24 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
+        <div className="text-center mb-16">
+          <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">El Estándar de la Industria</span>
+          <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700">Lo que dicen de nosotros.</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+           {/* Testimonio 1: Novios */}
+           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative">
+              <Quote className="absolute top-8 right-8 text-slate-100 dark:text-white/5" size={48} />
+              <div className="flex gap-1 mb-6">
+                {[1,2,3,4,5].map(i => <Star key={i} size={16} className="fill-amber-500 text-amber-500"/>)}
+              </div>
+              <p className="text-slate-600 dark:text-slate-300 text-lg font-light leading-relaxed mb-8 relative z-10">
+                "Usar Baulia fue la mejor decisión para nuestra boda. La invitación quedó hermosa, y no tuvimos que lidiar con invitados preguntando cómo llegar o batallando para confirmar. Todo automatizado."
+              </p>
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Avatar" className="w-full h-full object-cover"/></div>
+                 <div>
+                   <h4 className="font-bold text-slate-900 dark:text-white text-sm">Sofía & Mauricio</h4>
+                   <p className="text-xs text-slate-500 font-medium">Boda en Hacienda, 250 invitados.</p>
+                 </div>
+              </div>
+           </div>
+
+           {/* Testimonio 2: Planner */}
+           <div className="bg-slate-900 dark:bg-white rounded-[2rem] p-8 border border-transparent flex flex-col justify-between shadow-xl transition-colors duration-500 relative transform lg:-translate-y-4">
+              <Quote className="absolute top-8 right-8 text-white/5 dark:text-slate-900/5" size={48} />
+              <div className="flex gap-1 mb-6">
+                {[1,2,3,4,5].map(i => <Star key={i} size={16} className="fill-amber-500 text-amber-500"/>)}
+              </div>
+              <p className="text-slate-300 dark:text-slate-700 text-lg font-light leading-relaxed mb-8 relative z-10">
+                "Como Wedding Planner, esta plataforma me ahorra más de 15 horas de logística por evento. El escáner de QR en la puerta nos da un control brutal y a los novios les fascina ver todo bajo mi propia marca."
+              </p>
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 rounded-full bg-white/20 dark:bg-slate-900/10 overflow-hidden flex items-center justify-center font-editorial text-white dark:text-slate-900 text-xl font-bold">EG</div>
+                 <div>
+                   <h4 className="font-bold text-white dark:text-slate-900 text-sm">Estudio Gala</h4>
+                   <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Agencia de Eventos (Planner)</p>
+                 </div>
+              </div>
+           </div>
+
+           {/* Testimonio 3: Quinceañera / Evento Social */}
+           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative">
+              <Quote className="absolute top-8 right-8 text-slate-100 dark:text-white/5" size={48} />
+              <div className="flex gap-1 mb-6">
+                {[1,2,3,4,5].map(i => <Star key={i} size={16} className="fill-amber-500 text-amber-500"/>)}
+              </div>
+              <p className="text-slate-600 dark:text-slate-300 text-lg font-light leading-relaxed mb-8 relative z-10">
+                "El Muro Social proyectado en las pantallas durante la fiesta de mi hija fue la sensación. Todos subiendo fotos y mensajes en vivo. Además, la mesa de regalos en efectivo directo a mi cuenta nos salvó."
+              </p>
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Avatar" className="w-full h-full object-cover"/></div>
+                 <div>
+                   <h4 className="font-bold text-slate-900 dark:text-white text-sm">Familia Torres</h4>
+                   <p className="text-xs text-slate-500 font-medium">XV Años, Evento Social.</p>
+                 </div>
+              </div>
+           </div>
         </div>
       </section>
 
@@ -9003,7 +9048,6 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
               <p className="text-slate-500 dark:text-slate-400 text-sm font-light leading-relaxed max-w-sm mb-8 transition-colors">Software de gestión de élite. <br/>Elegancia en la invitación, poder absoluto en la ejecución.</p>
               
               <div className="flex space-x-3">
-                 {/* PON TUS ENLACES REALES AQUÍ ADENTRO DE LOS COMILLAS '' */}
                  <button onClick={() => window.open('https://instagram.com/TU_PERFIL', '_blank')} className="w-10 h-10 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="Instagram">
                    <IconIG />
                  </button>
