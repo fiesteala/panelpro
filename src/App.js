@@ -7190,7 +7190,7 @@ const GaleriaView = ({ photos, addNotification }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: VISTA PÚBLICA DEL INVITADO (W/ CÁMARA CUADRADA TIPO SUPERMERCADO) ---
+// --- COMPONENTE: VISTA PÚBLICA DEL INVITADO (BLINDADO ANTI-CRASH) ---
 // ==========================================
 const GuestCameraView = ({ eventId }) => {
   const [config, setConfig] = useState({ modoPublico: true, hashtag: '', moderacion: false, marcoUrl: '' });
@@ -7285,7 +7285,7 @@ const GuestCameraView = ({ eventId }) => {
   const tTextSub = isDarkMode ? 'text-zinc-400' : 'text-slate-500';
   const tInputBg = isDarkMode ? 'bg-zinc-800 focus:bg-zinc-700' : 'bg-slate-50 focus:bg-white';
 
-  const currentUserName = !config.modoPublico ? authGuest?.name : guestName.trim();
+  const currentUserName = !config?.modoPublico ? (authGuest?.name || '') : (guestName || '').trim();
 
   const DiceIcon = ({ className, size = 24 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -7350,7 +7350,6 @@ const GuestCameraView = ({ eventId }) => {
     }
   };
 
-  // 🔴 MOTOR DE ESCÁNER CUADRADO AUTOMÁTICO CLONADO AL DE PUERTA
   const startLoginScanner = () => {
     if (!window.Html5Qrcode) {
       setTimeout(startLoginScanner, 500);
@@ -7376,7 +7375,6 @@ const GuestCameraView = ({ eventId }) => {
              }
              setIsScanning(false);
              
-             // 🔴 EXTRACCIÓN CIENTÍFICA DEL CÓDIGO (Igual que en Puerta)
              let code = decodedText;
              try {
                 const parsedUrl = new URL(decodedText);
@@ -7403,8 +7401,9 @@ const GuestCameraView = ({ eventId }) => {
 
   useEffect(() => {
     setGlobalEventId(eventId);
-    if (!window.Html5QrcodeScanner) {
+    if (!window.Html5QrcodeScanner && !document.getElementById('qr-script')) {
       const script = document.createElement('script');
+      script.id = 'qr-script';
       script.src = "https://unpkg.com/html5-qrcode";
       script.async = true;
       document.body.appendChild(script);
@@ -7457,7 +7456,7 @@ const GuestCameraView = ({ eventId }) => {
 
   useEffect(() => {
      let timer;
-     if (!config.modoPublico && !authGuest) {
+     if (!config?.modoPublico && !authGuest) {
          timer = setTimeout(() => {
              startLoginScanner();
          }, 1000); 
@@ -7466,7 +7465,7 @@ const GuestCameraView = ({ eventId }) => {
          if (timer) clearTimeout(timer);
          if (scannerRef.current) scannerRef.current.stop().catch(e=>e);
      }
-  }, [config.modoPublico, authGuest]);
+  }, [config, authGuest]);
 
   const notifySocial = async (tipo, targetUser, fotoId, textoExtra = '', fotoUrl = '') => {
     if (!targetUser || !currentUserName || targetUser === currentUserName) return; 
@@ -7552,7 +7551,7 @@ const GuestCameraView = ({ eventId }) => {
   };
 
   const publishPost = async () => {
-    const nombreFinal = !config.modoPublico ? authGuest?.name : guestName.trim();
+    const nombreFinal = !config?.modoPublico ? authGuest?.name : (guestName || '').trim();
     if (!nombreFinal) { showToast("Ingresa tu nombre para publicar.", "error"); return; }
 
     setIsUploading(true);
@@ -7573,10 +7572,10 @@ const GuestCameraView = ({ eventId }) => {
       const validUrls = uploadedUrls.filter(url => url !== null);
       if (validUrls.length === 0) throw new Error("Fallo al procesar fotos.");
 
-      if(config.modoPublico) localStorage.setItem('eventmaster_guestName', guestName.trim());
+      if(config?.modoPublico) localStorage.setItem('eventmaster_guestName', (guestName||'').trim());
 
-      let finalCaption = postDraft.caption.trim();
-      if (config.hashtag && !finalCaption.toLowerCase().includes(config.hashtag.toLowerCase())) {
+      let finalCaption = (postDraft.caption || '').trim();
+      if (config?.hashtag && !finalCaption.toLowerCase().includes(config.hashtag.toLowerCase())) {
          finalCaption = finalCaption ? `${finalCaption} ${config.hashtag}` : config.hashtag;
       }
 
@@ -7591,14 +7590,14 @@ const GuestCameraView = ({ eventId }) => {
         fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         likes: [], 
         comentarios: [],
-        status: config.moderacion ? 'pending' : 'approved'
+        status: config?.moderacion ? 'pending' : 'approved'
       };
       
       await setDoc(doc(db, "eventos", eventId, "fotos", nuevaFoto.id), nuevaFoto);
       setPostDraft(null);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
-      if(config.moderacion) {
+      if(config?.moderacion) {
         showToast("¡Subida! Un administrador la revisará en breve.", "info");
       }
     } catch (error) { 
@@ -7619,7 +7618,7 @@ const GuestCameraView = ({ eventId }) => {
     if (isLiking) {
       likesArray.push(currentUserName);
       const coverUrl = foto.urls ? foto.urls[0] : foto.url;
-      notifySocial('like_foto', foto.autor, foto.id, '', coverUrl);
+      notifySocial('like_foto', foto.autor || 'Anónimo', foto.id, '', coverUrl);
     } else {
       likesArray = likesArray.filter(name => name !== currentUserName);
     }
@@ -7639,7 +7638,7 @@ const GuestCameraView = ({ eventId }) => {
       const isLiking = !likes.includes(currentUserName);
       if (isLiking) {
         likes.push(currentUserName);
-        notifySocial('like_comment', updatedComments[cIndex].autor, foto.id, '', coverUrl);
+        notifySocial('like_comment', updatedComments[cIndex].autor || 'Anónimo', foto.id, '', coverUrl);
       } else likes = likes.filter(n => n !== currentUserName);
       updatedComments[cIndex].likes = likes;
     } else {
@@ -7650,7 +7649,7 @@ const GuestCameraView = ({ eventId }) => {
         const isLiking = !likes.includes(currentUserName);
         if (isLiking) {
           likes.push(currentUserName);
-          notifySocial('like_comment', replies[rIndex].autor, foto.id, '', coverUrl); 
+          notifySocial('like_comment', replies[rIndex].autor || 'Anónimo', foto.id, '', coverUrl); 
         } else likes = likes.filter(n => n !== currentUserName);
         replies[rIndex].likes = likes;
       }
@@ -7663,7 +7662,7 @@ const GuestCameraView = ({ eventId }) => {
     if (!currentUserName || !commentText.trim() || !foto) return;
 
     let finalComment = commentText.trim();
-    if (!replyingTo && config.hashtag && !finalComment.toLowerCase().includes(config.hashtag.toLowerCase())) finalComment += ` ${config.hashtag}`;
+    if (!replyingTo && config?.hashtag && !finalComment.toLowerCase().includes(config.hashtag.toLowerCase())) finalComment += ` ${config.hashtag}`;
 
     let updatedComments = Array.isArray(foto.comentarios) ? [...foto.comentarios] : (foto.comentarios ? Object.values(foto.comentarios) : []);
     const newObj = { id: Date.now(), autor: currentUserName, avatar: guestAvatar, texto: finalComment, likes: [] };
@@ -7674,12 +7673,12 @@ const GuestCameraView = ({ eventId }) => {
       if (cIndex > -1) {
         let currentReplies = Array.isArray(updatedComments[cIndex].replies) ? updatedComments[cIndex].replies : [];
         updatedComments[cIndex].replies = [...currentReplies, newObj];
-        notifySocial('reply_comment', replyingTo.autor, foto.id, finalComment, coverUrl); 
+        notifySocial('reply_comment', replyingTo.autor || 'Anónimo', foto.id, finalComment, coverUrl); 
       }
     } else {
       newObj.replies = [];
       updatedComments.push(newObj);
-      notifySocial('comment_foto', foto.autor, foto.id, finalComment, coverUrl); 
+      notifySocial('comment_foto', foto.autor || 'Anónimo', foto.id, finalComment, coverUrl); 
     }
     
     await setDoc(doc(db, "eventos", eventId, "fotos", foto.id), { ...foto, comentarios: updatedComments });
@@ -7747,7 +7746,7 @@ const GuestCameraView = ({ eventId }) => {
     );
   };
 
-  if (!config.modoPublico && !authGuest) {
+  if (!config?.modoPublico && !authGuest) {
     return (
       <div className={`min-h-screen ${tBgBase} flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans`}>
         
@@ -7826,7 +7825,7 @@ const GuestCameraView = ({ eventId }) => {
 
             <div onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="flex items-center gap-2 cursor-pointer">
               <div className={`w-9 h-9 rounded-full ${tBgBase} overflow-hidden border ${tBorder} flex-shrink-0 relative`}>
-                 {isAvatarUploading ? <RefreshCw size={14} className="absolute inset-0 m-auto text-indigo-500 animate-spin"/> : guestAvatar ? <img src={guestAvatar} className="w-full h-full object-cover"/> : <span className={`font-bold ${tTextSub} flex items-center justify-center h-full`}>{currentUserName?.charAt(0)}</span>}
+                 {isAvatarUploading ? <RefreshCw size={14} className="absolute inset-0 m-auto text-indigo-500 animate-spin"/> : guestAvatar ? <img src={guestAvatar} className="w-full h-full object-cover"/> : <span className={`font-bold ${tTextSub} flex items-center justify-center h-full`}>{currentUserName?.charAt(0) || '?'}</span>}
               </div>
               <span className={`font-black text-sm ${tTextMain} truncate max-w-[120px] tracking-tight`}>{currentUserName}</span>
             </div>
@@ -7862,14 +7861,14 @@ const GuestCameraView = ({ eventId }) => {
                          return (
                             <div key={idx} onClick={() => openNotificationPost(n.fotoId, n.tipo)} className={`flex items-start p-3 border-b ${tBorder} cursor-pointer transition-colors ${isNew ? (isDarkMode ? 'bg-indigo-900/40' : 'bg-pink-50/40') : `hover:${tBgBase}`}`}>
                                <div className={`w-8 h-8 rounded-full ${tBgBase} mr-3 flex-shrink-0 overflow-hidden border ${tBorder}`}>
-                                  {n.actorAvatar ? <img src={n.actorAvatar} className="w-full h-full object-cover" /> : <span className={`w-full h-full flex items-center justify-center text-xs font-bold ${tTextSub}`}>{n.actorName.charAt(0).toUpperCase()}</span>}
+                                  {n.actorAvatar ? <img src={n.actorAvatar} className="w-full h-full object-cover" /> : <span className={`w-full h-full flex items-center justify-center text-xs font-bold ${tTextSub}`}>{(n.actorName || '?').charAt(0).toUpperCase()}</span>}
                                </div>
                                <div className="flex-1 pr-2">
                                  <p className={`text-xs ${tTextMain} leading-snug`}>
-                                    {n.tipo === 'like_foto' && <span><b className="font-bold">{n.actorName}</b> le dio Me gusta a tu foto.</span>}
-                                    {n.tipo === 'comment_foto' && <span><b className="font-bold">{n.actorName}</b> comentó: {n.textoExtra}</span>}
-                                    {n.tipo === 'like_comment' && <span>A <b className="font-bold">{n.actorName}</b> le gustó tu comentario.</span>}
-                                    {n.tipo === 'reply_comment' && <span><b className="font-bold">{n.actorName}</b> te respondió: {n.textoExtra}</span>}
+                                    {n.tipo === 'like_foto' && <span><b className="font-bold">{n.actorName || 'Alguien'}</b> le dio Me gusta a tu foto.</span>}
+                                    {n.tipo === 'comment_foto' && <span><b className="font-bold">{n.actorName || 'Alguien'}</b> comentó: {n.textoExtra}</span>}
+                                    {n.tipo === 'like_comment' && <span>A <b className="font-bold">{n.actorName || 'Alguien'}</b> le gustó tu comentario.</span>}
+                                    {n.tipo === 'reply_comment' && <span><b className="font-bold">{n.actorName || 'Alguien'}</b> te respondió: {n.textoExtra}</span>}
                                  </p>
                                  <p className={`text-[9px] ${tTextSub} mt-1`}>{new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                                </div>
@@ -7916,12 +7915,12 @@ const GuestCameraView = ({ eventId }) => {
 
         <div className="w-full space-y-8">
           {feedFotos.map((foto) => {
-            if (config.moderacion && foto.status === 'pending' && foto.autor !== currentUserName) return null;
-            const isPending = config.moderacion && foto.status === 'pending';
+            if (config?.moderacion && foto.status === 'pending' && foto.autor !== currentUserName) return null;
+            const isPending = config?.moderacion && foto.status === 'pending';
 
             const likesArr = Array.isArray(foto.likes) ? foto.likes : (foto.likes ? Object.values(foto.likes) : []);
             const hasLiked = currentUserName && likesArr.includes(currentUserName);
-            const urls = foto.urls || [foto.url]; 
+            const urls = foto.urls || [foto.url || '']; 
             
             const comentariosArr = Array.isArray(foto.comentarios) ? foto.comentarios : (foto.comentarios ? Object.values(foto.comentarios) : []);
             const commentCount = comentariosArr.reduce((acc, c) => {
@@ -7936,10 +7935,10 @@ const GuestCameraView = ({ eventId }) => {
 
                 <div className="p-3.5 flex items-center">
                   <div className={`w-9 h-9 ${tBgBase} rounded-full flex items-center justify-center text-slate-400 font-bold text-xs mr-3 shadow-inner overflow-hidden border ${tBorder} shrink-0`}>
-                    {foto.avatar ? <img src={foto.avatar} alt="P" className="w-full h-full object-cover"/> : foto.autor.charAt(0).toUpperCase()}
+                    {foto.avatar ? <img src={foto.avatar} alt="P" className="w-full h-full object-cover"/> : (foto.autor || '?').charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className={`font-bold text-sm ${tTextMain} leading-tight`}>{foto.autor}</p>
+                    <p className={`font-bold text-sm ${tTextMain} leading-tight`}>{foto.autor || 'Anónimo'}</p>
                     <p className={`text-[10px] ${tTextSub} font-medium`}>{foto.fecha}</p>
                   </div>
                 </div>
@@ -7948,7 +7947,7 @@ const GuestCameraView = ({ eventId }) => {
                    {urls.map((u, idx) => (
                      <div key={idx} className={`w-full flex-shrink-0 snap-center relative border-y ${tBorder}`}>
                        <img src={u} alt={`Post ${idx}`} className={`w-full h-auto object-cover max-h-[70vh] sm:max-h-[600px] ${tBgBase}`} loading="lazy" />
-                       {config.marcoUrl && <img src={config.marcoUrl} className="absolute inset-0 w-full h-full object-cover pointer-events-none z-10" />}
+                       {config?.marcoUrl && <img src={config.marcoUrl} className="absolute inset-0 w-full h-full object-cover pointer-events-none z-10" />}
                        {urls.length > 1 && <div className="absolute top-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded-full backdrop-blur-md z-20">{idx + 1} / {urls.length}</div>}
                      </div>
                    ))}
@@ -7977,7 +7976,7 @@ const GuestCameraView = ({ eventId }) => {
                      </p>
                   )}
 
-                  {foto.mensaje && <p className={`text-sm ${tTextMain} mb-1.5 leading-snug`}><span className="font-bold mr-2">{foto.autor}</span>{renderTextWithHashtags(foto.mensaje)}</p>}
+                  {foto.mensaje && <p className={`text-sm ${tTextMain} mb-1.5 leading-snug`}><span className="font-bold mr-2">{foto.autor || 'Anónimo'}</span>{renderTextWithHashtags(foto.mensaje || '')}</p>}
                   
                   {commentCount > 0 && (
                     <button onClick={() => setActivePostComments(foto)} className={`text-xs ${tTextSub} font-medium hover:${tTextMain} transition-colors mt-1 mb-2`}>
@@ -8040,7 +8039,7 @@ const GuestCameraView = ({ eventId }) => {
                  {postDraft.previewUrls.map((url, i) => (
                     <div key={i} className={`relative w-64 sm:w-80 h-80 sm:h-96 flex-shrink-0 snap-center rounded-2xl overflow-hidden border ${tBorder} shadow-sm`}>
                        <img src={url} className="w-full h-full object-cover" />
-                       {config.marcoUrl && <img src={config.marcoUrl} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />}
+                       {config?.marcoUrl && <img src={config.marcoUrl} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />}
                     </div>
                  ))}
                </div>
@@ -8090,10 +8089,10 @@ const GuestCameraView = ({ eventId }) => {
               {activePostComments.mensaje && (
                 <div className={`flex items-start mb-4 border-b ${tBorder} pb-4`}>
                   <div className={`w-8 h-8 ${tBgBase} rounded-full mr-3 flex-shrink-0 overflow-hidden border ${tBorder}`}>
-                    {activePostComments.avatar ? <img src={activePostComments.avatar} className="w-full h-full object-cover"/> : <span className={`font-bold text-xs ${tTextSub} h-full flex items-center justify-center`}>{activePostComments.autor.charAt(0).toUpperCase()}</span>}
+                    {activePostComments.avatar ? <img src={activePostComments.avatar} className="w-full h-full object-cover"/> : <span className={`font-bold text-xs ${tTextSub} h-full flex items-center justify-center`}>{(activePostComments.autor || '?').charAt(0).toUpperCase()}</span>}
                   </div>
                   <div>
-                    <p className={`text-sm ${tTextMain}`}><span className="font-bold mr-2">{activePostComments.autor}</span>{renderTextWithHashtags(activePostComments.mensaje)}</p>
+                    <p className={`text-sm ${tTextMain}`}><span className="font-bold mr-2">{activePostComments.autor || 'Anónimo'}</span>{renderTextWithHashtags(activePostComments.mensaje || '')}</p>
                     <p className={`text-[10px] ${tTextSub} mt-1`}>{activePostComments.fecha}</p>
                   </div>
                 </div>
@@ -8108,10 +8107,10 @@ const GuestCameraView = ({ eventId }) => {
                     <div key={c.id} className="flex flex-col">
                       <div className="flex items-start group">
                         <div className={`w-8 h-8 ${tBgBase} rounded-full mr-3 flex-shrink-0 overflow-hidden border ${tBorder}`}>
-                          {c.avatar ? <img src={c.avatar} className="w-full h-full object-cover"/> : <span className={`font-bold text-xs ${tTextSub} h-full flex items-center justify-center`}>{c.autor.charAt(0).toUpperCase()}</span>}
+                          {c.avatar ? <img src={c.avatar} className="w-full h-full object-cover"/> : <span className={`font-bold text-xs ${tTextSub} h-full flex items-center justify-center`}>{(c.autor || '?').charAt(0).toUpperCase()}</span>}
                         </div>
                         <div className="flex-1 pr-2">
-                          <p className={`text-sm ${tTextMain}`}><span className="font-bold mr-2">{c.autor}</span>{renderTextWithHashtags(c.texto)}</p>
+                          <p className={`text-sm ${tTextMain}`}><span className="font-bold mr-2">{c.autor || 'Anónimo'}</span>{renderTextWithHashtags(c.texto || '')}</p>
                           <div className="flex items-center gap-3 mt-1">
                             <span className={`text-[10px] ${tTextSub} font-medium`}>{c.likes?.length > 0 ? `${c.likes.length} Me gusta` : ''}</span>
                             <button onClick={() => setReplyingTo({ commentId: c.id, autor: c.autor })} className={`text-[10px] font-bold ${tTextSub} hover:${tTextMain} transition-colors`}>Responder</button>
@@ -8127,10 +8126,10 @@ const GuestCameraView = ({ eventId }) => {
                             return (
                               <div key={r.id} className="flex items-start">
                                 <div className={`w-6 h-6 ${tBgBase} rounded-full mr-2 flex-shrink-0 overflow-hidden border ${tBorder}`}>
-                                  {r.avatar ? <img src={r.avatar} className="w-full h-full object-cover"/> : <span className={`font-bold text-[9px] ${tTextSub} h-full flex items-center justify-center`}>{r.autor.charAt(0).toUpperCase()}</span>}
+                                  {r.avatar ? <img src={r.avatar} className="w-full h-full object-cover"/> : <span className={`font-bold text-[9px] ${tTextSub} h-full flex items-center justify-center`}>{(r.autor || '?').charAt(0).toUpperCase()}</span>}
                                 </div>
                                 <div className="flex-1 pr-2">
-                                  <p className={`text-xs ${tTextMain}`}><span className="font-bold mr-1.5">{r.autor}</span>{renderTextWithHashtags(r.texto)}</p>
+                                  <p className={`text-xs ${tTextMain}`}><span className="font-bold mr-1.5">{r.autor || 'Anónimo'}</span>{renderTextWithHashtags(r.texto || '')}</p>
                                   <span className={`text-[9px] ${tTextSub} font-medium mt-0.5 block`}>{r.likes?.length > 0 ? `${r.likes.length} Me gusta` : ''}</span>
                                 </div>
                                 <button onClick={() => toggleCommentLike(activePostComments, true, c.id, r.id)} className={`pt-1 transition-transform active:scale-75 ${rLiked ? 'text-rose-500' : `${tTextSub} hover:text-pink-400`}`}><Heart size={10} className={rLiked ? 'fill-rose-500' : ''}/></button>
@@ -8154,7 +8153,7 @@ const GuestCameraView = ({ eventId }) => {
               )}
               <div className={`flex items-center ${tBgCard} border ${tBorder} rounded-full pl-4 pr-1.5 py-1.5 shadow-sm focus-within:border-indigo-400 transition-colors`}>
                 <div className={`w-7 h-7 ${tBgBase} rounded-full mr-2 flex-shrink-0 overflow-hidden border ${tBorder}`}>
-                  {guestAvatar ? <img src={guestAvatar} className="w-full h-full object-cover"/> : <span className={`font-bold text-[10px] ${tTextSub} h-full flex items-center justify-center`}>{currentUserName?.charAt(0).toUpperCase() || '?'}</span>}
+                  {guestAvatar ? <img src={guestAvatar} className="w-full h-full object-cover"/> : <span className={`font-bold text-[10px] ${tTextSub} h-full flex items-center justify-center`}>{(currentUserName || '?').charAt(0).toUpperCase()}</span>}
                 </div>
                 <input 
                   type="text" 
