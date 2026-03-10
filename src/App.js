@@ -444,9 +444,9 @@ const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setAc
 };
 
 // ==========================================
-// --- COMPONENTE: RECEPCIÓN Y ESCÁNER (AUTOMÁTICO Y DIRECTO) ---
+// --- COMPONENTE: RECEPCIÓN Y ESCÁNER (CERO ALERTAS NATIVAS) ---
 // ==========================================
-const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, simulateSharedMode }) => {
+const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, simulateSharedMode, addNotification }) => {
   const [forceMobile, setForceMobile] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
   
@@ -459,9 +459,8 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   const [camError, setCamError] = useState(null);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
-  // Ficha inteligente debajo del escáner
   const [cardData, setCardData] = useState({ 
-    status: 'idle', // idle, success, warning, error
+    status: 'idle', 
     title: 'Esperando código...', 
     subtitle: 'Apunta la cámara a la pulsera del invitado.' 
   });
@@ -469,11 +468,9 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   const scannerRef = useRef(null);
   const lastScannedCode = useRef(null);
   
-  // Memoria en tiempo real para la lista manual
   const guestsRef = useRef(guests || []);
   useEffect(() => { guestsRef.current = guests || []; }, [guests]);
 
-  // 🔴 DETECCIÓN DE PANTALLA
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
     window.addEventListener('resize', handleResize);
@@ -482,42 +479,34 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 
   const showDesktopPlaceholder = isDesktop && !forceMobile && !isSharedMode;
 
-  // 🔴 MOTOR DE CÁMARA AUTOMÁTICA Y CONTINUA
   useEffect(() => {
-    // Si estamos en la vista de escritorio, no prendemos la cámara.
     if (showDesktopPlaceholder) return;
 
     let html5QrCode;
-    
     const initScanner = () => {
       if (!window.Html5Qrcode) {
         setTimeout(initScanner, 500); 
         return;
       }
-      
       try {
         html5QrCode = new window.Html5Qrcode("qr-reader-puerta");
         scannerRef.current = html5QrCode;
         
         html5QrCode.start(
-          { facingMode: "environment" }, // Fuerza la cámara trasera en celulares
+          { facingMode: "environment" }, 
           { fps: 10, qrbox: { width: 250, height: 250 } },
           (decodedText) => {
-             // 1. Extraemos el ID limpio
              let code = decodedText;
              try {
                 const parsedUrl = new URL(decodedText);
                 code = parsedUrl.searchParams.get('u') || parsedUrl.searchParams.get('usr') || parsedUrl.searchParams.get('uid') || parsedUrl.searchParams.get('invitado') || code;
              } catch(e) {}
              
-             // 2. Prevenimos escanear el mismo código 20 veces por segundo
              if (lastScannedCode.current === code) return;
              lastScannedCode.current = code;
-             setTimeout(() => { lastScannedCode.current = null; }, 3000); // Bloqueo de 3 segundos para el MISMO código
+             setTimeout(() => { lastScannedCode.current = null; }, 3000);
 
-             if (code && code !== 'null') {
-                processEntry(code);
-             }
+             if (code && code !== 'null') processEntry(code);
           },
           (errorMessage) => {}
         ).catch(err => {
@@ -535,10 +524,8 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     };
   }, [showDesktopPlaceholder]);
 
-  // 🔴 LÓGICA DE ACCESO CONECTADA A BASE DE DATOS
   const processEntry = async (code) => {
     const codeLower = code.trim().toLowerCase();
-    
     let foundParentId = null;
     let targetSubId = null;
 
@@ -617,22 +604,32 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     } catch(e){}
   };
 
+  // 🔴 CONSTRUCTOR DE URLS LIMPIAS
+  const getCleanBaseUrl = () => {
+    let base = window.location.href.split('?')[0];
+    if (base.endsWith('/')) base = base.slice(0, -1);
+    return base;
+  };
+
   const copyStaffLink = () => {
-    const url = window.location.origin + '/?modo=puerta&e=' + ID_DEL_EVENTO;
+    const url = `${getCleanBaseUrl()}/?modo=puerta&e=${ID_DEL_EVENTO}`;
     navigator.clipboard.writeText(url).then(() => {
-      alert('¡Enlace de Puerta copiado!');
+      if (addNotification) addNotification('¡Copiado!', 'Enlace de Recepción copiado.', 'success');
     }).catch(() => {
       const textArea = document.createElement("textarea");
       textArea.value = url;
       document.body.appendChild(textArea);
       textArea.select();
-      try { document.execCommand('copy'); alert('¡Enlace de Puerta copiado!'); } catch (err) {}
+      try { 
+         document.execCommand('copy'); 
+         if (addNotification) addNotification('¡Copiado!', 'Enlace de Recepción copiado.', 'success');
+      } catch (err) {}
       document.body.removeChild(textArea);
     });
   };
 
   const shareStaffLinkWhatsApp = () => {
-    const url = window.location.origin + '/?modo=puerta&e=' + ID_DEL_EVENTO;
+    const url = `${getCleanBaseUrl()}/?modo=puerta&e=${ID_DEL_EVENTO}`;
     const msg = `📱 *Recepción EventMaster*\n\nAccede al escáner de puerta aquí:\n${url}`;
     window.open(`https://wa.me/${staffPhone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
   };
@@ -652,7 +649,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     return matchesSearch;
   });
 
-  // 🔴 VISTA DE ESCRITORIO (PANEL DE CONTROL)
   if (showDesktopPlaceholder) {
      return (
         <div className="h-full flex flex-col items-center justify-center p-6 animate-in fade-in">
@@ -683,7 +679,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
      );
   }
 
-  // 🔴 VISTA MÓVIL (ESCÁNER REAL)
   return (
     <div className={`h-full flex flex-col space-y-4 pb-6 ${isSharedMode ? 'max-w-lg mx-auto' : 'max-w-4xl'}`}>
       
@@ -707,8 +702,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
       </div>
 
       <div className="flex flex-col gap-4 flex-1">
-        
-        {/* ESCÁNER VISUAL */}
         <div className="w-full bg-slate-900 rounded-3xl overflow-hidden relative shadow-2xl flex-shrink-0" style={{ height: '350px' }}>
           {camError ? (
             <button onClick={() => window.location.reload()} className="absolute inset-0 flex flex-col items-center justify-center text-white bg-slate-800 p-6 text-center">
@@ -727,7 +720,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           )}
         </div>
 
-        {/* FICHA INTELIGENTE */}
         <div className={`w-full p-6 rounded-3xl shadow-lg border-2 transition-all flex flex-col justify-center min-h-[140px] flex-shrink-0 relative overflow-hidden
             ${cardData.status === 'idle' ? 'bg-white border-slate-200' : ''}
             ${cardData.status === 'success' ? 'bg-emerald-50 border-emerald-400 shadow-emerald-500/20 scale-[1.02]' : ''}
@@ -750,7 +742,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
                 {cardData.subtitle}
               </p>
            </div>
-           
            {cardData.status === 'success' && <CheckCircle size={100} className="absolute -right-4 -bottom-4 text-emerald-500/10 pointer-events-none"/>}
            {cardData.status === 'warning' && <AlertTriangle size={100} className="absolute -right-4 -bottom-4 text-amber-500/10 pointer-events-none"/>}
            {cardData.status === 'error' && <X size={100} className="absolute -right-4 -bottom-4 text-rose-500/10 pointer-events-none"/>}
@@ -828,7 +819,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
               <input type="tel" placeholder="Número WhatsApp..." value={staffPhone} onChange={e=>setStaffPhone(e.target.value)} className="w-full p-3 border border-slate-200 rounded-xl font-bold outline-none focus:border-emerald-500" />
               <button onClick={shareStaffLinkWhatsApp} className="px-5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600"><Send size={18}/></button>
             </div>
-            <button onClick={copyStaffLink} className="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors mb-2 flex justify-center items-center"><Link size={18} className="mr-2"/> Copiar enlace manual</button>
+            <button onClick={() => { setShowShareModal(false); setForceMobile(true); }} className="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors mb-2">Simular en esta pantalla</button>
           </div>
         </div>
       )}
@@ -8985,7 +8976,7 @@ const ConfiguracionMaestraView = ({ agencyConfig, addNotification }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: VISOR PÚBLICO WIDGET (Transparente y Comunicativo) ---
+// --- COMPONENTE: VISOR PÚBLICO WIDGET (CERO ALERTAS) ---
 // ==========================================
 const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [eventoInfo, setEventoInfo] = useState(null);
@@ -8993,6 +8984,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [loading, setLoading] = useState(true);
   const [showRSVP, setShowRSVP] = useState(false);
   const [rsvpStatus, setRsvpStatus] = useState('idle'); 
+  const [formError, setFormError] = useState(''); // 🔴 ESTADO NATIVO DE ERROR
   
   const [guestPhone, setGuestPhone] = useState('');
   const [tempSubGuests, setTempSubGuests] = useState([]);
@@ -9001,7 +8993,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [openName, setOpenName] = useState('');
 
   const urlParams = new URLSearchParams(window.location.search);
-  
   const isIframe = urlParams.get('iframe') === 'true';
   
   const t_bg = urlParams.get('bg') ? `#${urlParams.get('bg')}` : '#f8fafc'; 
@@ -9010,12 +9001,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const t_txt = urlParams.get('txt') ? `#${urlParams.get('txt')}` : '#1c1917'; 
   const t_font = urlParams.get('font') || '';
 
-  const themeContainer = { 
-    backgroundColor: isIframe ? 'transparent' : t_bg, 
-    fontFamily: t_font ? `"${t_font}", sans-serif` : 'inherit', 
-    minHeight: '100vh', 
-    color: t_txt 
-  };
+  const themeContainer = { backgroundColor: isIframe ? 'transparent' : t_bg, fontFamily: t_font ? `"${t_font}", sans-serif` : 'inherit', minHeight: '100vh', color: t_txt };
   const themeCard = { backgroundColor: t_card, borderColor: `${t_txt}40`, color: t_txt };
   const themeBtn = { backgroundColor: t_btn, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.1em' };
   const themeInput = { backgroundColor: isIframe ? 'rgba(255,255,255,0.5)' : `${t_bg}80`, color: t_txt, borderColor: `${t_txt}40` };
@@ -9053,6 +9039,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   }, [eventId, guestUid]);
 
   const handleSubGuestChange = (index, field, value) => {
+    setFormError('');
     const newSubGuests = [...tempSubGuests];
     newSubGuests[index] = { ...newSubGuests[index], [field]: value };
     setTempSubGuests(newSubGuests);
@@ -9061,6 +9048,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const handleRSVPSubmit = async (e) => {
     e.preventDefault();
     setRsvpStatus('submitting');
+    setFormError('');
     try {
       if (guestUid && guestInfo) {
         const attendingGuests = tempSubGuests.filter(sg => sg.willAttend);
@@ -9068,7 +9056,11 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
 
         if (!isCancelled) {
           const emptyNames = attendingGuests.filter(sg => !sg.name.trim());
-          if(emptyNames.length > 0) { alert("Por favor, ingresa el nombre de todos los que SÍ asistirán."); setRsvpStatus('idle'); return; }
+          if(emptyNames.length > 0) { 
+             setFormError("Por favor, ingresa el nombre de todos los que SÍ asistirán."); 
+             setRsvpStatus('idle'); 
+             return; 
+          }
         }
 
         const updatedGuest = {
@@ -9090,7 +9082,10 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
         setTimeout(() => { window.parent.postMessage('rsvp_success', '*'); }, 2000); 
       }
 
-    } catch (error) { alert("Hubo un error al confirmar. Intenta de nuevo."); setRsvpStatus('idle'); }
+    } catch (error) { 
+      setFormError("Hubo un error al guardar. Revisa tu conexión de red."); 
+      setRsvpStatus('idle'); 
+    }
   };
 
   if (loading) return <div style={themeContainer} className="flex items-center justify-center animate-pulse text-2xl font-bold">Cargando Misión...</div>;
@@ -9158,16 +9153,9 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                               value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)} 
                               style={themeInput} className="w-full p-3 border-4 rounded-lg text-lg font-bold outline-none" 
                             />
-                            {/* 🔴 CHECKBOX LIMPIO Y PERFECTO PARA EL INVITADO */}
                             <label className="flex items-center space-x-3 cursor-pointer pt-1">
-                               <input 
-                                 type="checkbox" checked={sg.isChild || false} 
-                                 onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} 
-                                 className="w-5 h-5 accent-indigo-600" 
-                               />
-                               <span className="text-sm font-bold uppercase tracking-widest opacity-80">
-                                 Es un Niño (Menor)
-                               </span>
+                               <input type="checkbox" checked={sg.isChild || false} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-5 h-5 accent-indigo-600" />
+                               <span className="text-sm font-bold uppercase tracking-widest opacity-80">Es un Niño (Menor)</span>
                             </label>
                           </div>
                         )}
@@ -9202,6 +9190,13 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                 </div>
               )}
               
+              {/* 🔴 ALERTA ROJA NATIVA Y ELEGANTE */}
+              {formError && (
+                 <div className="bg-red-500/20 border-2 border-red-500 text-white p-3 rounded-xl font-bold text-sm flex items-center shadow-lg animate-in shake">
+                    <AlertCircle size={20} className="mr-2 flex-shrink-0"/> {formError}
+                 </div>
+              )}
+
               <button type="submit" disabled={rsvpStatus === 'submitting'} style={{...themeBtn, opacity: (!guestInfo || tempSubGuests.filter(s => s.willAttend).length > 0) ? 1 : 0.8 }} className="w-full py-5 rounded-xl font-bold text-2xl hover:scale-[1.02] transition-transform mt-6 border-b-8 border-black/30">
                 {rsvpStatus === 'submitting' ? 'GUARDANDO...' : (!guestInfo || tempSubGuests.filter(s => s.willAttend).length > 0 ? 'GUARDAR PARTIDA' : 'DECLINAR MISIÓN')}
               </button>
@@ -9300,7 +9295,6 @@ const LoginScreen = () => {
 const AdminDashboard = ({ authData }) => {
   const { role: userRole, plan: userPlan, eventId } = authData;
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
   const [activeTab, setActiveTab] = useState(userRole === 'superadmin' ? 'licencias' : 'dashboard');  
   
   const [tareas, setTareas] = useState([]); 
@@ -9339,7 +9333,6 @@ const AdminDashboard = ({ authData }) => {
 
   useEffect(() => {
     if (userRole === 'superadmin') return;
-
     setGlobalEventId(eventId);
 
     const unsubConfigMain = onSnapshot(doc(db, "eventos", eventId), (docSnap) => {
@@ -9354,36 +9347,25 @@ const AdminDashboard = ({ authData }) => {
       if (docSnap.exists()) setAgencyConfig(docSnap.data());
     });
 
-    // 🔴 MOTOR DE NOTIFICACIONES EN VIVO (RSVP)
     const unsubGuests = onSnapshot(collection(db, "eventos", eventId, "invitados"), (snap) => {
       const newGuests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      
-      // Comparamos los datos nuevos con los viejos para lanzar notificaciones
       if (prevGuestsRef.current.length > 0) {
          newGuests.forEach(newG => {
             const oldG = prevGuestsRef.current.find(g => g.id === newG.id);
             if (oldG) {
-               // 1. Confirmó Asistencia
                if ((oldG.status === 'pendiente' || oldG.status === 'por_invitar') && newG.status === 'confirmado') {
                   addNotification('¡Nueva Confirmación!', `${newG.name} ha confirmado (${newG.passes} lugares).`, 'success', 'invitados');
-               } 
-               // 2. Declinó Invitación
-               else if (oldG.status !== 'cancelado' && newG.status === 'cancelado') {
+               } else if (oldG.status !== 'cancelado' && newG.status === 'cancelado') {
                   addNotification('Invitación Declinada', `${newG.name} ha liberado sus lugares.`, 'danger', 'invitados');
-               } 
-               // 3. Modificó y Canceló a un acompañante (Liberó pases)
-               else if (oldG.status === 'confirmado' && newG.status === 'confirmado' && newG.passes < oldG.passes) {
+               } else if (oldG.status === 'confirmado' && newG.status === 'confirmado' && newG.passes < oldG.passes) {
                   addNotification('Lugares Liberados', `${newG.name} redujo su grupo y liberó ${oldG.passes - newG.passes} lugar(es).`, 'warning', 'invitados');
                }
-
-               // 4. Solicitó Pases Extra
                if (newG.extraRequested > (oldG.extraRequested || 0)) {
                   addNotification('Pases Extra', `${newG.name} solicita ${newG.extraRequested} pase(s) extra.`, 'warning', 'invitados');
                }
             }
          });
       }
-      
       prevGuestsRef.current = newGuests;
       setGuests(newGuests);
     });
@@ -9405,7 +9387,8 @@ const AdminDashboard = ({ authData }) => {
       case 'licencias': return userRole === 'superadmin' && typeof SuperAdminView !== 'undefined' ? <SuperAdminView /> : null;
       case 'dashboard': return typeof DashboardView !== 'undefined' ? <DashboardView guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null; 
       case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
-      case 'escaner': return userPlan === 'diamante' && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} /> : null; 
+      // 🔴 AQUÍ PASAMOS LA FUNCIÓN DE NOTIFICACIONES AL ESCÁNER DE ESCRITORIO
+      case 'escaner': return userPlan === 'diamante' && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
       case 'mesas': return userPlan === 'diamante' && typeof MesasView !== 'undefined' ? <MesasView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
       case 'mapa': return userPlan === 'diamante' && typeof MapaView !== 'undefined' ? <MapaView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} globalSearch={globalSearch} elements={mapElements} setElements={setMapElements} /> : null;
       case 'decoracion': return userPlan === 'diamante' && typeof DecoracionView !== 'undefined' ? <DecoracionView elements={decoElements} setElements={setDecoElements} addNotification={addNotification} /> : null; 
@@ -9459,37 +9442,51 @@ export default function App() {
   const urlParams = new URLSearchParams(window.location.search);
   const modoApp = urlParams.get('modo');
 
+  const eventIdParam = urlParams.get('e') || urlParams.get('evt') || urlParams.get('id');
+  const guestUidParam = urlParams.get('u') || urlParams.get('usr') || urlParams.get('uid') || urlParams.get('invitado');
+
   const [authData, setAuthData] = useState({ isAuthenticated: false, role: null, plan: null, eventId: null });
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [accountSuspended, setAccountSuspended] = useState(false);
 
-  // 🔴 EL "VIGILANTE" DE SESIONES Y CUENTAS SUSPENDIDAS
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const q = query(collection(db, "usuarios"), where("email", "==", user.email.toLowerCase()));
-        const querySnapshot = await getDocs(q);
-        
-        if (!querySnapshot.empty) {
-          const userData = querySnapshot.docs[0].data();
-          
-          // VERIFICACIÓN DE SUSPENSIÓN
-          if (userData.status === 'suspendido') {
-             await signOut(auth);
-             alert("Esta cuenta ha sido suspendida. Por favor, contacta a tu administrador.");
-             setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null });
-             setIsCheckingAuth(false);
-             return;
-          }
+    if (!window.Html5QrcodeScanner && !document.getElementById('qr-script')) {
+      const script = document.createElement('script');
+      script.id = 'qr-script';
+      script.src = "https://unpkg.com/html5-qrcode";
+      script.async = true;
+      document.body.appendChild(script);
+    }
 
-          setAuthData({ isAuthenticated: true, role: userData.role, plan: userData.plan, eventId: userData.eventId });
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      try {
+        if (user && user.email) {
+          const q = query(collection(db, "usuarios"), where("email", "==", user.email.toLowerCase()));
+          const querySnapshot = await getDocs(q);
+          
+          if (!querySnapshot.empty) {
+            const userData = querySnapshot.docs[0].data();
+            
+            // 🔴 PANTALLA ROJA NATIVA EN LUGAR DE ALERT()
+            if (userData.status === 'suspendido') {
+               await signOut(auth);
+               setAccountSuspended(true);
+               setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null });
+            } else {
+               setAuthData({ isAuthenticated: true, role: userData.role, plan: userData.plan, eventId: userData.eventId });
+            }
+          } else {
+            await signOut(auth);
+            setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null });
+          }
         } else {
-          await signOut(auth);
           setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null });
         }
-      } else {
+      } catch (error) {
         setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null });
+      } finally {
+        setIsCheckingAuth(false);
       }
-      setIsCheckingAuth(false);
     });
 
     return () => unsubscribe();
@@ -9499,22 +9496,35 @@ export default function App() {
     return <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center text-indigo-400 font-bold"><RefreshCw size={40} className="animate-spin mb-4" /> Autenticando...</div>;
   }
 
-  // Rutas públicas (Invitados sin panel)
-  if (modoApp === 'camara') { return <GuestCameraView />; }
-  if (modoApp === 'proyector') { return <GuestProyectorView />; }
-  // 🔴 LA NUEVA RUTA: EL VISOR PÚBLICO DE LA INVITACIÓN
+  // PANTALLA NATIVA DE SUSPENSIÓN
+  if (accountSuspended) {
+    return (
+      <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
+        <AlertTriangle size={64} className="text-rose-500 mb-4 animate-pulse" />
+        <h1 className="text-2xl font-black text-white mb-2">Cuenta Suspendida</h1>
+        <p className="text-slate-400 max-w-sm">Por favor, contacta a tu administrador de plataforma para reactivar tu licencia.</p>
+      </div>
+    );
+  }
+
+  // RUTAS PÚBLICAS
+  if (modoApp === 'camara') { 
+    if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Enlace roto (Falta código de evento).</div>;
+    return <GuestCameraView eventId={eventIdParam} />; 
+  } 
+  if (modoApp === 'proyector') { 
+    if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Enlace roto (Falta código de evento).</div>;
+    return <GuestProyectorView eventId={eventIdParam} />; 
+  } 
   if (modoApp === 'invitacion') { 
-    const idDelEnlace = urlParams.get('id');
-    const uidInvitado = urlParams.get('uid'); // Leemos el código secreto del invitado
-    if (!idDelEnlace) return <div className="p-10 text-center font-bold text-rose-500">Error: Enlace de invitación roto (Falta ID).</div>;
-    return <InvitacionPublicaView eventId={idDelEnlace} guestUid={uidInvitado} />; 
+    if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Enlace de invitación roto.</div>;
+    return <InvitacionPublicaView eventId={eventIdParam} guestUid={guestUidParam} />; 
+  }
+  if (modoApp === 'puerta') {
+    if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 text-2xl mt-10">❌ Enlace de puerta inválido.</div>;
+    return <HostessStandaloneView eventId={eventIdParam} />;
   }
 
-  // Pantalla de bloqueo si no hay sesión
-  if (!authData.isAuthenticated) {
-    return <LoginScreen />;
-  }
-
-  // Panel cargado con permisos
+  if (!authData.isAuthenticated) { return <LoginScreen />; }
   return <AdminDashboard authData={authData} />;
 }
