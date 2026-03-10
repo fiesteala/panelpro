@@ -567,8 +567,12 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
          }
       }
 
+      // 🔴 SACAMOS LA MESA ANTES PARA MOSTRARLA INCLUSO SI YA INGRESÓ
+      const tableName = tables.find(t => String(t.id) === String(freshParent.tableId))?.name || 'Sin Mesa Asignada';
+
       if (targetSub.entered) { 
-        setCardData({ status: 'warning', title: 'Ya Ingresó', subtitle: `${targetSub.name} ya cruzó la puerta anteriormente.` });
+        // 🔴 DEJA LOS DATOS PERO MARCA AMARILLO
+        setCardData({ status: 'warning', title: targetSub.name, subtitle: `Asignado a: ${tableName}` });
         return; 
       }
 
@@ -578,8 +582,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
       let newStatus = freshParent.status;
       if (enteredCount > 0 && newStatus !== 'ingreso') newStatus = 'ingreso';
 
-      const tableName = tables.find(t => String(t.id) === String(freshParent.tableId))?.name || 'Sin Mesa Asignada';
-      
       setCardData({ status: 'success', title: targetSub.name, subtitle: `Asignado a: ${tableName}` });
       await setDoc(docRef, { ...freshParent, subGuests: newSubs, entered: enteredCount, status: newStatus });
       
@@ -604,7 +606,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     } catch(e){}
   };
 
-  // 🔴 CONSTRUCTOR DE URLS LIMPIAS
   const getCleanBaseUrl = () => {
     let base = window.location.href.split('?')[0];
     if (base.endsWith('/')) base = base.slice(0, -1);
@@ -702,7 +703,8 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
       </div>
 
       <div className="flex flex-col gap-4 flex-1">
-        <div className="w-full bg-slate-900 rounded-3xl overflow-hidden relative shadow-2xl flex-shrink-0" style={{ height: '350px' }}>
+        {/* 🔴 ESCÁNER CUADRADO PERFECTO */}
+        <div className="w-full max-w-[350px] mx-auto bg-slate-900 rounded-3xl overflow-hidden relative shadow-2xl flex-shrink-0 aspect-square">
           {camError ? (
             <button onClick={() => window.location.reload()} className="absolute inset-0 flex flex-col items-center justify-center text-white bg-slate-800 p-6 text-center">
               <Camera size={48} className="text-rose-500 mb-4"/>
@@ -733,7 +735,8 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
                 ${cardData.status === 'warning' ? 'text-amber-600' : ''}
                 ${cardData.status === 'error' ? 'text-rose-600' : ''}
               `}>
-                 {cardData.status === 'idle' ? 'ESTADO: LISTO' : cardData.status === 'success' ? 'ACCESO APROBADO' : cardData.status === 'warning' ? 'ATENCIÓN' : 'ERROR'}
+                 {/* 🔴 EL TEXTO CAMBIA A YA INGRESÓ CUANDO ES AMARILLO */}
+                 {cardData.status === 'idle' ? 'ESTADO: LISTO' : cardData.status === 'success' ? 'ACCESO APROBADO' : cardData.status === 'warning' ? 'YA INGRESÓ' : 'ERROR'}
               </p>
               <h3 className={`text-2xl sm:text-3xl font-black leading-tight mb-2 ${cardData.status === 'idle' ? 'text-slate-700' : 'text-slate-900'}`}>
                 {cardData.title}
@@ -829,7 +832,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 };
 
 // ==========================================
-// --- COMPONENTE: INVITADOS (UI PERFECCIONADA) ---
+// --- COMPONENTE: INVITADOS (UI PERFECCIONADA CON FORMATO PULSERA 25X19) ---
 // ==========================================
 const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
   const [isWeddingMode, setIsWeddingMode] = useState(true); 
@@ -848,7 +851,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
   const [separateLists, setSeparateLists] = useState(true);
   const [exportCols, setExportCols] = useState({ nombre: true, pases: true, estatus: true, telefono: true, mesa: true });
 
-  // 🔴 ESTADOS MOTOR PDF
   const [isPreparingListPrint, setIsPreparingListPrint] = useState(false);
   const [isPreparingQRPrint, setIsPreparingQRPrint] = useState(false);
 
@@ -919,12 +921,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", parentGuest.id), updatedGuest);
     const domain = window.location.origin; 
     const linkPersonalizado = `${domain}/?modo=invitacion&id=${ID_DEL_EVENTO}&uid=${parentGuest.id}`;
-    const msg = `✨ ¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.
-
-Tu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):
-🔗 ${linkPersonalizado}
-
-¡No faltes!`;
+    const msg = `✨ ¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n🔗 ${linkPersonalizado}\n\n¡No faltes!`;
 
     const phone = parentGuest.phone ? parentGuest.phone.replace(/\D/g,'') : '';
     if (phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -935,7 +932,6 @@ Tu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver lo
     const nuevoId = Date.now().toString();
     const pNum = Number(newGuest.passes) || 1;
     
-    // 🔴 MAGIA 1: Creamos los lugares de los acompañantes desde el momento cero
     const initSubGuests = Array(pNum).fill(null).map((_, i) => ({
       id: `usr_${nuevoId}_${i}`,
       name: i === 0 ? newGuest.name : `Acompañante ${i+1}`,
@@ -953,7 +949,7 @@ Tu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver lo
       entered: 0, 
       tableId: null, 
       sent: false, 
-      subGuests: initSubGuests, // Aquí insertamos los acompañantes vacíos
+      subGuests: initSubGuests,
       extraRequested: 0, 
       originalPasses: pNum
     };
@@ -978,7 +974,6 @@ Tu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver lo
 
   const toggleCol = (col) => setExportCols(prev => ({ ...prev, [col]: !prev[col] }));
 
-  // 🔴 MOTORES DE DESCARGA PDF
   const triggerListPdfDownload = async () => {
     setIsPreparingListPrint(true);
     setTimeout(async () => {
@@ -1004,6 +999,7 @@ Tu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver lo
     }, 500);
   };
 
+  // 🔴 MOTOR PDF EXACTO A 25cm x 19cm (Horizontal Landscape)
   const triggerQRPdfDownload = async () => {
     setIsPreparingQRPrint(true);
     setTimeout(async () => {
@@ -1011,15 +1007,17 @@ Tu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver lo
         const { jsPDF } = await import('jspdf');
         const html2canvas = (await import('html2canvas')).default;
         const pages = document.querySelectorAll('.qr-pdf-page');
-        const pdf = new jsPDF('l', 'mm', 'letter'); // LANDSCAPE
+        
+        // Orientación Landscape con tamaño exacto de la lámina: 19cm de alto, 25cm de ancho
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'cm', format: [19, 25] });
 
         for (let i = 0; i < pages.length; i++) {
-           const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-           const imgData = canvas.toDataURL('image/jpeg', 0.95);
-           if (i > 0) pdf.addPage();
-           pdf.addImage(imgData, 'JPEG', 0, 0, 279.4, 215.9);
+           const canvas = await html2canvas(pages[i], { scale: 3, useCORS: true, backgroundColor: '#ffffff' });
+           const imgData = canvas.toDataURL('image/jpeg', 1.0);
+           if (i > 0) pdf.addPage([19, 25], 'landscape');
+           pdf.addImage(imgData, 'JPEG', 0, 0, 25, 19);
         }
-        pdf.save('Pulseras-QR.pdf');
+        pdf.save('Pulseras-VIP.pdf');
         if(addNotification) addNotification('¡PDF Guardado!', 'Revisa tu carpeta de descargas.', 'success');
       } catch (error) {
         if(addNotification) addNotification('Error', 'Hubo un fallo al generar el archivo PDF.', 'error');
@@ -1029,7 +1027,6 @@ Tu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver lo
     }, 500);
   };
 
-  // --- VISTA 1: ESTUDIO DE IMPRESIÓN LISTAS (PDF REPORTES) ---
   if (exportViewOpen) {
     const allList = getFlattenedGuests(invitadosFiltrados);
     const PAGE_1_LIMIT = 26;
@@ -1037,8 +1034,7 @@ Tu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver lo
     
     let filteredChunks = [];
     if (isWeddingMode && separateLists) {
-       // Separados por lado. (Simplificado para evitar sobrecarga de código, juntamos todos pero marcados)
-       filteredChunks = [allList]; // Usaremos la lista completa para no hacer la lógica inmensa
+       filteredChunks = [allList]; 
     } else {
        filteredChunks = [allList];
     }
@@ -1150,7 +1146,7 @@ Tu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver lo
           </div>
           <button onClick={triggerQRPdfDownload} disabled={isPreparingQRPrint} className="px-5 py-2.5 bg-pink-600 hover:bg-pink-500 rounded-xl text-sm font-bold flex items-center shadow-lg disabled:bg-slate-500 transition-all">
             {isPreparingQRPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
-            {isPreparingQRPrint ? 'Preparando...' : 'Descargar PDF (Horizontal)'}
+            {isPreparingQRPrint ? 'Preparando...' : 'Descargar PDF (25x19)'}
           </button>
         </div>
         
@@ -1159,12 +1155,13 @@ Tu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver lo
              <div className="text-center py-20 text-slate-400 font-bold">No hay invitados confirmados para generar códigos QR.</div>
            ) : (
              wristbandPages.map((page, pageIdx) => (
-               <div key={pageIdx} className="qr-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '279.4mm', height: '215.9mm', padding: '10mm', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflow: 'hidden' }}>
+               // 🔴 LÁMINA EXACTA 25cm x 19cm
+               <div key={pageIdx} className="qr-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '25cm', height: '19cm', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflow: 'hidden', padding: 0, margin: 0 }}>
                  {page.map((ind) => {
                    const link = window.location.origin + window.location.pathname + '?modo=camara&uid=' + ind.id;
                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`;
                    return (
-                     <div key={ind.id} style={{ width: '25cm', height: '1.9cm', border: '1px dashed #cbd5e1', display: 'flex', boxSizing: 'border-box', backgroundColor: 'white', margin: '0 auto' }}>
+                     <div key={ind.id} style={{ width: '25cm', height: '1.9cm', borderBottom: '1px dashed #cbd5e1', display: 'flex', boxSizing: 'border-box', backgroundColor: 'white', margin: 0 }}>
                         <div style={{ width: '2.5cm', height: '100%', backgroundColor: '#f1f5f9', borderRight: '1px dashed #94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <span style={{ fontSize: '8px', color: '#94a3b8', transform: 'rotate(-90deg)', letterSpacing: '1px' }}>PEGAMENTO</span>
                         </div>
@@ -1183,7 +1180,7 @@ Tu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver lo
                    )
                  })}
                  {Array.from({ length: 10 - page.length }).map((_, i) => (
-                    <div key={`empty_${i}`} style={{ width: '25cm', height: '1.9cm', border: '1px dashed #e2e8f0', backgroundColor: '#f8fafc', boxSizing: 'border-box', margin: '0 auto' }}></div>
+                    <div key={`empty_${i}`} style={{ width: '25cm', height: '1.9cm', borderBottom: '1px dashed #e2e8f0', backgroundColor: '#f8fafc', boxSizing: 'border-box', margin: 0 }}></div>
                  ))}
                </div>
              ))
@@ -1271,7 +1268,7 @@ Tu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver lo
                         <span className={`${row.isMain ? 'font-bold text-slate-800' : 'font-normal text-slate-700'} ${row.isMissing ? 'text-amber-500 italic' : ''} ${row.parentGuest.status === 'cancelado' ? 'line-through' : ''}`}>
                           {row.displayName}
                         </span>
-                        {isWeddingMode && !row.isMissing && (
+                        {isWeddingMode && !row.isMissing && row.parentGuest.side && (
                           <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest ${row.parentGuest.side === 'novia' ? 'bg-rose-100 text-rose-600' : 'bg-indigo-100 text-indigo-600'}`}>
                             {row.parentGuest.side}
                           </span>
