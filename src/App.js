@@ -614,11 +614,8 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     } catch(e){}
   };
 
-  const getCleanBaseUrl = () => {
-    let base = window.location.href.split('?')[0];
-    if (base.endsWith('/')) base = base.slice(0, -1);
-    return base;
-  };
+  // 🔴 CORRECCIÓN: URL DEL PANEL BAULIA
+  const getCleanBaseUrl = () => window.location.hostname.includes('localhost') ? window.location.origin : 'https://panel.baulia.com';
 
   const copyStaffLink = () => {
     const url = `${getCleanBaseUrl()}/?modo=puerta&e=${ID_DEL_EVENTO}`;
@@ -852,7 +849,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 };
 
 // ==========================================
-// --- COMPONENTE: INVITADOS (UI PERFECCIONADA CON FORMATO PULSERA 25X19) ---
+// --- COMPONENTE: INVITADOS ---
 // ==========================================
 const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
   const [isWeddingMode, setIsWeddingMode] = useState(true); 
@@ -874,6 +871,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
   const [isPreparingListPrint, setIsPreparingListPrint] = useState(false);
   const [isPreparingQRPrint, setIsPreparingQRPrint] = useState(false);
 
+  const safeGuests = guests || [];
+
   const handleOpenAdd = (side) => {
     setNewGuest({ name: '', passes: 1, childrenPasses: 0, phone: '', status: 'por_invitar' });
     setAddModal({ open: true, side });
@@ -883,34 +882,34 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
     setEditModal({ open: true, guest: { ...guest } });
   };
 
-  const totalPases = guests.reduce((sum, g) => sum + g.passes, 0);
-  const totalNinos = guests.reduce((sum, g) => sum + (g.childrenPasses || 0), 0);
-  const totalConfirmados = guests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').reduce((sum, g) => sum + g.passes, 0);
-  const totalPendientes = guests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').reduce((sum, g) => sum + g.passes, 0);
-  const totalIngresos = guests.reduce((sum, g) => sum + (g.entered || 0), 0); 
+  const totalPases = safeGuests.reduce((sum, g) => sum + (g.passes || 0), 0);
+  const totalNinos = safeGuests.reduce((sum, g) => sum + (g.childrenPasses || 0), 0);
+  const totalConfirmados = safeGuests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').reduce((sum, g) => sum + (g.passes || 0), 0);
+  const totalPendientes = safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').reduce((sum, g) => sum + (g.passes || 0), 0);
+  const totalIngresos = safeGuests.reduce((sum, g) => sum + (g.entered || 0), 0); 
   
-  const totalCancelados = guests.reduce((sum, g) => {
-    const pasesOriginales = g.originalPasses || g.passes;
+  const totalCancelados = safeGuests.reduce((sum, g) => {
+    const pasesOriginales = g.originalPasses || g.passes || 0;
     const pasesConfirmados = g.subGuests?.length || 0;
     if (g.status === 'cancelado') return sum + pasesOriginales;
     if (g.status === 'confirmado' || g.status === 'ingreso') return sum + Math.max(0, pasesOriginales - pasesConfirmados);
     return sum;
   }, 0);
 
-  const pasesNovia = guests.filter(g => g.side === 'novia').reduce((sum, g) => sum + g.passes, 0);
-  const pasesNovio = guests.filter(g => g.side === 'novio').reduce((sum, g) => sum + g.passes, 0);
+  const pasesNovia = safeGuests.filter(g => g.side === 'novia').reduce((sum, g) => sum + (g.passes || 0), 0);
+  const pasesNovio = safeGuests.filter(g => g.side === 'novio').reduce((sum, g) => sum + (g.passes || 0), 0);
 
-  const invitadosFiltrados = guests.filter(g => {
+  const invitadosFiltrados = safeGuests.filter(g => {
     const term = searchTerm.toLowerCase();
     const matchesSide = filtroLado === 'Todos' ? true : g.side === filtroLado.toLowerCase();
     if (!term) return matchesSide;
 
-    const name = g.name.toLowerCase();
-    const status = g.status.toLowerCase();
+    const name = (g.name || '').toLowerCase();
+    const status = (g.status || '').toLowerCase();
     const side = g.side ? g.side.toLowerCase() : ''; 
-    const subGuestsNames = g.subGuests ? g.subGuests.map(sg => sg.name.toLowerCase()).join(' ') : '';
-    const tableObj = tables?.find(t => t.id === g.tableId);
-    const tableName = tableObj ? tableObj.name.toLowerCase() : '';
+    const subGuestsNames = g.subGuests ? g.subGuests.map(sg => (sg.name || '').toLowerCase()).join(' ') : '';
+    const tableObj = tables?.find(t => String(t.id) === String(g.tableId));
+    const tableName = tableObj ? (tableObj.name || '').toLowerCase() : '';
 
     return (name.includes(term) || status.includes(term) || subGuestsNames.includes(term) || tableName.includes(term) || side.includes(term)) && matchesSide;
   });
@@ -919,14 +918,14 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
     const flattened = [];
     guestList.forEach(guest => {
       if (!guest.subGuests || guest.subGuests.length === 0) {
-        flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.passes, isMain: true, isChild: false, pin: null });
+        flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.passes, isMain: true, isChild: false, pin: null, entered: false });
       } else {
         guest.subGuests.forEach((sg, idx) => {
-          flattened.push({ _rowId: sg.id, parentGuest: guest, displayName: sg.name, passes: guest.passes, isMain: idx === 0, isChild: sg.isChild, pin: sg.id });
+          flattened.push({ _rowId: sg.id, parentGuest: guest, displayName: sg.name, passes: guest.passes, isMain: idx === 0, isChild: sg.isChild, pin: sg.id, entered: sg.entered });
         });
-        const faltantes = guest.passes - guest.subGuests.length;
+        const faltantes = (guest.passes || 0) - guest.subGuests.length;
         if (faltantes > 0 && (guest.status === 'pendiente' || guest.status === 'por_invitar')) {
-          flattened.push({ _rowId: `${guest.id}_faltantes`, parentGuest: guest, displayName: `Lugares sin confirmar (${faltantes})`, passes: faltantes, isMain: false, isChild: false, pin: null, isMissing: true });
+          flattened.push({ _rowId: `${guest.id}_faltantes`, parentGuest: guest, displayName: `Lugares sin confirmar (${faltantes})`, passes: faltantes, isMain: false, isChild: false, pin: null, isMissing: true, entered: false });
         }
       }
     });
@@ -939,8 +938,11 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
     const nuevoStatus = parentGuest.status === 'por_invitar' ? 'pendiente' : parentGuest.status;
     const updatedGuest = { ...parentGuest, sent: true, status: nuevoStatus };
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", parentGuest.id), updatedGuest);
-    const domain = window.location.origin; 
-    const linkPersonalizado = `${domain}/?modo=invitacion&id=${ID_DEL_EVENTO}&uid=${parentGuest.id}`;
+    
+    // 🔴 FORZAR DOMINIO DE INVITACIONES (baulia.com)
+    const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
+    const linkPersonalizado = `${baseDomain}/${ID_DEL_EVENTO}?u=${parentGuest.id}`;
+    
     const msg = `✨ ¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n🔗 ${linkPersonalizado}\n\n¡No faltes!`;
 
     const phone = parentGuest.phone ? parentGuest.phone.replace(/\D/g,'') : '';
@@ -1028,7 +1030,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
         const html2canvas = (await import('html2canvas')).default;
         const pages = document.querySelectorAll('.qr-pdf-page');
         
-        // Orientación Landscape con tamaño exacto de la lámina: 19cm de alto, 25cm de ancho
         const pdf = new jsPDF({ orientation: 'landscape', unit: 'cm', format: [19, 25] });
 
         for (let i = 0; i < pages.length; i++) {
@@ -1084,7 +1085,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
               {exportCols.pases && <td className="px-2 py-2 text-center font-bold">{row.isMain ? row.passes : ''}</td>}
               {exportCols.estatus && <td className="px-2 py-2 text-center uppercase text-[10px]">{row.parentGuest.status.replace('_', ' ')}</td>}
               {exportCols.telefono && <td className="px-2 py-2">{row.isMain ? (row.parentGuest.phone || 'N/A') : '-'}</td>}
-              {exportCols.mesa && <td className="px-2 py-2">{row.parentGuest.tableId ? (tables?.find(t => t.id === row.parentGuest.tableId)?.name || row.parentGuest.tableId) : '-'}</td>}
+              {exportCols.mesa && <td className="px-2 py-2">{row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : '-'}</td>}
             </tr>
           ))}
         </tbody>
@@ -1120,7 +1121,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
             <header className="flex justify-between items-start border-b-2 border-slate-800 pb-4 mb-6">
               <div>
                 <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">{isWeddingMode ? 'Boda Ana & Roberto' : 'Lista de Invitados'}</h1>
-                <p className="text-slate-600 text-xs font-medium mt-1">15 de Noviembre, 2026 | Recepción</p>
+                <p className="text-slate-600 text-xs font-medium mt-1">Recepción</p>
               </div>
               <div className="text-right">
                 <p className="text-xs font-bold text-slate-400">Total: {totalPases} Pases</p>
@@ -1147,7 +1148,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
 
   // --- VISTA 2: ESTUDIO DE PULSERAS QR ---
   if (qrStudioOpen) {
-    const allIndividuals = guests
+    const allIndividuals = safeGuests
       .filter(g => g.status === 'confirmado' || g.status === 'ingreso')
       .flatMap(g => (g.subGuests || []).map(sg => ({ ...sg, familyName: g.name, familyId: g.id })));
 
@@ -1164,7 +1165,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
               <p className="text-[10px] text-slate-400">10 pulseras de 25cm x 1.9cm por hoja.</p>
             </div>
           </div>
-          <button onClick={triggerQRPdfDownload} disabled={isPreparingQRPrint} className="px-5 py-2.5 bg-pink-600 hover:bg-pink-500 rounded-xl text-sm font-bold flex items-center shadow-lg disabled:bg-slate-500 transition-all">
+          <button onClick={triggerQRPdfDownload} disabled={isPreparingQRPrint} className="px-5 py-2.5 bg-pink-600 hover:bg-pink-50 rounded-xl text-sm font-bold flex items-center shadow-lg disabled:bg-slate-500 transition-all">
             {isPreparingQRPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
             {isPreparingQRPrint ? 'Preparando...' : 'Descargar PDF (25x19)'}
           </button>
@@ -1175,10 +1176,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
              <div className="text-center py-20 text-slate-400 font-bold">No hay invitados confirmados para generar códigos QR.</div>
            ) : (
              wristbandPages.map((page, pageIdx) => (
-               // 🔴 LÁMINA EXACTA 25cm x 19cm
                <div key={pageIdx} className="qr-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '25cm', height: '19cm', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflow: 'hidden', padding: 0, margin: 0 }}>
                  {page.map((ind) => {
-                   const link = window.location.origin + window.location.pathname + '?modo=camara&uid=' + ind.id;
+                   const link = window.location.origin + window.location.pathname + '?modo=camara&e=' + ID_DEL_EVENTO + '&u=' + ind.id;
                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`;
                    return (
                      <div key={ind.id} style={{ width: '25cm', height: '1.9cm', borderBottom: '1px dashed #cbd5e1', display: 'flex', boxSizing: 'border-box', backgroundColor: 'white', margin: 0 }}>
@@ -1210,7 +1210,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
     );
   }
 
-  // --- VISTA PRINCIPAL (TABLA NORMAL) ---
   return (
     <div className="h-full flex flex-col space-y-4 pb-6 relative">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
@@ -1316,7 +1315,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
                   <td className="px-2 py-1.5 text-center">
                     {row.parentGuest.tableId ? (
                       <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[9px] font-bold border border-slate-200">
-                        {tables?.find(t => t.id === row.parentGuest.tableId)?.name || row.parentGuest.tableId}
+                        {tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId}
                       </span>
                     ) : <span className="text-[9px] text-slate-400 italic">-</span>}
                   </td>
@@ -1330,9 +1329,15 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
                   </td>
                   
                   <td className="px-2 py-1.5 text-center">
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${row.parentGuest.status === 'confirmado' ? 'bg-amber-100 text-amber-700' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700' : row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600' : 'bg-slate-100 text-slate-500'}`}>
-                      {row.parentGuest.status.replace('_', ' ')}
-                    </span>
+                    {row.isMain ? (
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${row.parentGuest.status === 'ingreso' ? 'bg-emerald-100 text-emerald-700' : row.parentGuest.status === 'confirmado' ? 'bg-amber-100 text-amber-700' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700' : row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600' : 'bg-slate-100 text-slate-500'}`}>
+                        {row.parentGuest.status === 'ingreso' ? `En el evento` : (row.parentGuest.status ? row.parentGuest.status.replace('_', ' ') : 'Pendiente')}
+                      </span>
+                    ) : !row.isMissing ? (
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${row.entered ? 'bg-emerald-500 text-white shadow-sm' : (row.parentGuest.status === 'confirmado' || row.parentGuest.status === 'ingreso' ? 'bg-amber-100 text-amber-700' : (row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600' : 'bg-slate-100 text-slate-500'))}`}>
+                        {row.entered ? '✔ ADENTRO' : (row.parentGuest.status === 'cancelado' ? 'CANCELADO' : (row.parentGuest.status === 'confirmado' || row.parentGuest.status === 'ingreso' ? 'CONFIRMADO' : (row.parentGuest.status === 'por_invitar' ? 'POR INVITAR' : 'PENDIENTE')))}
+                      </span>
+                    ) : <span className="text-slate-300">-</span>}
                   </td>
                   
                   <td className="px-3 py-1.5 text-right">
@@ -1365,7 +1370,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
               <p className="text-[10px] text-slate-500 mb-6">Invitación: {qrModal.parentGuest.name}</p>
               
               <div className="inline-block border-2 border-dashed border-slate-300 p-2 rounded-xl mb-4">
-                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin + window.location.pathname + '?modo=camara&uid=' + qrModal.pin)}`} alt="QR" className="w-32 h-32" />
+                {/* 🔴 QR LIMPIO QUE USA EL DOMINIO BAULIA.COM PARA LAS INVITACIONES */}
+                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent((window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com') + '/' + ID_DEL_EVENTO + '?u=' + (qrModal.pin || qrModal.parentGuest?.id || ''))}`} alt="QR" className="w-32 h-32" />
               </div>
               
               <p className="text-[8px] text-slate-400 uppercase tracking-widest mb-1">Código Manual</p>
@@ -6874,12 +6880,9 @@ const GaleriaView = ({ photos, addNotification }) => {
   const cloudName = "duy0mcqsh"; 
   const uploadPreset = "ml_default"; 
 
-  // 🔴 CORRECCIÓN: Enlaces con el parámetro &e= blindado
-  const getCleanBaseUrl = () => {
-    let base = window.location.href.split('?')[0];
-    if (base.endsWith('/')) base = base.slice(0, -1);
-    return base;
-  };
+  // 🔴 CORRECCIÓN: Enlaces con RUTAS LIMPIAS BAULIA
+  const getCleanBaseUrl = () => window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
+  
   const guestLink = `${getCleanBaseUrl()}/?modo=camara&e=${ID_DEL_EVENTO}`;
   const proyectorLink = `${getCleanBaseUrl()}/?modo=proyector&e=${ID_DEL_EVENTO}`; 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(guestLink)}&margin=10`;
@@ -8584,7 +8587,7 @@ const GuestProyectorView = ({ eventId }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS (HÍBRIDO + SISTEMA DE ALERTAS NATIVO) ---
+// --- COMPONENTE: CENTRO DE LICENCIAS ---
 // ==========================================
 const SuperAdminView = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -8595,17 +8598,16 @@ const SuperAdminView = () => {
   const [licencias, setLicencias] = useState([]);
   const [correosVisibles, setCorreosVisibles] = useState({});
 
-  // 🔴 NUEVO SISTEMA DE DIÁLOGOS (Reemplaza alert y window.confirm)
   const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null });
 
   const tiposDeEvento = [
-    { id: 'boda', label: 'Boda', placeholder: 'Ej. Carlos y Sofía', labelNombre: 'Nombre de los Novios' },
-    { id: 'xv_anos', label: 'XV Años', placeholder: 'Ej. María Fernanda', labelNombre: 'Nombre de la Quinceañera' },
-    { id: 'cumpleanos', label: 'Cumpleaños', placeholder: 'Ej. Juan Pérez', labelNombre: 'Nombre del Festejado' },
+    { id: 'boda', label: 'Boda', placeholder: 'Ej. Carlos y Sofia', labelNombre: 'Nombre de los Novios' },
+    { id: 'xv_anos', label: 'XV Años', placeholder: 'Ej. Maria Fernanda', labelNombre: 'Nombre de la Quinceañera' },
+    { id: 'cumpleanos', label: 'Cumpleaños', placeholder: 'Ej. Juan Perez', labelNombre: 'Nombre del Festejado' },
     { id: 'bautizo', label: 'Bautizo', placeholder: 'Ej. Bautizo de Mateo', labelNombre: 'Nombre del Festejado' },
-    { id: 'empresarial', label: 'Empresarial', placeholder: 'Ej. Convención Telcel', labelNombre: 'Nombre de la Empresa' },
+    { id: 'empresarial', label: 'Empresarial', placeholder: 'Ej. Convencion Telcel', labelNombre: 'Nombre de la Empresa' },
     { id: 'concierto', label: 'Concierto', placeholder: 'Ej. Festival Primavera', labelNombre: 'Nombre del Evento' },
-    { id: 'otro', label: 'Otro Evento', placeholder: 'Ej. Graduación', labelNombre: 'Nombre del Evento' }
+    { id: 'otro', label: 'Otro Evento', placeholder: 'Ej. Graduacion', labelNombre: 'Nombre del Evento' }
   ];
 
   const eventoSeleccionado = tiposDeEvento.find(t => t.id === formData.tipoEvento);
@@ -8625,98 +8627,55 @@ const SuperAdminView = () => {
     setIsCreating(true);
 
     try {
+      // 🔴 AQUÍ SE CREA LA URL HERMOSA PARA EL CLIENTE
       const slug = formData.nombres.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-      const numRandom = Math.floor(100 + Math.random() * 900); 
-      const newEventId = `evt_${slug}_${numRandom}`;
+      const newEventId = slug; 
+      
       const newEmail = formData.email.trim().toLowerCase();
       const newPassword = Math.random().toString(36).slice(-8) + "!";
 
       await createUserWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
       await signOut(secondaryAuth); 
 
-      await setDoc(doc(db, "usuarios", newEventId), {
-        email: newEmail,
-        role: 'cliente',
-        plan: formData.plan,
-        tipoEvento: formData.tipoEvento,
-        eventId: newEventId,
-        nombres: formData.nombres,
-        status: 'activo', 
-        createdAt: serverTimestamp()
-      });
-
-      await setDoc(doc(db, "eventos", newEventId), {
-        presupuestoTotal: 150000,
-        nombres: formData.nombres,
-        plan: formData.plan,
-        tipoEvento: formData.tipoEvento 
-      });
+      await setDoc(doc(db, "usuarios", newEventId), { email: newEmail, role: 'cliente', plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, nombres: formData.nombres, status: 'activo', createdAt: serverTimestamp() });
+      await setDoc(doc(db, "eventos", newEventId), { presupuestoTotal: 150000, nombres: formData.nombres, plan: formData.plan, tipoEvento: formData.tipoEvento });
 
       setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label });
       setClientPhone('');
       
     } catch (error) {
-      if (error.code === 'auth/email-already-in-use') {
-         setDialog({ isOpen: true, type: 'alert', title: 'Correo Duplicado', message: 'Este correo ya está registrado en otra licencia. Por favor, usa uno distinto.' });
-      } else {
-         setDialog({ isOpen: true, type: 'alert', title: 'Error del Sistema', message: `Ocurrió un error al crear la licencia: ${error.message}` });
-      }
+      if (error.code === 'auth/email-already-in-use') setDialog({ isOpen: true, type: 'alert', title: 'Correo Duplicado', message: 'Este correo ya está registrado.' });
+      else setDialog({ isOpen: true, type: 'alert', title: 'Error del Sistema', message: `Ocurrió un error al crear la licencia: ${error.message}` });
     }
     setIsCreating(false);
   };
 
   const handleSendWhatsApp = () => {
-    if (clientPhone.length < 10) {
-      setDialog({ isOpen: true, type: 'alert', title: 'Información Incompleta', message: 'Por favor ingresa un número de teléfono válido a 10 dígitos.' });
-      return;
-    }
-    const domain = window.location.origin; 
+    if (clientPhone.length < 10) { setDialog({ isOpen: true, type: 'alert', title: 'Información Incompleta', message: 'Ingresa un número de 10 dígitos.' }); return; }
+    
+    // 🔴 FORZAMOS EL DOMINIO DEL PANEL PARA LOS ACCESOS
+    const domain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://panel.baulia.com'; 
     const mensaje = `✨ ¡Hola ${successData.nombres}! Tu Panel de Control Premium para tu ${successData.tipoEvento} está listo.\n\nAccede a tu plataforma privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña temporal: ${successData.password}\n\n¡Guarda estos accesos, te servirán para gestionar todos los detalles!`;
     window.open(`https://wa.me/${clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
-  // 🔴 SE REEMPLAZA EL WINDOW.CONFIRM POR EL DIÁLOGO NATIVO
   const toggleStatus = (lic) => {
     const nuevoEstatus = lic.status === 'suspendido' ? 'activo' : 'suspendido';
     const accionText = nuevoEstatus === 'suspendido' ? 'SUSPENDER' : 'ACTIVAR';
-    
-    setDialog({
-      isOpen: true,
-      type: 'confirm',
-      title: `${accionText === 'SUSPENDER' ? 'Suspender' : 'Activar'} Licencia`,
-      message: `¿Estás seguro que deseas ${accionText} la plataforma de ${lic.nombres}?`,
-      onConfirm: async () => {
-        setDialog({ ...dialog, isOpen: false });
-        await setDoc(doc(db, "usuarios", lic.id), { ...lic, status: nuevoEstatus });
-      }
-    });
+    setDialog({ isOpen: true, type: 'confirm', title: `${accionText === 'SUSPENDER' ? 'Suspender' : 'Activar'} Licencia`, message: `¿Estás seguro que deseas ${accionText} la plataforma de ${lic.nombres}?`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await setDoc(doc(db, "usuarios", lic.id), { ...lic, status: nuevoEstatus }); } });
   };
 
   const handleDelete = (lic) => {
-    setDialog({
-      isOpen: true,
-      type: 'confirm',
-      title: 'Eliminar Permanentemente',
-      message: `⚠️ PELIGRO EXTREMO: ¿Estás 100% seguro de eliminar toda la información de ${lic.nombres}? Esta acción destruirá su acceso y no se puede deshacer.`,
-      onConfirm: async () => {
-        setDialog({ ...dialog, isOpen: false });
-        await deleteDoc(doc(db, "usuarios", lic.id));
-        await deleteDoc(doc(db, "eventos", lic.eventId)); 
-      }
-    });
+    setDialog({ isOpen: true, type: 'confirm', title: 'Eliminar Permanentemente', message: `⚠️ PELIGRO EXTREMO: ¿Seguro de eliminar la información de ${lic.nombres}?`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await deleteDoc(doc(db, "usuarios", lic.id)); await deleteDoc(doc(db, "eventos", lic.eventId)); } });
   };
 
-  const toggleVerCorreo = (id) => {
-    setCorreosVisibles(prev => ({ ...prev, [id]: !prev[id] }));
-  };
+  const toggleVerCorreo = (id) => setCorreosVisibles(prev => ({ ...prev, [id]: !prev[id] }));
 
   const totalEventos = licencias.length;
   const totalDiamante = licencias.filter(l => l.plan === 'diamante').length;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
-      
-      {/* 🔴 EL COMPONENTE DE DIÁLOGOS DEL SISTEMA (Reemplazo de Alerts) */}
       {dialog.isOpen && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 p-6 text-center border border-white/20">
@@ -8726,15 +8685,8 @@ const SuperAdminView = () => {
             <h3 className="text-xl font-black text-slate-800 mb-2">{dialog.title}</h3>
             <p className="text-sm text-slate-500 mb-6 px-2">{dialog.message}</p>
             <div className="flex space-x-3">
-              {dialog.type === 'confirm' && (
-                <button onClick={() => setDialog({ ...dialog, isOpen: false })} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">
-                  Cancelar
-                </button>
-              )}
-              <button 
-                onClick={() => { if(dialog.onConfirm) dialog.onConfirm(); else setDialog({ ...dialog, isOpen: false }); }} 
-                className={`flex-1 py-3.5 text-white rounded-xl font-bold shadow-lg transition-transform active:scale-95 ${dialog.type === 'alert' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/30'}`}
-              >
+              {dialog.type === 'confirm' && <button onClick={() => setDialog({ ...dialog, isOpen: false })} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">Cancelar</button>}
+              <button onClick={() => { if(dialog.onConfirm) dialog.onConfirm(); else setDialog({ ...dialog, isOpen: false }); }} className={`flex-1 py-3.5 text-white rounded-xl font-bold shadow-lg transition-transform active:scale-95 ${dialog.type === 'alert' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/30'}`}>
                 {dialog.type === 'confirm' ? 'Sí, proceder' : 'Entendido'}
               </button>
             </div>
@@ -8742,53 +8694,27 @@ const SuperAdminView = () => {
         </div>
       )}
 
-      {/* 🔴 DISEÑO 3.0 RESTAURADO: ENCABEZADO DE LUJO */}
       <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-3xl p-8 shadow-xl text-white flex items-center justify-between">
         <div>
           <span className="bg-black/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">Nivel 3: Acceso Maestro</span>
           <h2 className="text-3xl font-black flex items-center mb-2"><Building className="mr-3" size={36}/> Centro de Licencias</h2>
           <p className="text-amber-100 max-w-lg text-sm">Control global de la plataforma. Crea nuevos eventos, asigna planes y entrega credenciales directamente a tus clientes.</p>
         </div>
-        <div className="hidden md:flex w-24 h-24 bg-white/10 rounded-full items-center justify-center border-4 border-white/20 shadow-inner">
-           <Lock size={40} className="text-white" />
-        </div>
+        <div className="hidden md:flex w-24 h-24 bg-white/10 rounded-full items-center justify-center border-4 border-white/20 shadow-inner"><Lock size={40} className="text-white" /></div>
       </div>
 
-      {/* 🔴 DISEÑO 3.0 RESTAURADO: TARJETAS GRANDES */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
-            <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-3"><Calendar size={24}/></div>
-            <h3 className="text-2xl font-black text-slate-800">{totalEventos}</h3>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Eventos Activos</p>
-         </div>
-         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
-            <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mb-3"><Star size={24}/></div>
-            <h3 className="text-2xl font-black text-slate-800">{totalDiamante}</h3>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Planes Diamante</p>
-         </div>
-         <div onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda' }); }} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center hover:border-emerald-400 cursor-pointer transition-colors group">
-            <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><Plus size={24}/></div>
-            <h3 className="text-sm font-black text-emerald-600 mt-2">NUEVA LICENCIA</h3>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Crear Evento</p>
-         </div>
+         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center"><div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-3"><Calendar size={24}/></div><h3 className="text-2xl font-black text-slate-800">{totalEventos}</h3><p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Eventos Activos</p></div>
+         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center"><div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mb-3"><Star size={24}/></div><h3 className="text-2xl font-black text-slate-800">{totalDiamante}</h3><p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Planes Diamante</p></div>
+         <div onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda' }); }} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center hover:border-emerald-400 cursor-pointer transition-colors group"><div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><Plus size={24}/></div><h3 className="text-sm font-black text-emerald-600 mt-2">NUEVA LICENCIA</h3><p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Crear Evento</p></div>
       </div>
 
-      {/* 🔴 DISEÑO 4.0 MANTENIDO: TABLA ULTRA-COMPACTA CON OJITO Y CONTROLES */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-         <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-            <h3 className="font-bold text-slate-800 text-sm">Directorio de Eventos Generados</h3>
-         </div>
+         <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center"><h3 className="font-bold text-slate-800 text-sm">Directorio de Eventos Generados</h3></div>
          <div className="overflow-x-auto">
            <table className="w-full text-left whitespace-nowrap min-w-[800px]">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[10px] uppercase tracking-widest">
-                <tr>
-                  <th className="px-5 py-3 font-bold">Cliente / ID</th>
-                  <th className="px-5 py-3 font-bold">Acceso (Correo)</th>
-                  <th className="px-5 py-3 font-bold text-center">Tipo</th>
-                  <th className="px-5 py-3 font-bold text-center">Plan</th>
-                  <th className="px-5 py-3 font-bold text-center">Estatus</th>
-                  <th className="px-5 py-3 font-bold text-right">Controles</th>
-                </tr>
+                <tr><th className="px-5 py-3 font-bold">Cliente / ID</th><th className="px-5 py-3 font-bold">Acceso (Correo)</th><th className="px-5 py-3 font-bold text-center">Tipo</th><th className="px-5 py-3 font-bold text-center">Plan</th><th className="px-5 py-3 font-bold text-center">Estatus</th><th className="px-5 py-3 font-bold text-right">Controles</th></tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
                  {licencias.length === 0 ? (
@@ -8802,35 +8728,15 @@ const SuperAdminView = () => {
                       
                       return (
                         <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40' : 'hover:bg-slate-50'}`}>
-                          <td className="px-5 py-3">
-                            <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800' : 'text-slate-800'}`}>{lic.nombres || 'Sin Nombre'}</p>
-                            <p className="text-[10px] text-slate-400 font-mono mt-0.5">{lic.eventId}</p>
-                          </td>
-                          <td className="px-5 py-3">
-                            <div className="flex items-center text-slate-600 bg-slate-100/70 px-2 py-1.5 rounded-lg w-max border border-slate-200/50">
-                              <span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span>
-                              <button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 hover:text-indigo-600 transition-colors">
-                                {correoVisible ? <EyeOff size={14} /> : <Eye size={14} />}
-                              </button>
-                            </div>
-                          </td>
+                          <td className="px-5 py-3"><p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800' : 'text-slate-800'}`}>{lic.nombres || 'Sin Nombre'}</p><p className="text-[10px] text-slate-400 font-mono mt-0.5">{lic.eventId}</p></td>
+                          <td className="px-5 py-3"><div className="flex items-center text-slate-600 bg-slate-100/70 px-2 py-1.5 rounded-lg w-max border border-slate-200/50"><span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span><button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 hover:text-indigo-600 transition-colors">{correoVisible ? <EyeOff size={14} /> : <Eye size={14} />}</button></div></td>
                           <td className="px-5 py-3 text-center text-slate-500 font-bold text-[10px] uppercase tracking-wider">{etiquetaTipo}</td>
-                          <td className="px-5 py-3 text-center">
-                             <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
-                               {lic.plan}
-                             </span>
-                          </td>
-                          <td className="px-5 py-3 text-center">
-                             <div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div>
-                          </td>
+                          <td className="px-5 py-3 text-center"><span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>{lic.plan}</span></td>
+                          <td className="px-5 py-3 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
                           <td className="px-5 py-3 text-right">
                              <div className="flex items-center justify-end space-x-2">
-                               <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors ${estaSuspendido ? 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200' : 'text-amber-600 bg-amber-100 hover:bg-amber-200'}`}>
-                                 <Power size={16} />
-                               </button>
-                               <button onClick={() => handleDelete(lic)} title="Eliminar Permanentemente" className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:text-white hover:bg-rose-500 transition-colors">
-                                 <Trash2 size={16} />
-                               </button>
+                               <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors ${estaSuspendido ? 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200' : 'text-amber-600 bg-amber-100 hover:bg-amber-200'}`}><Power size={16} /></button>
+                               <button onClick={() => handleDelete(lic)} title="Eliminar Permanentemente" className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:text-white hover:bg-rose-500 transition-colors"><Trash2 size={16} /></button>
                              </div>
                           </td>
                         </tr>
@@ -8842,7 +8748,6 @@ const SuperAdminView = () => {
          </div>
       </div>
 
-      {/* 🔴 DISEÑO 3.0 RESTAURADO: MODAL DE CREACIÓN DE LICENCIAS AMPLIO Y CÓMODO */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
@@ -9576,10 +9481,21 @@ const HostessStandaloneView = ({ eventId }) => {
 // ==========================================
 export default function App() {
   const urlParams = new URLSearchParams(window.location.search);
-  const modoApp = urlParams.get('modo');
-
-  const eventIdParam = urlParams.get('e') || urlParams.get('evt') || urlParams.get('id');
+  let modoApp = urlParams.get('modo');
+  let eventIdParam = urlParams.get('e') || urlParams.get('evt') || urlParams.get('id');
   const guestUidParam = urlParams.get('u') || urlParams.get('usr') || urlParams.get('uid') || urlParams.get('invitado');
+
+  // 🔴 MAGIA DE RUTAS LIMPIAS BAULIA
+  const hostname = window.location.hostname;
+  const pathname = window.location.pathname.replace(/^\/+/g, '');
+
+  if (hostname.startsWith('panel.')) {
+     // En el panel bloqueamos las rutas públicas por defecto
+  } else if (pathname && !eventIdParam) {
+     // Si entra a baulia.com/boda-ana-y-luis
+     eventIdParam = pathname;
+     if (!modoApp) modoApp = 'invitacion';
+  }
 
   const [authData, setAuthData] = useState({ isAuthenticated: false, role: null, plan: null, eventId: null });
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -9602,8 +9518,6 @@ export default function App() {
           
           if (!querySnapshot.empty) {
             const userData = querySnapshot.docs[0].data();
-            
-            // 🔴 PANTALLA ROJA NATIVA EN LUGAR DE ALERT()
             if (userData.status === 'suspendido') {
                await signOut(auth);
                setAccountSuspended(true);
@@ -9628,20 +9542,15 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  if (isCheckingAuth) {
-    return <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center text-indigo-400 font-bold"><RefreshCw size={40} className="animate-spin mb-4" /> Autenticando...</div>;
-  }
+  if (isCheckingAuth) return <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center text-indigo-400 font-bold"><RefreshCw size={40} className="animate-spin mb-4" /> Autenticando...</div>;
 
-  // PANTALLA NATIVA DE SUSPENSIÓN
-  if (accountSuspended) {
-    return (
+  if (accountSuspended) return (
       <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
         <AlertTriangle size={64} className="text-rose-500 mb-4 animate-pulse" />
         <h1 className="text-2xl font-black text-white mb-2">Cuenta Suspendida</h1>
-        <p className="text-slate-400 max-w-sm">Por favor, contacta a tu administrador de plataforma para reactivar tu licencia.</p>
+        <p className="text-slate-400 max-w-sm">Contacta a tu administrador de plataforma para reactivar tu licencia.</p>
       </div>
-    );
-  }
+  );
 
   // RUTAS PÚBLICAS
   if (modoApp === 'camara') { 
