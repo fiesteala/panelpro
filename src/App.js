@@ -447,6 +447,9 @@ const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setAc
 // --- COMPONENTE: RECEPCIÓN Y ESCÁNER (AUTOMÁTICO Y DIRECTO) ---
 // ==========================================
 const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, simulateSharedMode }) => {
+  const [forceMobile, setForceMobile] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+  
   const [isListOpen, setIsListOpen] = useState(false);
   const [listSearchTerm, setListSearchTerm] = useState('');
   const [listTab, setListTab] = useState('todos'); 
@@ -454,6 +457,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   const [showShareModal, setShowShareModal] = useState(false);
   const [staffPhone, setStaffPhone] = useState('');
   const [camError, setCamError] = useState(null);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   // Ficha inteligente debajo del escáner
   const [cardData, setCardData] = useState({ 
@@ -469,8 +473,20 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   const guestsRef = useRef(guests || []);
   useEffect(() => { guestsRef.current = guests || []; }, [guests]);
 
+  // 🔴 DETECCIÓN DE PANTALLA
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const showDesktopPlaceholder = isDesktop && !forceMobile && !isSharedMode;
+
   // 🔴 MOTOR DE CÁMARA AUTOMÁTICA Y CONTINUA
   useEffect(() => {
+    // Si estamos en la vista de escritorio, no prendemos la cámara.
+    if (showDesktopPlaceholder) return;
+
     let html5QrCode;
     
     const initScanner = () => {
@@ -480,12 +496,11 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
       }
       
       try {
-        // Usamos Html5Qrcode directo (sin UI) para que prenda automático
         html5QrCode = new window.Html5Qrcode("qr-reader-puerta");
         scannerRef.current = html5QrCode;
         
         html5QrCode.start(
-          { facingMode: "environment" }, // Fuerza la cámara trasera
+          { facingMode: "environment" }, // Fuerza la cámara trasera en celulares
           { fps: 10, qrbox: { width: 250, height: 250 } },
           (decodedText) => {
              // 1. Extraemos el ID limpio
@@ -498,7 +513,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
              // 2. Prevenimos escanear el mismo código 20 veces por segundo
              if (lastScannedCode.current === code) return;
              lastScannedCode.current = code;
-             setTimeout(() => { lastScannedCode.current = null; }, 3000); // 3 segundos de bloqueo para ESE mismo código
+             setTimeout(() => { lastScannedCode.current = null; }, 3000); // Bloqueo de 3 segundos para el MISMO código
 
              if (code && code !== 'null') {
                 processEntry(code);
@@ -506,7 +521,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           },
           (errorMessage) => {}
         ).catch(err => {
-           setCamError("Toca aquí para permitir el uso de la cámara.");
+           setCamError("Permite el uso de la cámara en tu navegador para continuar.");
         });
       } catch(e) { console.error(e); }
     };
@@ -518,7 +533,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
         scannerRef.current.stop().catch(e=>e);
       }
     };
-  }, []);
+  }, [showDesktopPlaceholder]);
 
   // 🔴 LÓGICA DE ACCESO CONECTADA A BASE DE DATOS
   const processEntry = async (code) => {
@@ -527,11 +542,10 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     let foundParentId = null;
     let targetSubId = null;
 
-    // Buscamos a la familia a la que pertenece este código
     if (codeLower.startsWith('usr_')) {
        const parts = codeLower.split('_');
-       if (parts.length >= 3) foundParentId = parts[1]; // Saca el ID de la familia
-       targetSubId = codeLower; // Identifica exactamente quién es
+       if (parts.length >= 3) foundParentId = parts[1];
+       targetSubId = codeLower;
     } else {
        foundParentId = codeLower;
     }
@@ -552,13 +566,11 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
       
       const freshParent = { id: docSnap.id, ...docSnap.data() };
 
-      // Si el evento fue cancelado
       if (freshParent.status === 'cancelado') {
          setCardData({ status: 'error', title: 'Acceso Denegado', subtitle: `La invitación de ${freshParent.name} fue cancelada.` });
          return;
       }
 
-      // Buscamos el pase específico o el primero libre
       let targetSub = targetSubId ? (freshParent.subGuests || []).find(sg => sg.id === targetSubId) : null;
       if (!targetSub) {
          targetSub = (freshParent.subGuests || []).find(sg => !sg.entered);
@@ -573,7 +585,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
         return; 
       }
 
-      // 🔴 DAMOS ACCESO: Registramos la entrada de esa persona
       const newSubs = (freshParent.subGuests || []).map(sg => sg.id === targetSub.id ? { ...sg, entered: true } : sg);
       const enteredCount = newSubs.filter(sg => sg.entered).length;
       
@@ -582,7 +593,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 
       const tableName = tables.find(t => String(t.id) === String(freshParent.tableId))?.name || 'Sin Mesa Asignada';
       
-      // Actualizamos la ficha y la base de datos simultáneamente
       setCardData({ status: 'success', title: targetSub.name, subtitle: `Asignado a: ${tableName}` });
       await setDoc(docRef, { ...freshParent, subGuests: newSubs, entered: enteredCount, status: newStatus });
       
@@ -591,7 +601,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     }
   };
 
-  // 🔴 INGRESO MANUAL DESDE LA LISTA
   const handleManualEntryFromList = async (parentGuest, subGuest) => {
     if (subGuest.entered) return;
     try {
@@ -608,15 +617,26 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     } catch(e){}
   };
 
+  const copyStaffLink = () => {
+    const url = window.location.origin + '/?modo=puerta&e=' + ID_DEL_EVENTO;
+    navigator.clipboard.writeText(url).then(() => {
+      alert('¡Enlace de Puerta copiado!');
+    }).catch(() => {
+      const textArea = document.createElement("textarea");
+      textArea.value = url;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try { document.execCommand('copy'); alert('¡Enlace de Puerta copiado!'); } catch (err) {}
+      document.body.removeChild(textArea);
+    });
+  };
+
   const shareStaffLinkWhatsApp = () => {
-    const url = new URL(window.location.origin);
-    url.searchParams.set('modo', 'puerta'); 
-    url.searchParams.set('e', ID_DEL_EVENTO);
-    const msg = `📱 *Recepción EventMaster*\n\nAccede al escáner de puerta aquí:\n${url.toString()}`;
+    const url = window.location.origin + '/?modo=puerta&e=' + ID_DEL_EVENTO;
+    const msg = `📱 *Recepción EventMaster*\n\nAccede al escáner de puerta aquí:\n${url}`;
     window.open(`https://wa.me/${staffPhone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
-  // Prepara la lista plana para el buscador manual
   const flattenedGuests = [];
   (guests || []).forEach(g => {
     if (g.status === 'cancelado') return;
@@ -632,17 +652,55 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     return matchesSearch;
   });
 
+  // 🔴 VISTA DE ESCRITORIO (PANEL DE CONTROL)
+  if (showDesktopPlaceholder) {
+     return (
+        <div className="h-full flex flex-col items-center justify-center p-6 animate-in fade-in">
+           <div className="bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-xl max-w-lg w-full text-center border border-slate-200 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-3 bg-emerald-500"></div>
+              <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-emerald-100">
+                 <Smartphone size={48} />
+              </div>
+              <h2 className="text-3xl font-black text-slate-800 mb-3 tracking-tight">Escáner Móvil</h2>
+              <p className="text-slate-500 mb-8 text-sm leading-relaxed">
+                 Esta herramienta está diseñada para usarse en la puerta del evento usando la cámara de un celular o tablet.
+              </p>
+              
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-left mb-6 shadow-inner">
+                 <label className="block text-xs font-black text-slate-700 uppercase tracking-widest mb-3 flex items-center"><ShieldCheck size={16} className="mr-2 text-emerald-500"/> Enviar acceso al Staff</label>
+                 <div className="flex gap-2 mb-3">
+                    <input type="tel" placeholder="WhatsApp (10 dígitos)..." value={staffPhone} onChange={e=>setStaffPhone(e.target.value)} className="w-full p-3 border border-slate-200 rounded-xl font-bold outline-none focus:border-emerald-500 bg-white shadow-sm" />
+                    <button onClick={shareStaffLinkWhatsApp} className="px-5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-md transition-colors active:scale-95"><Send size={18}/></button>
+                 </div>
+                 <button onClick={copyStaffLink} className="w-full py-3.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-colors flex items-center justify-center shadow-sm active:scale-95">
+                    <Link size={18} className="mr-2"/> Copiar enlace manual
+                 </button>
+              </div>
+              
+              <button onClick={() => setForceMobile(true)} className="text-[10px] font-bold text-slate-400 hover:text-emerald-600 underline">Forzar vista de escáner aquí en la computadora</button>
+           </div>
+        </div>
+     );
+  }
+
+  // 🔴 VISTA MÓVIL (ESCÁNER REAL)
   return (
     <div className={`h-full flex flex-col space-y-4 pb-6 ${isSharedMode ? 'max-w-lg mx-auto' : 'max-w-4xl'}`}>
       
-      {/* CABECERA */}
+      {isOffline && (
+        <div className="bg-amber-500 text-white p-3 rounded-2xl shadow-lg flex items-center justify-center font-bold text-sm animate-in slide-in-from-top-4">
+          <WifiOff size={18} className="mr-2 animate-pulse" /> 
+          Modo Offline. Guardando accesos localmente.
+        </div>
+      )}
+
       <div className="flex justify-between items-center gap-4 px-2">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">{isSharedMode ? 'Recepción VIP' : 'Control de Accesos'}</h2>
-          <p className="text-slate-500 text-sm mt-1">Escaneo continuo automático activo.</p>
+          <p className="text-slate-500 text-sm mt-1">Escaneo continuo automático.</p>
         </div>
         {!isSharedMode && (
-          <button onClick={() => setShowShareModal(true)} className="p-2 bg-emerald-100 text-emerald-700 rounded-full hover:bg-emerald-200 transition-colors" title="Compartir a Staff">
+          <button onClick={() => setShowShareModal(true)} className="p-3 bg-emerald-100 text-emerald-700 rounded-full hover:bg-emerald-200 transition-colors shadow-sm" title="Compartir a Staff">
             <Link size={20} /> 
           </button>
         )}
@@ -650,28 +708,26 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 
       <div className="flex flex-col gap-4 flex-1">
         
-        {/* 🔴 EL ESCÁNER VISUAL (Puro y sin bordes feos) */}
+        {/* ESCÁNER VISUAL */}
         <div className="w-full bg-slate-900 rounded-3xl overflow-hidden relative shadow-2xl flex-shrink-0" style={{ height: '350px' }}>
           {camError ? (
             <button onClick={() => window.location.reload()} className="absolute inset-0 flex flex-col items-center justify-center text-white bg-slate-800 p-6 text-center">
               <Camera size={48} className="text-rose-500 mb-4"/>
               <span className="font-bold text-lg mb-2">Permiso de cámara requerido</span>
-              <span className="text-sm text-slate-400">Toca para recargar y aceptar los permisos.</span>
+              <span className="text-sm text-slate-400">{camError}</span>
             </button>
           ) : (
             <>
                <div id="qr-reader-puerta" className="absolute inset-0 w-full h-full object-cover"></div>
-               {/* Overlay Decorativo del Escáner */}
                <div className="absolute inset-0 border-[40px] border-black/40 pointer-events-none z-10"></div>
                <div className="absolute inset-0 border-2 border-emerald-400 m-[40px] pointer-events-none z-10 opacity-70">
-                 {/* Línea de escaneo láser */}
                  <div className="w-full h-0.5 bg-emerald-400 shadow-[0_0_15px_#34d399] absolute top-1/2 -translate-y-1/2 opacity-60"></div>
                </div>
             </>
           )}
         </div>
 
-        {/* 🔴 LA FICHA DE RESULTADO (CARD) */}
+        {/* FICHA INTELIGENTE */}
         <div className={`w-full p-6 rounded-3xl shadow-lg border-2 transition-all flex flex-col justify-center min-h-[140px] flex-shrink-0 relative overflow-hidden
             ${cardData.status === 'idle' ? 'bg-white border-slate-200' : ''}
             ${cardData.status === 'success' ? 'bg-emerald-50 border-emerald-400 shadow-emerald-500/20 scale-[1.02]' : ''}
@@ -695,24 +751,19 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
               </p>
            </div>
            
-           {/* Iconos de fondo difuminados en la ficha */}
            {cardData.status === 'success' && <CheckCircle size={100} className="absolute -right-4 -bottom-4 text-emerald-500/10 pointer-events-none"/>}
            {cardData.status === 'warning' && <AlertTriangle size={100} className="absolute -right-4 -bottom-4 text-amber-500/10 pointer-events-none"/>}
            {cardData.status === 'error' && <X size={100} className="absolute -right-4 -bottom-4 text-rose-500/10 pointer-events-none"/>}
         </div>
 
-        {/* 🔴 BOTÓN HACIA LA LISTA MANUAL */}
         <button onClick={() => setIsListOpen(true)} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold shadow-lg hover:bg-slate-800 transition-colors flex items-center justify-center text-lg flex-shrink-0 mt-2">
           <Users size={22} className="mr-3 text-emerald-400" /> Abrir Directorio Manual
         </button>
-
       </div>
 
-      {/* 🔴 MODAL: DIRECTORIO MANUAL */}
       {isListOpen && (
          <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex flex-col justify-end sm:justify-center sm:p-6 animate-in fade-in duration-200">
              <div className="bg-white w-full sm:max-w-2xl mx-auto sm:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col h-[90vh] sm:h-[80vh] overflow-hidden">
-                
                 <div className="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
                    <div>
                      <h3 className="text-xl font-bold text-slate-800 flex items-center"><Users size={20} className="mr-2 text-emerald-600" /> Ingreso Manual</h3>
@@ -766,19 +817,18 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
          </div>
       )}
 
-      {/* MODAL COMPARTIR */}
       {showShareModal && (
         <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl animate-in zoom-in-95">
             <button onClick={() => setShowShareModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-rose-500"><X size={20}/></button>
             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4"><ShieldCheck size={32}/></div>
-            <h3 className="font-black text-xl text-slate-800 mb-2">Acceso a Recepción</h3>
+            <h3 className="font-black text-xl text-slate-800 mb-2">Acceso de Staff</h3>
             <p className="text-sm text-slate-500 mb-6">Envía este link a las personas encargadas de la entrada del evento.</p>
             <div className="flex gap-2 mb-4">
               <input type="tel" placeholder="Número WhatsApp..." value={staffPhone} onChange={e=>setStaffPhone(e.target.value)} className="w-full p-3 border border-slate-200 rounded-xl font-bold outline-none focus:border-emerald-500" />
               <button onClick={shareStaffLinkWhatsApp} className="px-5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600"><Send size={18}/></button>
             </div>
-            <button onClick={() => { setShowShareModal(false); simulateSharedMode(); }} className="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors mb-2">Simular en esta pantalla</button>
+            <button onClick={copyStaffLink} className="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors mb-2 flex justify-center items-center"><Link size={18} className="mr-2"/> Copiar enlace manual</button>
           </div>
         </div>
       )}
