@@ -8570,7 +8570,7 @@ const GuestProyectorView = ({ eventId }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 5.0 - BENTO INTERACTIVO) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 6.0 - BENTO IRRESISTIBLE) ---
 // ==========================================
 const LandingPageView = () => {
   const [legalModal, setLegalModal] = useState(null);
@@ -8665,7 +8665,7 @@ const LandingPageView = () => {
          </div>
       </div>
 
-      {/* 🔴 BENTO BOX: INVITACIONES INTERACTIVAS */}
+      {/* 🔴 BENTO BOX: INVITACIONES INTERACTIVAS (EXTENDIDO) */}
       <section id="experiencia" className="py-32 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
         <div className="mb-16">
           <span className="text-amber-500 font-black tracking-widest uppercase text-xs mb-4 block">Fase 1: La Invitación</span>
@@ -8678,7 +8678,6 @@ const LandingPageView = () => {
           <div className="md:col-span-2 md:row-span-2 bg-gradient-to-br from-slate-900 to-slate-950 rounded-[3rem] p-10 md:p-12 border border-white/10 flex flex-col justify-end relative overflow-hidden group hover:border-amber-500/50 transition-colors">
             <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-[80px] group-hover:bg-amber-500/20 transition-colors"></div>
             
-            {/* Micro-Demo: Fotografías Flotantes */}
             <div className="absolute top-10 right-10 w-48 h-64 pointer-events-none perspective-[1000px]">
                <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 1" className="absolute inset-0 w-full h-full object-cover rounded-2xl border-[6px] border-white/10 transform rotate-[15deg] translate-x-12 translate-y-8 group-hover:rotate-[25deg] group-hover:translate-x-20 shadow-2xl transition-all duration-700 ease-out" />
                <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 2" className="absolute inset-0 w-full h-full object-cover rounded-2xl border-[6px] border-white/10 transform -rotate-[5deg] group-hover:-rotate-[15deg] group-hover:-translate-x-10 shadow-2xl transition-all duration-700 ease-out z-10" />
@@ -8688,19 +8687,17 @@ const LandingPageView = () => {
             
             <div className="relative z-10 w-3/4">
                <h3 className="text-4xl font-black text-white mb-4 leading-tight">Diseño <br/> Inmersivo</h3>
-               <p className="text-slate-400 text-lg leading-relaxed">Galerías de alta resolución, monogramas heráldicos personalizados y paletas de color que reflejan el alma de tu evento. Todo adaptado perfectamente al celular.</p>
+               <p className="text-slate-400 text-lg leading-relaxed">Galerías de alta resolución, monogramas heráldicos y paletas de color que reflejan el alma de tu evento. Adaptado perfectamente al celular.</p>
             </div>
           </div>
 
-          {/* TARJETA 2: CUENTA REGRESIVA VIVA */}
+          {/* TARJETA 2: CUENTA REGRESIVA */}
           <div className="md:col-span-2 bg-[#121a2f] rounded-[3rem] p-8 md:p-10 border border-white/10 flex items-center justify-between relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div>
               <h3 className="text-2xl font-black text-white mb-2">Cuenta Regresiva</h3>
               <p className="text-slate-400 text-sm max-w-[200px]">El latido de tu evento en tiempo real.</p>
             </div>
-            
-            {/* Micro-Demo: Reloj Digital */}
             <div className="flex gap-2 text-center relative z-10">
               <div className="bg-slate-900/80 backdrop-blur border border-white/10 rounded-xl p-3 w-14 shadow-inner">
                 <span className="block text-xl font-black text-indigo-400">{String(timeLeft.d).padStart(2, '0')}</span>
@@ -8730,7 +8727,6 @@ const LandingPageView = () => {
                  <h3 className="text-3xl font-black leading-tight mb-2">RSVP<br/>Inteligente</h3>
                  <p className="text-amber-900 font-bold text-sm">Pasa el cursor / Toca</p>
                </div>
-               {/* Micro-Demo: Botón de RSVP Animado */}
                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center shadow-inner relative overflow-hidden">
                  <div className={`absolute inset-0 bg-white transition-transform duration-500 ${fakeRsvp ? 'translate-y-0' : 'translate-y-full'}`}></div>
                  {fakeRsvp ? <CheckCircle size={32} className="text-emerald-500 relative z-10 animate-in zoom-in duration-300"/> : <UserPlus size={32} className="text-slate-900 relative z-10"/>}
@@ -8740,9 +8736,7 @@ const LandingPageView = () => {
 
           {/* TARJETA 4: MAPA RADAR */}
           <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/10 flex flex-col justify-between relative overflow-hidden group">
-             {/* Micro-Demo: Mapa GPS Radar */}
              <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMWgyMHYyMEgxVjF6IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')] transition-opacity group-hover:opacity-40 duration-700"></div>
-             
              <div className="absolute right-8 top-8 w-16 h-16 flex items-center justify-center">
                 <span className="absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-20 animate-ping"></span>
                 <span className="absolute inline-flex h-10 w-10 rounded-full bg-rose-500 opacity-40 animate-pulse"></span>
@@ -8750,10 +8744,47 @@ const LandingPageView = () => {
                   <MapPin size={14} className="text-white"/>
                 </div>
              </div>
-
              <div className="relative z-10 mt-auto">
                <h3 className="text-2xl font-black text-white mb-2">Logística GPS</h3>
-               <p className="text-slate-400 text-sm max-w-[200px]">Rutas precisas a la ceremonia, recepción y hospedaje.</p>
+               <p className="text-slate-400 text-sm max-w-[200px]">Rutas precisas a la ceremonia y recepción.</p>
+             </div>
+          </div>
+
+          {/* 🔴 NUEVA TARJETA 5: PASES QR (VIP) */}
+          <div className="md:col-span-2 bg-gradient-to-r from-indigo-900 to-[#0a0f1c] rounded-[3rem] p-8 md:p-10 border border-indigo-500/20 flex items-center justify-between relative overflow-hidden group">
+             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+             <div className="relative z-10 max-w-[200px] md:max-w-[280px]">
+               <h3 className="text-2xl font-black text-white mb-2 flex items-center"><QrCode size={24} className="mr-2 text-indigo-400"/> Accesos QR</h3>
+               <p className="text-indigo-200 text-sm">Cada invitado recibe un boleto digital único e intransferible. Adiós a los colados.</p>
+             </div>
+             <div className="relative z-10 w-24 h-24 bg-white rounded-3xl p-3 shadow-[0_0_40px_rgba(99,102,241,0.5)] group-hover:scale-110 transition-transform flex items-center justify-center">
+                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VIP-PASS-123`} alt="QR Code VIP" className="w-full h-full mix-blend-multiply opacity-90" />
+             </div>
+          </div>
+
+          {/* 🔴 NUEVA TARJETA 6: MESA DE REGALOS */}
+          <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/10 flex flex-col justify-between group hover:border-emerald-400/50 transition-colors relative overflow-hidden">
+             <div className="absolute -right-4 -top-4 bg-emerald-500/20 w-32 h-32 rounded-full blur-[40px] group-hover:bg-emerald-500/40 transition-colors"></div>
+             <div className="w-14 h-14 bg-emerald-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:-translate-y-2 transition-transform border border-emerald-500/30">
+               <Wallet size={28} className="text-emerald-400" />
+             </div>
+             <div className="relative z-10">
+               <h3 className="text-xl font-black text-white mb-1">Mesa de Regalos</h3>
+               <p className="text-slate-400 text-sm">Recibe regalos o efectivo directo en tus cuentas.</p>
+             </div>
+          </div>
+
+          {/* 🔴 NUEVA TARJETA 7: ITINERARIO VISUAL */}
+          <div className="bg-slate-900 rounded-[3rem] p-8 border border-white/10 flex flex-col justify-between group hover:border-sky-400/50 transition-colors relative overflow-hidden">
+             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-sky-500/10 to-transparent"></div>
+             <div className="space-y-3 mb-6 relative z-10">
+               <div className="flex items-center gap-3"><div className="w-3 h-3 bg-sky-400 rounded-full shadow-[0_0_10px_rgba(56,189,248,0.8)]"></div><div className="h-2 w-20 bg-white/20 rounded-full"></div></div>
+               <div className="flex items-center gap-3"><div className="w-3 h-3 border-2 border-slate-600 rounded-full"></div><div className="h-2 w-16 bg-white/10 rounded-full"></div></div>
+               <div className="flex items-center gap-3"><div className="w-3 h-3 border-2 border-slate-600 rounded-full"></div><div className="h-2 w-24 bg-white/10 rounded-full"></div></div>
+             </div>
+             <div className="relative z-10">
+               <h3 className="text-xl font-black text-white mb-1">Itinerario</h3>
+               <p className="text-slate-400 text-sm">El minuto a minuto para que nadie se pierda nada.</p>
              </div>
           </div>
 
@@ -8793,7 +8824,6 @@ const LandingPageView = () => {
             <div className="lg:w-1/2 w-full relative perspective-[1000px]">
               <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-amber-500/20 blur-[120px] rounded-full pointer-events-none"></div>
               
-              {/* Fake UI Panel Mockup */}
               <div className="bg-[#0a0f1c] rounded-[3rem] border border-white/10 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.8)] relative z-10 transform md:rotate-y-[-10deg] md:rotate-x-[5deg] hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-700">
                 <div className="bg-slate-900 rounded-[2.5rem] border border-white/5 h-[600px] w-full overflow-hidden flex flex-col relative">
                    <div className="h-16 border-b border-white/5 flex items-center px-6 gap-2 bg-slate-950/50 shrink-0">
@@ -8856,7 +8886,9 @@ const LandingPageView = () => {
              <div className="md:w-5/12 relative z-10 flex justify-center w-full">
                 <div className="w-full max-w-sm bg-[#0a0f1c] rounded-[2.5rem] border border-white/10 p-8 shadow-2xl transform md:rotate-3 hover:rotate-0 transition-transform duration-500">
                    <div className="flex items-center gap-5 mb-10 border-b border-white/5 pb-8">
-                      <div className="w-16 h-16 bg-slate-800 rounded-2xl border border-white/10 flex items-center justify-center text-white font-black text-2xl shadow-inner">E</div>
+                      <div className="w-16 h-16 bg-slate-800 rounded-2xl border border-white/10 flex items-center justify-center text-white font-black text-2xl shadow-inner">
+                        E
+                      </div>
                       <div>
                         <p className="text-white font-black text-xl mb-1">Elite Bodas</p>
                         <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest">Panel Maestro Pro</p>
@@ -8966,7 +8998,7 @@ const LandingPageView = () => {
          </div>
       </section>
 
-      {/* 🔴 FOOTER VIP */}
+      {/* 🔴 FOOTER VIP ACTIVO Y EXPANDIDO CON LOGOS OFICIALES */}
       <footer className="border-t border-white/5 bg-slate-950 pt-20 pb-10 relative z-10">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
            <div className="md:col-span-2">
@@ -8976,6 +9008,7 @@ const LandingPageView = () => {
               </div>
               <p className="text-slate-400 text-sm leading-relaxed max-w-sm mb-6">La Bóveda Premium de Gestión de Eventos. Elegancia en la invitación, poder en la ejecución.</p>
               
+              {/* 🔴 REDES SOCIALES OFICIALES (Reemplaza los '#' con tus links reales) */}
               <div className="flex space-x-3">
                  <button onClick={() => window.open('#', '_blank')} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-colors" title="Instagram">
                    <IconIG />
@@ -9006,6 +9039,7 @@ const LandingPageView = () => {
               <h4 className="text-white font-bold mb-6 tracking-widest uppercase text-xs">Compañía</h4>
               <ul className="space-y-4 text-sm text-slate-400">
                  <li><button onClick={() => setLegalModal('about')} className="hover:text-white transition-colors">Acerca de Baulia</button></li>
+                 {/* 🔴 PON TU CORREO REAL AQUÍ */}
                  <li><button onClick={() => window.open('mailto:hola@baulia.com')} className="hover:text-white transition-colors flex items-center"><Mail size={14} className="mr-2"/> hola@baulia.com</button></li>
               </ul>
            </div>
@@ -9015,6 +9049,7 @@ const LandingPageView = () => {
               <ul className="space-y-4 text-sm text-slate-400">
                  <li><button onClick={() => setLegalModal('terms')} className="hover:text-white transition-colors">Términos de Servicio</button></li>
                  <li><button onClick={() => setLegalModal('privacy')} className="hover:text-white transition-colors">Aviso de Privacidad</button></li>
+                 {/* 🔴 PON TU NÚMERO DE WHATSAPP AQUÍ */}
                  <li><button onClick={() => window.open('https://wa.me/525500000000', '_blank')} className="text-slate-400 hover:text-white transition-colors">Soporte y Ayuda</button></li>
               </ul>
            </div>
@@ -9050,19 +9085,49 @@ const LandingPageView = () => {
                 <>
                   <p><strong>Última actualización:</strong> {new Date().toLocaleDateString('es-MX')}</p>
                   <p>Bienvenido a Baulia. Estos Términos de Servicio ("Términos") regulan el uso de nuestra plataforma web, panel de control y servicios relacionados (colectivamente, el "Servicio"). Al acceder o utilizar Baulia, usted ("el Usuario", "el Cliente" o "el Planner") acepta estar sujeto a estos Términos.</p>
+                  
                   <h3 className="text-lg font-bold text-white mt-8 mb-2">1. Descripción del Servicio</h3>
                   <p>Baulia provee un entorno digital (Software as a Service) para la gestión y logística de eventos, que incluye pero no se limita a: creación de invitaciones web, gestión de confirmaciones (RSVP), acomodo de mesas, control financiero, muros sociales interactivos y escaneo de pases QR.</p>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">2. Pagos y Suscripciones</h3>
+                  <p><strong>Para Clientes Finales (Novios/Festejados):</strong> El pago del Servicio consiste en una tarifa única por evento. La licencia otorga acceso al panel de control desde el momento del pago hasta 30 días naturales posteriores a la fecha del evento programado.</p>
+                  <p><strong>Para Agencias y Planners:</strong> Las cuentas de Planner operan bajo un modelo de suscripción mensual o anual, o mediante paquetes de eventos prepagados, según se acuerde comercialmente.</p>
+                  <p><strong>Política de Reembolsos:</strong> Debido a la naturaleza digital e inmediata del servicio, no se ofrecen reembolsos una vez que el panel de control ha sido aprovisionado y entregado al usuario, ni si el evento es cancelado o pospuesto.</p>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">3. Responsabilidad del Contenido</h3>
+                  <p>El Usuario es el único responsable de toda la información, datos, textos, fotografías o cualquier otro material ("Contenido") que suba, publique o transmita a través de Baulia.</p>
+                  <p>Baulia no revisa el Contenido subido de forma proactiva, sin embargo, nos reservamos el derecho (pero no la obligación) de eliminar cualquier Contenido que viole estos Términos, incluyendo material inapropiado, ilegal o que infrinja derechos de autor. En el caso específico del "Muro Social", el administrador del evento tiene las herramientas para moderar el contenido de sus propios invitados.</p>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">4. Disponibilidad del Sistema</h3>
+                  <p>Baulia se esfuerza por garantizar que la plataforma esté disponible el 99.9% del tiempo, utilizando infraestructura en la nube de nivel mundial (como Vercel y Google Firebase). Sin embargo, no somos responsables por interrupciones derivadas de fallas en la red de internet del usuario, caídas globales de servidores de terceros o fuerza mayor.</p>
                 </>
               ) : legalModal === 'privacy' ? (
                 <>
                   <p><strong>Última actualización:</strong> {new Date().toLocaleDateString('es-MX')}</p>
                   <p>En cumplimiento con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) de México, <strong>Baulia Technologies</strong> ("Baulia", "nosotros" o "nuestro") expide el presente Aviso de Privacidad.</p>
+
                   <h3 className="text-lg font-bold text-white mt-8 mb-2">1. Datos Recabados</h3>
                   <p>Para la correcta prestación de nuestros servicios de gestión de eventos, Baulia recaba los siguientes datos personales:</p>
                   <ul className="list-disc pl-6 space-y-2 mt-2">
-                    <li><strong>Del Administrador:</strong> Nombre, correo, teléfono y datos del evento.</li>
-                    <li><strong>De los Invitados:</strong> Nombres, RSVP y fotografías subidas voluntariamente.</li>
+                    <li><strong>Del Administrador (Cliente/Planner):</strong> Nombre completo, correo electrónico, número de teléfono, datos de facturación e información general del evento.</li>
+                    <li><strong>De los Invitados:</strong> Nombres, números de teléfono (para envío de accesos), registros de asistencia (RSVP) y fotografías subidas voluntariamente a la plataforma "Muro Social".</li>
                   </ul>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">2. Finalidad del Tratamiento de Datos</h3>
+                  <p>Los datos personales recabados serán utilizados exclusivamente para las siguientes finalidades principales:</p>
+                  <ul className="list-disc pl-6 space-y-2 mt-2">
+                    <li>Creación, mantenimiento y soporte de la cuenta ("Panel de Control").</li>
+                    <li>Generación de códigos QR únicos para control de acceso al evento.</li>
+                    <li>Envío de notificaciones operativas vía WhatsApp o Correo Electrónico.</li>
+                    <li>Visualización y almacenamiento temporal de fotografías y mensajes durante la ejecución del evento (Muro Social).</li>
+                  </ul>
+                  <p className="mt-4"><strong>Baulia NO vende, alquila, ni cede sus bases de datos a terceros para fines publicitarios.</strong></p>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">3. Almacenamiento y Seguridad</h3>
+                  <p>Su información es procesada y almacenada en infraestructuras de nube de alta seguridad. Implementamos medidas de seguridad técnicas, administrativas y físicas para proteger sus datos contra daño, pérdida, alteración, destrucción o el uso no autorizado.</p>
+
+                  <h3 className="text-lg font-bold text-white mt-8 mb-2">4. Retención de los Datos</h3>
+                  <p>La información de los eventos (incluyendo listas de invitados y galerías fotográficas) se mantendrá en nuestros servidores activos hasta 30 días posteriores a la fecha del evento. Transcurrido este periodo de gracia, los datos de los invitados y galerías pueden ser depurados permanentemente de nuestra base de datos para proteger su privacidad y optimizar el almacenamiento.</p>
                 </>
               ) : (
                 <>
@@ -9070,6 +9135,7 @@ const LandingPageView = () => {
                     <BauliaLogo size={64} className="mb-6 drop-shadow-[0_0_15px_rgba(245,158,11,0.4)]" />
                     <h3 className="text-3xl font-black text-white tracking-widest uppercase">El Estándar de Oro</h3>
                   </div>
+
                   <div className="bg-white/5 border border-white/10 p-8 rounded-3xl mb-8 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-[40px]"></div>
                     <h4 className="text-xl font-bold text-amber-400 mb-4 relative z-10">Nuestra Misión</h4>
@@ -9077,11 +9143,32 @@ const LandingPageView = () => {
                       Transformar la gestión de eventos mediante tecnología premium, brindando a anfitriones y <i>planners</i> el <b>control absoluto</b>, y a los invitados una <b>experiencia interactiva inolvidable</b>.
                     </p>
                   </div>
+
                   <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl mb-8">
                     <h4 className="text-xl font-bold text-indigo-400 mb-4">Nuestra Visión</h4>
                     <p className="text-lg leading-relaxed">
                       Ser el ecosistema global definitivo (SaaS) para la industria de celebraciones de lujo, eliminando el estrés de la planeación y elevando la forma en que el mundo se reúne para crear recuerdos.
                     </p>
+                  </div>
+
+                  <h4 className="text-lg font-bold text-white mt-12 mb-6">Lo que nos define (Valores)</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-5 border border-white/5 rounded-2xl bg-white/5">
+                      <span className="text-amber-500 font-black tracking-widest uppercase text-[10px] block mb-1">01. Cero Caos</span>
+                      <p className="text-sm">Diseñamos interfaces que reducen la ansiedad de los organizadores al mínimo.</p>
+                    </div>
+                    <div className="p-5 border border-white/5 rounded-2xl bg-white/5">
+                      <span className="text-indigo-400 font-black tracking-widest uppercase text-[10px] block mb-1">02. Lujo Digital</span>
+                      <p className="text-sm">Creemos que el software de tu evento debe ser tan elegante como el evento mismo.</p>
+                    </div>
+                    <div className="p-5 border border-white/5 rounded-2xl bg-white/5">
+                      <span className="text-emerald-400 font-black tracking-widest uppercase text-[10px] block mb-1">03. Privacidad Absoluta</span>
+                      <p className="text-sm">Tus recuerdos y los datos de tus invitados son sagrados y están blindados.</p>
+                    </div>
+                    <div className="p-5 border border-white/5 rounded-2xl bg-white/5">
+                      <span className="text-rose-400 font-black tracking-widest uppercase text-[10px] block mb-1">04. Empoderamiento B2B</span>
+                      <p className="text-sm">Ayudamos a que las agencias y planners brillen bajo su propia marca.</p>
+                    </div>
                   </div>
                 </>
               )}
