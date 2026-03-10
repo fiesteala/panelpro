@@ -443,247 +443,346 @@ const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setAc
   );
 };
 
+// ==========================================
+// --- COMPONENTE: RECEPCIÓN Y ESCÁNER (AUTOMÁTICO Y DIRECTO) ---
+// ==========================================
 const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, simulateSharedMode }) => {
-  const [manualCode, setManualCode] = useState('');
-  const [activeGuestId, setActiveGuestId] = useState(null);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [listSearchTerm, setListSearchTerm] = useState('');
   const [isListOpen, setIsListOpen] = useState(false);
+  const [listSearchTerm, setListSearchTerm] = useState('');
+  const [listTab, setListTab] = useState('todos'); 
+  
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [staffPhone, setStaffPhone] = useState('');
+  const [camError, setCamError] = useState(null);
 
-  // 🔴 NUEVO ESTADO: Detector de Internet
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  // Ficha inteligente debajo del escáner
+  const [cardData, setCardData] = useState({ 
+    status: 'idle', // idle, success, warning, error
+    title: 'Esperando código...', 
+    subtitle: 'Apunta la cámara a la pulsera del invitado.' 
+  });
 
+  const scannerRef = useRef(null);
+  const lastScannedCode = useRef(null);
+  
+  // Memoria en tiempo real para la lista manual
+  const guestsRef = useRef(guests || []);
+  useEffect(() => { guestsRef.current = guests || []; }, [guests]);
+
+  // 🔴 MOTOR DE CÁMARA AUTOMÁTICA Y CONTINUA
   useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
+    let html5QrCode;
+    
+    const initScanner = () => {
+      if (!window.Html5Qrcode) {
+        setTimeout(initScanner, 500); 
+        return;
+      }
+      
+      try {
+        // Usamos Html5Qrcode directo (sin UI) para que prenda automático
+        html5QrCode = new window.Html5Qrcode("qr-reader-puerta");
+        scannerRef.current = html5QrCode;
+        
+        html5QrCode.start(
+          { facingMode: "environment" }, // Fuerza la cámara trasera
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          (decodedText) => {
+             // 1. Extraemos el ID limpio
+             let code = decodedText;
+             try {
+                const parsedUrl = new URL(decodedText);
+                code = parsedUrl.searchParams.get('u') || parsedUrl.searchParams.get('usr') || parsedUrl.searchParams.get('uid') || parsedUrl.searchParams.get('invitado') || code;
+             } catch(e) {}
+             
+             // 2. Prevenimos escanear el mismo código 20 veces por segundo
+             if (lastScannedCode.current === code) return;
+             lastScannedCode.current = code;
+             setTimeout(() => { lastScannedCode.current = null; }, 3000); // 3 segundos de bloqueo para ESE mismo código
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+             if (code && code !== 'null') {
+                processEntry(code);
+             }
+          },
+          (errorMessage) => {}
+        ).catch(err => {
+           setCamError("Toca aquí para permitir el uso de la cámara.");
+        });
+      } catch(e) { console.error(e); }
+    };
+
+    initScanner();
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      if (scannerRef.current && scannerRef.current.isScanning) {
+        scannerRef.current.stop().catch(e=>e);
+      }
     };
   }, []);
 
-  const activeGuest = guests.find(g => g.id === activeGuestId);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (!manualCode.trim()) return;
-    const code = manualCode.trim().toLowerCase();
+  // 🔴 LÓGICA DE ACCESO CONECTADA A BASE DE DATOS
+  const processEntry = async (code) => {
+    const codeLower = code.trim().toLowerCase();
     
-    let foundParent = guests.find(g => g.id.toLowerCase() === code);
-    
-    if (!foundParent) {
-      foundParent = guests.find(g => g.subGuests && g.subGuests.some(sg => sg.id.toLowerCase() === code));
-    }
+    let foundParentId = null;
+    let targetSubId = null;
 
-    if (foundParent) {
-      setActiveGuestId(foundParent.id);
-      setErrorMsg('');
-      setManualCode(''); 
-      setIsListOpen(false); 
+    // Buscamos a la familia a la que pertenece este código
+    if (codeLower.startsWith('usr_')) {
+       const parts = codeLower.split('_');
+       if (parts.length >= 3) foundParentId = parts[1]; // Saca el ID de la familia
+       targetSubId = codeLower; // Identifica exactamente quién es
     } else {
-      setActiveGuestId(null);
-      setErrorMsg('Código no reconocido. Verifica la pulsera.');
+       foundParentId = codeLower;
+    }
+
+    if (!foundParentId) {
+      setCardData({ status: 'error', title: 'Código Inválido', subtitle: 'Este pase no pertenece al evento.' });
+      return;
+    }
+
+    try {
+      const docRef = doc(db, "eventos", ID_DEL_EVENTO, "invitados", foundParentId);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+         setCardData({ status: 'error', title: 'No Encontrado', subtitle: 'La familia no está en la base de datos.' });
+         return;
+      }
+      
+      const freshParent = { id: docSnap.id, ...docSnap.data() };
+
+      // Si el evento fue cancelado
+      if (freshParent.status === 'cancelado') {
+         setCardData({ status: 'error', title: 'Acceso Denegado', subtitle: `La invitación de ${freshParent.name} fue cancelada.` });
+         return;
+      }
+
+      // Buscamos el pase específico o el primero libre
+      let targetSub = targetSubId ? (freshParent.subGuests || []).find(sg => sg.id === targetSubId) : null;
+      if (!targetSub) {
+         targetSub = (freshParent.subGuests || []).find(sg => !sg.entered);
+         if (!targetSub) { 
+           setCardData({ status: 'warning', title: 'Pases Agotados', subtitle: `Toda la familia ${freshParent.name} ya ingresó.` });
+           return; 
+         }
+      }
+
+      if (targetSub.entered) { 
+        setCardData({ status: 'warning', title: 'Ya Ingresó', subtitle: `${targetSub.name} ya cruzó la puerta anteriormente.` });
+        return; 
+      }
+
+      // 🔴 DAMOS ACCESO: Registramos la entrada de esa persona
+      const newSubs = (freshParent.subGuests || []).map(sg => sg.id === targetSub.id ? { ...sg, entered: true } : sg);
+      const enteredCount = newSubs.filter(sg => sg.entered).length;
+      
+      let newStatus = freshParent.status;
+      if (enteredCount > 0 && newStatus !== 'ingreso') newStatus = 'ingreso';
+
+      const tableName = tables.find(t => String(t.id) === String(freshParent.tableId))?.name || 'Sin Mesa Asignada';
+      
+      // Actualizamos la ficha y la base de datos simultáneamente
+      setCardData({ status: 'success', title: targetSub.name, subtitle: `Asignado a: ${tableName}` });
+      await setDoc(docRef, { ...freshParent, subGuests: newSubs, entered: enteredCount, status: newStatus });
+      
+    } catch(e) {
+      setCardData({ status: 'error', title: 'Error de Red', subtitle: 'Revisa tu conexión a internet.' });
     }
   };
 
-  const handleToggleSubGuestEntry = (guestId, subGuestId) => {
-    const guest = guests.find(g => g.id === guestId);
-    if (!guest) return;
-
-    const newSubGuests = guest.subGuests.map(sg => sg.id === subGuestId ? { ...sg, entered: !sg.entered } : sg);
-    const newlyEnteredCount = newSubGuests.filter(sg => sg.entered).length;
-    let newStatus = guest.status;
-    if (newlyEnteredCount > 0 && guest.status !== 'ingreso') newStatus = 'ingreso';
-
-    const updatedGuest = { ...guest, subGuests: newSubGuests, entered: newlyEnteredCount, status: newStatus };
-    
-    // 🔴 MAGIA OFFLINE: Al no poner "await", Firebase hace el cambio visual al instante 
-    // y lo pone en una cola interna. Si no hay internet, se sube luego.
-    setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), updatedGuest)
-      .catch(err => console.log('Guardado localmente. Se sincronizará al tener red.'));
-  };
-
-  const simulateCameraScan = () => {
-    const mockQR = guests[0]?.subGuests?.[0]?.id || guests[0]?.id || '1a2b';
-    setManualCode(mockQR);
-    setTimeout(() => {
-      const formEvent = { preventDefault: () => {} };
-      handleSearch(formEvent);
-    }, 600);
-  };
-
-  const handleCopyLink = () => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('modo', 'camara'); // Link correcto para vista móvil de Hostess
-    const textArea = document.createElement("textarea");
-    textArea.value = url.toString();
-    document.body.appendChild(textArea);
-    textArea.select();
+  // 🔴 INGRESO MANUAL DESDE LA LISTA
+  const handleManualEntryFromList = async (parentGuest, subGuest) => {
+    if (subGuest.entered) return;
     try {
-      document.execCommand('copy');
-      alert('¡Enlace único copiado al portapapeles!\n\nEnvíalo a tu personal de puerta para que usen su celular.');
-    } catch (err) {}
-    document.body.removeChild(textArea);
+      const docRef = doc(db, "eventos", ID_DEL_EVENTO, "invitados", parentGuest.id);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) return;
+      const freshParent = { id: docSnap.id, ...docSnap.data() };
+      
+      const newSubs = (freshParent.subGuests || []).map(sg => sg.id === subGuest.id ? { ...sg, entered: true } : sg);
+      const newEntered = newSubs.filter(sg => sg.entered).length;
+      let newStatus = freshParent.status;
+      if (newEntered > 0 && newStatus !== 'ingreso') newStatus = 'ingreso';
+      await setDoc(docRef, { ...freshParent, subGuests: newSubs, entered: newEntered, status: newStatus });
+    } catch(e){}
   };
 
-  const filteredList = guests.filter(g => g.name.toLowerCase().includes(listSearchTerm.toLowerCase()) || g.id.toLowerCase().includes(listSearchTerm.toLowerCase()));
+  const shareStaffLinkWhatsApp = () => {
+    const url = new URL(window.location.origin);
+    url.searchParams.set('modo', 'puerta'); 
+    url.searchParams.set('e', ID_DEL_EVENTO);
+    const msg = `📱 *Recepción EventMaster*\n\nAccede al escáner de puerta aquí:\n${url.toString()}`;
+    window.open(`https://wa.me/${staffPhone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  // Prepara la lista plana para el buscador manual
+  const flattenedGuests = [];
+  (guests || []).forEach(g => {
+    if (g.status === 'cancelado') return;
+    if (g.subGuests && g.subGuests.length > 0) {
+        g.subGuests.forEach(sg => flattenedGuests.push({ parent: g, sub: sg, searchStr: `${sg.name || ''} ${g.name || ''}`.toLowerCase(), entered: sg.entered }));
+    }
+  });
+  
+  const filteredList = flattenedGuests.filter(item => {
+    const matchesSearch = (item.searchStr || '').includes((listSearchTerm || '').toLowerCase());
+    if (listTab === 'adentro') return matchesSearch && item.entered;
+    if (listTab === 'faltan') return matchesSearch && !item.entered;
+    return matchesSearch;
+  });
 
   return (
-    <div className={`h-full flex flex-col space-y-6 pb-6 ${isSharedMode ? 'max-w-5xl mx-auto' : ''}`}>
+    <div className={`h-full flex flex-col space-y-4 pb-6 ${isSharedMode ? 'max-w-lg mx-auto' : 'max-w-4xl'}`}>
       
-      {/* 🔴 BANNER OFFLINE INTELIGENTE */}
-      {isOffline && (
-        <div className="bg-amber-500 text-white p-3 rounded-2xl shadow-lg flex items-center justify-center font-bold text-sm animate-in slide-in-from-top-4">
-          <WifiOff size={18} className="mr-2 animate-pulse" /> 
-          Sin conexión a internet. Guardando accesos localmente.
-        </div>
-      )}
-
-      <div className={`flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${activeGuest ? 'hidden lg:flex' : 'flex'}`}>
+      {/* CABECERA */}
+      <div className="flex justify-between items-center gap-4 px-2">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">{isSharedMode ? 'Recepción del Evento' : 'Control de Puerta y Recepción'}</h2>
-          <p className="text-slate-500 text-sm mt-1">{isSharedMode ? 'Escáner siempre activo. Registra ingresos rápidamente.' : 'Escanea códigos, busca manualmente o comparte el acceso a tu personal.'}</p>
+          <h2 className="text-2xl font-bold text-slate-800">{isSharedMode ? 'Recepción VIP' : 'Control de Accesos'}</h2>
+          <p className="text-slate-500 text-sm mt-1">Escaneo continuo automático activo.</p>
         </div>
-        {!isSharedMode ? (
-          <div className="flex flex-wrap gap-2">
-            <button onClick={simulateSharedMode} className="flex items-center px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors">
-              <ExternalLink size={16} className="mr-2" /> Simular Vista Puerta
-            </button>
-            <button onClick={handleCopyLink} className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm">
-              <Link size={16} className="mr-2" /> Link de Acceso
-            </button>
-          </div>
-        ) : (
-          <button onClick={exitSharedMode} className="flex items-center px-4 py-2 bg-rose-100 text-rose-700 rounded-lg text-sm font-medium hover:bg-rose-200 transition-colors shadow-sm">
-            <LogOut size={16} className="mr-2" /> Salir a Panel Principal
+        {!isSharedMode && (
+          <button onClick={() => setShowShareModal(true)} className="p-2 bg-emerald-100 text-emerald-700 rounded-full hover:bg-emerald-200 transition-colors" title="Compartir a Staff">
+            <Link size={20} /> 
           </button>
         )}
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start flex-1">
-        <div className={`w-full lg:w-1/3 xl:w-1/4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col ${activeGuest ? 'hidden lg:flex' : 'flex'}`}>
-          <div className="mb-6 relative w-full aspect-square bg-slate-900 rounded-2xl overflow-hidden flex flex-col items-center justify-center group cursor-pointer shadow-inner" onClick={simulateCameraScan}>
-            <style>{`@keyframes scanline { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } } .animate-scanline { animation: scanline 3s linear infinite; }`}</style>
-            <div className={`absolute top-0 w-full h-1 shadow-[0_0_20px_rgba(16,185,129,1)] animate-scanline z-10 ${isOffline ? 'bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,1)]' : 'bg-emerald-500'}`}></div>
-            <div className="absolute inset-0 border-[6px] border-white/10 rounded-2xl m-8 pointer-events-none"></div>
-            <Camera size={48} className="text-slate-400 mb-2 group-hover:text-emerald-400 transition-colors" />
-            <p className="text-slate-300 text-sm font-medium tracking-wide">Cámara Activa</p>
-            <p className="text-slate-500 text-xs mt-2 bg-black/40 px-3 py-1 rounded-full">(Toca para simular escaneo)</p>
-          </div>
-
-          <div className="relative flex items-center justify-center mb-6">
-            <div className="border-t border-slate-200 w-full"></div>
-            <span className="bg-white px-3 text-xs text-slate-400 uppercase tracking-widest absolute">o manual</span>
-          </div>
-
-          <form onSubmit={handleSearch} className="mb-4">
-            <div className="flex space-x-2">
-              <input type="text" placeholder="Código (Ej. 1A2B)" value={manualCode} onChange={(e) => setManualCode(e.target.value)} className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all font-mono text-center uppercase tracking-widest text-lg shadow-inner" />
-            </div>
-            <button type="submit" className="w-full mt-3 py-4 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-900 transition-colors shadow-md flex items-center justify-center text-lg">
-              <SearchIcon size={20} className="mr-2" /> Buscar
+      <div className="flex flex-col gap-4 flex-1">
+        
+        {/* 🔴 EL ESCÁNER VISUAL (Puro y sin bordes feos) */}
+        <div className="w-full bg-slate-900 rounded-3xl overflow-hidden relative shadow-2xl flex-shrink-0" style={{ height: '350px' }}>
+          {camError ? (
+            <button onClick={() => window.location.reload()} className="absolute inset-0 flex flex-col items-center justify-center text-white bg-slate-800 p-6 text-center">
+              <Camera size={48} className="text-rose-500 mb-4"/>
+              <span className="font-bold text-lg mb-2">Permiso de cámara requerido</span>
+              <span className="text-sm text-slate-400">Toca para recargar y aceptar los permisos.</span>
             </button>
-          </form>
-
-          <button onClick={() => setIsListOpen(true)} className="w-full py-4 mt-auto bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-bold hover:bg-emerald-100 transition-colors flex items-center justify-center text-lg">
-            <Users size={20} className="mr-2" /> Ver Lista Completa
-          </button>
-          {errorMsg && <div className="mt-4 bg-rose-50 text-rose-700 p-4 rounded-xl text-sm flex items-center border border-rose-100"><AlertTriangle size={20} className="mr-3 flex-shrink-0" /> {errorMsg}</div>}
-        </div>
-
-        <div className={`w-full lg:w-2/3 xl:w-3/4 h-full ${activeGuest ? 'block' : 'hidden lg:block'}`}>
-          {activeGuest ? (
-            <div className={`bg-white rounded-3xl border shadow-xl overflow-hidden animate-in fade-in zoom-in-95 lg:zoom-in-100 duration-200 h-full flex flex-col ${isOffline ? 'border-amber-300' : 'border-emerald-200'}`}>
-              <div className={`${isOffline ? 'bg-amber-50' : 'bg-emerald-50'} p-6 sm:p-8 border-b border-emerald-100 flex flex-col sm:flex-row items-start justify-between gap-6 transition-colors`}>
-                <div className="flex-1">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border ${isOffline ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200'}`}>
-                    <CheckCircle size={14} className="mr-1.5" /> Código Válido
-                  </span>
-                  <h3 className="text-3xl sm:text-4xl font-extrabold text-slate-800 leading-tight">{activeGuest.name}</h3>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="bg-white px-4 py-2 rounded-lg border border-slate-200 text-slate-600 font-mono text-sm shadow-sm flex items-center"><QrCode size={16} className="mr-2 text-slate-400"/> ID: {activeGuest.id}</span>
-                    <span className="bg-white px-4 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm shadow-sm flex items-center"><Users size={16} className="mr-2 text-slate-400"/> {activeGuest.passes} Pases Totales</span>
-                  </div>
-                </div>
-                <div className="text-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 min-w-[140px] w-full sm:w-auto">
-                  <p className="text-xs text-slate-400 uppercase font-bold tracking-widest mb-2">Mesa Asignada</p>
-                  <p className="text-6xl font-black text-indigo-600">{tables.find(t => t.id === activeGuest.tableId)?.name || '-'}</p>
-                </div>
-              </div>
-              <div className="p-6 sm:p-8 flex-1 overflow-y-auto bg-white">
-                <div className="flex items-center justify-between mb-6">
-                  <h4 className="text-xl font-bold text-slate-800">Control de Acceso</h4>
-                  <div className="bg-slate-100 px-4 py-2 rounded-xl text-sm font-bold text-slate-700">Ingresos: <span className={`${isOffline ? 'text-amber-600' : 'text-emerald-600'} text-lg`}>{activeGuest.entered}</span> / {activeGuest.passes}</div>
-                </div>
-                <div className="space-y-4">
-                  {activeGuest.subGuests.map((sub, idx) => (
-                    <div key={sub.id} onClick={() => handleToggleSubGuestEntry(activeGuest.id, sub.id)} className={`flex items-center justify-between p-5 rounded-2xl border-2 transition-all cursor-pointer select-none active:scale-[0.99] ${sub.entered ? 'bg-emerald-50/50 border-emerald-400 shadow-sm' : 'bg-white hover:bg-slate-50 border-slate-200'}`}>
-                      <div className="flex items-center space-x-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${sub.entered ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>{idx + 1}</div>
-                        <div className="flex flex-col">
-                          <span className={`text-lg font-bold ${sub.entered ? 'text-emerald-900' : 'text-slate-700'}`}>{sub.name}</span>
-                          <span className={`text-sm mt-0.5 font-semibold uppercase tracking-wider ${sub.entered ? 'text-emerald-600' : 'text-slate-400'}`}>{sub.entered ? 'Ingreso Registrado' : 'Toca para dar acceso'}</span>
-                        </div>
-                      </div>
-                      <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${sub.entered ? 'bg-emerald-500 border-emerald-500' : 'bg-white border-slate-300'}`}>{sub.entered && <CheckCircle size={20} className="text-white" />}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="p-6 bg-slate-50 border-t border-slate-200">
-                <button onClick={() => setActiveGuestId(null)} className="w-full py-4 sm:py-5 bg-slate-800 text-white rounded-2xl font-bold text-lg hover:bg-slate-900 transition-colors shadow-lg flex items-center justify-center"><Scan size={24} className="mr-3" /> Listo, Escanear Siguiente</button>
-              </div>
-            </div>
           ) : (
-            <div className="h-full bg-slate-100/50 rounded-3xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center p-12 text-center relative overflow-hidden">
-              {isOffline && <div className="absolute top-10 flex flex-col items-center"><WifiOff size={48} className="text-amber-200 mb-2"/><p className="text-amber-600 font-bold uppercase tracking-widest text-sm">Modo de Respaldo</p></div>}
-              <Scan size={80} className={`mb-6 ${isOffline ? 'text-amber-200 mt-20' : 'text-slate-300'}`} />
-              <h3 className="text-2xl font-bold text-slate-400 mb-2">Lector Preparado</h3>
-              <p className="max-w-md text-slate-400 text-lg">La cámara está activa. Los datos del invitado y su mesa asignada aparecerán aquí automáticamente al escanear.</p>
-            </div>
+            <>
+               <div id="qr-reader-puerta" className="absolute inset-0 w-full h-full object-cover"></div>
+               {/* Overlay Decorativo del Escáner */}
+               <div className="absolute inset-0 border-[40px] border-black/40 pointer-events-none z-10"></div>
+               <div className="absolute inset-0 border-2 border-emerald-400 m-[40px] pointer-events-none z-10 opacity-70">
+                 {/* Línea de escaneo láser */}
+                 <div className="w-full h-0.5 bg-emerald-400 shadow-[0_0_15px_#34d399] absolute top-1/2 -translate-y-1/2 opacity-60"></div>
+               </div>
+            </>
           )}
         </div>
+
+        {/* 🔴 LA FICHA DE RESULTADO (CARD) */}
+        <div className={`w-full p-6 rounded-3xl shadow-lg border-2 transition-all flex flex-col justify-center min-h-[140px] flex-shrink-0 relative overflow-hidden
+            ${cardData.status === 'idle' ? 'bg-white border-slate-200' : ''}
+            ${cardData.status === 'success' ? 'bg-emerald-50 border-emerald-400 shadow-emerald-500/20 scale-[1.02]' : ''}
+            ${cardData.status === 'warning' ? 'bg-amber-50 border-amber-400 shadow-amber-500/20' : ''}
+            ${cardData.status === 'error' ? 'bg-rose-50 border-rose-400 shadow-rose-500/20' : ''}
+        `}>
+           <div className="relative z-10 text-center">
+              <p className={`text-xs font-black uppercase tracking-widest mb-1
+                ${cardData.status === 'idle' ? 'text-slate-400' : ''}
+                ${cardData.status === 'success' ? 'text-emerald-600' : ''}
+                ${cardData.status === 'warning' ? 'text-amber-600' : ''}
+                ${cardData.status === 'error' ? 'text-rose-600' : ''}
+              `}>
+                 {cardData.status === 'idle' ? 'ESTADO: LISTO' : cardData.status === 'success' ? 'ACCESO APROBADO' : cardData.status === 'warning' ? 'ATENCIÓN' : 'ERROR'}
+              </p>
+              <h3 className={`text-2xl sm:text-3xl font-black leading-tight mb-2 ${cardData.status === 'idle' ? 'text-slate-700' : 'text-slate-900'}`}>
+                {cardData.title}
+              </h3>
+              <p className={`text-lg font-bold ${cardData.status === 'success' ? 'text-emerald-700' : 'text-slate-500'}`}>
+                {cardData.subtitle}
+              </p>
+           </div>
+           
+           {/* Iconos de fondo difuminados en la ficha */}
+           {cardData.status === 'success' && <CheckCircle size={100} className="absolute -right-4 -bottom-4 text-emerald-500/10 pointer-events-none"/>}
+           {cardData.status === 'warning' && <AlertTriangle size={100} className="absolute -right-4 -bottom-4 text-amber-500/10 pointer-events-none"/>}
+           {cardData.status === 'error' && <X size={100} className="absolute -right-4 -bottom-4 text-rose-500/10 pointer-events-none"/>}
+        </div>
+
+        {/* 🔴 BOTÓN HACIA LA LISTA MANUAL */}
+        <button onClick={() => setIsListOpen(true)} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold shadow-lg hover:bg-slate-800 transition-colors flex items-center justify-center text-lg flex-shrink-0 mt-2">
+          <Users size={22} className="mr-3 text-emerald-400" /> Abrir Directorio Manual
+        </button>
+
       </div>
 
+      {/* 🔴 MODAL: DIRECTORIO MANUAL */}
       {isListOpen && (
-        <div className="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex flex-col justify-end sm:justify-center sm:p-6 animate-in fade-in duration-200">
-          <div className="bg-white w-full sm:max-w-3xl mx-auto sm:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[80vh] animate-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200 overflow-hidden">
-            <div className="p-6 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-              <div><h3 className="text-xl font-bold text-slate-800 flex items-center"><Users size={24} className="mr-2 text-emerald-600" /> Lista General de Recepción</h3></div>
-              <button onClick={() => setIsListOpen(false)} className="p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors"><X size={24}/></button>
+         <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex flex-col justify-end sm:justify-center sm:p-6 animate-in fade-in duration-200">
+             <div className="bg-white w-full sm:max-w-2xl mx-auto sm:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col h-[90vh] sm:h-[80vh] overflow-hidden">
+                
+                <div className="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
+                   <div>
+                     <h3 className="text-xl font-bold text-slate-800 flex items-center"><Users size={20} className="mr-2 text-emerald-600" /> Ingreso Manual</h3>
+                     <p className="text-xs text-slate-500">Busca por nombre si no traen pulsera.</p>
+                   </div>
+                   <button onClick={() => setIsListOpen(false)} className="p-2 bg-slate-200 rounded-full hover:bg-slate-300 text-slate-600 transition-colors"><X size={20}/></button>
+                </div>
+                
+                <div className="bg-white border-b border-slate-100 shadow-sm z-10 shrink-0">
+                   <div className="flex p-2 gap-2 bg-slate-100">
+                      <button onClick={()=>setListTab('todos')} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${listTab==='todos' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>Todos</button>
+                      <button onClick={()=>setListTab('adentro')} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${listTab==='adentro' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500'}`}>Adentro</button>
+                      <button onClick={()=>setListTab('faltan')} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${listTab==='faltan' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500'}`}>Faltan</button>
+                   </div>
+                   <div className="relative p-4">
+                     <SearchIcon className="absolute left-7 top-1/2 -translate-y-1/2 text-slate-400" size={18}/>
+                     <input type="text" autoFocus placeholder="Buscar por nombre o familia..." value={listSearchTerm} onChange={(e) => setListSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all font-bold text-lg" />
+                   </div>
+                </div>
+                
+                <div className="overflow-y-auto flex-1 p-4 bg-slate-50 custom-scrollbar space-y-3">
+                   {filteredList.map(item => {
+                      const { parent, sub } = item;
+                      const mesaName = tables.find(t => String(t.id) === String(parent.tableId))?.name || 'Sin Mesa Asignada';
+                      
+                      return (
+                        <div key={sub.id} className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-white border rounded-2xl transition-all shadow-sm ${sub.entered ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200'}`}>
+                           <div className="mb-3 sm:mb-0 w-full sm:w-auto">
+                              <p className={`font-bold text-lg leading-tight ${sub.entered ? 'text-slate-500' : 'text-slate-800'}`}>{sub.name}</p>
+                              <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                                 <span className="text-[10px] font-black uppercase text-slate-500 bg-slate-100 px-2 py-1 rounded">{parent.name}</span>
+                                 <span className="text-[11px] font-bold text-slate-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded">Mesa: {mesaName}</span>
+                              </div>
+                           </div>
+                           
+                           <div className="w-full sm:w-auto text-right">
+                             {sub.entered ? (
+                                <div className="px-5 py-3 rounded-xl text-sm font-black bg-emerald-100 text-emerald-700 flex items-center justify-center sm:justify-start"><CheckCircle size={18} className="mr-2"/> Ya Ingresó</div>
+                             ) : (
+                                <button onClick={() => handleManualEntryFromList(parent, sub)} className="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold bg-slate-900 text-white hover:bg-slate-800 shadow-md transition-transform active:scale-95 flex items-center justify-center">
+                                  Dar Acceso <ArrowRight size={16} className="ml-2" />
+                                </button>
+                             )}
+                           </div>
+                        </div>
+                      )
+                   })}
+                   {filteredList.length === 0 && <div className="text-center p-12 text-slate-400 font-bold text-lg border-2 border-dashed border-slate-200 rounded-2xl">No se encontraron invitados.</div>}
+                </div>
+             </div>
+         </div>
+      )}
+
+      {/* MODAL COMPARTIR */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl animate-in zoom-in-95">
+            <button onClick={() => setShowShareModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-rose-500"><X size={20}/></button>
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4"><ShieldCheck size={32}/></div>
+            <h3 className="font-black text-xl text-slate-800 mb-2">Acceso a Recepción</h3>
+            <p className="text-sm text-slate-500 mb-6">Envía este link a las personas encargadas de la entrada del evento.</p>
+            <div className="flex gap-2 mb-4">
+              <input type="tel" placeholder="Número WhatsApp..." value={staffPhone} onChange={e=>setStaffPhone(e.target.value)} className="w-full p-3 border border-slate-200 rounded-xl font-bold outline-none focus:border-emerald-500" />
+              <button onClick={shareStaffLinkWhatsApp} className="px-5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600"><Send size={18}/></button>
             </div>
-            <div className="p-4 bg-white border-b border-slate-100 shadow-sm z-10">
-              <div className="relative">
-                <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input type="text" autoFocus placeholder="Buscar por nombre, familia o ID..." value={listSearchTerm} onChange={(e) => setListSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all text-lg" />
-              </div>
-            </div>
-            <div className="overflow-y-auto flex-1 p-2 sm:p-4">
-              <div className="space-y-2">
-                {filteredList.map(guest => {
-                  const isComplete = guest.entered === guest.passes;
-                  return (
-                    <div key={guest.id} onClick={() => { setActiveGuestId(guest.id); setIsListOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl hover:border-emerald-400 hover:shadow-md cursor-pointer transition-all active:scale-[0.98]">
-                      <div className="flex-1 mb-3 sm:mb-0">
-                        <p className="font-bold text-slate-800 text-lg">{guest.name}</p>
-                        <div className="flex items-center gap-3 mt-1 text-sm"><span className="text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">ID: {guest.id}</span><span className="text-slate-500"><MapIcon size={14} className="inline mr-1"/> {tables.find(t => t.id === guest.tableId)?.name || 'Sin Mesa'}</span></div>
-                      </div>
-                      <div className="flex items-center w-full sm:w-auto justify-between sm:justify-end gap-4">
-                        <div className={`px-4 py-2 rounded-xl text-sm font-bold text-center flex-1 sm:flex-none ${isComplete ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>{guest.entered} / {guest.passes} Ingresos</div>
-                        <div className="p-2 text-emerald-600 bg-emerald-50 rounded-xl"><ArrowRight size={20} /></div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
+            <button onClick={() => { setShowShareModal(false); simulateSharedMode(); }} className="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors mb-2">Simular en esta pantalla</button>
           </div>
         </div>
       )}
+
     </div>
   );
 };
