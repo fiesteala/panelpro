@@ -9685,7 +9685,7 @@ const ConfiguracionMaestraView = ({ agencyConfig, addNotification }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: VISOR PÚBLICO WIDGET (CERO ALERTAS) ---
+// --- COMPONENTE: VISOR PÚBLICO WIDGET (ANTI-ZOOM Y CRISTAL) ---
 // ==========================================
 const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [eventoInfo, setEventoInfo] = useState(null);
@@ -9693,7 +9693,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [loading, setLoading] = useState(true);
   const [showRSVP, setShowRSVP] = useState(false);
   const [rsvpStatus, setRsvpStatus] = useState('idle'); 
-  const [formError, setFormError] = useState(''); // 🔴 ESTADO NATIVO DE ERROR
+  const [formError, setFormError] = useState(''); 
   
   const [guestPhone, setGuestPhone] = useState('');
   const [tempSubGuests, setTempSubGuests] = useState([]);
@@ -9714,6 +9714,18 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const themeCard = { backgroundColor: t_card, borderColor: `${t_txt}40`, color: t_txt };
   const themeBtn = { backgroundColor: t_btn, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.1em' };
   const themeInput = { backgroundColor: isIframe ? 'rgba(255,255,255,0.5)' : `${t_bg}80`, color: t_txt, borderColor: `${t_txt}40` };
+
+  // 🔴 INYECCIÓN ANTI-ZOOM PARA MÓVILES
+  useEffect(() => {
+    let meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = "viewport";
+      document.head.appendChild(meta);
+    }
+    // Fuerza a la escala 1.0 y prohíbe al usuario hacer zoom
+    meta.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -9813,14 +9825,16 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   }
 
   return (
-    <div style={themeContainer} className="relative pb-24 flex items-center justify-center p-4">
+    <div style={themeContainer} className="relative pb-24 flex items-center justify-center p-4 overflow-hidden">
       
-      {/* 🔴 PARCHE DE CRISTAL: MATAR EL FONDO NEGRO DEL PANEL SI ES IFRAME */}
+      {/* 🔴 PARCHE DE CRISTAL Y ANTI-ZOOM HORIZONTAL */}
       {isIframe && (
         <style>{`
           html, body, #root { 
             background: transparent !important; 
             background-color: transparent !important; 
+            overflow-x: hidden !important; 
+            touch-action: pan-y !important; /* Permite scroll vertical, bloquea zoom de pellizco y scroll horizontal */
           }
         `}</style>
       )}
@@ -9829,7 +9843,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
 
       {showRSVP && (
         <div className="w-full max-w-md mx-auto z-50 animate-in slide-in-from-bottom-8 duration-500">
-          <div style={themeCard} className={`w-full rounded-2xl p-6 border-4 max-h-[90vh] overflow-y-auto custom-scrollbar ${isIframe ? 'shadow-[8px_8px_0_rgba(0,0,0,0.5)]' : 'shadow-2xl'}`}>
+          <div style={themeCard} className={`w-full rounded-2xl p-6 border-4 max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar ${isIframe ? 'shadow-[8px_8px_0_rgba(0,0,0,0.5)]' : 'shadow-2xl'}`}>
             
             <div className="text-center mb-6 border-b-4 pb-4" style={{ borderColor: `${t_txt}20` }}>
                <h3 className="text-3xl font-bold uppercase tracking-widest">Confirmación</h3>
