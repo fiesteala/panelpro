@@ -9685,7 +9685,7 @@ const ConfiguracionMaestraView = ({ agencyConfig, addNotification }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: VISOR PÚBLICO WIDGET (ANTI-ZOOM Y CRISTAL) ---
+// --- COMPONENTE: VISOR PÚBLICO WIDGET (COMPACTO, ANTI-ZOOM Y CRISTAL) ---
 // ==========================================
 const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [eventoInfo, setEventoInfo] = useState(null);
@@ -9711,9 +9711,11 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const t_font = urlParams.get('font') || '';
 
   const themeContainer = { backgroundColor: isIframe ? 'transparent' : t_bg, fontFamily: t_font ? `"${t_font}", sans-serif` : 'inherit', minHeight: '100vh', color: t_txt };
-  const themeCard = { backgroundColor: t_card, borderColor: `${t_txt}40`, color: t_txt };
+  const themeCard = { backgroundColor: t_card, borderColor: `${t_txt}20`, color: t_txt };
   const themeBtn = { backgroundColor: t_btn, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.1em' };
-  const themeInput = { backgroundColor: isIframe ? 'rgba(255,255,255,0.5)' : `${t_bg}80`, color: t_txt, borderColor: `${t_txt}40` };
+  
+  // Fondo de inputs más sutil
+  const themeInput = { backgroundColor: isIframe ? 'rgba(255,255,255,0.3)' : `${t_bg}50`, color: t_txt, borderColor: `${t_txt}30` };
 
   // 🔴 INYECCIÓN ANTI-ZOOM PARA MÓVILES
   useEffect(() => {
@@ -9804,28 +9806,28 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
       }
 
     } catch (error) { 
-      setFormError("Hubo un error al guardar. Revisa tu conexión de red."); 
+      setFormError("Error al guardar. Revisa tu conexión."); 
       setRsvpStatus('idle'); 
     }
   };
 
-  if (loading) return <div style={themeContainer} className="flex items-center justify-center animate-pulse text-2xl font-bold">Cargando Misión...</div>;
-  if (!eventoInfo) return <div style={themeContainer} className="flex items-center justify-center font-bold text-xl text-center p-6"><p>ERROR 404:<br/>No se encontró el evento.</p></div>;
+  if (loading) return <div style={themeContainer} className="flex items-center justify-center animate-pulse text-lg font-bold">Cargando Bóveda...</div>;
+  if (!eventoInfo) return <div style={themeContainer} className="flex items-center justify-center font-bold text-lg text-center p-6"><p>ERROR 404:<br/>Evento no encontrado.</p></div>;
 
   const extrasAprobados = (guestInfo?.passes > (guestInfo?.originalPasses || guestInfo?.passes)) ? guestInfo.passes - guestInfo.originalPasses : 0;
 
   if (rsvpStatus === 'success') {
     return (
       <div style={themeContainer} className="flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
-        <div style={{...themeCard, borderColor: t_btn, borderWidth: '4px'}} className="w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-xl"><CheckCircle size={48} color={t_btn} /></div>
-        <h2 className="text-3xl font-bold mb-2 text-shadow-md">¡Asistencia Confirmada!</h2>
-        <p className="opacity-90 mb-8 font-bold">¡Tu progreso ha sido guardado!</p>
+        <div style={{...themeCard, borderColor: t_btn, borderWidth: '2px'}} className="w-20 h-20 rounded-full flex items-center justify-center mb-5 shadow-lg"><CheckCircle size={36} color={t_btn} /></div>
+        <h2 className="text-2xl font-bold mb-1 drop-shadow-sm">¡Asistencia Confirmada!</h2>
+        <p className="text-sm opacity-80 font-medium">Hemos guardado tu respuesta.</p>
       </div>
     );
   }
 
   return (
-    <div style={themeContainer} className="relative pb-24 flex items-center justify-center p-4 overflow-hidden">
+    <div style={themeContainer} className="relative pb-16 flex items-center justify-center p-3 sm:p-4 overflow-hidden">
       
       {/* 🔴 PARCHE DE CRISTAL Y ANTI-ZOOM HORIZONTAL */}
       {isIframe && (
@@ -9834,7 +9836,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
             background: transparent !important; 
             background-color: transparent !important; 
             overflow-x: hidden !important; 
-            touch-action: pan-y !important; /* Permite scroll vertical, bloquea zoom de pellizco y scroll horizontal */
+            touch-action: pan-y !important; 
           }
         `}</style>
       )}
@@ -9842,54 +9844,58 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
       {t_font && <style>{`@import url('https://fonts.googleapis.com/css2?family=${t_font.replace(/ /g, '+')}&display=swap');`}</style>}
 
       {showRSVP && (
-        <div className="w-full max-w-md mx-auto z-50 animate-in slide-in-from-bottom-8 duration-500">
-          <div style={themeCard} className={`w-full rounded-2xl p-6 border-4 max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar ${isIframe ? 'shadow-[8px_8px_0_rgba(0,0,0,0.5)]' : 'shadow-2xl'}`}>
+        <div className="w-full max-w-sm mx-auto z-50 animate-in slide-in-from-bottom-8 duration-500">
+          <div style={themeCard} className={`w-full rounded-2xl p-4 sm:p-5 border max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar ${isIframe ? 'shadow-[0_8px_30px_rgba(0,0,0,0.12)]' : 'shadow-xl'}`}>
             
-            <div className="text-center mb-6 border-b-4 pb-4" style={{ borderColor: `${t_txt}20` }}>
-               <h3 className="text-3xl font-bold uppercase tracking-widest">Confirmación</h3>
-               {guestInfo && <p className="mt-2 text-xl font-bold opacity-80">{guestInfo.name} ({guestInfo.originalPasses || guestInfo.passes} lugares)</p>}
+            <div className="text-center mb-5 border-b pb-3" style={{ borderColor: `${t_txt}15` }}>
+               <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-widest leading-tight">Confirmación</h3>
+               {guestInfo && <p className="mt-1 text-sm font-medium opacity-80">{guestInfo.name} ({guestInfo.originalPasses || guestInfo.passes} lugares)</p>}
             </div>
 
             {extrasAprobados > 0 && guestInfo?.status === 'confirmado' && (
-               <div style={{ backgroundColor: `${t_btn}20`, borderColor: t_btn, color: t_txt }} className="mb-6 border-2 p-3 rounded-xl shadow-sm animate-in fade-in">
-                  <p className="text-sm font-black uppercase tracking-widest mb-1 flex items-center justify-center"><CheckCircle size={16} className="mr-2"/> Solicitud Aprobada</p>
-                  <p className="text-sm text-center font-bold">Te han otorgado {extrasAprobados} pase(s) extra. Tienes {guestInfo.passes} lugares en total.</p>
+               <div style={{ backgroundColor: `${t_btn}15`, borderColor: t_btn, color: t_txt }} className="mb-4 border p-2.5 rounded-lg shadow-sm animate-in fade-in">
+                  <p className="text-xs font-black uppercase tracking-widest mb-0.5 flex items-center justify-center"><CheckCircle size={14} className="mr-1.5"/> Solicitud Aprobada</p>
+                  <p className="text-xs text-center font-medium">Te han otorgado {extrasAprobados} pase(s) extra. Tienes {guestInfo.passes} en total.</p>
                </div>
             )}
             
-            <form onSubmit={handleRSVPSubmit} className="space-y-5">
-              <div className="p-4 rounded-xl border-4" style={{ borderColor: `${t_txt}20` }}>
-                <label className="block text-lg font-bold uppercase tracking-widest mb-2 flex items-center"><Phone size={18} className="mr-2"/> Teléfono (WhatsApp)</label>
-                <input type="tel" required value={guestPhone} onChange={e => setGuestPhone(e.target.value)} style={themeInput} className="w-full p-3 border-4 rounded-lg outline-none font-bold text-xl" placeholder="10 dígitos" />
+            <form onSubmit={handleRSVPSubmit} className="space-y-4">
+              
+              {/* CAMPO TELÉFONO COMPACTO */}
+              <div className="p-3 rounded-xl border" style={{ borderColor: `${t_txt}20` }}>
+                <label className="block text-xs font-bold uppercase tracking-widest mb-1.5 flex items-center opacity-90"><Phone size={14} className="mr-1.5"/> WhatsApp de Contacto</label>
+                {/* 🔴 IMPORTANTE: text-base (16px) EVITA EL ZOOM EN IPHONE */}
+                <input type="tel" required value={guestPhone} onChange={e => setGuestPhone(e.target.value)} style={themeInput} className="w-full p-2.5 border rounded-lg outline-none font-medium text-base" placeholder="10 dígitos" />
               </div>
 
               {guestInfo ? (
                 <>
-                  <div className="text-center mt-6 mb-2">
-                    <h4 className="font-bold text-xl uppercase tracking-wider">¿Quiénes asisten?</h4>
+                  <div className="text-center mt-5 mb-2">
+                    <h4 className="font-bold text-sm uppercase tracking-widest opacity-90">Asistentes</h4>
                   </div>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {tempSubGuests.map((sg, idx) => (
-                      <div key={idx} style={{ borderColor: sg.willAttend ? t_txt : `${t_txt}20`, opacity: sg.willAttend ? 1 : 0.6 }} className="p-3 rounded-xl border-4 transition-all">
-                        <div className="flex justify-between items-center mb-2">
-                          <label className="text-lg font-bold uppercase tracking-wider">Pase #{idx + 1}</label>
-                          <label style={{ backgroundColor: isIframe ? 'rgba(0,0,0,0.1)' : `${t_bg}80` }} className="flex items-center space-x-2 cursor-pointer px-3 py-1.5 rounded-lg border-2 border-black/20" >
-                            <input type="checkbox" checked={sg.willAttend} onChange={(e) => handleSubGuestChange(idx, 'willAttend', e.target.checked)} className="w-5 h-5 accent-green-600" />
-                            <span className="text-sm font-bold uppercase tracking-wider">{sg.willAttend ? 'SÍ VOY' : 'NO VOY'}</span>
+                      <div key={idx} style={{ borderColor: sg.willAttend ? `${t_txt}40` : `${t_txt}15`, opacity: sg.willAttend ? 1 : 0.6 }} className="p-2.5 rounded-xl border transition-all">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <label className="text-xs font-bold uppercase tracking-wider">Pase #{idx + 1}</label>
+                          <label style={{ backgroundColor: isIframe ? 'rgba(0,0,0,0.05)' : `${t_bg}60` }} className="flex items-center space-x-1.5 cursor-pointer px-2 py-1 rounded-md border" >
+                            <input type="checkbox" checked={sg.willAttend} onChange={(e) => handleSubGuestChange(idx, 'willAttend', e.target.checked)} className="w-3.5 h-3.5 accent-emerald-600" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">{sg.willAttend ? 'SÍ VOY' : 'NO VOY'}</span>
                           </label>
                         </div>
                         
                         {sg.willAttend && (
-                          <div className="space-y-3 mt-3 pt-3 border-t-4 animate-in fade-in" style={{ borderColor: `${t_txt}20` }}>
+                          <div className="space-y-2 mt-2 pt-2 border-t animate-in fade-in" style={{ borderColor: `${t_txt}10` }}>
+                            {/* 🔴 IMPORTANTE: text-base (16px) EVITA EL ZOOM EN IPHONE */}
                             <input 
-                              type="text" required placeholder="Nombre de la persona..." 
+                              type="text" required placeholder="Nombre del asistente..." 
                               value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)} 
-                              style={themeInput} className="w-full p-3 border-4 rounded-lg text-lg font-bold outline-none" 
+                              style={themeInput} className="w-full p-2 border rounded-md text-base font-medium outline-none" 
                             />
-                            <label className="flex items-center space-x-3 cursor-pointer pt-1">
-                               <input type="checkbox" checked={sg.isChild || false} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-5 h-5 accent-indigo-600" />
-                               <span className="text-sm font-bold uppercase tracking-widest opacity-80">Es un Niño (Menor)</span>
+                            <label className="flex items-center space-x-2 cursor-pointer pt-0.5">
+                               <input type="checkbox" checked={sg.isChild || false} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-3.5 h-3.5 accent-indigo-600" />
+                               <span className="text-xs font-medium uppercase tracking-wider opacity-80">Menor de edad</span>
                             </label>
                           </div>
                         )}
@@ -9897,41 +9903,44 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                     ))}
                   </div>
 
-                  <div className="border-t-4 pt-4 mt-6 flex items-center justify-between p-3 rounded-xl" style={{ borderColor: `${t_txt}20`, backgroundColor: isIframe ? 'transparent' : `${t_bg}50` }}>
+                  {/* SOLICITAR PASES EXTRA COMPACTO */}
+                  <div className="border-t pt-3 mt-4 flex items-center justify-between p-2 rounded-lg" style={{ borderColor: `${t_txt}15`, backgroundColor: isIframe ? 'transparent' : `${t_bg}40` }}>
                     <div>
-                      <p className="text-lg font-bold uppercase tracking-widest">¿Pases extra?</p>
-                      <p className="text-sm opacity-70 mt-1">Sujeto a los novios.</p>
+                      <p className="text-xs font-bold uppercase tracking-widest">¿Pases extra?</p>
+                      <p className="text-[10px] opacity-70">Sujeto a confirmación.</p>
                     </div>
-                    <div style={{ backgroundColor: t_card, borderColor: `${t_txt}40` }} className="flex items-center border-4 rounded-lg p-1 shadow-sm">
-                      <button type="button" onClick={() => setExtraRequested(Math.max(0, extraRequested - 1))} className="px-3 py-1 text-3xl font-bold hover:opacity-50">-</button>
-                      <span className="text-2xl font-black w-10 text-center">{extraRequested}</span>
-                      <button type="button" onClick={() => setExtraRequested(extraRequested + 1)} className="px-3 py-1 text-3xl font-bold hover:opacity-50">+</button>
+                    <div style={{ backgroundColor: t_card, borderColor: `${t_txt}30` }} className="flex items-center border rounded-md p-0.5 shadow-sm">
+                      <button type="button" onClick={() => setExtraRequested(Math.max(0, extraRequested - 1))} className="px-2 py-0.5 text-lg font-bold hover:opacity-50">-</button>
+                      <span className="text-sm font-black w-6 text-center">{extraRequested}</span>
+                      <button type="button" onClick={() => setExtraRequested(extraRequested + 1)} className="px-2 py-0.5 text-lg font-bold hover:opacity-50">+</button>
                     </div>
                   </div>
                 </>
               ) : (
-                <div className="space-y-4">
-                  <div className="p-4 rounded-xl border-4" style={{ borderColor: `${t_txt}20` }}>
-                    <label className="block text-lg font-bold uppercase tracking-widest mb-2">Tu Nombre Completo</label>
-                    <input type="text" required value={openName} onChange={e => setOpenName(e.target.value)} style={themeInput} className="w-full p-3 border-4 rounded-lg outline-none font-bold text-xl" placeholder="Ej. Steve..." />
+                <div className="space-y-3">
+                  <div className="p-3 rounded-xl border" style={{ borderColor: `${t_txt}20` }}>
+                    <label className="block text-xs font-bold uppercase tracking-widest mb-1.5 opacity-90">Tu Nombre Completo</label>
+                    <input type="text" required value={openName} onChange={e => setOpenName(e.target.value)} style={themeInput} className="w-full p-2.5 border rounded-lg outline-none font-medium text-base" placeholder="Ej. Familia López" />
                   </div>
-                  <div className="p-4 rounded-xl border-4" style={{ borderColor: `${t_txt}20` }}>
-                    <label className="block text-lg font-bold uppercase tracking-widest mb-2">¿Cuántos asisten?</label>
-                    <select value={openPasses} onChange={e => setOpenPasses(e.target.value)} style={themeInput} className="w-full p-3 border-4 rounded-lg outline-none font-bold text-xl">
-                      {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n} jugador(es)</option>)}
+                  <div className="p-3 rounded-xl border" style={{ borderColor: `${t_txt}20` }}>
+                    <label className="block text-xs font-bold uppercase tracking-widest mb-1.5 opacity-90">¿Cuántos asisten?</label>
+                    <select value={openPasses} onChange={e => setOpenPasses(e.target.value)} style={themeInput} className="w-full p-2.5 border rounded-lg outline-none font-medium text-base">
+                      {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n} persona(s)</option>)}
                     </select>
                   </div>
                 </div>
               )}
               
+              {/* ALERTA DE ERROR COMPACTA */}
               {formError && (
-                 <div className="bg-red-500/20 border-2 border-red-500 text-white p-3 rounded-xl font-bold text-sm flex items-center shadow-lg animate-in shake">
-                    <AlertCircle size={20} className="mr-2 flex-shrink-0"/> {formError}
+                 <div className="bg-rose-500/10 border border-rose-500/30 text-rose-600 p-2.5 rounded-lg font-bold text-xs flex items-center shadow-sm animate-in shake">
+                    <AlertCircle size={16} className="mr-1.5 flex-shrink-0"/> {formError}
                  </div>
               )}
 
-              <button type="submit" disabled={rsvpStatus === 'submitting'} style={{...themeBtn, opacity: (!guestInfo || tempSubGuests.filter(s => s.willAttend).length > 0) ? 1 : 0.8 }} className="w-full py-5 rounded-xl font-bold text-2xl hover:scale-[1.02] transition-transform mt-6 border-b-8 border-black/30">
-                {rsvpStatus === 'submitting' ? 'GUARDANDO...' : (!guestInfo || tempSubGuests.filter(s => s.willAttend).length > 0 ? 'GUARDAR PARTIDA' : 'DECLINAR MISIÓN')}
+              {/* BOTÓN SUBMIT COMPACTO PERO PODEROSO */}
+              <button type="submit" disabled={rsvpStatus === 'submitting'} style={{...themeBtn, opacity: (!guestInfo || tempSubGuests.filter(s => s.willAttend).length > 0) ? 1 : 0.8 }} className="w-full py-3.5 rounded-xl font-bold text-sm sm:text-base shadow-lg hover:scale-[1.02] transition-transform mt-5 border-b-4 border-black/20">
+                {rsvpStatus === 'submitting' ? 'Enviando...' : (!guestInfo || tempSubGuests.filter(s => s.willAttend).length > 0 ? 'Confirmar Asistencia' : 'Declinar Invitación')}
               </button>
             </form>
           </div>
