@@ -236,7 +236,7 @@
                     <audio 
                         ref={audioRef}
                         id="bg-music" 
-                        src="./cancion.mp3" 
+                        src="/maricela-estudillo-gonzalez/cancion.mp3" 
                         loop 
                     />
 
@@ -281,7 +281,7 @@
                             {/* Monogram Section (Imagen Local) */}
                             <div className="mb-8 z-20 animate-pulse-slow">
                                 <img 
-                                    src="./monograma.svg" 
+                                    src="/maricela-estudillo-gonzalez/monograma.svg" 
                                     alt="Monograma" 
                                     className="w-20 h-20 md:w-24 md:h-24 mx-auto drop-shadow-md object-contain hover:scale-105 transition-transform duration-700" 
                                 />
@@ -305,7 +305,7 @@
                             <div className="relative w-64 h-80 md:w-72 md:h-[26rem] rounded-full p-2 border border-gold/30 bg-white/40 backdrop-blur-sm shadow-xl z-10 mb-10 overflow-hidden">
                                 <div className="w-full h-full rounded-full overflow-hidden relative">
                                     <img 
-                                        src="./portada.jpg" 
+                                        src="/maricela-estudillo-gonzalez/portada.jpg" 
                                         alt="Foto de Maricela" 
                                         className="w-full h-full object-cover animate-slow-zoom"
                                     />
@@ -332,6 +332,7 @@
 
                         </div>
 
+                        
                     </main>
 
                     {/* CONTENIDO PRINCIPAL */}
@@ -472,23 +473,18 @@
                             </div>
                             
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px] md:auto-rows-[300px]">
-    {[
-        { url: "./foto1.jpg", span: "row-span-2 col-span-2 md:col-span-2" },
-        { url: "./foto2.jpg", span: "row-span-1 col-span-1" },
-        { url: "./foto3.jpg", span: "row-span-2 col-span-1" },
-        { url: "./foto4.jpg", span: "row-span-1 col-span-1" }
-    ].map((img, idx) => (
-        <div key={idx} className={`relative overflow-hidden rounded-2xl shadow-md group ${img.span}`}>
-            <img 
-                src={img.url} 
-                alt={`Galería ${idx + 1}`} 
-                className="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
-            />
-            {/* Opcional: Un ligero velo oscuro que aparece al pasar el cursor */}
-            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        </div>
-    ))}
-</div>
+                                {[
+                                    { url: "/sofia-xv/foto1.jpg", span: "row-span-2 col-span-2 md:col-span-2" },
+                                    { url: "/sofia-xv/foto2.jpg", span: "row-span-1 col-span-1" },
+                                    { url: "/sofia-xv/foto3.jpg", span: "row-span-2 col-span-1" },
+                                    { url: "/sofia-xv/foto4.jpg", span: "row-span-1 col-span-1" }
+                                ].map((img, idx) => (
+                                    <div key={idx} className={`${img.span} rounded-3xl overflow-hidden shadow-lg transition-all duration-700 hover:scale-[1.05] group bg-white/20 border-2 border-white/50 relative flex items-center justify-center`}>
+                                        <span className="absolute text-[10px] text-gray-400 opacity-50 z-0">Foto {idx+1}</span>
+                                        <img src={img.url} alt={`Momento ${idx+1}`} className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:rotate-1 transition-all duration-700 relative z-10" />
+                                    </div>
+                                ))}
+                            </div>
                         </RevealOnScroll>
 
                         {/* 2. REGALO MONETARIO / LLUVIA DE SOBRES */}
