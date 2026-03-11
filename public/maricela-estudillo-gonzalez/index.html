@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>50 Primaveras | Maricela Estudillo González</title>
+    
+    <!-- Fuentes Elegantes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
+
+    <!-- React y Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        spring: {
+                            light: '#FAF7F2', // Fondo crema cálido
+                            peach: '#F4D3C4', // Durazno pastel
+                            sage: '#C2CBB8',  // Verde salvia
+                            gold: '#D4AF37',  // Dorado sutil
+                            dark: '#4A4A4A',  // Texto principal
+                            accent: '#E8A598' // Acento floral
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        script: ['Pinyon Script', 'cursive'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 1.5s ease-out',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #FAF7F2; overflow-x: hidden; scroll-behavior: smooth; }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
+        .masonry-grid { column-count: 2; column-gap: 1rem; }
+        @media (min-width: 768px) { .masonry-grid { column-count: 3; } }
+        .masonry-item { break-inside: avoid; margin-bottom: 1rem; }
+        /* Ocultar scrollbar en modal pero permitir scroll */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- ICONOS SVG REUTILIZABLES ---
+        const Icons = {
+            Play: () => <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+            Pause: () => <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+            MapPin: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
+            Calendar: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
+            Sun: () => <svg className="w-6 h-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
+            Glass: () => <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 5c0 1-1 3-3 3H6C4 8 3 6 3 5c0-1 1-3 3-3h12c2 0 3 2 3 3zM12 8v13m-3 0h6" /></svg>,
+            Camera: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
+            Gift: () => <svg className="w-8 h-8 mx-auto text-spring-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" /></svg>,
+            Dress: () => <svg className="w-8 h-8 mx-auto text-spring-sage" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>,
+            Translate: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>
+        };
+
+        const App = () => {
+            // --- ESTADOS ---
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [guestUid, setGuestUid] = useState('');
+            const [rsvpSuccess, setRsvpSuccess] = useState(false);
+            const [lang, setLang] = useState('es');
+            
+            const audioRef = useRef(null);
+            const targetDate = new Date('May 23, 2026 15:00:00').getTime();
+
+            // --- EFECTOS ---
+            useEffect(() => {
+                // Extraer UID de la URL
+                const params = new URLSearchParams(window.location.search);
+                const u = params.get('u');
+                if (u) setGuestUid(u);
+
+                // Contador
+                const timer = setInterval(() => {
+                    const now = new Date().getTime();
+                    const distance = targetDate - now;
+
+                    if (distance < 0) {
+                        clearInterval(timer);
+                        return;
+                    }
+
+                    setTimeLeft({
+                        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+                        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+                        seconds: Math.floor((distance % (1000 * 60)) / 1000)
+                    });
+                }, 1000);
+
+                // Listener para el Iframe de Baulia
+                const handleMessage = (event) => {
+                    // Validar origen si es necesario en producción
+                    if (typeof event.data === 'string' && event.data.includes('rsvp_success')) {
+                        setIsModalOpen(false);
+                        setRsvpSuccess(true);
+                    }
+                };
+                window.addEventListener('message', handleMessage);
+
+                return () => {
+                    clearInterval(timer);
+                    window.removeEventListener('message', handleMessage);
+                };
+            }, []);
+
+            // --- MANEJADORES ---
+            const togglePlay = () => {
+                if (isPlaying) {
+                    audioRef.current.pause();
+                } else {
+                    audioRef.current.play().catch(e => console.log("Audio autoplay prevented"));
+                }
+                setIsPlaying(!isPlaying);
+            };
+
+            const toggleLang = () => setLang(lang === 'es' ? 'en' : 'es');
+
+            // --- COMPONENTES VISUALES ---
+            return (
+                <div className="font-sans text-spring-dark antialiased bg-spring-light min-h-screen relative selection:bg-spring-peach selection:text-white">
+                    
+                    {/* Audio Invisible (Ruta solicitada) */}
+                    <audio ref={audioRef} id="bg-music" src="/maricela-estudillo-gonzalez/cancion.mp3" loop />
+
+                    {/* Navbar Superior / Traductor */}
+                    <div className="fixed top-0 w-full z-40 p-4 flex justify-between items-center pointer-events-none">
+                        <div className="pointer-events-auto">
+                            <button onClick={togglePlay} className="glass-panel p-3 rounded-full text-spring-dark hover:text-spring-accent transition-colors shadow-sm">
+                                {isPlaying ? <Icons.Pause /> : <Icons.Play />}
+                            </button>
+                        </div>
+                        <div className="pointer-events-auto">
+                            <button onClick={toggleLang} className="glass-panel px-4 py-2 rounded-full text-xs font-medium uppercase tracking-widest flex items-center gap-2 hover:bg-white/90 transition-all">
+                                <Icons.Translate /> {lang === 'es' ? 'EN' : 'ES'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* SECCIÓN 1: PORTADA */}
+                    <header className="relative min-h-screen flex flex-col items-center justify-center text-center p-6 overflow-hidden">
+                        {/* Decoración de fondo */}
+                        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-spring-peach rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-float"></div>
+                        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-spring-sage rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-float" style={{animationDelay: '2s'}}></div>
+                        
+                        <div className="z-10 animate-fade-in flex flex-col items-center">
+                            {/* Monograma */}
+                            <div className="w-24 h-24 mb-8 rounded-full border-[1px] border-spring-gold flex items-center justify-center bg-white shadow-xl relative">
+                                <span className="font-serif text-4xl text-spring-gold pt-2">M</span>
+                                <div className="absolute -inset-2 border-[1px] border-spring-gold/30 rounded-full"></div>
+                            </div>
+
+                            <p className="text-sm md:text-base tracking-[0.3em] uppercase text-spring-dark/70 mb-4">
+                                {lang === 'es' ? 'Celebra conmigo mis' : 'Celebrate with me my'}
+                            </p>
+                            
+                            <h1 className="font-script text-7xl md:text-9xl text-spring-dark mb-2 drop-shadow-sm">
+                                50 Primaveras
+                            </h1>
+                            <h2 className="font-serif text-3xl md:text-5xl tracking-wide text-spring-accent mb-12">
+                                Maricela
+                            </h2>
+
+                            <div className="glass-panel px-8 py-4 rounded-full inline-block">
+                                <p className="font-serif text-lg md:text-xl tracking-widest">
+                                    23 . MAYO . 2026
+                                </p>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* SECCIÓN 2: FRASE */}
+                    <section className="py-24 px-6 text-center max-w-3xl mx-auto relative z-10">
+                        <div className="text-4xl text-spring-gold/50 mb-6 font-serif">"</div>
+                        <p className="font-serif text-2xl md:text-3xl italic leading-relaxed text-spring-dark/80">
+                            {lang === 'es' 
+                                ? "La vida es una hermosa colección de momentos. Hoy, con el corazón lleno de gratitud, celebro medio siglo de risas, aprendizajes y amor." 
+                                : "Life is a beautiful collection of moments. Today, with a heart full of gratitude, I celebrate half a century of laughter, learning, and love."}
+                        </p>
+                        <div className="w-16 h-[1px] bg-spring-gold mx-auto mt-10"></div>
+                    </section>
+
+                    {/* SECCIÓN 3: CUENTA REGRESIVA */}
+                    <section className="py-16 bg-white/40">
+                        <div className="max-w-4xl mx-auto px-6 text-center">
+                            <h3 className="text-sm tracking-[0.2em] uppercase mb-10 text-spring-dark/60">
+                                {lang === 'es' ? 'Faltan' : 'Time Left'}
+                            </h3>
+                            <div className="flex justify-center gap-4 md:gap-10">
+                                {Object.entries(timeLeft).map(([unit, value]) => (
+                                    <div key={unit} className="flex flex-col items-center">
+                                        <div className="w-16 h-16 md:w-24 md:h-24 glass-panel rounded-2xl flex items-center justify-center text-2xl md:text-4xl font-serif text-spring-dark shadow-sm mb-3">
+                                            {value.toString().padStart(2, '0')}
+                                        </div>
+                                        <span className="text-[10px] md:text-xs uppercase tracking-widest text-spring-dark/60">
+                                            {lang === 'es' ? 
+                                                (unit === 'days' ? 'Días' : unit === 'hours' ? 'Hrs' : unit === 'minutes' ? 'Min' : 'Seg') : 
+                                                unit}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* SECCIÓN 4: UBICACIÓN Y CLIMA */}
+                    <section className="py-24 px-6 relative">
+                        <div className="max-w-5xl mx-auto">
+                            <h3 className="text-3xl font-serif text-center mb-16">{lang === 'es' ? 'La Recepción' : 'The Reception'}</h3>
+                            
+                            <div className="grid md:grid-cols-2 gap-10">
+                                {/* Tarjeta Lugar */}
+                                <div className="glass-panel p-10 rounded-3xl text-center shadow-lg hover:shadow-xl transition-shadow bg-white/60">
+                                    <div className="w-16 h-16 mx-auto bg-spring-peach/20 rounded-full flex items-center justify-center text-spring-accent mb-6">
+                                        <Icons.MapPin />
+                                    </div>
+                                    <h4 className="font-serif text-2xl mb-2">Palapa los Otates</h4>
+                                    <p className="text-sm text-spring-dark/70 mb-6 leading-relaxed">
+                                        Av. Reyes Aztecas 102, Tacoteno,<br/>
+                                        96870 Minatitlán, Ver.<br/>
+                                        15:00 hrs.
+                                    </p>
+                                    <div className="flex flex-col gap-3">
+                                        <a href="https://maps.app.goo.gl/jbq8caTyzZdFDBz5A" target="_blank" className="bg-spring-dark text-white py-3 rounded-full text-sm tracking-wide hover:bg-black transition-colors">
+                                            {lang === 'es' ? 'Ver en GPS' : 'Open in GPS'}
+                                        </a>
+                                        <button className="border border-spring-dark/20 text-spring-dark py-3 rounded-full text-sm tracking-wide hover:bg-spring-dark/5 transition-colors flex justify-center items-center gap-2">
+                                            <Icons.Calendar />
+                                            {lang === 'es' ? 'Agregar al Calendario' : 'Add to Calendar'}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Tarjeta Clima / Detalles */}
+                                <div className="glass-panel p-10 rounded-3xl text-center shadow-lg bg-spring-sage/10 flex flex-col justify-center items-center">
+                                    <Icons.Sun />
+                                    <h4 className="font-serif text-xl mt-4 mb-2">
+                                        {lang === 'es' ? 'Pronóstico Esperado' : 'Expected Weather'}
+                                    </h4>
+                                    <p className="text-4xl font-light mb-2">28°C</p>
+                                    <p className="text-sm text-spring-dark/70 uppercase tracking-widest">
+                                        {lang === 'es' ? 'Día Soleado y Cálido' : 'Warm & Sunny Day'}
+                                    </p>
+                                    <div className="mt-8 w-full border-t border-spring-dark/10 pt-8">
+                                        <p className="text-sm italic text-spring-dark/60">
+                                            {lang === 'es' 
+                                                ? "Un hermoso día de primavera nos espera para celebrar al aire libre."
+                                                : "A beautiful spring day awaits us to celebrate outdoors."}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* SECCIÓN 5: ITINERARIO */}
+                    <section className="py-24 bg-white/40">
+                        <div className="max-w-3xl mx-auto px-6">
+                            <h3 className="text-3xl font-serif text-center mb-16">{lang === 'es' ? 'Nuestro Itinerario' : 'Our Itinerary'}</h3>
+                            
+                            <div className="relative border-l border-spring-gold/30 ml-4 md:ml-1/2">
+                                {[
+                                    { time: '15:00', title: 'Recepción y Bienvenida', icon: <Icons.Glass />, desc: 'Llegada de invitados y cocteles frescos.' },
+                                    { time: '16:00', title: 'Banquete Primaveral', icon: <Icons.Glass />, desc: 'Disfrutaremos de una deliciosa comida juntos.' },
+                                    { time: '17:30', title: 'Brindis por Maricela', icon: <Icons.Glass />, desc: 'Palabras especiales y partida de pastel.' },
+                                    { time: '18:00', title: '¡A Bailar!', icon: <Icons.Play />, desc: 'Música en vivo para celebrar la vida.' }
+                                ].map((item, idx) => (
+                                    <div key={idx} className="mb-12 ml-10 relative">
+                                        <div className="absolute -left-[3.4rem] w-12 h-12 bg-spring-light border border-spring-gold/30 rounded-full flex items-center justify-center text-spring-gold shadow-sm">
+                                            <div className="w-5 h-5">{item.icon}</div>
+                                        </div>
+                                        <div className="glass-panel p-6 rounded-2xl">
+                                            <span className="text-spring-accent font-serif text-xl">{item.time}</span>
+                                            <h4 className="text-lg font-medium mt-1">{item.title}</h4>
+                                            <p className="text-sm text-spring-dark/70 mt-2">{item.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* SECCIÓN 6: CÓDIGO DE VESTIMENTA & REGALOS */}
+                    <section className="py-24 px-6 grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+                        
+                        {/* Dress Code */}
+                        <div className="text-center p-10 glass-panel rounded-3xl">
+                            <Icons.Dress />
+                            <h3 className="text-2xl font-serif mt-6 mb-4">{lang === 'es' ? 'Código de Vestimenta' : 'Dress Code'}</h3>
+                            <p className="uppercase tracking-[0.15em] text-xs font-semibold text-spring-sage mb-4">
+                                {lang === 'es' ? 'Formal de Día / Palapa' : 'Daytime Formal / Resort'}
+                            </p>
+                            <p className="text-sm text-spring-dark/70 leading-relaxed mb-6">
+                                {lang === 'es' 
+                                    ? "Ellos: Guayabera o camisa de lino.\nEllas: Vestido de día, colores pastel o florales.\n(Sugerimos calzado cómodo para jardín)."
+                                    : "Men: Guayabera or linen shirt.\nWomen: Day dress, pastel or floral colors.\n(Comfortable garden shoes suggested)."}
+                            </p>
+                            <div className="flex justify-center gap-2 mt-4">
+                                <div className="w-6 h-6 rounded-full bg-[#F4D3C4] shadow-inner"></div>
+                                <div className="w-6 h-6 rounded-full bg-[#C2CBB8] shadow-inner"></div>
+                                <div className="w-6 h-6 rounded-full bg-[#E8A598] shadow-inner"></div>
+                                <div className="w-6 h-6 rounded-full bg-[#D4AF37] shadow-inner"></div>
+                            </div>
+                        </div>
+
+                        {/* Mesa de Regalos */}
+                        <div className="text-center p-10 glass-panel rounded-3xl flex flex-col justify-center">
+                            <Icons.Gift />
+                            <h3 className="text-2xl font-serif mt-6 mb-4">{lang === 'es' ? 'Mesa de Regalos' : 'Gift Registry'}</h3>
+                            <p className="text-sm text-spring-dark/70 leading-relaxed mb-6">
+                                {lang === 'es' 
+                                    ? "Tu presencia es mi mayor regalo, pero si deseas tener un detalle conmigo, puedes hacerlo aquí:"
+                                    : "Your presence is my greatest gift, but if you wish to give something, you can do it here:"}
+                            </p>
+                            
+                            {/* PLACEHOLDERS PARA DATOS BANCARIOS/TIENDAS */}
+                            <div className="bg-white/50 p-4 rounded-xl mb-4 border border-spring-dark/5">
+                                <p className="text-xs uppercase tracking-widest text-spring-dark/50 mb-1">Transferencia</p>
+                                <p className="font-medium">BBVA: 0123 4567 8901 2345</p>
+                                <p className="text-sm mt-1">Maricela Estudillo G.</p>
+                            </div>
+                            
+                            <a href="#" className="text-xs font-medium uppercase tracking-widest text-spring-accent hover:text-spring-dark transition-colors border-b border-spring-accent inline-block mx-auto pb-1 mt-2">
+                                {lang === 'es' ? 'Ver Mesa en Liverpool' : 'View Liverpool Registry'}
+                            </a>
+                        </div>
+
+                    </section>
+
+                    {/* SECCIÓN 7: MURO SOCIAL & GALERÍA */}
+                    <section className="py-20 bg-white/60">
+                        <div className="max-w-6xl mx-auto px-6">
+                            <div className="text-center mb-16">
+                                <Icons.Camera />
+                                <h3 className="text-3xl font-serif mt-4 mb-2">Muro Social</h3>
+                                <p className="text-xl text-spring-accent font-medium mb-6">#Mis50PrimaverasMaricela</p>
+                                <a href="https://instagram.com" target="_blank" className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full text-sm shadow-md hover:shadow-lg transition-all">
+                                    {lang === 'es' ? 'Probar Filtro de Instagram' : 'Try Instagram Filter'}
+                                </a>
+                            </div>
+
+                            {/* Galería Masonry (Imágenes Placeholder de estilo elegante) */}
+                            <div className="masonry-grid">
+                                {[
+                                    "https://images.unsplash.com/photo-1526045612212-70caf35c14df?auto=format&fit=crop&q=80&w=600",
+                                    "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=600",
+                                    "https://images.unsplash.com/photo-1507643179773-3e975d7ac515?auto=format&fit=crop&q=80&w=600",
+                                    "https://images.unsplash.com/photo-1501426026826-31c667bdf23d?auto=format&fit=crop&q=80&w=600",
+                                    "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=600"
+                                ].map((src, i) => (
+                                    <div key={i} className="masonry-item rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                        <img src={src} alt="Momento Maricela" className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* SECCIÓN 8: CTA RSVP GIGANTE */}
+                    <section className="py-32 px-6 text-center">
+                        {rsvpSuccess ? (
+                            <div className="max-w-xl mx-auto glass-panel p-12 rounded-3xl bg-spring-sage/20 border-spring-sage/40">
+                                <h2 className="text-4xl font-serif text-spring-dark mb-4">¡Gracias por confirmar!</h2>
+                                <p className="text-lg text-spring-dark/80">
+                                    Nos emociona mucho compartir este día tan especial contigo.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="max-w-2xl mx-auto">
+                                <h2 className="text-3xl font-serif mb-8 text-spring-dark/80">
+                                    {lang === 'es' ? '¿Nos acompañas en este día especial?' : 'Will you join us on this special day?'}
+                                </h2>
+                                <button 
+                                    onClick={() => setIsModalOpen(true)}
+                                    className="relative group inline-block w-full sm:w-auto"
+                                >
+                                    <div className="absolute -inset-1 bg-gradient-to-r from-spring-accent to-spring-gold rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                                    <div className="relative bg-spring-dark text-white text-xl md:text-2xl font-serif px-12 py-6 rounded-full shadow-2xl hover:bg-black transition-colors w-full tracking-wide">
+                                        {lang === 'es' ? 'CONFIRMAR ASISTENCIA' : 'RSVP NOW'}
+                                    </div>
+                                </button>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* FOOTER & ACCESO BAULIA */}
+                    <footer className="py-16 text-center border-t border-spring-dark/5 relative z-10 flex flex-col items-center gap-6 pb-20">
+                        <div className="font-script text-4xl text-spring-dark/40">Maricela</div>
+                        
+                        <a href="https://panel.baulia.com" className="text-[10px] uppercase tracking-widest text-spring-dark/30 hover:text-spring-dark/60 transition-colors">
+                            {lang === 'es' ? '¿Eres el anfitrión? Iniciar Sesión' : 'Are you the host? Login'}
+                        </a>
+
+                        {/* Branding Baulia */}
+                        <div className="mt-8 pt-8 border-t border-spring-dark/5 flex flex-col items-center gap-3 w-3/4 max-w-xs mx-auto">
+                            <a href="https://baulia.com" target="_blank" rel="noopener noreferrer" className="group flex flex-col items-center opacity-40 hover:opacity-80 transition-all duration-300 text-spring-dark">
+                                {/* Monograma Minimalista Baulia */}
+                                <div className="w-8 h-8 rounded-sm border border-current flex items-center justify-center mb-3 rotate-45 group-hover:rotate-0 transition-transform duration-500 bg-spring-light shadow-sm">
+                                    <span className="font-serif text-sm -rotate-45 group-hover:rotate-0 transition-transform duration-500">B</span>
+                                </div>
+                                <span className="text-[9px] uppercase tracking-[0.25em] font-medium text-center">
+                                    {lang === 'es' ? 'Crea tu invitación con Baulia' : 'Create your invitation with Baulia'}
+                                </span>
+                            </a>
+                        </div>
+                    </footer>
+
+                    {/* MODAL RSVP WIDGET BAULIA (REQUERIMIENTO ESTRICTO) */}
+                    {isModalOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xl bg-black/40 animate-fade-in">
+                            
+                            {/* Botón Cerrar */}
+                            <button 
+                                onClick={() => setIsModalOpen(false)}
+                                className="absolute top-6 right-6 text-white hover:text-spring-peach transition-colors z-50"
+                            >
+                                <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+
+                            {/* Contenedor del Iframe */}
+                            <div className="w-full max-w-lg h-[85vh] relative rounded-3xl overflow-hidden shadow-2xl bg-transparent">
+                                {/* Variables de Baulia aplicadas:
+                                    e = maricela-estudillo-gonzalez
+                                    u = guestUid (dinámico de la URL)
+                                    card = FAF7F2 (spring-light crema)
+                                    btn = E8A598 (spring-accent durazno)
+                                    txt = 4A4A4A (spring-dark)
+                                    font = Montserrat
+                                */}
+                                <iframe 
+                                    src={`https://baulia.com/?modo=invitacion&e=maricela-estudillo-gonzalez&u=${guestUid}&iframe=true&card=FAF7F2&btn=E8A598&txt=4A4A4A&font=Montserrat`} 
+                                    allowTransparency="true" 
+                                    className="w-full h-full border-none bg-transparent"
+                                ></iframe>
+                            </div>
+                        </div>
+                    )}
+
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
