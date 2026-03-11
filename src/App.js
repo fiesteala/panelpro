@@ -12,7 +12,7 @@ import {
   DollarSign, PieChart, TrendingDown, Upload, Building, Landmark, History, Phone, Mail, Calendar, Eye, EyeOff, MessageSquare, 
   FileSignature, AlertCircle, Star, Image as ImageIcon, CalendarDays, FileDown, 
   ListTodo, CheckCircle2, Circle, PlayCircle, AlignLeft, MapPin, ShieldCheck, Printer, Scan, Camera, Navigation as NavigationIcon, Navigation, MoreVertical,
-  Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Image, Key, Power
+  Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Image, Key, Power, Quote
 } from 'lucide-react';
 
 // Función Helper para Exportar a CSV
