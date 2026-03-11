@@ -2,475 +2,676 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>50 Primaveras | Maricela Estudillo González</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maricela - Mis 50 Años | Invitación Primavera Vibrante</title>
     
-    <!-- Fuentes Elegantes -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
-
-    <!-- React y Babel -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Config for Custom Colors & Fonts -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
+                        gold: {
+                            light: '#FDF1A9',
+                            DEFAULT: '#D4AF37',
+                            dark: '#AA8529',
+                            warm: '#B48E2F'
+                        },
                         spring: {
-                            light: '#FAF7F2', // Fondo crema cálido
-                            peach: '#F4D3C4', // Durazno pastel
-                            sage: '#C2CBB8',  // Verde salvia
-                            gold: '#D4AF37',  // Dorado sutil
-                            dark: '#4A4A4A',  // Texto principal
-                            accent: '#E8A598' // Acento floral
+                            pink: '#F76C82',
+                            yellow: '#FFD166',
+                            green: '#8DB580',
+                            dark: '#2A2A2A'
                         }
                     },
                     fontFamily: {
-                        sans: ['Montserrat', 'sans-serif'],
-                        serif: ['Playfair Display', 'serif'],
-                        script: ['Pinyon Script', 'cursive'],
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        script: ['"Pinyon Script"', 'cursive'],
+                        sans: ['"Montserrat"', 'sans-serif'],
                     },
                     animation: {
-                        'fade-in': 'fadeIn 1.5s ease-out',
+                        'fade-in-up': 'fadeInUp 1.2s ease-out forwards',
                         'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulseSlow 4s infinite alternate',
+                        'slow-zoom': 'slowZoom 20s ease-in-out infinite alternate',
+                        'spin-slow': 'spin 20s linear infinite',
+                        'falling-1': 'falling 15s linear infinite',
+                        'falling-2': 'falling 18s linear infinite 5s',
+                        'falling-3': 'falling 22s linear infinite 10s',
                     },
                     keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
+                            '50%': { transform: 'translateY(-8px)' },
+                        },
+                        pulseSlow: {
+                            '0%': { transform: 'scale(1)', opacity: '0.8' },
+                            '100%': { transform: 'scale(1.05)', opacity: '1' },
+                        },
+                        slowZoom: {
+                            '0%': { transform: 'scale(1)' },
+                            '100%': { transform: 'scale(1.15)' },
+                        },
+                        falling: {
+                            '0%': { transform: 'translate(0, -10vh) rotate(0deg)', opacity: '0' },
+                            '10%': { opacity: '0.6' },
+                            '90%': { opacity: '0.6' },
+                            '100%': { transform: 'translate(20vw, 100vh) rotate(360deg)', opacity: '0' },
                         }
+                    },
+                    boxShadow: {
+                        'card-luxury': '0 20px 50px -10px rgba(0, 0, 0, 0.3), 0 0 30px rgba(212, 175, 55, 0.1)',
                     }
                 }
             }
         }
     </script>
+
+    <!-- Custom CSS -->
     <style>
-        body { background-color: #FAF7F2; overflow-x: hidden; scroll-behavior: smooth; }
-        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
-        .masonry-grid { column-count: 2; column-gap: 1rem; }
-        @media (min-width: 768px) { .masonry-grid { column-count: 3; } }
-        .masonry-item { break-inside: avoid; margin-bottom: 1rem; }
-        /* Ocultar scrollbar en modal pero permitir scroll */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body {
+            background-color: #1a1a1a;
+            overflow-x: hidden;
+        }
+        .text-gold-metallic {
+            background: linear-gradient(to right, #BF953F, #D4AF37, #B38728, #FDF1A9, #AA771C);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        /* Staggered animation delays */
+        .delay-100 { animation-delay: 0.1s; opacity: 0; }
+        .delay-300 { animation-delay: 0.3s; opacity: 0; }
+        .delay-500 { animation-delay: 0.5s; opacity: 0; }
+        .delay-700 { animation-delay: 0.7s; opacity: 0; }
+        .delay-1000 { animation-delay: 1.0s; opacity: 0; }
     </style>
+
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body>
+<body class="antialiased text-spring-dark">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- ICONOS SVG REUTILIZABLES ---
-        const Icons = {
-            Play: () => <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-            Pause: () => <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-            MapPin: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
-            Calendar: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
-            Sun: () => <svg className="w-6 h-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
-            Glass: () => <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 5c0 1-1 3-3 3H6C4 8 3 6 3 5c0-1 1-3 3-3h12c2 0 3 2 3 3zM12 8v13m-3 0h6" /></svg>,
-            Camera: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
-            Gift: () => <svg className="w-8 h-8 mx-auto text-spring-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" /></svg>,
-            Dress: () => <svg className="w-8 h-8 mx-auto text-spring-sage" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>,
-            Translate: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>
+        // Componente de Ramo Floral SVG para las esquinas de la tarjeta
+        const FloralCorner = ({ className, style }) => (
+            <svg viewBox="0 0 200 200" className={className} style={style} xmlns="http://www.w3.org/2000/svg">
+                <g transform="scale(0.8) translate(20, 20)">
+                    {/* Hojas Verdes */}
+                    <path d="M 40 100 C 10 70, 20 20, 80 10 C 80 60, 60 90, 40 100 Z" fill="#8DB580" opacity="0.8"/>
+                    <path d="M 100 40 C 70 10, 20 20, 10 80 C 60 80, 90 60, 100 40 Z" fill="#A3C697" opacity="0.9"/>
+                    <path d="M 130 140 C 160 170, 180 130, 170 80 C 140 90, 120 120, 130 140 Z" fill="#8DB580" opacity="0.8"/>
+                    
+                    {/* Flor Amarilla Brillante */}
+                    <circle cx="120" cy="70" r="30" fill="#FFD166" />
+                    <circle cx="120" cy="70" r="15" fill="#FFB347" />
+                    <path d="M 120 40 C 130 20, 150 20, 145 45 C 165 40, 175 60, 150 70 C 175 80, 165 100, 145 95 C 150 120, 130 120, 120 100 C 110 120, 90 120, 95 95 C 75 100, 65 80, 90 70 C 65 60, 75 40, 95 45 C 90 20, 110 20, 120 40 Z" fill="#FFE28A" opacity="0.9"/>
+                    
+                    {/* Flor Rosa Vibrante */}
+                    <circle cx="70" cy="120" r="35" fill="#F76C82" />
+                    <circle cx="70" cy="120" r="15" fill="#D84A63" />
+                    <path d="M 70 85 C 85 60, 110 65, 100 90 C 125 80, 140 105, 110 120 C 140 135, 125 160, 100 150 C 110 175, 85 180, 70 155 C 55 180, 30 175, 40 150 C 15 160, 0 135, 30 120 C 0 105, 15 80, 40 90 C 30 65, 55 60, 70 85 Z" fill="#FF8FA3" opacity="0.9"/>
+                    
+                    {/* Detalles Dorados */}
+                    <circle cx="120" cy="70" r="5" fill="#D4AF37" />
+                    <circle cx="70" cy="120" r="6" fill="#D4AF37" />
+                    <path d="M 90 90 Q 100 100, 110 90" stroke="#D4AF37" strokeWidth="2" fill="none"/>
+                </g>
+            </svg>
+        );
+
+        // Hook personalizado para animar elementos al hacer Scroll
+        const RevealOnScroll = ({ children, delay = "", className = "" }) => {
+            const domRef = useRef();
+            const [isVisible, setVisible] = useState(false);
+            useEffect(() => {
+                const observer = new IntersectionObserver(entries => {
+                    if (entries[0].isIntersecting) {
+                        setVisible(true);
+                        observer.unobserve(domRef.current);
+                    }
+                }, { threshold: 0.15 });
+                if (domRef.current) observer.observe(domRef.current);
+                return () => {
+                    if(domRef.current) observer.unobserve(domRef.current);
+                }
+            }, []);
+            return (
+                <div ref={domRef} className={`transition-all duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'} ${delay} ${className}`}>
+                    {children}
+                </div>
+            );
         };
 
         const App = () => {
-            // --- ESTADOS ---
+            const [language, setLanguage] = useState('ES');
             const [isPlaying, setIsPlaying] = useState(false);
             const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-            const [isModalOpen, setIsModalOpen] = useState(false);
-            const [guestUid, setGuestUid] = useState('');
-            const [rsvpSuccess, setRsvpSuccess] = useState(false);
-            const [lang, setLang] = useState('es');
             
+            // --- NUEVOS ESTADOS FASE 4 ---
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [isConfirmed, setIsConfirmed] = useState(false);
+            
+            // Obtener guestUid de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const guestUid = urlParams.get('u') || '';
+            // -----------------------------
+
             const audioRef = useRef(null);
-            const targetDate = new Date('May 23, 2026 15:00:00').getTime();
 
-            // --- EFECTOS ---
+            // Lógica de la Cuenta Regresiva
             useEffect(() => {
-                // Extraer UID de la URL
-                const params = new URLSearchParams(window.location.search);
-                const u = params.get('u');
-                if (u) setGuestUid(u);
-
-                // Contador
-                const timer = setInterval(() => {
+                const targetDate = new Date("May 23, 2026 15:00:00").getTime();
+                
+                const interval = setInterval(() => {
                     const now = new Date().getTime();
                     const distance = targetDate - now;
-
+                    
                     if (distance < 0) {
-                        clearInterval(timer);
-                        return;
+                        clearInterval(interval);
+                    } else {
+                        setTimeLeft({
+                            days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+                            hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                            minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+                            seconds: Math.floor((distance % (1000 * 60)) / 1000)
+                        });
                     }
-
-                    setTimeLeft({
-                        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-                        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-                        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-                        seconds: Math.floor((distance % (1000 * 60)) / 1000)
-                    });
                 }, 1000);
+                
+                return () => clearInterval(interval);
+            }, []);
 
-                // Listener para el Iframe de Baulia
+            // --- NUEVO EFECTO FASE 4 (Cierre Automático) ---
+            useEffect(() => {
                 const handleMessage = (event) => {
-                    // Validar origen si es necesario en producción
-                    if (typeof event.data === 'string' && event.data.includes('rsvp_success')) {
-                        setIsModalOpen(false);
-                        setRsvpSuccess(true);
+                    if (event.data === 'rsvp_success') {
+                        setIsConfirmed(true);
+                        setTimeout(() => setIsModalOpen(false), 3500);
                     }
                 };
                 window.addEventListener('message', handleMessage);
-
-                return () => {
-                    clearInterval(timer);
-                    window.removeEventListener('message', handleMessage);
-                };
+                return () => window.removeEventListener('message', handleMessage);
             }, []);
+            // -----------------------------------------------
 
-            // --- MANEJADORES ---
-            const togglePlay = () => {
+            const toggleLanguage = () => {
+                setLanguage(prev => prev === 'ES' ? 'EN' : 'ES');
+            };
+
+            const toggleAudio = () => {
                 if (isPlaying) {
                     audioRef.current.pause();
                 } else {
-                    audioRef.current.play().catch(e => console.log("Audio autoplay prevented"));
+                    audioRef.current.play();
                 }
                 setIsPlaying(!isPlaying);
             };
 
-            const toggleLang = () => setLang(lang === 'es' ? 'en' : 'es');
-
-            // --- COMPONENTES VISUALES ---
             return (
-                <div className="font-sans text-spring-dark antialiased bg-spring-light min-h-screen relative selection:bg-spring-peach selection:text-white">
+                <div className="relative min-h-screen w-full overflow-hidden font-sans bg-[#FDFBF7]">
                     
-                    {/* Audio Invisible (Ruta solicitada) */}
-                    <audio ref={audioRef} id="bg-music" src="/maricela-estudillo-gonzalez/cancion.mp3" loop />
+                    {/* AUDIO ELEMENT */}
+                    <audio 
+                        ref={audioRef}
+                        id="bg-music" 
+                        src="/maricela-estudillo-gonzalez/cancion.mp3" 
+                        loop 
+                    />
 
-                    {/* Navbar Superior / Traductor */}
-                    <div className="fixed top-0 w-full z-40 p-4 flex justify-between items-center pointer-events-none">
-                        <div className="pointer-events-auto">
-                            <button onClick={togglePlay} className="glass-panel p-3 rounded-full text-spring-dark hover:text-spring-accent transition-colors shadow-sm">
-                                {isPlaying ? <Icons.Pause /> : <Icons.Play />}
-                            </button>
+                    {/* NEW ELEGANT BACKGROUND & FLOATING VECTOR FLOWERS */}
+                    <div className="fixed inset-0 z-0 overflow-hidden bg-gradient-to-br from-[#FFF5F5] via-[#FDFBF7] to-[#FDF1F3]">
+                        {/* Partículas Flotantes (Pétalos) */}
+                        <div className="absolute top-0 left-[15%] w-3 h-3 md:w-4 md:h-4 bg-spring-pink/40 rounded-full blur-[1px] animate-falling-1 z-0"></div>
+                        <div className="absolute top-0 left-[50%] w-2 h-2 md:w-3 md:h-3 bg-gold/40 rounded-full blur-[1px] animate-falling-2 z-0"></div>
+                        <div className="absolute top-0 left-[85%] w-4 h-4 md:w-5 md:h-5 bg-spring-pink/30 rounded-full blur-[2px] animate-falling-3 z-0"></div>
+
+                        {/* Giant Vector Flowers forming a natural frame */}
+                        <div className="absolute -top-16 -left-16 w-80 h-80 md:w-[36rem] md:h-[36rem] opacity-75 transform -rotate-12 z-0">
+                            <FloralCorner className="w-full h-full animate-float drop-shadow-2xl" />
                         </div>
-                        <div className="pointer-events-auto">
-                            <button onClick={toggleLang} className="glass-panel px-4 py-2 rounded-full text-xs font-medium uppercase tracking-widest flex items-center gap-2 hover:bg-white/90 transition-all">
-                                <Icons.Translate /> {lang === 'es' ? 'EN' : 'ES'}
-                            </button>
+                        <div className="absolute -bottom-16 -right-16 w-80 h-80 md:w-[36rem] md:h-[36rem] opacity-75 transform rotate-[165deg] z-0">
+                            <FloralCorner className="w-full h-full animate-float drop-shadow-2xl" style={{ animationDelay: '2s' }} />
                         </div>
                     </div>
 
-                    {/* SECCIÓN 1: PORTADA */}
-                    <header className="relative min-h-screen flex flex-col items-center justify-center text-center p-6 overflow-hidden">
-                        {/* Decoración de fondo */}
-                        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-spring-peach rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-float"></div>
-                        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-spring-sage rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-float" style={{animationDelay: '2s'}}></div>
+                    {/* TRANSLATOR BUTTON */}
+                    <div className="absolute top-6 right-6 z-50 animate-fade-in-up delay-100">
+                        <button 
+                            onClick={toggleLanguage}
+                            className="bg-white/80 backdrop-blur-md px-4 py-2 rounded-full text-xs font-medium tracking-widest uppercase transition-all duration-300 hover:bg-white shadow-lg border border-gold/30 flex items-center gap-2 text-spring-dark"
+                        >
+                            <span className="text-gold-dark">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                </svg>
+                            </span>
+                            {language}
+                        </button>
+                    </div>
+
+                    {/* MAIN HERO CONTENT - EDITORIAL LAYOUT */}
+                    <main className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
                         
-                        <div className="z-10 animate-fade-in flex flex-col items-center">
-                            {/* Monograma */}
-                            <div className="w-24 h-24 mb-8 rounded-full border-[1px] border-spring-gold flex items-center justify-center bg-white shadow-xl relative">
-                                <span className="font-serif text-4xl text-spring-gold pt-2">M</span>
-                                <div className="absolute -inset-2 border-[1px] border-spring-gold/30 rounded-full"></div>
-                            </div>
-
-                            <p className="text-sm md:text-base tracking-[0.3em] uppercase text-spring-dark/70 mb-4">
-                                {lang === 'es' ? 'Celebra conmigo mis' : 'Celebrate with me my'}
-                            </p>
+                        <div className="relative w-full max-w-lg flex flex-col items-center text-center mt-12 mb-20 animate-fade-in-up delay-300">
                             
-                            <h1 className="font-script text-7xl md:text-9xl text-spring-dark mb-2 drop-shadow-sm">
-                                50 Primaveras
-                            </h1>
-                            <h2 className="font-serif text-3xl md:text-5xl tracking-wide text-spring-accent mb-12">
-                                Maricela
-                            </h2>
-
-                            <div className="glass-panel px-8 py-4 rounded-full inline-block">
-                                <p className="font-serif text-lg md:text-xl tracking-widest">
-                                    23 . MAYO . 2026
-                                </p>
-                            </div>
-                        </div>
-                    </header>
-
-                    {/* SECCIÓN 2: FRASE */}
-                    <section className="py-24 px-6 text-center max-w-3xl mx-auto relative z-10">
-                        <div className="text-4xl text-spring-gold/50 mb-6 font-serif">"</div>
-                        <p className="font-serif text-2xl md:text-3xl italic leading-relaxed text-spring-dark/80">
-                            {lang === 'es' 
-                                ? "La vida es una hermosa colección de momentos. Hoy, con el corazón lleno de gratitud, celebro medio siglo de risas, aprendizajes y amor." 
-                                : "Life is a beautiful collection of moments. Today, with a heart full of gratitude, I celebrate half a century of laughter, learning, and love."}
-                        </p>
-                        <div className="w-16 h-[1px] bg-spring-gold mx-auto mt-10"></div>
-                    </section>
-
-                    {/* SECCIÓN 3: CUENTA REGRESIVA */}
-                    <section className="py-16 bg-white/40">
-                        <div className="max-w-4xl mx-auto px-6 text-center">
-                            <h3 className="text-sm tracking-[0.2em] uppercase mb-10 text-spring-dark/60">
-                                {lang === 'es' ? 'Faltan' : 'Time Left'}
-                            </h3>
-                            <div className="flex justify-center gap-4 md:gap-10">
-                                {Object.entries(timeLeft).map(([unit, value]) => (
-                                    <div key={unit} className="flex flex-col items-center">
-                                        <div className="w-16 h-16 md:w-24 md:h-24 glass-panel rounded-2xl flex items-center justify-center text-2xl md:text-4xl font-serif text-spring-dark shadow-sm mb-3">
-                                            {value.toString().padStart(2, '0')}
-                                        </div>
-                                        <span className="text-[10px] md:text-xs uppercase tracking-widest text-spring-dark/60">
-                                            {lang === 'es' ? 
-                                                (unit === 'days' ? 'Días' : unit === 'hours' ? 'Hrs' : unit === 'minutes' ? 'Min' : 'Seg') : 
-                                                unit}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* SECCIÓN 4: UBICACIÓN Y CLIMA */}
-                    <section className="py-24 px-6 relative">
-                        <div className="max-w-5xl mx-auto">
-                            <h3 className="text-3xl font-serif text-center mb-16">{lang === 'es' ? 'La Recepción' : 'The Reception'}</h3>
-                            
-                            <div className="grid md:grid-cols-2 gap-10">
-                                {/* Tarjeta Lugar */}
-                                <div className="glass-panel p-10 rounded-3xl text-center shadow-lg hover:shadow-xl transition-shadow bg-white/60">
-                                    <div className="w-16 h-16 mx-auto bg-spring-peach/20 rounded-full flex items-center justify-center text-spring-accent mb-6">
-                                        <Icons.MapPin />
-                                    </div>
-                                    <h4 className="font-serif text-2xl mb-2">Palapa los Otates</h4>
-                                    <p className="text-sm text-spring-dark/70 mb-6 leading-relaxed">
-                                        Av. Reyes Aztecas 102, Tacoteno,<br/>
-                                        96870 Minatitlán, Ver.<br/>
-                                        15:00 hrs.
-                                    </p>
-                                    <div className="flex flex-col gap-3">
-                                        <a href="https://maps.app.goo.gl/jbq8caTyzZdFDBz5A" target="_blank" className="bg-spring-dark text-white py-3 rounded-full text-sm tracking-wide hover:bg-black transition-colors">
-                                            {lang === 'es' ? 'Ver en GPS' : 'Open in GPS'}
-                                        </a>
-                                        <button className="border border-spring-dark/20 text-spring-dark py-3 rounded-full text-sm tracking-wide hover:bg-spring-dark/5 transition-colors flex justify-center items-center gap-2">
-                                            <Icons.Calendar />
-                                            {lang === 'es' ? 'Agregar al Calendario' : 'Add to Calendar'}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Tarjeta Clima / Detalles */}
-                                <div className="glass-panel p-10 rounded-3xl text-center shadow-lg bg-spring-sage/10 flex flex-col justify-center items-center">
-                                    <Icons.Sun />
-                                    <h4 className="font-serif text-xl mt-4 mb-2">
-                                        {lang === 'es' ? 'Pronóstico Esperado' : 'Expected Weather'}
-                                    </h4>
-                                    <p className="text-4xl font-light mb-2">28°C</p>
-                                    <p className="text-sm text-spring-dark/70 uppercase tracking-widest">
-                                        {lang === 'es' ? 'Día Soleado y Cálido' : 'Warm & Sunny Day'}
-                                    </p>
-                                    <div className="mt-8 w-full border-t border-spring-dark/10 pt-8">
-                                        <p className="text-sm italic text-spring-dark/60">
-                                            {lang === 'es' 
-                                                ? "Un hermoso día de primavera nos espera para celebrar al aire libre."
-                                                : "A beautiful spring day awaits us to celebrate outdoors."}
-                                        </p>
+                            {/* Monogram Section (Actualizado entrelazado M y G) */}
+                            <div className="mb-8 z-20">
+                                <div className="relative flex items-center justify-center w-28 h-28 rounded-full border border-gold/40 p-1 bg-white/60 backdrop-blur-sm shadow-md">
+                                    <div className="absolute inset-0 rounded-full border border-gold/40 border-dashed rotate-45 scale-110 animate-spin-slow opacity-60"></div>
+                                    <div className="absolute inset-0 rounded-full border border-gold/20 scale-105 animate-pulse-slow"></div>
+                                    <div className="w-full h-full rounded-full bg-white flex items-center justify-center shadow-inner relative overflow-hidden">
+                                        <span className="font-script text-[4.5rem] leading-none text-gold-metallic absolute z-10 drop-shadow-sm pr-2 pb-2">M</span>
+                                        <span className="font-script text-[3.8rem] leading-none text-spring-pink absolute ml-6 mt-4 z-20 opacity-90 drop-shadow-sm">G</span>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </section>
 
-                    {/* SECCIÓN 5: ITINERARIO */}
-                    <section className="py-24 bg-white/40">
-                        <div className="max-w-3xl mx-auto px-6">
-                            <h3 className="text-3xl font-serif text-center mb-16">{lang === 'es' ? 'Nuestro Itinerario' : 'Our Itinerary'}</h3>
-                            
-                            <div className="relative border-l border-spring-gold/30 ml-4 md:ml-1/2">
-                                {[
-                                    { time: '15:00', title: 'Recepción y Bienvenida', icon: <Icons.Glass />, desc: 'Llegada de invitados y cocteles frescos.' },
-                                    { time: '16:00', title: 'Banquete Primaveral', icon: <Icons.Glass />, desc: 'Disfrutaremos de una deliciosa comida juntos.' },
-                                    { time: '17:30', title: 'Brindis por Maricela', icon: <Icons.Glass />, desc: 'Palabras especiales y partida de pastel.' },
-                                    { time: '18:00', title: '¡A Bailar!', icon: <Icons.Play />, desc: 'Música en vivo para celebrar la vida.' }
-                                ].map((item, idx) => (
-                                    <div key={idx} className="mb-12 ml-10 relative">
-                                        <div className="absolute -left-[3.4rem] w-12 h-12 bg-spring-light border border-spring-gold/30 rounded-full flex items-center justify-center text-spring-gold shadow-sm">
-                                            <div className="w-5 h-5">{item.icon}</div>
-                                        </div>
-                                        <div className="glass-panel p-6 rounded-2xl">
-                                            <span className="text-spring-accent font-serif text-xl">{item.time}</span>
-                                            <h4 className="text-lg font-medium mt-1">{item.title}</h4>
-                                            <p className="text-sm text-spring-dark/70 mt-2">{item.desc}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* SECCIÓN 6: CÓDIGO DE VESTIMENTA & REGALOS */}
-                    <section className="py-24 px-6 grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
-                        
-                        {/* Dress Code */}
-                        <div className="text-center p-10 glass-panel rounded-3xl">
-                            <Icons.Dress />
-                            <h3 className="text-2xl font-serif mt-6 mb-4">{lang === 'es' ? 'Código de Vestimenta' : 'Dress Code'}</h3>
-                            <p className="uppercase tracking-[0.15em] text-xs font-semibold text-spring-sage mb-4">
-                                {lang === 'es' ? 'Formal de Día / Palapa' : 'Daytime Formal / Resort'}
-                            </p>
-                            <p className="text-sm text-spring-dark/70 leading-relaxed mb-6">
-                                {lang === 'es' 
-                                    ? "Ellos: Guayabera o camisa de lino.\nEllas: Vestido de día, colores pastel o florales.\n(Sugerimos calzado cómodo para jardín)."
-                                    : "Men: Guayabera or linen shirt.\nWomen: Day dress, pastel or floral colors.\n(Comfortable garden shoes suggested)."}
-                            </p>
-                            <div className="flex justify-center gap-2 mt-4">
-                                <div className="w-6 h-6 rounded-full bg-[#F4D3C4] shadow-inner"></div>
-                                <div className="w-6 h-6 rounded-full bg-[#C2CBB8] shadow-inner"></div>
-                                <div className="w-6 h-6 rounded-full bg-[#E8A598] shadow-inner"></div>
-                                <div className="w-6 h-6 rounded-full bg-[#D4AF37] shadow-inner"></div>
-                            </div>
-                        </div>
-
-                        {/* Mesa de Regalos */}
-                        <div className="text-center p-10 glass-panel rounded-3xl flex flex-col justify-center">
-                            <Icons.Gift />
-                            <h3 className="text-2xl font-serif mt-6 mb-4">{lang === 'es' ? 'Mesa de Regalos' : 'Gift Registry'}</h3>
-                            <p className="text-sm text-spring-dark/70 leading-relaxed mb-6">
-                                {lang === 'es' 
-                                    ? "Tu presencia es mi mayor regalo, pero si deseas tener un detalle conmigo, puedes hacerlo aquí:"
-                                    : "Your presence is my greatest gift, but if you wish to give something, you can do it here:"}
-                            </p>
-                            
-                            {/* PLACEHOLDERS PARA DATOS BANCARIOS/TIENDAS */}
-                            <div className="bg-white/50 p-4 rounded-xl mb-4 border border-spring-dark/5">
-                                <p className="text-xs uppercase tracking-widest text-spring-dark/50 mb-1">Transferencia</p>
-                                <p className="font-medium">BBVA: 0123 4567 8901 2345</p>
-                                <p className="text-sm mt-1">Maricela Estudillo G.</p>
-                            </div>
-                            
-                            <a href="#" className="text-xs font-medium uppercase tracking-widest text-spring-accent hover:text-spring-dark transition-colors border-b border-spring-accent inline-block mx-auto pb-1 mt-2">
-                                {lang === 'es' ? 'Ver Mesa en Liverpool' : 'View Liverpool Registry'}
-                            </a>
-                        </div>
-
-                    </section>
-
-                    {/* SECCIÓN 7: MURO SOCIAL & GALERÍA */}
-                    <section className="py-20 bg-white/60">
-                        <div className="max-w-6xl mx-auto px-6">
-                            <div className="text-center mb-16">
-                                <Icons.Camera />
-                                <h3 className="text-3xl font-serif mt-4 mb-2">Muro Social</h3>
-                                <p className="text-xl text-spring-accent font-medium mb-6">#Mis50PrimaverasMaricela</p>
-                                <a href="https://instagram.com" target="_blank" className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full text-sm shadow-md hover:shadow-lg transition-all">
-                                    {lang === 'es' ? 'Probar Filtro de Instagram' : 'Try Instagram Filter'}
-                                </a>
-                            </div>
-
-                            {/* Galería Masonry (Imágenes Placeholder de estilo elegante) */}
-                            <div className="masonry-grid">
-                                {[
-                                    "https://images.unsplash.com/photo-1526045612212-70caf35c14df?auto=format&fit=crop&q=80&w=600",
-                                    "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=600",
-                                    "https://images.unsplash.com/photo-1507643179773-3e975d7ac515?auto=format&fit=crop&q=80&w=600",
-                                    "https://images.unsplash.com/photo-1501426026826-31c667bdf23d?auto=format&fit=crop&q=80&w=600",
-                                    "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=600"
-                                ].map((src, i) => (
-                                    <div key={i} className="masonry-item rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                                        <img src={src} alt="Momento Maricela" className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500" />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* SECCIÓN 8: CTA RSVP GIGANTE */}
-                    <section className="py-32 px-6 text-center">
-                        {rsvpSuccess ? (
-                            <div className="max-w-xl mx-auto glass-panel p-12 rounded-3xl bg-spring-sage/20 border-spring-sage/40">
-                                <h2 className="text-4xl font-serif text-spring-dark mb-4">¡Gracias por confirmar!</h2>
-                                <p className="text-lg text-spring-dark/80">
-                                    Nos emociona mucho compartir este día tan especial contigo.
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="max-w-2xl mx-auto">
-                                <h2 className="text-3xl font-serif mb-8 text-spring-dark/80">
-                                    {lang === 'es' ? '¿Nos acompañas en este día especial?' : 'Will you join us on this special day?'}
+                            {/* Title Section */}
+                            <div className="flex flex-col items-center z-10 px-4 mb-8">
+                                <span className="font-sans text-xs md:text-sm tracking-[0.4em] uppercase text-spring-green font-semibold mb-4">
+                                    {language === 'ES' ? 'Celebrando la vida' : 'Celebrating Life'}
+                                </span>
+                                
+                                <h1 className="font-serif text-6xl md:text-8xl mb-2 text-spring-dark leading-none drop-shadow-sm">
+                                    Maricela
+                                </h1>
+                                <h2 className="font-sans text-xs md:text-sm tracking-[0.3em] md:tracking-[0.5em] uppercase font-medium text-gold-dark/80">
+                                    Estudillo González
                                 </h2>
+                            </div>
+
+                            {/* FOTO DE PORTADA */}
+                            <div className="relative w-64 h-80 md:w-72 md:h-[26rem] rounded-full p-2 border border-gold/30 bg-white/40 backdrop-blur-sm shadow-xl z-10 mb-10 overflow-hidden">
+                                <div className="w-full h-full rounded-full overflow-hidden relative">
+                                    <img 
+                                        src="/maricela-estudillo-gonzalez/portada.jpg" 
+                                        alt="Foto de Maricela" 
+                                        className="w-full h-full object-cover animate-slow-zoom"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* 50 Primaveras Badge */}
+                            <div className="mb-6 z-10 w-full flex items-center justify-center gap-4 px-2">
+                                <div className="h-px w-12 bg-gradient-to-r from-transparent to-gold"></div>
+                                <span className="font-script text-5xl md:text-6xl text-spring-pink font-semibold drop-shadow-sm">
+                                    50 {language === 'ES' ? 'Primaveras' : 'Springs'}
+                                </span>
+                                <div className="h-px w-12 bg-gradient-to-l from-transparent to-gold"></div>
+                            </div>
+
+                            {/* Emotive Phrase */}
+                            <div className="max-w-md z-10 px-6">
+                                <p className="font-serif italic text-xl md:text-2xl text-gray-700 leading-relaxed">
+                                    {language === 'ES' 
+                                        ? '"Llegar a esta primavera es celebrar las flores de ayer y las semillas del mañana."'
+                                        : '"Reaching this spring is celebrating the flowers of yesterday and the seeds of tomorrow."'}
+                                </p>
+                            </div>
+
+                        </div>
+
+                        {/* Scroll Indicator */}
+                        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce opacity-80 z-20 delay-1000 animate-fade-in-up">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <polyline points="19 12 12 19 5 12"></polyline>
+                            </svg>
+                        </div>
+                    </main>
+
+                    {/* CONTENIDO PRINCIPAL */}
+                    <div className="relative z-10 flex flex-col items-center w-full px-4 md:px-8 pb-32 space-y-32 md:space-y-40">
+                        
+                        {/* CUENTA REGRESIVA */}
+                        <RevealOnScroll className="w-full max-w-2xl flex flex-col items-center mt-10">
+                            <span className="font-sans text-xs md:text-sm tracking-[0.4em] uppercase text-gold-warm font-medium mb-8">
+                                {language === 'ES' ? 'Faltan' : 'Time Left'}
+                            </span>
+                            <div className="flex justify-center gap-3 md:gap-8 w-full">
+                                {[
+                                    { label: language === 'ES' ? 'Días' : 'Days', value: timeLeft.days },
+                                    { label: language === 'ES' ? 'Hrs' : 'Hrs', value: timeLeft.hours },
+                                    { label: language === 'ES' ? 'Min' : 'Min', value: timeLeft.minutes },
+                                    { label: language === 'ES' ? 'Seg' : 'Sec', value: timeLeft.seconds }
+                                ].map((item, idx) => (
+                                    <div key={idx} className="flex flex-col items-center w-[4.5rem] md:w-28 group">
+                                        <div className="w-16 h-16 md:w-24 md:h-24 rounded-full border border-gold/30 bg-white/60 backdrop-blur-md shadow-lg flex items-center justify-center mb-4 transition-transform duration-500 group-hover:scale-110 group-hover:border-gold-warm">
+                                            <span className="font-serif text-3xl md:text-5xl text-spring-dark">{item.value}</span>
+                                        </div>
+                                        <span className="font-sans text-[0.65rem] md:text-xs tracking-[0.2em] uppercase text-gray-500 font-medium group-hover:text-gold-dark transition-colors">{item.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </RevealOnScroll>
+
+                        {/* RECEPCIÓN */}
+                        <RevealOnScroll className="w-full max-w-2xl">
+                            <div className="bg-white/80 backdrop-blur-xl rounded-[3rem] p-8 md:p-14 border border-gold/20 shadow-card-luxury flex flex-col items-center text-center relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-40 h-40 bg-spring-pink/10 rounded-full blur-3xl pointer-events-none"></div>
+                                <div className="absolute bottom-0 left-0 w-40 h-40 bg-spring-yellow/10 rounded-full blur-3xl pointer-events-none"></div>
+                                
+                                <span className="font-sans text-xs tracking-[0.3em] uppercase text-spring-green font-semibold mb-4 z-10">
+                                    {language === 'ES' ? 'Dónde y Cuándo' : 'Where & When'}
+                                </span>
+                                <h3 className="font-serif text-5xl md:text-6xl text-spring-dark mb-10 z-10">
+                                    {language === 'ES' ? 'La Recepción' : 'The Reception'}
+                                </h3>
+                                
+                                <div className="flex flex-col items-center mb-10 z-10">
+                                    <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center mb-5 hover:scale-110 hover:bg-gold/20 transition-all duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-gold-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                    <p className="font-serif text-3xl text-gray-800 mb-3">Palapa Los Otates</p>
+                                    <p className="font-sans text-sm md:text-base text-gray-500 leading-relaxed px-4">
+                                        Av. Reyes Aztecas 102, Tacoteno,<br/>96870 Minatitlán, Ver.<br/>
+                                        <span className="font-medium text-gold-dark tracking-widest uppercase mt-3 block text-xs">Sábado, 23 de Mayo • 15:00 hrs</span>
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-3 bg-[#FDFBF7] px-6 py-3 rounded-full border border-gold/20 mb-10 z-10 shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-spring-yellow animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 4.5v-2M12 21.5v-2M4.5 12h-2M21.5 12h-2M6.697 6.697l-1.414-1.414M18.717 18.717l-1.414-1.414M6.697 17.303l-1.414 1.414M18.717 5.283l-1.414 1.414M12 8a4 4 0 100 8 4 4 0 000-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    <span className="font-sans text-xs tracking-[0.15em] uppercase text-gray-600 font-medium">
+                                        28°C / {language === 'ES' ? 'Día Soleado' : 'Sunny Day'}
+                                    </span>
+                                </div>
+
+                                <div className="flex flex-col md:flex-row gap-4 w-full md:justify-center z-10">
+                                    <a href="https://maps.app.goo.gl/jbq8caTyzZdFDBz5A" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-spring-dark text-white rounded-full font-sans text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-gold-dark hover:shadow-lg hover:-translate-y-1 flex justify-center items-center">
+                                        {language === 'ES' ? 'Ver en GPS' : 'Open in GPS'}
+                                    </a>
+                                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Mis+50+A%C3%B1os+-+Maricela&dates=20260523T210000Z/20260524T030000Z&details=Celebraci%C3%B3n+de+los+50+A%C3%B1os+de+Maricela+Estudillo+Gonz%C3%A1lez&location=Palapa+los+Otates,+Av.+Reyes+Aztecas+102,+Tacoteno,+96870+Minatitl%C3%A1n,+Ver." target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-transparent text-spring-dark border border-gold-dark rounded-full font-sans text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-gold/5 hover:-translate-y-1 flex justify-center items-center">
+                                        {language === 'ES' ? 'Agendar' : 'Add to Calendar'}
+                                    </a>
+                                </div>
+                            </div>
+                        </RevealOnScroll>
+
+                        {/* 4. ITINERARIO */}
+                        <RevealOnScroll className="w-full max-w-lg">
+                            <h3 className="font-serif text-5xl md:text-6xl text-spring-dark text-center mb-14">
+                                {language === 'ES' ? 'Itinerario' : 'Timeline'}
+                            </h3>
+                            <div className="relative border-l-2 border-gold/30 ml-6 md:ml-12 space-y-16 pb-4">
+                                {[
+                                    { time: "15:00 hrs", title: language === 'ES' ? "Llegada de Invitados" : "Guest Arrival", desc: language === 'ES' ? "Cóctel de bienvenida" : "Welcome cocktail" },
+                                    { time: "16:00 hrs", title: language === 'ES' ? "Banquete Especial" : "Special Banquet", desc: language === 'ES' ? "Comida exquisita y música" : "Exquisite food and music" },
+                                    { time: "18:00 hrs", title: language === 'ES' ? "Brindis y Pastel" : "Toast & Cake", desc: language === 'ES' ? "Palabras emotivas" : "Emotional words" },
+                                    { time: "19:00 hrs", title: language === 'ES' ? "¡A celebrar!" : "Let's celebrate!", desc: language === 'ES' ? "Grupo Musical en vivo" : "Live music band" }
+                                ].map((item, idx) => (
+                                    <div key={idx} className="relative pl-12 group">
+                                        <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-[3px] border-gold-dark group-hover:bg-gold-dark transition-colors duration-300"></div>
+                                        <span className="font-sans text-[10px] text-gold-dark tracking-[0.2em] font-bold mb-2 block uppercase">{item.time}</span>
+                                        <h4 className="font-serif text-2xl md:text-3xl text-gray-800 mb-1 group-hover:text-spring-dark transition-colors">{item.title}</h4>
+                                        <p className="font-sans text-xs text-gray-400 italic">{item.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </RevealOnScroll>
+
+                        {/* 5. CÓDIGO DE VESTIMENTA */}
+                        <RevealOnScroll className="w-full max-w-xl text-center">
+                            <h3 className="font-serif text-5xl md:text-6xl text-spring-dark mb-6 uppercase tracking-tighter">
+                                {language === 'ES' ? 'Código de Vestimenta' : 'Dress Code'}
+                            </h3>
+                            
+                            <p className="font-serif italic text-2xl md:text-3xl text-gray-700 mb-12 px-4 leading-relaxed">
+                                {language === 'ES' 
+                                    ? '"Colores claros y telas frescas para disfrutar de la palapa y celebrar juntos esta hermosa tarde de primavera."' 
+                                    : '"Light colors and fresh fabrics to enjoy the palapa and celebrate this beautiful spring afternoon together."'}
+                            </p>
+
+                            <div className="flex justify-center gap-12 md:gap-24">
+                                <div className="flex flex-col items-center">
+                                    <div className="w-24 h-24 rounded-full bg-white border border-gold/30 shadow-lg flex items-center justify-center mb-6 text-spring-pink hover:scale-110 transition-transform duration-500">
+                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M9.5 3c1.5 2.5 3.5 2.5 5 0L16.5 8c.3.5.5 1.1.5 1.7v1.8a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 11.5V9.7c0-.6.2-1.2.5-1.7L9.5 3zM8.5 13L4.5 20.5a1 1 0 0 0 .9 1.5h13.2a1 1 0 0 0 .9-1.5L15.5 13M8 10h8" /></svg>
+                                    </div>
+                                    <span className="font-sans text-[10px] tracking-widest text-gray-600 uppercase font-bold text-center leading-tight">
+                                        {language === 'ES' ? 'Vestido Cómodo /' : 'Comfortable /'}<br/>{language === 'ES' ? 'Floral' : 'Floral Dress'}
+                                    </span>
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <div className="w-24 h-24 rounded-full bg-white border border-gold/30 shadow-lg flex items-center justify-center mb-6 text-spring-green hover:scale-110 transition-transform duration-500">
+                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M20.38 3.46L16 2 12 5 8 2 3.62 3.46a2 2 0 00-1.35 2.22l.87 5.23a2 2 0 002 1.67h.54V21a1 1 0 001 1h10.64a1 1 0 001-1V12.58h.54a2 2 0 002-1.67l.87-5.23a2 2 0 00-1.35-2.22zM8 2v5a4 4 0 108 0V2M12 12v10M8 13h2v2H8zM14 13h2v2h-2z" /></svg>
+                                    </div>
+                                    <span className="font-sans text-[10px] tracking-widest text-gray-600 uppercase font-bold text-center leading-tight">
+                                        Guayabera /<br/>{language === 'ES' ? 'Camisa' : 'Shirt'}
+                                    </span>
+                                </div>
+                            </div>
+                        </RevealOnScroll>
+
+                        {/* 6. GALERÍA MASONRY */}
+                        <RevealOnScroll className="w-full max-w-5xl px-4">
+                            <div className="text-center mb-12">
+                                <span className="font-sans text-xs tracking-[0.3em] uppercase text-spring-green font-semibold">
+                                    {language === 'ES' ? 'Un Viaje en el Tiempo' : 'A Journey Through Time'}
+                                </span>
+                                <h3 className="font-serif text-5xl md:text-6xl text-spring-dark mt-4">
+                                    {language === 'ES' ? 'Momentos Inolvidables' : 'Unforgettable Moments'}
+                                </h3>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px] md:auto-rows-[300px]">
+                                {[
+                                    { url: "/sofia-xv/foto1.jpg", span: "row-span-2 col-span-2 md:col-span-2" },
+                                    { url: "/sofia-xv/foto2.jpg", span: "row-span-1 col-span-1" },
+                                    { url: "/sofia-xv/foto3.jpg", span: "row-span-2 col-span-1" },
+                                    { url: "/sofia-xv/foto4.jpg", span: "row-span-1 col-span-1" }
+                                ].map((img, idx) => (
+                                    <div key={idx} className={`${img.span} rounded-3xl overflow-hidden shadow-lg transition-all duration-700 hover:scale-[1.05] group bg-white/20 border-2 border-white/50 relative flex items-center justify-center`}>
+                                        <span className="absolute text-[10px] text-gray-400 opacity-50 z-0">Foto {idx+1}</span>
+                                        <img src={img.url} alt={`Momento ${idx+1}`} className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:rotate-1 transition-all duration-700 relative z-10" />
+                                    </div>
+                                ))}
+                            </div>
+                        </RevealOnScroll>
+
+                        {/* 2. REGALO MONETARIO / LLUVIA DE SOBRES */}
+                        <RevealOnScroll className="w-full max-w-3xl">
+                            <div className="text-center mb-14">
+                                <span className="font-sans text-xs tracking-[0.3em] uppercase text-gold-dark font-semibold">
+                                    {language === 'ES' ? 'Detalles de Cariño' : 'Details of Affection'}
+                                </span>
+                                <h3 className="font-serif text-5xl md:text-6xl text-spring-dark mt-4">
+                                    {language === 'ES' ? 'Lluvia de Sobres' : 'Monetary Gift'}
+                                </h3>
+                            </div>
+                            
+                            <div className="flex justify-center px-4">
+                                <div className="bg-white/70 backdrop-blur-xl rounded-[3rem] p-10 md:p-14 border border-gold/20 flex flex-col items-center text-center shadow-card-luxury transition-all duration-500 w-full max-w-xl group hover:-translate-y-2">
+                                    <div className="w-24 h-24 rounded-full bg-spring-pink/10 flex items-center justify-center mb-8 text-spring-pink shadow-inner border border-spring-pink/20 group-hover:scale-110 transition-transform duration-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                        </svg>
+                                    </div>
+                                    
+                                    <p className="font-serif italic text-2xl md:text-3xl text-gray-700 mb-8 px-2 leading-relaxed">
+                                        {language === 'ES' 
+                                            ? '"El mejor regalo es tu presencia, pero si deseas tener un detalle conmigo, agradeceré infinitamente que sea en efectivo o transferencia."' 
+                                            : '"The best gift is your presence, but if you wish to give me something, I would deeply appreciate a monetary gift."'}
+                                    </p>
+                                    
+                                    <div className="bg-[#FDFBF7] p-6 rounded-3xl border border-gold/20 w-full mt-2 shadow-sm group-hover:border-gold-dark transition-colors duration-500">
+                                        <p className="font-sans text-[0.7rem] tracking-widest text-gold-dark uppercase font-bold mb-3">Banco: Tu Banco</p>
+                                        <p className="font-sans text-sm md:text-base text-gray-800 select-all font-medium mb-1 tracking-widest">CLABE: 0000 0000 0000 0000 00</p>
+                                        <div className="h-px w-1/2 bg-gold/30 mx-auto my-3"></div>
+                                        <p className="font-sans text-[0.65rem] text-gray-500 uppercase italic tracking-widest">A nombre de: Maricela Estudillo</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </RevealOnScroll>
+
+                        {/* 3. MURO SOCIAL Y FILTRO (Hashtag y Filtro IG) */}
+                        <RevealOnScroll className="w-full max-w-4xl px-4 pb-20">
+                            <div className="relative overflow-hidden bg-gradient-to-br from-spring-pink/20 to-spring-yellow/20 rounded-[4rem] p-10 md:p-20 text-center border border-white/50 shadow-inner">
+                                {/* Decoración floral flotante interna */}
+                                <FloralCorner className="absolute -top-10 -right-10 w-40 h-40 opacity-30 transform rotate-180 animate-pulse-slow" />
+                                
+                                <span className="font-sans text-xs tracking-[0.3em] uppercase text-spring-pink font-bold mb-6 block relative z-10">
+                                    {language === 'ES' ? 'Compartamos la Alegría' : 'Share the Joy'}
+                                </span>
+                                
+                                <h3 className="font-serif text-4xl md:text-6xl text-spring-dark mb-8 relative z-10">
+                                    {language === 'ES' ? 'Captura el Momento' : 'Capture the Moment'}
+                                </h3>
+                                
+                                <p className="font-serif italic text-2xl md:text-3xl text-gray-700 mb-10 max-w-2xl mx-auto relative z-10">
+                                    {language === 'ES' 
+                                        ? 'Sube tus fotos y videos usando nuestro hashtag especial:' 
+                                        : 'Upload your photos and videos using our special hashtag:'}
+                                </p>
+                                
+                                <div className="inline-block bg-white/60 backdrop-blur-md px-8 py-4 rounded-full border border-spring-pink/30 mb-12 shadow-md relative z-10 animate-float hover:scale-105 transition-transform duration-300">
+                                    <span className="font-sans text-xl md:text-2xl text-spring-pink font-bold tracking-tight">
+                                        #Mis50PrimaverasMaricela
+                                    </span>
+                                </div>
+                                
+                                <div className="flex flex-col items-center relative z-10">
+                                    <p className="font-sans text-xs tracking-[0.2em] uppercase text-gray-500 mb-6 font-medium">O usa nuestro filtro de Instagram</p>
+                                    <a href="#" className="group flex items-center gap-4 bg-white px-8 py-5 rounded-full shadow-xl transition-all duration-500 hover:shadow-spring-pink/30 hover:-translate-y-2 border border-spring-pink/20">
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center text-white shadow-md group-hover:rotate-12 transition-transform duration-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                                            </svg>
+                                        </div>
+                                        <span className="font-sans text-xs tracking-[0.2em] uppercase font-bold text-gray-700">
+                                            {language === 'ES' ? 'Probar Filtro' : 'Try Filter'}
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+                        </RevealOnScroll>
+
+                        {/* --- INICIO FASE 4: RSVP Y FOOTER --- */}
+                        
+                        {/* BOTÓN RSVP GIGANTE */}
+                        <RevealOnScroll className="w-full max-w-xl pb-10 mt-10">
+                            <div className="flex flex-col items-center text-center">
+                                <div className="text-spring-pink mb-4 animate-pulse">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                </div>
+                                <h3 className="font-serif text-4xl md:text-5xl text-spring-dark mb-10 px-4">
+                                    {language === 'ES' ? 'Acompáñame a celebrar este día tan especial' : 'Join me to celebrate this special day'}
+                                </h3>
                                 <button 
                                     onClick={() => setIsModalOpen(true)}
-                                    className="relative group inline-block w-full sm:w-auto"
+                                    className="w-full py-8 bg-spring-pink text-white rounded-full font-sans font-bold text-sm tracking-[0.4em] uppercase shadow-2xl transition-all duration-500 hover:scale-[1.03] hover:bg-gold-warm hover:shadow-gold-glow flex justify-center items-center group relative overflow-hidden"
                                 >
-                                    <div className="absolute -inset-1 bg-gradient-to-r from-spring-accent to-spring-gold rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                                    <div className="relative bg-spring-dark text-white text-xl md:text-2xl font-serif px-12 py-6 rounded-full shadow-2xl hover:bg-black transition-colors w-full tracking-wide">
-                                        {lang === 'es' ? 'CONFIRMAR ASISTENCIA' : 'RSVP NOW'}
-                                    </div>
+                                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                                    <span className="relative z-10">{language === 'ES' ? 'Confirmar Asistencia' : 'Confirm Attendance'}</span>
                                 </button>
+                                <p className="mt-6 font-script text-3xl text-gold-warm">Maricela espera tu confirmación</p>
                             </div>
-                        )}
-                    </section>
+                        </RevealOnScroll>
 
-                    {/* FOOTER & ACCESO BAULIA */}
-                    <footer className="py-16 text-center border-t border-spring-dark/5 relative z-10 flex flex-col items-center gap-6 pb-20">
-                        <div className="font-script text-4xl text-spring-dark/40">Maricela</div>
-                        
-                        <a href="https://panel.baulia.com" className="text-[10px] uppercase tracking-widest text-spring-dark/30 hover:text-spring-dark/60 transition-colors">
-                            {lang === 'es' ? '¿Eres el anfitrión? Iniciar Sesión' : 'Are you the host? Login'}
-                        </a>
-
-                        {/* Branding Baulia */}
-                        <div className="mt-8 pt-8 border-t border-spring-dark/5 flex flex-col items-center gap-3 w-3/4 max-w-xs mx-auto">
-                            <a href="https://baulia.com" target="_blank" rel="noopener noreferrer" className="group flex flex-col items-center opacity-40 hover:opacity-80 transition-all duration-300 text-spring-dark">
-                                {/* Monograma Minimalista Baulia */}
-                                <div className="w-8 h-8 rounded-sm border border-current flex items-center justify-center mb-3 rotate-45 group-hover:rotate-0 transition-transform duration-500 bg-spring-light shadow-sm">
-                                    <span className="font-serif text-sm -rotate-45 group-hover:rotate-0 transition-transform duration-500">B</span>
-                                </div>
-                                <span className="text-[9px] uppercase tracking-[0.25em] font-medium text-center">
-                                    {lang === 'es' ? 'Crea tu invitación con Baulia' : 'Create your invitation with Baulia'}
-                                </span>
+                        {/* FOOTER */}
+                        <footer className="w-full max-w-2xl text-center space-y-6 pt-10 border-t border-gold/10 opacity-60 hover:opacity-100 transition-opacity">
+                            <a href="https://panel.baulia.com" className="font-sans text-[10px] tracking-[0.3em] uppercase text-gray-600 font-medium transition-colors hover:text-spring-pink">
+                                ¿Eres el anfitrión? Iniciar Sesión
                             </a>
-                        </div>
-                    </footer>
-
-                    {/* MODAL RSVP WIDGET BAULIA (REQUERIMIENTO ESTRICTO) */}
-                    {isModalOpen && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xl bg-black/40 animate-fade-in">
                             
-                            {/* Botón Cerrar */}
-                            <button 
-                                onClick={() => setIsModalOpen(false)}
-                                className="absolute top-6 right-6 text-white hover:text-spring-peach transition-colors z-50"
-                            >
-                                <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
+                            <div className="flex flex-col items-center gap-2">
+                                <p className="font-sans text-[9px] tracking-[0.2em] uppercase text-gray-500">
+                                    Crea tu invitación con nosotros
+                                </p>
+                                <a href="https://baulia.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 group">
+                                    <span className="font-sans text-xs font-bold tracking-tighter text-gray-800 group-hover:text-spring-pink transition-colors">baulia.com</span>
+                                </a>
+                            </div>
+                        </footer>
+                        
+                        {/* --- FIN FASE 4 --- */}
 
-                            {/* Contenedor del Iframe */}
-                            <div className="w-full max-w-lg h-[85vh] relative rounded-3xl overflow-hidden shadow-2xl bg-transparent">
-                                {/* Variables de Baulia aplicadas:
-                                    e = maricela-estudillo-gonzalez
-                                    u = guestUid (dinámico de la URL)
-                                    card = FAF7F2 (spring-light crema)
-                                    btn = E8A598 (spring-accent durazno)
-                                    txt = 4A4A4A (spring-dark)
-                                    font = Montserrat
-                                */}
-                                <iframe 
-                                    src={`https://baulia.com/?modo=invitacion&e=maricela-estudillo-gonzalez&u=${guestUid}&iframe=true&card=FAF7F2&btn=E8A598&txt=4A4A4A&font=Montserrat`} 
-                                    allowTransparency="true" 
-                                    className="w-full h-full border-none bg-transparent"
-                                ></iframe>
+                    </div>
+
+                    {/* --- INICIO FASE 4: MODAL DE CONFIRMACIÓN --- */}
+                    {isModalOpen && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-white/30 backdrop-blur-2xl animate-fade-in-up">
+                            <div className="relative w-full max-w-4xl h-[90vh] md:h-[85vh] flex flex-col items-center justify-center">
+                                
+                                <button 
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="absolute -top-4 -right-4 md:top-0 md:-right-12 z-[110] w-10 h-10 rounded-full bg-white shadow-xl flex items-center justify-center hover:bg-gray-100 transition-all hover:rotate-90"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+
+                                {isConfirmed ? (
+                                    <div className="w-full bg-white/95 rounded-[3rem] p-10 md:p-20 text-center shadow-2xl animate-fade-in-up border border-white">
+                                        <div className="w-24 h-24 bg-spring-green/20 text-spring-green rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+                                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" /></svg>
+                                        </div>
+                                        <h2 className="font-serif text-5xl md:text-6xl text-spring-dark mb-4">¡Gracias por confirmar!</h2>
+                                        <p className="font-script text-3xl text-gold-dark">Tu lugar está reservado para esta gran celebración.</p>
+                                    </div>
+                                ) : (
+                                    <iframe 
+                                        src={`https://baulia.com/?modo=invitacion&e=maricela-estudillo-gonzalez&u=${guestUid}&iframe=true&card=FDFBF7&btn=F76C82&txt=2A2A2A&font=Montserrat`} 
+                                        allowTransparency="true" 
+                                        className="w-full h-full max-h-[85vh] border-none rounded-2xl mx-auto shadow-2xl bg-white/50"
+                                    ></iframe>
+                                )}
                             </div>
                         </div>
                     )}
+                    {/* --- FIN FASE 4 --- */}
+
+                    {/* FLOATING MUSIC PLAYER */}
+                    <div className="fixed bottom-6 right-6 z-50 animate-fade-in-up delay-1000">
+                        <button 
+                            onClick={toggleAudio}
+                            className={`w-14 h-14 rounded-full bg-white flex items-center justify-center transition-all duration-500 hover:scale-110 shadow-xl border border-gold/30 ${isPlaying ? 'bg-spring-pink/10 border-spring-pink' : ''}`}
+                            aria-label="Reproducir música"
+                        >
+                            {isPlaying ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-spring-pink">
+                                    <rect x="6" y="4" width="4" height="16"></rect>
+                                    <rect x="14" y="4" width="4" height="16"></rect>
+                                </svg>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-gold-dark ml-1">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            )}
+                        </button>
+                    </div>
 
                 </div>
             );
