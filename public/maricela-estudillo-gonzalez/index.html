@@ -278,16 +278,13 @@
                         
                         <div className="relative w-full max-w-lg flex flex-col items-center text-center mt-12 mb-20 animate-fade-in-up delay-300">
                             
-                            {/* Monogram Section (Actualizado entrelazado M y G) */}
-                            <div className="mb-8 z-20">
-                                <div className="relative flex items-center justify-center w-28 h-28 rounded-full border border-gold/40 p-1 bg-white/60 backdrop-blur-sm shadow-md">
-                                    <div className="absolute inset-0 rounded-full border border-gold/40 border-dashed rotate-45 scale-110 animate-spin-slow opacity-60"></div>
-                                    <div className="absolute inset-0 rounded-full border border-gold/20 scale-105 animate-pulse-slow"></div>
-                                    <div className="w-full h-full rounded-full bg-white flex items-center justify-center shadow-inner relative overflow-hidden">
-                                        <span className="font-script text-[4.5rem] leading-none text-gold-metallic absolute z-10 drop-shadow-sm pr-2 pb-2">M</span>
-                                        <span className="font-script text-[3.8rem] leading-none text-spring-pink absolute ml-6 mt-4 z-20 opacity-90 drop-shadow-sm">G</span>
-                                    </div>
-                                </div>
+                            {/* Monogram Section (Imagen Local) */}
+                            <div className="mb-8 z-20 animate-pulse-slow">
+                                <img 
+                                    src="/maricela-estudillo-gonzalez/monograma.svg" 
+                                    alt="Monograma" 
+                                    className="w-32 h-32 md:w-40 md:h-40 mx-auto drop-shadow-md object-contain hover:scale-105 transition-transform duration-700" 
+                                />
                             </div>
 
                             {/* Title Section */}
@@ -642,11 +639,14 @@
                                         <p className="font-script text-3xl text-gold-dark">Tu lugar está reservado para esta gran celebración.</p>
                                     </div>
                                 ) : (
-                                    <iframe 
-                                        src={`https://baulia.com/?modo=invitacion&e=maricela-estudillo-gonzalez&u=${guestUid}&iframe=true&card=FDFBF7&btn=F76C82&txt=2A2A2A&font=Montserrat`} 
-                                        allowTransparency="true" 
-                                        className="w-full h-full max-h-[85vh] border-none rounded-2xl mx-auto shadow-2xl bg-white/50"
-                                    ></iframe>
+                                    <div className="w-full h-full max-h-[85vh] bg-white/40 backdrop-blur-2xl rounded-3xl overflow-hidden shadow-2xl border border-white/60 relative">
+                                        <iframe 
+                                            src={`https://baulia.com/?modo=invitacion&e=maricela-estudillo-gonzalez&u=${guestUid}&iframe=true&card=FDFBF7&btn=F76C82&txt=2A2A2A&font=Montserrat&bg=transparent`} 
+                                            allowTransparency="true"
+                                            style={{ backgroundColor: 'transparent' }}
+                                            className="w-full h-full border-none relative z-10"
+                                        ></iframe>
+                                    </div>
                                 )}
                             </div>
                         </div>
