@@ -7289,6 +7289,19 @@ const GuestCameraView = ({ eventId }) => {
   
   const scannerRef = useRef(null);
 
+  // 🔴 FUNCIÓN DE CERRAR SESIÓN BLINDADA
+  const handleGuestLogout = () => {
+    setAuthGuest(null);
+    setGuestName('');
+    setGuestAvatar('');
+    localStorage.removeItem('eventmaster_authGuestId');
+    localStorage.removeItem('eventmaster_guestName');
+    localStorage.removeItem('eventmaster_currentEventId'); // Borramos el candado
+    setShowMenu(false);
+    // Limpiamos la URL para que no vuelva a iniciar sesión automáticamente
+    window.history.replaceState({}, document.title, window.location.pathname + "?modo=camara&e=" + eventId);
+  };
+
   const ejecutarLogin = async (codigoIngresado) => {
     const code = (codigoIngresado || '').trim().toLowerCase();
     if (!code) return;
@@ -7328,6 +7341,7 @@ const GuestCameraView = ({ eventId }) => {
       setGuestAvatar(localStorage.getItem(`eventmaster_avatar_${foundUser.id}`) || '');
       localStorage.setItem('eventmaster_authGuestId', foundUser.id);
       localStorage.setItem('eventmaster_guestName', foundUser.name);
+      localStorage.setItem('eventmaster_currentEventId', eventId); // 🔴 CANDADO DE EVENTO APLICADO
       window.history.replaceState({}, document.title, window.location.pathname + "?modo=camara&e=" + eventId);
     } else {
       showToast("Código no reconocido. Revisa tu pulsera.", "error");
@@ -7335,7 +7349,6 @@ const GuestCameraView = ({ eventId }) => {
     }
   };
 
-  // 🔴 MOTOR DE ESCÁNER (Blindado contra Pantalla Blanca en Móvil)
   const startLoginScanner = () => {
     if (!window.Html5Qrcode) {
       setTimeout(startLoginScanner, 500);
@@ -7356,7 +7369,6 @@ const GuestCameraView = ({ eventId }) => {
              qrbox: function(width, height) { return { width: width * 0.95, height: height * 0.95 }; }
           },
           (decodedText) => {
-             // 1. Pausa inmediata para que no lea 2 veces
              if (scannerRef.current && scannerRef.current.isScanning) {
                 scannerRef.current.pause();
              }
@@ -7381,7 +7393,6 @@ const GuestCameraView = ({ eventId }) => {
 
              setGuestCode(code);
              
-             // 2. Apagado seguro de la cámara ANTES de cambiar de vista
              if (scannerRef.current) {
                 scannerRef.current.stop().then(() => {
                    scannerRef.current.clear();
@@ -7406,7 +7417,6 @@ const GuestCameraView = ({ eventId }) => {
   };
 
   useEffect(() => {
-    // 🔴 INYECCIÓN ANTI-ZOOM PARA SAFARI MÓVIL
     let meta = document.querySelector('meta[name="viewport"]');
     if (!meta) {
       meta = document.createElement('meta');
@@ -7445,10 +7455,22 @@ const GuestCameraView = ({ eventId }) => {
       setSocialActivity(snap.docs.map(doc => doc.data()).sort((a, b) => b.timestamp - a.timestamp));
     });
 
+    // 🔴 REVISIÓN DEL CANDADO DE EVENTO
     const savedGuestId = localStorage.getItem('eventmaster_authGuestId');
-    if (savedGuestId) {
+    const savedEventId = localStorage.getItem('eventmaster_currentEventId'); 
+
+    if (savedGuestId && savedEventId === eventId) {
+      // Si el ID guardado pertenece A ESTE EVENTO, lo dejamos entrar
       setAuthGuest({ id: savedGuestId, name: localStorage.getItem('eventmaster_guestName') });
       setGuestAvatar(localStorage.getItem(`eventmaster_avatar_${savedGuestId}`) || '');
+    } else if (savedGuestId && savedEventId !== eventId) {
+      // 🔴 ¡ALERTA! El invitado escaneó otro evento diferente. Borramos su sesión vieja.
+      localStorage.removeItem('eventmaster_authGuestId');
+      localStorage.removeItem('eventmaster_guestName');
+      localStorage.removeItem('eventmaster_currentEventId');
+      setAuthGuest(null);
+      setGuestName('');
+      setGuestAvatar('');
     }
 
     return () => { unsubConfig(); unsubFotos(); unsubGuests(); unsubActivity(); };
@@ -7589,7 +7611,10 @@ const GuestCameraView = ({ eventId }) => {
       const validUrls = uploadedUrls.filter(url => url !== null);
       if (validUrls.length === 0) throw new Error("Fallo al procesar fotos.");
 
-      if(config?.modoPublico) localStorage.setItem('eventmaster_guestName', (guestName||'').trim());
+      if(config?.modoPublico) {
+         localStorage.setItem('eventmaster_guestName', (guestName||'').trim());
+         localStorage.setItem('eventmaster_currentEventId', eventId);
+      }
 
       let finalCaption = (postDraft.caption || '').trim();
       if (config?.hashtag && !finalCaption.toLowerCase().includes(config.hashtag.toLowerCase())) {
@@ -7835,7 +7860,9 @@ const GuestCameraView = ({ eventId }) => {
                   <Moon size={16} className="mr-3"/> <span className="text-sm font-bold">{isDarkMode ? 'Modo Día' : 'Modo Noche'}</span>
                 </button>
                 <div className={`w-full h-px ${tBorder} my-1`}></div>
-                <button onClick={() => { setAuthGuest(null); setGuestName(''); setGuestAvatar(''); localStorage.removeItem('eventmaster_authGuestId'); localStorage.removeItem('eventmaster_guestName'); }} className={`flex items-center w-full px-4 py-3 rounded-xl hover:bg-rose-500 hover:text-white transition-colors text-rose-500`}>
+                
+                {/* 🔴 NUEVO BOTÓN DE CERRAR SESIÓN BLINDADO */}
+                <button onClick={handleGuestLogout} className={`flex items-center w-full px-4 py-3 rounded-xl hover:bg-rose-500 hover:text-white transition-colors text-rose-500`}>
                   <LogOut size={16} className="mr-3"/> <span className="text-sm font-bold">Cerrar Sesión</span>
                 </button>
               </div>
@@ -7882,13 +7909,13 @@ const GuestCameraView = ({ eventId }) => {
                                   {n.actorAvatar ? <img src={n.actorAvatar} className="w-full h-full object-cover" /> : <span className={`w-full h-full flex items-center justify-center text-xs font-bold ${tTextSub}`}>{(n.actorName || '?').charAt(0).toUpperCase()}</span>}
                                </div>
                                <div className="flex-1 pr-2">
-                                 <p className={`text-xs ${tTextMain} leading-snug`}>
-                                    {n.tipo === 'like_foto' && <span><b className="font-bold">{n.actorName || 'Alguien'}</b> le dio Me gusta a tu foto.</span>}
-                                    {n.tipo === 'comment_foto' && <span><b className="font-bold">{n.actorName || 'Alguien'}</b> comentó: {n.textoExtra}</span>}
-                                    {n.tipo === 'like_comment' && <span>A <b className="font-bold">{n.actorName || 'Alguien'}</b> le gustó tu comentario.</span>}
-                                    {n.tipo === 'reply_comment' && <span><b className="font-bold">{n.actorName || 'Alguien'}</b> te respondió: {n.textoExtra}</span>}
-                                 </p>
-                                 <p className={`text-[9px] ${tTextSub} mt-1`}>{new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                  <p className={`text-xs ${tTextMain} leading-snug`}>
+                                     {n.tipo === 'like_foto' && <span><b className="font-bold">{n.actorName || 'Alguien'}</b> le dio Me gusta a tu foto.</span>}
+                                     {n.tipo === 'comment_foto' && <span><b className="font-bold">{n.actorName || 'Alguien'}</b> comentó: {n.textoExtra}</span>}
+                                     {n.tipo === 'like_comment' && <span>A <b className="font-bold">{n.actorName || 'Alguien'}</b> le gustó tu comentario.</span>}
+                                     {n.tipo === 'reply_comment' && <span><b className="font-bold">{n.actorName || 'Alguien'}</b> te respondió: {n.textoExtra}</span>}
+                                  </p>
+                                  <p className={`text-[9px] ${tTextSub} mt-1`}>{new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                                </div>
                                {n.fotoUrl && (
                                  <div className={`w-10 h-10 flex-shrink-0 rounded-md border ${tBorder} overflow-hidden shadow-sm ml-1`}>
@@ -8063,8 +8090,8 @@ const GuestCameraView = ({ eventId }) => {
                </div>
 
                <div>
-                  {/* 🔴 TEXT-BASE para evitar zoom en iOS */}
-                  <textarea placeholder="Escribe un pie de foto..." value={postDraft.caption} onChange={e=>setPostDraft({...postDraft, caption: e.target.value})} className={`w-full p-4 rounded-2xl ${tInputBg} ${tTextMain} outline-none border ${tBorder} resize-none min-h-[100px] text-base sm:text-sm shadow-inner`} />
+                 {/* 🔴 TEXT-BASE para evitar zoom en iOS */}
+                 <textarea placeholder="Escribe un pie de foto..." value={postDraft.caption} onChange={e=>setPostDraft({...postDraft, caption: e.target.value})} className={`w-full p-4 rounded-2xl ${tInputBg} ${tTextMain} outline-none border ${tBorder} resize-none min-h-[100px] text-base sm:text-sm shadow-inner`} />
                </div>
                
                <div className="grid grid-cols-2 gap-3">
