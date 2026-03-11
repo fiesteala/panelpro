@@ -9814,6 +9814,17 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
 
   return (
     <div style={themeContainer} className="relative pb-24 flex items-center justify-center p-4">
+      
+      {/* 🔴 PARCHE DE CRISTAL: MATAR EL FONDO NEGRO DEL PANEL SI ES IFRAME */}
+      {isIframe && (
+        <style>{`
+          html, body, #root { 
+            background: transparent !important; 
+            background-color: transparent !important; 
+          }
+        `}</style>
+      )}
+
       {t_font && <style>{`@import url('https://fonts.googleapis.com/css2?family=${t_font.replace(/ /g, '+')}&display=swap');`}</style>}
 
       {showRSVP && (
@@ -9899,7 +9910,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                 </div>
               )}
               
-              {/* 🔴 ALERTA ROJA NATIVA Y ELEGANTE */}
               {formError && (
                  <div className="bg-red-500/20 border-2 border-red-500 text-white p-3 rounded-xl font-bold text-sm flex items-center shadow-lg animate-in shake">
                     <AlertCircle size={20} className="mr-2 flex-shrink-0"/> {formError}
