@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maricela - Mis 50 Años | Invitación Primavera Vibrante</title>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Tailwind Config for Custom Colors & Fonts -->
     <script>
         tailwind.config = {
             theme: {
@@ -79,7 +76,6 @@
         }
     </script>
 
-    <!-- Custom CSS -->
     <style>
         body {
             background-color: #1a1a1a;
@@ -101,11 +97,9 @@
         .delay-1000 { animation-delay: 1.0s; opacity: 0; }
     </style>
 
-    <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     
-    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body class="antialiased text-spring-dark">
@@ -673,7 +667,7 @@
                                         <iframe 
                                             src={`https://baulia.com/?modo=invitacion&e=maricela-estudillo-gonzalez&u=${guestUid}&iframe=true&card=FDFBF7&btn=F76C82&txt=2A2A2A&font=Montserrat&bg=transparent`} 
                                             allowTransparency="true"
-                                            style={{ backgroundColor: 'transparent' }}
+                                            style={{ backgroundColor: 'transparent', touchAction: 'pan-y' }}
                                             className="w-full h-full border-none relative z-10"
                                         ></iframe>
                                     </div>
@@ -710,5 +704,28 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
+
+    <script>
+      // Bloquear Clic Derecho
+      document.addEventListener('contextmenu', event => event.preventDefault());
+
+      // Bloquear atajos de teclado para ver el código fuente (F12, Ctrl+Shift+I, Ctrl+U)
+      document.onkeydown = function(e) {
+        if(event.keyCode == 123) { return false; }
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; }
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { return false; }
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { return false; }
+        if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; }
+      }
+    </script>
+    <style>
+      /* Prevenir que puedan seleccionar o sombrear el texto/imágenes para copiarlos */
+      body {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+    </style>
 </body>
 </html>
