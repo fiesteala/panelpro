@@ -332,7 +332,13 @@
 
                         </div>
 
-                        
+                        {/* Scroll Indicator */}
+                        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce opacity-80 z-20 delay-1000 animate-fade-in-up">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <polyline points="19 12 12 19 5 12"></polyline>
+                            </svg>
+                        </div>
                     </main>
 
                     {/* CONTENIDO PRINCIPAL */}
@@ -348,7 +354,7 @@
                                     { label: language === 'ES' ? 'Días' : 'Days', value: timeLeft.days },
                                     { label: language === 'ES' ? 'Hrs' : 'Hrs', value: timeLeft.hours },
                                     { label: language === 'ES' ? 'Min' : 'Min', value: timeLeft.minutes },
-                                    { label: language === 'ES' ? 'Seg' : 'Sec', value: timeLeft.seconds }
+                                    { label: language === 'ES' ? 'Seg' : 'Seg', value: timeLeft.seconds }
                                 ].map((item, idx) => (
                                     <div key={idx} className="flex flex-col items-center w-[4.5rem] md:w-28 group">
                                         <div className="w-16 h-16 md:w-24 md:h-24 rounded-full border border-gold/30 bg-white/60 backdrop-blur-md shadow-lg flex items-center justify-center mb-4 transition-transform duration-500 group-hover:scale-110 group-hover:border-gold-warm">
@@ -600,8 +606,8 @@
                                 <p className="font-sans text-[9px] tracking-[0.2em] uppercase text-gray-500">
                                     Crea tu invitación con nosotros
                                 </p>
-                                <a href="https://baulia.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 group">
-                                    <span className="font-sans text-xs font-bold tracking-tighter text-gray-800 group-hover:text-spring-pink transition-colors">baulia.com</span>
+                                <a href="https://www.baulia.com" target="_blank" rel="noopener noreferrer" className="inline-block group mt-1">
+                                    <img src="/maricela-estudillo-gonzalez/logo.svg" alt="Baulia" className="h-4 md:h-5 w-auto mx-auto opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
                                 </a>
                             </div>
                         </footer>
