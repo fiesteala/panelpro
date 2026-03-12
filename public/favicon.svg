@@ -1,0 +1,8 @@
+<svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&amp;display=swap');
+    .b { font-family: 'Cinzel', serif; font-size: 34px; font-weight: 600; fill: #D4AF37; text-anchor: middle; }
+  </style>
+  <rect x="4" y="4" width="42" height="42" fill="#111111" stroke="#D4AF37" stroke-width="3" rx="4"/>
+  <text x="25" y="37" class="b">B</text>
+</svg>
