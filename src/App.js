@@ -36,19 +36,22 @@ export const setGlobalEventId = (id) => { ID_DEL_EVENTO = id; };
 // ==========================================
 // --- LOGOTIPO OFICIAL BAULIA ---
 // ==========================================
-const BauliaLogo = ({ size = 32, className = "" }) => (
-  <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-    <defs>
-      <linearGradient id="baulia-gold" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#fde68a" />
-        <stop offset="40%" stopColor="#f59e0b" />
-        <stop offset="100%" stopColor="#92400e" />
-      </linearGradient>
-    </defs>
-    <rect x="15" y="30" width="70" height="55" rx="12" stroke="url(#baulia-gold)" strokeWidth="8"/>
-    <path d="M25 30 V20 C25 8 35 4 50 4 C65 4 75 8 75 20 V30" stroke="url(#baulia-gold)" strokeWidth="8" strokeLinecap="round"/>
-    <circle cx="50" cy="52" r="6" fill="url(#baulia-gold)"/>
-    <path d="M50 58 V68" stroke="url(#baulia-gold)" strokeWidth="6" strokeLinecap="round"/>
+const BauliaLogo = ({ className = "h-10", forceWhite = false }) => (
+  <svg viewBox="0 0 340 60" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <style>
+      {`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400&display=swap');
+        .baulia-text { font-family: 'Cinzel', serif; font-size: 28px; font-weight: 400; fill: ${forceWhite ? '#FFFFFF' : '#1C1917'}; letter-spacing: 14px; transition: fill 0.5s ease; }
+        .baulia-b { font-family: 'Cinzel', serif; font-size: 26px; font-weight: 400; fill: #D4AF37; text-anchor: middle; transform-origin: 25px 30px; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), fill 0.4s ease; }
+        .baulia-box { fill: none; stroke: #D4AF37; stroke-width: 1px; transform-origin: 25px 30px; transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55), stroke-width 0.3s ease; }
+        svg:hover .baulia-box { transform: rotate(90deg); stroke-width: 1.5px; }
+        svg:hover .baulia-b { transform: scale(1.15); fill: #FDF1A9; }
+        @media (prefers-color-scheme: dark) { .baulia-text { fill: #FFFFFF; } }
+      `}
+    </style>
+    <rect x="5" y="10" width="40" height="40" className="baulia-box"/>
+    <text x="25" y="38" className="baulia-b">B</text>
+    <text x="65" y="39" className="baulia-text">BAULIA</text>
   </svg>
 );
 
@@ -161,15 +164,16 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
             {agencyConfig?.logoUrl && userRole !== 'superadmin' ? (
               <img src={agencyConfig.logoUrl} alt="Agency Logo" className="h-10 object-contain drop-shadow-md mb-1" />
             ) : (
-              <>
-                 <BauliaLogo size={32} />
-                 <div>
-                   <h1 className="text-xl font-black text-white tracking-widest">{userRole === 'superadmin' ? 'BAULIA CORE' : agencyName}</h1>
-                   <p className="text-[8px] text-amber-500 uppercase tracking-widest mt-0.5">
-                     {userRole === 'superadmin' ? 'God Mode' : userRole === 'planner' ? 'Planner Workspace' : 'Panel Premium'}
-                   </p>
-                 </div>
-              </>
+              <div className="flex flex-col justify-center">
+                 {userRole === 'superadmin' || agencyName === 'BAULIA' || agencyName === 'EVENT MASTER' ? (
+                   <BauliaLogo className="h-8 w-auto mb-1" forceWhite={true} />
+                 ) : (
+                   <h1 className="text-xl font-black text-white tracking-widest uppercase">{agencyName}</h1>
+                 )}
+                 <p className="text-[8px] text-amber-500 uppercase tracking-widest mt-0.5">
+                   {userRole === 'superadmin' ? 'God Mode' : userRole === 'planner' ? 'Planner Workspace' : 'Panel Premium'}
+                 </p>
+              </div>
             )}
           </div>
           <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 hover:bg-slate-800 rounded-lg relative z-10"><X size={20} /></button>
@@ -8663,10 +8667,9 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
       {/* 🔴 NAVEGACIÓN FLOTANTE */}
       <nav className="fixed w-full z-50 top-0 pt-4 md:pt-6 px-4 md:px-8 pointer-events-none">
         <div className="max-w-6xl mx-auto bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-2xl border border-slate-200/50 dark:border-white/10 h-16 md:h-20 rounded-[2rem] flex items-center justify-between px-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] pointer-events-auto transition-colors duration-700">
-          <div className="flex items-center gap-3">
-            <BauliaLogo size={28} />
-            <span className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-widest uppercase">Baulia</span>
-          </div>
+            <a href="/" className="flex items-center group">
+               <BauliaLogo className="h-8 md:h-10 w-auto" />
+            </a>
           <div className="hidden lg:flex gap-8 text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
             <a href="#experiencia" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">La Experiencia</a>
             <a href="#boveda" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">El Panel</a>
@@ -9074,8 +9077,7 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
            <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
-                 <BauliaLogo size={32} />
-                 <span className="text-2xl font-black text-slate-900 dark:text-white tracking-widest uppercase transition-colors">Baulia</span>
+                 <BauliaLogo className="h-10 w-auto" />
               </div>
               <p className="text-slate-500 dark:text-slate-400 text-sm font-light leading-relaxed max-w-sm mb-8 transition-colors">Software de gestión de élite. <br/>Elegancia en la invitación, poder absoluto en la ejecución.</p>
               
@@ -9166,7 +9168,7 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
               ) : (
                 <>
                   <div className="flex flex-col items-center text-center mb-12 mt-4">
-                    <BauliaLogo size={48} className="mb-6 opacity-80" />
+                    <BauliaLogo className="h-12 w-auto mb-6 opacity-80" />
                     <h3 className="text-2xl font-editorial font-medium text-slate-900 dark:text-white tracking-widest uppercase transition-colors">El Estándar de Oro</h3>
                   </div>
                   <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 p-8 rounded-3xl mb-8 transition-colors">
@@ -9981,11 +9983,10 @@ const LoginScreen = () => {
       
       <div className="bg-slate-900/80 backdrop-blur-xl p-10 rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.6)] w-full max-w-md relative z-10 border border-slate-800">
         <div className="flex flex-col items-center mb-8">
-           <div className="mb-4 drop-shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-              <BauliaLogo size={64} />
+           <div className="mb-2 drop-shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform cursor-default">
+              <BauliaLogo className="h-16 w-auto" forceWhite={true} />
            </div>
-           <h2 className="text-3xl font-black text-white tracking-widest uppercase">Baulia</h2>
-           <p className="text-amber-500 text-xs font-bold tracking-[0.2em] mt-1">Bóveda Premium</p>
+           <p className="text-amber-500 text-xs font-bold tracking-[0.2em] mt-2">Bóveda Premium</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
