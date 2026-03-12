@@ -37,7 +37,7 @@ export const setGlobalEventId = (id) => { ID_DEL_EVENTO = id; };
 // --- LOGOTIPO OFICIAL BAULIA (DIAMANTE PRO) ---
 // ==========================================
 const BauliaLogo = ({ className = "h-10", forceWhite = false }) => (
-  <svg viewBox="0 0 915 201" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+  <svg viewBox="0 0 915 201" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={{ overflow: 'visible' }}>
     <style>
       {`
         .baulia-text { 
