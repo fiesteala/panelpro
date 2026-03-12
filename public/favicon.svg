@@ -1,8 +1,4 @@
 <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&amp;display=swap');
-    .b { font-family: 'Cinzel', serif; font-size: 34px; font-weight: 600; fill: #D4AF37; text-anchor: middle; }
-  </style>
   <rect x="4" y="4" width="42" height="42" fill="#111111" stroke="#D4AF37" stroke-width="3" rx="4"/>
-  <text x="25" y="37" class="b">B</text>
+  <path d="M18 15h7.5c2.5 0 4.5.5 5.5 1.5s1.5 2.5 1.5 4.5c0 1.5-.5 2.8-1.5 3.8-.5.5-1.2.8-2 1v.2c1.2.2 2.2.8 2.8 1.5.8 1 1.2 2.2 1.2 3.8 0 2.2-.8 3.8-2.2 4.8C29.2 37.2 27 38 24 38H18V15zm4 9.5h3.5c1.2 0 2.2-.2 2.8-.8.5-.5.8-1.2.8-2.2 0-1-.2-1.8-.8-2.2-.5-.5-1.5-.8-2.8-.8H22v6zm0 10h4c1.5 0 2.5-.2 3-.8.8-.5 1-1.5 1-2.5 0-1.2-.2-2-.8-2.5-.8-.5-1.8-.8-3.2-.8H22v6.6z" fill="#D4AF37"/>
 </svg>

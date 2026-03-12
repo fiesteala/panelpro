@@ -8603,7 +8603,7 @@ const GuestProyectorView = ({ eventId }) => {
 // ==========================================
 // --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - SOCIAL PROOF) ---
 // ==========================================
-const LandingPageView = ({ isDarkMode, toggleTheme }) => {
+const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [legalModal, setLegalModal] = useState(null);
   
   // Estados para Demos Interactivas
@@ -8676,11 +8676,14 @@ const LandingPageView = ({ isDarkMode, toggleTheme }) => {
             <a href="#planes" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Colección</a>
           </div>
           <div className="flex items-center gap-4">
-            <button onClick={toggleTheme} className="text-slate-400 hover:text-amber-600 dark:text-slate-500 dark:hover:text-amber-400 transition-colors" title={isDarkMode ? "Cambiar a Modo Día" : "Cambiar a Modo Noche"}>
-              {isDarkMode ? <Moon size={20} /> : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>}
-            </button>
-            <button onClick={() => window.location.href = 'https://panel.baulia.com'} className="text-[10px] md:text-xs font-black uppercase tracking-widest text-white dark:text-slate-900 bg-slate-900 dark:bg-white px-5 py-2.5 md:px-6 md:py-3 rounded-full hover:scale-105 transition-transform shadow-md">
-              Acceso Clientes
+            <button onClick={cycleTheme} className="text-slate-400 hover:text-amber-600 dark:text-slate-500 dark:hover:text-amber-400 transition-colors" title={`Modo: ${themeSetting.toUpperCase()}`}>
+              {themeSetting === 'auto' ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              ) : themeSetting === 'dark' ? (
+                <Moon size={20} />
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              )}
             </button>
           </div>
         </div>
@@ -10309,55 +10312,49 @@ export default function App() {
   const isPanel = hostname.startsWith('panel.') || hostname.includes('localhost');
 
   // ==========================================
-  // 🔴 MOTOR GLOBAL DE TEMA BAULIA (OSCURO/CLARO)
+  // 🔴 MOTOR GLOBAL DE TEMA BAULIA (3 ESTADOS: Auto, Light, Dark)
   // ==========================================
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    // 1. Prioridad Máxima: Lo que el usuario eligió manualmente antes
-    const savedTheme = localStorage.getItem('baulia_theme');
-    if (savedTheme !== null) return savedTheme === 'dark';
+  const [themeSetting, setThemeSetting] = useState(() => localStorage.getItem('baulia_theme') || 'auto');
+  const [systemIsDark, setSystemIsDark] = useState(false);
 
-    // 2. Prioridad Media: Lo que dice el sistema operativo (iOS, Windows, Mac)
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return true;
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) return false;
+  // Escucha el sistema del usuario
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    setSystemIsDark(mediaQuery.matches);
+    const handleChange = (e) => setSystemIsDark(e.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
-    // 3. Prioridad Baja: La hora local (Modo oscuro de 7 PM a 5:59 AM)
-    const hour = new Date().getHours();
-    return hour >= 19 || hour < 6;
-  });
+  // Calcula el modo oscuro real
+  const isDarkMode = themeSetting === 'dark' || (themeSetting === 'auto' && systemIsDark);
 
-  // Inyecta la clase 'dark' al HTML raíz para que Tailwind haga la magia
+  // Aplica la clase al HTML
   useEffect(() => {
     const root = document.documentElement;
     if (isDarkMode) root.classList.add('dark');
     else root.classList.remove('dark');
   }, [isDarkMode]);
 
-  // Escucha si el usuario cambia el tema de su celular en tiempo real (Ej. bajando la cortinilla del iPhone)
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e) => {
-      // Solo cambia automático si el usuario NO ha forzado un tema manualmente
-      if (localStorage.getItem('baulia_theme') === null) {
-        setIsDarkMode(e.matches);
-      }
-    };
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
+  // Ciclo: Auto -> Dark -> Light -> Auto
+  const cycleTheme = () => {
+    setThemeSetting(prev => {
+      let next = 'auto';
+      if (prev === 'auto') next = 'dark';
+      else if (prev === 'dark') next = 'light';
+      else if (prev === 'light') next = 'auto';
 
-  // Función que le pasaremos a la Landing Page y al Header para alternar
-  const toggleTheme = () => {
-    setIsDarkMode(prev => {
-      const newTheme = !prev;
-      localStorage.setItem('baulia_theme', newTheme ? 'dark' : 'light');
-      return newTheme;
+      if (next === 'auto') localStorage.removeItem('baulia_theme');
+      else localStorage.setItem('baulia_theme', next);
+      
+      return next;
     });
   };
   // ==========================================
 
-  // Si entra a baulia.com limpio (sin /boda-ana, etc), muestra la Web de Ventas PASANDO LOS CONTROLES
+  // Si entra a baulia.com limpio, muestra la Web de Ventas
   if (!isPanel && !pathname && !eventIdParam) {
-     return <LandingPageView isDarkMode={isDarkMode} toggleTheme={toggleTheme} />;
+      return <LandingPageView isDarkMode={isDarkMode} themeSetting={themeSetting} cycleTheme={cycleTheme} />;
   }
 
   // Si entra a baulia.com/boda-ana-y-luis
