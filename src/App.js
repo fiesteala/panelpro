@@ -8744,21 +8744,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           Baulia es la bóveda digital que fusiona <b>invitaciones interactivas de lujo</b> con el software de gestión y control de accesos más poderoso del mercado.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <button onClick={() => window.open('/?e=demo-boda', '_blank')} className="flex items-center text-left w-full p-4 rounded-2xl hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors group/item">
-                  <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center text-amber-600 mr-4 shrink-0"><Star size={18}/></div>
-                  <div><p className="font-bold text-slate-900 dark:text-white text-sm">Boda de Lujo</p><p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">Clásica & Elegante</p></div>
-                </button>
-                
-                <button onClick={() => window.open('/?e=demo-xv', '_blank')} className="flex items-center text-left w-full p-4 rounded-2xl hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors group/item">
-                  <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 mr-4 shrink-0"><Heart size={18}/></div>
-                  <div><p className="font-bold text-slate-900 dark:text-white text-sm">XV Años Glam</p><p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">Moderna & Neón</p></div>
-                </button>
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto relative">
+          
+          <button onClick={() => window.open('/?modo=showcase', '_blank')} className="w-full sm:w-auto px-8 py-4 md:py-5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.4)] border border-amber-400">
+            Explorar Showroom <Smartphone size={18} className="ml-3"/>
+          </button>
 
-                <button onClick={() => window.open('/?e=demo-empresa', '_blank')} className="flex items-center text-left w-full p-4 rounded-2xl hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors group/item">
-                  <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 mr-4 shrink-0"><Building size={18}/></div>
-                  <div><p className="font-bold text-slate-900 dark:text-white text-sm">Corporativo</p><p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">Congresos & Galas</p></div>
-                </button>
           <a href="#planes" className="px-8 py-4 md:py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
             Ver Colección
           </a>
@@ -9065,7 +9056,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Cuenta regresiva</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mapas y ubicación GPS</li>
             </ul>
-            <button onClick={() => window.open('/?e=demo-boda', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+            <button onClick={() => window.open('/?modo=showcase', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
               Iniciar Draft
             </button>
           </div>
@@ -9083,7 +9074,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mesa de Regalos / Efectivo</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Dress Code (Código de Vestimenta)</li>
             </ul>
-            <button onClick={() => window.open('/?e=demo-boda', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+            <button onClick={() => window.open('/?modo=showcase', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
               Iniciar Draft
             </button>
           </div>
@@ -10378,191 +10369,113 @@ const ReviewHarvester = ({ authData }) => {
   );
 };
 
-/// ==========================================
-// --- COMPONENTE: VISOR DE DEMOS MULTI-EVENTO (FULL EXPERIENCE) ---
 // ==========================================
-const DemoViewer = ({ tipo }) => {
-  const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 0 });
-  
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        let { d, h, m, s } = prev;
-        s--;
-        if (s < 0) { s = 59; m--; }
-        if (m < 0) { m = 59; h--; }
-        if (h < 0) { h = 23; d--; }
-        return { d, h, m, s };
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+// --- COMPONENTE: SHOWROOM SIMULADOR (LA VITRINA DEL DISEÑADOR) ---
+// ==========================================
+const ShowcaseSimulatorView = () => {
+  const [activeCategory, setActiveCategory] = useState('boda');
 
-  // Configuraciones visuales y contenido "Hook" por evento
-  const data = {
-    boda: {
-      bg: 'bg-[#111111]', accent: 'text-amber-500', btn: 'bg-amber-600', border: 'border-amber-500/30', bgCard: 'bg-[#1a1a1a]',
-      title: 'Ana & Luis', subtitle: 'NUESTRA BODA', date: '15 . NOVIEMBRE . 2026',
-      heroImg: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070',
-      coupleImg: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=1000',
-      font: 'font-serif', overlay: 'bg-gradient-to-b from-transparent via-[#111111]/60 to-[#111111]',
-      message: 'Hay momentos en la vida que son especiales por sí solos. Compartirlos con las personas que quieres los hace inolvidables.',
-      dressCode: 'Etiqueta Rigurosa (Traje oscuro y vestido largo. Evitar blanco).',
-      gifts: 'Su presencia es nuestro mejor regalo. Si desean tener un detalle, tendremos un buzón para lluvia de sobres en la recepción.',
-      schedule: [
-        { time: '16:00', event: 'Ceremonia Religiosa' },
-        { time: '18:00', event: 'Cóctel de Bienvenida' },
-        { time: '19:30', event: 'Banquete y Brindis' },
-        { time: '21:00', event: 'Apertura de Pista' }
-      ]
+  // Aquí pondremos los links a las invitaciones REALES que tú diseñes
+  const demos = {
+    boda: { 
+      id: 'boda', label: 'Boda de Lujo', 
+      url: 'https://www.baulia.com/maricela-estudillo-gonzalez', // <--- Cambiaremos esto por tu demo de boda real luego
+      desc: 'Elegancia clásica, tipografías finas y colores sobrios. El estándar de alta costura.'
     },
-    xv: {
-      bg: 'bg-slate-950', accent: 'text-pink-500', btn: 'bg-pink-600', border: 'border-pink-500/30', bgCard: 'bg-slate-900',
-      title: 'Mis XV Años', subtitle: 'VALERIA', date: 'SÁBADO 24 DE OCTUBRE',
-      heroImg: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2070',
-      coupleImg: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1000',
-      font: 'font-sans font-black tracking-tight', overlay: 'bg-gradient-to-b from-pink-900/40 via-slate-950/80 to-slate-950',
-      message: '¡Ha llegado el momento de brillar! Acompáñame a celebrar la noche más mágica y espectacular de mi vida.',
-      dressCode: 'Formal Glam (Vestidos de noche y traje. Colores oscuros o neón).',
-      gifts: 'Lo más importante es que estés ahí. Si gustas regalarme algo, mi opción preferida es en efectivo (Lluvia de sobres).',
-      schedule: [
-        { time: '19:00', event: 'Recepción de Invitados' },
-        { time: '20:00', event: 'Entrada Triunfal y Vals' },
-        { time: '21:00', event: 'Cena' },
-        { time: '22:30', event: '¡A bailar! (DJ Set)' }
-      ]
+    xv: { 
+      id: 'xv', label: 'XV Años', 
+      url: 'https://www.baulia.com/maricela-estudillo-gonzalez', // <--- Reemplazar luego
+      desc: 'Glamour, luces neón y animaciones dinámicas para la mejor noche.'
     },
-    empresa: {
-      bg: 'bg-[#0f172a]', accent: 'text-sky-400', btn: 'bg-sky-600', border: 'border-sky-400/30', bgCard: 'bg-[#1e293b]',
-      title: 'Tech Summit 26', subtitle: 'GALA CORPORATIVA', date: '10 DIC | EXPO SANTA FE',
-      heroImg: 'https://images.unsplash.com/photo-1515169067868-5387ec356754?q=80&w=2070',
-      coupleImg: 'https://images.unsplash.com/photo-1475721025505-c338bd9f7d28?q=80&w=1000',
-      font: 'font-sans font-bold uppercase tracking-widest', overlay: 'bg-gradient-to-b from-blue-900/30 via-[#0f172a]/80 to-[#0f172a]',
-      message: 'Celebramos un año de innovación y crecimiento. Únete a los líderes de la industria en nuestra gala de premiación anual.',
-      dressCode: 'Business Formal / Gala.',
-      gifts: null, 
-      schedule: [
-        { time: '18:00', event: 'Registro y Networking' },
-        { time: '19:00', event: 'Keynote Principal' },
-        { time: '20:30', event: 'Entrega de Premios' },
-        { time: '21:30', event: 'Cena de Gala' }
-      ]
+    infantil: { 
+      id: 'infantil', label: 'Cumpleaños Infantil', 
+      url: 'https://fiesteala.github.io/minecraft/', // <--- Tu genialidad de Minecraft
+      desc: 'Temáticas inmersivas al 100%. Llevamos a los niños a su mundo favorito.'
+    },
+    social: { 
+      id: 'social', label: 'Eventos Sociales', 
+      url: 'https://www.baulia.com/maricela-estudillo-gonzalez', // <--- El ejemplo de Maricela
+      desc: 'Bautizos, Aniversarios y celebraciones privadas con un toque personal.'
     }
-  }[tipo] || data.boda;
+  };
+
+  const currentDemo = demos[activeCategory];
 
   return (
-    <div className={`${data.bg} text-white overflow-x-hidden pb-32 min-h-screen transition-colors font-sans selection:bg-white/20`}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@300;400;600;900&display=swap');
-        .font-serif { font-family: 'Cormorant Garamond', serif; }
-        .font-sans { font-family: 'Montserrat', sans-serif; }
-      `}</style>
-      
-      <div className={`fixed top-0 w-full ${data.btn} text-center py-2.5 z-[100] shadow-2xl`}>
-        <p className="text-[10px] font-black uppercase tracking-widest text-white flex items-center justify-center">
-          <Star size={14} className="mr-2" /> Estás viendo el modo de prueba <Star size={14} className="ml-2" />
-        </p>
-      </div>
-
-      <div className="relative h-screen flex flex-col items-center justify-center text-center px-4 bg-fixed bg-cover bg-center" style={{backgroundImage: `url('${data.heroImg}')`}}>
-        <div className={`absolute inset-0 ${data.overlay}`}></div>
-        <div className="relative z-10 mt-10 animate-in slide-in-from-bottom-10 duration-1000">
-          <p className={`${data.accent} uppercase tracking-[0.3em] text-xs font-bold mb-6 drop-shadow-md`}>{data.subtitle}</p>
-          <h1 className={`text-6xl md:text-8xl ${data.font} mb-4 drop-shadow-2xl`}>{data.title}</h1>
-          <p className="text-sm md:text-lg font-light tracking-widest mt-4 drop-shadow-md">{data.date}</p>
+    <div className="min-h-screen bg-slate-950 flex flex-col font-sans text-white overflow-hidden selection:bg-amber-500">
+      {/* Header del Showroom */}
+      <header className="h-20 border-b border-white/10 flex items-center justify-between px-4 sm:px-8 shrink-0 bg-slate-950/80 backdrop-blur-md z-10">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <button onClick={() => window.location.href = '/'} className="p-2 hover:bg-white/10 rounded-full transition-colors"><ArrowRight size={20} className="rotate-180"/></button>
+          <h1 className="text-sm sm:text-xl font-bold tracking-widest uppercase">Showroom <span className="text-amber-500 font-light">Baulia</span></h1>
         </div>
-      </div>
-
-      <div className="relative z-20 -mt-20 max-w-3xl mx-auto px-4 mb-24">
-        <div className={`${data.bgCard} border ${data.border} rounded-[2rem] p-6 md:p-10 shadow-2xl flex justify-center gap-4 md:gap-8 text-center backdrop-blur-xl`}>
-          {[ {l:'Días', v:timeLeft.d}, {l:'Hrs', v:timeLeft.h}, {l:'Min', v:timeLeft.m}, {l:'Seg', v:timeLeft.s} ].map((t,i) => (
-            <div key={i} className="flex flex-col items-center">
-              <span className={`text-3xl md:text-5xl ${data.accent} ${data.font}`}>{String(t.v).padStart(2, '0')}</span>
-              <span className="text-[9px] uppercase tracking-widest text-slate-400 mt-2 font-bold">{t.l}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-4 text-center mb-32 flex flex-col items-center">
-        <h2 className={`text-3xl md:text-4xl ${data.font} ${data.accent} mb-8`}>¡Bienvenidos!</h2>
-        <div className="w-full max-w-md aspect-[4/5] rounded-[3rem] overflow-hidden border-4 border-white/10 shadow-2xl mb-8 relative">
-          <img src={data.coupleImg} className="w-full h-full object-cover" alt="Nosotros"/>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-        </div>
-        <p className="text-lg md:text-xl font-light text-slate-300 max-w-2xl leading-relaxed italic">"{data.message}"</p>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 mb-32">
-        <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
-          <div>
-            <h2 className={`text-3xl ${data.font} ${data.accent} mb-10 text-center md:text-left flex items-center justify-center md:justify-start`}><Clock size={28} className="mr-3"/> Itinerario</h2>
-            <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-white/10">
-              {data.schedule.map((item, idx) => (
-                <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white/10 bg-black shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
-                    <div className={`w-3 h-3 rounded-full ${data.btn}`}></div>
-                  </div>
-                  <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] ${data.bgCard} p-5 rounded-2xl border ${data.border} shadow-lg`}>
-                    <span className={`font-black text-lg ${data.accent}`}>{item.time}</span>
-                    <h3 className="font-bold text-white text-base mt-1">{item.event}</h3>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <h2 className={`text-3xl ${data.font} ${data.accent} mb-10 text-center md:text-left flex items-center justify-center md:justify-start`}><MapPin size={28} className="mr-3"/> Ubicación & Extras</h2>
-            
-            <div className={`${data.bgCard} p-8 rounded-[2rem] border ${data.border} shadow-xl hover:-translate-y-1 transition-transform`}>
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-6"><MapPin size={24} className={data.accent}/></div>
-              <h3 className="text-xl font-bold mb-2">Lugar del Evento</h3>
-              <p className="text-sm text-slate-400 mb-6 font-light">Gran Salón de Eventos y Jardín<br/>Av. Paseo de la Reforma 123, CDMX</p>
-              <button className={`w-full py-3 rounded-xl border ${data.border} ${data.accent} text-xs font-bold uppercase tracking-widest hover:bg-white/5 transition-colors`}>Abrir GPS</button>
-            </div>
-
-            <div className={`${data.bgCard} p-8 rounded-[2rem] border ${data.border} shadow-xl hover:-translate-y-1 transition-transform`}>
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-6"><Star size={24} className={data.accent}/></div>
-              <h3 className="text-xl font-bold mb-2">Código de Vestimenta</h3>
-              <p className="text-sm text-slate-400 font-light">{data.dressCode}</p>
-            </div>
-
-            {data.gifts && (
-              <div className={`${data.bgCard} p-8 rounded-[2rem] border ${data.border} shadow-xl hover:-translate-y-1 transition-transform`}>
-                <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-6"><Wallet size={24} className={data.accent}/></div>
-                <h3 className="text-xl font-bold mb-2">Mesa de Regalos</h3>
-                <p className="text-sm text-slate-400 font-light mb-6">{data.gifts}</p>
-                <button className={`w-full py-3 rounded-xl ${data.btn} text-white text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity`}>Ver Datos Bancarios</button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-2xl mx-auto px-4 mb-32 text-center">
-        <h2 className={`text-4xl ${data.font} ${data.accent} mb-4`}>Confirma tu Asistencia</h2>
-        <p className="text-slate-400 mb-10 text-sm font-light">En la versión final, este módulo genera un código QR único para que el invitado ingrese al evento.</p>
-        
-        <div className={`${data.bgCard} border ${data.border} rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden`}>
-            <div className="absolute inset-0 bg-white/5 opacity-50"></div>
-            <div className="relative z-10 flex flex-col items-center">
-               <h3 className="text-xl font-bold mb-6">Pase de Prueba</h3>
-               <input type="text" disabled placeholder="Nombre del Invitado..." className="w-full p-4 rounded-xl bg-black/40 border border-white/10 mb-4 text-center cursor-not-allowed"/>
-               <select disabled className="w-full p-4 rounded-xl bg-black/40 border border-white/10 mb-8 text-center cursor-not-allowed appearance-none text-slate-400">
-                 <option>2 Asistentes permitidos</option>
-               </select>
-               <button disabled className={`w-full py-5 rounded-xl ${data.btn} text-white font-black uppercase tracking-widest opacity-80 cursor-not-allowed shadow-[0_0_20px_rgba(255,255,255,0.1)]`}>
-                 Enviar Confirmación
-               </button>
-            </div>
-        </div>
-      </div>
-
-      <div className="fixed bottom-6 w-full px-4 z-[100] flex justify-center pointer-events-none">
-        <button onClick={() => window.location.href = '/#planes'} className={`pointer-events-auto text-white ${data.btn} px-8 py-4 md:py-5 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl hover:scale-105 transition-transform animate-bounce flex items-center border-2 border-white/20`}>
-          Adquirir esta tecnología <ArrowRight size={18} className="ml-2"/>
+        <button onClick={() => window.location.href = '/#planes'} className="px-4 py-2 sm:px-6 sm:py-2.5 bg-amber-500 text-slate-900 font-bold rounded-full text-[10px] sm:text-xs uppercase tracking-widest hover:bg-amber-400 transition-colors shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+          Crear la Mía
         </button>
+      </header>
+
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+        {/* Fondo con blur para dar ambiente */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-amber-500/10 z-0"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-white/5 blur-[120px] rounded-full z-0"></div>
+
+        {/* Panel lateral: Categorías */}
+        <div className="w-full lg:w-80 p-4 sm:p-6 lg:p-8 flex flex-row lg:flex-col gap-2 sm:gap-4 z-10 shrink-0 lg:border-r border-white/10 bg-slate-950/50 backdrop-blur-sm overflow-x-auto lg:overflow-y-auto hide-scrollbar">
+          <h2 className="hidden lg:block text-[10px] text-slate-400 uppercase tracking-widest font-black mb-2">Selecciona un estilo</h2>
+          {Object.values(demos).map(demo => (
+            <button 
+              key={demo.id} 
+              onClick={() => setActiveCategory(demo.id)}
+              className={`text-left p-3 sm:p-4 rounded-2xl transition-all border min-w-[140px] lg:min-w-0 ${activeCategory === demo.id ? 'bg-white/10 border-amber-500/50 shadow-lg' : 'bg-transparent border-white/5 hover:bg-white/5 hover:border-white/20'}`}
+            >
+              <h3 className={`font-bold text-sm sm:text-lg mb-1 ${activeCategory === demo.id ? 'text-amber-400' : 'text-slate-200'}`}>{demo.label}</h3>
+              <p className="text-[10px] sm:text-xs text-slate-400 leading-relaxed hidden lg:block">{demo.desc}</p>
+            </button>
+          ))}
+          
+          <div className="mt-auto pt-8 hidden lg:block">
+            <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 p-5 rounded-2xl">
+              <h4 className="font-bold text-amber-500 mb-2 flex items-center"><Star size={16} className="mr-2"/> 100% Personalizable</h4>
+              <p className="text-xs text-amber-200/70">Cualquier color, cualquier temática. Baulia se adapta a tu visión.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Panel Central: El Simulador de Celular */}
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12 z-10 relative overflow-hidden">
+           
+           {/* iPhone Mockup */}
+           <div className="relative w-[300px] sm:w-[360px] h-[600px] sm:h-[740px] bg-black rounded-[2.5rem] sm:rounded-[3rem] border-[6px] sm:border-[8px] border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex-shrink-0">
+             
+             {/* Dynamic Island / Notch */}
+             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 sm:w-24 h-5 sm:h-6 bg-black rounded-full z-20 flex justify-end items-center pr-2">
+               <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-slate-800/80 mr-1"></div>
+               <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-indigo-900/50"></div>
+             </div>
+             
+             {/* Pantalla (Iframe) */}
+             <div className="w-full h-full rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden bg-slate-900 relative">
+               <iframe 
+                 src={currentDemo.url} 
+                 className="w-full h-full border-0"
+                 title={`Demo ${currentDemo.label}`}
+                 sandbox="allow-scripts allow-same-origin"
+               ></iframe>
+             </div>
+             
+             {/* Botones físicos del cel simulados */}
+             <div className="absolute top-24 -left-2 sm:-left-3 w-1 sm:w-1.5 h-8 bg-slate-700 rounded-l-md"></div>
+             <div className="absolute top-36 -left-2 sm:-left-3 w-1 sm:w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
+             <div className="absolute top-52 -left-2 sm:-left-3 w-1 sm:w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
+             <div className="absolute top-36 -right-2 sm:-right-3 w-1 sm:w-1.5 h-16 bg-slate-700 rounded-r-md"></div>
+           </div>
+
+           {/* Botón ver pantalla completa */}
+           <button onClick={() => window.open(currentDemo.url, '_blank')} className="absolute bottom-4 sm:bottom-6 md:bottom-12 lg:right-12 px-4 sm:px-6 py-2.5 sm:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-widest flex items-center transition-colors">
+             Pantalla completa <ExternalLink size={14} className="ml-2"/>
+           </button>
+        </div>
+
       </div>
     </div>
   );
@@ -10684,10 +10597,10 @@ export default function App() {
       return <LandingPageView isDarkMode={isDarkMode} themeSetting={themeSetting} cycleTheme={cycleTheme} />;
   }
   
-  // 🟢 2. RUTAS DEMO (EL VENDEDOR SILENCIOSO MULTI-NICHO)
-  if (eventIdParam === 'demo-boda') return <DemoViewer tipo="boda" />;
-  if (eventIdParam === 'demo-xv') return <DemoViewer tipo="xv" />;
-  if (eventIdParam === 'demo-empresa') return <DemoViewer tipo="empresa" />;
+  // 🟢 2. RUTAS DEMO (EL SHOWROOM INTERACTIVO)
+  if (modoApp === 'showcase') {
+    return <ShowcaseSimulatorView />;
+  }
 
   // 🟢 3. RUTAS PÚBLICAS (INVITADOS)
   if (modoApp === 'camara') { 
