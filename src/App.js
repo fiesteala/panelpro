@@ -10368,9 +10368,9 @@ const ReviewHarvester = ({ authData }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: DEMO INVITACIÓN VIP (VENDEDOR) ---
+// --- COMPONENTE: VISOR DE DEMOS MULTI-EVENTO (BLINDADO) ---
 // ==========================================
-const DemoBodaVip = () => {
+const DemoViewer = ({ tipo }) => {
   const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 0 });
   
   useEffect(() => {
@@ -10387,79 +10387,85 @@ const DemoBodaVip = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Configuraciones visuales según el evento
+  const config = {
+    boda: {
+      bg: 'bg-[#111111]', accent: 'text-amber-500', btn: 'bg-amber-500', border: 'border-amber-500/30',
+      title: 'Ana & Luis', subtitle: 'NUESTRA BODA', date: '15 . NOVIEMBRE . 2026',
+      heroImg: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070',
+      font: 'font-serif', overlay: 'bg-gradient-to-b from-transparent via-[#111111]/60 to-[#111111]'
+    },
+    xv: {
+      bg: 'bg-slate-950', accent: 'text-pink-500', btn: 'bg-pink-500', border: 'border-pink-500/30',
+      title: 'Mis XV Años', subtitle: 'VALERIA', date: 'SÁBADO 24 DE OCTUBRE',
+      heroImg: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2070',
+      font: 'font-sans font-black tracking-tight', overlay: 'bg-gradient-to-b from-pink-900/40 via-slate-950/80 to-slate-950'
+    },
+    empresa: {
+      bg: 'bg-[#0f172a]', accent: 'text-sky-400', btn: 'bg-sky-500', border: 'border-sky-400/30',
+      title: 'Tech Summit 26', subtitle: 'GALA CORPORATIVA', date: '10 DIC | EXPO SANTA FE',
+      heroImg: 'https://images.unsplash.com/photo-1515169067868-5387ec356754?q=80&w=2070',
+      font: 'font-sans font-bold uppercase tracking-widest', overlay: 'bg-gradient-to-b from-blue-900/30 via-[#0f172a]/80 to-[#0f172a]'
+    }
+  }[tipo] || config.boda;
+
   return (
-    <div className="bg-[#111111] text-white overflow-x-hidden pb-32">
+    <div className={`${config.bg} text-white overflow-x-hidden pb-32 min-h-screen transition-colors`}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,400&family=Montserrat:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,400&family=Montserrat:wght@300;400;600;900&display=swap');
         .font-serif { font-family: 'Cormorant Garamond', serif; }
         .font-sans { font-family: 'Montserrat', sans-serif; }
       `}</style>
       
-      {/* Banner Superior Baulia */}
-      <div className="fixed top-0 w-full bg-gradient-to-r from-amber-500 to-yellow-600 text-center py-2 z-[100] shadow-lg">
+      {/* Banner Superior Ventas */}
+      <div className={`fixed top-0 w-full ${config.btn} text-center py-2 z-[100] shadow-lg`}>
         <p className="text-[10px] font-black uppercase tracking-widest text-white flex items-center justify-center">
-          <Star size={14} className="mr-2" /> Estás viendo una Invitación Demo de Baulia <Star size={14} className="ml-2" />
+          <Star size={14} className="mr-2" /> Estás viendo una Invitación Demo <Star size={14} className="ml-2" />
         </p>
       </div>
 
       {/* Hero Portada */}
       <div className="relative h-screen flex flex-col items-center justify-center text-center px-4">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070')] bg-cover bg-center opacity-40"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#111111]/60 to-[#111111]"></div>
+        <div className={`absolute inset-0 bg-cover bg-center opacity-40`} style={{backgroundImage: `url('${config.heroImg}')`}}></div>
+        <div className={`absolute inset-0 ${config.overlay}`}></div>
         
         <div className="relative z-10 mt-10">
-          <p className="text-amber-500 uppercase tracking-[0.3em] text-xs font-bold mb-6">Nuestra Boda</p>
-          <h1 className="text-7xl md:text-8xl font-serif mb-4 drop-shadow-lg">Ana & Luis</h1>
-          <p className="text-lg font-light tracking-widest mt-4">15 . NOVIEMBRE . 2026</p>
+          <p className={`${config.accent} uppercase tracking-[0.3em] text-xs font-bold mb-6`}>{config.subtitle}</p>
+          <h1 className={`text-6xl md:text-8xl ${config.font} mb-4 drop-shadow-2xl`}>{config.title}</h1>
+          <p className="text-sm md:text-lg font-light tracking-widest mt-4">{config.date}</p>
         </div>
       </div>
 
       {/* Cuenta Regresiva */}
       <div className="relative z-10 -mt-20 max-w-3xl mx-auto px-4 mb-24">
-        <div className="bg-[#1a1a1a] border border-amber-500/20 rounded-2xl p-6 md:p-8 shadow-2xl flex justify-center gap-4 md:gap-8 text-center">
+        <div className={`bg-black/40 backdrop-blur-md border ${config.border} rounded-2xl p-6 md:p-8 shadow-2xl flex justify-center gap-4 md:gap-8 text-center`}>
           {[ {l:'Días', v:timeLeft.d}, {l:'Hrs', v:timeLeft.h}, {l:'Min', v:timeLeft.m}, {l:'Seg', v:timeLeft.s} ].map((t,i) => (
             <div key={i} className="flex flex-col items-center">
-              <span className="text-3xl md:text-5xl font-serif text-amber-500">{String(t.v).padStart(2, '0')}</span>
+              <span className={`text-3xl md:text-5xl ${config.accent} ${config.font}`}>{String(t.v).padStart(2, '0')}</span>
               <span className="text-[9px] uppercase tracking-widest text-slate-400 mt-2">{t.l}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Detalles del Evento */}
-      <div className="max-w-4xl mx-auto px-4 text-center mb-24">
-        <h2 className="text-4xl font-serif text-amber-500 mb-12">Dónde y Cuándo</h2>
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="bg-[#1a1a1a] p-10 rounded-2xl border border-white/5 hover:border-amber-500/30 transition-colors">
-            <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-6 text-amber-500"><MapPin size={24}/></div>
-            <h3 className="text-2xl font-serif mb-2">Ceremonia</h3>
-            <p className="text-sm text-slate-400 mb-6 font-light">Templo de San Francisco<br/>16:00 Hrs</p>
-            <button className="text-[10px] uppercase tracking-widest border border-amber-500 text-amber-500 px-6 py-2 rounded-full hover:bg-amber-500 hover:text-white transition-colors">Ver Mapa</button>
-          </div>
-          <div className="bg-[#1a1a1a] p-10 rounded-2xl border border-white/5 hover:border-amber-500/30 transition-colors">
-            <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-6 text-amber-500"><MapPin size={24}/></div>
-            <h3 className="text-2xl font-serif mb-2">Recepción</h3>
-            <p className="text-sm text-slate-400 mb-6 font-light">Hacienda Los Arcángeles<br/>18:00 Hrs</p>
-            <button className="text-[10px] uppercase tracking-widest border border-amber-500 text-amber-500 px-6 py-2 rounded-full hover:bg-amber-500 hover:text-white transition-colors">Ver Mapa</button>
-          </div>
-        </div>
-      </div>
-
-      {/* Módulo RSVP Real (Transparente para integrarse al diseño) */}
-      <div className="max-w-xl mx-auto px-4 mb-24">
-        <h2 className="text-4xl font-serif text-center text-amber-500 mb-4">RSVP</h2>
-        <p className="text-center text-slate-400 mb-10 text-sm font-light">Confirma tu asistencia usando la tecnología real de Baulia a continuación.</p>
-        
-        {/* Usamos el componente real pasándole parámetros de colores oscuros para que combine */}
-        <div className="bg-[#1a1a1a] border border-amber-500/30 rounded-3xl shadow-[0_0_30px_rgba(245,158,11,0.1)] overflow-hidden">
-           <InvitacionPublicaView eventId="evento_de_prueba" guestUid={null} />
+      {/* Mock Módulo RSVP (Desactivado para proteger DB) */}
+      <div className="max-w-xl mx-auto px-4 mb-24 text-center">
+        <h2 className={`text-3xl ${config.font} ${config.accent} mb-4`}>Confirmación</h2>
+        <p className="text-slate-400 mb-8 text-sm font-light">En un evento real, aquí se muestra la tecnología de accesos exactos.</p>
+        <div className={`bg-white/5 border ${config.border} rounded-3xl p-8 backdrop-blur-sm`}>
+            <div className="animate-pulse flex flex-col items-center opacity-50">
+               <div className="w-16 h-16 rounded-full bg-white/20 mb-4"></div>
+               <div className="h-4 w-48 bg-white/20 rounded mb-3"></div>
+               <div className="h-3 w-32 bg-white/20 rounded"></div>
+            </div>
+            <p className="text-xs font-bold uppercase tracking-widest mt-6 text-white/50 border border-white/20 py-2 rounded-lg">Módulo Interactivo</p>
         </div>
       </div>
 
       {/* Sticky CTA (Botón flotante de ventas) */}
       <div className="fixed bottom-6 w-full px-4 z-[100] flex justify-center pointer-events-none">
-        <button onClick={() => window.location.href = '/#planes'} className="pointer-events-auto bg-white text-slate-900 border-2 border-amber-500 px-8 py-4 md:py-5 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-[0_0_40px_rgba(245,158,11,0.6)] hover:scale-105 transition-transform animate-bounce flex items-center">
-          Quiero esta Invitación para mi Evento <ArrowRight size={18} className="ml-2"/>
+        <button onClick={() => window.location.href = '/#planes'} className={`pointer-events-auto text-white ${config.btn} px-8 py-4 md:py-5 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl hover:scale-105 transition-transform animate-bounce flex items-center`}>
+          Quiero esta tecnología <ArrowRight size={18} className="ml-2"/>
         </button>
       </div>
     </div>
@@ -10582,10 +10588,10 @@ export default function App() {
       return <LandingPageView isDarkMode={isDarkMode} themeSetting={themeSetting} cycleTheme={cycleTheme} />;
   }
   
-  // 🟢 2. RUTA DEMO (EL VENDEDOR SILENCIOSO)
-  if (eventIdParam === 'demo-boda-vip') {
-    return <DemoBodaVip />;
-  }
+  // 🟢 2. RUTAS DEMO (EL VENDEDOR SILENCIOSO MULTI-NICHO)
+  if (eventIdParam === 'demo-boda') return <DemoViewer tipo="boda" />;
+  if (eventIdParam === 'demo-xv') return <DemoViewer tipo="xv" />;
+  if (eventIdParam === 'demo-empresa') return <DemoViewer tipo="empresa" />;
 
   // 🟢 3. RUTAS PÚBLICAS (INVITADOS)
   if (modoApp === 'camara') { 
