@@ -10547,12 +10547,19 @@ export default function App() {
   const isPanel = hostname.startsWith('panel.') || hostname.includes('localhost');
 
   // ==========================================
-  // 🔴 MOTOR GLOBAL DE TEMA BAULIA (3 ESTADOS: Auto, Light, Dark)
+  // 1. REGLA DE ORO: TODOS LOS ESTADOS (HOOKS) PRIMERO
   // ==========================================
   const [themeSetting, setThemeSetting] = useState(() => localStorage.getItem('baulia_theme') || 'auto');
   const [systemIsDark, setSystemIsDark] = useState(false);
+  const [authData, setAuthData] = useState({ isAuthenticated: false, role: null, plan: null, eventId: null });
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [accountSuspended, setAccountSuspended] = useState(false);
 
-  // Escucha el sistema del usuario
+  // ==========================================
+  // 2. TODOS LOS EFECTOS SECUNDARIOS
+  // ==========================================
+  
+  // Escucha el sistema del usuario para el Modo Noche
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     setSystemIsDark(mediaQuery.matches);
@@ -10561,47 +10568,15 @@ export default function App() {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  // Calcula el modo oscuro real
   const isDarkMode = themeSetting === 'dark' || (themeSetting === 'auto' && systemIsDark);
 
-  // Aplica la clase al HTML
   useEffect(() => {
     const root = document.documentElement;
     if (isDarkMode) root.classList.add('dark');
     else root.classList.remove('dark');
   }, [isDarkMode]);
 
-  // Ciclo: Auto -> Dark -> Light -> Auto
-  const cycleTheme = () => {
-    setThemeSetting(prev => {
-      let next = 'auto';
-      if (prev === 'auto') next = 'dark';
-      else if (prev === 'dark') next = 'light';
-      else if (prev === 'light') next = 'auto';
-
-      if (next === 'auto') localStorage.removeItem('baulia_theme');
-      else localStorage.setItem('baulia_theme', next);
-      
-      return next;
-    });
-  };
-  // ==========================================
-
-  // Si entra a baulia.com limpio, muestra la Web de Ventas
-  if (!isPanel && !pathname && !eventIdParam) {
-      return <LandingPageView isDarkMode={isDarkMode} themeSetting={themeSetting} cycleTheme={cycleTheme} />;
-  }
-
-  // Si entra a baulia.com/boda-ana-y-luis
-  if (!isPanel && pathname && !eventIdParam) {
-     eventIdParam = pathname;
-     if (!modoApp) modoApp = 'invitacion';
-  }
-
-  const [authData, setAuthData] = useState({ isAuthenticated: false, role: null, plan: null, eventId: null });
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [accountSuspended, setAccountSuspended] = useState(false);
-
+  // Autenticación Global de Firebase
   useEffect(() => {
     if (!window.Html5QrcodeScanner && !document.getElementById('qr-script')) {
       const script = document.createElement('script');
@@ -10620,7 +10595,6 @@ export default function App() {
           if (!querySnapshot.empty) {
             const userData = querySnapshot.docs[0].data();
             
-            // 🔴 PANTALLA ROJA NATIVA DE SUSPENSIÓN
             if (userData.status === 'suspendido') {
                await signOut(auth);
                setAccountSuspended(true);
@@ -10645,24 +10619,41 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  if (isCheckingAuth) return <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center text-amber-500 font-bold"><RefreshCw size={40} className="animate-spin mb-4" /> Bóveda Segura...</div>;
+  const cycleTheme = () => {
+    setThemeSetting(prev => {
+      let next = 'auto';
+      if (prev === 'auto') next = 'dark';
+      else if (prev === 'dark') next = 'light';
+      else if (prev === 'light') next = 'auto';
 
-  // PANTALLA NATIVA DE SUSPENSIÓN
-  if (accountSuspended) return (
-      <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
-        <AlertTriangle size={64} className="text-rose-500 mb-4 animate-pulse" />
-        <h1 className="text-2xl font-black text-white mb-2">Cuenta Suspendida</h1>
-        <p className="text-slate-400 max-w-sm">Contacta a tu administrador de plataforma para reactivar tu licencia.</p>
-      </div>
-  );
+      if (next === 'auto') localStorage.removeItem('baulia_theme');
+      else localStorage.setItem('baulia_theme', next);
+      
+      return next;
+    });
+  };
 
-// 🔴 RUTA DEMO (EL VENDEDOR SILENCIOSO)
-  // 🔴 RUTA DEMO (EL VENDEDOR SILENCIOSO)
+  // ==========================================
+  // 3. ENRUTAMIENTO (AHORA SÍ, YA PODEMOS REDIRIGIR)
+  // ==========================================
+
+  // Si entra a baulia.com/boda-ana-y-luis
+  if (!isPanel && pathname && !eventIdParam) {
+     eventIdParam = pathname;
+     if (!modoApp) modoApp = 'invitacion';
+  }
+
+  // 🟢 1. LANDING PAGE PRINCIPAL
+  if (!isPanel && !pathname && !eventIdParam) {
+      return <LandingPageView isDarkMode={isDarkMode} themeSetting={themeSetting} cycleTheme={cycleTheme} />;
+  }
+  
+  // 🟢 2. RUTA DEMO (EL VENDEDOR SILENCIOSO)
   if (eventIdParam === 'demo-boda-vip') {
     return <DemoBodaVip />;
   }
 
-  // RUTAS PÚBLICAS
+  // 🟢 3. RUTAS PÚBLICAS (INVITADOS)
   if (modoApp === 'camara') { 
     if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Enlace roto (Falta código de evento).</div>;
     return <GuestCameraView eventId={eventIdParam} />; 
@@ -10680,10 +10671,19 @@ export default function App() {
     return <HostessStandaloneView eventId={eventIdParam} />;
   }
 
-  // SI ES EL PANEL (O LOCALHOST) Y NO ESTÁ LOGUEADO
+  // 🟢 4. ZONA SEGURA (PANEL DE CLIENTES/ADMIN)
+  if (isCheckingAuth) return <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center text-amber-500 font-bold"><RefreshCw size={40} className="animate-spin mb-4" /> Bóveda Segura...</div>;
+
+  if (accountSuspended) return (
+      <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
+        <AlertTriangle size={64} className="text-rose-500 mb-4 animate-pulse" />
+        <h1 className="text-2xl font-black text-white mb-2">Cuenta Suspendida</h1>
+        <p className="text-slate-400 max-w-sm">Contacta a tu administrador de plataforma para reactivar tu licencia.</p>
+      </div>
+  );
+
   if (!authData.isAuthenticated) { return <LoginScreen />; }
   
-  // PANEL ADMINISTRADOR (CERO INVASIVO)
   return (
     <>
       <AdminDashboard authData={authData} />
