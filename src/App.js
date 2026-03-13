@@ -8745,12 +8745,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <a href="#planes" className="px-10 py-4 md:py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
-            Ver Colección <ArrowRight size={18} className="ml-3"/>
-          </a>
-          <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20quiero%20una%20demo%20de%20Baulia', '_blank')} className="px-10 py-4 md:py-5 bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white rounded-full font-bold text-sm uppercase tracking-widest hover:bg-white dark:hover:bg-white/10 transition-colors flex items-center justify-center backdrop-blur-sm">
-            Hablar con Ventas
+          <button onClick={() => window.open('/demo-boda-vip', '_blank')} className="px-8 py-4 md:py-5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.4)] border border-amber-400">
+            Probar Invitación VIP <Smartphone size={18} className="ml-3"/>
           </button>
+          <a href="#planes" className="px-8 py-4 md:py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
+            Ver Colección
+          </a>
         </div>
       </section>
 
@@ -10459,6 +10459,38 @@ export default function App() {
         <p className="text-slate-400 max-w-sm">Contacta a tu administrador de plataforma para reactivar tu licencia.</p>
       </div>
   );
+
+// 🔴 RUTA DEMO (EL VENDEDOR SILENCIOSO)
+  if (eventIdParam === 'demo-boda-vip') {
+    // Si entran a la demo, les mostramos la vista de Invitación Pública pero le pasamos parámetros falsos visuales
+    // Para que sea perfecto, inyectamos los colores Premium como parámetros de URL simulados
+    const demoBg = "1C1917"; // Fondo oscuro elegante
+    const demoCard = "292524"; // Tarjeta un poco más clara
+    const demoBtn = "D4AF37"; // Botón dorado Baulia
+    const demoTxt = "FFFFFF"; // Texto blanco
+    const demoFont = "Playfair Display"; 
+
+    return (
+      <div className="relative min-h-screen">
+        {/* Banner flotante para avisar que es un DEMO y atrapar la venta */}
+        <div className="fixed top-0 left-0 w-full bg-gradient-to-r from-amber-500 to-yellow-600 text-white text-xs font-black text-center py-2 z-[9999] uppercase tracking-widest flex items-center justify-center shadow-md">
+          <Star size={14} className="mr-2" />
+          Estás viendo una Invitación Demo de Baulia
+          <Star size={14} className="ml-2" />
+        </div>
+        
+        {/* Mock de la invitación */}
+        <div className="pt-10">
+          <InvitacionPublicaView eventId="evento_de_prueba" guestUid={null} />
+        </div>
+        
+        {/* Botón flotante para comprar de inmediato */}
+        <button onClick={() => window.location.href = '/#planes'} className="fixed bottom-6 right-6 bg-slate-900 text-white border-2 border-amber-500 px-6 py-4 rounded-full font-black uppercase tracking-widest shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:scale-105 transition-transform z-[9999] animate-bounce">
+          Quiero esta tecnología
+        </button>
+      </div>
+    );
+  }
 
   // RUTAS PÚBLICAS
   if (modoApp === 'camara') { 
