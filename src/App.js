@@ -8646,11 +8646,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [fakeRsvp, setFakeRsvp] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 59 });
   const [accentColor, setAccentColor] = useState('amber');
-  // 🔴 ESTADO PARA LAS RESEÑAS REALES APROBADAS
+  // ESTADO PARA LAS RESEÑAS REALES APROBADAS
   const [liveReviews, setLiveReviews] = useState([]);
 
   useEffect(() => {
-    // Escucha en tiempo real solo las reseñas que tú aprobaste en el panel
+    // Escucha en tiempo real solo las reseñas aprobadas
     const q = query(collection(db, "resenas"), where("status", "==", "aprobada"));
     const unsub = onSnapshot(q, (snap) => {
       const fetched = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -8689,7 +8689,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white transition-colors duration-700 overflow-x-hidden">
       
-      {/* 🔴 INYECCIÓN DE FUENTES EDITORIALES */}
+      {/* INYECCIÓN DE FUENTES EDITORIALES */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
         .font-editorial { font-family: 'Playfair Display', serif; }
@@ -8700,7 +8700,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       <div className="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 dark:bg-amber-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
       <div className="fixed bottom-[-20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-500/5 dark:bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
 
-      {/* 🔴 NAVEGACIÓN FLOTANTE */}
+      {/* NAVEGACIÓN FLOTANTE */}
       <nav className="fixed w-full z-50 top-0 pt-4 md:pt-6 px-4 md:px-8 pointer-events-none">
         <div className="max-w-6xl mx-auto bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-2xl border border-slate-200/50 dark:border-white/10 h-16 md:h-20 rounded-[2rem] flex items-center justify-between px-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] pointer-events-auto transition-colors duration-700">
             <a href="/" className="flex items-center group">
@@ -8728,7 +8728,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </nav>
 
-      {/* 🔴 HERO SECTION */}
+      {/* HERO SECTION */}
       <section className="relative min-h-[90vh] flex flex-col items-center justify-center pt-32 pb-20 px-4 md:px-6 z-10 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest mb-8 backdrop-blur-md shadow-sm">
           <Star size={12} className="fill-amber-500 dark:fill-amber-400"/>
@@ -8754,104 +8754,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </section>
 
-      {/* ========================================== */}
-      {/* SECCIÓN DE PRECIOS: LA COLECCIÓN BAULIA  */}
-      {/* ========================================== */}
-      <div id="planes" className="py-24 px-4 max-w-7xl mx-auto">
-        <div className="text-center mb-20">
-          <span className="px-4 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-black uppercase tracking-[0.2em] border border-amber-500/20 shadow-sm">
-            Oferta de Lanzamiento
-          </span>
-          <h2 className="text-4xl md:text-5xl font-serif text-slate-900 dark:text-white mt-8 mb-6">
-            La Colección
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-sm md:text-base">
-            Diseña tu evento sin compromiso. Comienza en <b>Modo Prueba</b> con marca de agua y paga solo cuando estés 100% enamorado del resultado.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-center">
-          
-          {/* PAQUETE 1: BÁSICO */}
-          <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
-            <h3 className="text-xl font-serif text-slate-900 dark:text-white mb-2">Básico</h3>
-            <p className="text-xs text-slate-500 mb-6 h-8">La elegancia esencial para tu evento.</p>
-            <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
-              $990 <span className="text-sm text-slate-400 font-normal">MXN</span>
-            </div>
-            <ul className="space-y-4 mb-8 text-sm text-slate-600 dark:text-slate-300">
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Invitación interactiva</li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Confirmación simple</li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Cuenta regresiva</li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mapas y ubicación GPS</li>
-            </ul>
-            <button className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-              Iniciar Draft
-            </button>
-          </div>
-
-          {/* PAQUETE 2: PLATA */}
-          <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
-            <h3 className="text-xl font-serif text-slate-900 dark:text-white mb-2">Plata</h3>
-            <p className="text-xs text-slate-500 mb-6 h-8">Recupera tu inversión con regalos en efectivo.</p>
-            <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
-              $1,490 <span className="text-sm text-slate-400 font-normal">MXN</span>
-            </div>
-            <ul className="space-y-4 mb-8 text-sm text-slate-600 dark:text-slate-300">
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Todo lo del Básico</b></li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Itinerario del evento</li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mesa de Regalos / Efectivo</li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Dress Code (Código de Vestimenta)</li>
-            </ul>
-            <button className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-              Iniciar Draft
-            </button>
-          </div>
-
-          {/* PAQUETE 3: ORO (ESTRELLA - DESTACADO) */}
-          <div className="bg-slate-900 dark:bg-[#111111] rounded-3xl p-8 border-2 border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.15)] transform md:-translate-y-4 relative z-10">
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md">
-              El Más Popular
-            </div>
-            <h3 className="text-xl font-serif text-white mb-2 mt-2">Oro</h3>
-            <p className="text-xs text-amber-200/70 mb-6 h-8">Cero colados. Seguridad total con tecnología QR.</p>
-            <div className="text-4xl font-light text-amber-500 mb-8">
-              $1,990 <span className="text-sm text-amber-500/50 font-normal">MXN</span>
-            </div>
-            <ul className="space-y-4 mb-8 text-sm text-slate-300">
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Todo lo del Plata</b></li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Pases QR Únicos e Infértiles</li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> RSVP Estricto por número de pases</li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Escáner de Puerta para Hostess</li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Panel de Presupuesto</li>
-            </ul>
-            <button className="w-full py-4 rounded-full bg-gradient-to-r from-amber-500 to-yellow-600 text-white text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-lg">
-              Comprar Paquete Oro
-            </button>
-          </div>
-
-          {/* PAQUETE 4: DIAMANTE */}
-          <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
-            <h3 className="text-xl font-serif text-slate-900 dark:text-white mb-2">Diamante VIP</h3>
-            <p className="text-xs text-slate-500 mb-6 h-8">La suite definitiva para Planners y eventos TOP.</p>
-            <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
-              $2,990 <span className="text-sm text-slate-400 font-normal">MXN</span>
-            </div>
-            <ul className="space-y-4 mb-8 text-sm text-slate-600 dark:text-slate-300">
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Todo lo del Oro</b></li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Acomodo de Mesas Visual 3D</li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Muro Social (Proyección en Vivo)</li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Bocetador Decorativo</li>
-            </ul>
-            <button className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-              Iniciar Draft VIP
-            </button>
-          </div>
-
-        </div>
-      </div>
-
-      {/* 🔴 BENTO BOX: INVITACIONES INTERACTIVAS */}
+      {/* BENTO BOX: INVITACIONES INTERACTIVAS */}
       <section id="experiencia" className="py-24 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
         <div className="mb-16">
           <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Fase 1: La Invitación</span>
@@ -8969,7 +8872,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </section>
 
-      {/* 🔴 SECCIÓN: EL PANEL (BÓVEDA) */}
+      {/* SECCIÓN: EL PANEL (BÓVEDA) */}
       <section id="boveda" className="py-32 relative z-10 border-y border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/50 transition-colors duration-700">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex flex-col lg:flex-row gap-16 items-center">
@@ -9030,7 +8933,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </section>
 
-      {/* 🔴 SECCIÓN: TESTIMONIOS (CONECTADOS A FIREBASE) */}
+      {/* SECCIÓN: TESTIMONIOS */}
       <section className="py-24 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16">
           <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">El Estándar de la Industria</span>
@@ -9039,7 +8942,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
            {liveReviews.length > 0 ? (
-             /* MUESTRA LAS RESEÑAS REALES DE TUS CLIENTES */
              liveReviews.slice(0, 3).map((review, idx) => (
                <div key={review.id} className={`bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative ${idx === 1 ? 'transform lg:-translate-y-4 shadow-xl dark:bg-slate-900 dark:border-slate-800' : ''}`}>
                   <Quote className="absolute top-8 right-8 text-slate-100 dark:text-white/5" size={48} />
@@ -9061,7 +8963,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                </div>
              ))
            ) : (
-             /* SI NO HAS APROBADO NINGUNA, MUESTRA ESTAS 3 POR DEFECTO PARA QUE NO SE VEA VACÍO */
              <>
                <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative">
                   <Quote className="absolute top-8 right-8 text-slate-100 dark:text-white/5" size={48} />
@@ -9086,7 +8987,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </section>
 
-      {/* 🔴 SECCIÓN B2B: PLANNERS */}
+      {/* SECCIÓN B2B: PLANNERS */}
       <section id="planners" className="py-24 relative z-10 overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
           <div className="bg-slate-900 dark:bg-[#0a0a0a] rounded-[3rem] p-10 md:p-20 border border-slate-800 dark:border-white/10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between shadow-2xl transition-colors duration-700">
@@ -9122,71 +9023,104 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </section>
 
-      {/* 🔴 SECCIÓN: COLECCIÓN DE PLANES */}
-      <section id="planes" className="py-32 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
+      {/* ========================================== */}
+      {/* SECCIÓN DE PRECIOS: LA COLECCIÓN BAULIA (LA NUEVA QUE SÍ QUEREMOS) */}
+      {/* ========================================== */}
+      <div id="planes" className="py-24 px-4 max-w-7xl mx-auto z-10 relative">
         <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white mb-4 tracking-tight transition-colors duration-700">Colección Baulia</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-lg max-w-xl mx-auto font-light transition-colors duration-700">Inversiones a la medida de tu celebración. Único pago por evento, el panel es tuyo hasta el día de la fiesta.</p>
+          <span className="px-4 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-black uppercase tracking-[0.2em] border border-amber-500/20 shadow-sm">
+            Oferta de Lanzamiento
+          </span>
+          <h2 className="text-4xl md:text-5xl font-serif text-slate-900 dark:text-white mt-8 mb-6 transition-colors">
+            La Colección
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-sm md:text-base transition-colors">
+            Diseña tu evento sin compromiso. Comienza en <b>Modo Prueba</b> con marca de agua y paga solo cuando estés 100% enamorado del resultado.
+          </p>
         </div>
 
-        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-4 items-end">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-colors h-max shadow-sm dark:shadow-none">
-            <h3 className="text-slate-900 dark:text-white font-bold text-xl mb-1 transition-colors">Básica</h3>
-            <p className="text-slate-500 dark:text-slate-500 text-xs mb-8 h-8 transition-colors">La esencia digital para eventos íntimos.</p>
-            <div className="space-y-4 text-sm text-slate-600 dark:text-slate-400 font-light mb-10 transition-colors">
-              <p className="flex items-center text-slate-800 dark:text-slate-200"><span className="w-1 h-1 rounded-full bg-slate-400 mr-3"></span> Invitación Interactiva</p>
-              <p className="flex items-center text-slate-800 dark:text-slate-200"><span className="w-1 h-1 rounded-full bg-slate-400 mr-3"></span> Confirmación Simple</p>
-              <p className="flex items-center"><span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mr-3"></span> Cuenta Regresiva</p>
-              <p className="flex items-center"><span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mr-3"></span> Mapas GPS</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-center">
+          
+          {/* PAQUETE 1: BÁSICO */}
+          <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
+            <h3 className="text-xl font-serif text-slate-900 dark:text-white mb-2">Básico</h3>
+            <p className="text-xs text-slate-500 mb-6 h-8">La elegancia esencial para tu evento.</p>
+            <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
+              $990 <span className="text-sm text-slate-400 font-normal">MXN</span>
             </div>
-            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Básica', '_blank')} className="w-full py-4 rounded-full bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-white font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-xs uppercase tracking-widest">Adquirir Básica</button>
+            <ul className="space-y-4 mb-8 text-sm text-slate-600 dark:text-slate-300">
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Invitación interactiva</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Confirmación simple</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Cuenta regresiva</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mapas y ubicación GPS</li>
+            </ul>
+            <button onClick={() => window.open('/demo-boda-vip', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+              Iniciar Draft
+            </button>
           </div>
 
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-colors h-max shadow-sm dark:shadow-none">
-            <h3 className="text-slate-900 dark:text-white font-bold text-xl mb-1 transition-colors">Plata</h3>
-            <p className="text-slate-500 dark:text-slate-500 text-xs mb-8 h-8 transition-colors">Ideal para control de regalos y hospedaje.</p>
-            <div className="space-y-4 text-sm text-slate-600 dark:text-slate-400 font-light mb-10 transition-colors">
-              <p className="text-slate-900 dark:text-white font-bold border-b border-slate-100 dark:border-white/5 pb-3 mb-3">Todo en Básica, más:</p>
-              <p className="flex items-center text-slate-800 dark:text-slate-200"><span className="w-1 h-1 rounded-full bg-slate-400 mr-3"></span> Itinerario Visual</p>
-              <p className="flex items-center text-slate-800 dark:text-slate-200"><span className="w-1 h-1 rounded-full bg-slate-400 mr-3"></span> Mesa de Regalos</p>
-              <p className="flex items-center"><span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mr-3"></span> Dress Code</p>
+          {/* PAQUETE 2: PLATA */}
+          <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
+            <h3 className="text-xl font-serif text-slate-900 dark:text-white mb-2">Plata</h3>
+            <p className="text-xs text-slate-500 mb-6 h-8">Recupera tu inversión con regalos en efectivo.</p>
+            <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
+              $1,490 <span className="text-sm text-slate-400 font-normal">MXN</span>
             </div>
-            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Plata', '_blank')} className="w-full py-4 rounded-full bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-white font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-xs uppercase tracking-widest">Adquirir Plata</button>
+            <ul className="space-y-4 mb-8 text-sm text-slate-600 dark:text-slate-300">
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Todo lo del Básico</b></li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Itinerario del evento</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mesa de Regalos / Efectivo</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Dress Code (Código de Vestimenta)</li>
+            </ul>
+            <button onClick={() => window.open('/demo-boda-vip', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+              Iniciar Draft
+            </button>
           </div>
 
-          <div className="bg-slate-900 dark:bg-white rounded-[2rem] p-[2px] shadow-2xl transform lg:-translate-y-4 relative z-10 h-max transition-colors duration-700">
-            <div className="bg-slate-900 dark:bg-[#050505] rounded-[1.9rem] p-8 h-full flex flex-col relative overflow-hidden transition-colors duration-700">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 dark:bg-white/10 rounded-full blur-[40px]"></div>
-              <span className="bg-white text-slate-900 dark:bg-white dark:text-slate-900 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full w-max mb-6">El más popular</span>
-              <h3 className="text-white dark:text-white font-bold text-2xl mb-1 transition-colors">Plan Oro</h3>
-              <p className="text-slate-400 text-xs mb-8 h-8 transition-colors">Control estricto de accesos y finanzas.</p>
-              
-              <div className="space-y-4 text-sm text-slate-300 font-light mb-10 flex-1 transition-colors">
-                <p className="text-white font-bold border-b border-white/10 pb-3 mb-3">Todo en Plata, más:</p>
-                <p className="flex items-start"><span className="w-1 h-1 rounded-full bg-white mr-3 mt-2 shrink-0"></span> <span className="text-white font-medium">Pases QR (Escáner Puerta)</span></p>
-                <p className="flex items-start"><span className="w-1 h-1 rounded-full bg-white mr-3 mt-2 shrink-0"></span> <span>RSVP Estricto (No colados)</span></p>
-                <p className="flex items-start"><span className="w-1 h-1 rounded-full bg-slate-600 mr-3 mt-2 shrink-0"></span> <span>Panel de Presupuesto</span></p>
-              </div>
-              <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Oro', '_blank')} className="w-full py-4 rounded-full bg-white text-slate-900 font-bold hover:bg-slate-200 transition-colors text-xs uppercase tracking-widest">Adquirir Oro</button>
+          {/* PAQUETE 3: ORO (ESTRELLA - DESTACADO) */}
+          <div className="bg-slate-900 dark:bg-[#111111] rounded-3xl p-8 border-2 border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.15)] transform md:-translate-y-4 relative z-10">
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md">
+              El Más Popular
             </div>
+            <h3 className="text-xl font-serif text-white mb-2 mt-2">Oro</h3>
+            <p className="text-xs text-amber-200/70 mb-6 h-8">Cero colados. Seguridad total con tecnología QR.</p>
+            <div className="text-4xl font-light text-amber-500 mb-8">
+              $1,990 <span className="text-sm text-amber-500/50 font-normal">MXN</span>
+            </div>
+            <ul className="space-y-4 mb-8 text-sm text-slate-300">
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Todo lo del Plata</b></li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Pases QR Únicos e Infértiles</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> RSVP Estricto por número de pases</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Escáner de Puerta para Hostess</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Panel de Presupuesto</li>
+            </ul>
+            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Oro', '_blank')} className="w-full py-4 rounded-full bg-gradient-to-r from-amber-500 to-yellow-600 text-white text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-lg">
+              Comprar Paquete Oro
+            </button>
           </div>
 
-          <div className="bg-slate-100 dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-colors h-max shadow-sm dark:shadow-none">
-            <h3 className="text-slate-900 dark:text-white font-bold text-xl mb-1 transition-colors">Diamante VIP</h3>
-            <p className="text-slate-500 text-xs mb-8 h-8 transition-colors">La suite tecnológica extrema para tu boda.</p>
-            <div className="space-y-4 text-sm text-slate-600 dark:text-slate-400 font-light mb-10 transition-colors">
-              <p className="text-slate-900 dark:text-white font-bold border-b border-slate-200 dark:border-white/5 pb-3 mb-3">Todo en Oro, más:</p>
-              <p className="flex items-start"><span className="w-1 h-1 rounded-full bg-slate-400 mr-3 mt-2 shrink-0"></span> <span className="text-slate-800 dark:text-slate-200">Acomodo de Mesas Visual</span></p>
-              <p className="flex items-start"><span className="w-1 h-1 rounded-full bg-slate-400 mr-3 mt-2 shrink-0"></span> <span className="text-slate-800 dark:text-slate-200">Muro Social (Proyector)</span></p>
-              <p className="flex items-start"><span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mr-3 mt-2 shrink-0"></span> <span>Bocetador Decorativo</span></p>
+          {/* PAQUETE 4: DIAMANTE */}
+          <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
+            <h3 className="text-xl font-serif text-slate-900 dark:text-white mb-2">Diamante VIP</h3>
+            <p className="text-xs text-slate-500 mb-6 h-8">La suite definitiva para Planners y eventos TOP.</p>
+            <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
+              $2,990 <span className="text-sm text-slate-400 font-normal">MXN</span>
             </div>
-            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Diamante', '_blank')} className="w-full py-4 rounded-full bg-slate-900 dark:bg-white/10 text-white font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors text-xs uppercase tracking-widest">Adquirir Diamante</button>
+            <ul className="space-y-4 mb-8 text-sm text-slate-600 dark:text-slate-300">
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Todo lo del Oro</b></li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Acomodo de Mesas Visual 3D</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Muro Social (Proyección en Vivo)</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Bocetador Decorativo</li>
+            </ul>
+            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Diamante', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+              Iniciar Draft VIP
+            </button>
           </div>
 
         </div>
-      </section>
+      </div>
 
-      {/* 🔴 PREGUNTAS FRECUENTES (FAQ) */}
+      {/* PREGUNTAS FRECUENTES (FAQ) */}
       <section id="faq" className="py-24 px-4 md:px-8 max-w-4xl mx-auto relative z-10">
          <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white mb-4 transition-colors">Preguntas Frecuentes</h2>
@@ -9211,7 +9145,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
          </div>
       </section>
 
-      {/* 🔴 FOOTER VIP EDITORIAL */}
+      {/* FOOTER VIP EDITORIAL */}
       <footer className="border-t border-slate-200 dark:border-white/5 bg-white dark:bg-[#050505] pt-20 pb-10 relative z-10 transition-colors duration-700">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
            <div className="md:col-span-2">
@@ -9269,7 +9203,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </footer>
 
-      {/* 🔴 MODALES LEGALES Y ACERCA DE (OVERLAYS) */}
+      {/* MODALES LEGALES Y ACERCA DE (OVERLAYS) */}
       {legalModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-slate-900/90 backdrop-blur-md flex justify-center items-center p-4 md:p-8 animate-in fade-in duration-200">
           <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 w-full max-w-3xl h-[80vh] rounded-[2rem] shadow-2xl flex flex-col relative overflow-hidden animate-in zoom-in-95 transition-colors duration-300">
