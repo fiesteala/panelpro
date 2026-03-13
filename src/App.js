@@ -9065,7 +9065,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Cuenta regresiva</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mapas y ubicación GPS</li>
             </ul>
-            <button onClick={() => window.open('/demo-boda-vip', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+            <button onClick={() => window.open('/?e=demo-boda', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
               Iniciar Draft
             </button>
           </div>
@@ -9083,7 +9083,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mesa de Regalos / Efectivo</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Dress Code (Código de Vestimenta)</li>
             </ul>
-            <button onClick={() => window.open('/demo-boda-vip', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+            <button onClick={() => window.open('/?e=demo-boda', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
               Iniciar Draft
             </button>
           </div>
@@ -10378,7 +10378,7 @@ const ReviewHarvester = ({ authData }) => {
   );
 };
 
-// ==========================================
+/// ==========================================
 // --- COMPONENTE: VISOR DE DEMOS MULTI-EVENTO (FULL EXPERIENCE) ---
 // ==========================================
 const DemoViewer = ({ tipo }) => {
@@ -10440,7 +10440,7 @@ const DemoViewer = ({ tipo }) => {
       font: 'font-sans font-bold uppercase tracking-widest', overlay: 'bg-gradient-to-b from-blue-900/30 via-[#0f172a]/80 to-[#0f172a]',
       message: 'Celebramos un año de innovación y crecimiento. Únete a los líderes de la industria en nuestra gala de premiación anual.',
       dressCode: 'Business Formal / Gala.',
-      gifts: null, // No aplica
+      gifts: null, 
       schedule: [
         { time: '18:00', event: 'Registro y Networking' },
         { time: '19:00', event: 'Keynote Principal' },
@@ -10448,7 +10448,7 @@ const DemoViewer = ({ tipo }) => {
         { time: '21:30', event: 'Cena de Gala' }
       ]
     }
-  }[tipo] || config.boda;
+  }[tipo] || data.boda;
 
   return (
     <div className={`${data.bg} text-white overflow-x-hidden pb-32 min-h-screen transition-colors font-sans selection:bg-white/20`}>
@@ -10458,17 +10458,14 @@ const DemoViewer = ({ tipo }) => {
         .font-sans { font-family: 'Montserrat', sans-serif; }
       `}</style>
       
-      {/* Banner Superior Ventas */}
       <div className={`fixed top-0 w-full ${data.btn} text-center py-2.5 z-[100] shadow-2xl`}>
         <p className="text-[10px] font-black uppercase tracking-widest text-white flex items-center justify-center">
           <Star size={14} className="mr-2" /> Estás viendo el modo de prueba <Star size={14} className="ml-2" />
         </p>
       </div>
 
-      {/* 1. HERO PORTADA (Con efecto Parallax CSS) */}
       <div className="relative h-screen flex flex-col items-center justify-center text-center px-4 bg-fixed bg-cover bg-center" style={{backgroundImage: `url('${data.heroImg}')`}}>
         <div className={`absolute inset-0 ${data.overlay}`}></div>
-        
         <div className="relative z-10 mt-10 animate-in slide-in-from-bottom-10 duration-1000">
           <p className={`${data.accent} uppercase tracking-[0.3em] text-xs font-bold mb-6 drop-shadow-md`}>{data.subtitle}</p>
           <h1 className={`text-6xl md:text-8xl ${data.font} mb-4 drop-shadow-2xl`}>{data.title}</h1>
@@ -10476,7 +10473,6 @@ const DemoViewer = ({ tipo }) => {
         </div>
       </div>
 
-      {/* 2. CUENTA REGRESIVA FLOTANTE */}
       <div className="relative z-20 -mt-20 max-w-3xl mx-auto px-4 mb-24">
         <div className={`${data.bgCard} border ${data.border} rounded-[2rem] p-6 md:p-10 shadow-2xl flex justify-center gap-4 md:gap-8 text-center backdrop-blur-xl`}>
           {[ {l:'Días', v:timeLeft.d}, {l:'Hrs', v:timeLeft.h}, {l:'Min', v:timeLeft.m}, {l:'Seg', v:timeLeft.s} ].map((t,i) => (
@@ -10488,7 +10484,6 @@ const DemoViewer = ({ tipo }) => {
         </div>
       </div>
 
-      {/* 3. MENSAJE Y FOTO PRINCIPAL */}
       <div className="max-w-5xl mx-auto px-4 text-center mb-32 flex flex-col items-center">
         <h2 className={`text-3xl md:text-4xl ${data.font} ${data.accent} mb-8`}>¡Bienvenidos!</h2>
         <div className="w-full max-w-md aspect-[4/5] rounded-[3rem] overflow-hidden border-4 border-white/10 shadow-2xl mb-8 relative">
@@ -10498,11 +10493,8 @@ const DemoViewer = ({ tipo }) => {
         <p className="text-lg md:text-xl font-light text-slate-300 max-w-2xl leading-relaxed italic">"{data.message}"</p>
       </div>
 
-      {/* 4. ITINERARIO Y DETALLES */}
       <div className="max-w-6xl mx-auto px-4 mb-32">
         <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
-          
-          {/* Timeline */}
           <div>
             <h2 className={`text-3xl ${data.font} ${data.accent} mb-10 text-center md:text-left flex items-center justify-center md:justify-start`}><Clock size={28} className="mr-3"/> Itinerario</h2>
             <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-white/10">
@@ -10520,7 +10512,6 @@ const DemoViewer = ({ tipo }) => {
             </div>
           </div>
 
-          {/* Tarjetas de Información */}
           <div className="space-y-6">
             <h2 className={`text-3xl ${data.font} ${data.accent} mb-10 text-center md:text-left flex items-center justify-center md:justify-start`}><MapPin size={28} className="mr-3"/> Ubicación & Extras</h2>
             
@@ -10546,11 +10537,9 @@ const DemoViewer = ({ tipo }) => {
               </div>
             )}
           </div>
-
         </div>
       </div>
 
-      {/* 5. MÓDULO RSVP VIP */}
       <div className="max-w-2xl mx-auto px-4 mb-32 text-center">
         <h2 className={`text-4xl ${data.font} ${data.accent} mb-4`}>Confirma tu Asistencia</h2>
         <p className="text-slate-400 mb-10 text-sm font-light">En la versión final, este módulo genera un código QR único para que el invitado ingrese al evento.</p>
@@ -10570,7 +10559,6 @@ const DemoViewer = ({ tipo }) => {
         </div>
       </div>
 
-      {/* Sticky CTA (Botón flotante de ventas para ti) */}
       <div className="fixed bottom-6 w-full px-4 z-[100] flex justify-center pointer-events-none">
         <button onClick={() => window.location.href = '/#planes'} className={`pointer-events-auto text-white ${data.btn} px-8 py-4 md:py-5 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl hover:scale-105 transition-transform animate-bounce flex items-center border-2 border-white/20`}>
           Adquirir esta tecnología <ArrowRight size={18} className="ml-2"/>
