@@ -10379,7 +10379,7 @@ const ReviewHarvester = ({ authData }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: VISOR DE DEMOS MULTI-EVENTO (BLINDADO) ---
+// --- COMPONENTE: VISOR DE DEMOS MULTI-EVENTO (FULL EXPERIENCE) ---
 // ==========================================
 const DemoViewer = ({ tipo }) => {
   const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 0 });
@@ -10398,85 +10398,182 @@ const DemoViewer = ({ tipo }) => {
     return () => clearInterval(timer);
   }, []);
 
-  // Configuraciones visuales según el evento
-  const config = {
+  // Configuraciones visuales y contenido "Hook" por evento
+  const data = {
     boda: {
-      bg: 'bg-[#111111]', accent: 'text-amber-500', btn: 'bg-amber-500', border: 'border-amber-500/30',
+      bg: 'bg-[#111111]', accent: 'text-amber-500', btn: 'bg-amber-600', border: 'border-amber-500/30', bgCard: 'bg-[#1a1a1a]',
       title: 'Ana & Luis', subtitle: 'NUESTRA BODA', date: '15 . NOVIEMBRE . 2026',
       heroImg: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070',
-      font: 'font-serif', overlay: 'bg-gradient-to-b from-transparent via-[#111111]/60 to-[#111111]'
+      coupleImg: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=1000',
+      font: 'font-serif', overlay: 'bg-gradient-to-b from-transparent via-[#111111]/60 to-[#111111]',
+      message: 'Hay momentos en la vida que son especiales por sí solos. Compartirlos con las personas que quieres los hace inolvidables.',
+      dressCode: 'Etiqueta Rigurosa (Traje oscuro y vestido largo. Evitar blanco).',
+      gifts: 'Su presencia es nuestro mejor regalo. Si desean tener un detalle, tendremos un buzón para lluvia de sobres en la recepción.',
+      schedule: [
+        { time: '16:00', event: 'Ceremonia Religiosa' },
+        { time: '18:00', event: 'Cóctel de Bienvenida' },
+        { time: '19:30', event: 'Banquete y Brindis' },
+        { time: '21:00', event: 'Apertura de Pista' }
+      ]
     },
     xv: {
-      bg: 'bg-slate-950', accent: 'text-pink-500', btn: 'bg-pink-500', border: 'border-pink-500/30',
+      bg: 'bg-slate-950', accent: 'text-pink-500', btn: 'bg-pink-600', border: 'border-pink-500/30', bgCard: 'bg-slate-900',
       title: 'Mis XV Años', subtitle: 'VALERIA', date: 'SÁBADO 24 DE OCTUBRE',
       heroImg: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2070',
-      font: 'font-sans font-black tracking-tight', overlay: 'bg-gradient-to-b from-pink-900/40 via-slate-950/80 to-slate-950'
+      coupleImg: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1000',
+      font: 'font-sans font-black tracking-tight', overlay: 'bg-gradient-to-b from-pink-900/40 via-slate-950/80 to-slate-950',
+      message: '¡Ha llegado el momento de brillar! Acompáñame a celebrar la noche más mágica y espectacular de mi vida.',
+      dressCode: 'Formal Glam (Vestidos de noche y traje. Colores oscuros o neón).',
+      gifts: 'Lo más importante es que estés ahí. Si gustas regalarme algo, mi opción preferida es en efectivo (Lluvia de sobres).',
+      schedule: [
+        { time: '19:00', event: 'Recepción de Invitados' },
+        { time: '20:00', event: 'Entrada Triunfal y Vals' },
+        { time: '21:00', event: 'Cena' },
+        { time: '22:30', event: '¡A bailar! (DJ Set)' }
+      ]
     },
     empresa: {
-      bg: 'bg-[#0f172a]', accent: 'text-sky-400', btn: 'bg-sky-500', border: 'border-sky-400/30',
+      bg: 'bg-[#0f172a]', accent: 'text-sky-400', btn: 'bg-sky-600', border: 'border-sky-400/30', bgCard: 'bg-[#1e293b]',
       title: 'Tech Summit 26', subtitle: 'GALA CORPORATIVA', date: '10 DIC | EXPO SANTA FE',
       heroImg: 'https://images.unsplash.com/photo-1515169067868-5387ec356754?q=80&w=2070',
-      font: 'font-sans font-bold uppercase tracking-widest', overlay: 'bg-gradient-to-b from-blue-900/30 via-[#0f172a]/80 to-[#0f172a]'
+      coupleImg: 'https://images.unsplash.com/photo-1475721025505-c338bd9f7d28?q=80&w=1000',
+      font: 'font-sans font-bold uppercase tracking-widest', overlay: 'bg-gradient-to-b from-blue-900/30 via-[#0f172a]/80 to-[#0f172a]',
+      message: 'Celebramos un año de innovación y crecimiento. Únete a los líderes de la industria en nuestra gala de premiación anual.',
+      dressCode: 'Business Formal / Gala.',
+      gifts: null, // No aplica
+      schedule: [
+        { time: '18:00', event: 'Registro y Networking' },
+        { time: '19:00', event: 'Keynote Principal' },
+        { time: '20:30', event: 'Entrega de Premios' },
+        { time: '21:30', event: 'Cena de Gala' }
+      ]
     }
   }[tipo] || config.boda;
 
   return (
-    <div className={`${config.bg} text-white overflow-x-hidden pb-32 min-h-screen transition-colors`}>
+    <div className={`${data.bg} text-white overflow-x-hidden pb-32 min-h-screen transition-colors font-sans selection:bg-white/20`}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,400&family=Montserrat:wght@300;400;600;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@300;400;600;900&display=swap');
         .font-serif { font-family: 'Cormorant Garamond', serif; }
         .font-sans { font-family: 'Montserrat', sans-serif; }
       `}</style>
       
       {/* Banner Superior Ventas */}
-      <div className={`fixed top-0 w-full ${config.btn} text-center py-2 z-[100] shadow-lg`}>
+      <div className={`fixed top-0 w-full ${data.btn} text-center py-2.5 z-[100] shadow-2xl`}>
         <p className="text-[10px] font-black uppercase tracking-widest text-white flex items-center justify-center">
-          <Star size={14} className="mr-2" /> Estás viendo una Invitación Demo <Star size={14} className="ml-2" />
+          <Star size={14} className="mr-2" /> Estás viendo el modo de prueba <Star size={14} className="ml-2" />
         </p>
       </div>
 
-      {/* Hero Portada */}
-      <div className="relative h-screen flex flex-col items-center justify-center text-center px-4">
-        <div className={`absolute inset-0 bg-cover bg-center opacity-40`} style={{backgroundImage: `url('${config.heroImg}')`}}></div>
-        <div className={`absolute inset-0 ${config.overlay}`}></div>
+      {/* 1. HERO PORTADA (Con efecto Parallax CSS) */}
+      <div className="relative h-screen flex flex-col items-center justify-center text-center px-4 bg-fixed bg-cover bg-center" style={{backgroundImage: `url('${data.heroImg}')`}}>
+        <div className={`absolute inset-0 ${data.overlay}`}></div>
         
-        <div className="relative z-10 mt-10">
-          <p className={`${config.accent} uppercase tracking-[0.3em] text-xs font-bold mb-6`}>{config.subtitle}</p>
-          <h1 className={`text-6xl md:text-8xl ${config.font} mb-4 drop-shadow-2xl`}>{config.title}</h1>
-          <p className="text-sm md:text-lg font-light tracking-widest mt-4">{config.date}</p>
+        <div className="relative z-10 mt-10 animate-in slide-in-from-bottom-10 duration-1000">
+          <p className={`${data.accent} uppercase tracking-[0.3em] text-xs font-bold mb-6 drop-shadow-md`}>{data.subtitle}</p>
+          <h1 className={`text-6xl md:text-8xl ${data.font} mb-4 drop-shadow-2xl`}>{data.title}</h1>
+          <p className="text-sm md:text-lg font-light tracking-widest mt-4 drop-shadow-md">{data.date}</p>
         </div>
       </div>
 
-      {/* Cuenta Regresiva */}
-      <div className="relative z-10 -mt-20 max-w-3xl mx-auto px-4 mb-24">
-        <div className={`bg-black/40 backdrop-blur-md border ${config.border} rounded-2xl p-6 md:p-8 shadow-2xl flex justify-center gap-4 md:gap-8 text-center`}>
+      {/* 2. CUENTA REGRESIVA FLOTANTE */}
+      <div className="relative z-20 -mt-20 max-w-3xl mx-auto px-4 mb-24">
+        <div className={`${data.bgCard} border ${data.border} rounded-[2rem] p-6 md:p-10 shadow-2xl flex justify-center gap-4 md:gap-8 text-center backdrop-blur-xl`}>
           {[ {l:'Días', v:timeLeft.d}, {l:'Hrs', v:timeLeft.h}, {l:'Min', v:timeLeft.m}, {l:'Seg', v:timeLeft.s} ].map((t,i) => (
             <div key={i} className="flex flex-col items-center">
-              <span className={`text-3xl md:text-5xl ${config.accent} ${config.font}`}>{String(t.v).padStart(2, '0')}</span>
-              <span className="text-[9px] uppercase tracking-widest text-slate-400 mt-2">{t.l}</span>
+              <span className={`text-3xl md:text-5xl ${data.accent} ${data.font}`}>{String(t.v).padStart(2, '0')}</span>
+              <span className="text-[9px] uppercase tracking-widest text-slate-400 mt-2 font-bold">{t.l}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Mock Módulo RSVP (Desactivado para proteger DB) */}
-      <div className="max-w-xl mx-auto px-4 mb-24 text-center">
-        <h2 className={`text-3xl ${config.font} ${config.accent} mb-4`}>Confirmación</h2>
-        <p className="text-slate-400 mb-8 text-sm font-light">En un evento real, aquí se muestra la tecnología de accesos exactos.</p>
-        <div className={`bg-white/5 border ${config.border} rounded-3xl p-8 backdrop-blur-sm`}>
-            <div className="animate-pulse flex flex-col items-center opacity-50">
-               <div className="w-16 h-16 rounded-full bg-white/20 mb-4"></div>
-               <div className="h-4 w-48 bg-white/20 rounded mb-3"></div>
-               <div className="h-3 w-32 bg-white/20 rounded"></div>
+      {/* 3. MENSAJE Y FOTO PRINCIPAL */}
+      <div className="max-w-5xl mx-auto px-4 text-center mb-32 flex flex-col items-center">
+        <h2 className={`text-3xl md:text-4xl ${data.font} ${data.accent} mb-8`}>¡Bienvenidos!</h2>
+        <div className="w-full max-w-md aspect-[4/5] rounded-[3rem] overflow-hidden border-4 border-white/10 shadow-2xl mb-8 relative">
+          <img src={data.coupleImg} className="w-full h-full object-cover" alt="Nosotros"/>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+        </div>
+        <p className="text-lg md:text-xl font-light text-slate-300 max-w-2xl leading-relaxed italic">"{data.message}"</p>
+      </div>
+
+      {/* 4. ITINERARIO Y DETALLES */}
+      <div className="max-w-6xl mx-auto px-4 mb-32">
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
+          
+          {/* Timeline */}
+          <div>
+            <h2 className={`text-3xl ${data.font} ${data.accent} mb-10 text-center md:text-left flex items-center justify-center md:justify-start`}><Clock size={28} className="mr-3"/> Itinerario</h2>
+            <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-white/10">
+              {data.schedule.map((item, idx) => (
+                <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white/10 bg-black shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                    <div className={`w-3 h-3 rounded-full ${data.btn}`}></div>
+                  </div>
+                  <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] ${data.bgCard} p-5 rounded-2xl border ${data.border} shadow-lg`}>
+                    <span className={`font-black text-lg ${data.accent}`}>{item.time}</span>
+                    <h3 className="font-bold text-white text-base mt-1">{item.event}</h3>
+                  </div>
+                </div>
+              ))}
             </div>
-            <p className="text-xs font-bold uppercase tracking-widest mt-6 text-white/50 border border-white/20 py-2 rounded-lg">Módulo Interactivo</p>
+          </div>
+
+          {/* Tarjetas de Información */}
+          <div className="space-y-6">
+            <h2 className={`text-3xl ${data.font} ${data.accent} mb-10 text-center md:text-left flex items-center justify-center md:justify-start`}><MapPin size={28} className="mr-3"/> Ubicación & Extras</h2>
+            
+            <div className={`${data.bgCard} p-8 rounded-[2rem] border ${data.border} shadow-xl hover:-translate-y-1 transition-transform`}>
+              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-6"><MapPin size={24} className={data.accent}/></div>
+              <h3 className="text-xl font-bold mb-2">Lugar del Evento</h3>
+              <p className="text-sm text-slate-400 mb-6 font-light">Gran Salón de Eventos y Jardín<br/>Av. Paseo de la Reforma 123, CDMX</p>
+              <button className={`w-full py-3 rounded-xl border ${data.border} ${data.accent} text-xs font-bold uppercase tracking-widest hover:bg-white/5 transition-colors`}>Abrir GPS</button>
+            </div>
+
+            <div className={`${data.bgCard} p-8 rounded-[2rem] border ${data.border} shadow-xl hover:-translate-y-1 transition-transform`}>
+              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-6"><Star size={24} className={data.accent}/></div>
+              <h3 className="text-xl font-bold mb-2">Código de Vestimenta</h3>
+              <p className="text-sm text-slate-400 font-light">{data.dressCode}</p>
+            </div>
+
+            {data.gifts && (
+              <div className={`${data.bgCard} p-8 rounded-[2rem] border ${data.border} shadow-xl hover:-translate-y-1 transition-transform`}>
+                <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-6"><Wallet size={24} className={data.accent}/></div>
+                <h3 className="text-xl font-bold mb-2">Mesa de Regalos</h3>
+                <p className="text-sm text-slate-400 font-light mb-6">{data.gifts}</p>
+                <button className={`w-full py-3 rounded-xl ${data.btn} text-white text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity`}>Ver Datos Bancarios</button>
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
 
-      {/* Sticky CTA (Botón flotante de ventas) */}
+      {/* 5. MÓDULO RSVP VIP */}
+      <div className="max-w-2xl mx-auto px-4 mb-32 text-center">
+        <h2 className={`text-4xl ${data.font} ${data.accent} mb-4`}>Confirma tu Asistencia</h2>
+        <p className="text-slate-400 mb-10 text-sm font-light">En la versión final, este módulo genera un código QR único para que el invitado ingrese al evento.</p>
+        
+        <div className={`${data.bgCard} border ${data.border} rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden`}>
+            <div className="absolute inset-0 bg-white/5 opacity-50"></div>
+            <div className="relative z-10 flex flex-col items-center">
+               <h3 className="text-xl font-bold mb-6">Pase de Prueba</h3>
+               <input type="text" disabled placeholder="Nombre del Invitado..." className="w-full p-4 rounded-xl bg-black/40 border border-white/10 mb-4 text-center cursor-not-allowed"/>
+               <select disabled className="w-full p-4 rounded-xl bg-black/40 border border-white/10 mb-8 text-center cursor-not-allowed appearance-none text-slate-400">
+                 <option>2 Asistentes permitidos</option>
+               </select>
+               <button disabled className={`w-full py-5 rounded-xl ${data.btn} text-white font-black uppercase tracking-widest opacity-80 cursor-not-allowed shadow-[0_0_20px_rgba(255,255,255,0.1)]`}>
+                 Enviar Confirmación
+               </button>
+            </div>
+        </div>
+      </div>
+
+      {/* Sticky CTA (Botón flotante de ventas para ti) */}
       <div className="fixed bottom-6 w-full px-4 z-[100] flex justify-center pointer-events-none">
-        <button onClick={() => window.location.href = '/#planes'} className={`pointer-events-auto text-white ${config.btn} px-8 py-4 md:py-5 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl hover:scale-105 transition-transform animate-bounce flex items-center`}>
-          Quiero esta tecnología <ArrowRight size={18} className="ml-2"/>
+        <button onClick={() => window.location.href = '/#planes'} className={`pointer-events-auto text-white ${data.btn} px-8 py-4 md:py-5 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-2xl hover:scale-105 transition-transform animate-bounce flex items-center border-2 border-white/20`}>
+          Adquirir esta tecnología <ArrowRight size={18} className="ml-2"/>
         </button>
       </div>
     </div>
