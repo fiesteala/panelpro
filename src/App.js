@@ -8754,6 +8754,103 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </section>
 
+      {/* ========================================== */}
+      {/* SECCIÓN DE PRECIOS: LA COLECCIÓN BAULIA  */}
+      {/* ========================================== */}
+      <div id="planes" className="py-24 px-4 max-w-7xl mx-auto">
+        <div className="text-center mb-20">
+          <span className="px-4 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-black uppercase tracking-[0.2em] border border-amber-500/20 shadow-sm">
+            Oferta de Lanzamiento
+          </span>
+          <h2 className="text-4xl md:text-5xl font-serif text-slate-900 dark:text-white mt-8 mb-6">
+            La Colección
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-sm md:text-base">
+            Diseña tu evento sin compromiso. Comienza en <b>Modo Prueba</b> con marca de agua y paga solo cuando estés 100% enamorado del resultado.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-center">
+          
+          {/* PAQUETE 1: BÁSICO */}
+          <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
+            <h3 className="text-xl font-serif text-slate-900 dark:text-white mb-2">Básico</h3>
+            <p className="text-xs text-slate-500 mb-6 h-8">La elegancia esencial para tu evento.</p>
+            <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
+              $990 <span className="text-sm text-slate-400 font-normal">MXN</span>
+            </div>
+            <ul className="space-y-4 mb-8 text-sm text-slate-600 dark:text-slate-300">
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Invitación interactiva</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Confirmación simple</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Cuenta regresiva</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mapas y ubicación GPS</li>
+            </ul>
+            <button className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+              Iniciar Draft
+            </button>
+          </div>
+
+          {/* PAQUETE 2: PLATA */}
+          <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
+            <h3 className="text-xl font-serif text-slate-900 dark:text-white mb-2">Plata</h3>
+            <p className="text-xs text-slate-500 mb-6 h-8">Recupera tu inversión con regalos en efectivo.</p>
+            <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
+              $1,490 <span className="text-sm text-slate-400 font-normal">MXN</span>
+            </div>
+            <ul className="space-y-4 mb-8 text-sm text-slate-600 dark:text-slate-300">
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Todo lo del Básico</b></li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Itinerario del evento</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mesa de Regalos / Efectivo</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Dress Code (Código de Vestimenta)</li>
+            </ul>
+            <button className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+              Iniciar Draft
+            </button>
+          </div>
+
+          {/* PAQUETE 3: ORO (ESTRELLA - DESTACADO) */}
+          <div className="bg-slate-900 dark:bg-[#111111] rounded-3xl p-8 border-2 border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.15)] transform md:-translate-y-4 relative z-10">
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md">
+              El Más Popular
+            </div>
+            <h3 className="text-xl font-serif text-white mb-2 mt-2">Oro</h3>
+            <p className="text-xs text-amber-200/70 mb-6 h-8">Cero colados. Seguridad total con tecnología QR.</p>
+            <div className="text-4xl font-light text-amber-500 mb-8">
+              $1,990 <span className="text-sm text-amber-500/50 font-normal">MXN</span>
+            </div>
+            <ul className="space-y-4 mb-8 text-sm text-slate-300">
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Todo lo del Plata</b></li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Pases QR Únicos e Infértiles</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> RSVP Estricto por número de pases</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Escáner de Puerta para Hostess</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Panel de Presupuesto</li>
+            </ul>
+            <button className="w-full py-4 rounded-full bg-gradient-to-r from-amber-500 to-yellow-600 text-white text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-lg">
+              Comprar Paquete Oro
+            </button>
+          </div>
+
+          {/* PAQUETE 4: DIAMANTE */}
+          <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
+            <h3 className="text-xl font-serif text-slate-900 dark:text-white mb-2">Diamante VIP</h3>
+            <p className="text-xs text-slate-500 mb-6 h-8">La suite definitiva para Planners y eventos TOP.</p>
+            <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
+              $2,990 <span className="text-sm text-slate-400 font-normal">MXN</span>
+            </div>
+            <ul className="space-y-4 mb-8 text-sm text-slate-600 dark:text-slate-300">
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Todo lo del Oro</b></li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Acomodo de Mesas Visual 3D</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Muro Social (Proyección en Vivo)</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Bocetador Decorativo</li>
+            </ul>
+            <button className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+              Iniciar Draft VIP
+            </button>
+          </div>
+
+        </div>
+      </div>
+
       {/* 🔴 BENTO BOX: INVITACIONES INTERACTIVAS */}
       <section id="experiencia" className="py-24 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
         <div className="mb-16">
