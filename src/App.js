@@ -10337,6 +10337,105 @@ const ReviewHarvester = ({ authData }) => {
 };
 
 // ==========================================
+// --- COMPONENTE: DEMO INVITACIÓN VIP (VENDEDOR) ---
+// ==========================================
+const DemoBodaVip = () => {
+  const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 0 });
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        let { d, h, m, s } = prev;
+        s--;
+        if (s < 0) { s = 59; m--; }
+        if (m < 0) { m = 59; h--; }
+        if (h < 0) { h = 23; d--; }
+        return { d, h, m, s };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="bg-[#111111] text-white overflow-x-hidden pb-32">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,400&family=Montserrat:wght@300;400;600&display=swap');
+        .font-serif { font-family: 'Cormorant Garamond', serif; }
+        .font-sans { font-family: 'Montserrat', sans-serif; }
+      `}</style>
+      
+      {/* Banner Superior Baulia */}
+      <div className="fixed top-0 w-full bg-gradient-to-r from-amber-500 to-yellow-600 text-center py-2 z-[100] shadow-lg">
+        <p className="text-[10px] font-black uppercase tracking-widest text-white flex items-center justify-center">
+          <Star size={14} className="mr-2" /> Estás viendo una Invitación Demo de Baulia <Star size={14} className="ml-2" />
+        </p>
+      </div>
+
+      {/* Hero Portada */}
+      <div className="relative h-screen flex flex-col items-center justify-center text-center px-4">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070')] bg-cover bg-center opacity-40"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#111111]/60 to-[#111111]"></div>
+        
+        <div className="relative z-10 mt-10">
+          <p className="text-amber-500 uppercase tracking-[0.3em] text-xs font-bold mb-6">Nuestra Boda</p>
+          <h1 className="text-7xl md:text-8xl font-serif mb-4 drop-shadow-lg">Ana & Luis</h1>
+          <p className="text-lg font-light tracking-widest mt-4">15 . NOVIEMBRE . 2026</p>
+        </div>
+      </div>
+
+      {/* Cuenta Regresiva */}
+      <div className="relative z-10 -mt-20 max-w-3xl mx-auto px-4 mb-24">
+        <div className="bg-[#1a1a1a] border border-amber-500/20 rounded-2xl p-6 md:p-8 shadow-2xl flex justify-center gap-4 md:gap-8 text-center">
+          {[ {l:'Días', v:timeLeft.d}, {l:'Hrs', v:timeLeft.h}, {l:'Min', v:timeLeft.m}, {l:'Seg', v:timeLeft.s} ].map((t,i) => (
+            <div key={i} className="flex flex-col items-center">
+              <span className="text-3xl md:text-5xl font-serif text-amber-500">{String(t.v).padStart(2, '0')}</span>
+              <span className="text-[9px] uppercase tracking-widest text-slate-400 mt-2">{t.l}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Detalles del Evento */}
+      <div className="max-w-4xl mx-auto px-4 text-center mb-24">
+        <h2 className="text-4xl font-serif text-amber-500 mb-12">Dónde y Cuándo</h2>
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="bg-[#1a1a1a] p-10 rounded-2xl border border-white/5 hover:border-amber-500/30 transition-colors">
+            <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-6 text-amber-500"><MapPin size={24}/></div>
+            <h3 className="text-2xl font-serif mb-2">Ceremonia</h3>
+            <p className="text-sm text-slate-400 mb-6 font-light">Templo de San Francisco<br/>16:00 Hrs</p>
+            <button className="text-[10px] uppercase tracking-widest border border-amber-500 text-amber-500 px-6 py-2 rounded-full hover:bg-amber-500 hover:text-white transition-colors">Ver Mapa</button>
+          </div>
+          <div className="bg-[#1a1a1a] p-10 rounded-2xl border border-white/5 hover:border-amber-500/30 transition-colors">
+            <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-6 text-amber-500"><MapPin size={24}/></div>
+            <h3 className="text-2xl font-serif mb-2">Recepción</h3>
+            <p className="text-sm text-slate-400 mb-6 font-light">Hacienda Los Arcángeles<br/>18:00 Hrs</p>
+            <button className="text-[10px] uppercase tracking-widest border border-amber-500 text-amber-500 px-6 py-2 rounded-full hover:bg-amber-500 hover:text-white transition-colors">Ver Mapa</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Módulo RSVP Real (Transparente para integrarse al diseño) */}
+      <div className="max-w-xl mx-auto px-4 mb-24">
+        <h2 className="text-4xl font-serif text-center text-amber-500 mb-4">RSVP</h2>
+        <p className="text-center text-slate-400 mb-10 text-sm font-light">Confirma tu asistencia usando la tecnología real de Baulia a continuación.</p>
+        
+        {/* Usamos el componente real pasándole parámetros de colores oscuros para que combine */}
+        <div className="bg-[#1a1a1a] border border-amber-500/30 rounded-3xl shadow-[0_0_30px_rgba(245,158,11,0.1)] overflow-hidden">
+           <InvitacionPublicaView eventId="evento_de_prueba" guestUid={null} />
+        </div>
+      </div>
+
+      {/* Sticky CTA (Botón flotante de ventas) */}
+      <div className="fixed bottom-6 w-full px-4 z-[100] flex justify-center pointer-events-none">
+        <button onClick={() => window.location.href = '/#planes'} className="pointer-events-auto bg-white text-slate-900 border-2 border-amber-500 px-8 py-4 md:py-5 rounded-full font-black text-xs md:text-sm uppercase tracking-widest shadow-[0_0_40px_rgba(245,158,11,0.6)] hover:scale-105 transition-transform animate-bounce flex items-center">
+          Quiero esta Invitación para mi Evento <ArrowRight size={18} className="ml-2"/>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
 // 3. EL ENRUTADOR PRINCIPAL (App) - CEREBRO MAESTRO
 // ==========================================
 export default function App() {
@@ -10461,35 +10560,9 @@ export default function App() {
   );
 
 // 🔴 RUTA DEMO (EL VENDEDOR SILENCIOSO)
+  // 🔴 RUTA DEMO (EL VENDEDOR SILENCIOSO)
   if (eventIdParam === 'demo-boda-vip') {
-    // Si entran a la demo, les mostramos la vista de Invitación Pública pero le pasamos parámetros falsos visuales
-    // Para que sea perfecto, inyectamos los colores Premium como parámetros de URL simulados
-    const demoBg = "1C1917"; // Fondo oscuro elegante
-    const demoCard = "292524"; // Tarjeta un poco más clara
-    const demoBtn = "D4AF37"; // Botón dorado Baulia
-    const demoTxt = "FFFFFF"; // Texto blanco
-    const demoFont = "Playfair Display"; 
-
-    return (
-      <div className="relative min-h-screen">
-        {/* Banner flotante para avisar que es un DEMO y atrapar la venta */}
-        <div className="fixed top-0 left-0 w-full bg-gradient-to-r from-amber-500 to-yellow-600 text-white text-xs font-black text-center py-2 z-[9999] uppercase tracking-widest flex items-center justify-center shadow-md">
-          <Star size={14} className="mr-2" />
-          Estás viendo una Invitación Demo de Baulia
-          <Star size={14} className="ml-2" />
-        </div>
-        
-        {/* Mock de la invitación */}
-        <div className="pt-10">
-          <InvitacionPublicaView eventId="evento_de_prueba" guestUid={null} />
-        </div>
-        
-        {/* Botón flotante para comprar de inmediato */}
-        <button onClick={() => window.location.href = '/#planes'} className="fixed bottom-6 right-6 bg-slate-900 text-white border-2 border-amber-500 px-6 py-4 rounded-full font-black uppercase tracking-widest shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:scale-105 transition-transform z-[9999] animate-bounce">
-          Quiero esta tecnología
-        </button>
-      </div>
-    );
+    return <DemoBodaVip />;
   }
 
   // RUTAS PÚBLICAS
