@@ -8745,9 +8745,20 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <button onClick={() => window.open('/demo-boda-vip', '_blank')} className="px-8 py-4 md:py-5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.4)] border border-amber-400">
-            Probar Invitación VIP <Smartphone size={18} className="ml-3"/>
-          </button>
+          <button onClick={() => window.open('/?e=demo-boda', '_blank')} className="flex items-center text-left w-full p-4 rounded-2xl hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors group/item">
+                  <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center text-amber-600 mr-4 shrink-0"><Star size={18}/></div>
+                  <div><p className="font-bold text-slate-900 dark:text-white text-sm">Boda de Lujo</p><p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">Clásica & Elegante</p></div>
+                </button>
+                
+                <button onClick={() => window.open('/?e=demo-xv', '_blank')} className="flex items-center text-left w-full p-4 rounded-2xl hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors group/item">
+                  <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 mr-4 shrink-0"><Heart size={18}/></div>
+                  <div><p className="font-bold text-slate-900 dark:text-white text-sm">XV Años Glam</p><p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">Moderna & Neón</p></div>
+                </button>
+
+                <button onClick={() => window.open('/?e=demo-empresa', '_blank')} className="flex items-center text-left w-full p-4 rounded-2xl hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors group/item">
+                  <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 mr-4 shrink-0"><Building size={18}/></div>
+                  <div><p className="font-bold text-slate-900 dark:text-white text-sm">Corporativo</p><p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">Congresos & Galas</p></div>
+                </button>
           <a href="#planes" className="px-8 py-4 md:py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
             Ver Colección
           </a>
