@@ -1,5 +1,5 @@
 import React, { useState, useRef, useLayoutEffect, useEffect } from 'react';
-import { collection, doc, setDoc, onSnapshot, getDocs, query, where, serverTimestamp, deleteDoc, getDoc, addDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, onSnapshot, getDocs, query, where, serverTimestamp, deleteDoc, getDoc, addDoc, updateDoc } from 'firebase/firestore';
 import { db, auth, secondaryAuth } from './firebase';
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail, updatePassword } from 'firebase/auth';
 
@@ -12,7 +12,7 @@ import {
   DollarSign, PieChart, TrendingDown, Upload, Building, Landmark, History, Phone, Mail, Calendar, Eye, EyeOff, MessageSquare, 
   FileSignature, AlertCircle, Star, Image as ImageIcon, CalendarDays, FileDown, 
   ListTodo, CheckCircle2, Circle, PlayCircle, AlignLeft, MapPin, ShieldCheck, Printer, Scan, Camera, Navigation as NavigationIcon, Navigation, MoreVertical,
-  Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Image, Key, Power, Quote
+  Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Image, Key, Power, Quote, Check
 } from 'lucide-react';
 
 // Función Helper para Exportar a CSV
