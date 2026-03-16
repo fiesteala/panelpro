@@ -10614,7 +10614,7 @@ export default function App() {
   }
 
   // 🟢 1. LANDING PAGE PRINCIPAL
-  if (!isPanel && !pathname && !eventIdParam) {
+  if (!isPanel && !pathname && !eventIdParam && modoApp !== 'showcase') {
       return <LandingPageView isDarkMode={isDarkMode} themeSetting={themeSetting} cycleTheme={cycleTheme} />;
   }
   
