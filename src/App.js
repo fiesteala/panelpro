@@ -10384,13 +10384,13 @@ const ShowcaseSimulatorView = () => {
     },
     xv: { 
       id: 'xv', label: 'XV Años Glamour', 
-      url: '/demos/XV/index.html', 
+      url: '/demos/xv/index.html', 
       desc: 'Luces neón, animaciones dinámicas y energía vibrante para la mejor noche.',
       features: ['Muro de Fotos', 'Dress Code Neón', 'Itinerario de Gala', 'Música Automática']
     },
     cumple_formal: { 
       id: 'cumple_formal', label: 'Cumpleaños Formal', 
-      url: '/demos/cumple%20formal/index.html', 
+      url: '/demos/cumple_formal/index.html', 
       desc: 'Diseños sofisticados para celebrar décadas (30s, 40s, 50s) con mucho estilo y elegancia.',
       features: ['Lluvia de Sobres', 'Confirmación Fácil', 'Galería de Recuerdos']
     },
@@ -10417,9 +10417,9 @@ const ShowcaseSimulatorView = () => {
   const currentDemo = demos[activeCategory];
 
   return (
-    <div className="min-h-screen bg-[#050505] flex flex-col font-sans text-white overflow-hidden selection:bg-amber-500">
+    <div className="min-h-screen bg-[#050505] flex flex-col font-sans text-white overflow-x-hidden overflow-y-auto custom-scrollbar selection:bg-amber-500">
       {/* Header Minimalista */}
-      <header className="h-20 border-b border-white/5 flex items-center justify-between px-6 sm:px-10 shrink-0 bg-transparent z-20">
+      <header className="h-20 border-b border-white/5 flex items-center justify-between px-6 sm:px-10 shrink-0 bg-transparent z-20 relative">
         <div className="flex items-center gap-4">
           <button onClick={() => window.location.href = '/'} className="p-2 hover:bg-white/10 rounded-full transition-colors"><ArrowRight size={20} className="rotate-180"/></button>
           <h1 className="text-sm sm:text-xl font-bold tracking-widest uppercase">Galería <span className="text-amber-500 font-light">Baulia</span></h1>
@@ -10429,7 +10429,7 @@ const ShowcaseSimulatorView = () => {
         </button>
       </header>
 
-      <div className="flex-1 flex flex-col lg:flex-row relative z-10">
+      <div className="flex flex-col lg:flex-row relative z-10 min-h-[calc(100vh-80px)]">
         {/* Fondo con blur ambiental estilo iPhone */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-[#050505] to-[#050505] z-0 pointer-events-none"></div>
 
@@ -10483,7 +10483,7 @@ const ShowcaseSimulatorView = () => {
                  src={currentDemo.url} 
                  className="absolute top-0 left-0 border-0"
                  title={`Demo ${currentDemo.label}`}
-                 /* Engañamos al iframe: Le decimos que mida 390x844 (Tamaño iPhone 14) y luego lo escalamos al 76% para que quepa en nuestro dibujito de 300x634 */
+                 /* Engañamos al iframe: Le decimos que mida 390x844 (Tamaño iPhone 14) y luego lo escalamos al 78% para que quepa en nuestro dibujito de 300x634 */
                  style={{ 
                     width: '390px', 
                     height: '844px', 
@@ -10506,7 +10506,43 @@ const ShowcaseSimulatorView = () => {
              Pantalla completa <ExternalLink size={14} className="ml-2"/>
            </button>
         </div>
+      </div>
 
+      {/* 🔴 NUEVA SECCIÓN DE INFORMACIÓN: LA PROMESA BAULIA */}
+      <div className="w-full max-w-6xl mx-auto px-6 py-20 relative z-10">
+        <div className="border-t border-white/10 pt-20">
+          <div className="text-center mb-16">
+            <span className="text-amber-500 font-bold tracking-widest uppercase text-[10px] mb-4 block">Garantía de Excelencia</span>
+            <h2 className="text-3xl sm:text-4xl font-editorial text-white mb-4">¿Por qué elegir nuestra tecnología?</h2>
+            <p className="text-slate-400 text-sm max-w-2xl mx-auto">No entregamos simples páginas web. Entregamos un ecosistema completo para que tú y tus invitados disfruten sin estrés.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] hover:bg-white/10 transition-colors">
+              <div className="w-12 h-12 bg-amber-500/20 text-amber-500 rounded-full flex items-center justify-center mb-6">
+                <Palette size={24} />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Diseño a la Medida</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">Olvídate de las plantillas aburridas. Adaptamos la paleta de colores, tipografías y elementos gráficos exactamente a la temática de tu evento.</p>
+            </div>
+            
+            <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] hover:bg-white/10 transition-colors">
+              <div className="w-12 h-12 bg-indigo-500/20 text-indigo-500 rounded-full flex items-center justify-center mb-6">
+                <ShieldCheck size={24} />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Accesos Blindados</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">Tus invitados confirman asistencia y el sistema genera pases QR únicos e infalsificables. Escanéalos en puerta con nuestra app de Hostess.</p>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] hover:bg-white/10 transition-colors">
+              <div className="w-12 h-12 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mb-6">
+                <LayoutDashboard size={24} />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Panel Maestro VIP</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">Acomoda mesas en 3D, proyecta las fotos de tus invitados en vivo y controla tu presupuesto desde tu Bóveda Privada.</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Botón flotante móvil para ir a precios */}

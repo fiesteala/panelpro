@@ -108,6 +108,11 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* Nueva clase para una sombra de texto más fuerte y elegante */
+        .text-shadow-elegant {
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+        }
     </style>
 </head>
 <body class="text-charcoal font-serif bg-ivory">
@@ -321,7 +326,7 @@
                     {/* BOTÓN FLOTANTE CRÍTICO DE VENTA */}
                     <button
                         onClick={() => window.parent.location.href = 'https://baulia.com/#planes'}
-                        className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] bg-charcoal text-champagne border border-champagne px-8 py-3 rounded-full font-sans font-bold text-sm md:text-base tracking-widest shadow-2xl hover:scale-105 transition-transform whitespace-nowrap uppercase"
+                        className="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-[9999] bg-charcoal text-champagne border border-champagne px-8 py-3 rounded-full font-sans font-bold text-sm md:text-base tracking-widest shadow-2xl hover:scale-105 transition-transform whitespace-nowrap uppercase"
                     >
                         ✨ Adquirir esta tecnología
                     </button>
@@ -347,19 +352,23 @@
                                 alt="Bebé" 
                                 className="w-full h-full object-cover object-center animate-ken-burns"
                             />
-                            <div className="absolute inset-0 bg-black/20"></div>
+                            {/* Aumentamos la opacidad del overlay para mejorar el contraste */}
+                            <div className="absolute inset-0 bg-black/40"></div>
                             <LightParticles />
                             <div className="absolute bottom-0 w-full h-48 bg-gradient-to-t from-ivory to-transparent pointer-events-none z-10"></div>
                         </div>
 
-                        <div className="relative z-10 w-full px-4 -mt-10 transition-opacity duration-75" style={{ opacity: textOpacity }}>
-                            <div className="animate-fade-in">
-                                <span className="font-script text-4xl md:text-5xl text-[#1A1A1A] block mb-2 drop-shadow-md">JA</span>
-                                <div className="h-[1px] w-12 bg-champagne/80 mx-auto mb-6"></div>
-                            </div>
+                        {/* Monograma movido a la parte superior */}
+                        <div className="absolute top-16 z-20 animate-fade-in transition-opacity duration-75" style={{ opacity: textOpacity }}>
+                            <span className="font-script text-5xl md:text-6xl text-champagne block mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">JA</span>
+                        </div>
+
+                        <div className="relative z-10 w-full px-4 mt-20 transition-opacity duration-75" style={{ opacity: textOpacity }}>
+                            {/* El monograma se ha movido de aquí */}
                             <div className="animate-fade-in" style={{animationDelay: '0.5s'}}>
-                                <h2 className="text-champagne text-xs md:text-sm tracking-[0.4em] uppercase mb-4 drop-shadow-md">Celebramos el Bautizo de</h2>
-                                <h1 className="font-script text-7xl md:text-9xl lg:text-[10rem] text-champagne drop-shadow-xl leading-none">Jazel Alor</h1>
+                                <h2 className="text-champagne text-sm md:text-base tracking-[0.4em] uppercase mb-4 drop-shadow-lg font-bold">Celebramos el Bautizo de</h2>
+                                {/* Aplicamos la nueva clase text-shadow-elegant para mayor legibilidad */}
+                                <h1 className="font-script text-7xl md:text-9xl lg:text-[10rem] text-champagne leading-none text-shadow-elegant">Jazel Alor</h1>
                             </div>
                         </div>
 
