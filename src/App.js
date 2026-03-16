@@ -10375,22 +10375,27 @@ const ReviewHarvester = ({ authData }) => {
 const ShowcaseSimulatorView = () => {
   const [activeCategory, setActiveCategory] = useState('boda');
 
-  // 🔴 RUTAS LOCALES: Apuntan a la carpeta "public/demos/..." de tu proyecto.
+  // 🔴 RUTAS LOCALES: Apuntando exactamente a tu estructura de carpetas en /public/demos/
   const demos = {
     boda: { 
       id: 'boda', label: 'Bodas de Lujo', 
-      url: '/demos/boda-vip/index.html', 
+      url: '/demos/boda/index.html', 
       desc: 'Elegancia clásica, tipografías finas y paletas sobrias. El estándar de alta costura nupcial.'
     },
     xv: { 
       id: 'xv', label: 'XV Años Glamour', 
-      url: '/demos/xv-anos/index.html', 
+      url: '/demos/XV/index.html', 
       desc: 'Luces neón, animaciones dinámicas y energía vibrante para la mejor noche.'
     },
-    cumpleanos: { 
-      id: 'cumpleanos', label: 'Cumpleaños Adultos', 
-      url: '/demos/cumpleanos/index.html', 
-      desc: 'Diseños sofisticados para celebrar décadas (30s, 40s, 50s) con mucho estilo.'
+    cumple_formal: { 
+      id: 'cumple_formal', label: 'Cumpleaños Formal', 
+      url: '/demos/cumple%20formal/index.html', 
+      desc: 'Diseños sofisticados para celebrar décadas (30s, 40s, 50s) con mucho estilo y elegancia.'
+    },
+    cumple_informal: { 
+      id: 'cumple_informal', label: 'Cumpleaños Casual', 
+      url: '/demos/cumple%20informal/index.html', 
+      desc: 'Divertido, relajado y lleno de color. Perfecto para fiestas entre amigos y celebraciones modernas.'
     },
     infantil: { 
       id: 'infantil', label: 'Fiestas Infantiles', 
@@ -10398,14 +10403,19 @@ const ShowcaseSimulatorView = () => {
       desc: 'Temáticas inmersivas al 100%. Llevamos a los niños al universo de sus personajes favoritos.'
     },
     bautizo: { 
-      id: 'bautizo', label: 'Bautizos / Primera Comunión', 
+      id: 'bautizo', label: 'Bautizos / Comunión', 
       url: '/demos/bautizo/index.html', 
       desc: 'Tonos pastel, acuarelas suaves y diseños angelicales para momentos familiares íntimos.'
     },
+    social: { 
+      id: 'social', label: 'Eventos Sociales', 
+      url: '/demos/social/index.html', 
+      desc: 'Aniversarios, baby showers y celebraciones privadas con un toque personal y único.'
+    },
     corporativo: { 
-      id: 'corporativo', label: 'Empresarial / Convenciones', 
+      id: 'corporativo', label: 'Empresarial / Galas', 
       url: '/demos/corporativo/index.html', 
-      desc: 'Seriedad, branding corporativo y logística estricta para galas, congresos y lanzamientos de marca.'
+      desc: 'Seriedad, branding corporativo y logística estricta para congresos y lanzamientos de marca.'
     }
   };
 
