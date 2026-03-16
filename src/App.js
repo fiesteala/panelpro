@@ -8746,7 +8746,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto relative">
           
-          <button onClick={() => window.open('/?modo=showcase', '_blank')} className="w-full sm:w-auto px-8 py-4 md:py-5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.4)] border border-amber-400">
+          <button onClick={() => window.location.href = '/?modo=showcase'} className="w-full sm:w-auto px-8 py-4 md:py-5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.4)] border border-amber-400">
             Explorar Showroom <Smartphone size={18} className="ml-3"/>
           </button>
 
@@ -9026,7 +9026,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* ========================================== */}
-      {/* SECCIÓN DE PRECIOS: LA COLECCIÓN BAULIA (LA NUEVA QUE SÍ QUEREMOS) */}
+      {/* SECCIÓN DE PRECIOS: LA COLECCIÓN BAULIA */}
       {/* ========================================== */}
       <div id="planes" className="py-24 px-4 max-w-7xl mx-auto z-10 relative">
         <div className="text-center mb-20">
@@ -9056,7 +9056,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Cuenta regresiva</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mapas y ubicación GPS</li>
             </ul>
-            <button onClick={() => window.open('/?modo=showcase', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+            <button onClick={() => window.location.href = '/?modo=showcase'} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
               Iniciar Draft
             </button>
           </div>
@@ -9074,7 +9074,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mesa de Regalos / Efectivo</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Dress Code (Código de Vestimenta)</li>
             </ul>
-            <button onClick={() => window.open('/?modo=showcase', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+            <button onClick={() => window.location.href = '/?modo=showcase'} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
               Iniciar Draft
             </button>
           </div>
@@ -9115,7 +9115,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Bocetador Decorativo</li>
             </ul>
             <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20me%20interesa%20el%20plan%20Diamante', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-              Iniciar Draft VIP
+              Contactar Ventas
             </button>
           </div>
 
@@ -10370,134 +10370,152 @@ const ReviewHarvester = ({ authData }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: SHOWROOM SIMULADOR (LA VITRINA DEL DISEÑADOR) ---
+// --- COMPONENTE: SHOWROOM SIMULADOR (VITRINA PERFECTA) ---
 // ==========================================
 const ShowcaseSimulatorView = () => {
   const [activeCategory, setActiveCategory] = useState('boda');
 
-  // 🔴 RUTAS LOCALES: Apuntando exactamente a tu estructura de carpetas en /public/demos/
   const demos = {
     boda: { 
       id: 'boda', label: 'Bodas de Lujo', 
       url: '/demos/boda/index.html', 
-      desc: 'Elegancia clásica, tipografías finas y paletas sobrias. El estándar de alta costura nupcial.'
+      desc: 'Elegancia clásica, tipografías finas y paletas sobrias. El estándar de alta costura nupcial.',
+      features: ['Mesa de Regalos', 'Cuenta Regresiva', 'Pases QR VIP', 'GPS Directo']
     },
     xv: { 
       id: 'xv', label: 'XV Años Glamour', 
       url: '/demos/XV/index.html', 
-      desc: 'Luces neón, animaciones dinámicas y energía vibrante para la mejor noche.'
+      desc: 'Luces neón, animaciones dinámicas y energía vibrante para la mejor noche.',
+      features: ['Muro de Fotos', 'Dress Code Neón', 'Itinerario de Gala', 'Música Automática']
     },
     cumple_formal: { 
       id: 'cumple_formal', label: 'Cumpleaños Formal', 
       url: '/demos/cumple%20formal/index.html', 
-      desc: 'Diseños sofisticados para celebrar décadas (30s, 40s, 50s) con mucho estilo y elegancia.'
-    },
-    cumple_informal: { 
-      id: 'cumple_informal', label: 'Cumpleaños Casual', 
-      url: '/demos/cumple%20informal/index.html', 
-      desc: 'Divertido, relajado y lleno de color. Perfecto para fiestas entre amigos y celebraciones modernas.'
+      desc: 'Diseños sofisticados para celebrar décadas (30s, 40s, 50s) con mucho estilo y elegancia.',
+      features: ['Lluvia de Sobres', 'Confirmación Fácil', 'Galería de Recuerdos']
     },
     infantil: { 
       id: 'infantil', label: 'Fiestas Infantiles', 
       url: '/demos/infantil/index.html', 
-      desc: 'Temáticas inmersivas al 100%. Llevamos a los niños al universo de sus personajes favoritos.'
+      desc: 'Temáticas inmersivas al 100%. Llevamos a los niños al universo de sus personajes favoritos.',
+      features: ['Diseños 100% Temáticos', 'Animaciones', 'Ubicación Salón']
     },
     bautizo: { 
       id: 'bautizo', label: 'Bautizos / Comunión', 
       url: '/demos/bautizo/index.html', 
-      desc: 'Tonos pastel, acuarelas suaves y diseños angelicales para momentos familiares íntimos.'
-    },
-    social: { 
-      id: 'social', label: 'Eventos Sociales', 
-      url: '/demos/social/index.html', 
-      desc: 'Aniversarios, baby showers y celebraciones privadas con un toque personal y único.'
+      desc: 'Tonos pastel, acuarelas suaves y diseños angelicales para momentos familiares íntimos.',
+      features: ['Padrinos', 'Locación Iglesia', 'Mesa de Regalos']
     },
     corporativo: { 
       id: 'corporativo', label: 'Empresarial / Galas', 
       url: '/demos/corporativo/index.html', 
-      desc: 'Seriedad, branding corporativo y logística estricta para congresos y lanzamientos de marca.'
+      desc: 'Seriedad, branding corporativo y logística estricta para congresos y lanzamientos de marca.',
+      features: ['Control de Gafetes', 'Programa por Horas', 'Patrocinadores']
     }
   };
 
   const currentDemo = demos[activeCategory];
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col font-sans text-white overflow-hidden selection:bg-amber-500">
-      {/* Header del Showroom */}
-      <header className="h-20 border-b border-white/10 flex items-center justify-between px-4 sm:px-8 shrink-0 bg-slate-950/80 backdrop-blur-md z-10">
-        <div className="flex items-center gap-2 sm:gap-4">
+    <div className="min-h-screen bg-[#050505] flex flex-col font-sans text-white overflow-hidden selection:bg-amber-500">
+      {/* Header Minimalista */}
+      <header className="h-20 border-b border-white/5 flex items-center justify-between px-6 sm:px-10 shrink-0 bg-transparent z-20">
+        <div className="flex items-center gap-4">
           <button onClick={() => window.location.href = '/'} className="p-2 hover:bg-white/10 rounded-full transition-colors"><ArrowRight size={20} className="rotate-180"/></button>
-          <h1 className="text-sm sm:text-xl font-bold tracking-widest uppercase">Showroom <span className="text-amber-500 font-light">Baulia</span></h1>
+          <h1 className="text-sm sm:text-xl font-bold tracking-widest uppercase">Galería <span className="text-amber-500 font-light">Baulia</span></h1>
         </div>
-        <button onClick={() => window.location.href = '/#planes'} className="px-4 py-2 sm:px-6 sm:py-2.5 bg-amber-500 text-slate-900 font-bold rounded-full text-[10px] sm:text-xs uppercase tracking-widest hover:bg-amber-400 transition-colors shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+        <button onClick={() => window.location.href = '/#planes'} className="hidden sm:block px-6 py-2.5 bg-amber-500 text-slate-900 font-bold rounded-full text-xs uppercase tracking-widest hover:bg-amber-400 transition-colors shadow-[0_0_20px_rgba(245,158,11,0.3)]">
           Crear la Mía
         </button>
       </header>
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
-        {/* Fondo con blur para dar ambiente */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-amber-500/10 z-0"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-white/5 blur-[120px] rounded-full z-0"></div>
+      <div className="flex-1 flex flex-col lg:flex-row relative z-10">
+        {/* Fondo con blur ambiental estilo iPhone */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-[#050505] to-[#050505] z-0 pointer-events-none"></div>
 
-        {/* Panel lateral: Categorías con Scroll */}
-        <div className="w-full lg:w-80 p-4 sm:p-6 lg:p-8 flex flex-row lg:flex-col gap-2 sm:gap-4 z-10 shrink-0 lg:border-r border-white/10 bg-slate-950/50 backdrop-blur-sm overflow-x-auto lg:overflow-y-auto custom-scrollbar">
-          <h2 className="hidden lg:block text-[10px] text-slate-400 uppercase tracking-widest font-black mb-2 shrink-0">Catálogo de Estilos</h2>
-          
-          {Object.values(demos).map(demo => (
-            <button 
-              key={demo.id} 
-              onClick={() => setActiveCategory(demo.id)}
-              className={`text-left p-3 sm:p-4 rounded-2xl transition-all border min-w-[160px] lg:min-w-0 shrink-0 ${activeCategory === demo.id ? 'bg-white/10 border-amber-500/50 shadow-lg' : 'bg-transparent border-white/5 hover:bg-white/5 hover:border-white/20'}`}
-            >
-              <h3 className={`font-bold text-sm sm:text-lg mb-1 ${activeCategory === demo.id ? 'text-amber-400' : 'text-slate-200'}`}>{demo.label}</h3>
-              <p className="text-[10px] sm:text-xs text-slate-400 leading-relaxed hidden lg:block">{demo.desc}</p>
-            </button>
-          ))}
-          
-          <div className="mt-auto pt-6 hidden lg:block shrink-0">
-            <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 p-5 rounded-2xl">
-              <h4 className="font-bold text-amber-500 mb-2 flex items-center"><Star size={16} className="mr-2"/> Arquitectura Libre</h4>
-              <p className="text-xs text-amber-200/70">La plataforma se adapta a la temática de tu evento, no al revés.</p>
-            </div>
+        {/* Panel Izquierdo: El Pitch de Ventas */}
+        <div className="w-full lg:w-5/12 xl:w-1/3 p-6 sm:p-10 flex flex-col justify-center z-10 shrink-0">
+          <h2 className="text-3xl sm:text-5xl font-editorial font-medium mb-4 text-white leading-tight">
+            {currentDemo.label}
+          </h2>
+          <p className="text-slate-400 text-sm sm:text-base leading-relaxed mb-8">
+            {currentDemo.desc}
+          </p>
+
+          <div className="space-y-4 mb-10">
+            {currentDemo.features.map((feat, idx) => (
+               <div key={idx} className="flex items-center bg-white/5 border border-white/10 px-4 py-3 rounded-xl">
+                 <CheckCircle size={16} className="text-amber-500 mr-3 shrink-0"/>
+                 <span className="font-bold text-sm tracking-wide">{feat}</span>
+               </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {Object.values(demos).map(demo => (
+              <button 
+                key={demo.id} 
+                onClick={() => setActiveCategory(demo.id)}
+                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all border ${activeCategory === demo.id ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-lg' : 'bg-transparent text-slate-400 border-white/20 hover:border-white/50'}`}
+              >
+                {demo.label.split(' ')[0]} {/* Solo la primera palabra para botones compactos */}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Panel Central: El Simulador de Celular */}
-        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12 z-10 relative overflow-hidden">
+        {/* Panel Derecho: El Simulador Escalar */}
+        <div className="flex-1 flex items-center justify-center p-6 lg:p-10 z-10 relative">
            
-           {/* iPhone Mockup */}
-           <div className="relative w-[300px] sm:w-[360px] h-[600px] sm:h-[740px] bg-black rounded-[2.5rem] sm:rounded-[3rem] border-[6px] sm:border-[8px] border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex-shrink-0">
+           {/* iPhone Mockup Físico */}
+           <div className="relative w-[320px] h-[650px] bg-black rounded-[3rem] border-[8px] border-slate-800 shadow-[0_0_80px_rgba(0,0,0,0.6)] flex-shrink-0">
              
-             {/* Dynamic Island / Notch */}
-             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 sm:w-24 h-5 sm:h-6 bg-black rounded-full z-20 flex justify-end items-center pr-2">
-               <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-slate-800/80 mr-1"></div>
-               <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-indigo-900/50"></div>
+             {/* Isla Dinámica */}
+             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-20 flex justify-end items-center pr-2">
+               <div className="w-2 h-2 rounded-full bg-slate-800/80 mr-1"></div>
+               <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
              </div>
              
-             {/* Pantalla (Iframe) */}
-             <div className="w-full h-full rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden bg-slate-900 relative">
+             {/* LA MAGIA: El contenedor que recorta, y el iframe engañado */}
+             <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-[#111] relative">
+               
                <iframe 
                  src={currentDemo.url} 
-                 className="w-full h-full border-0"
+                 className="absolute top-0 left-0 border-0"
                  title={`Demo ${currentDemo.label}`}
-                 sandbox="allow-scripts allow-same-origin"
+                 /* Engañamos al iframe: Le decimos que mida 390x844 (Tamaño iPhone 14) y luego lo escalamos al 76% para que quepa en nuestro dibujito de 300x634 */
+                 style={{ 
+                    width: '390px', 
+                    height: '844px', 
+                    transform: 'scale(0.78)', 
+                    transformOrigin: 'top left' 
+                 }}
                ></iframe>
+
              </div>
              
-             {/* Botones físicos del cel simulados */}
-             <div className="absolute top-24 -left-2 sm:-left-3 w-1 sm:w-1.5 h-8 bg-slate-700 rounded-l-md"></div>
-             <div className="absolute top-36 -left-2 sm:-left-3 w-1 sm:w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
-             <div className="absolute top-52 -left-2 sm:-left-3 w-1 sm:w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
-             <div className="absolute top-36 -right-2 sm:-right-3 w-1 sm:w-1.5 h-16 bg-slate-700 rounded-r-md"></div>
+             {/* Botones Físicos Simulados */}
+             <div className="absolute top-24 -left-[11px] w-1.5 h-8 bg-slate-700 rounded-l-md"></div>
+             <div className="absolute top-36 -left-[11px] w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
+             <div className="absolute top-52 -left-[11px] w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
+             <div className="absolute top-36 -right-[11px] w-1.5 h-16 bg-slate-700 rounded-r-md"></div>
            </div>
 
            {/* Botón ver pantalla completa */}
-           <button onClick={() => window.open(currentDemo.url, '_blank')} className="absolute bottom-4 sm:bottom-6 md:bottom-12 lg:right-12 px-4 sm:px-6 py-2.5 sm:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-widest flex items-center transition-colors shadow-xl">
+           <button onClick={() => window.open(currentDemo.url, '_blank')} className="absolute bottom-10 right-10 px-5 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full font-bold text-[10px] uppercase tracking-widest flex items-center transition-colors shadow-2xl z-50">
              Pantalla completa <ExternalLink size={14} className="ml-2"/>
            </button>
         </div>
 
       </div>
+
+      {/* Botón flotante móvil para ir a precios */}
+      <div className="fixed bottom-6 w-full px-4 sm:hidden z-50">
+        <button onClick={() => window.location.href = '/#planes'} className="w-full py-4 bg-amber-500 text-slate-900 font-black rounded-full text-xs uppercase tracking-widest shadow-2xl">
+          Crear la Mía <ArrowRight size={16} className="inline ml-1"/>
+        </button>
+      </div>
+
     </div>
   );
 };
