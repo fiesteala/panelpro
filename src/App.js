@@ -10375,27 +10375,37 @@ const ReviewHarvester = ({ authData }) => {
 const ShowcaseSimulatorView = () => {
   const [activeCategory, setActiveCategory] = useState('boda');
 
-  // Aquí pondremos los links a las invitaciones REALES que tú diseñes
+  // 🔴 RUTAS LOCALES: Apuntan a la carpeta "public/demos/..." de tu proyecto.
   const demos = {
     boda: { 
-      id: 'boda', label: 'Boda de Lujo', 
-      url: 'https://www.baulia.com/maricela-estudillo-gonzalez', // <--- Cambiaremos esto por tu demo de boda real luego
-      desc: 'Elegancia clásica, tipografías finas y colores sobrios. El estándar de alta costura.'
+      id: 'boda', label: 'Bodas de Lujo', 
+      url: '/demos/boda-vip/index.html', 
+      desc: 'Elegancia clásica, tipografías finas y paletas sobrias. El estándar de alta costura nupcial.'
     },
     xv: { 
-      id: 'xv', label: 'XV Años', 
-      url: 'https://www.baulia.com/maricela-estudillo-gonzalez', // <--- Reemplazar luego
-      desc: 'Glamour, luces neón y animaciones dinámicas para la mejor noche.'
+      id: 'xv', label: 'XV Años Glamour', 
+      url: '/demos/xv-anos/index.html', 
+      desc: 'Luces neón, animaciones dinámicas y energía vibrante para la mejor noche.'
+    },
+    cumpleanos: { 
+      id: 'cumpleanos', label: 'Cumpleaños Adultos', 
+      url: '/demos/cumpleanos/index.html', 
+      desc: 'Diseños sofisticados para celebrar décadas (30s, 40s, 50s) con mucho estilo.'
     },
     infantil: { 
-      id: 'infantil', label: 'Cumpleaños Infantil', 
-      url: 'https://fiesteala.github.io/minecraft/', // <--- Tu genialidad de Minecraft
-      desc: 'Temáticas inmersivas al 100%. Llevamos a los niños a su mundo favorito.'
+      id: 'infantil', label: 'Fiestas Infantiles', 
+      url: '/demos/infantil/index.html', 
+      desc: 'Temáticas inmersivas al 100%. Llevamos a los niños al universo de sus personajes favoritos.'
     },
-    social: { 
-      id: 'social', label: 'Eventos Sociales', 
-      url: 'https://www.baulia.com/maricela-estudillo-gonzalez', // <--- El ejemplo de Maricela
-      desc: 'Bautizos, Aniversarios y celebraciones privadas con un toque personal.'
+    bautizo: { 
+      id: 'bautizo', label: 'Bautizos / Primera Comunión', 
+      url: '/demos/bautizo/index.html', 
+      desc: 'Tonos pastel, acuarelas suaves y diseños angelicales para momentos familiares íntimos.'
+    },
+    corporativo: { 
+      id: 'corporativo', label: 'Empresarial / Convenciones', 
+      url: '/demos/corporativo/index.html', 
+      desc: 'Seriedad, branding corporativo y logística estricta para galas, congresos y lanzamientos de marca.'
     }
   };
 
@@ -10419,24 +10429,25 @@ const ShowcaseSimulatorView = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-amber-500/10 z-0"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-white/5 blur-[120px] rounded-full z-0"></div>
 
-        {/* Panel lateral: Categorías */}
-        <div className="w-full lg:w-80 p-4 sm:p-6 lg:p-8 flex flex-row lg:flex-col gap-2 sm:gap-4 z-10 shrink-0 lg:border-r border-white/10 bg-slate-950/50 backdrop-blur-sm overflow-x-auto lg:overflow-y-auto hide-scrollbar">
-          <h2 className="hidden lg:block text-[10px] text-slate-400 uppercase tracking-widest font-black mb-2">Selecciona un estilo</h2>
+        {/* Panel lateral: Categorías con Scroll */}
+        <div className="w-full lg:w-80 p-4 sm:p-6 lg:p-8 flex flex-row lg:flex-col gap-2 sm:gap-4 z-10 shrink-0 lg:border-r border-white/10 bg-slate-950/50 backdrop-blur-sm overflow-x-auto lg:overflow-y-auto custom-scrollbar">
+          <h2 className="hidden lg:block text-[10px] text-slate-400 uppercase tracking-widest font-black mb-2 shrink-0">Catálogo de Estilos</h2>
+          
           {Object.values(demos).map(demo => (
             <button 
               key={demo.id} 
               onClick={() => setActiveCategory(demo.id)}
-              className={`text-left p-3 sm:p-4 rounded-2xl transition-all border min-w-[140px] lg:min-w-0 ${activeCategory === demo.id ? 'bg-white/10 border-amber-500/50 shadow-lg' : 'bg-transparent border-white/5 hover:bg-white/5 hover:border-white/20'}`}
+              className={`text-left p-3 sm:p-4 rounded-2xl transition-all border min-w-[160px] lg:min-w-0 shrink-0 ${activeCategory === demo.id ? 'bg-white/10 border-amber-500/50 shadow-lg' : 'bg-transparent border-white/5 hover:bg-white/5 hover:border-white/20'}`}
             >
               <h3 className={`font-bold text-sm sm:text-lg mb-1 ${activeCategory === demo.id ? 'text-amber-400' : 'text-slate-200'}`}>{demo.label}</h3>
               <p className="text-[10px] sm:text-xs text-slate-400 leading-relaxed hidden lg:block">{demo.desc}</p>
             </button>
           ))}
           
-          <div className="mt-auto pt-8 hidden lg:block">
+          <div className="mt-auto pt-6 hidden lg:block shrink-0">
             <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 p-5 rounded-2xl">
-              <h4 className="font-bold text-amber-500 mb-2 flex items-center"><Star size={16} className="mr-2"/> 100% Personalizable</h4>
-              <p className="text-xs text-amber-200/70">Cualquier color, cualquier temática. Baulia se adapta a tu visión.</p>
+              <h4 className="font-bold text-amber-500 mb-2 flex items-center"><Star size={16} className="mr-2"/> Arquitectura Libre</h4>
+              <p className="text-xs text-amber-200/70">La plataforma se adapta a la temática de tu evento, no al revés.</p>
             </div>
           </div>
         </div>
@@ -10471,7 +10482,7 @@ const ShowcaseSimulatorView = () => {
            </div>
 
            {/* Botón ver pantalla completa */}
-           <button onClick={() => window.open(currentDemo.url, '_blank')} className="absolute bottom-4 sm:bottom-6 md:bottom-12 lg:right-12 px-4 sm:px-6 py-2.5 sm:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-widest flex items-center transition-colors">
+           <button onClick={() => window.open(currentDemo.url, '_blank')} className="absolute bottom-4 sm:bottom-6 md:bottom-12 lg:right-12 px-4 sm:px-6 py-2.5 sm:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-widest flex items-center transition-colors shadow-xl">
              Pantalla completa <ExternalLink size={14} className="ml-2"/>
            </button>
         </div>
