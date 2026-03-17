@@ -183,7 +183,12 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
   ];
 
   const themeColors = {
-    indigo: 'bg-indigo-600 text-white shadow-indigo-900/20', rose: 'bg-rose-600 text-white shadow-rose-900/20', emerald: 'bg-emerald-600 text-white shadow-emerald-900/20', slate: 'bg-slate-800 text-white shadow-slate-900/20', amber: 'bg-amber-500 text-slate-900 shadow-amber-900/20', sky: 'bg-sky-500 text-white shadow-sky-900/20'
+    indigo: 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]', 
+    rose: 'bg-rose-600 text-white shadow-[0_0_15px_rgba(225,29,72,0.4)]', 
+    emerald: 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(5,150,105,0.4)]', 
+    slate: 'bg-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]', 
+    amber: 'bg-amber-500 text-slate-900 shadow-[0_0_15px_rgba(245,158,11,0.4)] border border-amber-400', 
+    sky: 'bg-sky-500 text-white shadow-[0_0_15px_rgba(14,165,233,0.4)]'
   };
 
   // 🔴 DEFAULT A BAULIA SI NO HAY MARCA BLANCA
@@ -192,10 +197,10 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
 
   return (
     <>
-      {isOpen && <div className="fixed inset-0 bg-black/50 z-20 xl:hidden" onClick={() => setIsOpen(false)} />}
-      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-slate-950 text-slate-400 transition-transform duration-300 ease-in-out flex flex-col border-r border-slate-900 shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
+      {isOpen && <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-20 xl:hidden" onClick={() => setIsOpen(false)} />}
+      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-[#050505] text-slate-400 transition-transform duration-300 ease-in-out flex flex-col border-r border-white/5 shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
         
-        <div className="flex items-center justify-between p-6 border-b border-slate-900 shrink-0 min-h-[88px] relative overflow-hidden bg-slate-950">
+        <div className="flex items-center justify-between p-6 border-b border-white/5 shrink-0 min-h-[88px] relative overflow-hidden bg-[#0a0a0a]">
           <div className="relative z-10 w-full flex items-center gap-3">
             {agencyConfig?.logoUrl && userRole !== 'superadmin' ? (
               <img src={agencyConfig.logoUrl} alt="Agency Logo" className="h-10 object-contain drop-shadow-md mb-1" />
@@ -207,19 +212,19 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
                    <h1 className="text-xl font-black text-white tracking-widest uppercase">{agencyName}</h1>
                  )}
                  <p className="text-[8px] text-amber-500 uppercase tracking-widest mt-0.5">
-                   {userRole === 'superadmin' ? 'God Mode' : userRole === 'planner' ? 'Planner Workspace' : 'Panel Premium'}
+                   {userRole === 'superadmin' ? 'God Mode' : userRole === 'planner' ? 'Planner Workspace' : 'Bóveda Premium'}
                  </p>
               </div>
             )}
           </div>
-          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 hover:bg-slate-800 rounded-lg relative z-10"><X size={20} /></button>
+          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 hover:bg-white/10 rounded-lg relative z-10"><X size={20} /></button>
         </div>
         
         <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-6 custom-scrollbar">
           {userRole === 'superadmin' && (
              <div className="space-y-1">
-               <p className="text-[10px] text-slate-600 uppercase tracking-widest font-black ml-4 mb-3">SISTEMA</p>
-               <button onClick={() => { setActiveTab('licencias'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'licencias' ? 'bg-amber-500 text-slate-900 font-black shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'hover:bg-slate-900 hover:text-white'}`}>
+               <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black ml-4 mb-3">SISTEMA</p>
+               <button onClick={() => { setActiveTab('licencias'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'licencias' ? 'bg-amber-500 text-slate-900 font-black shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'hover:bg-white/5 hover:text-white'}`}>
                  <Building size={18} /><span>Centro de Licencias</span>
                </button>
              </div>
@@ -231,12 +236,12 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
 
             return (
               <div key={gIdx} className="space-y-1">
-                <p className="text-[10px] text-slate-600 uppercase tracking-widest font-black ml-4 mb-3">{group.title}</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black ml-4 mb-3">{group.title}</p>
                 {visibleItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
                   return (
-                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-emerald-500 text-slate-900 font-black shadow-lg shadow-emerald-900/20' : `${activeTheme} font-bold` : 'hover:bg-slate-900 hover:text-white'}`}>
+                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-emerald-500 text-slate-900 font-black shadow-[0_0_15px_rgba(16,185,129,0.4)]' : `${activeTheme} font-bold` : 'hover:bg-white/5 hover:text-white'}`}>
                       <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
                       <span className="text-sm tracking-wide">{item.label}</span>
                     </button>
@@ -248,8 +253,8 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
         </nav>
 
         {userRole === 'planner' && (
-          <div className="p-4 border-t border-slate-900 shrink-0 bg-slate-950">
-            <button onClick={() => { setActiveTab('configuracion'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all border ${activeTab === 'configuracion' ? 'bg-slate-800 text-amber-400 border-amber-500/50 shadow-lg' : 'bg-slate-900 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white'}`}>
+          <div className="p-4 border-t border-white/5 shrink-0 bg-[#0a0a0a]">
+            <button onClick={() => { setActiveTab('configuracion'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all border ${activeTab === 'configuracion' ? 'bg-white/10 text-amber-400 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-transparent text-slate-400 border-white/5 hover:bg-white/5 hover:text-white'}`}>
               <Settings2 size={18} strokeWidth={activeTab === 'configuracion' ? 2.5 : 2} />
               <span className="font-bold text-sm tracking-wide">Marca Blanca</span>
             </button>
@@ -260,8 +265,9 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
   );
 };
 
-// --- VISTAS ESPECÍFICAS ---
-
+// ==========================================
+// --- COMPONENTE: DASHBOARD VIEW (VISTA MAESTRA) ---
+// ==========================================
 const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setActiveTab, addNotification }) => {
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
 
@@ -288,7 +294,7 @@ const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setAc
   const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
   const isOverdue = (dateStr) => { if(!dateStr) return false; return new Date(dateStr) < new Date(); };
 
-  // 🔴 DESCARGA DIRECTA DE PDF
+  // 🔴 DESCARGA DIRECTA DE PDF (Mantenemos el fondo blanco forzado para la impresión PDF)
   const triggerDashboardPdf = async () => {
     setIsPreparingPrint(true);
     setTimeout(async () => {
@@ -297,7 +303,8 @@ const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setAc
         const html2canvas = (await import('html2canvas')).default;
         
         const element = document.getElementById('dashboard-export-area');
-        const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#f8fafc' });
+        // Forzamos fondo blanco al PDF aunque el panel sea negro
+        const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#111111' });
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
         
         const pdf = new jsPDF('p', 'mm', 'letter');
@@ -305,7 +312,7 @@ const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setAc
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         
         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save('Resumen-Dashboard.pdf');
+        pdf.save('Resumen-Boveda.pdf');
         if(addNotification) addNotification('¡PDF Guardado!', 'Revisa tu carpeta de descargas.', 'success');
       } catch (error) {
         console.error(error);
@@ -319,103 +326,104 @@ const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setAc
     <div className="space-y-6" id="dashboard-export-area">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Panel General</h2>
-          <p className="text-slate-500 text-sm mt-1">Resumen en tiempo real y alertas de tu evento.</p>
+          <h2 className="text-2xl font-black text-white tracking-tight">Centro de Mando</h2>
+          <p className="text-slate-400 text-sm mt-1">Monitoreo en tiempo real de la Bóveda.</p>
         </div>
-        <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-sm flex items-center disabled:bg-slate-500">
+        <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="px-5 py-2.5 bg-white/10 border border-white/20 text-white rounded-xl text-sm font-bold hover:bg-white/20 transition-colors shadow-sm flex items-center disabled:opacity-50">
           {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
-          {isPreparingPrint ? 'Preparando...' : 'Descargar PDF'}
+          {isPreparingPrint ? 'Preparando...' : 'Descargar Reporte'}
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
+        <div className="bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden group">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-slate-500 text-sm font-bold uppercase tracking-wider">Pases Asignados</p>
-              <h3 className="text-3xl font-black text-slate-800 mt-1">{totalPasses}</h3>
+              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Pases Asignados</p>
+              <h3 className="text-4xl font-black text-white mt-1">{totalPasses}</h3>
             </div>
-            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:scale-110 transition-transform"><Users size={24} /></div>
+            <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-xl group-hover:scale-110 transition-transform"><Users size={24} /></div>
           </div>
           <div className="mt-4 flex items-center text-sm">
-            <span className="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded mr-2">{confirmationPercentage}% Confirmado</span>
+            <span className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded text-[10px] uppercase tracking-widest">{confirmationPercentage}% Confirmado</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
+        <div className="bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden group">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-slate-500 text-sm font-bold uppercase tracking-wider">Mesas Creadas</p>
-              <h3 className="text-3xl font-black text-slate-800 mt-1">{totalMesas}</h3>
+              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Mesas Creadas</p>
+              <h3 className="text-4xl font-black text-white mt-1">{totalMesas}</h3>
             </div>
-            <div className="p-3 bg-purple-50 text-purple-600 rounded-xl group-hover:scale-110 transition-transform"><Layers size={24} /></div>
+            <div className="p-3 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-xl group-hover:scale-110 transition-transform"><Layers size={24} /></div>
           </div>
-          <div className="mt-4 w-full bg-slate-100 rounded-full h-1.5">
-            <div className="bg-purple-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${ocupacionPorcentaje}%` }}></div>
+          <div className="mt-5 w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+            <div className="bg-purple-500 h-full rounded-full transition-all duration-500" style={{ width: `${ocupacionPorcentaje}%` }}></div>
           </div>
-          <p className="text-[11px] text-slate-500 mt-2 font-bold">
-            <span className="text-purple-600">{capacidadTotalSillas} Sillas totales</span> • {ocupacionPorcentaje}% ocupadas
+          <p className="text-[10px] text-slate-500 mt-3 font-bold uppercase tracking-widest">
+            <span className="text-purple-400">{capacidadTotalSillas} Sillas</span> • {ocupacionPorcentaje}% uso
           </p>
         </div>
 
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
+        <div className="bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden group">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-slate-500 text-sm font-bold uppercase tracking-wider">Costo Estimado</p>
-              <h3 className="text-3xl font-black text-slate-800 mt-1">${(totalEstimado / 1000).toFixed(0)}k</h3>
+              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Gasto Estimado</p>
+              <h3 className="text-4xl font-black text-white mt-1">${(totalEstimado / 1000).toFixed(0)}k</h3>
             </div>
-            <div className="p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform"><Wallet size={24} /></div>
+            <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl group-hover:scale-110 transition-transform"><Wallet size={24} /></div>
           </div>
-          <div className="mt-4 w-full bg-slate-100 rounded-full h-1.5">
-            <div className={`h-1.5 rounded-full ${budgetPercentage > 100 ? 'bg-rose-500' : 'bg-amber-500'}`} style={{ width: `${Math.min(budgetPercentage, 100)}%` }}></div>
+          <div className="mt-5 w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+            <div className={`h-full rounded-full ${budgetPercentage > 100 ? 'bg-rose-500' : 'bg-amber-500'}`} style={{ width: `${Math.min(budgetPercentage, 100)}%` }}></div>
           </div>
-          <p className="text-[11px] text-slate-500 mt-2 font-bold flex justify-between">
+          <p className="text-[10px] text-slate-500 mt-3 font-bold uppercase tracking-widest flex justify-between">
             <span>Pagado: ${(totalPagado/1000).toFixed(1)}k</span>
-            <span className={budgetPercentage > 100 ? 'text-rose-500' : ''}>{budgetPercentage}% del Ppto.</span>
+            <span className={budgetPercentage > 100 ? 'text-rose-500' : ''}>{budgetPercentage}% del total</span>
           </p>
         </div>
 
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
+        <div className="bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden group">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-slate-500 text-sm font-bold uppercase tracking-wider">Avance Evento</p>
-              <h3 className="text-3xl font-black text-slate-800 mt-1">{tareasPorcentaje}%</h3>
+              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Avance Evento</p>
+              <h3 className="text-4xl font-black text-white mt-1">{tareasPorcentaje}%</h3>
             </div>
-            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-110 transition-transform"><CheckSquare size={24} /></div>
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl group-hover:scale-110 transition-transform"><CheckSquare size={24} /></div>
           </div>
-          <div className="mt-4 w-full bg-slate-100 rounded-full h-1.5">
-            <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${tareasPorcentaje}%` }}></div>
+          <div className="mt-5 w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+            <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${tareasPorcentaje}%` }}></div>
           </div>
-          <p className="text-[11px] text-slate-500 mt-2 font-bold">
-            <span className="text-emerald-600">{tareasCompletadas} Tareas listas</span> de {tareasTotal}
+          <p className="text-[10px] text-slate-500 mt-3 font-bold uppercase tracking-widest">
+            <span className="text-emerald-400">{tareasCompletadas} Listas</span> de {tareasTotal} tareas
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-          <div className="p-5 border-b border-slate-100 flex justify-between items-center">
-            <h3 className="font-bold text-slate-800 flex items-center"><ListTodo size={18} className="mr-2 text-indigo-500"/> Tareas Próximas</h3>
-            {setActiveTab && <button onClick={() => setActiveTab('checklist')} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors print:hidden">Ver todas</button>}
+        {/* TAREAS PRÓXIMAS */}
+        <div className="bg-[#0a0a0a] rounded-2xl border border-white/10 shadow-2xl flex flex-col">
+          <div className="p-5 border-b border-white/5 flex justify-between items-center bg-white/5 rounded-t-2xl">
+            <h3 className="font-bold text-white flex items-center text-sm"><ListTodo size={16} className="mr-2 text-indigo-400"/> Prioridades Logísticas</h3>
+            {setActiveTab && <button onClick={() => setActiveTab('checklist')} className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-widest print:hidden">Ver Tablero</button>}
           </div>
           <div className="p-5 flex-1">
             {tareasPendientes.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-400 py-6">
-                <CheckCircle size={40} className="mb-3 text-emerald-200"/>
-                <p className="text-sm font-medium">¡Al día! No hay tareas pendientes.</p>
+              <div className="h-full flex flex-col items-center justify-center text-slate-500 py-6">
+                <CheckCircle size={40} className="mb-3 text-emerald-500/30"/>
+                <p className="text-xs font-bold uppercase tracking-widest">Sin tareas urgentes.</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {tareasPendientes.map(tarea => {
                   const vencida = isOverdue(tarea.fechaLimite);
                   return (
-                    <div key={tarea.id} className="flex items-start gap-3">
-                      <div className={`mt-0.5 w-2 h-2 rounded-full ${vencida ? 'bg-rose-500 animate-pulse' : 'bg-amber-400'}`}></div>
+                    <div key={tarea.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                      <div className={`mt-1 w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] shrink-0 ${vencida ? 'bg-rose-500 text-rose-500 animate-pulse' : 'bg-amber-400 text-amber-400'}`}></div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-bold truncate ${vencida ? 'text-rose-700' : 'text-slate-700'}`}>{tarea.titulo}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">{tarea.categoria}</span>
-                          {tarea.fechaLimite && <span className={`text-[10px] font-semibold ${vencida ? 'text-rose-500' : 'text-slate-400'}`}><Calendar size={10} className="inline mr-0.5"/> {tarea.fechaLimite}</span>}
+                        <p className={`text-sm font-bold truncate ${vencida ? 'text-rose-400' : 'text-slate-200'}`}>{tarea.titulo}</p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 bg-black/50 px-2 py-0.5 rounded border border-white/10">{tarea.categoria}</span>
+                          {tarea.fechaLimite && <span className={`text-[9px] font-bold tracking-widest ${vencida ? 'text-rose-500' : 'text-slate-500'}`}><Calendar size={10} className="inline mr-0.5"/> {tarea.fechaLimite}</span>}
                         </div>
                       </div>
                     </div>
@@ -426,16 +434,17 @@ const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setAc
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-          <div className="p-5 border-b border-slate-100 flex justify-between items-center">
-            <h3 className="font-bold text-slate-800 flex items-center"><AlertTriangle size={18} className="mr-2 text-rose-500"/> Pagos Pendientes</h3>
-            {setActiveTab && <button onClick={() => setActiveTab('presupuesto')} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors print:hidden">Ir a Finanzas</button>}
+        {/* PAGOS PENDIENTES */}
+        <div className="bg-[#0a0a0a] rounded-2xl border border-white/10 shadow-2xl flex flex-col">
+          <div className="p-5 border-b border-white/5 flex justify-between items-center bg-white/5 rounded-t-2xl">
+            <h3 className="font-bold text-white flex items-center text-sm"><AlertTriangle size={16} className="mr-2 text-amber-500"/> Alertas Financieras</h3>
+            {setActiveTab && <button onClick={() => setActiveTab('presupuesto')} className="text-[10px] font-bold text-amber-500 hover:text-amber-400 uppercase tracking-widest print:hidden">Abrir Bóveda</button>}
           </div>
           <div className="p-5 flex-1">
             {pagosPendientes.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-400 py-6">
-                <CheckCircle size={40} className="mb-3 text-emerald-200"/>
-                <p className="text-sm font-medium">Finanzas sanas. No hay deudas próximas.</p>
+              <div className="h-full flex flex-col items-center justify-center text-slate-500 py-6">
+                <CheckCircle size={40} className="mb-3 text-emerald-500/30"/>
+                <p className="text-xs font-bold uppercase tracking-widest">Finanzas Sanas.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -443,16 +452,16 @@ const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setAc
                   const deuda = pago.estimado - pago.pagado;
                   const vencido = isOverdue(pago.fechaLimite);
                   return (
-                    <div key={pago.id} className="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div key={pago.id} className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5 hover:bg-white/10 transition-colors">
                       <div className="min-w-0 flex-1 mr-3">
-                        <p className="text-sm font-bold text-slate-800 truncate">{pago.concepto}</p>
-                        <p className={`text-[10px] font-bold mt-0.5 flex items-center ${vencido ? 'text-rose-500' : 'text-slate-500'}`}>
-                          <Clock size={10} className="mr-1"/> {pago.fechaLimite ? `Límite: ${pago.fechaLimite}` : 'Sin fecha límite'}
+                        <p className="text-sm font-bold text-slate-200 truncate">{pago.concepto}</p>
+                        <p className={`text-[9px] font-bold mt-1 uppercase tracking-widest flex items-center ${vencido ? 'text-rose-500' : 'text-slate-500'}`}>
+                          <Clock size={10} className="mr-1"/> {pago.fechaLimite ? `Límite: ${pago.fechaLimite}` : 'Sin plazo'}
                         </p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-xs text-slate-500 mb-0.5">Falta pagar</p>
-                        <p className={`text-sm font-black ${vencido ? 'text-rose-600' : 'text-amber-600'}`}>{formatMoney(deuda)}</p>
+                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-0.5">Pendiente</p>
+                        <p className={`text-base font-black ${vencido ? 'text-rose-500' : 'text-amber-500'}`}>{formatMoney(deuda)}</p>
                       </div>
                     </div>
                   )
@@ -6756,9 +6765,8 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
      (data?.gastos || []).forEach(g => { if(g.concepto.toLowerCase().includes(term)) searchResults.push({ id: g.id, text: g.concepto, type: 'Gasto', tab: 'presupuesto', icon: <Wallet size={14}/> }) });
   }
 
-  // Lógica para los botones del menú de perfil
   const handleLogout = async () => {
-    await signOut(auth); // Firebase cierra la sesión de forma segura
+    await signOut(auth);
     window.location.reload(); 
   };
 
@@ -6768,19 +6776,19 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
   };
 
   return (
-    <header ref={headerRef} className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden">
+    <header ref={headerRef} className="bg-[#050505]/90 backdrop-blur-xl border-b border-white/5 h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden">
       <div className="flex items-center flex-1">
-        <button onClick={() => setIsOpen(true)} className="xl:hidden text-slate-500 hover:text-slate-700 mr-4 transition-colors"><Menu size={24} /></button>
+        <button onClick={() => setIsOpen(true)} className="xl:hidden text-slate-400 hover:text-white mr-4 transition-colors"><Menu size={24} /></button>
         
         <div className="relative w-full max-w-md hidden sm:block">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input type="text" placeholder="Buscar en toda la plataforma..." value={globalSearch} onChange={(e) => {setGlobalSearch(e.target.value); setShowResults(true);}} className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all"/>
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+          <input type="text" placeholder="Buscar en la bóveda..." value={globalSearch} onChange={(e) => {setGlobalSearch(e.target.value); setShowResults(true);}} className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 focus:bg-white/10 transition-all"/>
           {showResults && globalSearch.length > 1 && (
-            <div className="absolute top-full left-0 mt-2 w-full bg-white shadow-xl rounded-2xl border border-slate-100 py-2 max-h-80 overflow-y-auto z-[100] animate-in fade-in">
-              {searchResults.length === 0 ? <div className="p-4 text-center text-sm text-slate-400">No se encontraron resultados para "{globalSearch}"</div> : searchResults.map(res => (
-                  <button key={`${res.type}_${res.id}`} onClick={() => handleNavigate(res.tab)} className="w-full text-left px-4 py-3 hover:bg-slate-50 flex items-center border-b border-slate-50 last:border-0 transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center mr-3">{res.icon}</div>
-                    <div><p className="font-bold text-slate-700 text-sm">{res.text}</p><p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{res.type}</p></div>
+            <div className="absolute top-full left-0 mt-2 w-full bg-[#0a0a0a] shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-white/10 py-2 max-h-80 overflow-y-auto z-[100] animate-in fade-in">
+              {searchResults.length === 0 ? <div className="p-4 text-center text-sm text-slate-500">No se encontraron resultados para "{globalSearch}"</div> : searchResults.map(res => (
+                  <button key={`${res.type}_${res.id}`} onClick={() => handleNavigate(res.tab)} className="w-full text-left px-4 py-3 hover:bg-white/5 flex items-center border-b border-white/5 last:border-0 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-white/5 text-amber-500 flex items-center justify-center mr-3 border border-white/10">{res.icon}</div>
+                    <div><p className="font-bold text-white text-sm">{res.text}</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">{res.type}</p></div>
                   </button>
                 ))
               }
@@ -6790,36 +6798,36 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
       </div>
 
       <div className="flex items-center space-x-2 sm:space-x-4">
-        {/* INDICADORES RÁPIDOS */}
-        <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 shadow-sm">
-          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-600" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
-          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-amber-600 bg-amber-50" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countConfirmados}</span></div>
-          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-rose-600 bg-rose-50" title="Cancelaron"><X size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countCancelados}</span></div>
-          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-emerald-600 bg-emerald-50" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countIngresos}</span></div>
+        {/* INDICADORES RÁPIDOS OSCUROS */}
+        <div className="flex items-center bg-[#0a0a0a] border border-white/10 rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 shadow-sm">
+          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-400" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
+          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-amber-500 bg-amber-500/10" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countConfirmados}</span></div>
+          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-rose-400 bg-rose-500/10" title="Cancelaron"><X size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countCancelados}</span></div>
+          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-emerald-400 bg-emerald-500/10" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countIngresos}</span></div>
         </div>
 
-        {/* CAMPANITA DE NOTIFICACIONES */}
+        {/* CAMPANITA */}
         <div className="relative">
-          <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-slate-500 hover:text-indigo-600 transition-colors rounded-full hover:bg-indigo-50">
+          <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-slate-400 hover:text-amber-400 transition-colors rounded-full hover:bg-white/5">
             <Bell size={20} />
-            {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-white rounded-full text-[9px] font-bold text-white flex items-center justify-center animate-in zoom-in">{unreadCount}</span>}
+            {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-[#050505] rounded-full text-[9px] font-bold text-white flex items-center justify-center animate-in zoom-in">{unreadCount}</span>}
           </button>
           
           {showBellMenu && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-white shadow-2xl rounded-2xl border border-slate-100 overflow-hidden z-[100] animate-in slide-in-from-top-2">
-              <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
-                <h4 className="font-bold text-slate-800">Centro de Atención</h4>
-                {bellAlerts.length > 0 && <button onClick={(e) => { e.stopPropagation(); setBellAlerts([]); }} className="text-[10px] text-slate-400 hover:text-indigo-600 font-bold">Limpiar historial</button>}
+            <div className="absolute right-0 top-full mt-2 w-80 bg-[#0a0a0a] shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2">
+              <div className="p-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                <h4 className="font-bold text-white">Centro de Atención</h4>
+                {bellAlerts.length > 0 && <button onClick={(e) => { e.stopPropagation(); setBellAlerts([]); }} className="text-[10px] text-slate-500 hover:text-amber-400 font-bold">Limpiar historial</button>}
               </div>
-              <div className="max-h-80 overflow-y-auto">
+              <div className="max-h-80 overflow-y-auto custom-scrollbar">
                 {allAlerts.length === 0 ? (
-                  <div className="p-8 text-center text-slate-400"><CheckCircle size={32} className="mx-auto mb-2 text-emerald-300"/> ¡Todo al día! No tienes notificaciones.</div>
+                  <div className="p-8 text-center text-slate-500"><CheckCircle size={32} className="mx-auto mb-2 text-emerald-500/50"/> ¡Todo al día! No tienes notificaciones.</div>
                 ) : (
                   allAlerts.map(alert => (
                     <div 
                       key={alert.id} 
-                      className={`w-full text-left px-4 py-3 flex items-start transition-colors group cursor-pointer border-b border-slate-100
-                        ${alert.isRead ? 'bg-white opacity-70 hover:bg-slate-50' : 'bg-slate-100 hover:bg-slate-200'} 
+                      className={`w-full text-left px-4 py-3 flex items-start transition-colors group cursor-pointer border-b border-white/5
+                        ${alert.isRead ? 'bg-transparent opacity-60 hover:bg-white/5' : 'bg-white/5 hover:bg-white/10'} 
                       `} 
                       onClick={(e) => { 
                         e.stopPropagation();
@@ -6831,15 +6839,15 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
                         }
                       }}
                     >
-                      <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-500' : alert.type === 'danger' ? 'text-rose-500' : alert.type === 'warning' ? 'text-amber-500' : 'text-indigo-500'}`}>
+                      <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-400' : alert.type === 'danger' ? 'text-rose-400' : alert.type === 'warning' ? 'text-amber-400' : 'text-indigo-400'}`}>
                         {alert.type === 'success' ? <CheckCircle size={16}/> : alert.type === 'warning' || alert.type === 'danger' ? <AlertCircle size={16}/> : <Bell size={16}/>}
                       </div>
                       <div className="flex-1">
-                        <p className={`text-sm leading-tight ${alert.isRead ? 'font-medium text-slate-600' : 'font-bold text-slate-800'}`}>{alert.title}</p>
-                        <p className={`text-[10px] mt-1 leading-snug ${alert.isRead ? 'text-slate-400' : 'text-slate-500 font-medium'}`}>{alert.message}</p>
+                        <p className={`text-sm leading-tight ${alert.isRead ? 'font-medium text-slate-400' : 'font-bold text-white'}`}>{alert.title}</p>
+                        <p className={`text-[10px] mt-1 leading-snug ${alert.isRead ? 'text-slate-500' : 'text-slate-400 font-medium'}`}>{alert.message}</p>
                       </div>
                       {!alert.isDynamic && (
-                        <button onClick={(e) => { e.stopPropagation(); setBellAlerts(prev => prev.filter(a => a.id !== alert.id)); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 transition-opacity ml-2">
+                        <button onClick={(e) => { e.stopPropagation(); setBellAlerts(prev => prev.filter(a => a.id !== alert.id)); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-500 transition-opacity ml-2">
                           <X size={14}/>
                         </button>
                       )}
@@ -6851,33 +6859,33 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
           )}
         </div>
 
-        {/* 🔴 BOTÓN DE PERFIL INVERTIDO (TEXTO A LA IZQ, ICONO A LA DER) */}
+        {/* PERFIL (OSCURO) */}
         <div className="relative">
           <button 
             onClick={() => {setShowProfileMenu(!showProfileMenu); setShowBellMenu(false); setShowResults(false);}} 
-            className="flex items-center space-x-2 sm:space-x-3 hover:bg-slate-50 p-1 sm:p-1.5 rounded-xl transition-colors text-right border border-transparent hover:border-slate-200"
+            className="flex items-center space-x-2 sm:space-x-3 hover:bg-white/5 p-1 sm:p-1.5 rounded-xl transition-colors text-right border border-transparent hover:border-white/10"
           >
             <div className="hidden sm:block pl-1">
-              <p className="text-xs font-bold text-slate-800 leading-tight">Boda Ana & Luis</p>
-              <p className="text-[9px] text-slate-500 font-medium">15 de Nov, 2026</p>
+              <p className="text-xs font-bold text-white leading-tight">Proyecto Activo</p>
+              <p className="text-[9px] text-amber-500 font-medium tracking-widest uppercase">ID: {ID_DEL_EVENTO.slice(0,8)}...</p>
             </div>
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm text-sm shrink-0">
-              B
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 flex items-center justify-center text-slate-900 font-black shadow-md text-sm shrink-0 border border-amber-300">
+              <Users size={16}/>
             </div>
           </button>
           
           {showProfileMenu && (
-            <div className="absolute right-0 top-full mt-2 w-56 bg-white shadow-2xl rounded-2xl border border-slate-100 overflow-hidden z-[100] animate-in slide-in-from-top-2">
-              <div className="p-4 border-b border-slate-100 bg-slate-50 sm:hidden">
-                <p className="font-bold text-slate-800 text-sm">Boda Ana & Luis</p>
-                <p className="text-[10px] text-slate-500 truncate">15 de Nov, 2026</p>
+            <div className="absolute right-0 top-full mt-2 w-56 bg-[#0a0a0a] shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2">
+              <div className="p-4 border-b border-white/5 bg-white/5 sm:hidden">
+                <p className="font-bold text-white text-sm">Proyecto Activo</p>
+                <p className="text-[10px] text-amber-500 uppercase">ID: {ID_DEL_EVENTO}</p>
               </div>
               <div className="p-2">
-                <button onClick={() => handleNavigate('invitacion')} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 font-medium hover:bg-slate-50 hover:text-indigo-600 rounded-lg transition-colors flex items-center"><ExternalLink size={16} className="mr-2.5"/> Ver Invitación App</button>
-                <button onClick={handleContactStaff} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 font-medium hover:bg-slate-50 hover:text-emerald-600 rounded-lg transition-colors flex items-center"><MessageCircle size={16} className="mr-2.5"/> Contactar Staff</button>
+                <button onClick={() => handleNavigate('invitacion')} className="w-full text-left px-3 py-2.5 text-sm text-slate-300 font-medium hover:bg-white/5 hover:text-amber-400 rounded-lg transition-colors flex items-center"><ExternalLink size={16} className="mr-2.5"/> Ver Invitación App</button>
+                <button onClick={handleContactStaff} className="w-full text-left px-3 py-2.5 text-sm text-slate-300 font-medium hover:bg-white/5 hover:text-emerald-400 rounded-lg transition-colors flex items-center"><MessageCircle size={16} className="mr-2.5"/> Soporte Premium</button>
               </div>
-              <div className="p-2 border-t border-slate-100">
-                <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-sm text-rose-500 font-bold hover:bg-rose-50 rounded-lg transition-colors flex items-center"><LogOut size={16} className="mr-2.5"/> Cerrar Sesión</button>
+              <div className="p-2 border-t border-white/5">
+                <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-sm text-rose-500 font-bold hover:bg-rose-500/10 rounded-lg transition-colors flex items-center"><LogOut size={16} className="mr-2.5"/> Cerrar Sesión</button>
               </div>
             </div>
           )}
@@ -10190,7 +10198,6 @@ const AdminDashboard = ({ authData }) => {
       case 'licencias': return userRole === 'superadmin' && typeof SuperAdminView !== 'undefined' ? <SuperAdminView /> : null;
       case 'dashboard': return typeof DashboardView !== 'undefined' ? <DashboardView guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null; 
       case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
-      // 🔴 AQUÍ PASAMOS LA FUNCIÓN DE NOTIFICACIONES AL ESCÁNER DE ESCRITORIO
       case 'escaner': return userPlan === 'diamante' && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
       case 'mesas': return userPlan === 'diamante' && typeof MesasView !== 'undefined' ? <MesasView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
       case 'mapa': return userPlan === 'diamante' && typeof MapaView !== 'undefined' ? <MapaView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} globalSearch={globalSearch} elements={mapElements} setElements={setMapElements} /> : null;
@@ -10207,17 +10214,18 @@ const AdminDashboard = ({ authData }) => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 font-sans overflow-hidden">
+    // 🔴 AQUÍ EL FONDO SE VUELVE NEGRO
+    <div className="flex h-screen bg-[#000000] font-sans overflow-hidden text-slate-200">
       
       <div className="fixed top-4 right-4 z-[999] hidden sm:flex flex-col space-y-2 pointer-events-none">
         {notifications.map(notif => (
-          <div key={notif.id} onClick={() => { if(notif.tab) setActiveTab(notif.tab); setNotifications(prev => prev.filter(n => n.id !== notif.id)); }} className={`w-80 bg-white border-l-4 rounded-xl shadow-2xl p-4 flex items-start transform transition-all duration-300 animate-in slide-in-from-right-8 pointer-events-auto ${notif.type === 'success' ? 'border-emerald-500' : notif.type === 'danger' ? 'border-rose-500' : 'border-amber-500'} ${notif.tab ? 'cursor-pointer hover:scale-[1.02]' : ''}`}>
-            <div className={`mr-3 mt-0.5 ${notif.type === 'success' ? 'text-emerald-500' : notif.type === 'danger' ? 'text-rose-500' : 'text-amber-500'}`}>
+          <div key={notif.id} onClick={() => { if(notif.tab) setActiveTab(notif.tab); setNotifications(prev => prev.filter(n => n.id !== notif.id)); }} className={`w-80 bg-[#0a0a0a] border border-white/10 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-4 flex items-start transform transition-all duration-300 animate-in slide-in-from-right-8 pointer-events-auto ${notif.tab ? 'cursor-pointer hover:scale-[1.02]' : ''}`}>
+            <div className={`mr-3 mt-0.5 ${notif.type === 'success' ? 'text-emerald-400' : notif.type === 'danger' ? 'text-rose-400' : 'text-amber-400'}`}>
               {notif.type === 'success' ? <CheckCircle size={20}/> : notif.type === 'danger' ? <AlertCircle size={20}/> : <Bell size={20}/>}
             </div>
             <div>
-              <h4 className="font-bold text-slate-800 text-sm">{notif.title}</h4>
-              <p className="text-slate-500 text-xs mt-0.5 leading-snug">{notif.message}</p>
+              <h4 className="font-bold text-white text-sm">{notif.title}</h4>
+              <p className="text-slate-400 text-xs mt-0.5 leading-snug">{notif.message}</p>
             </div>
           </div>
         ))}
