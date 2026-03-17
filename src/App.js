@@ -8674,75 +8674,124 @@ const GuestProyectorView = ({ eventId }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CAJERO AUTOMÁTICO STRIPE (CHECKOUT) ---
+// --- COMPONENTE: FORMULARIO DE PAGO STRIPE (CONECTADO AL CEREBRO) ---
 // ==========================================
-const CheckoutForm = ({ plan, precio, onSuccess, onCancel }) => {
+const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   const stripe = useStripe();
   const elements = useElements();
-  const [error, setError] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [formData, setFormData] = useState({ nombre: '', email: '', fecha: '' });
+  const [loading, setLoading] = useState(false);
+  const [errorTexto, setErrorTexto] = useState(null);
+
+  // Datos del cliente
+  const [nombre, setNombre] = useState('');
+  const [email, setEmail] = useState('');
+  const [fecha, setFecha] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!stripe || !elements) return;
 
-    setIsProcessing(true);
-    setError(null);
+    setLoading(true);
+    setErrorTexto(null);
 
-    // 🔴 Aquí simularemos el pago por ahora (En Fase 6 conectaremos el Backend real)
-    setTimeout(() => {
-      setIsProcessing(false);
-      onSuccess(formData); // Simulamos que el pago pasó con éxito
-    }, 2500);
+    // 1. Empaquetamos la tarjeta de forma segura con Stripe
+    const { error, paymentMethod } = await stripe.createPaymentMethod({
+      type: 'card',
+      card: elements.getElement(CardElement),
+      billing_details: { name: nombre, email: email }
+    });
+
+    if (error) {
+      setErrorTexto(error.message);
+      setLoading(false);
+      return;
+    }
+
+    // 2. 🚀 DISPARAMOS LA VENTA A TU ROBOT EN LA NUBE
+    try {
+      const respuesta = await fetch("https://us-central1-panel-de-control-intelig-db278.cloudfunctions.net/crearBovedaVIP", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paymentMethodId: paymentMethod.id,
+          plan: planSeleccionado.nombre,
+          precio: planSeleccionado.precio,
+          nombre: nombre,
+          email: email,
+          fecha: fecha
+        })
+      });
+
+      const resultado = await respuesta.json();
+
+      if (resultado.success) {
+        // ¡Magia! Se cobró el dinero y se creó la Bóveda en Firebase.
+        onSuccess(resultado, planSeleccionado);
+      } else {
+        // Stripe rechazó la tarjeta (sin fondos, bloqueada, etc.)
+        setErrorTexto(resultado.error || "Transacción declinada por el banco.");
+      }
+    } catch (err) {
+      setErrorTexto("Fallo de comunicación con la base de Baulia.");
+      console.error(err);
+    }
+    setLoading(false);
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
-        
-        <div className="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl text-center mb-6">
-          <p className="text-xs text-indigo-300 uppercase tracking-widest font-bold mb-1">Total a Pagar</p>
-          <p className="text-3xl font-editorial font-black text-white">${precio} <span className="text-sm font-sans font-medium text-indigo-400">MXN</span></p>
-          <p className="text-[10px] text-indigo-400 mt-1 uppercase tracking-widest">Plan {plan}</p>
+      <div className="space-y-4 mb-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+        {/* Resumen de compra */}
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex justify-between items-center mb-6">
+           <div>
+             <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-1">Plan Seleccionado</p>
+             <p className="text-white font-editorial text-xl">{planSeleccionado.nombre}</p>
+           </div>
+           <div className="text-right">
+             <p className="text-white font-black text-2xl">${planSeleccionado.precio}</p>
+             <p className="text-slate-500 text-[9px] uppercase tracking-widest">MXN / Pago Único</p>
+           </div>
         </div>
 
-        <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Nombre de los Festejados</label>
-          <input type="text" required value={formData.nombre} onChange={e=>setFormData({...formData, nombre: e.target.value})} className="w-full p-3.5 bg-[#111] border border-white/10 rounded-xl outline-none focus:border-amber-500 text-white text-sm transition-colors" placeholder="Ej. Ana y Luis" />
-        </div>
-        
-        <div className="grid grid-cols-2 gap-3">
+        {/* Formulario de Datos */}
+        <div className="space-y-3">
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Fecha del Evento</label>
-            <input type="date" required value={formData.fecha} onChange={e=>setFormData({...formData, fecha: e.target.value})} className="w-full p-3.5 bg-[#111] border border-white/10 rounded-xl outline-none focus:border-amber-500 text-slate-300 text-sm [color-scheme:dark] transition-colors" />
+            <label className="block text-[10px] uppercase tracking-widest text-slate-400 mb-1 ml-1">Nombre de los Festejados</label>
+            <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Carlos & María" className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-amber-500 focus:outline-none transition-colors" />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Correo (Acceso)</label>
-            <input type="email" required value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} className="w-full p-3.5 bg-[#111] border border-white/10 rounded-xl outline-none focus:border-amber-500 text-white text-sm transition-colors" placeholder="ejemplo@correo.com" />
+            <label className="block text-[10px] uppercase tracking-widest text-slate-400 mb-1 ml-1">Correo Electrónico</label>
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-amber-500 focus:outline-none transition-colors" />
+          </div>
+          <div>
+            <label className="block text-[10px] uppercase tracking-widest text-slate-400 mb-1 ml-1">Fecha del Evento</label>
+            <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-amber-500 focus:outline-none transition-colors" />
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-white/10">
-          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center"><Lock size={12} className="mr-1.5 text-emerald-400"/> Datos de Tarjeta (Seguro)</label>
-          <div className="p-4 bg-[#111] border border-white/10 rounded-xl shadow-inner">
-            <CardElement options={{ 
-              style: { 
-                base: { fontSize: '16px', color: '#ffffff', '::placeholder': { color: '#64748b' }, iconColor: '#f59e0b' },
-                invalid: { color: '#f43f5e', iconColor: '#f43f5e' }
-              } 
-            }}/>
-          </div>
-          {error && <p className="text-rose-500 text-xs mt-2 font-bold flex items-center"><AlertCircle size={14} className="mr-1"/> {error}</p>}
+        {/* Tarjeta de Crédito (Stripe) */}
+        <div className="mt-6">
+           <label className="block text-[10px] uppercase tracking-widest text-slate-400 mb-2 ml-1">Datos de Pago</label>
+           <div className="p-4 bg-[#111] border border-white/10 rounded-xl">
+             <CardElement options={{
+               style: {
+                 base: { fontSize: '14px', color: '#ffffff', '::placeholder': { color: '#475569' }, iconColor: '#f59e0b' },
+                 invalid: { color: '#ef4444', iconColor: '#ef4444' }
+               }
+             }}/>
+           </div>
+           {errorTexto && <p className="text-red-400 text-xs mt-2 ml-1 flex items-center"><span className="w-1 h-1 bg-red-400 rounded-full mr-2"></span>{errorTexto}</p>}
         </div>
-        
       </div>
 
-      <div className="mt-6 pt-4 border-t border-white/10 flex gap-3 shrink-0">
-        <button type="button" onClick={onCancel} className="flex-1 py-4 bg-white/5 text-white rounded-xl font-bold hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
-        <button type="submit" disabled={!stripe || isProcessing} className="flex-1 py-4 bg-amber-500 text-slate-900 rounded-xl font-black shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-colors uppercase tracking-widest text-[10px] disabled:opacity-50 flex items-center justify-center">
-          {isProcessing ? <RefreshCw size={16} className="animate-spin mr-2"/> : <ShieldCheck size={16} className="mr-2"/>}
-          {isProcessing ? 'Procesando...' : `Pagar $${precio}`}
+      {/* Botón de Pagar */}
+      <div className="pt-4 border-t border-white/5 mt-auto">
+        <button type="submit" disabled={!stripe || loading} className="w-full py-4 bg-amber-500 text-slate-900 font-black rounded-xl text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center">
+          {loading ? (
+             <span className="flex items-center"><span className="animate-spin h-4 w-4 border-2 border-slate-900 border-t-transparent rounded-full mr-2"></span> Procesando Bóveda...</span>
+          ) : (
+             `Pagar $${planSeleccionado.precio} MXN`
+          )}
         </button>
       </div>
     </form>
