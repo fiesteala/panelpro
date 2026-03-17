@@ -10540,70 +10540,127 @@ const ReviewHarvester = ({ authData }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: SHOWROOM SIMULADOR (VITRINA PERFECTA) ---
+// --- COMPONENTE: SHOWROOM SIMULADOR (VITRINA PERFECTA CON UPSELL) ---
 // ==========================================
 const ShowcaseSimulatorView = () => {
   const [activeCategory, setActiveCategory] = useState('boda');
+  
+  // 🔴 ESTADOS PARA EL CAJERO Y SELECCIÓN DE PLANES
+  const [checkoutStep, setCheckoutStep] = useState(0); // 0: Cerrado, 1: Selector, 2: Pago, 3: Éxito
+  const [planSeleccionado, setPlanSeleccionado] = useState(null);
+
+  const planes = [
+    { id: 'basico', nombre: 'Básico', precio: '990', desc: 'Invitación, RSVP simple y GPS.', icon: <Smartphone size={24}/> },
+    { id: 'plata', nombre: 'Plata', precio: '1,490', desc: 'Suma Mesa de Regalos e Itinerario.', icon: <Wallet size={24}/> },
+    { id: 'oro', nombre: 'Oro', precio: '1,990', desc: 'Panel Maestro, Control QR y Mesas.', icon: <ShieldCheck size={24}/>, popular: true },
+    { id: 'diamante', nombre: 'Diamante', precio: '2,990', desc: 'Bocetador 3D y Muro Social.', icon: <LayoutDashboard size={24}/> }
+  ];
 
   const demos = {
-    boda: { 
-      id: 'boda', label: 'Bodas de Lujo', 
-      url: '/demos/boda/index.html', 
-      desc: 'Elegancia clásica, tipografías finas y paletas sobrias. El estándar de alta costura nupcial.',
-      features: ['Mesa de Regalos', 'Cuenta Regresiva', 'Pases QR VIP', 'GPS Directo']
-    },
-    xv: { 
-      id: 'xv', label: 'XV Años Glamour', 
-      url: '/demos/xv/index.html', 
-      desc: 'Luces neón, animaciones dinámicas y energía vibrante para la mejor noche.',
-      features: ['Muro de Fotos', 'Dress Code Neón', 'Itinerario de Gala', 'Música Automática']
-    },
-    cumple_formal: { 
-      id: 'cumple_formal', label: 'Cumpleaños Formal', 
-      url: '/demos/cumple_formal/index.html', 
-      desc: 'Diseños sofisticados para celebrar décadas (30s, 40s, 50s) con mucho estilo y elegancia.',
-      features: ['Lluvia de Sobres', 'Confirmación Fácil', 'Galería de Recuerdos']
-    },
-    infantil: { 
-      id: 'infantil', label: 'Fiestas Infantiles', 
-      url: '/demos/infantil/index.html', 
-      desc: 'Temáticas inmersivas al 100%. Llevamos a los niños al universo de sus personajes favoritos.',
-      features: ['Diseños 100% Temáticos', 'Animaciones', 'Ubicación Salón']
-    },
-    bautizo: { 
-      id: 'bautizo', label: 'Bautizos / Comunión', 
-      url: '/demos/bautizo/index.html', 
-      desc: 'Tonos pastel, acuarelas suaves y diseños angelicales para momentos familiares íntimos.',
-      features: ['Padrinos', 'Locación Iglesia', 'Mesa de Regalos']
-    },
-    corporativo: { 
-      id: 'corporativo', label: 'Empresarial / Galas', 
-      url: '/demos/corporativo/index.html', 
-      desc: 'Seriedad, branding corporativo y logística estricta para congresos y lanzamientos de marca.',
-      features: ['Control de Gafetes', 'Programa por Horas', 'Patrocinadores']
-    }
+    boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica, tipografías finas y paletas sobrias. El estándar de alta costura nupcial.', features: ['Mesa de Regalos', 'Cuenta Regresiva', 'Pases QR VIP', 'GPS Directo'] },
+    xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón, animaciones dinámicas y energía vibrante para la mejor noche.', features: ['Muro de Fotos', 'Dress Code Neón', 'Itinerario de Gala', 'Música Automática'] },
+    cumple_formal: { id: 'cumple_formal', label: 'Cumpleaños Formal', url: '/demos/cumple_formal/index.html', desc: 'Diseños sofisticados para celebrar décadas (30s, 40s, 50s) con mucho estilo y elegancia.', features: ['Lluvia de Sobres', 'Confirmación Fácil', 'Galería de Recuerdos'] },
+    infantil: { id: 'infantil', label: 'Fiestas Infantiles', url: '/demos/infantil/index.html', desc: 'Temáticas inmersivas al 100%. Llevamos a los niños al universo de sus personajes favoritos.', features: ['Diseños 100% Temáticos', 'Animaciones', 'Ubicación Salón'] },
+    bautizo: { id: 'bautizo', label: 'Bautizos / Comunión', url: '/demos/bautizo/index.html', desc: 'Tonos pastel, acuarelas suaves y diseños angelicales para momentos familiares íntimos.', features: ['Padrinos', 'Locación Iglesia', 'Mesa de Regalos'] },
+    corporativo: { id: 'corporativo', label: 'Empresarial / Galas', url: '/demos/corporativo/index.html', desc: 'Seriedad, branding corporativo y logística estricta para congresos y lanzamientos de marca.', features: ['Control de Gafetes', 'Programa por Horas', 'Patrocinadores'] }
   };
 
   const currentDemo = demos[activeCategory];
 
+  const handlePaymentSuccess = (datos) => {
+    // 🔴 Simulamos éxito. En Fase 6 aquí crearemos la base de datos real.
+    setCheckoutStep(3);
+  };
+
   return (
     <div className="min-h-screen bg-[#050505] flex flex-col font-sans text-white overflow-x-hidden overflow-y-auto custom-scrollbar selection:bg-amber-500">
+      
+      {/* 🔴 MODALES DE COMPRA DE CRISTAL DENTRO DEL SHOWROOM */}
+      {checkoutStep > 0 && (
+        <div className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-[#0a0a0a] rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-[0_0_50px_rgba(245,158,11,0.1)] border border-white/10 relative flex flex-col max-h-[90vh]">
+            
+            {/* PASO 1: SELECCIÓN DE PLAN (UPSELL) */}
+            {checkoutStep === 1 && (
+              <div className="p-8 animate-in slide-in-from-right-8 duration-300">
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h3 className="font-editorial text-3xl font-bold text-white mb-1">Selecciona tu Plan</h3>
+                    <p className="text-slate-400 text-xs">Añade tecnología de control a tu diseño perfecto.</p>
+                  </div>
+                  <button onClick={() => setCheckoutStep(0)} className="p-2 text-slate-500 hover:text-white transition-colors bg-white/5 rounded-full"><X size={20}/></button>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto max-h-[60vh] custom-scrollbar pr-2 pb-4">
+                  {planes.map(plan => (
+                    <button 
+                      key={plan.id}
+                      onClick={() => { setPlanSeleccionado(plan); setCheckoutStep(2); }}
+                      className={`text-left p-5 rounded-2xl border transition-all duration-300 group relative overflow-hidden ${plan.popular ? 'border-amber-500/50 bg-amber-500/5 hover:bg-amber-500/10' : 'border-white/10 bg-[#111] hover:border-white/30 hover:bg-white/5'}`}
+                    >
+                      {plan.popular && <div className="absolute top-0 right-0 bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg">Ideal</div>}
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 shadow-inner ${plan.popular ? 'bg-amber-500/20 text-amber-500' : 'bg-white/5 text-slate-400 group-hover:text-white'}`}>
+                        {plan.icon}
+                      </div>
+                      <h4 className="font-bold text-lg text-white mb-1">{plan.nombre}</h4>
+                      <p className="text-[10px] text-slate-400 mb-4 h-6 leading-relaxed">{plan.desc}</p>
+                      <p className="font-black text-xl text-white">${plan.precio} <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">MXN</span></p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* PASO 2: STRIPE CHECKOUT REUTILIZANDO TU COMPONENTE */}
+            {checkoutStep === 2 && (
+              <div className="p-8 animate-in slide-in-from-right-8 duration-300 flex-1 overflow-y-auto custom-scrollbar">
+                <div className="flex justify-between items-center mb-4">
+                   <h3 className="font-editorial text-2xl text-white font-bold">Finalizar Compra</h3>
+                   <button onClick={() => setCheckoutStep(1)} className="text-slate-500 hover:text-white text-xs font-bold uppercase tracking-widest">Volver</button>
+                </div>
+                <Elements stripe={stripePromise}>
+                  <CheckoutForm 
+                    plan={planSeleccionado.nombre} 
+                    precio={planSeleccionado.precio} 
+                    onSuccess={handlePaymentSuccess} 
+                    onCancel={() => setCheckoutStep(1)} 
+                  />
+                </Elements>
+              </div>
+            )}
+
+            {/* PASO 3: ÉXITO */}
+            {checkoutStep === 3 && (
+              <div className="p-10 text-center animate-in zoom-in-95 duration-500">
+                <div className="w-24 h-24 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                  <CheckCircle size={48} className="animate-pulse"/>
+                </div>
+                <h3 className="font-editorial font-black text-4xl text-white mb-3">¡Bienvenido a Baulia!</h3>
+                <p className="text-slate-400 text-sm mb-10 leading-relaxed max-w-sm mx-auto">Tu bóveda privada se ha creado con éxito. Hemos enviado a tu correo las credenciales de acceso seguro.</p>
+                <button onClick={() => window.location.href = 'https://panel.baulia.com'} className="w-full py-4 bg-amber-500 text-slate-900 font-black rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all uppercase tracking-widest text-[10px]">
+                  Entrar a mi Panel de Control
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Header Minimalista */}
       <header className="h-20 border-b border-white/5 flex items-center justify-between px-6 sm:px-10 shrink-0 bg-transparent z-20 relative">
         <div className="flex items-center gap-4">
           <button onClick={() => window.location.href = '/'} className="p-2 hover:bg-white/10 rounded-full transition-colors"><ArrowRight size={20} className="rotate-180"/></button>
           <h1 className="text-sm sm:text-xl font-bold tracking-widest uppercase">Galería <span className="text-amber-500 font-light">Baulia</span></h1>
         </div>
-        <button onClick={() => window.location.href = '/#planes'} className="hidden sm:block px-6 py-2.5 bg-amber-500 text-slate-900 font-bold rounded-full text-xs uppercase tracking-widest hover:bg-amber-400 transition-colors shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-          Crear la Mía
+        {/* 🔴 EL BOTÓN AHORA ABRE EL MODAL DE PAGO (Paso 1) */}
+        <button onClick={() => setCheckoutStep(1)} className="hidden sm:block px-6 py-2.5 bg-amber-500 text-slate-900 font-bold rounded-full text-xs uppercase tracking-widest hover:bg-amber-400 transition-colors shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+          Comprar este Diseño
         </button>
       </header>
 
       <div className="flex flex-col lg:flex-row relative z-10 min-h-[calc(100vh-80px)]">
-        {/* Fondo con blur ambiental estilo iPhone */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-[#050505] to-[#050505] z-0 pointer-events-none"></div>
 
-        {/* Panel Izquierdo: El Pitch de Ventas */}
         <div className="w-full lg:w-5/12 xl:w-1/3 p-6 sm:p-10 flex flex-col justify-center z-10 shrink-0">
           <h2 className="text-3xl sm:text-5xl font-editorial font-medium mb-4 text-white leading-tight">
             {currentDemo.label}
@@ -10626,59 +10683,42 @@ const ShowcaseSimulatorView = () => {
               <button 
                 key={demo.id} 
                 onClick={() => setActiveCategory(demo.id)}
-                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all border ${activeCategory === demo.id ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-lg' : 'bg-transparent text-slate-400 border-white/20 hover:border-white/50'}`}
+                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all border ${activeCategory === demo.id ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)]' : 'bg-transparent text-slate-400 border-white/20 hover:border-white/50'}`}
               >
-                {demo.label.split(' ')[0]} {/* Solo la primera palabra para botones compactos */}
+                {demo.label.split(' ')[0]}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Panel Derecho: El Simulador Escalar */}
         <div className="flex-1 flex items-center justify-center p-6 lg:p-10 z-10 relative">
-           
-           {/* iPhone Mockup Físico */}
            <div className="relative w-[320px] h-[650px] bg-black rounded-[3rem] border-[8px] border-slate-800 shadow-[0_0_80px_rgba(0,0,0,0.6)] flex-shrink-0">
-             
-             {/* Isla Dinámica */}
              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-20 flex justify-end items-center pr-2">
                <div className="w-2 h-2 rounded-full bg-slate-800/80 mr-1"></div>
                <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
              </div>
              
-             {/* LA MAGIA: El contenedor que recorta, y el iframe engañado */}
              <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-[#111] relative">
-               
                <iframe 
                  src={currentDemo.url} 
                  className="absolute top-0 left-0 border-0"
                  title={`Demo ${currentDemo.label}`}
-                 /* Engañamos al iframe: Le decimos que mida 390x844 (Tamaño iPhone 14) y luego lo escalamos al 78% para que quepa en nuestro dibujito de 300x634 */
-                 style={{ 
-                    width: '390px', 
-                    height: '844px', 
-                    transform: 'scale(0.78)', 
-                    transformOrigin: 'top left' 
-                 }}
+                 style={{ width: '390px', height: '844px', transform: 'scale(0.78)', transformOrigin: 'top left' }}
                ></iframe>
-
              </div>
              
-             {/* Botones Físicos Simulados */}
              <div className="absolute top-24 -left-[11px] w-1.5 h-8 bg-slate-700 rounded-l-md"></div>
              <div className="absolute top-36 -left-[11px] w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
              <div className="absolute top-52 -left-[11px] w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
              <div className="absolute top-36 -right-[11px] w-1.5 h-16 bg-slate-700 rounded-r-md"></div>
            </div>
 
-           {/* Botón ver pantalla completa */}
            <button onClick={() => window.open(currentDemo.url, '_blank')} className="absolute bottom-10 right-10 px-5 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full font-bold text-[10px] uppercase tracking-widest flex items-center transition-colors shadow-2xl z-50">
              Pantalla completa <ExternalLink size={14} className="ml-2"/>
            </button>
         </div>
       </div>
 
-      {/* 🔴 NUEVA SECCIÓN DE INFORMACIÓN: LA PROMESA BAULIA */}
       <div className="w-full max-w-6xl mx-auto px-6 py-20 relative z-10">
         <div className="border-t border-white/10 pt-20">
           <div className="text-center mb-16">
@@ -10715,10 +10755,10 @@ const ShowcaseSimulatorView = () => {
         </div>
       </div>
 
-      {/* Botón flotante móvil para ir a precios */}
+      {/* 🔴 BOTON MÓVIL MODIFICADO */}
       <div className="fixed bottom-6 w-full px-4 sm:hidden z-50">
-        <button onClick={() => window.location.href = '/#planes'} className="w-full py-4 bg-amber-500 text-slate-900 font-black rounded-full text-xs uppercase tracking-widest shadow-2xl">
-          Crear la Mía <ArrowRight size={16} className="inline ml-1"/>
+        <button onClick={() => setCheckoutStep(1)} className="w-full py-4 bg-amber-500 text-slate-900 font-black rounded-full text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.4)]">
+          Comprar este Diseño <ArrowRight size={16} className="inline ml-1"/>
         </button>
       </div>
 
