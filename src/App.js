@@ -5323,184 +5323,239 @@ const ChecklistView = ({ tareas, addNotification }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CHECKLIST (DARK PREMIUM) ---
+// --- COMPONENTE: CRONOGRAMA (DARK PREMIUM) ---
 // ==========================================
-const ChecklistView = ({ tareas, addNotification }) => {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [filtroCategoria, setFiltroCategoria] = useState('Todas');
+const TimingView = ({ timing, setTiming, addNotification }) => {
+  const [exportViewOpen, setExportViewOpen] = useState(false);
+  const [isPreparingPrint, setIsPreparingPrint] = useState(false);
   
-  const [formData, setFormData] = useState({
-    titulo: '', categoria: 'Logística', fechaLimite: '', estado: 'pendiente'
-  });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editModal, setEditModal] = useState({ open: false, evento: null });
+  const [deleteModal, setDeleteModal] = useState(null);
+  const [formData, setFormData] = useState({ hora: '', actividad: '', responsable: '', lugar: '', notas: '' });
 
-  const categorias = ['Logística', 'Comida/Bebida', 'Comunicación', 'Música', 'Decoración', 'Finanzas', 'Otros'];
+  const timingOrdenado = [...timing].sort((a, b) => a.hora.localeCompare(b.hora));
 
-  const safeTareas = tareas || [];
-
-  const handleSaveTarea = async (e) => {
-    e.preventDefault();
+  const handleSave = async (e) => {
+      e.preventDefault();
     const nuevoId = Date.now().toString();
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "tareas", nuevoId), { id: nuevoId, ...formData });
-    setIsFormOpen(false);
-    setFormData({ titulo: '', categoria: 'Logística', fechaLimite: '', estado: 'pendiente' });
-    if(addNotification) addNotification('Tarea Agregada', 'Se ha añadido al tablero correctamente.', 'success', 'tareas');
+    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "timing", nuevoId), { id: nuevoId, ...formData });
+      setModalOpen(false);
+      if(addNotification) addNotification('Actividad Guardada', 'El cronograma se ha actualizado en la nube.', 'success');
   };
 
-  const moverTarea = async (id, nuevoEstado) => {
-    const tarea = safeTareas.find(t => t.id === id);
-    if(tarea) {
-      await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "tareas", id.toString()), { ...tarea, estado: nuevoEstado });
-    }
+  const handleUpdate = async (e) => {
+      e.preventDefault();
+    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "timing", editModal.evento.id.toString()), editModal.evento);
+      setEditModal({ open: false, evento: null });
+      if(addNotification) addNotification('Cambios Guardados', 'Actividad modificada en la nube.', 'success');
   };
 
-  const eliminarTarea = async (id) => {
-    await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "tareas", id.toString()));
-    if(addNotification) addNotification('Tarea Eliminada', 'Se ha quitado del checklist.', 'warning');
+  const executeDelete = async () => {
+    await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "timing", deleteModal.id.toString()));
+      setDeleteModal(null);
+      if(addNotification) addNotification('Eliminada', 'Actividad removida del cronograma.', 'warning');
   };
 
-  const isOverdue = (dateStr) => {
-    if (!dateStr) return false;
-    return new Date(dateStr) < new Date();
+  const triggerPdfDownload = async () => {
+    setIsPreparingPrint(true);
+    setTimeout(async () => {
+      try {
+        const { jsPDF } = await import('jspdf');
+        const html2canvas = (await import('html2canvas')).default;
+        const pages = document.querySelectorAll('.timing-pdf-page');
+        const pdf = new jsPDF('p', 'mm', 'letter');
+
+        for (let i = 0; i < pages.length; i++) {
+           const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+           const imgData = canvas.toDataURL('image/jpeg', 0.95);
+           if (i > 0) pdf.addPage();
+           pdf.addImage(imgData, 'JPEG', 0, 0, 215.9, 279.4);
+        }
+        pdf.save('Cronograma-Rundown.pdf');
+        if(addNotification) addNotification('¡PDF Guardado!', 'Revisa tu carpeta de descargas.', 'success');
+      } catch (error) {
+        if(addNotification) addNotification('Error', 'Fallo al generar el PDF.', 'error');
+      }
+      setIsPreparingPrint(false);
+      setExportViewOpen(false);
+    }, 500);
   };
 
-  const tareasFiltradas = filtroCategoria === 'Todas' 
-    ? safeTareas 
-    : safeTareas.filter(t => t.categoria === filtroCategoria);
+  if (exportViewOpen) {
+    const PAGE_1_LIMIT = 12;
+    const PAGE_N_LIMIT = 18;
+    const firstPageItems = timingOrdenado.slice(0, PAGE_1_LIMIT);
+    const extraItems = timingOrdenado.slice(PAGE_1_LIMIT);
+    const extraPages = [];
+    for(let i=0; i<extraItems.length; i+=PAGE_N_LIMIT) extraPages.push(extraItems.slice(i, i+PAGE_N_LIMIT));
 
-  const pendientes = tareasFiltradas.filter(t => t.estado === 'pendiente');
-  const enProceso = tareasFiltradas.filter(t => t.estado === 'proceso');
-  const completadas = tareasFiltradas.filter(t => t.estado === 'listo');
+    const renderTableRows = (rows) => (
+      <table className="w-full text-left text-sm border-collapse">
+        <thead>
+          <tr className="bg-slate-800 text-white">
+            <th className="px-4 py-3 font-bold w-24 border border-slate-800">Hora</th>
+            <th className="px-4 py-3 font-bold border border-slate-800">Actividad / Momento</th>
+            <th className="px-4 py-3 font-bold border border-slate-800">Responsable</th>
+            <th className="px-4 py-3 font-bold border border-slate-800">Lugar / Notas Extra</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((evento, idx) => (
+            <tr key={`print_${evento.id}`} className={idx % 2 === 0 ? 'bg-slate-50' : 'bg-white'}>
+              <td className="px-4 py-4 font-black text-lg text-indigo-600 border border-slate-300 align-top">{evento.hora}</td>
+              <td className="px-4 py-4 border border-slate-300 align-top"><p className="font-bold text-slate-800 text-base">{evento.actividad}</p></td>
+              <td className="px-4 py-4 border border-slate-300 font-bold text-slate-600 uppercase text-xs align-top">{evento.responsable}</td>
+              <td className="px-4 py-4 border border-slate-300 align-top">
+                {evento.lugar && <p className="font-bold text-xs text-slate-800 mb-1 flex items-center"><MapPin size={10} className="mr-1"/> {evento.lugar}</p>}
+                {evento.notas && <p className="text-xs text-slate-500 italic">{evento.notas}</p>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
 
-  const renderTarea = (tarea) => {
-    const overdue = isOverdue(tarea.fechaLimite) && tarea.estado !== 'listo';
-    
     return (
-      <div key={tarea.id} className={`bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border shadow-sm mb-3 transition-all hover:shadow-md hover:scale-[1.01] group ${overdue ? 'border-rose-300 dark:border-rose-500/50' : 'border-slate-200 dark:border-white/10'}`}>
-        <div className="flex justify-between items-start mb-2">
-          <span className="px-2.5 py-1 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-transparent dark:border-white/5 rounded-md text-[9px] font-black uppercase tracking-widest">{tarea.categoria}</span>
-          <button onClick={() => eliminarTarea(tarea.id)} className="text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"><X size={14}/></button>
+      <div className="fixed inset-0 z-[120] bg-slate-900/95 flex flex-col overflow-hidden backdrop-blur-md">
+        <div className="bg-[#0a0a0a] text-white p-4 flex justify-between items-center border-b border-white/10 shadow-lg print:hidden z-10 shrink-0 gap-4">
+          <div className="flex items-center space-x-4">
+            <button onClick={() => setExportViewOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24}/></button>
+            <div><h3 className="font-bold text-sm">Estudio de Impresión: Staff Rundown</h3><p className="text-[10px] text-slate-400 uppercase tracking-widest">Guion operativo Carta.</p></div>
+          </div>
+          <button onClick={triggerPdfDownload} disabled={isPreparingPrint} className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl text-sm font-black flex items-center shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all disabled:opacity-50">
+            {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
+            {isPreparingPrint ? 'Preparando...' : 'Descargar PDF'}
+          </button>
         </div>
-        
-        <h4 className={`font-bold text-sm mb-3 leading-snug ${tarea.estado === 'listo' ? 'text-slate-400 dark:text-slate-600 line-through' : 'text-slate-800 dark:text-white'}`}>
-          {tarea.titulo}
-        </h4>
-        
-        <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100 dark:border-white/5">
-          <div className="flex items-center">
-            {tarea.fechaLimite ? (
-              <span className={`text-[9px] font-black uppercase tracking-widest flex items-center px-2 py-1 rounded-md border ${overdue ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20' : 'text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'}`}>
-                {overdue ? <AlertCircle size={10} className="mr-1.5"/> : <Calendar size={10} className="mr-1.5"/>}
-                {tarea.fechaLimite}
-              </span>
-            ) : <span className="text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest flex items-center"><Calendar size={10} className="mr-1"/> Sin fecha</span>}
+
+        <div className="flex-1 overflow-y-auto bg-[#111] custom-scrollbar flex flex-col items-center py-8 gap-8">
+          <div className="timing-pdf-page bg-white mx-auto shadow-2xl shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden', position: 'relative' }}>
+            <header className="flex justify-between items-start border-b-4 border-slate-900 pb-6 mb-8">
+              <div>
+                <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tight">GUION OPERATIVO</h1>
+                <p className="text-lg text-slate-600 font-bold mt-1">EVENT MASTER</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Documento Confidencial</p>
+                <p className="text-xs text-slate-400 mt-1">Solo Staff y Proveedores</p>
+              </div>
+            </header>
+            <main>{renderTableRows(firstPageItems)}</main>
+            <div className="absolute bottom-6 right-6 text-[10px] font-bold text-slate-400">Página 1 de {1 + extraPages.length}</div>
           </div>
-          
-          <div className="flex space-x-1.5">
-            {tarea.estado === 'pendiente' && (
-              <button onClick={() => moverTarea(tarea.id, 'proceso')} className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center">
-                <Clock size={12} className="mr-1.5"/> Iniciar
-              </button>
-            )}
-            {tarea.estado === 'proceso' && (
-              <>
-                <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-3 py-1.5 text-slate-500 dark:text-slate-400 text-[9px] font-black uppercase tracking-widest hover:text-slate-700 dark:hover:text-white transition-colors">Pausar</button>
-                <button onClick={() => moverTarea(tarea.id, 'listo')} className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors flex items-center">
-                  <CheckCircle2 size={12} className="mr-1.5"/> Listo
-                </button>
-              </>
-            )}
-            {tarea.estado === 'listo' && (
-              <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-3 py-1.5 text-slate-400 dark:text-slate-500 text-[9px] font-black uppercase tracking-widest hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Reabrir</button>
-            )}
-          </div>
+
+          {extraPages.map((pageRows, pIdx) => (
+            <div key={`extrapage_${pIdx}`} className="timing-pdf-page bg-white mx-auto shadow-2xl shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden', position: 'relative' }}>
+              <header className="border-b-2 border-slate-800 pb-3 mb-6">
+                <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">GUION OPERATIVO (Cont.)</h1>
+              </header>
+              <main>{renderTableRows(pageRows)}</main>
+              <div className="absolute bottom-6 right-6 text-[10px] font-bold text-slate-400">Página {pIdx + 2} de {1 + extraPages.length}</div>
+            </div>
+          ))}
         </div>
       </div>
     );
-  };
+  }
 
   return (
     <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500 z-10">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">Tablero de Actividades</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Organiza tu progreso moviendo las tareas entre las columnas.</p>
+          <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">El Minuto a Minuto</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Sincroniza al staff y proveedores con el guion perfecto.</p>
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
-          <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className="px-4 py-2 border border-slate-200 dark:border-white/10 rounded-xl bg-white dark:bg-[#0a0a0a] text-sm font-bold text-slate-700 dark:text-white outline-none shadow-sm transition-colors flex-1 md:flex-none cursor-pointer">
-            <option value="Todas">Todas las Categorías</option>
-            {categorias.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <button onClick={() => setIsFormOpen(true)} className="flex items-center justify-center px-5 py-2.5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-all flex-1 md:flex-none uppercase tracking-widest text-[10px]">
-            <Plus size={16} className="mr-1.5" /> Nueva Tarea
+        <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
+          <button onClick={() => setExportViewOpen(true)} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors">
+            <FileDown size={14} className="mr-2 text-indigo-600 dark:text-amber-500"/> Reporte PDF
+          </button>
+          <button onClick={() => { setFormData({ hora: '', actividad: '', responsable: '', lugar: '', notas: '' }); setModalOpen(true); }} className="flex-1 md:flex-none flex items-center justify-center px-5 py-2.5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-all">
+            <Plus size={16} className="mr-1.5" /> Momento
           </button>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col md:flex-row gap-6 overflow-hidden">
-        {/* COLUMNA 1: POR HACER */}
-        <div className="flex-1 flex flex-col bg-slate-50/80 dark:bg-white/[0.02] backdrop-blur-sm rounded-[2rem] border border-slate-200/50 dark:border-white/5 p-4 transition-colors shadow-inner">
-          <div className="flex items-center justify-between mb-5 px-3 pt-2">
-            <h3 className="font-black text-slate-700 dark:text-slate-300 flex items-center text-xs uppercase tracking-widest"><Circle size={14} className="mr-2 text-slate-400 dark:text-slate-500"/> Por Hacer</h3>
-            <span className="bg-white dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400 text-[10px] font-black px-2.5 py-1 rounded-md border border-slate-200 dark:border-white/10 shadow-sm">{pendientes.length}</span>
+      <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl p-6 overflow-y-auto custom-scrollbar transition-colors">
+        {timingOrdenado.length === 0 ? (
+          <div className="text-center py-24 text-slate-400 dark:text-slate-500 flex flex-col items-center justify-center h-full">
+            <Clock size={56} className="mx-auto mb-4 opacity-20"/>
+            <h3 className="text-xl font-bold text-slate-700 dark:text-white mb-2 font-editorial">Cronograma Vacío</h3>
+            <p className="text-sm font-medium">Empieza a planear el orden de tu gran día.</p>
           </div>
-          <div className="flex-1 overflow-y-auto px-1 pb-4 custom-scrollbar">
-            {pendientes.map(renderTarea)}
-            {pendientes.length === 0 && <div className="text-center py-12 text-slate-400 dark:text-slate-600 text-sm border-2 border-dashed border-slate-200 dark:border-white/5 rounded-2xl font-medium">No hay tareas pendientes.</div>}
+        ) : (
+          <div className="relative border-l-[3px] border-indigo-100 dark:border-white/5 ml-4 md:ml-10 space-y-8 py-4 transition-colors">
+            {timingOrdenado.map((evento) => (
+              <div key={evento.id} className="relative pl-8 md:pl-12 group">
+                <div className="absolute w-5 h-5 bg-white dark:bg-[#0a0a0a] border-4 border-indigo-500 dark:border-amber-500 rounded-full -left-[11px] top-1.5 shadow-sm group-hover:scale-125 transition-transform z-10"></div>
+                <div className="bg-slate-50 dark:bg-[#111] border border-slate-100 dark:border-white/5 p-5 rounded-2xl shadow-sm hover:shadow-md dark:shadow-none hover:border-indigo-200 dark:hover:border-amber-500/50 transition-all flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-2xl font-black text-indigo-600 dark:text-amber-500 tracking-tight">{evento.hora}</span>
+                      <span className="px-2.5 py-1 bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 rounded-md text-[9px] font-black uppercase tracking-widest border border-transparent dark:border-white/5">{evento.responsable}</span>
+                    </div>
+                    <h4 className="text-xl font-bold text-slate-800 dark:text-white mb-2 leading-tight font-editorial">{evento.actividad}</h4>
+                    {evento.lugar && <p className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center mb-1.5"><MapPin size={12} className="mr-1.5 text-rose-500 dark:text-rose-400"/> {evento.lugar}</p>}
+                    {evento.notas && <p className="text-xs text-slate-500 dark:text-slate-500 flex items-start mt-2 bg-white dark:bg-black/20 p-2.5 rounded-xl border border-slate-100 dark:border-white/5"><AlignLeft size={12} className="mr-2 mt-0.5 opacity-50 shrink-0"/> <span className="italic leading-relaxed">{evento.notas}</span></p>}
+                  </div>
+                  <div className="flex md:flex-col justify-end md:justify-start gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-slate-200 dark:border-white/10 mt-2 md:mt-0 transition-colors">
+                    <button onClick={() => setEditModal({ open: true, evento: { ...evento } })} className="p-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-transparent text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-white hover:bg-indigo-50 dark:hover:bg-white/10 rounded-xl transition-colors shadow-sm dark:shadow-none"><Edit2 size={16} /></button>
+                    <button onClick={() => setDeleteModal(evento)} className="p-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-transparent text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-white/10 rounded-xl transition-colors shadow-sm dark:shadow-none"><Trash2 size={16} /></button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-
-        {/* COLUMNA 2: EN PROCESO */}
-        <div className="flex-1 flex flex-col bg-indigo-50/50 dark:bg-indigo-500/5 backdrop-blur-sm rounded-[2rem] border border-indigo-100/50 dark:border-indigo-500/10 p-4 transition-colors shadow-inner">
-          <div className="flex items-center justify-between mb-5 px-3 pt-2">
-            <h3 className="font-black text-indigo-800 dark:text-indigo-400 flex items-center text-xs uppercase tracking-widest"><Clock size={14} className="mr-2 text-indigo-500 dark:text-indigo-500"/> En Proceso</h3>
-            <span className="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{enProceso.length}</span>
-          </div>
-          <div className="flex-1 overflow-y-auto px-1 pb-4 custom-scrollbar">
-            {enProceso.map(renderTarea)}
-            {enProceso.length === 0 && <div className="text-center py-12 text-indigo-300 dark:text-indigo-900 text-sm border-2 border-dashed border-indigo-200 dark:border-indigo-900/50 rounded-2xl font-medium">Arrastra o inicia una tarea.</div>}
-          </div>
-        </div>
-
-        {/* COLUMNA 3: COMPLETADO */}
-        <div className="flex-1 flex flex-col bg-emerald-50/50 dark:bg-emerald-500/5 backdrop-blur-sm rounded-[2rem] border border-emerald-100/50 dark:border-emerald-500/10 p-4 transition-colors shadow-inner">
-          <div className="flex items-center justify-between mb-5 px-3 pt-2">
-            <h3 className="font-black text-emerald-800 dark:text-emerald-400 flex items-center text-xs uppercase tracking-widest"><CheckCircle2 size={14} className="mr-2 text-emerald-500 dark:text-emerald-500"/> Completado</h3>
-            <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{completadas.length}</span>
-          </div>
-          <div className="flex-1 overflow-y-auto px-1 pb-4 custom-scrollbar">
-            {completadas.map(renderTarea)}
-            {completadas.length === 0 && <div className="text-center py-12 text-emerald-300 dark:text-emerald-900/50 text-sm border-2 border-dashed border-emerald-200 dark:border-emerald-900/30 rounded-2xl font-medium">Aún no hay tareas terminadas.</div>}
-          </div>
-        </div>
+        )}
       </div>
 
-      {isFormOpen && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 duration-200 transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-white/10 transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors">
-              <h3 className="font-bold text-lg text-slate-800 dark:text-white flex items-center tracking-wide"><ListTodo size={20} className="mr-2 text-indigo-600 dark:text-amber-500"/> Agregar Tarea</h3>
-              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
-            </div>
-            <form onSubmit={handleSaveTarea} className="p-6 space-y-5">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">¿Qué necesitas hacer?</label>
-                <input type="text" required value={formData.titulo} onChange={e=>setFormData({...formData, titulo: e.target.value})} placeholder="Ej. Contratar al fotógrafo" className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-amber-500 outline-none text-slate-800 dark:text-white font-bold transition-colors" autoFocus/>
+      {/* MODALES CON ESTILO DARK/PREMIUM */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors"><h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center"><Clock size={20} className="mr-2 text-indigo-600 dark:text-amber-500"/> Agregar Momento</h3><button onClick={() => setModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button></div>
+            <form onSubmit={handleSave} className="p-6 space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Hora</label><input type="time" required value={formData.hora} onChange={e=>setFormData({...formData, hora: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white font-bold [color-scheme:light] dark:[color-scheme:dark] transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Responsable</label><input type="text" value={formData.responsable} onChange={e=>setFormData({...formData, responsable: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white font-bold transition-colors" placeholder="Ej. DJ, Hostess" /></div>
               </div>
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Categoría</label>
-                <select value={formData.categoria} onChange={e=>setFormData({...formData, categoria: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-amber-500 outline-none text-slate-800 dark:text-white font-bold transition-colors cursor-pointer">
-                  {categorias.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Fecha Límite (Opcional)</label>
-                <input type="date" value={formData.fechaLimite} onChange={e=>setFormData({...formData, fechaLimite: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-amber-500 outline-none text-slate-600 dark:text-slate-300 [color-scheme:light] dark:[color-scheme:dark] transition-colors" />
-              </div>
-              
-              <button type="submit" className="w-full p-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-4 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors active:scale-95">
-                Crear Tarea
-              </button>
+              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Actividad / Momento</label><input type="text" required value={formData.actividad} onChange={e=>setFormData({...formData, actividad: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white font-bold transition-colors" placeholder="Ej. Entrada de Novios" /></div>
+              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Lugar (Opcional)</label><input type="text" value={formData.lugar} onChange={e=>setFormData({...formData, lugar: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white text-sm transition-colors" placeholder="Ej. Pista de Baile" /></div>
+              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Notas Extra (Opcional)</label><textarea value={formData.notas} onChange={e=>setFormData({...formData, notas: e.target.value})} className="w-full p-4 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white text-sm resize-none h-20 transition-colors" placeholder="Canción específica, detalles..." /></div>
+              <button type="submit" className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-4 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors active:scale-95">Guardar Momento</button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {editModal.open && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors"><h3 className="font-bold text-lg text-slate-900 dark:text-white">Editar Momento</h3><button onClick={() => setEditModal({open: false, evento: null})} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button></div>
+            <form onSubmit={handleUpdate} className="p-6 space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Hora</label><input type="time" required value={editModal.evento.hora} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, hora: e.target.value}})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white font-bold [color-scheme:light] dark:[color-scheme:dark] transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Responsable</label><input type="text" value={editModal.evento.responsable} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, responsable: e.target.value}})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white font-bold transition-colors" /></div>
+              </div>
+              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Actividad / Momento</label><input type="text" required value={editModal.evento.actividad} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, actividad: e.target.value}})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white font-bold transition-colors" /></div>
+              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Lugar (Opcional)</label><input type="text" value={editModal.evento.lugar || ''} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, lugar: e.target.value}})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white text-sm transition-colors" /></div>
+              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Notas Extra</label><textarea value={editModal.evento.notas || ''} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, notas: e.target.value}})} className="w-full p-4 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white text-sm resize-none h-20 transition-colors" /></div>
+              <button type="submit" className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-4 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors active:scale-95">Guardar Cambios</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {deleteModal && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm p-8 text-center shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors">
+             <div className="w-20 h-20 bg-rose-100 dark:bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner dark:border dark:border-rose-500/20"><Trash2 size={36} /></div>
+             <h3 className="font-editorial font-black text-2xl text-slate-900 dark:text-white mb-2 transition-colors">¿Eliminar actividad?</h3>
+             <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 leading-relaxed">Borrarás "<b>{deleteModal.actividad}</b>" a las {deleteModal.hora}. Esta acción es definitiva.</p>
+             <div className="flex space-x-3">
+               <button onClick={()=>setDeleteModal(null)} className="flex-1 py-4 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
+               <button onClick={executeDelete} className="flex-1 py-4 bg-rose-500 text-white rounded-xl font-black hover:bg-rose-600 transition-colors shadow-md dark:shadow-[0_0_15px_rgba(244,63,94,0.3)] uppercase tracking-widest text-[10px]">Sí, Eliminar</button>
+             </div>
           </div>
         </div>
       )}
