@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
+    "@stripe/react-stripe-js": "^5.6.1",
+    "@stripe/stripe-js": "^8.10.0",
     "firebase": "^12.10.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.0",
