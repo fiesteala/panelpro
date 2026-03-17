@@ -5657,7 +5657,7 @@ const TimingView = ({ timing, setTiming, addNotification }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PRESUPUESTO (Fase 4) ---
+// --- COMPONENTE: PRESUPUESTO (DARK PREMIUM) ---
 // ==========================================
 const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presupuestoTotal, setPresupuestoTotal, addNotification }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -5834,22 +5834,22 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
     );
 
     return (
-      <div className="fixed inset-0 z-[120] bg-slate-200 flex flex-col overflow-hidden">
-        <div className="bg-slate-900 text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg print:hidden z-10 gap-4 shrink-0">
+      <div className="fixed inset-0 z-[120] bg-[#050505] flex flex-col overflow-hidden">
+        <div className="bg-[#0a0a0a] text-white p-4 flex flex-col sm:flex-row justify-between items-center border-b border-white/10 z-10 gap-4 shrink-0">
           <div className="flex items-center space-x-4">
-            <button onClick={() => setExportViewOpen(false)} className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X size={24}/></button>
+            <button onClick={() => setExportViewOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24}/></button>
             <div>
               <h3 className="font-bold text-sm">Reporte Financiero</h3>
-              <p className="text-[10px] text-slate-400">Paginado Tamaño Carta</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest">Paginado Tamaño Carta</p>
             </div>
           </div>
-          <button onClick={triggerPdfDownload} disabled={isPreparingPrint} className="w-full sm:w-auto px-5 py-2.5 bg-indigo-600 hover:bg-indigo-50 text-white rounded-xl text-sm font-bold flex items-center justify-center shadow-md transition-all disabled:bg-slate-500">
+          <button onClick={triggerPdfDownload} disabled={isPreparingPrint} className="w-full sm:w-auto px-5 py-2.5 bg-amber-500 text-slate-900 rounded-xl text-sm font-black flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all disabled:opacity-50">
             {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
             {isPreparingPrint ? 'Preparando...' : 'Descargar PDF'}
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-slate-200 flex flex-col items-center py-8 gap-8 relative">
+        <div className="flex-1 overflow-y-auto bg-[#111] flex flex-col items-center py-8 gap-8 relative custom-scrollbar">
           <div className="finance-pdf-page bg-white shadow-2xl shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden', position: 'relative' }}>
             <header className="flex justify-between items-center border-b-2 border-slate-200 pb-4 mb-6">
               <div className="flex items-center">
@@ -5899,93 +5899,124 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
   }
 
   return (
-    <div className="h-full flex flex-col space-y-6 pb-6 relative">
+    <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-200">
       <div className="flex justify-between items-end">
-        <div><h2 className="text-2xl font-bold text-slate-800">Control Financiero</h2><p className="text-slate-500 text-sm mt-1">Con gestión de abonos, fechas límite y reportes.</p></div>
-        <div className="flex gap-2">
-          <div className="bg-white rounded-xl border border-slate-200 p-1 hidden sm:flex">
-            <button onClick={()=>setViewMode('table')} className={`px-3 py-1.5 rounded-lg text-sm font-bold flex items-center transition-colors ${viewMode === 'table' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'}`}><LayoutGrid size={16} className="mr-1.5"/> Tabla</button>
-            <button onClick={()=>setViewMode('calendar')} className={`px-3 py-1.5 rounded-lg text-sm font-bold flex items-center transition-colors ${viewMode === 'calendar' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'}`}><CalendarDays size={16} className="mr-1.5"/> Fechas</button>
+        <div>
+          <h2 className="text-3xl font-editorial text-white tracking-wide">Control Financiero</h2>
+          <p className="text-slate-400 text-sm mt-1 font-light">Gestión de capital, abonos y reportes de tu bóveda.</p>
+        </div>
+        <div className="flex gap-3">
+          <div className="bg-[#0a0a0a] rounded-xl border border-white/10 p-1 hidden sm:flex shadow-sm">
+            <button onClick={()=>setViewMode('table')} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center transition-colors ${viewMode === 'table' ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-white'}`}><LayoutGrid size={14} className="mr-2"/> Tabla</button>
+            <button onClick={()=>setViewMode('calendar')} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center transition-colors ${viewMode === 'calendar' ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-white'}`}><CalendarDays size={14} className="mr-2"/> Fechas</button>
           </div>
-          <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 shadow-sm"><FileDown size={16} className="mr-2 text-indigo-600"/> Reporte PDF</button>
-          <button onClick={exportData} className="hidden sm:flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 shadow-sm"><Download size={16} className="mr-2"/> Excel</button>
-          <button onClick={() => { setFormData({ concepto: '', categoria: 'Lugar', estimado: '', fechaLimite: '' }); setIsFormOpen(true); }} className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold shadow-sm hover:bg-indigo-700"><Plus size={18} className="mr-2" /> Nuevo Gasto</button>
+          <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2 bg-[#0a0a0a] border border-white/10 text-white rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-white/5 shadow-sm transition-colors"><FileDown size={14} className="mr-2 text-amber-500"/> Reporte</button>
+          <button onClick={exportData} className="hidden sm:flex items-center px-4 py-2 bg-[#0a0a0a] border border-white/10 text-white rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-white/5 shadow-sm transition-colors"><Download size={14} className="mr-2 text-indigo-400"/> Excel</button>
+          <button onClick={() => { setFormData({ concepto: '', categoria: 'Lugar', estimado: '', fechaLimite: '' }); setIsFormOpen(true); }} className="flex items-center px-5 py-2 bg-amber-500 text-slate-900 rounded-xl font-black text-sm shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all"><Plus size={16} className="mr-1.5" /> Gasto</button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-          <div className="text-slate-500 font-semibold text-sm mb-2 flex justify-between items-center">
-            <span><Wallet size={16} className="inline mr-2 text-indigo-500"/> Presupuesto Total</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {/* TARJETA 1 */}
+        <div className="bg-[#0a0a0a] p-6 rounded-2xl border border-white/10 shadow-2xl flex flex-col relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-3 flex justify-between items-center z-10 relative">
+            <span className="flex items-center"><Wallet size={14} className="mr-2 text-indigo-400"/> Presupuesto Total</span>
             {!isEditingBudget && (
-              <button onClick={() => setIsEditingBudget(true)} className="text-indigo-400 hover:text-indigo-600 transition-colors p-1 bg-indigo-50 rounded" title="Editar Presupuesto"><Edit2 size={12}/></button>
+              <button onClick={() => setIsEditingBudget(true)} className="text-indigo-400 hover:text-white transition-colors p-1.5 bg-white/5 rounded-lg border border-white/10" title="Editar Presupuesto"><Edit2 size={12}/></button>
             )}
           </div>
           {isEditingBudget ? (
-             <div className="flex mt-auto bg-slate-50 rounded-lg overflow-hidden border border-slate-200 focus-within:border-indigo-400 transition-colors">
+             <div className="flex mt-auto bg-[#111] rounded-xl overflow-hidden border border-indigo-500/50 focus-within:border-amber-500 transition-colors z-10 relative">
                <span className="pl-3 py-2 text-slate-400 font-bold">$</span>
-               <input type="number" autoFocus value={tempBudget} onChange={(e)=>setTempBudget(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') guardarPresupuestoNube(); }} className="w-full py-2 px-2 bg-transparent font-bold outline-none text-slate-800" />
-               <button onClick={guardarPresupuestoNube} className="bg-indigo-600 text-white px-4 font-bold text-xs hover:bg-indigo-700 transition-colors">OK</button>
+               <input type="number" autoFocus value={tempBudget} onChange={(e)=>setTempBudget(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') guardarPresupuestoNube(); }} className="w-full py-2 px-2 bg-transparent font-bold outline-none text-white" />
+               <button onClick={guardarPresupuestoNube} className="bg-amber-500 text-slate-900 px-4 font-black text-xs hover:bg-amber-400 transition-colors">OK</button>
              </div>
           ) : (
-             <h3 className="text-3xl font-black text-slate-800 mt-auto">{formatMoney(presupuestoTotal)}</h3>
+             <h3 className="text-3xl lg:text-4xl font-editorial text-white mt-auto z-10 relative tracking-wide">{formatMoney(presupuestoTotal)}</h3>
           )}
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col"><div className="text-slate-500 font-semibold text-sm mb-2"><PieChart size={16} className="inline mr-2 text-sky-500"/> Costo Estimado</div><h3 className="text-3xl font-black text-slate-800 mt-auto">{formatMoney(totalEstimado)}</h3></div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col"><div className="text-slate-500 font-semibold text-sm mb-2"><DollarSign size={16} className="inline mr-2 text-emerald-500"/> Dinero Pagado</div><h3 className="text-3xl font-black text-emerald-600 mt-auto">{formatMoney(totalPagado)}</h3></div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col"><div className="text-slate-500 font-semibold text-sm mb-2"><TrendingDown size={16} className="inline mr-2 text-amber-500"/> Por Pagar (Deuda)</div><h3 className="text-3xl font-black text-amber-500 mt-auto">{formatMoney(totalDeuda)}</h3></div>
+        {/* TARJETA 2 */}
+        <div className="bg-[#0a0a0a] p-6 rounded-2xl border border-white/10 shadow-2xl flex flex-col relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-3 flex items-center z-10 relative"><PieChart size={14} className="mr-2 text-sky-400"/> Costo Estimado</div>
+          <h3 className="text-3xl lg:text-4xl font-editorial text-white mt-auto z-10 relative tracking-wide">{formatMoney(totalEstimado)}</h3>
+        </div>
+
+        {/* TARJETA 3 */}
+        <div className="bg-[#0a0a0a] p-6 rounded-2xl border border-white/10 shadow-2xl flex flex-col relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-3 flex items-center z-10 relative"><DollarSign size={14} className="mr-2 text-emerald-400"/> Capital Pagado</div>
+          <h3 className="text-3xl lg:text-4xl font-editorial text-emerald-400 mt-auto z-10 relative tracking-wide">{formatMoney(totalPagado)}</h3>
+        </div>
+
+        {/* TARJETA 4 */}
+        <div className="bg-[#0a0a0a] p-6 rounded-2xl border border-white/10 shadow-2xl flex flex-col relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-3 flex items-center z-10 relative"><TrendingDown size={14} className="mr-2 text-amber-500"/> Deuda Restante</div>
+          <h3 className="text-3xl lg:text-4xl font-editorial text-amber-500 mt-auto z-10 relative tracking-wide">{formatMoney(totalDeuda)}</h3>
+        </div>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm print:hidden">
-        <h3 className="text-sm font-bold text-slate-700 mb-3 flex items-center"><PieChart size={16} className="mr-2 text-indigo-500"/> Distribución del Gasto (Estimado)</h3>
-        <div className="w-full h-4 rounded-full overflow-hidden flex bg-slate-100">
+      <div className="bg-[#0a0a0a] p-8 rounded-2xl border border-white/10 shadow-2xl print:hidden">
+        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center"><PieChart size={14} className="mr-2 text-indigo-400"/> Distribución del Capital (Estimado)</h3>
+        <div className="w-full h-3 rounded-full overflow-hidden flex bg-white/5 border border-white/5">
           {Object.entries(gastosPorCategoria).map(([cat, amount], idx) => {
             const pct = (amount / totalEstimado) * 100;
-            return <div key={idx} className={`${coloresCategoria[cat] || 'bg-indigo-300'} h-full transition-all`} style={{width: `${pct}%`}} title={`${cat}: ${formatMoney(amount)}`}></div>
+            return <div key={idx} className={`${coloresCategoria[cat] || 'bg-indigo-400'} h-full transition-all`} style={{width: `${pct}%`}} title={`${cat}: ${formatMoney(amount)}`}></div>
           })}
         </div>
-        <div className="flex flex-wrap gap-4 mt-3">
+        <div className="flex flex-wrap gap-5 mt-4">
           {Object.entries(gastosPorCategoria).map(([cat, amount], idx) => (
-            <div key={idx} className="flex items-center text-[10px] font-bold text-slate-600"><span className={`w-2 h-2 rounded-full mr-1.5 ${coloresCategoria[cat] || 'bg-indigo-300'}`}></span>{cat} ({(amount/totalEstimado*100).toFixed(0)}%)</div>
+            <div key={idx} className="flex items-center text-[10px] font-bold text-slate-300 uppercase tracking-wider"><span className={`w-2.5 h-2.5 rounded-full mr-2 shadow-sm ${coloresCategoria[cat] || 'bg-indigo-400'}`}></span>{cat} <span className="opacity-50 ml-1">({(amount/totalEstimado*100).toFixed(0)}%)</span></div>
           ))}
         </div>
       </div>
 
       {viewMode === 'table' ? (
-        <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col print:hidden">
-          <div className="overflow-y-auto">
+        <div className="flex-1 bg-[#0a0a0a] rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col print:hidden">
+          <div className="overflow-y-auto custom-scrollbar">
             <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-600"><tr><th className="px-6 py-4 font-semibold">Concepto / Servicio</th><th className="px-6 py-4 font-semibold">Fecha Límite</th><th className="px-6 py-4 font-semibold text-right">Costo Total</th><th className="px-6 py-4 font-semibold text-right">Abonado</th><th className="px-6 py-4 font-semibold text-right">Falta Pagar</th><th className="px-6 py-4 font-semibold text-center">Acciones</th></tr></thead>
-              <tbody className="divide-y divide-slate-100">
+              <thead className="bg-[#111] border-b border-white/5 text-slate-400 uppercase tracking-widest text-[10px]">
+                <tr>
+                  <th className="px-6 py-4 font-bold">Servicio Contratado</th>
+                  <th className="px-6 py-4 font-bold">Límite</th>
+                  <th className="px-6 py-4 font-bold text-right">Costo Total</th>
+                  <th className="px-6 py-4 font-bold text-right">Abonado</th>
+                  <th className="px-6 py-4 font-bold text-right">Falta Pagar</th>
+                  <th className="px-6 py-4 font-bold text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
                 {safeGastos.map((gasto) => {
                   const deuda = gasto.estimado - gasto.pagado;
                   const overdue = isOverdue(gasto.fechaLimite, deuda);
                   return (
-                    <tr key={gasto.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <p className="font-bold text-slate-800">{gasto.concepto}</p>
-                        {gasto.proveedorId && <p className="text-[10px] text-indigo-500 flex items-center mt-1"><Building size={10} className="mr-1"/> Proveedor Vinculado</p>}
+                    <tr key={gasto.id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-5">
+                        <p className="font-bold text-white text-base">{gasto.concepto}</p>
+                        {gasto.proveedorId && <p className="text-[9px] text-indigo-400 font-bold uppercase tracking-widest flex items-center mt-1.5"><Building size={10} className="mr-1"/> Proveedor Vinculado</p>}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-5">
                         {gasto.fechaLimite ? (
-                           <span className={`px-2.5 py-1 rounded-md text-xs font-semibold flex items-center w-max ${overdue ? 'bg-rose-100 text-rose-700' : (deuda===0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600')}`}>
-                             {overdue ? <AlertCircle size={12} className="mr-1"/> : <Calendar size={12} className="mr-1"/>}
+                           <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest flex items-center w-max border ${overdue ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : (deuda===0 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-slate-400 border-white/10')}`}>
+                             {overdue ? <AlertCircle size={12} className="mr-1.5"/> : <Calendar size={12} className="mr-1.5"/>}
                              {gasto.fechaLimite}
                            </span>
-                        ) : <span className="text-xs text-slate-400">-</span>}
+                        ) : <span className="text-[10px] font-bold uppercase text-slate-600 tracking-widest">Sin Plazo</span>}
                       </td>
-                      <td className="px-6 py-4 text-right font-medium">{formatMoney(gasto.estimado)}</td>
-                      <td className="px-6 py-4 text-right">
-                        <span className="font-bold text-emerald-600 block">{formatMoney(gasto.pagado)}</span>
-                        {gasto.historial?.length > 0 && <button onClick={()=>setHistoryModal(gasto)} className="text-[10px] text-indigo-500 hover:text-indigo-700 font-bold flex items-center justify-end w-full mt-0.5"><History size={10} className="mr-1"/> Ver pagos ({gasto.historial.length})</button>}
+                      <td className="px-6 py-5 text-right font-medium text-slate-300">{formatMoney(gasto.estimado)}</td>
+                      <td className="px-6 py-5 text-right">
+                        <span className="font-bold text-emerald-400 block text-base">{formatMoney(gasto.pagado)}</span>
+                        {gasto.historial?.length > 0 && <button onClick={()=>setHistoryModal(gasto)} className="text-[9px] text-indigo-400 hover:text-indigo-300 font-bold uppercase tracking-widest flex items-center justify-end w-full mt-1"><History size={10} className="mr-1"/> Ver pagos ({gasto.historial.length})</button>}
                       </td>
-                      <td className="px-6 py-4 text-right font-bold text-amber-500">{deuda > 0 ? formatMoney(deuda) : <span className="text-emerald-500 text-xs">Liquidado</span>}</td>
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-6 py-5 text-right font-black text-amber-500 text-base">{deuda > 0 ? formatMoney(deuda) : <span className="text-emerald-500 text-[10px] uppercase tracking-widest border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 rounded-md">Liquidado</span>}</td>
+                      <td className="px-6 py-5 text-center">
                         <div className="flex justify-center items-center space-x-2">
-                          {deuda > 0 && <button onClick={() => setPaymentProcess({ item: gasto, monto: '', fecha: new Date().toISOString().split('T')[0], metodo: 'Transferencia', cuenta: '', comprobante: null })} className="px-3 py-1.5 bg-emerald-50 text-emerald-600 font-bold text-xs rounded-lg hover:bg-emerald-100 border border-emerald-200">Abonar</button>}
-                          <button onClick={() => setEditGastoModal(gasto)} className="p-1.5 text-slate-400 hover:text-indigo-600 bg-slate-50 rounded-lg transition-colors"><Edit2 size={16} /></button>
-                          <button onClick={() => initiateDelete(gasto)} className="p-1.5 text-rose-400 hover:text-rose-600 bg-rose-50 rounded-lg transition-colors"><Trash2 size={16} /></button>
+                          {deuda > 0 && <button onClick={() => setPaymentProcess({ item: gasto, monto: '', fecha: new Date().toISOString().split('T')[0], metodo: 'Transferencia', cuenta: '', comprobante: null })} className="px-4 py-1.5 bg-emerald-500/10 text-emerald-400 font-bold uppercase tracking-widest text-[10px] rounded-lg hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors">Abonar</button>}
+                          <button onClick={() => setEditGastoModal(gasto)} className="p-2 text-slate-400 hover:text-white bg-white/5 border border-white/10 rounded-lg transition-colors"><Edit2 size={14} /></button>
+                          <button onClick={() => initiateDelete(gasto)} className="p-2 text-slate-400 hover:text-rose-500 bg-white/5 border border-white/10 rounded-lg transition-colors"><Trash2 size={14} /></button>
                         </div>
                       </td>
                     </tr>
@@ -5996,28 +6027,28 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
           </div>
         </div>
       ) : (
-        <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6 print:hidden">
-          <h3 className="font-bold text-slate-800 text-lg mb-6 flex items-center"><CalendarDays size={20} className="mr-2 text-indigo-600"/> Próximos Pagos Pendientes</h3>
+        <div className="flex-1 bg-[#0a0a0a] rounded-2xl border border-white/10 shadow-2xl overflow-hidden p-8 print:hidden">
+          <h3 className="font-bold text-white text-lg mb-8 flex items-center"><CalendarDays size={20} className="mr-2 text-amber-500"/> Próximos Pagos Pendientes</h3>
           {gastosConFecha.length === 0 ? (
-            <div className="text-center py-10 text-slate-400"><Calendar size={48} className="mx-auto mb-4 opacity-20"/> No hay pagos pendientes con fecha límite asignada.</div>
+            <div className="text-center py-16 text-slate-500"><Calendar size={48} className="mx-auto mb-4 opacity-20"/> No hay pagos pendientes con fecha límite asignada.</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {gastosConFecha.map(g => {
                 const deuda = g.estimado - g.pagado;
                 const overdue = isOverdue(g.fechaLimite, deuda);
                 return (
-                  <div key={g.id} className={`p-4 rounded-xl border-l-4 shadow-sm flex flex-col bg-slate-50 ${overdue ? 'border-l-rose-500' : 'border-l-indigo-500'}`}>
-                    <div className="flex justify-between items-start mb-2">
-                      <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${overdue ? 'bg-rose-100 text-rose-700' : 'bg-indigo-100 text-indigo-700'}`}>{g.fechaLimite}</span>
+                  <div key={g.id} className={`p-6 rounded-2xl border-l-4 shadow-xl flex flex-col bg-[#111] border-y border-r border-white/5 ${overdue ? 'border-l-rose-500' : 'border-l-amber-500'}`}>
+                    <div className="flex justify-between items-start mb-4">
+                      <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${overdue ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}`}>{g.fechaLimite}</span>
                       {overdue && <AlertCircle size={16} className="text-rose-500 animate-pulse"/>}
                     </div>
-                    <h4 className="font-bold text-slate-800 text-md truncate">{g.concepto}</h4>
-                    <p className="text-xs text-slate-500 mb-3">{g.categoria}</p>
-                    <div className="mt-auto pt-3 border-t border-slate-200 flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-500">Deuda:</span>
-                      <span className={`font-black text-lg ${overdue ? 'text-rose-600' : 'text-slate-800'}`}>{formatMoney(deuda)}</span>
+                    <h4 className="font-bold text-white text-lg truncate mb-1">{g.concepto}</h4>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">{g.categoria}</p>
+                    <div className="mt-auto pt-4 border-t border-white/5 flex justify-between items-center">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Deuda:</span>
+                      <span className={`font-black text-xl ${overdue ? 'text-rose-500' : 'text-amber-500'}`}>{formatMoney(deuda)}</span>
                     </div>
-                    <button onClick={() => setPaymentProcess({ item: g, monto: '', fecha: new Date().toISOString().split('T')[0], metodo: 'Transferencia', cuenta: '', comprobante: null })} className="w-full mt-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-indigo-600 hover:bg-indigo-50 transition-colors">Registrar Abono</button>
+                    <button onClick={() => setPaymentProcess({ item: g, monto: '', fecha: new Date().toISOString().split('T')[0], metodo: 'Transferencia', cuenta: '', comprobante: null })} className="w-full mt-5 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-white uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all">Registrar Abono</button>
                   </div>
                 )
               })}
@@ -6027,43 +6058,44 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
       )}
 
       {editGastoModal && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/60 flex items-center justify-center p-4 print:hidden">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-5 border-b bg-slate-50 flex justify-between"><h3 className="font-bold text-xl text-slate-800">Editar Gasto</h3><button onClick={() => setEditGastoModal(null)}><X size={20}/></button></div>
-            <form onSubmit={handleUpdateGasto} className="p-6 space-y-4">
-              <div><label className="block text-xs font-bold mb-2 text-slate-600">Concepto</label><input type="text" required value={editGastoModal.concepto} onChange={e=>setEditGastoModal({...editGastoModal, concepto: e.target.value})} className="w-full p-3 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" /></div>
-              <div><label className="block text-xs font-bold mb-2 text-slate-600">Categoría</label><select value={editGastoModal.categoria} onChange={e=>setEditGastoModal({...editGastoModal, categoria: e.target.value})} className="w-full p-3 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none">{categorias.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+        <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in">
+          <div className="bg-[#0a0a0a] border border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-5 border-b border-white/10 bg-white/5 flex justify-between"><h3 className="font-bold text-lg text-white">Editar Gasto</h3><button onClick={() => setEditGastoModal(null)} className="text-slate-500 hover:text-white"><X size={20}/></button></div>
+            <form onSubmit={handleUpdateGasto} className="p-6 space-y-5">
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Concepto</label><input type="text" required value={editGastoModal.concepto} onChange={e=>setEditGastoModal({...editGastoModal, concepto: e.target.value})} className="w-full p-3.5 bg-[#111] border border-white/10 rounded-xl focus:border-amber-500 outline-none text-white text-sm" /></div>
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Categoría</label><select value={editGastoModal.categoria} onChange={e=>setEditGastoModal({...editGastoModal, categoria: e.target.value})} className="w-full p-3.5 bg-[#111] border border-white/10 rounded-xl focus:border-amber-500 outline-none text-white text-sm">{categorias.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-xs font-bold mb-2 text-slate-600">Costo Estimado ($)</label><input type="number" required value={editGastoModal.estimado} onChange={e=>setEditGastoModal({...editGastoModal, estimado: e.target.value})} className="w-full p-3 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" /></div>
-                <div><label className="block text-xs font-bold mb-2 text-slate-600">Fecha Límite</label><input type="date" value={editGastoModal.fechaLimite || ''} onChange={e=>setEditGastoModal({...editGastoModal, fechaLimite: e.target.value})} className="w-full p-3 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Costo Estimado ($)</label><input type="number" required value={editGastoModal.estimado} onChange={e=>setEditGastoModal({...editGastoModal, estimado: e.target.value})} className="w-full p-3.5 bg-[#111] border border-white/10 rounded-xl focus:border-amber-500 outline-none text-white text-sm font-bold" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Fecha Límite</label><input type="date" value={editGastoModal.fechaLimite || ''} onChange={e=>setEditGastoModal({...editGastoModal, fechaLimite: e.target.value})} className="w-full p-3.5 bg-[#111] border border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-300 text-sm [color-scheme:dark]" /></div>
               </div>
-              <button type="submit" className="w-full p-3 bg-indigo-600 text-white rounded-xl font-bold mt-4 hover:bg-indigo-700 transition-colors">Guardar Cambios</button>
+              <button type="submit" className="w-full p-4 bg-amber-500 text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-6 hover:bg-amber-400 transition-colors shadow-[0_0_15px_rgba(245,158,11,0.3)]">Guardar Cambios</button>
             </form>
           </div>
         </div>
       )}
 
       {historyModal && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/60 flex items-center justify-center p-4 print:hidden">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b bg-indigo-50 flex justify-between items-center">
-              <h3 className="font-bold text-lg text-indigo-900 flex items-center"><History size={20} className="mr-2"/> Historial: {historyModal.concepto}</h3>
-              <button onClick={() => setHistoryModal(null)} className="text-indigo-900/50 hover:text-indigo-900"><X size={20}/></button>
+        <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in">
+          <div className="bg-[#0a0a0a] border border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-5 border-b border-white/10 bg-indigo-950/30 flex justify-between items-center">
+              <h3 className="font-bold text-sm text-indigo-400 flex items-center uppercase tracking-widest"><History size={16} className="mr-2"/> Historial de Pagos</h3>
+              <button onClick={() => setHistoryModal(null)} className="text-slate-500 hover:text-white"><X size={20}/></button>
             </div>
-            <div className="p-6 max-h-96 overflow-y-auto space-y-4 bg-slate-50/50">
+            <div className="p-6 max-h-96 overflow-y-auto space-y-4 custom-scrollbar bg-[#050505]">
+              <p className="text-white font-bold mb-4">{historyModal.concepto}</p>
               {historyModal.historial.map((abono, i) => (
-                <div key={abono.id} className="p-4 border border-slate-200 rounded-xl relative flex justify-between items-center bg-white shadow-sm hover:border-indigo-200 transition-colors">
-                  <div className="absolute -left-2 -top-2 w-6 h-6 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center text-[10px] font-black text-slate-500">{i+1}</div>
+                <div key={abono.id} className="p-4 border border-white/10 rounded-2xl relative flex justify-between items-center bg-[#111] shadow-sm hover:border-white/20 transition-colors">
+                  <div className="absolute -left-2 -top-2 w-6 h-6 bg-slate-800 border border-white/10 rounded-full flex items-center justify-center text-[10px] font-black text-white">{i+1}</div>
                   <div>
-                    <p className="font-bold text-slate-800 text-lg">{formatMoney(abono.monto)}</p>
-                    <p className="text-xs text-slate-500 flex items-center mt-1"><Calendar size={12} className="mr-1"/> {abono.fecha}</p>
+                    <p className="font-black text-emerald-400 text-xl">{formatMoney(abono.monto)}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center mt-1"><Calendar size={10} className="mr-1"/> {abono.fecha}</p>
                   </div>
                   <div className="text-right flex flex-col items-end">
-                    <p className="text-xs font-bold text-indigo-600 uppercase bg-indigo-50 px-2 py-1 rounded inline-block">{abono.metodo}</p>
-                    {abono.cuenta && <p className="text-[10px] text-slate-400 mt-1">Ref: {abono.cuenta}</p>}
+                    <p className="text-[9px] font-black text-indigo-400 uppercase bg-indigo-500/10 border border-indigo-500/20 px-2 py-1 rounded-md inline-block">{abono.metodo}</p>
+                    {abono.cuenta && <p className="text-[10px] text-slate-500 mt-2 font-mono">Ref: {abono.cuenta}</p>}
                     {abono.comprobante && (
-                      <button onClick={() => setViewReceipt(abono.comprobante)} className="mt-2 text-[10px] flex items-center justify-end text-emerald-600 hover:text-emerald-700 font-bold w-full">
-                        <ImageIcon size={12} className="mr-1"/> Ver Ticket
+                      <button onClick={() => setViewReceipt(abono.comprobante)} className="mt-2 text-[9px] uppercase tracking-widest flex items-center justify-end text-emerald-400 hover:text-emerald-300 font-bold w-full">
+                        <ImageIcon size={10} className="mr-1"/> Ver Ticket
                       </button>
                     )}
                   </div>
@@ -6075,38 +6107,36 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
       )}
 
       {paymentProcess && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/60 flex items-center justify-center p-4 print:hidden">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b bg-emerald-50 flex justify-between items-center">
-              <h3 className="font-bold text-lg text-emerald-800 flex items-center"><DollarSign size={20} className="mr-2"/> Registrar Pago a: {paymentProcess.item.concepto}</h3>
+        <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in">
+          <div className="bg-[#0a0a0a] border border-emerald-500/20 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_0_50px_rgba(16,185,129,0.15)] animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-5 border-b border-white/5 bg-emerald-950/30 flex justify-between items-center">
+              <h3 className="font-bold text-sm text-emerald-400 flex items-center uppercase tracking-widest"><DollarSign size={16} className="mr-2"/> Registrar Pago</h3>
+              <button onClick={() => setPaymentProcess(null)} className="text-slate-500 hover:text-white"><X size={20}/></button>
             </div>
-            <form onSubmit={handleAddPayment} className="p-6 space-y-4">
+            <form onSubmit={handleAddPayment} className="p-6 space-y-5">
+              <div className="bg-[#111] p-4 rounded-xl border border-white/5 text-xs text-slate-400 mb-2">Destino: <b className="text-sm text-white ml-1">{paymentProcess.item.concepto}</b></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-xs font-bold mb-1 text-slate-600">Monto del Abono</label><input type="number" required max={paymentProcess.item.estimado - paymentProcess.item.pagado} value={paymentProcess.monto} onChange={e=>setPaymentProcess({...paymentProcess, monto: e.target.value})} className="w-full p-2.5 border rounded-xl font-bold text-lg text-emerald-600 focus:ring-2 focus:ring-emerald-200 outline-none bg-slate-50" /></div>
-                <div><label className="block text-xs font-bold mb-1 text-slate-600">Fecha</label><input type="date" required value={paymentProcess.fecha} onChange={e=>setPaymentProcess({...paymentProcess, fecha: e.target.value})} className="w-full p-2.5 border rounded-xl focus:ring-2 outline-none bg-slate-50" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Monto ($)</label><input type="number" required max={paymentProcess.item.estimado - paymentProcess.item.pagado} value={paymentProcess.monto} onChange={e=>setPaymentProcess({...paymentProcess, monto: e.target.value})} className="w-full p-3.5 border border-white/10 rounded-xl font-black text-xl text-emerald-400 focus:border-emerald-500 outline-none bg-[#111]" placeholder="0.00" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Fecha</label><input type="date" required value={paymentProcess.fecha} onChange={e=>setPaymentProcess({...paymentProcess, fecha: e.target.value})} className="w-full p-3.5 border border-white/10 rounded-xl focus:border-emerald-500 outline-none bg-[#111] text-white text-sm [color-scheme:dark]" /></div>
               </div>
-              <div><label className="block text-xs font-bold mb-1 text-slate-600">Forma de Pago</label><select value={paymentProcess.metodo} onChange={e=>setPaymentProcess({...paymentProcess, metodo: e.target.value})} className="w-full p-2.5 border rounded-xl focus:ring-2 outline-none bg-slate-50"><option value="Transferencia">Transferencia</option><option value="Efectivo">Efectivo</option><option value="Tarjeta">Tarjeta</option><option value="Depósito">Depósito</option></select></div>
-              {(paymentProcess.metodo === 'Transferencia' || paymentProcess.metodo === 'Depósito') && (<div><label className="block text-xs font-bold mb-1 text-slate-600">Cuenta / Referencia</label><input type="text" placeholder="Ej. 01234567890" value={paymentProcess.cuenta} onChange={e=>setPaymentProcess({...paymentProcess, cuenta: e.target.value})} className="w-full p-2.5 border rounded-xl focus:ring-2 outline-none bg-slate-50" /></div>)}
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Forma de Pago</label><select value={paymentProcess.metodo} onChange={e=>setPaymentProcess({...paymentProcess, metodo: e.target.value})} className="w-full p-3.5 border border-white/10 rounded-xl focus:border-emerald-500 outline-none bg-[#111] text-white text-sm"><option value="Transferencia">Transferencia</option><option value="Efectivo">Efectivo</option><option value="Tarjeta">Tarjeta</option><option value="Depósito">Depósito</option></select></div>
+              {(paymentProcess.metodo === 'Transferencia' || paymentProcess.metodo === 'Depósito') && (<div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Cuenta / Referencia</label><input type="text" placeholder="Ej. 01234567890" value={paymentProcess.cuenta} onChange={e=>setPaymentProcess({...paymentProcess, cuenta: e.target.value})} className="w-full p-3.5 border border-white/10 rounded-xl focus:border-emerald-500 outline-none bg-[#111] text-white text-sm font-mono" /></div>)}
               
               <div>
-                <label className="block text-xs font-bold mb-2 text-slate-600">Comprobante de Pago (Opcional)</label>
-                <div className="flex gap-2">
-                  <label className="flex-1 flex flex-col items-center justify-center p-3 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-emerald-50 hover:border-emerald-300 transition-colors">
-                    <Upload size={18} className="text-emerald-400 mb-1"/>
-                    <span className="text-[10px] font-bold text-slate-500 text-center">Subir Archivo</span>
+                <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Comprobante (Opcional)</label>
+                <div className="flex gap-3">
+                  <label className="flex-1 flex flex-col items-center justify-center p-4 border border-dashed border-white/20 rounded-xl cursor-pointer hover:bg-white/5 hover:border-emerald-400 transition-colors bg-[#111]">
+                    <UploadCloud size={18} className="text-emerald-500 mb-2"/>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Subir Archivo</span>
                     <input type="file" accept="image/*,.pdf" className="hidden" onChange={e => setPaymentProcess({...paymentProcess, comprobante: e.target.files[0]})} />
                   </label>
-                  <button type="button" onClick={() => { if(addNotification) addNotification('Cámara Activa', 'Se abrirá la cámara para fotografiar el recibo.', 'info'); }} className="flex-1 flex flex-col items-center justify-center p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:bg-emerald-50 transition-colors bg-slate-50 text-slate-600 hover:text-emerald-600">
-                    <Camera size={18} className="mb-1"/>
-                    <span className="text-[10px] font-bold">Tomar Foto</span>
-                  </button>
                 </div>
-                {paymentProcess.comprobante && <p className="text-xs text-emerald-600 font-bold mt-2 text-center truncate bg-emerald-50 py-1 rounded">Adjunto: {paymentProcess.comprobante.name}</p>}
+                {paymentProcess.comprobante && <p className="text-[10px] text-emerald-400 font-bold mt-3 text-center truncate bg-emerald-500/10 py-2 rounded-lg border border-emerald-500/20 uppercase tracking-widest">Adjunto: {paymentProcess.comprobante.name}</p>}
               </div>
 
-              <div className="flex space-x-3 pt-4 border-t border-slate-100">
-                <button type="button" onClick={() => setPaymentProcess(null)} className="flex-1 p-3 bg-slate-100 font-bold rounded-xl text-slate-600 transition-colors hover:bg-slate-200">Cancelar</button>
-                <button type="submit" className="flex-1 p-3 bg-emerald-500 text-white font-bold rounded-xl shadow-md hover:bg-emerald-600 transition-colors">Guardar Pago</button>
+              <div className="flex space-x-3 pt-6 border-t border-white/5">
+                <button type="button" onClick={() => setPaymentProcess(null)} className="flex-1 p-4 bg-white/5 font-bold rounded-xl text-slate-400 hover:text-white transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
+                <button type="submit" className="flex-1 p-4 bg-emerald-500 text-slate-900 font-black rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-400 transition-colors uppercase tracking-widest text-[10px]">Guardar Pago</button>
               </div>
             </form>
           </div>
@@ -6114,12 +6144,12 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
       )}
 
       {deleteProcess && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/60 flex items-center justify-center p-4 print:hidden">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl p-6 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center text-rose-500 mb-4"><AlertTriangle size={28} className="mr-3"/><h3 className="font-bold text-xl">Cancelar Servicio</h3></div>
-            {deleteProcess.step === 1 && (<div className="space-y-4"><p className="text-slate-600 text-sm">Este gasto tiene abonos por <b>{formatMoney(deleteProcess.item.pagado)}</b>.</p><p className="text-slate-800 font-bold">¿Hubo reembolso?</p><div className="flex space-x-3 pt-2"><button onClick={() => setDeleteProcess({...deleteProcess, step: 2})} className="flex-1 p-3 bg-emerald-50 text-emerald-700 font-bold rounded-xl border border-emerald-200 hover:bg-emerald-100">Sí</button><button onClick={() => setDeleteProcess({...deleteProcess, step: 3, refundAmount: 0})} className="flex-1 p-3 bg-rose-50 text-rose-700 font-bold rounded-xl border border-rose-200 hover:bg-rose-100">No</button></div></div>)}
-            {deleteProcess.step === 2 && (<div className="space-y-4"><label className="block text-sm font-bold text-slate-700">¿Cuánto te devolvieron?</label><input type="number" max={deleteProcess.item.pagado} value={deleteProcess.refundAmount} onChange={e=>setDeleteProcess({...deleteProcess, refundAmount: e.target.value})} className="w-full p-3 border-2 border-indigo-200 rounded-xl text-lg font-bold outline-none" autoFocus /><button onClick={() => {if (Number(deleteProcess.refundAmount) >= deleteProcess.item.pagado) executeDelete(deleteProcess.item, deleteProcess.refundAmount, false); else setDeleteProcess({...deleteProcess, step: 3});}} className="w-full p-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700">Continuar</button></div>)}
-            {deleteProcess.step === 3 && (<div className="space-y-4"><p className="text-slate-600 text-sm">Se perdieron <b>{formatMoney(deleteProcess.item.pagado - Number(deleteProcess.refundAmount))}</b>.</p><p className="text-slate-800 font-bold text-sm">¿Mantener esta pérdida en el historial de gastos?</p><div className="flex space-x-3 pt-2"><button onClick={() => executeDelete(deleteProcess.item, deleteProcess.refundAmount, true)} className="flex-1 p-3 bg-indigo-50 text-indigo-700 font-bold rounded-xl text-xs hover:bg-indigo-100">Sí, registrar pérdida</button><button onClick={() => executeDelete(deleteProcess.item, deleteProcess.refundAmount, false)} className="flex-1 p-3 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs hover:bg-slate-200">No, borrar todo</button></div></div>)}
+        <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in">
+          <div className="bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl p-8 border border-white/10 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center text-rose-500 mb-6"><AlertTriangle size={28} className="mr-3"/><h3 className="font-bold text-xl">Cancelar Servicio</h3></div>
+            {deleteProcess.step === 1 && (<div className="space-y-6"><p className="text-slate-400 text-sm">Este gasto tiene abonos por <b className="text-white text-lg ml-1">{formatMoney(deleteProcess.item.pagado)}</b>.</p><p className="text-white font-bold">¿Hubo reembolso?</p><div className="flex space-x-3 pt-2"><button onClick={() => setDeleteProcess({...deleteProcess, step: 2})} className="flex-1 p-4 bg-emerald-500/10 text-emerald-400 font-bold uppercase tracking-widest text-xs rounded-xl border border-emerald-500/20 hover:bg-emerald-500/20">Sí</button><button onClick={() => setDeleteProcess({...deleteProcess, step: 3, refundAmount: 0})} className="flex-1 p-4 bg-rose-500/10 text-rose-400 font-bold uppercase tracking-widest text-xs rounded-xl border border-rose-500/20 hover:bg-rose-500/20">No</button></div></div>)}
+            {deleteProcess.step === 2 && (<div className="space-y-6"><label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">¿Cuánto te devolvieron?</label><input type="number" max={deleteProcess.item.pagado} value={deleteProcess.refundAmount} onChange={e=>setDeleteProcess({...deleteProcess, refundAmount: e.target.value})} className="w-full p-4 bg-[#111] border border-indigo-500/50 rounded-xl text-xl font-black text-white outline-none focus:border-amber-500" autoFocus /><button onClick={() => {if (Number(deleteProcess.refundAmount) >= deleteProcess.item.pagado) executeDelete(deleteProcess.item, deleteProcess.refundAmount, false); else setDeleteProcess({...deleteProcess, step: 3});}} className="w-full p-4 bg-amber-500 text-slate-900 font-black uppercase tracking-widest text-xs rounded-xl hover:bg-amber-400">Continuar</button></div>)}
+            {deleteProcess.step === 3 && (<div className="space-y-6"><p className="text-slate-400 text-sm">Se perdieron <b className="text-rose-500 text-lg ml-1">{formatMoney(deleteProcess.item.pagado - Number(deleteProcess.refundAmount))}</b>.</p><p className="text-white font-bold text-sm">¿Mantener esta pérdida en el historial de gastos?</p><div className="flex space-x-3 pt-2"><button onClick={() => executeDelete(deleteProcess.item, deleteProcess.refundAmount, true)} className="flex-1 p-4 bg-indigo-500/10 text-indigo-400 font-bold uppercase tracking-widest text-[9px] rounded-xl hover:bg-indigo-500/20 border border-indigo-500/20 leading-tight">Sí, registrar pérdida</button><button onClick={() => executeDelete(deleteProcess.item, deleteProcess.refundAmount, false)} className="flex-1 p-4 bg-white/5 text-slate-300 font-bold uppercase tracking-widest text-[9px] rounded-xl hover:bg-white/10 border border-white/10 leading-tight">No, borrar todo</button></div></div>)}
           </div>
         </div>
       )}
@@ -10214,8 +10244,12 @@ const AdminDashboard = ({ authData }) => {
   };
 
   return (
-    // 🔴 AQUÍ EL FONDO SE VUELVE NEGRO
-    <div className="flex h-screen bg-[#000000] font-sans overflow-hidden text-slate-200">
+    // 🔴 AQUÍ EL FONDO SE VUELVE NEGRO Y SE INYECTA LA FUENTE
+    <div className="flex h-screen bg-[#050505] font-sans overflow-hidden text-slate-200 selection:bg-amber-500 selection:text-white">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+        .font-editorial { font-family: 'Playfair Display', serif; }
+      `}</style>
       
       <div className="fixed top-4 right-4 z-[999] hidden sm:flex flex-col space-y-2 pointer-events-none">
         {notifications.map(notif => (
@@ -10704,10 +10738,19 @@ export default function App() {
   }
 
   // 🟢 4. ZONA SEGURA (PANEL DE CLIENTES/ADMIN)
-  if (isCheckingAuth) return <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center text-amber-500 font-bold"><RefreshCw size={40} className="animate-spin mb-4" /> Bóveda Segura...</div>;
+  if (isCheckingAuth) return (
+    <div className="h-screen w-screen bg-[#050505] flex flex-col items-center justify-center text-white relative overflow-hidden">
+       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+       <BauliaLogo className="h-12 md:h-16 w-auto mb-8 opacity-90 relative z-10" forceWhite={true} />
+       <div className="flex items-center gap-3 text-amber-500/80 uppercase tracking-[0.3em] text-[10px] font-black relative z-10">
+         <RefreshCw size={14} className="animate-spin" /> Accediendo a Bóveda VIP...
+       </div>
+    </div>
+  );
 
   if (accountSuspended) return (
-      <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
+      <div className="h-screen w-screen bg-[#050505] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
         <AlertTriangle size={64} className="text-rose-500 mb-4 animate-pulse" />
         <h1 className="text-2xl font-black text-white mb-2">Cuenta Suspendida</h1>
         <p className="text-slate-400 max-w-sm">Contacta a tu administrador de plataforma para reactivar tu licencia.</p>
