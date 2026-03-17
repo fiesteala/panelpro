@@ -186,45 +186,51 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
     indigo: 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]', 
     rose: 'bg-rose-600 text-white shadow-[0_0_15px_rgba(225,29,72,0.4)]', 
     emerald: 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(5,150,105,0.4)]', 
-    slate: 'bg-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]', 
-    amber: 'bg-amber-500 text-slate-900 shadow-[0_0_15px_rgba(245,158,11,0.4)] border border-amber-400', 
+    slate: 'bg-slate-800 dark:bg-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]', 
+    // 🔴 El acento dorado majestuoso heredado de la Landing Page
+    amber: 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)] border border-amber-400/50', 
     sky: 'bg-sky-500 text-white shadow-[0_0_15px_rgba(14,165,233,0.4)]'
   };
 
-  // 🔴 DEFAULT A BAULIA SI NO HAY MARCA BLANCA
   const activeTheme = agencyConfig?.themeColor ? themeColors[agencyConfig.themeColor] : themeColors.amber;
   const agencyName = agencyConfig?.name || 'BAULIA';
 
   return (
     <>
-      {isOpen && <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-20 xl:hidden" onClick={() => setIsOpen(false)} />}
-      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-[#050505] text-slate-400 transition-transform duration-300 ease-in-out flex flex-col border-r border-white/5 shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
+      {isOpen && <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm z-20 xl:hidden" onClick={() => setIsOpen(false)} />}
+      
+      {/* 🔴 Sidebar con efecto Cristal (Glassmorphism) para dejar pasar las luces del fondo */}
+      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-white/80 dark:bg-[#050505]/70 backdrop-blur-3xl text-slate-600 dark:text-slate-400 transition-colors duration-700 ease-in-out flex flex-col border-r border-slate-200/50 dark:border-white/10 shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
         
-        <div className="flex items-center justify-between p-6 border-b border-white/5 shrink-0 min-h-[88px] relative overflow-hidden bg-[#0a0a0a]">
+        <div className="flex items-center justify-between p-6 border-b border-slate-200/50 dark:border-white/10 shrink-0 min-h-[88px] relative overflow-hidden bg-transparent">
           <div className="relative z-10 w-full flex items-center gap-3">
             {agencyConfig?.logoUrl && userRole !== 'superadmin' ? (
               <img src={agencyConfig.logoUrl} alt="Agency Logo" className="h-10 object-contain drop-shadow-md mb-1" />
             ) : (
               <div className="flex flex-col justify-center">
                  {userRole === 'superadmin' || agencyName === 'BAULIA' || agencyName === 'EVENT MASTER' ? (
-                   <BauliaLogo className="h-8 w-auto mb-1" forceWhite={true} />
+                   <BauliaLogo className="h-8 w-auto mb-1 dark:hidden" forceWhite={false} />
                  ) : (
-                   <h1 className="text-xl font-black text-white tracking-widest uppercase">{agencyName}</h1>
+                   <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-widest uppercase font-editorial">{agencyName}</h1>
                  )}
-                 <p className="text-[8px] text-amber-500 uppercase tracking-widest mt-0.5">
+                 {userRole === 'superadmin' || agencyName === 'BAULIA' || agencyName === 'EVENT MASTER' ? (
+                   <BauliaLogo className="h-8 w-auto mb-1 hidden dark:block" forceWhite={true} />
+                 ) : null}
+                 
+                 <p className="text-[8px] text-amber-600 dark:text-amber-500 uppercase tracking-widest mt-0.5 font-bold">
                    {userRole === 'superadmin' ? 'God Mode' : userRole === 'planner' ? 'Planner Workspace' : 'Bóveda Premium'}
                  </p>
               </div>
             )}
           </div>
-          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 hover:bg-white/10 rounded-lg relative z-10"><X size={20} /></button>
+          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg relative z-10"><X size={20} /></button>
         </div>
         
         <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-6 custom-scrollbar">
           {userRole === 'superadmin' && (
              <div className="space-y-1">
-               <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black ml-4 mb-3">SISTEMA</p>
-               <button onClick={() => { setActiveTab('licencias'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'licencias' ? 'bg-amber-500 text-slate-900 font-black shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'hover:bg-white/5 hover:text-white'}`}>
+               <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-black ml-4 mb-3">SISTEMA</p>
+               <button onClick={() => { setActiveTab('licencias'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'licencias' ? activeTheme : 'hover:bg-slate-100/50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-400 dark:hover:text-white'}`}>
                  <Building size={18} /><span>Centro de Licencias</span>
                </button>
              </div>
@@ -236,14 +242,14 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
 
             return (
               <div key={gIdx} className="space-y-1">
-                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black ml-4 mb-3">{group.title}</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-black ml-4 mb-3">{group.title}</p>
                 {visibleItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
                   return (
-                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-emerald-500 text-slate-900 font-black shadow-[0_0_15px_rgba(16,185,129,0.4)]' : `${activeTheme} font-bold` : 'hover:bg-white/5 hover:text-white'}`}>
+                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-emerald-500 text-white dark:text-slate-900 font-black shadow-lg' : `${activeTheme} font-bold` : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-white/5 hover:text-amber-600 dark:hover:text-white'}`}>
                       <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-                      <span className="text-sm tracking-wide">{item.label}</span>
+                      <span className="text-sm tracking-wide font-medium">{item.label}</span>
                     </button>
                   );
                 })}
@@ -253,8 +259,8 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
         </nav>
 
         {userRole === 'planner' && (
-          <div className="p-4 border-t border-white/5 shrink-0 bg-[#0a0a0a]">
-            <button onClick={() => { setActiveTab('configuracion'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all border ${activeTab === 'configuracion' ? 'bg-white/10 text-amber-400 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-transparent text-slate-400 border-white/5 hover:bg-white/5 hover:text-white'}`}>
+          <div className="p-4 border-t border-slate-200/50 dark:border-white/10 shrink-0 bg-transparent">
+            <button onClick={() => { setActiveTab('configuracion'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all border ${activeTab === 'configuracion' ? 'bg-slate-900 dark:bg-white/10 text-amber-400 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-transparent text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:bg-slate-200/50 dark:hover:bg-white/5'}`}>
               <Settings2 size={18} strokeWidth={activeTab === 'configuracion' ? 2.5 : 2} />
               <span className="font-bold text-sm tracking-wide">Marca Blanca</span>
             </button>
@@ -6738,7 +6744,7 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
 // ==========================================
 // --- COMPONENTE: CABECERA INTELIGENTE ---
 // ==========================================
-const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, bellAlerts, setBellAlerts, markAsRead }) => {
+const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, bellAlerts, setBellAlerts, markAsRead, cycleTheme, themeSetting }) => {
   const [showResults, setShowResults] = useState(false);
   const [showBellMenu, setShowBellMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -6806,19 +6812,20 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
   };
 
   return (
-    <header ref={headerRef} className="bg-[#050505]/90 backdrop-blur-xl border-b border-white/5 h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden">
+    <header ref={headerRef} className="bg-white/60 dark:bg-[#050505]/60 backdrop-blur-2xl border-b border-slate-200/50 dark:border-white/5 h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden transition-colors duration-700">
       <div className="flex items-center flex-1">
-        <button onClick={() => setIsOpen(true)} className="xl:hidden text-slate-400 hover:text-white mr-4 transition-colors"><Menu size={24} /></button>
+        <button onClick={() => setIsOpen(true)} className="xl:hidden text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-white mr-4 transition-colors"><Menu size={24} /></button>
         
         <div className="relative w-full max-w-md hidden sm:block">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-          <input type="text" placeholder="Buscar en la bóveda..." value={globalSearch} onChange={(e) => {setGlobalSearch(e.target.value); setShowResults(true);}} className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 focus:bg-white/10 transition-all"/>
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
+          <input type="text" placeholder="Buscar en la bóveda..." value={globalSearch} onChange={(e) => {setGlobalSearch(e.target.value); setShowResults(true);}} className="w-full pl-10 pr-4 py-2 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 rounded-full text-sm text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-amber-300 dark:focus:border-amber-500/50 focus:bg-white dark:focus:bg-white/10 transition-all shadow-sm dark:shadow-none"/>
+          
           {showResults && globalSearch.length > 1 && (
-            <div className="absolute top-full left-0 mt-2 w-full bg-[#0a0a0a] shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-white/10 py-2 max-h-80 overflow-y-auto z-[100] animate-in fade-in">
+            <div className="absolute top-full left-0 mt-2 w-full bg-white dark:bg-[#0a0a0a] shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 py-2 max-h-80 overflow-y-auto z-[100] animate-in fade-in transition-colors">
               {searchResults.length === 0 ? <div className="p-4 text-center text-sm text-slate-500">No se encontraron resultados para "{globalSearch}"</div> : searchResults.map(res => (
-                  <button key={`${res.type}_${res.id}`} onClick={() => handleNavigate(res.tab)} className="w-full text-left px-4 py-3 hover:bg-white/5 flex items-center border-b border-white/5 last:border-0 transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-white/5 text-amber-500 flex items-center justify-center mr-3 border border-white/10">{res.icon}</div>
-                    <div><p className="font-bold text-white text-sm">{res.text}</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">{res.type}</p></div>
+                  <button key={`${res.type}_${res.id}`} onClick={() => handleNavigate(res.tab)} className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-white/5 flex items-center border-b border-slate-100 dark:border-white/5 last:border-0 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-white/5 text-amber-600 dark:text-amber-500 flex items-center justify-center mr-3 border border-transparent dark:border-white/10">{res.icon}</div>
+                    <div><p className="font-bold text-slate-800 dark:text-white text-sm">{res.text}</p><p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5">{res.type}</p></div>
                   </button>
                 ))
               }
@@ -6828,26 +6835,37 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
       </div>
 
       <div className="flex items-center space-x-2 sm:space-x-4">
-        {/* INDICADORES RÁPIDOS OSCUROS */}
-        <div className="flex items-center bg-[#0a0a0a] border border-white/10 rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 shadow-sm">
-          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-400" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
-          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-amber-500 bg-amber-500/10" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countConfirmados}</span></div>
-          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-rose-400 bg-rose-500/10" title="Cancelaron"><X size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countCancelados}</span></div>
-          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-emerald-400 bg-emerald-500/10" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countIngresos}</span></div>
+        {/* INDICADORES RÁPIDOS */}
+        <div className="hidden md:flex items-center bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 backdrop-blur-md rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 shadow-sm transition-colors">
+          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-600 dark:text-slate-400" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
+          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-amber-600 dark:text-amber-500 bg-amber-100/50 dark:bg-amber-500/10" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countConfirmados}</span></div>
+          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-rose-600 dark:text-rose-400 bg-rose-100/50 dark:bg-rose-500/10" title="Cancelaron"><X size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countCancelados}</span></div>
+          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-emerald-600 dark:text-emerald-400 bg-emerald-100/50 dark:bg-emerald-500/10" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countIngresos}</span></div>
         </div>
+
+        {/* BOTÓN DÍA/NOCHE */}
+        <button onClick={cycleTheme} className="p-2 text-slate-400 hover:text-amber-600 dark:text-slate-500 dark:hover:text-amber-400 transition-colors rounded-full hover:bg-slate-200/50 dark:hover:bg-white/5" title={`Tema: ${themeSetting}`}>
+          {themeSetting === 'auto' ? (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          ) : themeSetting === 'dark' ? (
+            <Moon size={20} />
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          )}
+        </button>
 
         {/* CAMPANITA */}
         <div className="relative">
-          <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-slate-400 hover:text-amber-400 transition-colors rounded-full hover:bg-white/5">
+          <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors rounded-full hover:bg-slate-200/50 dark:hover:bg-white/5">
             <Bell size={20} />
-            {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-[#050505] rounded-full text-[9px] font-bold text-white flex items-center justify-center animate-in zoom-in">{unreadCount}</span>}
+            {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-white dark:border-[#050505] rounded-full text-[9px] font-bold text-white flex items-center justify-center animate-in zoom-in">{unreadCount}</span>}
           </button>
           
           {showBellMenu && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-[#0a0a0a] shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2">
-              <div className="p-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
-                <h4 className="font-bold text-white">Centro de Atención</h4>
-                {bellAlerts.length > 0 && <button onClick={(e) => { e.stopPropagation(); setBellAlerts([]); }} className="text-[10px] text-slate-500 hover:text-amber-400 font-bold">Limpiar historial</button>}
+            <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-[#0a0a0a] shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
+              <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center">
+                <h4 className="font-bold text-slate-800 dark:text-white">Centro de Atención</h4>
+                {bellAlerts.length > 0 && <button onClick={(e) => { e.stopPropagation(); setBellAlerts([]); }} className="text-[10px] text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 font-bold">Limpiar historial</button>}
               </div>
               <div className="max-h-80 overflow-y-auto custom-scrollbar">
                 {allAlerts.length === 0 ? (
@@ -6856,28 +6874,24 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
                   allAlerts.map(alert => (
                     <div 
                       key={alert.id} 
-                      className={`w-full text-left px-4 py-3 flex items-start transition-colors group cursor-pointer border-b border-white/5
-                        ${alert.isRead ? 'bg-transparent opacity-60 hover:bg-white/5' : 'bg-white/5 hover:bg-white/10'} 
+                      className={`w-full text-left px-4 py-3 flex items-start transition-colors group cursor-pointer border-b border-slate-50 dark:border-white/5
+                        ${alert.isRead ? 'bg-white dark:bg-transparent opacity-60 hover:bg-slate-50 dark:hover:bg-white/5' : 'bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10'} 
                       `} 
                       onClick={(e) => { 
                         e.stopPropagation();
                         if(markAsRead && !alert.isDynamic) markAsRead(alert.id); 
-                        if(alert.tab) {
-                          handleNavigate(alert.tab); 
-                        } else {
-                          setShowBellMenu(false);
-                        }
+                        if(alert.tab) { handleNavigate(alert.tab); } else { setShowBellMenu(false); }
                       }}
                     >
-                      <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-400' : alert.type === 'danger' ? 'text-rose-400' : alert.type === 'warning' ? 'text-amber-400' : 'text-indigo-400'}`}>
+                      <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-500 dark:text-emerald-400' : alert.type === 'danger' ? 'text-rose-500 dark:text-rose-400' : alert.type === 'warning' ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-500 dark:text-indigo-400'}`}>
                         {alert.type === 'success' ? <CheckCircle size={16}/> : alert.type === 'warning' || alert.type === 'danger' ? <AlertCircle size={16}/> : <Bell size={16}/>}
                       </div>
                       <div className="flex-1">
-                        <p className={`text-sm leading-tight ${alert.isRead ? 'font-medium text-slate-400' : 'font-bold text-white'}`}>{alert.title}</p>
-                        <p className={`text-[10px] mt-1 leading-snug ${alert.isRead ? 'text-slate-500' : 'text-slate-400 font-medium'}`}>{alert.message}</p>
+                        <p className={`text-sm leading-tight ${alert.isRead ? 'font-medium text-slate-500 dark:text-slate-400' : 'font-bold text-slate-800 dark:text-white'}`}>{alert.title}</p>
+                        <p className={`text-[10px] mt-1 leading-snug ${alert.isRead ? 'text-slate-400 dark:text-slate-500' : 'text-slate-500 dark:text-slate-400 font-medium'}`}>{alert.message}</p>
                       </div>
                       {!alert.isDynamic && (
-                        <button onClick={(e) => { e.stopPropagation(); setBellAlerts(prev => prev.filter(a => a.id !== alert.id)); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-500 transition-opacity ml-2">
+                        <button onClick={(e) => { e.stopPropagation(); setBellAlerts(prev => prev.filter(a => a.id !== alert.id)); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 transition-opacity ml-2">
                           <X size={14}/>
                         </button>
                       )}
@@ -6889,33 +6903,33 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
           )}
         </div>
 
-        {/* PERFIL (OSCURO) */}
+        {/* PERFIL */}
         <div className="relative">
           <button 
             onClick={() => {setShowProfileMenu(!showProfileMenu); setShowBellMenu(false); setShowResults(false);}} 
-            className="flex items-center space-x-2 sm:space-x-3 hover:bg-white/5 p-1 sm:p-1.5 rounded-xl transition-colors text-right border border-transparent hover:border-white/10"
+            className="flex items-center space-x-2 sm:space-x-3 hover:bg-slate-200/50 dark:hover:bg-white/5 p-1 sm:p-1.5 rounded-xl transition-colors text-right border border-transparent hover:border-slate-200 dark:hover:border-white/10"
           >
             <div className="hidden sm:block pl-1">
-              <p className="text-xs font-bold text-white leading-tight">Proyecto Activo</p>
-              <p className="text-[9px] text-amber-500 font-medium tracking-widest uppercase">ID: {ID_DEL_EVENTO.slice(0,8)}...</p>
+              <p className="text-xs font-bold text-slate-800 dark:text-white leading-tight">Proyecto Activo</p>
+              <p className="text-[9px] text-amber-600 dark:text-amber-500 font-medium tracking-widest uppercase">ID: {ID_DEL_EVENTO.slice(0,8)}...</p>
             </div>
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 flex items-center justify-center text-slate-900 font-black shadow-md text-sm shrink-0 border border-amber-300">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-white font-black shadow-md text-sm shrink-0 border border-amber-300">
               <Users size={16}/>
             </div>
           </button>
           
           {showProfileMenu && (
-            <div className="absolute right-0 top-full mt-2 w-56 bg-[#0a0a0a] shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2">
-              <div className="p-4 border-b border-white/5 bg-white/5 sm:hidden">
-                <p className="font-bold text-white text-sm">Proyecto Activo</p>
-                <p className="text-[10px] text-amber-500 uppercase">ID: {ID_DEL_EVENTO}</p>
+            <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#0a0a0a] shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
+              <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 sm:hidden">
+                <p className="font-bold text-slate-800 dark:text-white text-sm">Proyecto Activo</p>
+                <p className="text-[10px] text-amber-600 dark:text-amber-500 uppercase">ID: {ID_DEL_EVENTO}</p>
               </div>
               <div className="p-2">
-                <button onClick={() => handleNavigate('invitacion')} className="w-full text-left px-3 py-2.5 text-sm text-slate-300 font-medium hover:bg-white/5 hover:text-amber-400 rounded-lg transition-colors flex items-center"><ExternalLink size={16} className="mr-2.5"/> Ver Invitación App</button>
-                <button onClick={handleContactStaff} className="w-full text-left px-3 py-2.5 text-sm text-slate-300 font-medium hover:bg-white/5 hover:text-emerald-400 rounded-lg transition-colors flex items-center"><MessageCircle size={16} className="mr-2.5"/> Soporte Premium</button>
+                <button onClick={() => handleNavigate('invitacion')} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg transition-colors flex items-center"><ExternalLink size={16} className="mr-2.5"/> Ver Invitación App</button>
+                <button onClick={handleContactStaff} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg transition-colors flex items-center"><MessageCircle size={16} className="mr-2.5"/> Soporte Premium</button>
               </div>
-              <div className="p-2 border-t border-white/5">
-                <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-sm text-rose-500 font-bold hover:bg-rose-500/10 rounded-lg transition-colors flex items-center"><LogOut size={16} className="mr-2.5"/> Cerrar Sesión</button>
+              <div className="p-2 border-t border-slate-100 dark:border-white/5">
+                <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-sm text-rose-500 font-bold hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors flex items-center"><LogOut size={16} className="mr-2.5"/> Cerrar Sesión</button>
               </div>
             </div>
           )}
@@ -10133,7 +10147,7 @@ const LoginScreen = () => {
 // ==========================================
 // --- COMPONENTE: PANEL DE ADMINISTRACIÓN PROTEGIDO ---
 // ==========================================
-const AdminDashboard = ({ authData }) => {
+const AdminDashboard = ({ authData, cycleTheme, themeSetting }) => {
   const { role: userRole, plan: userPlan, eventId } = authData;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(userRole === 'superadmin' ? 'licencias' : 'dashboard');  
@@ -10244,22 +10258,27 @@ const AdminDashboard = ({ authData }) => {
   };
 
   return (
-    // 🔴 AQUÍ EL FONDO SE VUELVE NEGRO Y SE INYECTA LA FUENTE
-    <div className="flex h-screen bg-[#050505] font-sans overflow-hidden text-slate-200 selection:bg-amber-500 selection:text-white">
+    // 🔴 AQUÍ SE INYECTA EL MODO CLARO/OSCURO, LA FUENTE EDITORIAL Y LAS LUCES DE FONDO DE LA LANDING
+    <div className="flex h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans overflow-hidden text-slate-900 dark:text-slate-200 transition-colors duration-700 selection:bg-amber-500 selection:text-white relative">
+      
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
         .font-editorial { font-family: 'Playfair Display', serif; }
       `}</style>
+
+      {/* LUCES DE AMBIENTE SUTILES HEREDADAS DE LA LANDING (Se ocultan tras el blur del panel) */}
+      <div className="absolute top-[-10%] left-[-5%] w-[40vw] h-[40vw] bg-amber-500/10 dark:bg-amber-600/10 blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
+      <div className="absolute bottom-[-10%] right-[-5%] w-[30vw] h-[30vw] bg-indigo-500/5 dark:bg-indigo-600/10 blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
       
       <div className="fixed top-4 right-4 z-[999] hidden sm:flex flex-col space-y-2 pointer-events-none">
         {notifications.map(notif => (
-          <div key={notif.id} onClick={() => { if(notif.tab) setActiveTab(notif.tab); setNotifications(prev => prev.filter(n => n.id !== notif.id)); }} className={`w-80 bg-[#0a0a0a] border border-white/10 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-4 flex items-start transform transition-all duration-300 animate-in slide-in-from-right-8 pointer-events-auto ${notif.tab ? 'cursor-pointer hover:scale-[1.02]' : ''}`}>
-            <div className={`mr-3 mt-0.5 ${notif.type === 'success' ? 'text-emerald-400' : notif.type === 'danger' ? 'text-rose-400' : 'text-amber-400'}`}>
+          <div key={notif.id} onClick={() => { if(notif.tab) setActiveTab(notif.tab); setNotifications(prev => prev.filter(n => n.id !== notif.id)); }} className={`w-80 bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-xl shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-4 flex items-start transform transition-all duration-300 animate-in slide-in-from-right-8 pointer-events-auto ${notif.tab ? 'cursor-pointer hover:scale-[1.02]' : ''}`}>
+            <div className={`mr-3 mt-0.5 ${notif.type === 'success' ? 'text-emerald-500 dark:text-emerald-400' : notif.type === 'danger' ? 'text-rose-500 dark:text-rose-400' : 'text-amber-500 dark:text-amber-400'}`}>
               {notif.type === 'success' ? <CheckCircle size={20}/> : notif.type === 'danger' ? <AlertCircle size={20}/> : <Bell size={20}/>}
             </div>
             <div>
-              <h4 className="font-bold text-white text-sm">{notif.title}</h4>
-              <p className="text-slate-400 text-xs mt-0.5 leading-snug">{notif.message}</p>
+              <h4 className="font-bold text-slate-800 dark:text-white text-sm">{notif.title}</h4>
+              <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 leading-snug">{notif.message}</p>
             </div>
           </div>
         ))}
@@ -10267,10 +10286,10 @@ const AdminDashboard = ({ authData }) => {
 
       {typeof Sidebar !== 'undefined' && <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} userPlan={userPlan} agencyConfig={agencyConfig} />}
       
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
+        <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} />
         
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-5 lg:p-6 print:p-0 print:overflow-visible">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-5 lg:p-6 print:p-0 print:overflow-visible custom-scrollbar relative z-10">
           <div className="h-full max-w-7xl mx-auto print:max-w-none print:w-full">
             {renderContent()}
           </div>
