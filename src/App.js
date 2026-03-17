@@ -10650,9 +10650,9 @@ const ShowcaseSimulatorView = () => {
       <header className="h-20 border-b border-white/5 flex items-center justify-between px-6 sm:px-10 shrink-0 bg-transparent z-20 relative">
         <div className="flex items-center gap-4">
           <button onClick={() => window.location.href = '/'} className="p-2 hover:bg-white/10 rounded-full transition-colors"><ArrowRight size={20} className="rotate-180"/></button>
-          <h1 className="text-sm sm:text-xl font-bold tracking-widest uppercase">Galería <span className="text-amber-500 font-light">Baulia</span></h1>
+          <h1 className="text-sm sm:text-xl font-bold tracking-widest uppercase text-white">Galería <span className="text-amber-500 font-light">Baulia</span></h1>
         </div>
-        {/* 🔴 EL BOTÓN AHORA ABRE EL MODAL DE PAGO (Paso 1) */}
+        {/* 🔴 CORRECCIÓN: AHORA SÍ ABRE EL MODAL VIP */}
         <button onClick={() => setCheckoutStep(1)} className="hidden sm:block px-6 py-2.5 bg-amber-500 text-slate-900 font-bold rounded-full text-xs uppercase tracking-widest hover:bg-amber-400 transition-colors shadow-[0_0_20px_rgba(245,158,11,0.3)]">
           Comprar este Diseño
         </button>
@@ -10755,7 +10755,7 @@ const ShowcaseSimulatorView = () => {
         </div>
       </div>
 
-      {/* 🔴 BOTON MÓVIL MODIFICADO */}
+      {/* 🔴 CORRECCIÓN: BOTÓN FLOTANTE MÓVIL MODIFICADO */}
       <div className="fixed bottom-6 w-full px-4 sm:hidden z-50">
         <button onClick={() => setCheckoutStep(1)} className="w-full py-4 bg-amber-500 text-slate-900 font-black rounded-full text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.4)]">
           Comprar este Diseño <ArrowRight size={16} className="inline ml-1"/>
