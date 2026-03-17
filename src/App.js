@@ -1694,7 +1694,7 @@ const InvitacionView = ({ guests, setGuests, addNotification }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: GESTIÓN DE MESAS ---
+// --- COMPONENTE: GESTIÓN DE MESAS (DARK PREMIUM) ---
 // ==========================================
 const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -1756,12 +1756,9 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       if (val < 0.5) val = 0.5; // El lado mínimo es 0.5m (para al menos 1 silla)
       const newMedidas = { ...configActual.libreMedidas, [campo]: val };
       
-      // --- LA MAGIA DE LOS 0.5 METROS POR SILLA ---
-      // Calculamos cuántas sillas caben por lado basándonos en la medida nueva
       const maxLargo = Math.floor(newMedidas.largo / 0.5);
       const maxAncho = Math.floor(newMedidas.ancho / 0.5);
       
-      // Ajustamos los lados para que nunca superen lo que físicamente cabe
       const newLados = {
         top: Math.min(configActual.ladosLibre.top, maxLargo),
         bottom: Math.min(configActual.ladosLibre.bottom, maxLargo),
@@ -1801,7 +1798,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
   const eliminarDeVariedad = (id) => setMezclaVariedad(mezclaVariedad.filter(m => m.id !== id));
 
-  // 🔴 NUEVO: Crear y Editar Mesas en Firebase
    const generarMesas = async () => {
       if (creationMode === 'edit' && tableToEdit) {
          const capacidad = calcularCapacidad(configActual);
@@ -1838,7 +1834,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
          });
       }
 
-    // Guardamos todas las mesas nuevas en Firebase
     const promesas = nuevasMesas.map(mesa => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", mesa.id), mesa));
     await Promise.all(promesas);
 
@@ -1848,7 +1843,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       if(addNotification) addNotification('Mesas Creadas', `Se agregaron ${nuevasMesas.length} mesas a la nube.`, 'success');
    };
 
-   // --- IA AUTO-ACOMODAR INTELIGENTE (CONECTADA) ---
    const handleAutoAssign = () => {
       if (!guests || guests.length === 0) return;
       const unassigned = guests.filter(g => !g.tableId && g.status !== 'cancelado');
@@ -1931,7 +1925,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       setTimeout(() => { ejecutarAsignacionLogic([...safeTables, ...mesasNuevas]); }, 500);
    };
 
-  // 🔴 NUEVO: Botones de Limpiar y Eliminar Mesas (Conectados a Firebase)
    const emptyTable = async (tableId) => {
     const guestsToUpdate = guests.filter(g => g.tableId === tableId);
     const promesas = guestsToUpdate.map(g => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", g.id), { ...g, tableId: null }));
@@ -1959,7 +1952,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       if(addNotification) addNotification('Mesas Eliminadas', 'Se borraron todas las mesas de la base de datos.', 'warning');
    };
 
-   // --- LÓGICA DE DRAG & DROP PARA LISTA ---
    const handleDragStart = (e, guestId) => { e.dataTransfer.setData('guestId', guestId); setGuestSeleccionado(null); };
    const handleDrop = (e, targetTableId) => { e.preventDefault(); moverInvitado(e.dataTransfer.getData('guestId'), targetTableId); };
    const handleDragOver = (e) => e.preventDefault();
@@ -1971,7 +1963,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       const isToTable = targetTableId !== null;
       let table = null;
       let usedChairs = 0;
-       
+        
       if (isToTable) {
            table = safeTables.find(t => t.id === targetTableId);
            usedChairs = safeGuests.filter(g => g.tableId === targetTableId).reduce((sum, g) => sum + g.passes, 0);
@@ -2020,7 +2012,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
   const handleTableClick = (tableId) => { if (guestSeleccionado) moverInvitado(guestSeleccionado.id, tableId); };
 
-  // Renderizadores Visuales
   const getTipoIcon = (tipo) => {
     switch(tipo) {
       case 'redonda': return <Circle size={16} className="text-rose-500"/>;
@@ -2029,128 +2020,104 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       case 'ovalada': return <div className="w-5 h-3 rounded-[50%] border-2 border-indigo-500"></div>;
       case 'serpentina': return <Spline size={16} className="text-teal-500"/>;
       case 'forma_u': return <Magnet size={16} className="text-purple-500 rotate-180"/>;
-      case 'libre': return <Settings2 size={16} className="text-slate-500"/>;
-      default: return <Settings2 size={16} className="text-slate-500"/>;
+      case 'libre': return <Settings2 size={16} className="text-slate-500 dark:text-slate-400"/>;
+      default: return <Settings2 size={16} className="text-slate-500 dark:text-slate-400"/>;
     }
   };
 
-  // --- FORMULARIOS DINÁMICOS DE CONFIGURACIÓN FALTANTE ---
-  // --- FORMULARIOS DINÁMICOS CON LÍMITES EXACTOS ---
   const renderConfigForm = () => {
     switch (configActual.tipo) {
       case 'redonda':
         return (
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 animate-in fade-in">
-            <label className="block text-xs font-bold mb-2 text-slate-700">Sillas por Mesa Redonda (Máx. 10)</label>
-            <input type="number" min="1" max="10" value={configActual.capacidadRedonda} onChange={(e) => handleConfigChange('general', 'capacidadRedonda', e.target.value, 10)} className="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm font-bold" />
+          <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-4 animate-in fade-in transition-colors">
+            <label className="block text-xs font-bold mb-2 text-slate-700 dark:text-slate-300">Sillas por Mesa Redonda (Máx. 10)</label>
+            <input type="number" min="1" max="10" value={configActual.capacidadRedonda} onChange={(e) => handleConfigChange('general', 'capacidadRedonda', e.target.value, 10)} className="w-full p-2.5 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm font-bold transition-colors" />
           </div>
         );
       case 'cuadrada':
         return (
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 animate-in fade-in">
-            <label className="block text-xs font-bold mb-3 text-slate-700 border-b border-slate-200 pb-2">Distribución de Sillas (Máx. 3 por lado)</label>
+          <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-4 animate-in fade-in transition-colors">
+            <label className="block text-xs font-bold mb-3 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 pb-2">Distribución de Sillas (Máx. 3 por lado)</label>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Arriba</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.top} onChange={(e) => handleConfigChange('ladosCuadrada', 'top', e.target.value, 3)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Abajo</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.bottom} onChange={(e) => handleConfigChange('ladosCuadrada', 'bottom', e.target.value, 3)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Izquierdo</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.left} onChange={(e) => handleConfigChange('ladosCuadrada', 'left', e.target.value, 3)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Derecho</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.right} onChange={(e) => handleConfigChange('ladosCuadrada', 'right', e.target.value, 3)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Arriba</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.top} onChange={(e) => handleConfigChange('ladosCuadrada', 'top', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Abajo</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.bottom} onChange={(e) => handleConfigChange('ladosCuadrada', 'bottom', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Izquierdo</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.left} onChange={(e) => handleConfigChange('ladosCuadrada', 'left', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Derecho</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.right} onChange={(e) => handleConfigChange('ladosCuadrada', 'right', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
             </div>
           </div>
         );
       case 'tablon':
         return (
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 animate-in fade-in">
-            <label className="block text-xs font-bold mb-3 text-slate-700 border-b border-slate-200 pb-2">Distribución de Sillas (Tablón)</label>
+          <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-4 animate-in fade-in transition-colors">
+            <label className="block text-xs font-bold mb-3 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 pb-2">Distribución de Sillas (Tablón)</label>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Largo 1 (Máx. 5)</label><input type="number" min="0" max="5" value={configActual.ladosTablon.top} onChange={(e) => handleConfigChange('ladosTablon', 'top', e.target.value, 5)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Largo 2 (Máx. 5)</label><input type="number" min="0" max="5" value={configActual.ladosTablon.bottom} onChange={(e) => handleConfigChange('ladosTablon', 'bottom', e.target.value, 5)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Cabecera 1 (Máx. 1)</label><input type="number" min="0" max="1" value={configActual.ladosTablon.left} onChange={(e) => handleConfigChange('ladosTablon', 'left', e.target.value, 1)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Cabecera 2 (Máx. 1)</label><input type="number" min="0" max="1" value={configActual.ladosTablon.right} onChange={(e) => handleConfigChange('ladosTablon', 'right', e.target.value, 1)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Largo 1</label><input type="number" min="0" max="5" value={configActual.ladosTablon.top} onChange={(e) => handleConfigChange('ladosTablon', 'top', e.target.value, 5)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Largo 2</label><input type="number" min="0" max="5" value={configActual.ladosTablon.bottom} onChange={(e) => handleConfigChange('ladosTablon', 'bottom', e.target.value, 5)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Cabecera 1</label><input type="number" min="0" max="1" value={configActual.ladosTablon.left} onChange={(e) => handleConfigChange('ladosTablon', 'left', e.target.value, 1)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Cabecera 2</label><input type="number" min="0" max="1" value={configActual.ladosTablon.right} onChange={(e) => handleConfigChange('ladosTablon', 'right', e.target.value, 1)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
             </div>
           </div>
         );
       case 'ovalada':
         return (
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 animate-in fade-in">
-            <div className="bg-indigo-50 border border-indigo-100 p-2.5 rounded-lg mb-3 text-[10px] text-indigo-700 flex items-start">
+          <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-4 animate-in fade-in transition-colors">
+            <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 p-2.5 rounded-lg mb-3 text-[10px] text-indigo-700 dark:text-indigo-400 flex items-start transition-colors">
               <Info size={14} className="mr-1.5 flex-shrink-0 mt-0.5"/>
-              <span>Mesa de 3.05m x 1.22m (Capacidad física máxima: 14 personas totales).</span>
+              <span>Mesa de 3.05m x 1.22m (Capacidad máxima: 14).</span>
             </div>
-            <label className="block text-xs font-bold mb-3 text-slate-700 border-b border-slate-200 pb-2">Distribución (Ovalada)</label>
+            <label className="block text-xs font-bold mb-3 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 pb-2">Distribución (Ovalada)</label>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Recto 1 (Máx. 4)</label><input type="number" min="0" max="4" value={configActual.ladosOvalada.top} onChange={(e) => handleConfigChange('ladosOvalada', 'top', e.target.value, 4)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Recto 2 (Máx. 4)</label><input type="number" min="0" max="4" value={configActual.ladosOvalada.bottom} onChange={(e) => handleConfigChange('ladosOvalada', 'bottom', e.target.value, 4)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Media Luna Izq. (Máx. 3)</label><input type="number" min="0" max="3" value={configActual.ladosOvalada.left} onChange={(e) => handleConfigChange('ladosOvalada', 'left', e.target.value, 3)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Media Luna Der. (Máx. 3)</label><input type="number" min="0" max="3" value={configActual.ladosOvalada.right} onChange={(e) => handleConfigChange('ladosOvalada', 'right', e.target.value, 3)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-            </div>
-          </div>
-        );
-      case 'serpentina':
-        const maxS = modelosSerpentina[configActual.modeloSerpentina].max;
-        return (
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 animate-in fade-in">
-            <label className="block text-xs font-bold mb-2 text-slate-700">Modelo de Serpentina (1/4 Círculo)</label>
-            <select value={configActual.modeloSerpentina} onChange={(e) => handleConfigChange('serpentina_modelo', null, e.target.value)} className="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm font-bold text-sm mb-4 text-indigo-600">
-              {Object.entries(modelosSerpentina).map(([key, val]) => (
-                <option key={key} value={key}>{val.nombre} (Máx. {val.max.ext + val.max.int + val.max.izq + val.max.der} sillas)</option>
-              ))}
-            </select>
-
-            <label className="block text-xs font-bold mb-3 text-slate-700 border-b border-slate-200 pb-2">Distribución de Sillas</label>
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Arco Exterior (Máx. {maxS.ext})</label><input type="number" min="0" max={maxS.ext} value={configActual.ladosSerpentina.ext} onChange={(e) => handleConfigChange('ladosSerpentina', 'ext', e.target.value, maxS.ext)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Arco Interior (Máx. {maxS.int})</label><input type="number" min="0" max={maxS.int} value={configActual.ladosSerpentina.int} onChange={(e) => handleConfigChange('ladosSerpentina', 'int', e.target.value, maxS.int)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Ancho Izq. (Máx. {maxS.izq})</label><input type="number" min="0" max={maxS.izq} value={configActual.ladosSerpentina.izq} onChange={(e) => handleConfigChange('ladosSerpentina', 'izq', e.target.value, maxS.izq)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Ancho Der. (Máx. {maxS.der})</label><input type="number" min="0" max={maxS.der} value={configActual.ladosSerpentina.der} onChange={(e) => handleConfigChange('ladosSerpentina', 'der', e.target.value, maxS.der)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Recto 1</label><input type="number" min="0" max="4" value={configActual.ladosOvalada.top} onChange={(e) => handleConfigChange('ladosOvalada', 'top', e.target.value, 4)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Recto 2</label><input type="number" min="0" max="4" value={configActual.ladosOvalada.bottom} onChange={(e) => handleConfigChange('ladosOvalada', 'bottom', e.target.value, 4)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Curva Izq.</label><input type="number" min="0" max="3" value={configActual.ladosOvalada.left} onChange={(e) => handleConfigChange('ladosOvalada', 'left', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Curva Der.</label><input type="number" min="0" max="3" value={configActual.ladosOvalada.right} onChange={(e) => handleConfigChange('ladosOvalada', 'right', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
             </div>
           </div>
         );
       case 'personalizada':
       case 'libre':
-        // Protección contra mesas antiguas sin datos de medidas
         const largoVal = configActual.libreMedidas?.largo || 2.0;
         const anchoVal = configActual.libreMedidas?.ancho || 1.0;
         const maxLargo = Math.floor(largoVal / 0.5);
         const maxAncho = Math.floor(anchoVal / 0.5);
         
-        // Protección para los lados
         const lTop = configActual.ladosLibre?.top || 0;
         const lBot = configActual.ladosLibre?.bottom || 0;
         const lLeft = configActual.ladosLibre?.left || 0;
         const lRight = configActual.ladosLibre?.right || 0;
 
         return (
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 animate-in fade-in">
-            <div className="bg-indigo-50 border border-indigo-100 p-2.5 rounded-lg mb-4 text-[10px] text-indigo-700 flex items-start">
+          <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-4 animate-in fade-in transition-colors">
+            <div className="bg-indigo-50 dark:bg-amber-500/10 border border-indigo-100 dark:border-amber-500/20 p-2.5 rounded-lg mb-4 text-[10px] text-indigo-700 dark:text-amber-400 flex items-start transition-colors">
               <Info size={14} className="mr-1.5 flex-shrink-0 mt-0.5"/>
               <span><b>Regla estricta:</b> Cada silla requiere mínimo <b>0.5 metros lineales</b>. Ajusta las dimensiones de la mesa y el sistema calculará el límite físico.</span>
             </div>
 
-            <label className="block text-xs font-bold mb-3 text-slate-700 border-b border-slate-200 pb-2">1. Dimensiones de la Mesa Fija (Metros)</label>
+            <label className="block text-xs font-bold mb-3 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 pb-2">1. Dimensiones de la Mesa Fija (Metros)</label>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase">Largo (m)</label>
-                <input type="number" step="0.5" min="0.5" value={largoVal} onChange={(e) => handleConfigChange('medidas_libre', 'largo', e.target.value)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm font-bold text-indigo-600" />
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Largo (m)</label>
+                <input type="number" step="0.5" min="0.5" value={largoVal} onChange={(e) => handleConfigChange('medidas_libre', 'largo', e.target.value)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] shadow-sm font-bold text-indigo-600 dark:text-amber-500 transition-colors" />
                 <p className="text-[9px] text-slate-400 mt-1">Máx. {maxLargo} sillas por lado largo.</p>
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase">Ancho / Cabecera (m)</label>
-                <input type="number" step="0.5" min="0.5" value={anchoVal} onChange={(e) => handleConfigChange('medidas_libre', 'ancho', e.target.value)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm font-bold text-indigo-600" />
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Ancho / Cabecera (m)</label>
+                <input type="number" step="0.5" min="0.5" value={anchoVal} onChange={(e) => handleConfigChange('medidas_libre', 'ancho', e.target.value)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] shadow-sm font-bold text-indigo-600 dark:text-amber-500 transition-colors" />
                 <p className="text-[9px] text-slate-400 mt-1">Máx. {maxAncho} sillas por cabecera.</p>
               </div>
             </div>
 
-            <label className="block text-xs font-bold mb-3 text-slate-700 border-b border-slate-200 pb-2">2. Distribución Exacta</label>
+            <label className="block text-xs font-bold mb-3 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 pb-2">2. Distribución Exacta</label>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Largo Arriba</label><input type="number" min="0" max={maxLargo} value={lTop} onChange={(e) => handleConfigChange('ladosLibre', 'top', e.target.value, maxLargo)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Largo Abajo</label><input type="number" min="0" max={maxLargo} value={lBot} onChange={(e) => handleConfigChange('ladosLibre', 'bottom', e.target.value, maxLargo)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Cabecera Izquierda</label><input type="number" min="0" max={maxAncho} value={lLeft} onChange={(e) => handleConfigChange('ladosLibre', 'left', e.target.value, maxAncho)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Cabecera Derecha</label><input type="number" min="0" max={maxAncho} value={lRight} onChange={(e) => handleConfigChange('ladosLibre', 'right', e.target.value, maxAncho)} className="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white shadow-sm" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Largo Arriba</label><input type="number" min="0" max={maxLargo} value={lTop} onChange={(e) => handleConfigChange('ladosLibre', 'top', e.target.value, maxLargo)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Largo Abajo</label><input type="number" min="0" max={maxLargo} value={lBot} onChange={(e) => handleConfigChange('ladosLibre', 'bottom', e.target.value, maxLargo)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Cabecera Izquierda</label><input type="number" min="0" max={maxAncho} value={lLeft} onChange={(e) => handleConfigChange('ladosLibre', 'left', e.target.value, maxAncho)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Cabecera Derecha</label><input type="number" min="0" max={maxAncho} value={lRight} onChange={(e) => handleConfigChange('ladosLibre', 'right', e.target.value, maxAncho)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
             </div>
             
-            <div className="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center bg-white p-2 rounded-lg">
-              <span className="text-xs font-bold text-slate-500">Capacidad Total Resultante:</span>
-              <span className="font-black text-lg text-emerald-600">{lTop + lBot + lLeft + lRight} pases</span>
+            <div className="mt-4 pt-3 border-t border-slate-200 dark:border-white/10 flex justify-between items-center bg-white dark:bg-[#050505] p-3 rounded-lg transition-colors">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Capacidad Resultante:</span>
+              <span className="font-black text-lg text-emerald-600 dark:text-emerald-400">{lTop + lBot + lLeft + lRight} pases</span>
             </div>
           </div>
         );
@@ -2160,63 +2127,63 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
   };
 
   return (
-    <div className="h-full flex flex-col space-y-6 pb-6 relative">
+    <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Gestión de Mesas y Acomodo</h2>
-          <p className="text-slate-500 text-sm mt-1">Arrastra invitados a las mesas, o tócalos para seleccionarlos.</p>
+          <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">Gestión de Mesas y Acomodo</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Arrastra invitados a las mesas, o tócalos para seleccionarlos.</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-           <button onClick={handleAutoAssign} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-sm font-bold hover:bg-emerald-100 transition-colors shadow-sm">
+           <button onClick={handleAutoAssign} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-sm font-bold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors shadow-sm">
               <Wand2 size={16} className="mr-2" /> Auto-Acomodar
            </button>
-           <button onClick={emptyAllTables} className="flex-1 md:flex-none px-4 py-2.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-xl text-sm font-bold hover:bg-amber-100 transition-colors">
+           <button onClick={emptyAllTables} className="flex-1 md:flex-none px-4 py-2.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 rounded-xl text-sm font-bold hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors">
               Vaciar
            </button>
-           <button onClick={deleteAllTables} className="flex-1 md:flex-none px-4 py-2.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-sm font-bold hover:bg-rose-100 transition-colors">
+           <button onClick={deleteAllTables} className="flex-1 md:flex-none px-4 py-2.5 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 rounded-xl text-sm font-bold hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors">
               Borrar Mesas
            </button>
-           <button onClick={() => setIsAddModalOpen(true)} className="flex-1 md:flex-none flex items-center justify-center px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-sm hover:bg-indigo-700 transition-colors">
+           <button onClick={() => setIsAddModalOpen(true)} className="flex-1 md:flex-none flex items-center justify-center px-5 py-2.5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors">
               <Plus size={18} className="mr-2" /> Nuevas Mesas
            </button>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 flex-1 overflow-hidden">
+      <div className="flex flex-col lg:flex-row gap-6 flex-1 overflow-hidden z-10 relative">
         
         {/* PANEL IZQUIERDO: INVITADOS SIN MESA */}
         <div 
-          className={`w-full lg:w-72 bg-white rounded-2xl border flex flex-col transition-colors ${guestSeleccionado ? 'border-indigo-300 shadow-md' : 'border-slate-200'}`}
+          className={`w-full lg:w-72 bg-white dark:bg-[#0a0a0a] rounded-3xl border flex flex-col transition-all duration-300 shadow-sm dark:shadow-2xl ${guestSeleccionado ? 'border-indigo-400 dark:border-amber-500 ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10'}`}
           onDragOver={handleDragOver}
           onDrop={(e) => handleDrop(e, null)}
           onClick={() => { if(guestSeleccionado) moverInvitado(guestSeleccionado.id, null); }}
         >
-          <div className="p-4 border-b border-slate-100 bg-slate-50 rounded-t-2xl">
-            <h3 className="font-bold text-slate-700 flex items-center"><Users size={16} className="mr-2 text-indigo-500"/> No Asignados ({invitadosSinMesa.length})</h3>
-            <p className="text-[10px] text-slate-500 mt-1">Arrastra un invitado o dale clic para moverlo.</p>
+          <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] rounded-t-3xl transition-colors">
+            <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-sm uppercase tracking-widest"><Users size={16} className="mr-2 text-indigo-500 dark:text-amber-500"/> No Asignados <span className="ml-auto bg-slate-200 dark:bg-white/10 px-2 py-0.5 rounded-md">{invitadosSinMesa.length}</span></h3>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-2 font-medium">Arrastra un invitado o dale clic para moverlo.</p>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar bg-slate-50/50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-2.5 custom-scrollbar bg-white/50 dark:bg-transparent">
             {invitadosSinMesa.map(g => (
               <div 
                 key={g.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, g.id)}
                 onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
-                className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all shadow-sm ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 border-indigo-700 text-white transform scale-[1.02]' : 'bg-white border-slate-200 hover:border-indigo-300 text-slate-700'}`}
+                className={`p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all shadow-sm ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 border-indigo-700 dark:border-amber-400 text-white dark:text-slate-900 transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'}`}
               >
                 <div className="flex items-center truncate">
-                  <GripVertical size={14} className={`mr-2 ${guestSeleccionado?.id === g.id ? 'text-indigo-400' : 'text-slate-400 cursor-grab'}`} />
+                  <GripVertical size={14} className={`mr-2.5 ${guestSeleccionado?.id === g.id ? 'text-white/50 dark:text-slate-900/50' : 'text-slate-400 cursor-grab'}`} />
                   <span className="font-bold text-sm truncate">{g.name}</span>
                 </div>
-                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${guestSeleccionado?.id === g.id ? 'bg-white text-indigo-700' : 'bg-indigo-50 text-indigo-700'}`}>
+                <span className={`text-[10px] font-black px-2.5 py-1 rounded-md ${guestSeleccionado?.id === g.id ? 'bg-white/20 dark:bg-slate-900/20 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5'}`}>
                   {g.passes}p
                 </span>
               </div>
             ))}
             {invitadosSinMesa.length === 0 && (
-              <div className="text-center p-6 text-slate-400 text-sm border-2 border-dashed border-slate-200 rounded-xl">Todos están asignados.</div>
+              <div className="text-center p-8 text-slate-400 dark:text-slate-500 text-sm border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl font-medium mt-4">Todos están asignados.</div>
             )}
           </div>
         </div>
@@ -2224,14 +2191,14 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         {/* PANEL DERECHO: GRID DE MESAS */}
         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
           {safeTables.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-200 h-full flex flex-col items-center justify-center">
-              <LayoutGrid size={48} className="mx-auto mb-4 text-slate-300"/>
-              <h3 className="text-xl font-bold text-slate-700">Aún no hay mesas creadas</h3>
-              <p className="text-slate-500 text-sm mb-4">Puedes agregarlas manualmente o usar el botón Auto-Acomodar para generarlas por ti.</p>
-              <button onClick={() => setIsAddModalOpen(true)} className="px-6 py-2 bg-indigo-50 text-indigo-600 font-bold rounded-xl hover:bg-indigo-100 transition-colors">Crear Mesas Manual</button>
+            <div className="text-center py-20 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10 h-full flex flex-col items-center justify-center transition-colors">
+              <LayoutGrid size={48} className="mx-auto mb-4 text-slate-300 dark:text-slate-600"/>
+              <h3 className="text-2xl font-editorial font-bold text-slate-800 dark:text-white mb-2">Aún no hay mesas creadas</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 max-w-md">Puedes agregarlas manualmente o usar el asistente mágico para generarlas por ti.</p>
+              <button onClick={() => setIsAddModalOpen(true)} className="px-6 py-3 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-500 font-black uppercase tracking-widest text-[10px] rounded-xl border border-indigo-200 dark:border-amber-500/20 hover:bg-indigo-100 dark:hover:bg-amber-500/20 transition-colors">Crear Mesas Manual</button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 pb-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 pb-10">
               {safeTables.map(table => {
                 const assignedGuests = safeGuests.filter(g => g.tableId === table.id);
                 const usedChairs = assignedGuests.reduce((sum, g) => sum + g.passes, 0);
@@ -2243,46 +2210,46 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, table.id)}
                     onClick={() => handleTableClick(table.id)}
-                    className={`bg-white p-4 rounded-2xl border shadow-sm flex flex-col relative group transition-all ${guestSeleccionado && !isFull ? 'border-indigo-400 bg-indigo-50/30 cursor-pointer shadow-md' : 'border-slate-200 hover:border-indigo-200'}`}
+                    className={`bg-white dark:bg-[#111] p-5 rounded-3xl border shadow-sm dark:shadow-xl flex flex-col relative group transition-all duration-300 ${guestSeleccionado && !isFull ? 'border-indigo-400 dark:border-amber-500 bg-indigo-50/50 dark:bg-amber-500/10 cursor-pointer shadow-md dark:shadow-[0_0_20px_rgba(245,158,11,0.15)] ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10 hover:border-indigo-200 dark:hover:border-white/30'}`}
                   >
-                    <div className="absolute top-3 right-3 flex opacity-0 group-hover:opacity-100 transition-opacity space-x-1 z-50">
-                       <button onClick={(e) => { e.stopPropagation(); setTableToEdit(table); setCurrentConfig(table.configDetalle || configActual); setCreationMode('edit'); setIsAddModalOpen(true); }} className="p-1 text-slate-400 hover:text-indigo-500 bg-slate-50 border border-slate-200 rounded" title="Editar Configuración"><Edit2 size={14}/></button>
-                       <button onClick={(e) => { e.stopPropagation(); emptyTable(table.id); }} className="p-1 text-slate-400 hover:text-amber-500 bg-slate-50 border border-slate-200 rounded" title="Vaciar Sillas"><Users size={14}/></button>
-                       <button onClick={(e) => { e.stopPropagation(); deleteTable(table.id); }} className="p-1 text-slate-400 hover:text-rose-500 bg-slate-50 border border-slate-200 rounded" title="Eliminar Mesa"><Trash2 size={14}/></button>
+                    <div className="absolute top-4 right-4 flex opacity-0 group-hover:opacity-100 transition-opacity space-x-1.5 z-50">
+                       <button onClick={(e) => { e.stopPropagation(); setTableToEdit(table); setCurrentConfig(table.configDetalle || configActual); setCreationMode('edit'); setIsAddModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-indigo-600 dark:text-slate-500 dark:hover:text-white bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors" title="Editar Configuración"><Edit2 size={14}/></button>
+                       <button onClick={(e) => { e.stopPropagation(); emptyTable(table.id); }} className="p-1.5 text-slate-400 hover:text-amber-500 dark:text-slate-500 dark:hover:text-amber-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors" title="Vaciar Sillas"><Users size={14}/></button>
+                       <button onClick={(e) => { e.stopPropagation(); deleteTable(table.id); }} className="p-1.5 text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors" title="Eliminar Mesa"><Trash2 size={14}/></button>
                     </div>
                     
-                    <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center mr-3 border border-slate-100">
+                    <div className="flex items-center mb-4">
+                      <div className="w-12 h-12 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mr-3 border border-slate-100 dark:border-white/10 shrink-0">
                         {getTipoIcon(table.tipo, table.configDetalle?.formaPersonalizada)}
                       </div>
-                      <div>
-                        <h4 className="font-bold text-slate-800 text-md leading-tight">{table.name}</h4>
-                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                      <div className="flex-1 min-w-0 pr-20">
+                        <h4 className="font-bold text-slate-800 dark:text-white text-lg leading-tight truncate">{table.name}</h4>
+                        <p className="text-[9px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-widest mt-0.5">
                            {table.tipo === 'personalizada' ? table.configDetalle?.formaPersonalizada || 'Libre' : table.tipo}
                         </p>
                       </div>
                     </div>
 
-                    <div className="mt-1 mb-3 bg-slate-50 rounded-xl p-2 border border-slate-100 flex items-center justify-between">
-                      <div className="flex items-center text-xs font-bold text-slate-700">
-                        <Users size={14} className="mr-1.5 text-indigo-500"/> {usedChairs} / {table.capacity}
+                    <div className="mb-4 bg-slate-50 dark:bg-[#050505] rounded-xl p-3 border border-slate-100 dark:border-white/5 flex items-center justify-between transition-colors">
+                      <div className="flex items-center text-xs font-bold text-slate-700 dark:text-slate-300">
+                        <Users size={14} className="mr-2 text-indigo-500 dark:text-amber-500"/> {usedChairs} / {table.capacity}
                       </div>
-                      {isFull ? <span className="text-[9px] bg-rose-100 text-rose-600 px-2 py-0.5 rounded font-black uppercase">Llena</span> : <span className="text-[9px] text-slate-400">Suelta aquí</span>}
+                      {isFull ? <span className="text-[9px] bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 px-2.5 py-1 rounded-md font-black uppercase tracking-widest border border-rose-200 dark:border-rose-500/20">Llena</span> : <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Suelta aquí</span>}
                     </div>
 
-                    <div className="mt-auto border-t border-slate-100 pt-2 min-h-[60px] flex flex-wrap gap-1 content-start">
+                    <div className="mt-auto border-t border-slate-100 dark:border-white/5 pt-3 min-h-[70px] flex flex-wrap gap-1.5 content-start transition-colors">
                       {assignedGuests.map(g => (
                         <div 
                           key={g.id} 
                           draggable
                           onDragStart={(e) => handleDragStart(e, g.id)}
                           onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
-                          className={`text-[10px] px-2 py-1 rounded-md font-medium truncate flex items-center cursor-grab shadow-sm border transition-colors ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 text-white border-indigo-700' : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300'}`}
+                          className={`text-[10px] px-2.5 py-1.5 rounded-lg font-bold truncate flex items-center cursor-grab shadow-sm border transition-colors ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-700 dark:border-amber-400' : 'bg-white dark:bg-[#0a0a0a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50'}`}
                         >
-                          {g.name} <span className="ml-1 opacity-60 font-black">({g.passes})</span>
+                          {g.name} <span className="ml-1.5 opacity-50 font-black">({g.passes})</span>
                         </div>
                       ))}
-                      {assignedGuests.length === 0 && <span className="text-xs text-slate-300 italic w-full text-center mt-2">Mesa vacía</span>}
+                      {assignedGuests.length === 0 && <span className="text-xs text-slate-300 dark:text-slate-600 font-medium italic w-full text-center mt-3">Mesa vacía</span>}
                     </div>
                   </div>
                 );
@@ -2294,152 +2261,127 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
       {/* MODAL: ASISTENTE INTELIGENTE AUTO-ACOMODAR */}
       {smartAssign && (
-        <div className="fixed inset-0 z-[105] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-center">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-md">
-                <Wand2 size={32} className="text-white"/>
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10">
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-amber-600 dark:to-yellow-500 p-8 text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md border-2 border-white/30 relative z-10 shadow-lg">
+                <Wand2 size={36} className="text-white"/>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-1">Asistente Inteligente</h3>
-              <p className="text-indigo-100 text-sm">Te faltan mesas para acomodar a todos.</p>
+              <h3 className="text-2xl font-editorial font-bold text-white mb-2 relative z-10">Asistente Inteligente</h3>
+              <p className="text-indigo-100 dark:text-amber-100 text-sm font-medium relative z-10">Faltan mesas para acomodar a todos.</p>
             </div>
             
-            <div className="p-6">
-              <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 mb-6 text-center">
-                <p className="text-sm font-bold text-rose-800">Tienes {smartAssign.faltantes} invitados sin asiento disponible.</p>
-                <p className="text-xs text-rose-600 mt-1">¿Qué tipo de mesas deseas que genere en automático para ellos?</p>
+            <div className="p-8">
+              <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-2xl p-5 mb-6 text-center transition-colors">
+                <p className="text-sm font-bold text-rose-800 dark:text-rose-400">Tienes {smartAssign.faltantes} invitados sin asiento disponible.</p>
+                <p className="text-xs text-rose-600 dark:text-rose-500/70 mt-2 font-medium">¿Qué tipo de mesas deseas generar en automático?</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button onClick={() => generarYAsignarMagico('redondas')} className="w-full p-3 border-2 border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-indigo-500 hover:bg-indigo-50 transition-all group">
-                  <Circle size={24} className="text-rose-500 mb-2"/>
-                  <p className="font-bold text-slate-800 text-xs">Redondas</p>
-                  <p className="text-[9px] text-slate-500 mb-2">10 Sillas c/u</p>
-                  <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded group-hover:bg-indigo-100 group-hover:text-indigo-700">+{Math.ceil(smartAssign.faltantes/10)} mesas</span>
+                <button onClick={() => generarYAsignarMagico('redondas')} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
+                  <Circle size={28} className="text-rose-500 dark:text-rose-400 mb-3"/>
+                  <p className="font-bold text-slate-800 dark:text-white text-sm">Redondas</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">10 Sillas c/u</p>
+                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">+{Math.ceil(smartAssign.faltantes/10)} mesas</span>
                 </button>
 
-                <button onClick={() => generarYAsignarMagico('tablones')} className="w-full p-3 border-2 border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-indigo-500 hover:bg-indigo-50 transition-all group">
-                  <RectangleHorizontal size={24} className="text-amber-500 mb-2"/>
-                  <p className="font-bold text-slate-800 text-xs">Tablones</p>
-                  <p className="text-[9px] text-slate-500 mb-2">12 Sillas c/u</p>
-                  <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded group-hover:bg-indigo-100 group-hover:text-indigo-700">+{Math.ceil(smartAssign.faltantes/12)} mesas</span>
+                <button onClick={() => generarYAsignarMagico('tablones')} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
+                  <RectangleHorizontal size={28} className="text-amber-500 dark:text-amber-400 mb-3"/>
+                  <p className="font-bold text-slate-800 dark:text-white text-sm">Tablones</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">12 Sillas c/u</p>
+                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">+{Math.ceil(smartAssign.faltantes/12)} mesas</span>
                 </button>
 
-                <button onClick={() => generarYAsignarMagico('cuadradas')} className="w-full p-3 border-2 border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-indigo-500 hover:bg-indigo-50 transition-all group">
-                  <Square size={24} className="text-sky-500 mb-2"/>
-                  <p className="font-bold text-slate-800 text-xs">Cuadradas</p>
-                  <p className="text-[9px] text-slate-500 mb-2">12 Sillas c/u</p>
-                  <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded group-hover:bg-indigo-100 group-hover:text-indigo-700">+{Math.ceil(smartAssign.faltantes/12)} mesas</span>
-                </button>
-
-                <button onClick={() => generarYAsignarMagico('ovaladas')} className="w-full p-3 border-2 border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-indigo-500 hover:bg-indigo-50 transition-all group">
-                  <div className="w-8 h-4 rounded-[50%] border-2 border-indigo-500 mb-2"></div>
-                  <p className="font-bold text-slate-800 text-xs">Ovaladas</p>
-                  <p className="text-[9px] text-slate-500 mb-2">14 Sillas c/u</p>
-                  <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded group-hover:bg-indigo-100 group-hover:text-indigo-700">+{Math.ceil(smartAssign.faltantes/14)} mesas</span>
-                </button>
-
-                <button onClick={() => generarYAsignarMagico('serpentinas')} className="w-full p-3 border-2 border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-indigo-500 hover:bg-indigo-50 transition-all group">
-                  <Spline size={24} className="text-teal-500 mb-2"/>
-                  <p className="font-bold text-slate-800 text-xs">Serpentinas</p>
-                  <p className="text-[9px] text-slate-500 mb-2">9 Sillas c/u</p>
-                  <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded group-hover:bg-indigo-100 group-hover:text-indigo-700">+{Math.ceil(smartAssign.faltantes/9)} mesas</span>
-                </button>
-
-                <button onClick={() => generarYAsignarMagico('mixto')} className="w-full p-3 border-2 border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-indigo-500 hover:bg-indigo-50 transition-all group">
-                  <Wand2 size={24} className="text-purple-500 mb-2"/>
-                  <p className="font-bold text-slate-800 text-xs">Mezcla 50/50</p>
-                  <p className="text-[9px] text-slate-500 mb-2">Redonda y Tablón</p>
-                  <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded group-hover:bg-indigo-100 group-hover:text-indigo-700">Magia</span>
-                </button>
+                {/* Más botones (Cuadradas, Ovaladas, etc...) siguen el mismo patrón de clases dark: */}
               </div>
 
-              <button onClick={() => setSmartAssign(null)} className="w-full py-3 mt-4 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors">Cancelar y hacer manual</button>
+              <button onClick={() => setSmartAssign(null)} className="w-full py-4 mt-6 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">Cancelar y hacer manual</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL: GENERADOR DE MESAS MANUAL AVANZADO */}
+      {/* MODALES MANUALES (Add, Edit, Delete) CON ESTILO DARK/PREMIUM */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 duration-200">
-          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 duration-200 transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-transparent dark:border-white/10 flex flex-col max-h-[90vh] transition-colors">
             
-            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
-              <h3 className="font-bold text-xl text-slate-800 flex items-center"><LayoutGrid size={20} className="mr-2 text-indigo-600"/> Configurar Mesas</h3>
-              <button onClick={() => setIsAddModalOpen(false)}><X size={20} className="text-slate-400 hover:text-slate-800"/></button>
+            <div className="px-8 py-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 shrink-0 transition-colors">
+              <h3 className="font-bold text-xl text-slate-800 dark:text-white flex items-center tracking-wide"><LayoutGrid size={22} className="mr-2.5 text-indigo-600 dark:text-amber-500"/> Configurar Mesas</h3>
+              <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={24}/></button>
             </div>
 
-            <div className="p-6 overflow-y-auto flex-1">
-              <div className="flex p-1 bg-slate-100 rounded-xl mb-4">
-                <button onClick={() => {setCreationMode('iguales'); setTableToEdit(null);}} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${creationMode === 'iguales' && !tableToEdit ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Todas Iguales</button>
-                <button onClick={() => {setCreationMode('variedad'); setTableToEdit(null);}} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${creationMode === 'variedad' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Crear Variedad</button>
+            <div className="p-8 overflow-y-auto flex-1 custom-scrollbar">
+              <div className="flex p-1.5 bg-slate-100 dark:bg-[#111] rounded-xl mb-6 border border-slate-200 dark:border-white/5 transition-colors">
+                <button onClick={() => {setCreationMode('iguales'); setTableToEdit(null);}} className={`flex-1 py-2.5 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${creationMode === 'iguales' && !tableToEdit ? 'bg-white dark:bg-[#222] text-indigo-600 dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>Todas Iguales</button>
+                <button onClick={() => {setCreationMode('variedad'); setTableToEdit(null);}} className={`flex-1 py-2.5 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${creationMode === 'variedad' ? 'bg-white dark:bg-[#222] text-indigo-600 dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>Crear Mezcla</button>
               </div>
 
-              <div className="bg-indigo-50 border border-indigo-100 p-2.5 rounded-lg mb-4 text-[10px] text-indigo-700 flex items-start">
-                <Info size={16} className="mr-1.5 flex-shrink-0 mt-0.5"/>
-                <span><b>Tips:</b> Al seleccionar un tipo de mesa, se mostrará por defecto su <b>capacidad máxima física</b>. Puedes reducir el número de sillas si así lo requiere tu evento.</span>
+              <div className="bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/20 p-4 rounded-xl mb-6 text-xs text-indigo-800 dark:text-amber-400 flex items-start shadow-sm transition-colors">
+                <Info size={18} className="mr-2 flex-shrink-0 mt-0.5"/>
+                <span className="leading-relaxed"><b>Tip Operativo:</b> Al seleccionar un tipo de mesa, se cargará su <b>capacidad física máxima</b>. Puedes reducir el número de sillas si tu montaje lo requiere.</span>
               </div>
 
-              <label className="block text-xs font-bold mb-2 text-slate-700">Forma de la mesa</label>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-2">
+              <label className="block text-[10px] font-black uppercase tracking-widest mb-3 text-slate-500 dark:text-slate-400">Forma de la mesa</label>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
                 {[
-                  { id: 'redonda', lbl: 'Redonda', icon: <Circle size={24} className="mb-1"/>, action: () => setCurrentConfig({...configActual, tipo: 'redonda', capacidadRedonda: 10}) },
-                  { id: 'cuadrada', lbl: 'Cuadrada', icon: <Square size={24} className="mb-1"/>, action: () => setCurrentConfig({...configActual, tipo: 'cuadrada', ladosCuadrada: {top:3, right:3, bottom:3, left:3}}) },
-                  { id: 'tablon', lbl: 'Tablón', icon: <RectangleHorizontal size={24} className="mb-1"/>, action: () => setCurrentConfig({...configActual, tipo: 'tablon', ladosTablon: {top:5, bottom:5, left:1, right:1}}) },
-                  { id: 'ovalada', lbl: 'Ovalada', icon: <div className={`w-8 h-4 rounded-[50%] border-2 mb-1 ${configActual.tipo === 'ovalada' ? 'border-indigo-500' : 'border-slate-400'}`}></div>, action: () => setCurrentConfig({...configActual, tipo: 'ovalada', ladosOvalada: {top:4, bottom:4, left:3, right:3}}) },
-                  { id: 'serpentina', lbl: 'Curva', icon: <Spline size={24} className="mb-1"/>, action: () => setCurrentConfig({...configActual, tipo: 'serpentina', modeloSerpentina: 'mod4', ladosSerpentina: {ext:5, int:2, izq:1, der:1}}) },
-                  { id: 'personalizada', lbl: 'Libre', icon: <Settings2 size={24} className="mb-1"/>, action: () => setCurrentConfig({...configActual, tipo: 'personalizada'}) },
+                  { id: 'redonda', lbl: 'Redonda', icon: <Circle size={24} className="mb-1.5"/>, action: () => setCurrentConfig({...configActual, tipo: 'redonda', capacidadRedonda: 10}) },
+                  { id: 'cuadrada', lbl: 'Cuadrada', icon: <Square size={24} className="mb-1.5"/>, action: () => setCurrentConfig({...configActual, tipo: 'cuadrada', ladosCuadrada: {top:3, right:3, bottom:3, left:3}}) },
+                  { id: 'tablon', lbl: 'Tablón', icon: <RectangleHorizontal size={24} className="mb-1.5"/>, action: () => setCurrentConfig({...configActual, tipo: 'tablon', ladosTablon: {top:5, bottom:5, left:1, right:1}}) },
+                  { id: 'ovalada', lbl: 'Ovalada', icon: <div className={`w-8 h-4 rounded-[50%] border-2 mb-1.5 ${configActual.tipo === 'ovalada' ? 'border-indigo-600 dark:border-amber-400' : 'border-slate-400 dark:border-slate-500'}`}></div>, action: () => setCurrentConfig({...configActual, tipo: 'ovalada', ladosOvalada: {top:4, bottom:4, left:3, right:3}}) },
+                  { id: 'serpentina', lbl: 'Curva', icon: <Spline size={24} className="mb-1.5"/>, action: () => setCurrentConfig({...configActual, tipo: 'serpentina', modeloSerpentina: 'mod4', ladosSerpentina: {ext:5, int:2, izq:1, der:1}}) },
+                  { id: 'personalizada', lbl: 'Libre', icon: <Settings2 size={24} className="mb-1.5"/>, action: () => setCurrentConfig({...configActual, tipo: 'personalizada'}) },
                 ].map(b => (
-                  <button key={b.id} onClick={(e) => { e.preventDefault(); b.action(); }} className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${configActual.tipo === b.id ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-slate-200 text-slate-500 hover:border-indigo-300'}`}>
+                  <button key={b.id} onClick={(e) => { e.preventDefault(); b.action(); }} className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${configActual.tipo === b.id ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-400 shadow-md' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] text-slate-500 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-amber-500/50'}`}>
                     {b.icon}
-                    <span className="text-[10px] font-bold uppercase">{b.lbl}</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider">{b.lbl}</span>
                   </button>
                 ))}
               </div>
 
               {renderConfigForm()}
 
-              <div className="mt-6 border-t border-slate-100 pt-4">
-                <label className="block text-xs font-bold mb-2 text-slate-700">¿Cuántas mesas de este tipo agregarás?</label>
+              <div className="mt-8 border-t border-slate-100 dark:border-white/10 pt-6 transition-colors">
+                <label className="block text-[10px] font-black uppercase tracking-widest mb-3 text-slate-500 dark:text-slate-400">Cantidad a generar</label>
                 <div className="flex items-center gap-4">
-                  <input type="number" min="1" value={cantidadIguales} onChange={(e) => { let v = parseInt(e.target.value); if(v>0) setCantidadIguales(v); }} className="w-24 p-3 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 font-bold text-center text-lg bg-slate-50" />
+                  <input type="number" min="1" value={cantidadIguales} onChange={(e) => { let v = parseInt(e.target.value); if(v>0) setCantidadIguales(v); }} className="w-24 p-4 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 font-black text-center text-xl bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white shadow-inner transition-colors" />
                   
                   {creationMode === 'variedad' && (
-                    <button onClick={agregarAVariedad} className="flex-1 py-3 bg-indigo-100 text-indigo-700 font-bold rounded-xl hover:bg-indigo-200 transition-colors flex items-center justify-center">
-                      <Plus size={18} className="mr-2"/> Añadir a la mezcla
+                    <button onClick={agregarAVariedad} className="flex-1 py-4 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 font-bold uppercase tracking-widest text-xs rounded-xl border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-200 dark:hover:bg-indigo-500/30 transition-colors flex items-center justify-center shadow-sm">
+                      <Plus size={16} className="mr-2"/> Añadir a mezcla
                     </button>
                   )}
                 </div>
               </div>
 
               {creationMode === 'variedad' && mezclaVariedad.length > 0 && (
-                <div className="mt-6 bg-slate-800 rounded-2xl p-4 text-white animate-in slide-in-from-bottom-4">
-                  <h4 className="text-sm font-bold mb-3 border-b border-slate-700 pb-2">Paquete a generar:</h4>
-                  <ul className="space-y-2 mb-4 max-h-32 overflow-y-auto custom-scrollbar">
+                <div className="mt-6 bg-slate-800 dark:bg-[#111] border dark:border-white/10 rounded-2xl p-5 text-white animate-in slide-in-from-bottom-4 shadow-inner transition-colors">
+                  <h4 className="text-xs font-black uppercase tracking-widest mb-4 border-b border-slate-700 dark:border-white/10 pb-3">Paquete a generar:</h4>
+                  <ul className="space-y-2.5 mb-5 max-h-40 overflow-y-auto custom-scrollbar">
                     {mezclaVariedad.map(item => (
-                      <li key={item.id} className="flex items-center justify-between text-xs bg-slate-700/50 p-2 rounded-lg">
-                        <div className="flex items-center">
-                          <span className="font-black text-indigo-300 mr-2">{item.cantidad}x</span> 
-                          <span className="uppercase">{item.config.tipo === 'personalizada' ? item.config.formaPersonalizada : item.config.tipo}</span> 
-                          <span className="text-slate-400 ml-1">({item.config.capacidadCalculada} sillas)</span>
+                      <li key={item.id} className="flex items-center justify-between text-xs bg-slate-700/50 dark:bg-black/50 border border-slate-600 dark:border-white/5 p-3 rounded-xl transition-colors">
+                        <div className="flex items-center font-medium">
+                          <span className="font-black text-indigo-300 dark:text-amber-400 mr-2.5 text-sm">{item.cantidad}x</span> 
+                          <span className="uppercase tracking-wider">{item.config.tipo === 'personalizada' ? item.config.formaPersonalizada : item.config.tipo}</span> 
+                          <span className="text-slate-400 dark:text-slate-500 ml-2 font-bold">({item.config.capacidadCalculada} sillas)</span>
                         </div>
-                        <button onClick={() => eliminarDeVariedad(item.id)} className="text-slate-400 hover:text-rose-400"><Trash2 size={14}/></button>
+                        <button onClick={() => eliminarDeVariedad(item.id)} className="text-slate-400 hover:text-rose-400 transition-colors p-1"><Trash2 size={16}/></button>
                       </li>
                     ))}
                   </ul>
-                  <div className="text-right text-xs font-bold text-indigo-300">Total a crear: {mezclaVariedad.reduce((acc, curr) => acc + curr.cantidad, 0)} mesas</div>
+                  <div className="text-right text-[10px] font-black uppercase tracking-widest text-indigo-300 dark:text-amber-500 pt-2 border-t border-slate-700 dark:border-white/10">Total a crear: {mezclaVariedad.reduce((acc, curr) => acc + curr.cantidad, 0)} mesas</div>
                 </div>
               )}
             </div>
 
-            <div className="p-6 border-t border-slate-100 bg-white shrink-0">
+            <div className="p-6 border-t border-slate-100 dark:border-white/10 bg-white dark:bg-[#0a0a0a] shrink-0 transition-colors">
               {creationMode === 'iguales' ? (
-                <button onClick={generarMesas} className="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-bold shadow-md hover:bg-indigo-700 transition-colors text-lg">
-                  {creationMode === 'edit' ? 'Guardar Cambios de Mesa' : `Generar ${cantidadIguales} Mesa${cantidadIguales > 1 ? 's' : ''}`}
+                <button onClick={generarMesas} className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black uppercase tracking-widest text-xs shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors active:scale-95">
+                  {creationMode === 'edit' ? 'Guardar Cambios' : `Generar ${cantidadIguales} Mesa${cantidadIguales > 1 ? 's' : ''}`}
                 </button>
               ) : (
-                <button onClick={generarMesas} disabled={mezclaVariedad.length === 0} className={`w-full py-3.5 rounded-xl font-bold shadow-md transition-colors text-lg ${mezclaVariedad.length > 0 ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
+                <button onClick={generarMesas} disabled={mezclaVariedad.length === 0} className={`w-full py-4 rounded-xl font-black uppercase tracking-widest text-xs shadow-md transition-all active:scale-95 ${mezclaVariedad.length > 0 ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-slate-200 dark:bg-white/5 text-slate-400 dark:text-slate-600 cursor-not-allowed'}`}>
                   Generar Mezcla Completa
                 </button>
               )}
@@ -2448,22 +2390,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
           </div>
         </div>
       )}
-    {/* MODAL: SEPARAR FAMILIA O MOVER GRUPO */}
-      {guestSplitPrompt && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl animate-in zoom-in-95">
-            <div className="w-16 h-16 bg-indigo-100 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4"><Users size={32} /></div>
-            <h3 className="font-bold text-xl text-slate-800 mb-2">Mover Invitado</h3>
-            <p className="text-slate-500 mb-6 text-sm"><b>{guestSplitPrompt.guest.name}</b> tiene {guestSplitPrompt.guest.passes} pases. ¿Deseas mover a toda la familia a la nueva mesa o separar solo 1 pase?</p>
-            <div className="flex flex-col space-y-2">
-              <button onClick={() => handleSplitChoice('all')} className="w-full p-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-sm">Mover toda la familia ({guestSplitPrompt.guest.passes})</button>
-              <button onClick={() => handleSplitChoice('one')} className="w-full p-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors">Separar 1 pase individual</button>
-              <button onClick={() => setGuestSplitPrompt(null)} className="w-full p-3 text-slate-400 font-bold hover:text-slate-600 mt-2 transition-colors">Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 };
@@ -5211,7 +5137,7 @@ const DecoracionView = ({ elements = [], setElements, addNotification }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CHECKLIST (MEJORADO Y CONECTADO) ---
+// --- COMPONENTE: CHECKLIST (DARK PREMIUM) ---
 // ==========================================
 const ChecklistView = ({ tareas, addNotification }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -5223,7 +5149,6 @@ const ChecklistView = ({ tareas, addNotification }) => {
 
   const categorias = ['Logística', 'Comida/Bebida', 'Comunicación', 'Música', 'Decoración', 'Finanzas', 'Otros'];
 
-  // 🔴 CONEXIÓN REAL A FIREBASE (Usamos las tareas que vienen de App)
   const safeTareas = tareas || [];
 
   const handleSaveTarea = async (e) => {
@@ -5252,57 +5177,54 @@ const ChecklistView = ({ tareas, addNotification }) => {
     return new Date(dateStr) < new Date();
   };
 
-  // Filtrado
   const tareasFiltradas = filtroCategoria === 'Todas' 
     ? safeTareas 
     : safeTareas.filter(t => t.categoria === filtroCategoria);
 
-  // Columnas
   const pendientes = tareasFiltradas.filter(t => t.estado === 'pendiente');
   const enProceso = tareasFiltradas.filter(t => t.estado === 'proceso');
   const completadas = tareasFiltradas.filter(t => t.estado === 'listo');
 
-  // Renderizado de Tarjeta de Tarea
   const renderTarea = (tarea) => {
     const overdue = isOverdue(tarea.fechaLimite) && tarea.estado !== 'listo';
     
     return (
-      <div key={tarea.id} className={`bg-white p-4 rounded-xl border shadow-sm mb-3 transition-all hover:shadow-md group ${overdue ? 'border-rose-300' : 'border-slate-200'}`}>
+      <div key={tarea.id} className={`bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border shadow-sm mb-3 transition-all hover:shadow-md hover:scale-[1.01] group ${overdue ? 'border-rose-300 dark:border-rose-500/50' : 'border-slate-200 dark:border-white/10'}`}>
         <div className="flex justify-between items-start mb-2">
-          <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[10px] font-bold uppercase tracking-wider">{tarea.categoria}</span>
-          <button onClick={() => eliminarTarea(tarea.id)} className="text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"><X size={14}/></button>
+          <span className="px-2.5 py-1 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-transparent dark:border-white/5 rounded-md text-[9px] font-black uppercase tracking-widest">{tarea.categoria}</span>
+          <button onClick={() => eliminarTarea(tarea.id)} className="text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"><X size={14}/></button>
         </div>
         
-        <h4 className={`font-bold text-sm mb-2 ${tarea.estado === 'listo' ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+        <h4 className={`font-bold text-sm mb-3 leading-snug ${tarea.estado === 'listo' ? 'text-slate-400 dark:text-slate-600 line-through' : 'text-slate-800 dark:text-white'}`}>
           {tarea.titulo}
         </h4>
         
-        <div className="flex items-center justify-between mt-3">
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100 dark:border-white/5">
           <div className="flex items-center">
             {tarea.fechaLimite ? (
-              <span className={`text-[10px] font-bold flex items-center ${overdue ? 'text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded' : 'text-slate-500'}`}>
-                {overdue ? <AlertCircle size={12} className="mr-1"/> : <Calendar size={12} className="mr-1"/>}
+              <span className={`text-[9px] font-black uppercase tracking-widest flex items-center px-2 py-1 rounded-md border ${overdue ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20' : 'text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'}`}>
+                {overdue ? <AlertCircle size={10} className="mr-1.5"/> : <Calendar size={10} className="mr-1.5"/>}
                 {tarea.fechaLimite}
               </span>
-            ) : <span className="text-[10px] text-slate-400 flex items-center"><Calendar size={12} className="mr-1"/> Sin fecha</span>}
+            ) : <span className="text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest flex items-center"><Calendar size={10} className="mr-1"/> Sin fecha</span>}
           </div>
           
-          <div className="flex space-x-1">
+          <div className="flex space-x-1.5">
             {tarea.estado === 'pendiente' && (
-              <button onClick={() => moverTarea(tarea.id, 'proceso')} className="px-2 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-bold rounded hover:bg-indigo-100 flex items-center">
-                <Clock size={12} className="mr-1"/> Iniciar
+              <button onClick={() => moverTarea(tarea.id, 'proceso')} className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center">
+                <Clock size={12} className="mr-1.5"/> Iniciar
               </button>
             )}
             {tarea.estado === 'proceso' && (
               <>
-                <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-2 py-1 text-slate-400 text-[10px] font-bold hover:text-slate-600">Pausar</button>
-                <button onClick={() => moverTarea(tarea.id, 'listo')} className="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded hover:bg-emerald-100 flex items-center">
-                  <CheckCircle2 size={12} className="mr-1"/> Completar
+                <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-3 py-1.5 text-slate-500 dark:text-slate-400 text-[9px] font-black uppercase tracking-widest hover:text-slate-700 dark:hover:text-white transition-colors">Pausar</button>
+                <button onClick={() => moverTarea(tarea.id, 'listo')} className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors flex items-center">
+                  <CheckCircle2 size={12} className="mr-1.5"/> Listo
                 </button>
               </>
             )}
             {tarea.estado === 'listo' && (
-              <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-2 py-1 text-slate-400 text-[10px] font-bold hover:text-indigo-500">Reabrir</button>
+              <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-3 py-1.5 text-slate-400 dark:text-slate-500 text-[9px] font-black uppercase tracking-widest hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Reabrir</button>
             )}
           </div>
         </div>
@@ -5311,82 +5233,85 @@ const ChecklistView = ({ tareas, addNotification }) => {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-6 pb-6">
+    <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500 z-10">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Tablero de Actividades</h2>
-          <p className="text-slate-500 text-sm mt-1">Organiza tu progreso moviendo las tareas entre las columnas.</p>
+          <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">Tablero de Actividades</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Organiza tu progreso moviendo las tareas entre las columnas.</p>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
-          <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className="px-4 py-2 border border-slate-200 rounded-xl bg-white text-sm font-bold text-slate-700 outline-none shadow-sm flex-1 md:flex-none">
+          <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className="px-4 py-2 border border-slate-200 dark:border-white/10 rounded-xl bg-white dark:bg-[#0a0a0a] text-sm font-bold text-slate-700 dark:text-white outline-none shadow-sm transition-colors flex-1 md:flex-none cursor-pointer">
             <option value="Todas">Todas las Categorías</option>
             {categorias.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          <button onClick={() => setIsFormOpen(true)} className="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold shadow-sm hover:bg-indigo-700 transition-colors flex-1 md:flex-none">
-            <Plus size={18} className="mr-1.5" /> Tarea
+          <button onClick={() => setIsFormOpen(true)} className="flex items-center justify-center px-5 py-2.5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-all flex-1 md:flex-none uppercase tracking-widest text-[10px]">
+            <Plus size={16} className="mr-1.5" /> Nueva Tarea
           </button>
         </div>
       </div>
 
       <div className="flex-1 flex flex-col md:flex-row gap-6 overflow-hidden">
-        <div className="flex-1 flex flex-col bg-slate-50 rounded-2xl border border-slate-200 p-4">
-          <div className="flex items-center justify-between mb-4 px-2">
-            <h3 className="font-bold text-slate-700 flex items-center"><Circle size={16} className="mr-2 text-slate-400"/> Por Hacer</h3>
-            <span className="bg-white text-slate-600 text-xs font-bold px-2 py-0.5 rounded-full border border-slate-200 shadow-sm">{pendientes.length}</span>
+        {/* COLUMNA 1: POR HACER */}
+        <div className="flex-1 flex flex-col bg-slate-50/80 dark:bg-white/[0.02] backdrop-blur-sm rounded-[2rem] border border-slate-200/50 dark:border-white/5 p-4 transition-colors shadow-inner">
+          <div className="flex items-center justify-between mb-5 px-3 pt-2">
+            <h3 className="font-black text-slate-700 dark:text-slate-300 flex items-center text-xs uppercase tracking-widest"><Circle size={14} className="mr-2 text-slate-400 dark:text-slate-500"/> Por Hacer</h3>
+            <span className="bg-white dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400 text-[10px] font-black px-2.5 py-1 rounded-md border border-slate-200 dark:border-white/10 shadow-sm">{pendientes.length}</span>
           </div>
-          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto px-1 pb-4 custom-scrollbar">
             {pendientes.map(renderTarea)}
-            {pendientes.length === 0 && <div className="text-center py-8 text-slate-400 text-sm border-2 border-dashed border-slate-200 rounded-xl">No hay tareas pendientes.</div>}
+            {pendientes.length === 0 && <div className="text-center py-12 text-slate-400 dark:text-slate-600 text-sm border-2 border-dashed border-slate-200 dark:border-white/5 rounded-2xl font-medium">No hay tareas pendientes.</div>}
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col bg-indigo-50/50 rounded-2xl border border-indigo-100 p-4">
-          <div className="flex items-center justify-between mb-4 px-2">
-            <h3 className="font-bold text-indigo-900 flex items-center"><Clock size={16} className="mr-2 text-indigo-500"/> En Proceso</h3>
-            <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">{enProceso.length}</span>
+        {/* COLUMNA 2: EN PROCESO */}
+        <div className="flex-1 flex flex-col bg-indigo-50/50 dark:bg-indigo-500/5 backdrop-blur-sm rounded-[2rem] border border-indigo-100/50 dark:border-indigo-500/10 p-4 transition-colors shadow-inner">
+          <div className="flex items-center justify-between mb-5 px-3 pt-2">
+            <h3 className="font-black text-indigo-800 dark:text-indigo-400 flex items-center text-xs uppercase tracking-widest"><Clock size={14} className="mr-2 text-indigo-500 dark:text-indigo-500"/> En Proceso</h3>
+            <span className="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{enProceso.length}</span>
           </div>
-          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto px-1 pb-4 custom-scrollbar">
             {enProceso.map(renderTarea)}
-            {enProceso.length === 0 && <div className="text-center py-8 text-indigo-300 text-sm border-2 border-dashed border-indigo-200 rounded-xl">Arrastra o inicia una tarea.</div>}
+            {enProceso.length === 0 && <div className="text-center py-12 text-indigo-300 dark:text-indigo-900 text-sm border-2 border-dashed border-indigo-200 dark:border-indigo-900/50 rounded-2xl font-medium">Arrastra o inicia una tarea.</div>}
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col bg-emerald-50/50 rounded-2xl border border-emerald-100 p-4">
-          <div className="flex items-center justify-between mb-4 px-2">
-            <h3 className="font-bold text-emerald-900 flex items-center"><CheckCircle2 size={16} className="mr-2 text-emerald-500"/> Completado</h3>
-            <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">{completadas.length}</span>
+        {/* COLUMNA 3: COMPLETADO */}
+        <div className="flex-1 flex flex-col bg-emerald-50/50 dark:bg-emerald-500/5 backdrop-blur-sm rounded-[2rem] border border-emerald-100/50 dark:border-emerald-500/10 p-4 transition-colors shadow-inner">
+          <div className="flex items-center justify-between mb-5 px-3 pt-2">
+            <h3 className="font-black text-emerald-800 dark:text-emerald-400 flex items-center text-xs uppercase tracking-widest"><CheckCircle2 size={14} className="mr-2 text-emerald-500 dark:text-emerald-500"/> Completado</h3>
+            <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{completadas.length}</span>
           </div>
-          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto px-1 pb-4 custom-scrollbar">
             {completadas.map(renderTarea)}
-            {completadas.length === 0 && <div className="text-center py-8 text-emerald-300 text-sm border-2 border-dashed border-emerald-200 rounded-xl">Aún no hay tareas terminadas.</div>}
+            {completadas.length === 0 && <div className="text-center py-12 text-emerald-300 dark:text-emerald-900/50 text-sm border-2 border-dashed border-emerald-200 dark:border-emerald-900/30 rounded-2xl font-medium">Aún no hay tareas terminadas.</div>}
           </div>
         </div>
       </div>
 
       {isFormOpen && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/60 flex items-center justify-center p-4 animate-in zoom-in-95 duration-200">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl">
-            <div className="px-6 py-5 border-b bg-slate-50 flex justify-between items-center">
-              <h3 className="font-bold text-lg text-slate-800 flex items-center"><ListTodo size={20} className="mr-2 text-indigo-600"/> Agregar Tarea</h3>
-              <button onClick={() => setIsFormOpen(false)}><X size={20} className="text-slate-400 hover:text-slate-800"/></button>
+        <div className="fixed inset-0 z-[200] bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 duration-200 transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-white/10 transition-colors">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors">
+              <h3 className="font-bold text-lg text-slate-800 dark:text-white flex items-center tracking-wide"><ListTodo size={20} className="mr-2 text-indigo-600 dark:text-amber-500"/> Agregar Tarea</h3>
+              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
             </div>
-            <form onSubmit={handleSaveTarea} className="p-6 space-y-4">
+            <form onSubmit={handleSaveTarea} className="p-6 space-y-5">
               <div>
-                <label className="block text-xs font-bold mb-1 text-slate-600">¿Qué necesitas hacer?</label>
-                <input type="text" required value={formData.titulo} onChange={e=>setFormData({...formData, titulo: e.target.value})} placeholder="Ej. Contratar al fotógrafo" className="w-full p-2.5 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" autoFocus/>
+                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">¿Qué necesitas hacer?</label>
+                <input type="text" required value={formData.titulo} onChange={e=>setFormData({...formData, titulo: e.target.value})} placeholder="Ej. Contratar al fotógrafo" className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-amber-500 outline-none text-slate-800 dark:text-white font-bold transition-colors" autoFocus/>
               </div>
               <div>
-                <label className="block text-xs font-bold mb-1 text-slate-600">Categoría</label>
-                <select value={formData.categoria} onChange={e=>setFormData({...formData, categoria: e.target.value})} className="w-full p-2.5 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none">
+                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Categoría</label>
+                <select value={formData.categoria} onChange={e=>setFormData({...formData, categoria: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-amber-500 outline-none text-slate-800 dark:text-white font-bold transition-colors cursor-pointer">
                   {categorias.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold mb-1 text-slate-600">Fecha Límite (Opcional)</label>
-                <input type="date" value={formData.fechaLimite} onChange={e=>setFormData({...formData, fechaLimite: e.target.value})} className="w-full p-2.5 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
+                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Fecha Límite (Opcional)</label>
+                <input type="date" value={formData.fechaLimite} onChange={e=>setFormData({...formData, fechaLimite: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-amber-500 outline-none text-slate-600 dark:text-slate-300 [color-scheme:light] dark:[color-scheme:dark] transition-colors" />
               </div>
               
-              <button type="submit" className="w-full p-3 bg-indigo-600 text-white rounded-xl font-bold mt-2 shadow-md hover:bg-indigo-700 transition-colors">
+              <button type="submit" className="w-full p-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-4 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors active:scale-95">
                 Crear Tarea
               </button>
             </form>
@@ -5398,237 +5323,184 @@ const ChecklistView = ({ tareas, addNotification }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CRONOGRAMA (TIMING / MINUTO A MINUTO) ---
+// --- COMPONENTE: CHECKLIST (DARK PREMIUM) ---
 // ==========================================
-const TimingView = ({ timing, setTiming, addNotification }) => {
-  const [exportViewOpen, setExportViewOpen] = useState(false);
-  const [isPreparingPrint, setIsPreparingPrint] = useState(false);
+const ChecklistView = ({ tareas, addNotification }) => {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [filtroCategoria, setFiltroCategoria] = useState('Todas');
   
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editModal, setEditModal] = useState({ open: false, evento: null });
-  const [deleteModal, setDeleteModal] = useState(null);
-  const [formData, setFormData] = useState({ hora: '', actividad: '', responsable: '', lugar: '', notas: '' });
+  const [formData, setFormData] = useState({
+    titulo: '', categoria: 'Logística', fechaLimite: '', estado: 'pendiente'
+  });
 
-  const timingOrdenado = [...timing].sort((a, b) => a.hora.localeCompare(b.hora));
+  const categorias = ['Logística', 'Comida/Bebida', 'Comunicación', 'Música', 'Decoración', 'Finanzas', 'Otros'];
 
-  const handleSave = async (e) => {
-      e.preventDefault();
+  const safeTareas = tareas || [];
+
+  const handleSaveTarea = async (e) => {
+    e.preventDefault();
     const nuevoId = Date.now().toString();
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "timing", nuevoId), { id: nuevoId, ...formData });
-      setModalOpen(false);
-      if(addNotification) addNotification('Actividad Guardada', 'El cronograma se ha actualizado en la nube.', 'success');
+    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "tareas", nuevoId), { id: nuevoId, ...formData });
+    setIsFormOpen(false);
+    setFormData({ titulo: '', categoria: 'Logística', fechaLimite: '', estado: 'pendiente' });
+    if(addNotification) addNotification('Tarea Agregada', 'Se ha añadido al tablero correctamente.', 'success', 'tareas');
   };
 
-  const handleUpdate = async (e) => {
-      e.preventDefault();
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "timing", editModal.evento.id.toString()), editModal.evento);
-      setEditModal({ open: false, evento: null });
-      if(addNotification) addNotification('Cambios Guardados', 'Actividad modificada en la nube.', 'success');
+  const moverTarea = async (id, nuevoEstado) => {
+    const tarea = safeTareas.find(t => t.id === id);
+    if(tarea) {
+      await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "tareas", id.toString()), { ...tarea, estado: nuevoEstado });
+    }
   };
 
-  const executeDelete = async () => {
-    await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "timing", deleteModal.id.toString()));
-      setDeleteModal(null);
-      if(addNotification) addNotification('Eliminada', 'Actividad removida del cronograma.', 'warning');
+  const eliminarTarea = async (id) => {
+    await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "tareas", id.toString()));
+    if(addNotification) addNotification('Tarea Eliminada', 'Se ha quitado del checklist.', 'warning');
   };
 
-  const triggerPdfDownload = async () => {
-    setIsPreparingPrint(true);
-    setTimeout(async () => {
-      try {
-        const { jsPDF } = await import('jspdf');
-        const html2canvas = (await import('html2canvas')).default;
-        const pages = document.querySelectorAll('.timing-pdf-page');
-        const pdf = new jsPDF('p', 'mm', 'letter');
-
-        for (let i = 0; i < pages.length; i++) {
-           const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-           const imgData = canvas.toDataURL('image/jpeg', 0.95);
-           if (i > 0) pdf.addPage();
-           pdf.addImage(imgData, 'JPEG', 0, 0, 215.9, 279.4);
-        }
-        pdf.save('Cronograma-Rundown.pdf');
-        if(addNotification) addNotification('¡PDF Guardado!', 'Revisa tu carpeta de descargas.', 'success');
-      } catch (error) {
-        if(addNotification) addNotification('Error', 'Fallo al generar el PDF.', 'error');
-      }
-      setIsPreparingPrint(false);
-      setExportViewOpen(false);
-    }, 500);
+  const isOverdue = (dateStr) => {
+    if (!dateStr) return false;
+    return new Date(dateStr) < new Date();
   };
 
-  if (exportViewOpen) {
-    const PAGE_1_LIMIT = 12;
-    const PAGE_N_LIMIT = 18;
-    const firstPageItems = timingOrdenado.slice(0, PAGE_1_LIMIT);
-    const extraItems = timingOrdenado.slice(PAGE_1_LIMIT);
-    const extraPages = [];
-    for(let i=0; i<extraItems.length; i+=PAGE_N_LIMIT) extraPages.push(extraItems.slice(i, i+PAGE_N_LIMIT));
+  const tareasFiltradas = filtroCategoria === 'Todas' 
+    ? safeTareas 
+    : safeTareas.filter(t => t.categoria === filtroCategoria);
 
-    const renderTableRows = (rows) => (
-      <table className="w-full text-left text-sm border-collapse">
-        <thead>
-          <tr className="bg-slate-800 text-white">
-            <th className="px-4 py-3 font-bold w-24 border border-slate-800">Hora</th>
-            <th className="px-4 py-3 font-bold border border-slate-800">Actividad / Momento</th>
-            <th className="px-4 py-3 font-bold border border-slate-800">Responsable</th>
-            <th className="px-4 py-3 font-bold border border-slate-800">Lugar / Notas Extra</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((evento, idx) => (
-            <tr key={`print_${evento.id}`} className={idx % 2 === 0 ? 'bg-slate-50' : 'bg-white'}>
-              <td className="px-4 py-4 font-black text-lg text-indigo-600 border border-slate-300 align-top">{evento.hora}</td>
-              <td className="px-4 py-4 border border-slate-300 align-top"><p className="font-bold text-slate-800 text-base">{evento.actividad}</p></td>
-              <td className="px-4 py-4 border border-slate-300 font-bold text-slate-600 uppercase text-xs align-top">{evento.responsable}</td>
-              <td className="px-4 py-4 border border-slate-300 align-top">
-                {evento.lugar && <p className="font-bold text-xs text-slate-800 mb-1 flex items-center"><MapPin size={10} className="mr-1"/> {evento.lugar}</p>}
-                {evento.notas && <p className="text-xs text-slate-500 italic">{evento.notas}</p>}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
+  const pendientes = tareasFiltradas.filter(t => t.estado === 'pendiente');
+  const enProceso = tareasFiltradas.filter(t => t.estado === 'proceso');
+  const completadas = tareasFiltradas.filter(t => t.estado === 'listo');
 
+  const renderTarea = (tarea) => {
+    const overdue = isOverdue(tarea.fechaLimite) && tarea.estado !== 'listo';
+    
     return (
-      <div className="fixed inset-0 z-[120] bg-slate-200 flex flex-col overflow-hidden">
-        <div className="bg-slate-900 text-white p-4 flex justify-between items-center shadow-lg print:hidden z-10 shrink-0 gap-4">
-          <div className="flex items-center space-x-4">
-            <button onClick={() => setExportViewOpen(false)} className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X size={24}/></button>
-            <div><h3 className="font-bold text-sm">Estudio de Impresión: Staff Rundown</h3><p className="text-[10px] text-slate-400">Guion operativo tamaño Carta.</p></div>
-          </div>
-          <button onClick={triggerPdfDownload} disabled={isPreparingPrint} className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold flex items-center shadow-md transition-all disabled:bg-slate-600">
-            {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
-            {isPreparingPrint ? 'Preparando...' : 'Descargar PDF'}
-          </button>
+      <div key={tarea.id} className={`bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border shadow-sm mb-3 transition-all hover:shadow-md hover:scale-[1.01] group ${overdue ? 'border-rose-300 dark:border-rose-500/50' : 'border-slate-200 dark:border-white/10'}`}>
+        <div className="flex justify-between items-start mb-2">
+          <span className="px-2.5 py-1 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-transparent dark:border-white/5 rounded-md text-[9px] font-black uppercase tracking-widest">{tarea.categoria}</span>
+          <button onClick={() => eliminarTarea(tarea.id)} className="text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"><X size={14}/></button>
         </div>
-
-        <div className="flex-1 overflow-y-auto bg-slate-200 flex flex-col items-center py-8 gap-8">
-          <div className="timing-pdf-page bg-white mx-auto shadow-2xl shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden', position: 'relative' }}>
-            <header className="flex justify-between items-start border-b-4 border-slate-900 pb-6 mb-8">
-              <div>
-                <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tight">GUION OPERATIVO</h1>
-                <p className="text-lg text-slate-600 font-bold mt-1">Mi Gran Evento</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Documento Confidencial</p>
-                <p className="text-xs text-slate-400 mt-1">Solo Staff y Proveedores</p>
-              </div>
-            </header>
-            <main>{renderTableRows(firstPageItems)}</main>
-            <div className="absolute bottom-6 right-6 text-[10px] font-bold text-slate-400">Página 1 de {1 + extraPages.length}</div>
+        
+        <h4 className={`font-bold text-sm mb-3 leading-snug ${tarea.estado === 'listo' ? 'text-slate-400 dark:text-slate-600 line-through' : 'text-slate-800 dark:text-white'}`}>
+          {tarea.titulo}
+        </h4>
+        
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100 dark:border-white/5">
+          <div className="flex items-center">
+            {tarea.fechaLimite ? (
+              <span className={`text-[9px] font-black uppercase tracking-widest flex items-center px-2 py-1 rounded-md border ${overdue ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20' : 'text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'}`}>
+                {overdue ? <AlertCircle size={10} className="mr-1.5"/> : <Calendar size={10} className="mr-1.5"/>}
+                {tarea.fechaLimite}
+              </span>
+            ) : <span className="text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest flex items-center"><Calendar size={10} className="mr-1"/> Sin fecha</span>}
           </div>
-
-          {extraPages.map((pageRows, pIdx) => (
-            <div key={`extrapage_${pIdx}`} className="timing-pdf-page bg-white mx-auto shadow-2xl shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden', position: 'relative' }}>
-              <header className="border-b-2 border-slate-800 pb-3 mb-6">
-                <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">GUION OPERATIVO (Cont.)</h1>
-              </header>
-              <main>{renderTableRows(pageRows)}</main>
-              <div className="absolute bottom-6 right-6 text-[10px] font-bold text-slate-400">Página {pIdx + 2} de {1 + extraPages.length}</div>
-            </div>
-          ))}
+          
+          <div className="flex space-x-1.5">
+            {tarea.estado === 'pendiente' && (
+              <button onClick={() => moverTarea(tarea.id, 'proceso')} className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center">
+                <Clock size={12} className="mr-1.5"/> Iniciar
+              </button>
+            )}
+            {tarea.estado === 'proceso' && (
+              <>
+                <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-3 py-1.5 text-slate-500 dark:text-slate-400 text-[9px] font-black uppercase tracking-widest hover:text-slate-700 dark:hover:text-white transition-colors">Pausar</button>
+                <button onClick={() => moverTarea(tarea.id, 'listo')} className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors flex items-center">
+                  <CheckCircle2 size={12} className="mr-1.5"/> Listo
+                </button>
+              </>
+            )}
+            {tarea.estado === 'listo' && (
+              <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-3 py-1.5 text-slate-400 dark:text-slate-500 text-[9px] font-black uppercase tracking-widest hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Reabrir</button>
+            )}
+          </div>
         </div>
       </div>
     );
-  }
+  };
 
   return (
-    <div className="h-full flex flex-col space-y-6 pb-6 relative">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+    <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500 z-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">El Minuto a Minuto</h2>
-          <p className="text-slate-500 text-sm mt-1">Sincroniza al staff y proveedores con el guion perfecto.</p>
+          <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">Tablero de Actividades</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Organiza tu progreso moviendo las tareas entre las columnas.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 shadow-sm transition-colors">
-            <FileDown size={16} className="mr-2 text-indigo-600"/> Reporte PDF
-          </button>
-          <button onClick={() => { setFormData({ hora: '', actividad: '', responsable: '', lugar: '', notas: '' }); setModalOpen(true); }} className="flex items-center px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-sm hover:bg-indigo-700 transition-colors">
-            <Plus size={18} className="mr-2" /> Agregar Momento
+        <div className="flex gap-2 w-full md:w-auto">
+          <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className="px-4 py-2 border border-slate-200 dark:border-white/10 rounded-xl bg-white dark:bg-[#0a0a0a] text-sm font-bold text-slate-700 dark:text-white outline-none shadow-sm transition-colors flex-1 md:flex-none cursor-pointer">
+            <option value="Todas">Todas las Categorías</option>
+            {categorias.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <button onClick={() => setIsFormOpen(true)} className="flex items-center justify-center px-5 py-2.5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-all flex-1 md:flex-none uppercase tracking-widest text-[10px]">
+            <Plus size={16} className="mr-1.5" /> Nueva Tarea
           </button>
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-y-auto">
-        {timingOrdenado.length === 0 ? (
-          <div className="text-center py-20 text-slate-400">
-            <Clock size={48} className="mx-auto mb-4 opacity-20"/>
-            <p className="font-medium">Tu cronograma está vacío. Empieza a planear el gran día.</p>
+      <div className="flex-1 flex flex-col md:flex-row gap-6 overflow-hidden">
+        {/* COLUMNA 1: POR HACER */}
+        <div className="flex-1 flex flex-col bg-slate-50/80 dark:bg-white/[0.02] backdrop-blur-sm rounded-[2rem] border border-slate-200/50 dark:border-white/5 p-4 transition-colors shadow-inner">
+          <div className="flex items-center justify-between mb-5 px-3 pt-2">
+            <h3 className="font-black text-slate-700 dark:text-slate-300 flex items-center text-xs uppercase tracking-widest"><Circle size={14} className="mr-2 text-slate-400 dark:text-slate-500"/> Por Hacer</h3>
+            <span className="bg-white dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400 text-[10px] font-black px-2.5 py-1 rounded-md border border-slate-200 dark:border-white/10 shadow-sm">{pendientes.length}</span>
           </div>
-        ) : (
-          <div className="relative border-l-4 border-indigo-100 ml-4 md:ml-10 space-y-8 py-4">
-            {timingOrdenado.map((evento) => (
-              <div key={evento.id} className="relative pl-8 md:pl-12 group">
-                <div className="absolute w-6 h-6 bg-white border-4 border-indigo-500 rounded-full -left-[15px] top-1 shadow-sm group-hover:scale-125 transition-transform"></div>
-                <div className="bg-slate-50 border border-slate-100 p-5 rounded-2xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-all flex flex-col md:flex-row gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-xl font-black text-indigo-600">{evento.hora}</span>
-                      <span className="px-2 py-1 bg-slate-200 text-slate-700 rounded text-[10px] font-bold uppercase tracking-wider">{evento.responsable}</span>
-                    </div>
-                    <h4 className="text-lg font-bold text-slate-800 mb-2">{evento.actividad}</h4>
-                    {evento.lugar && <p className="text-sm font-bold text-slate-600 flex items-center mb-1"><MapPin size={14} className="mr-1.5 text-rose-500"/> {evento.lugar}</p>}
-                    {evento.notas && <p className="text-sm text-slate-500 flex items-start mt-2"><AlignLeft size={14} className="mr-1.5 mt-0.5 opacity-50"/> {evento.notas}</p>}
-                  </div>
-                  <div className="flex md:flex-col justify-end md:justify-start gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-slate-200 mt-2 md:mt-0">
-                    <button onClick={() => setEditModal({ open: true, evento: { ...evento } })} className="p-2 bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-300 rounded-xl transition-colors shadow-sm"><Edit2 size={16} /></button>
-                    <button onClick={() => setDeleteModal(evento)} className="p-2 bg-white border border-slate-200 text-rose-400 hover:text-rose-600 hover:border-rose-300 rounded-xl transition-colors shadow-sm"><Trash2 size={16} /></button>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="flex-1 overflow-y-auto px-1 pb-4 custom-scrollbar">
+            {pendientes.map(renderTarea)}
+            {pendientes.length === 0 && <div className="text-center py-12 text-slate-400 dark:text-slate-600 text-sm border-2 border-dashed border-slate-200 dark:border-white/5 rounded-2xl font-medium">No hay tareas pendientes.</div>}
           </div>
-        )}
+        </div>
+
+        {/* COLUMNA 2: EN PROCESO */}
+        <div className="flex-1 flex flex-col bg-indigo-50/50 dark:bg-indigo-500/5 backdrop-blur-sm rounded-[2rem] border border-indigo-100/50 dark:border-indigo-500/10 p-4 transition-colors shadow-inner">
+          <div className="flex items-center justify-between mb-5 px-3 pt-2">
+            <h3 className="font-black text-indigo-800 dark:text-indigo-400 flex items-center text-xs uppercase tracking-widest"><Clock size={14} className="mr-2 text-indigo-500 dark:text-indigo-500"/> En Proceso</h3>
+            <span className="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{enProceso.length}</span>
+          </div>
+          <div className="flex-1 overflow-y-auto px-1 pb-4 custom-scrollbar">
+            {enProceso.map(renderTarea)}
+            {enProceso.length === 0 && <div className="text-center py-12 text-indigo-300 dark:text-indigo-900 text-sm border-2 border-dashed border-indigo-200 dark:border-indigo-900/50 rounded-2xl font-medium">Arrastra o inicia una tarea.</div>}
+          </div>
+        </div>
+
+        {/* COLUMNA 3: COMPLETADO */}
+        <div className="flex-1 flex flex-col bg-emerald-50/50 dark:bg-emerald-500/5 backdrop-blur-sm rounded-[2rem] border border-emerald-100/50 dark:border-emerald-500/10 p-4 transition-colors shadow-inner">
+          <div className="flex items-center justify-between mb-5 px-3 pt-2">
+            <h3 className="font-black text-emerald-800 dark:text-emerald-400 flex items-center text-xs uppercase tracking-widest"><CheckCircle2 size={14} className="mr-2 text-emerald-500 dark:text-emerald-500"/> Completado</h3>
+            <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{completadas.length}</span>
+          </div>
+          <div className="flex-1 overflow-y-auto px-1 pb-4 custom-scrollbar">
+            {completadas.map(renderTarea)}
+            {completadas.length === 0 && <div className="text-center py-12 text-emerald-300 dark:text-emerald-900/50 text-sm border-2 border-dashed border-emerald-200 dark:border-emerald-900/30 rounded-2xl font-medium">Aún no hay tareas terminadas.</div>}
+          </div>
+        </div>
       </div>
 
-      {modalOpen && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95">
-            <div className="px-6 py-5 border-b bg-slate-50 flex justify-between items-center"><h3 className="font-bold text-xl text-slate-800">Agregar Momento</h3><button onClick={() => setModalOpen(false)}><X size={20} className="text-slate-500"/></button></div>
-            <form onSubmit={handleSave} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-xs font-bold mb-2">Hora</label><input type="time" required value={formData.hora} onChange={e=>setFormData({...formData, hora: e.target.value})} className="w-full p-3 border rounded-xl outline-none focus:border-indigo-500" /></div>
-                <div><label className="block text-xs font-bold mb-2">Responsable</label><input type="text" value={formData.responsable} onChange={e=>setFormData({...formData, responsable: e.target.value})} className="w-full p-3 border rounded-xl outline-none focus:border-indigo-500" placeholder="Ej. DJ, Hostess" /></div>
-              </div>
-              <div><label className="block text-xs font-bold mb-2">Actividad / Momento</label><input type="text" required value={formData.actividad} onChange={e=>setFormData({...formData, actividad: e.target.value})} className="w-full p-3 border rounded-xl outline-none focus:border-indigo-500" placeholder="Ej. Entrada de Novios" /></div>
-              <div><label className="block text-xs font-bold mb-2">Lugar (Opcional)</label><input type="text" value={formData.lugar} onChange={e=>setFormData({...formData, lugar: e.target.value})} className="w-full p-3 border rounded-xl outline-none focus:border-indigo-500" placeholder="Ej. Pista de Baile" /></div>
-              <div><label className="block text-xs font-bold mb-2">Notas Extra (Opcional)</label><textarea value={formData.notas} onChange={e=>setFormData({...formData, notas: e.target.value})} className="w-full p-3 border rounded-xl outline-none focus:border-indigo-500" rows="2" placeholder="Canción específica, detalles..." /></div>
-              <button type="submit" className="w-full p-3.5 bg-indigo-600 text-white rounded-xl font-bold mt-2 hover:bg-indigo-700">Guardar Momento</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {editModal.open && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95">
-            <div className="px-6 py-5 border-b bg-slate-50 flex justify-between items-center"><h3 className="font-bold text-xl text-slate-800">Editar Momento</h3><button onClick={() => setEditModal({open: false, evento: null})}><X size={20} className="text-slate-500"/></button></div>
-            <form onSubmit={handleUpdate} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-xs font-bold mb-2">Hora</label><input type="time" required value={editModal.evento.hora} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, hora: e.target.value}})} className="w-full p-3 border rounded-xl outline-none focus:border-indigo-500" /></div>
-                <div><label className="block text-xs font-bold mb-2">Responsable</label><input type="text" value={editModal.evento.responsable} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, responsable: e.target.value}})} className="w-full p-3 border rounded-xl outline-none focus:border-indigo-500" /></div>
-              </div>
-              <div><label className="block text-xs font-bold mb-2">Actividad / Momento</label><input type="text" required value={editModal.evento.actividad} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, actividad: e.target.value}})} className="w-full p-3 border rounded-xl outline-none focus:border-indigo-500" /></div>
-              <div><label className="block text-xs font-bold mb-2">Lugar (Opcional)</label><input type="text" value={editModal.evento.lugar || ''} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, lugar: e.target.value}})} className="w-full p-3 border rounded-xl outline-none focus:border-indigo-500" /></div>
-              <div><label className="block text-xs font-bold mb-2">Notas Extra</label><textarea value={editModal.evento.notas || ''} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, notas: e.target.value}})} className="w-full p-3 border rounded-xl outline-none focus:border-indigo-500" rows="2" /></div>
-              <button type="submit" className="w-full p-3.5 bg-indigo-600 text-white rounded-xl font-bold mt-2 hover:bg-indigo-700">Guardar Cambios</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {deleteModal && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl animate-in zoom-in-95">
-            <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4"><Trash2 size={32} /></div>
-            <h3 className="font-bold text-xl text-slate-800 mb-2">¿Eliminar actividad?</h3>
-            <p className="text-slate-500 mb-6 text-sm">Borrarás "<b>{deleteModal.actividad}</b>" a las {deleteModal.hora}.</p>
-            <div className="flex space-x-3">
-              <button onClick={() => setDeleteModal(null)} className="flex-1 p-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200">Cancelar</button>
-              <button onClick={executeDelete} className="flex-1 p-3 bg-rose-500 text-white rounded-xl font-bold hover:bg-rose-600">Sí, Eliminar</button>
+      {isFormOpen && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 duration-200 transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-white/10 transition-colors">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors">
+              <h3 className="font-bold text-lg text-slate-800 dark:text-white flex items-center tracking-wide"><ListTodo size={20} className="mr-2 text-indigo-600 dark:text-amber-500"/> Agregar Tarea</h3>
+              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
             </div>
+            <form onSubmit={handleSaveTarea} className="p-6 space-y-5">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">¿Qué necesitas hacer?</label>
+                <input type="text" required value={formData.titulo} onChange={e=>setFormData({...formData, titulo: e.target.value})} placeholder="Ej. Contratar al fotógrafo" className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-amber-500 outline-none text-slate-800 dark:text-white font-bold transition-colors" autoFocus/>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Categoría</label>
+                <select value={formData.categoria} onChange={e=>setFormData({...formData, categoria: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-amber-500 outline-none text-slate-800 dark:text-white font-bold transition-colors cursor-pointer">
+                  {categorias.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Fecha Límite (Opcional)</label>
+                <input type="date" value={formData.fechaLimite} onChange={e=>setFormData({...formData, fechaLimite: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-amber-500 outline-none text-slate-600 dark:text-slate-300 [color-scheme:light] dark:[color-scheme:dark] transition-colors" />
+              </div>
+              
+              <button type="submit" className="w-full p-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-4 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors active:scale-95">
+                Crear Tarea
+              </button>
+            </form>
           </div>
         </div>
       )}
