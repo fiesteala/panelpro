@@ -6150,7 +6150,7 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
 };
 
 // ==========================================
-// --- COMPONENTE: PROVEEDORES (DARK PREMIUM) ---
+// --- COMPONENTE: PROVEEDORES (DARK PREMIUM COMPLETO) ---
 // ==========================================
 const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNotification }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -6178,7 +6178,6 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
   });
 
   const categorias = ['Lugar', 'Música', 'Decoración', 'Recuerdos', 'Comida/Bebida', 'Ropa/Maquillaje', 'Papelería', 'Otros'];
-  // 🔴 Colores ajustados para dark mode support
   const statusColors = { 
     'Cotizado':'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300 border-slate-200 dark:border-white/20', 
     'Negociando':'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border-amber-200 dark:border-amber-500/20', 
@@ -6300,7 +6299,6 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
 
   const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
 
-  // (Funciones PDF omitidas por brevedad, mantienen colores blancos para imprimir bien)
   const triggerPdfDownload = async () => {
     setIsPreparingPrint(true);
     setTimeout(async () => {
@@ -6449,7 +6447,6 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
       </div>
 
       {searchTerm.length > 0 ? (
-        // RESULTADOS DE BÚSQUEDA GLOBAL
         <div className="flex-1 overflow-y-auto pb-10 custom-scrollbar">
           <h3 className="font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center text-sm uppercase tracking-widest"><SearchIcon size={16} className="mr-2 text-indigo-500 dark:text-amber-500"/> Resultados Globales</h3>
           
@@ -6498,11 +6495,10 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
           )}
         </div>
       ) : (
-        // VISTA ORIGINAL: MIS PROVEEDORES
         <>
           <div className="flex gap-2">
             <select value={categoriaFiltro} onChange={e=>setCategoriaFiltro(e.target.value)} className="px-4 py-2 border border-slate-200 dark:border-white/10 rounded-xl bg-white dark:bg-[#0a0a0a] text-sm font-bold text-slate-700 dark:text-white outline-none shadow-sm transition-colors"><option value="Todas">Todas las áreas</option>{categorias.map(c => <option key={c} value={c}>Giro: {c}</option>)}</select>
-            <button onClick={() => { if(proveedoresFiltrados.length === 0) { if(addNotification) addNotification('Directorio Vacío', 'No hay proveedores para exportar.', 'warning'); return; } setExportViewOpen(true); }} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors">
+            <button onClick={() => { if(proveedoresFiltrados.length === 0) { if(addNotification) addNotification('Directorio Vacío', 'No hay proveedores para exportar.', 'warning'); return; } setExportViewOpen(true); }} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors">
               <FileDown size={14} className="mr-2 text-indigo-600 dark:text-amber-500"/> {categoriaFiltro === 'Todas' ? 'Directorio PDF' : 'Comparativa PDF'}
             </button>
           </div>
@@ -6651,7 +6647,85 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
         </div>
       )}
 
-      {/* (Modales de Contrato, Galería y Cancelación siguen la misma línea oscura, omitidos para no superar límite, pero conservan sus estilos dark: ya integrados en base si se requieren). */}
+      {/* MODALES ADICIONALES (Contrato, Galería, Cancelación, Contratación) */}
+      {viewContract && (
+        <div className="fixed inset-0 z-[210] bg-slate-900/90 dark:bg-black/90 backdrop-blur-md flex flex-col p-4 sm:p-10 animate-in fade-in duration-200 transition-colors">
+          <div className="flex justify-between items-center w-full max-w-4xl mx-auto mb-4 text-white">
+            <h3 className="font-bold text-lg flex items-center"><FileText size={20} className="mr-2"/> Documento Adjunto: {viewContract}</h3>
+            <button onClick={() => setViewContract(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24}/></button>
+          </div>
+          <div className="flex-1 w-full max-w-4xl mx-auto bg-slate-200 dark:bg-[#111] border dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center relative transition-colors">
+            <div className="text-center">
+              <FileSignature size={64} className="mx-auto text-slate-400 dark:text-slate-600 mb-4 opacity-50"/>
+              <p className="text-slate-600 dark:text-slate-400 font-bold text-xl">Visor de Documentos Seguro</p>
+              <button className="mt-6 px-6 py-2 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-lg font-bold shadow hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors" onClick={()=>setViewContract(null)}>Cerrar Previsualización</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {viewGallery && (
+        <div className="fixed inset-0 z-[210] bg-slate-900/90 dark:bg-black/90 backdrop-blur-md flex flex-col p-4 sm:p-10 animate-in fade-in duration-200 transition-colors">
+          <div className="flex justify-between items-center w-full max-w-4xl mx-auto mb-4 text-white">
+            <h3 className="font-bold text-lg flex items-center"><ImageIcon size={20} className="mr-2"/> Inspiración y Referencias: {viewGallery.nombre}</h3>
+            <button onClick={() => setViewGallery(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24}/></button>
+          </div>
+          <div className="flex-1 w-full max-w-4xl mx-auto bg-slate-100 dark:bg-[#0a0a0a] border-4 border-dashed border-slate-300 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl p-6 flex flex-col items-center justify-center transition-colors">
+            <UploadCloud size={64} className="text-indigo-300 dark:text-amber-500/30 mb-4"/>
+            <h4 className="text-xl font-bold text-slate-700 dark:text-white mb-2">Sube fotos de referencia</h4>
+            <button className="px-6 py-3 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold shadow hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors flex items-center"><Camera size={18} className="mr-2"/> Seleccionar Archivos</button>
+          </div>
+        </div>
+      )}
+
+      {cancelProvModal && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] border border-transparent dark:border-white/10 rounded-3xl w-full max-w-sm overflow-hidden p-8 text-center shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
+            <div className="w-16 h-16 bg-rose-100 dark:bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 border dark:border-rose-500/20"><AlertTriangle size={32} /></div>
+            <h3 className="font-editorial font-black text-2xl text-slate-900 dark:text-white mb-2 transition-colors">¿Cancelar contrato?</h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-8 text-sm leading-relaxed">Pasarás a <b>{cancelProvModal.nombre}</b> a descartado. Si había un pago vinculado, recuerda borrarlo desde Presupuesto.</p>
+            <div className="flex space-x-3">
+              <button onClick={() => setCancelProvModal(null)} className="flex-1 p-4 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Atrás</button>
+              <button onClick={confirmCancel} className="flex-1 p-4 bg-rose-500 text-white rounded-xl font-black hover:bg-rose-600 transition-colors shadow-md dark:shadow-[0_0_15px_rgba(244,63,94,0.3)] uppercase tracking-widest text-[10px]">Sí, Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {hireProcess && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/70 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl dark:shadow-[0_0_50px_rgba(99,102,241,0.15)] border border-transparent dark:border-indigo-500/20 animate-in zoom-in-95 duration-200 transition-colors">
+            <div className="p-8 bg-indigo-600 dark:bg-indigo-950/30 border-b dark:border-indigo-500/20 text-white text-center relative transition-colors">
+              <Building size={36} className="mx-auto mb-3 opacity-80 text-white dark:text-indigo-400"/>
+              <h3 className="font-editorial font-black text-2xl text-white dark:text-indigo-400 tracking-wide mb-1">Contratar Proveedor</h3>
+              <p className="text-indigo-200 dark:text-indigo-300/70 text-xs uppercase tracking-widest font-bold">{hireProcess.prov.nombre}</p>
+              <button onClick={() => setHireProcess(null)} className="absolute top-4 right-4 text-white/50 hover:text-white"><X size={20}/></button>
+            </div>
+            <form onSubmit={handleHireSubmit} className="p-8 space-y-5">
+              <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-100 dark:border-white/5 text-xs text-slate-500 dark:text-slate-400 mb-2 transition-colors flex items-center justify-between">
+                <span className="uppercase tracking-widest font-bold">Costo acordado:</span> 
+                <b className="text-lg font-black text-slate-900 dark:text-white ml-2">{formatMoney(hireProcess.prov.costo)}</b>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400">Anticipo Hoy ($)</label><input type="number" max={hireProcess.prov.costo} value={hireProcess.abono} onChange={e=>setHireProcess({...hireProcess, abono: e.target.value})} placeholder="0.00" className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-indigo-400 outline-none font-black text-lg text-emerald-600 dark:text-emerald-400 bg-slate-50 dark:bg-[#111] transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400">Fecha Límite Pago</label><input type="date" required value={hireProcess.fechaLimite} onChange={e=>setHireProcess({...hireProcess, fechaLimite: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-indigo-400 outline-none bg-slate-50 dark:bg-[#111] text-slate-800 dark:text-white text-sm [color-scheme:light] dark:[color-scheme:dark] transition-colors" /></div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400">Respaldar Contrato (Archivo)</label>
+                <div className="flex gap-2">
+                  <label className="flex-1 flex flex-col items-center justify-center p-5 border border-dashed border-slate-300 dark:border-white/20 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 hover:border-indigo-300 dark:hover:border-indigo-400 transition-colors bg-white dark:bg-[#111]">
+                    <UploadCloud size={20} className="text-indigo-400 dark:text-indigo-500 mb-2"/>
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Subir PDF</span>
+                    <input type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={e => setHireProcess({...hireProcess, file: e.target.files[0]})} />
+                  </label>
+                </div>
+              </div>
+              <button type="submit" className="w-full p-4 bg-indigo-600 dark:bg-indigo-500 text-white dark:text-white rounded-xl font-black mt-6 shadow-md dark:shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:bg-indigo-700 dark:hover:bg-indigo-400 transition-colors uppercase tracking-widest text-[10px]">Confirmar Contratación</button>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
@@ -10685,17 +10759,17 @@ export default function App() {
   if (accountSuspended) return (
       <div className="h-screen w-screen bg-[#050505] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-        <AlertTriangle size={64} className="text-rose-500 mb-4 animate-pulse" />
-        <h1 className="text-2xl font-black text-white mb-2">Cuenta Suspendida</h1>
-        <p className="text-slate-400 max-w-sm">Contacta a tu administrador de plataforma para reactivar tu licencia.</p>
+        <AlertTriangle size={64} className="text-rose-500 mb-4 animate-pulse relative z-10" />
+        <h1 className="text-2xl font-black text-white mb-2 font-editorial relative z-10">Cuenta Suspendida</h1>
+        <p className="text-slate-400 max-w-sm relative z-10">Contacta a tu administrador de plataforma para reactivar tu licencia.</p>
       </div>
   );
 
   if (!authData.isAuthenticated) { return <LoginScreen />; }
-  
+
   return (
     <>
-      <AdminDashboard authData={authData} />
+      <AdminDashboard authData={authData} cycleTheme={cycleTheme} themeSetting={themeSetting} />
       <ReviewHarvester authData={authData} />
     </>
   );
