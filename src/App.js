@@ -169,9 +169,9 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
 }
 
 // ==========================================
-// --- COMPONENTE: MENÚ LATERAL (SIDEBAR BAULIA) ---
+// --- COMPONENTE: MENÚ LATERAL (SIDEBAR DE CRISTAL) ---
 // ==========================================
-const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPlan, agencyConfig }) => {
+const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPlan, agencyConfig, isDarkMode }) => {
   const planLevels = { 'oro': 1, 'diamante': 2 };
   const level = planLevels[userPlan] || 2; 
 
@@ -187,7 +187,6 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
     rose: 'bg-rose-600 text-white shadow-[0_0_15px_rgba(225,29,72,0.4)]', 
     emerald: 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(5,150,105,0.4)]', 
     slate: 'bg-slate-800 dark:bg-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]', 
-    // 🔴 El acento dorado majestuoso heredado de la Landing Page
     amber: 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)] border border-amber-400/50', 
     sky: 'bg-sky-500 text-white shadow-[0_0_15px_rgba(14,165,233,0.4)]'
   };
@@ -199,23 +198,21 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
     <>
       {isOpen && <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm z-20 xl:hidden" onClick={() => setIsOpen(false)} />}
       
-      {/* 🔴 Sidebar con efecto Cristal (Glassmorphism) para dejar pasar las luces del fondo */}
-      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-white/80 dark:bg-[#050505]/70 backdrop-blur-3xl text-slate-600 dark:text-slate-400 transition-colors duration-700 ease-in-out flex flex-col border-r border-slate-200/50 dark:border-white/10 shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
+      {/* 🔴 Sidebar con efecto Cristal Extremo para dejar pasar las luces globales */}
+      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-white/50 dark:bg-[#050505]/40 backdrop-blur-3xl text-slate-600 dark:text-slate-400 transition-colors duration-700 ease-in-out flex flex-col border-r border-slate-200/50 dark:border-white/10 shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
         
-        <div className="flex items-center justify-between p-6 border-b border-slate-200/50 dark:border-white/10 shrink-0 min-h-[88px] relative overflow-hidden bg-transparent">
+        <div className="flex items-center justify-between p-6 border-b border-slate-200/50 dark:border-white/10 shrink-0 min-h-[88px] relative overflow-hidden bg-white/30 dark:bg-white/5">
           <div className="relative z-10 w-full flex items-center gap-3">
             {agencyConfig?.logoUrl && userRole !== 'superadmin' ? (
               <img src={agencyConfig.logoUrl} alt="Agency Logo" className="h-10 object-contain drop-shadow-md mb-1" />
             ) : (
               <div className="flex flex-col justify-center">
                  {userRole === 'superadmin' || agencyName === 'BAULIA' || agencyName === 'EVENT MASTER' ? (
-                   <BauliaLogo className="h-8 w-auto mb-1 dark:hidden" forceWhite={false} />
+                   // 🔴 AHORA EL LOGO OBEDECE A LA VARIABLE GLOBAL isDarkMode
+                   <BauliaLogo className="h-8 w-auto mb-1" forceWhite={isDarkMode} />
                  ) : (
                    <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-widest uppercase font-editorial">{agencyName}</h1>
                  )}
-                 {userRole === 'superadmin' || agencyName === 'BAULIA' || agencyName === 'EVENT MASTER' ? (
-                   <BauliaLogo className="h-8 w-auto mb-1 hidden dark:block" forceWhite={true} />
-                 ) : null}
                  
                  <p className="text-[8px] text-amber-600 dark:text-amber-500 uppercase tracking-widest mt-0.5 font-bold">
                    {userRole === 'superadmin' ? 'God Mode' : userRole === 'planner' ? 'Planner Workspace' : 'Bóveda Premium'}
@@ -223,14 +220,14 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
               </div>
             )}
           </div>
-          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg relative z-10"><X size={20} /></button>
+          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 hover:bg-slate-200/50 dark:hover:bg-white/10 rounded-lg relative z-10"><X size={20} /></button>
         </div>
         
         <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-6 custom-scrollbar">
           {userRole === 'superadmin' && (
              <div className="space-y-1">
-               <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-black ml-4 mb-3">SISTEMA</p>
-               <button onClick={() => { setActiveTab('licencias'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'licencias' ? activeTheme : 'hover:bg-slate-100/50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-400 dark:hover:text-white'}`}>
+               <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-black ml-4 mb-3">SISTEMA</p>
+               <button onClick={() => { setActiveTab('licencias'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'licencias' ? 'bg-amber-500 text-slate-900 font-black shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'hover:bg-slate-100/50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-400 dark:hover:text-white'}`}>
                  <Building size={18} /><span>Centro de Licencias</span>
                </button>
              </div>
@@ -242,12 +239,12 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
 
             return (
               <div key={gIdx} className="space-y-1">
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-black ml-4 mb-3">{group.title}</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-black ml-4 mb-3">{group.title}</p>
                 {visibleItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
                   return (
-                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-emerald-500 text-white dark:text-slate-900 font-black shadow-lg' : `${activeTheme} font-bold` : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-white/5 hover:text-amber-600 dark:hover:text-white'}`}>
+                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-emerald-500 text-white dark:text-slate-900 font-black shadow-lg' : `${activeTheme} font-bold` : 'text-slate-700 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-white/10 hover:text-amber-600 dark:hover:text-white'}`}>
                       <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
                       <span className="text-sm tracking-wide font-medium">{item.label}</span>
                     </button>
@@ -257,15 +254,6 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
             );
           })}
         </nav>
-
-        {userRole === 'planner' && (
-          <div className="p-4 border-t border-slate-200/50 dark:border-white/10 shrink-0 bg-transparent">
-            <button onClick={() => { setActiveTab('configuracion'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all border ${activeTab === 'configuracion' ? 'bg-slate-900 dark:bg-white/10 text-amber-400 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-transparent text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:bg-slate-200/50 dark:hover:bg-white/5'}`}>
-              <Settings2 size={18} strokeWidth={activeTab === 'configuracion' ? 2.5 : 2} />
-              <span className="font-bold text-sm tracking-wide">Marca Blanca</span>
-            </button>
-          </div>
-        )}
       </aside>
     </>
   );
@@ -10136,7 +10124,7 @@ const LoginScreen = () => {
 // ==========================================
 // --- COMPONENTE: PANEL DE ADMINISTRACIÓN PROTEGIDO ---
 // ==========================================
-const AdminDashboard = ({ authData, cycleTheme, themeSetting }) => {
+const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const { role: userRole, plan: userPlan, eventId } = authData;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(userRole === 'superadmin' ? 'licencias' : 'dashboard');  
@@ -10247,7 +10235,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting }) => {
   };
 
   return (
-    // 🔴 AQUÍ SE INYECTA EL MODO CLARO/OSCURO, LA FUENTE EDITORIAL Y LAS LUCES DE FONDO DE LA LANDING
+    // 🔴 AQUÍ SE INYECTA EL MODO CLARO/OSCURO Y LAS LUCES GLOBALES
     <div className="flex h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans overflow-hidden text-slate-900 dark:text-slate-200 transition-colors duration-700 selection:bg-amber-500 selection:text-white relative">
       
       <style>{`
@@ -10255,9 +10243,9 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting }) => {
         .font-editorial { font-family: 'Playfair Display', serif; }
       `}</style>
 
-      {/* LUCES DE AMBIENTE SUTILES HEREDADAS DE LA LANDING (Se ocultan tras el blur del panel) */}
-      <div className="absolute top-[-10%] left-[-5%] w-[40vw] h-[40vw] bg-amber-500/10 dark:bg-amber-600/10 blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
-      <div className="absolute bottom-[-10%] right-[-5%] w-[30vw] h-[30vw] bg-indigo-500/5 dark:bg-indigo-600/10 blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
+      {/* 🔴 LUCES DE AMBIENTE GLOBALES (Ahora detrás del menú lateral también) */}
+      <div className="absolute top-[-10%] left-[-5%] w-[50vw] h-[50vw] bg-amber-500/15 dark:bg-amber-600/20 blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
+      <div className="absolute bottom-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-indigo-500/10 dark:bg-indigo-600/15 blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
       
       <div className="fixed top-4 right-4 z-[999] hidden sm:flex flex-col space-y-2 pointer-events-none">
         {notifications.map(notif => (
@@ -10273,7 +10261,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting }) => {
         ))}
       </div>
 
-      {typeof Sidebar !== 'undefined' && <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} userPlan={userPlan} agencyConfig={agencyConfig} />}
+      {typeof Sidebar !== 'undefined' && <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} userPlan={userPlan} agencyConfig={agencyConfig} isDarkMode={isDarkMode} />}
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} />
@@ -10766,10 +10754,10 @@ export default function App() {
   );
 
   if (!authData.isAuthenticated) { return <LoginScreen />; }
-
+  
   return (
     <>
-      <AdminDashboard authData={authData} cycleTheme={cycleTheme} themeSetting={themeSetting} />
+      <AdminDashboard authData={authData} cycleTheme={cycleTheme} themeSetting={themeSetting} isDarkMode={isDarkMode} />
       <ReviewHarvester authData={authData} />
     </>
   );
