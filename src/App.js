@@ -10544,10 +10544,20 @@ const ReviewHarvester = ({ authData }) => {
 // ==========================================
 const ShowcaseSimulatorView = () => {
   const [activeCategory, setActiveCategory] = useState('boda');
-  
-  // 🔴 ESTADOS PARA EL CAJERO Y SELECCIÓN DE PLANES
-  const [checkoutStep, setCheckoutStep] = useState(0); // 0: Cerrado, 1: Selector, 2: Pago, 3: Éxito
+  const [checkoutStep, setCheckoutStep] = useState(0); 
   const [planSeleccionado, setPlanSeleccionado] = useState(null);
+
+  // 🔴 LA MAGIA DE LA COMUNICACIÓN: Escuchamos al archivo HTML dentro del Iframe
+  useEffect(() => {
+    const escucharMensajeDelIframe = (event) => {
+      // Si el HTML nos manda la señal secreta, abrimos la pasarela VIP
+      if (event.data === 'open_checkout') {
+        setCheckoutStep(1); 
+      }
+    };
+    window.addEventListener('message', escucharMensajeDelIframe);
+    return () => window.removeEventListener('message', escucharMensajeDelIframe);
+  }, []);
 
   const planes = [
     { id: 'basico', nombre: 'Básico', precio: '990', desc: 'Invitación, RSVP simple y GPS.', icon: <Smartphone size={24}/> },
@@ -10557,18 +10567,48 @@ const ShowcaseSimulatorView = () => {
   ];
 
   const demos = {
-    boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica, tipografías finas y paletas sobrias. El estándar de alta costura nupcial.', features: ['Mesa de Regalos', 'Cuenta Regresiva', 'Pases QR VIP', 'GPS Directo'] },
-    xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón, animaciones dinámicas y energía vibrante para la mejor noche.', features: ['Muro de Fotos', 'Dress Code Neón', 'Itinerario de Gala', 'Música Automática'] },
-    cumple_formal: { id: 'cumple_formal', label: 'Cumpleaños Formal', url: '/demos/cumple_formal/index.html', desc: 'Diseños sofisticados para celebrar décadas (30s, 40s, 50s) con mucho estilo y elegancia.', features: ['Lluvia de Sobres', 'Confirmación Fácil', 'Galería de Recuerdos'] },
-    infantil: { id: 'infantil', label: 'Fiestas Infantiles', url: '/demos/infantil/index.html', desc: 'Temáticas inmersivas al 100%. Llevamos a los niños al universo de sus personajes favoritos.', features: ['Diseños 100% Temáticos', 'Animaciones', 'Ubicación Salón'] },
-    bautizo: { id: 'bautizo', label: 'Bautizos / Comunión', url: '/demos/bautizo/index.html', desc: 'Tonos pastel, acuarelas suaves y diseños angelicales para momentos familiares íntimos.', features: ['Padrinos', 'Locación Iglesia', 'Mesa de Regalos'] },
-    corporativo: { id: 'corporativo', label: 'Empresarial / Galas', url: '/demos/corporativo/index.html', desc: 'Seriedad, branding corporativo y logística estricta para congresos y lanzamientos de marca.', features: ['Control de Gafetes', 'Programa por Horas', 'Patrocinadores'] }
+    boda: { 
+      id: 'boda', label: 'Bodas de Lujo', 
+      url: '/demos/boda/index.html', 
+      desc: 'Elegancia clásica, tipografías finas y paletas sobrias. El estándar de alta costura nupcial.',
+      features: ['Mesa de Regalos', 'Cuenta Regresiva', 'Pases QR VIP', 'GPS Directo']
+    },
+    xv: { 
+      id: 'xv', label: 'XV Años Glamour', 
+      url: '/demos/xv/index.html', 
+      desc: 'Luces neón, animaciones dinámicas y energía vibrante para la mejor noche.',
+      features: ['Muro de Fotos', 'Dress Code Neón', 'Itinerario de Gala', 'Música Automática']
+    },
+    cumple_formal: { 
+      id: 'cumple_formal', label: 'Cumpleaños Formal', 
+      url: '/demos/cumple_formal/index.html', 
+      desc: 'Diseños sofisticados para celebrar décadas (30s, 40s, 50s) con mucho estilo y elegancia.',
+      features: ['Lluvia de Sobres', 'Confirmación Fácil', 'Galería de Recuerdos']
+    },
+    infantil: { 
+      id: 'infantil', label: 'Fiestas Infantiles', 
+      url: '/demos/infantil/index.html', 
+      desc: 'Temáticas inmersivas al 100%. Llevamos a los niños al universo de sus personajes favoritos.',
+      features: ['Diseños 100% Temáticos', 'Animaciones', 'Ubicación Salón']
+    },
+    bautizo: { 
+      id: 'bautizo', label: 'Bautizos / Comunión', 
+      url: '/demos/bautizo/index.html', 
+      desc: 'Tonos pastel, acuarelas suaves y diseños angelicales para momentos familiares íntimos.',
+      features: ['Padrinos', 'Locación Iglesia', 'Mesa de Regalos']
+    },
+    corporativo: { 
+      id: 'corporativo', label: 'Empresarial / Galas', 
+      url: '/demos/corporativo/index.html', 
+      desc: 'Seriedad, branding corporativo y logística estricta para congresos y lanzamientos de marca.',
+      features: ['Control de Gafetes', 'Programa por Horas', 'Patrocinadores']
+    }
   };
 
   const currentDemo = demos[activeCategory];
 
-  const handlePaymentSuccess = (datos) => {
-    // 🔴 Simulamos éxito. En Fase 6 aquí crearemos la base de datos real.
+  const handlePaymentSuccess = (datos, plan) => {
+    // 🔴 Simulamos éxito. En Fase 6 conectaremos Backend.
     setCheckoutStep(3);
   };
 
@@ -10611,7 +10651,7 @@ const ShowcaseSimulatorView = () => {
               </div>
             )}
 
-            {/* PASO 2: STRIPE CHECKOUT REUTILIZANDO TU COMPONENTE */}
+            {/* PASO 2: STRIPE CHECKOUT */}
             {checkoutStep === 2 && (
               <div className="p-8 animate-in slide-in-from-right-8 duration-300 flex-1 overflow-y-auto custom-scrollbar">
                 <div className="flex justify-between items-center mb-4">
@@ -10620,8 +10660,7 @@ const ShowcaseSimulatorView = () => {
                 </div>
                 <Elements stripe={stripePromise}>
                   <CheckoutForm 
-                    plan={planSeleccionado.nombre} 
-                    precio={planSeleccionado.precio} 
+                    planSeleccionado={planSeleccionado} 
                     onSuccess={handlePaymentSuccess} 
                     onCancel={() => setCheckoutStep(1)} 
                   />
@@ -10650,17 +10689,18 @@ const ShowcaseSimulatorView = () => {
       <header className="h-20 border-b border-white/5 flex items-center justify-between px-6 sm:px-10 shrink-0 bg-transparent z-20 relative">
         <div className="flex items-center gap-4">
           <button onClick={() => window.location.href = '/'} className="p-2 hover:bg-white/10 rounded-full transition-colors"><ArrowRight size={20} className="rotate-180"/></button>
-          <h1 className="text-sm sm:text-xl font-bold tracking-widest uppercase text-white">Galería <span className="text-amber-500 font-light">Baulia</span></h1>
+          <h1 className="text-sm sm:text-xl font-bold tracking-widest uppercase">Galería <span className="text-amber-500 font-light">Baulia</span></h1>
         </div>
-        {/* 🔴 CORRECCIÓN: AHORA SÍ ABRE EL MODAL VIP */}
         <button onClick={() => setCheckoutStep(1)} className="hidden sm:block px-6 py-2.5 bg-amber-500 text-slate-900 font-bold rounded-full text-xs uppercase tracking-widest hover:bg-amber-400 transition-colors shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-          Comprar este Diseño
+          Crear la Mía
         </button>
       </header>
 
       <div className="flex flex-col lg:flex-row relative z-10 min-h-[calc(100vh-80px)]">
+        {/* Fondo con blur ambiental estilo iPhone */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-[#050505] to-[#050505] z-0 pointer-events-none"></div>
 
+        {/* Panel Izquierdo: El Pitch de Ventas */}
         <div className="w-full lg:w-5/12 xl:w-1/3 p-6 sm:p-10 flex flex-col justify-center z-10 shrink-0">
           <h2 className="text-3xl sm:text-5xl font-editorial font-medium mb-4 text-white leading-tight">
             {currentDemo.label}
@@ -10691,71 +10731,48 @@ const ShowcaseSimulatorView = () => {
           </div>
         </div>
 
+        {/* Panel Derecho: El Simulador Escalar */}
         <div className="flex-1 flex items-center justify-center p-6 lg:p-10 z-10 relative">
+           
+           {/* iPhone Mockup Físico */}
            <div className="relative w-[320px] h-[650px] bg-black rounded-[3rem] border-[8px] border-slate-800 shadow-[0_0_80px_rgba(0,0,0,0.6)] flex-shrink-0">
+             
+             {/* Isla Dinámica */}
              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-20 flex justify-end items-center pr-2">
                <div className="w-2 h-2 rounded-full bg-slate-800/80 mr-1"></div>
                <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
              </div>
              
+             {/* LA MAGIA: El contenedor que recorta, y el iframe engañado */}
              <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-[#111] relative">
                <iframe 
                  src={currentDemo.url} 
                  className="absolute top-0 left-0 border-0"
                  title={`Demo ${currentDemo.label}`}
-                 style={{ width: '390px', height: '844px', transform: 'scale(0.78)', transformOrigin: 'top left' }}
+                 style={{ 
+                    width: '390px', 
+                    height: '844px', 
+                    transform: 'scale(0.78)', 
+                    transformOrigin: 'top left' 
+                 }}
                ></iframe>
              </div>
              
+             {/* Botones Físicos Simulados */}
              <div className="absolute top-24 -left-[11px] w-1.5 h-8 bg-slate-700 rounded-l-md"></div>
              <div className="absolute top-36 -left-[11px] w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
              <div className="absolute top-52 -left-[11px] w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
              <div className="absolute top-36 -right-[11px] w-1.5 h-16 bg-slate-700 rounded-r-md"></div>
            </div>
 
+           {/* Botón ver pantalla completa */}
            <button onClick={() => window.open(currentDemo.url, '_blank')} className="absolute bottom-10 right-10 px-5 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full font-bold text-[10px] uppercase tracking-widest flex items-center transition-colors shadow-2xl z-50">
              Pantalla completa <ExternalLink size={14} className="ml-2"/>
            </button>
         </div>
       </div>
-
-      <div className="w-full max-w-6xl mx-auto px-6 py-20 relative z-10">
-        <div className="border-t border-white/10 pt-20">
-          <div className="text-center mb-16">
-            <span className="text-amber-500 font-bold tracking-widest uppercase text-[10px] mb-4 block">Garantía de Excelencia</span>
-            <h2 className="text-3xl sm:text-4xl font-editorial text-white mb-4">¿Por qué elegir nuestra tecnología?</h2>
-            <p className="text-slate-400 text-sm max-w-2xl mx-auto">No entregamos simples páginas web. Entregamos un ecosistema completo para que tú y tus invitados disfruten sin estrés.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] hover:bg-white/10 transition-colors">
-              <div className="w-12 h-12 bg-amber-500/20 text-amber-500 rounded-full flex items-center justify-center mb-6">
-                <Palette size={24} />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">Diseño a la Medida</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">Olvídate de las plantillas aburridas. Adaptamos la paleta de colores, tipografías y elementos gráficos exactamente a la temática de tu evento.</p>
-            </div>
-            
-            <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] hover:bg-white/10 transition-colors">
-              <div className="w-12 h-12 bg-indigo-500/20 text-indigo-500 rounded-full flex items-center justify-center mb-6">
-                <ShieldCheck size={24} />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">Accesos Blindados</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">Tus invitados confirman asistencia y el sistema genera pases QR únicos e infalsificables. Escanéalos en puerta con nuestra app de Hostess.</p>
-            </div>
-
-            <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] hover:bg-white/10 transition-colors">
-              <div className="w-12 h-12 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mb-6">
-                <LayoutDashboard size={24} />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">Panel Maestro VIP</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">Acomoda mesas en 3D, proyecta las fotos de tus invitados en vivo y controla tu presupuesto desde tu Bóveda Privada.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 🔴 CORRECCIÓN: BOTÓN FLOTANTE MÓVIL MODIFICADO */}
+      
+      {/* Botón flotante móvil para el Showroom */}
       <div className="fixed bottom-6 w-full px-4 sm:hidden z-50">
         <button onClick={() => setCheckoutStep(1)} className="w-full py-4 bg-amber-500 text-slate-900 font-black rounded-full text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.4)]">
           Comprar este Diseño <ArrowRight size={16} className="inline ml-1"/>

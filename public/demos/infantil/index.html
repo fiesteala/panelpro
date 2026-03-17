@@ -204,11 +204,11 @@
             return (
                 <div className="min-h-screen font-pixel overflow-hidden relative selection:bg-green-500 selection:text-black">
                 
-                {/* 🔴 BOTÓN FLOTANTE CRÍTICO Z-9999 */}
+                {/* BOTÓN FLOTANTE CRÍTICO DE VENTA - VERSIÓN CORREGIDA */}
                 <button
-                    onClick={() => window.parent.location.href = 'https://baulia.com/#planes'}
-                    className="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-[9999] bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-full font-sans font-bold text-lg shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:scale-105 transition-transform flex items-center whitespace-nowrap"
-                >
+                    onClick={() => window.parent.postMessage('open_checkout', '*')}
+                    className="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-[9999] bg-charcoal text-champagne border border-champagne px-8 py-3 rounded-full font-sans font-bold text-sm md:text-base tracking-widest shadow-2xl hover:scale-105 transition-transform whitespace-nowrap uppercase"
+                    >
                     ✨ Adquirir esta tecnología
                 </button>
 
