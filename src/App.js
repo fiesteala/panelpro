@@ -1694,7 +1694,7 @@ const InvitacionView = ({ guests, setGuests, addNotification }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: GESTIÓN DE MESAS (DARK PREMIUM) ---
+// --- COMPONENTE: GESTIÓN DE MESAS (DARK PREMIUM COMPLETO) ---
 // ==========================================
 const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -1711,9 +1711,9 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
     capacidadPersonalizada: 10,
     ladosCuadrada: { top: 3, right: 3, bottom: 3, left: 3 }, 
     ladosTablon: { top: 5, bottom: 5, left: 1, right: 1 },
-    ladosOvalada: { top: 4, bottom: 4, left: 2, right: 2 }, // Ovalada por defecto
+    ladosOvalada: { top: 4, bottom: 4, left: 2, right: 2 }, 
     modeloSerpentina: 'mod4',
-    ladosSerpentina: { ext: 5, int: 2, izq: 1, der: 1 }, // Serpentina mod4 por defecto
+    ladosSerpentina: { ext: 5, int: 2, izq: 1, der: 1 }, 
     uTablones: { izq: 2, centro: 1, der: 2 },
     uSillas: { extIzq: 10, intIzq: 5, extCentro: 5, intCentro: 0, extDer: 10, intDer: 5, cabeceras: 2 },
     libreMedidas: { largo: 2.0, ancho: 1.0 },
@@ -1753,19 +1753,16 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
     if (tipo === 'general') setCurrentConfig({ ...configActual, [campo]: num });
     else if (tipo === 'medidas_libre') {
       let val = parseFloat(valor) || 0;
-      if (val < 0.5) val = 0.5; // El lado mínimo es 0.5m (para al menos 1 silla)
+      if (val < 0.5) val = 0.5; 
       const newMedidas = { ...configActual.libreMedidas, [campo]: val };
-      
       const maxLargo = Math.floor(newMedidas.largo / 0.5);
       const maxAncho = Math.floor(newMedidas.ancho / 0.5);
-      
       const newLados = {
         top: Math.min(configActual.ladosLibre.top, maxLargo),
         bottom: Math.min(configActual.ladosLibre.bottom, maxLargo),
         left: Math.min(configActual.ladosLibre.left, maxAncho),
         right: Math.min(configActual.ladosLibre.right, maxAncho)
       };
-      
       setCurrentConfig({ ...configActual, libreMedidas: newMedidas, ladosLibre: newLados });
     } 
     else if (tipo === 'serpentina_modelo') {
@@ -1902,9 +1899,8 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
          'redondas': { cap: 10, tipo: 'redonda', config: { tipo: 'redonda', capacidadRedonda: 10 } },
          'cuadradas': { cap: 12, tipo: 'cuadrada', config: { tipo: 'cuadrada', ladosCuadrada: { top: 3, right: 3, bottom: 3, left: 3 } } },
          'tablones': { cap: 12, tipo: 'tablon', config: { tipo: 'tablon', ladosTablon: { top: 5, bottom: 5, left: 1, right: 1 } } },
-         'ovaladas': { cap: 12, tipo: 'ovalada', config: { tipo: 'ovalada', ladosOvalada: { top: 5, bottom: 5, left: 1, right: 1 } } },
-         'serpentinas': { cap: 11, tipo: 'serpentina', config: { tipo: 'serpentina', modeloSerpentina: 'mod4', ladosSerpentina: { ext: 5, int: 4, izq: 1, der: 1 } } },
-         'forma_u': { cap: 24, tipo: 'forma_u', config: { tipo: 'forma_u', uTablones: { izq: 2, centro: 1, der: 2 }, uSillas: { extIzq: 10, intIzq: 0, extCentro: 5, intCentro: 0, extDer: 10, intDer: 0, cabeceras: 2 } } }
+         'ovaladas': { cap: 14, tipo: 'ovalada', config: { tipo: 'ovalada', ladosOvalada: { top: 4, bottom: 4, left: 3, right: 3 } } },
+         'serpentinas': { cap: 9, tipo: 'serpentina', config: { tipo: 'serpentina', modeloSerpentina: 'mod4', ladosSerpentina: { ext: 5, int: 2, izq: 1, der: 1 } } }
       };
 
       while (sillasGeneradas < smartAssign.faltantes) {
@@ -2071,6 +2067,26 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
               <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Recto 2</label><input type="number" min="0" max="4" value={configActual.ladosOvalada.bottom} onChange={(e) => handleConfigChange('ladosOvalada', 'bottom', e.target.value, 4)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
               <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Curva Izq.</label><input type="number" min="0" max="3" value={configActual.ladosOvalada.left} onChange={(e) => handleConfigChange('ladosOvalada', 'left', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
               <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Curva Der.</label><input type="number" min="0" max="3" value={configActual.ladosOvalada.right} onChange={(e) => handleConfigChange('ladosOvalada', 'right', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+            </div>
+          </div>
+        );
+      case 'serpentina':
+        const maxS = modelosSerpentina[configActual.modeloSerpentina].max;
+        return (
+          <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-4 animate-in fade-in transition-colors">
+            <label className="block text-xs font-bold mb-2 text-slate-700 dark:text-slate-300">Modelo de Serpentina (1/4 Círculo)</label>
+            <select value={configActual.modeloSerpentina} onChange={(e) => handleConfigChange('serpentina_modelo', null, e.target.value)} className="w-full p-2.5 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] shadow-sm font-bold text-sm mb-4 text-indigo-600 dark:text-amber-500 transition-colors">
+              {Object.entries(modelosSerpentina).map(([key, val]) => (
+                <option key={key} value={key}>{val.nombre} (Máx. {val.max.ext + val.max.int + val.max.izq + val.max.der} sillas)</option>
+              ))}
+            </select>
+
+            <label className="block text-xs font-bold mb-3 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 pb-2">Distribución de Sillas</label>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Arco Exterior (Máx. {maxS.ext})</label><input type="number" min="0" max={maxS.ext} value={configActual.ladosSerpentina.ext} onChange={(e) => handleConfigChange('ladosSerpentina', 'ext', e.target.value, maxS.ext)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Arco Interior (Máx. {maxS.int})</label><input type="number" min="0" max={maxS.int} value={configActual.ladosSerpentina.int} onChange={(e) => handleConfigChange('ladosSerpentina', 'int', e.target.value, maxS.int)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Ancho Izq. (Máx. {maxS.izq})</label><input type="number" min="0" max={maxS.izq} value={configActual.ladosSerpentina.izq} onChange={(e) => handleConfigChange('ladosSerpentina', 'izq', e.target.value, maxS.izq)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Ancho Der. (Máx. {maxS.der})</label><input type="number" min="0" max={maxS.der} value={configActual.ladosSerpentina.der} onChange={(e) => handleConfigChange('ladosSerpentina', 'der', e.target.value, maxS.der)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
             </div>
           </div>
         );
@@ -2293,7 +2309,33 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                   <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">+{Math.ceil(smartAssign.faltantes/12)} mesas</span>
                 </button>
 
-                {/* Más botones (Cuadradas, Ovaladas, etc...) siguen el mismo patrón de clases dark: */}
+                <button onClick={() => generarYAsignarMagico('cuadradas')} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
+                  <Square size={28} className="text-sky-500 dark:text-sky-400 mb-3"/>
+                  <p className="font-bold text-slate-800 dark:text-white text-sm">Cuadradas</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">12 Sillas c/u</p>
+                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">+{Math.ceil(smartAssign.faltantes/12)} mesas</span>
+                </button>
+
+                <button onClick={() => generarYAsignarMagico('ovaladas')} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
+                  <div className="w-10 h-5 rounded-[50%] border-4 border-indigo-500 dark:border-indigo-400 mb-3"></div>
+                  <p className="font-bold text-slate-800 dark:text-white text-sm">Ovaladas</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">14 Sillas c/u</p>
+                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">+{Math.ceil(smartAssign.faltantes/14)} mesas</span>
+                </button>
+
+                <button onClick={() => generarYAsignarMagico('serpentinas')} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
+                  <Spline size={28} className="text-teal-500 dark:text-teal-400 mb-3"/>
+                  <p className="font-bold text-slate-800 dark:text-white text-sm">Serpentinas</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">9 Sillas c/u</p>
+                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">+{Math.ceil(smartAssign.faltantes/9)} mesas</span>
+                </button>
+
+                <button onClick={() => generarYAsignarMagico('mixto')} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
+                  <Wand2 size={28} className="text-purple-500 dark:text-purple-400 mb-3"/>
+                  <p className="font-bold text-slate-800 dark:text-white text-sm">Mezcla 50/50</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">Redonda y Tablón</p>
+                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">Magia</span>
+                </button>
               </div>
 
               <button onClick={() => setSmartAssign(null)} className="w-full py-4 mt-6 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">Cancelar y hacer manual</button>
@@ -4032,13 +4074,16 @@ const DECO_CATALOG = [
 
 const PRESET_COLORS = ['#ffffff', 'rgba(255, 255, 255, 0.4)', '#fecdd3', '#fbcfe8', '#bfdbfe', '#a7f3d0', '#6ee7b7', '#16a34a', '#fde047', '#eab308', '#fcd34d', '#fed7aa', '#e5e7eb', '#9ca3af', '#1f2937', '#d946ef', '#ef4444'];
 
+// ==========================================
+// --- COMPONENTE: BOCETADOR DE DECORACIÓN (DARK PREMIUM) ---
+// ==========================================
 const DecoracionView = ({ elements = [], setElements, addNotification }) => {
   const [selectedId, setSelectedId] = useState(null);
   const [dragging, setDragging] = useState(null);
 
   const [isEditMode, setIsEditMode] = useState(true);
   const [activeTool, setActiveTool] = useState('select'); 
- 
+  
   const [editingGroupId, setEditingGroupId] = useState(null);
   const [selectedBalloonId, setSelectedBalloonId] = useState(null);
   
@@ -4838,31 +4883,32 @@ const DecoracionView = ({ elements = [], setElements, addNotification }) => {
   }
 
   return (
-    <div className="h-full flex flex-col space-y-4 pb-6" onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onMouseLeave={handlePointerUp}>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
+    <div className="h-full flex flex-col space-y-4 pb-6 relative transition-colors duration-500 z-10" onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onMouseLeave={handlePointerUp}>
+      
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Bocetador de Decoración</h2>
-          <p className="text-slate-500 text-sm">Arrastra del catálogo o haz clic para agregar.</p>
+          <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">Bocetador de Decoración</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Arrastra elementos del catálogo al lienzo interactivo.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => setShowExportModal(true)} className="px-4 py-2 bg-white border border-indigo-200 text-indigo-700 rounded-lg text-sm font-bold shadow-sm hover:bg-indigo-50 transition-colors flex items-center">
-            <FileDown size={16} className="mr-2"/> Generar Blueprint
+          <button onClick={() => setShowExportModal(true)} className="px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs uppercase tracking-widest font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-white/5 transition-colors flex items-center">
+            <FileDown size={14} className="mr-2 text-indigo-600 dark:text-amber-500"/> Blueprint PDF
           </button>
           <button 
             onClick={() => setSnapEnabled(!snapEnabled)} 
-            className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors border shadow-sm ${snapEnabled ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-500'}`}
+            className={`flex items-center px-4 py-2 rounded-xl text-xs uppercase tracking-widest font-bold transition-colors border shadow-sm ${snapEnabled ? 'bg-indigo-50 dark:bg-amber-500/10 border-indigo-200 dark:border-amber-500/20 text-indigo-700 dark:text-amber-400' : 'bg-white dark:bg-[#0a0a0a] border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400'}`}
             title="Auto-alinear objetos magnéticamente"
           >
-            <Magnet size={16} className="mr-2"/> Imán {snapEnabled ? 'ON' : 'OFF'}
+            <Magnet size={14} className="mr-2"/> Imán {snapEnabled ? 'ON' : 'OFF'}
           </button>
 
-          <button onClick={() => setShowClearConfirm(true)} className="px-3 py-2 bg-white border border-rose-200 text-rose-600 rounded-lg text-sm font-medium hover:bg-rose-50 transition-colors shadow-sm">
+          <button onClick={() => setShowClearConfirm(true)} className="px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors shadow-sm">
             <Trash2 size={16} />
           </button>
         </div>
       </div>
       
-      <div className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row overflow-hidden relative">
+      <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col md:flex-row overflow-hidden relative transition-colors duration-500">
         
         {/* BANNERS DE INSTRUCCIONES CLARAS */}
         {activeTool === 'move_bg' && (
@@ -4887,24 +4933,24 @@ const DecoracionView = ({ elements = [], setElements, addNotification }) => {
            </div>
         )}
 
-        {/* BARRA DE HERRAMIENTAS FLOTANTE */}
+        {/* BARRA DE HERRAMIENTAS FLOTANTE (ESTILO CRISTAL) */}
         {isEditMode && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:top-1/2 md:bottom-auto md:left-4 md:-translate-x-0 md:-translate-y-1/2 bg-slate-900/95 backdrop-blur-md border border-slate-700 shadow-2xl rounded-2xl flex flex-row md:flex-col items-center p-2 gap-2 z-[15]">
-             <button onClick={() => setActiveTool('select')} className={`p-3 rounded-xl transition-all ${activeTool === 'select' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/50 scale-110' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`} title="Seleccionar">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:top-1/2 md:bottom-auto md:left-4 md:-translate-x-0 md:-translate-y-1/2 bg-white/90 dark:bg-black/60 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl rounded-2xl flex flex-row md:flex-col items-center p-2 gap-2 z-[15] transition-colors duration-500">
+             <button onClick={() => setActiveTool('select')} className={`p-3 rounded-xl transition-all ${activeTool === 'select' ? 'bg-indigo-500 dark:bg-amber-500 text-white dark:text-slate-900 shadow-lg scale-110' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-indigo-600 dark:hover:text-amber-400'}`} title="Seleccionar">
                <NavigationIcon size={20} className="-rotate-90" />
              </button>
-             <button onClick={() => setActiveTool('pan')} className={`p-3 rounded-xl transition-all ${activeTool === 'pan' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/50 scale-110' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`} title="Mover Plano">
+             <button onClick={() => setActiveTool('pan')} className={`p-3 rounded-xl transition-all ${activeTool === 'pan' ? 'bg-indigo-500 dark:bg-amber-500 text-white dark:text-slate-900 shadow-lg scale-110' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-indigo-600 dark:hover:text-amber-400'}`} title="Mover Plano">
                <Hand size={20} />
              </button>
              {bgImage && (
-               <button onClick={() => setActiveTool('move_bg')} className={`p-3 rounded-xl transition-all ${activeTool === 'move_bg' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/50 scale-110' : 'text-slate-400 hover:bg-slate-800 hover:text-emerald-400'}`} title="Mover Foto">
+               <button onClick={() => setActiveTool('move_bg')} className={`p-3 rounded-xl transition-all ${activeTool === 'move_bg' ? 'bg-emerald-500 text-white shadow-lg scale-110' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-emerald-500 dark:hover:text-emerald-400'}`} title="Mover Foto">
                  <ImageIcon size={20} />
                </button>
              )}
           </div>
         )}
 
-        <div ref={containerRef} className="flex-1 relative overflow-hidden bg-[#eef2f6]">
+        <div ref={containerRef} className="flex-1 relative overflow-hidden bg-slate-100 dark:bg-[#111] transition-colors duration-500">
           <div 
             className={`absolute inset-0 z-0 ${activeTool === 'calibrate' ? 'cursor-crosshair' : 'touch-none'}`}
             onPointerDown={(e) => {
@@ -4933,13 +4979,19 @@ const DecoracionView = ({ elements = [], setElements, addNotification }) => {
           <div className="w-full h-full pointer-events-none">
             <div className="w-full h-full touch-none">
               
+              {/* 🔴 GRID DE FONDO DE ARQUITECTURA (CLARO Y OSCURO) */}
               <div className="absolute inset-0 z-0 pointer-events-none">
                 {bgImage && (
                   <div className="absolute z-0 pointer-events-none opacity-60" style={{ left: (bgPos.x * scale) + offsetX, top: (bgPos.y * scale) + offsetY }}>
-                    <img src={bgImage} style={{ width: bgImgSize.w * scale, height: bgImgSize.h * scale }} className="max-w-none shadow-2xl border-4 border-slate-300 rounded" />
+                    <img src={bgImage} style={{ width: bgImgSize.w * scale, height: bgImgSize.h * scale }} className="max-w-none shadow-2xl border-4 border-slate-300 dark:border-white/10 rounded" />
                   </div>
                 )}
-                <div className="absolute inset-0 transition-opacity duration-500 z-10 pointer-events-none bg-transparent" style={{ backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.15) 1px, transparent 1px)`, backgroundSize: `${scale}px ${scale}px`, backgroundPosition: `${offsetX}px ${offsetY}px` }} />
+                <div className="absolute inset-0 transition-opacity duration-500 z-10 pointer-events-none bg-transparent" 
+                     style={{ 
+                       backgroundImage: `linear-gradient(to right, rgba(120,120,120,0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(120,120,120,0.15) 1px, transparent 1px)`, 
+                       backgroundSize: `${scale}px ${scale}px`, 
+                       backgroundPosition: `${offsetX}px ${offsetY}px` 
+                     }} />
               </div>
 
               {calibrationLine && (() => {
@@ -4960,7 +5012,7 @@ const DecoracionView = ({ elements = [], setElements, addNotification }) => {
                   const isDimmed = editingGroupId && editingGroupId !== el.id;
                   return (
                     <div key={el.id} onPointerDown={(e) => handlePointerDown(e, el.id)} onDoubleClick={(e) => { if (el.type === 'globo_guirnalda' || el.type === 'globo_individual') { e.stopPropagation(); setEditingGroupId(el.id); setSelectedBalloonId(null); } }}
-                      className={`absolute flex items-center justify-center cursor-pointer select-none origin-bottom ${isSelected && !editingGroupId ? 'ring-2 ring-offset-4 ring-pink-500 z-[100]' : ''} ${!editingGroupId ? 'hover:ring-2 hover:ring-offset-2 hover:ring-slate-400 pointer-events-auto' : ''}`}
+                      className={`absolute flex items-center justify-center cursor-pointer select-none origin-bottom ${isSelected && !editingGroupId ? 'ring-2 ring-offset-4 ring-pink-500 dark:ring-amber-500 dark:ring-offset-black z-[100]' : ''} ${!editingGroupId ? 'hover:ring-2 hover:ring-offset-2 hover:ring-slate-400 dark:hover:ring-white/50 pointer-events-auto' : ''}`}
                       style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale + offsetX, top: el.y * scale + offsetY, transform: `rotateZ(${el.rotation || 0}deg)`, zIndex: isSelected ? 9999 : el.zIndex, opacity: isDimmed ? 0.3 : 1 }}
                     >
                       {renderShape(el)}
@@ -4972,71 +5024,71 @@ const DecoracionView = ({ elements = [], setElements, addNotification }) => {
           </div>
         </div>
         
-        <div className="w-full md:w-80 border-l border-slate-200 bg-slate-50 flex flex-col z-20 relative h-full shrink-0">
+        <div className="w-full md:w-80 border-l border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20 backdrop-blur-xl flex flex-col z-20 relative h-full shrink-0 transition-colors duration-500">
           
           {/* PANEL DE EDICIÓN ULTRA COMPACTO */}
           {selectedElement && (
-            <div className="shrink-0 bg-white border-b-2 border-indigo-200 p-3 shadow-md z-30 relative max-h-[40vh] overflow-y-auto custom-scrollbar animate-in slide-in-from-right-4">
-              <div className="flex items-center justify-between mb-2 border-b border-slate-100 pb-2">
-                <h3 className="font-bold text-slate-800 text-xs flex items-center"><Palette size={14} className="mr-1.5 text-indigo-500"/> Editar {selectedElement.name}</h3>
+            <div className="shrink-0 bg-white dark:bg-[#0a0a0a] border-b-2 border-indigo-200 dark:border-amber-500/20 p-4 shadow-md z-30 relative max-h-[40vh] overflow-y-auto custom-scrollbar animate-in slide-in-from-right-4 transition-colors">
+              <div className="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-white/5 pb-2">
+                <h3 className="font-bold text-slate-800 dark:text-white text-xs flex items-center uppercase tracking-widest"><Palette size={14} className="mr-1.5 text-indigo-500 dark:text-amber-500"/> Editar {selectedElement.name}</h3>
                 <div className="flex items-center space-x-1.5">
-                  {editingGroupId && <button onClick={() => { setEditingGroupId(null); setSelectedBalloonId(null); }} className="text-pink-600 bg-pink-50 hover:bg-pink-100 text-[9px] font-bold px-2 py-1 rounded transition-colors">Cerrar Globos</button>}
-                  <button onClick={() => {setSelectedId(null); setEditingGroupId(null);}} className="p-1 text-slate-400 hover:text-rose-500 bg-slate-100 rounded transition-colors"><X size={14}/></button>
+                  {editingGroupId && <button onClick={() => { setEditingGroupId(null); setSelectedBalloonId(null); }} className="text-pink-600 dark:text-amber-900 bg-pink-50 dark:bg-amber-500 hover:bg-pink-100 dark:hover:bg-amber-400 text-[9px] font-black uppercase px-2.5 py-1.5 rounded-md transition-colors">Cerrar Edición</button>}
+                  <button onClick={() => {setSelectedId(null); setEditingGroupId(null);}} className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 bg-slate-100 dark:bg-white/5 rounded-md transition-colors"><X size={14}/></button>
                 </div>
               </div>
 
               {editingGroupId && (selectedElement.type === 'globo_guirnalda' || selectedElement.type === 'globo_individual') ? (
-                <div className="space-y-2.5">
+                <div className="space-y-3">
                   {selectedBalloonId !== null ? (() => {
                      const b = selectedElement.balloons.find(x => x.id === selectedBalloonId);
                      if (!b) return null;
                      return (
                        <>
                          <div>
-                           <label className="block text-[9px] font-bold text-pink-700 uppercase tracking-wider mb-1.5">Color de Globo</label>
+                           <label className="block text-[9px] font-black text-pink-700 dark:text-amber-500 uppercase tracking-widest mb-2">Color de Globo</label>
                            <div className="flex flex-wrap gap-1.5">
                              {PRESET_COLORS.map(color => (
-                               <button key={color} onClick={() => { const newBalloons = selectedElement.balloons.map(x => x.id === selectedBalloonId ? {...x, colorOverride: color} : x); updateElementData(selectedElement.id, { balloons: newBalloons }); }} className={`w-5 h-5 rounded-full shadow-sm border-2 ${b.colorOverride === color ? 'border-pink-500 scale-110' : 'border-slate-200 hover:scale-110 transition-transform'}`} style={getTransparentStyle(color)} />
+                               <button key={color} onClick={() => { const newBalloons = selectedElement.balloons.map(x => x.id === selectedBalloonId ? {...x, colorOverride: color} : x); updateElementData(selectedElement.id, { balloons: newBalloons }); }} className={`w-6 h-6 rounded-full shadow-sm border-2 ${b.colorOverride === color ? 'border-pink-500 dark:border-amber-500 scale-110' : 'border-slate-200 dark:border-white/10 hover:scale-110 transition-transform'}`} style={getTransparentStyle(color)} />
                              ))}
                            </div>
-                           <button onClick={() => { const newBalloons = selectedElement.balloons.map(x => x.id === selectedBalloonId ? {...x, colorOverride: null} : x); updateElementData(selectedElement.id, { balloons: newBalloons }); }} className="text-[10px] bg-white border border-pink-200 px-2 py-1 rounded-md text-pink-600 font-bold mt-2 w-full text-center hover:bg-pink-50 transition-colors shadow-sm">Restaurar Color</button>
+                           <button onClick={() => { const newBalloons = selectedElement.balloons.map(x => x.id === selectedBalloonId ? {...x, colorOverride: null} : x); updateElementData(selectedElement.id, { balloons: newBalloons }); }} className="text-[10px] bg-white dark:bg-white/5 border border-pink-200 dark:border-white/10 px-3 py-1.5 rounded-lg text-pink-600 dark:text-slate-300 font-bold uppercase tracking-widest mt-3 w-full text-center hover:bg-pink-50 dark:hover:bg-white/10 transition-colors shadow-sm">Restaurar Color Base</button>
                          </div>
                          <div>
-                           <label className="block text-[9px] font-bold text-pink-700 uppercase tracking-wider mb-1">Medida (In)</label>
-                           <select value={b.sizeInches || selectedElement.sizeInches || (b.isMain ? 11 : 5)} onChange={e => { const val = parseFloat(e.target.value); const newBalloons = selectedElement.balloons.map(x => x.id === selectedBalloonId ? {...x, sizeInches: val} : x); updateElementData(selectedElement.id, { balloons: newBalloons }); }} className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs font-bold outline-none text-slate-700 focus:border-pink-400">
+                           <label className="block text-[9px] font-black text-pink-700 dark:text-amber-500 uppercase tracking-widest mb-1.5 mt-2">Medida (Pulgadas)</label>
+                           <select value={b.sizeInches || selectedElement.sizeInches || (b.isMain ? 11 : 5)} onChange={e => { const val = parseFloat(e.target.value); const newBalloons = selectedElement.balloons.map(x => x.id === selectedBalloonId ? {...x, sizeInches: val} : x); updateElementData(selectedElement.id, { balloons: newBalloons }); }} className="w-full px-3 py-2 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-lg text-xs font-bold outline-none text-slate-700 dark:text-white focus:border-pink-400 dark:focus:border-amber-500 transition-colors">
                              <option value={5}>5"</option><option value={9}>9"</option><option value={11}>11"</option><option value={18}>18"</option><option value={24}>24"</option><option value={36}>36"</option>
                            </select>
                          </div>
                        </>
                      );
                   })() : (
-                     <div className="bg-pink-50 text-pink-700 p-2.5 rounded-lg text-[10px] font-bold border border-pink-200 flex items-start shadow-sm"><Info size={14} className="mr-2 flex-shrink-0 mt-0.5" />Toca un globo en el lienzo para aislarlo, cambiar su medida o color.</div>
+                     <div className="bg-pink-50 dark:bg-amber-500/10 text-pink-700 dark:text-amber-400 p-3 rounded-xl text-[10px] font-bold border border-pink-200 dark:border-amber-500/20 flex items-start shadow-sm"><Info size={16} className="mr-2 flex-shrink-0 mt-0.5" />Toca un globo en el lienzo para aislarlo, cambiar su medida o color.</div>
                   )}
 
                   {selectedElement.type === 'globo_guirnalda' && (
-                    <div className="mt-2 pt-2 border-t border-slate-100">
-                      <label className="block text-[9px] font-bold text-indigo-700 uppercase tracking-wider mb-1.5 text-center">Agregar Globos</label>
-                      <div className="grid grid-cols-3 gap-1.5">
-                        <button onClick={() => addClusterToGarland('single')} className="py-1.5 bg-white text-indigo-700 border border-indigo-200 rounded-md text-[10px] font-bold hover:bg-indigo-50 transition-colors shadow-sm flex flex-col items-center"><div className="w-3 h-3 bg-indigo-400 rounded-full mb-1"></div>1</button>
-                        <button onClick={() => addClusterToGarland('tercia')} className="py-1.5 bg-white text-indigo-700 border border-indigo-200 rounded-md text-[10px] font-bold hover:bg-indigo-50 transition-colors shadow-sm flex flex-col items-center"><div className="flex -space-x-1 mb-1"><div className="w-2.5 h-2.5 bg-indigo-400 rounded-full"></div><div className="w-2.5 h-2.5 bg-indigo-400 rounded-full z-10"></div><div className="w-2.5 h-2.5 bg-indigo-400 rounded-full"></div></div>3</button>
-                        <button onClick={() => addClusterToGarland('cuarteto')} className="py-1.5 bg-white text-indigo-700 border border-indigo-200 rounded-md text-[10px] font-bold hover:bg-indigo-50 transition-colors shadow-sm flex flex-col items-center"><div className="grid grid-cols-2 gap-[1px] mb-1"><div className="w-1.5 h-1.5 bg-indigo-400 rounded-full"></div><div className="w-1.5 h-1.5 bg-indigo-400 rounded-full"></div><div className="w-1.5 h-1.5 bg-indigo-400 rounded-full"></div><div className="w-1.5 h-1.5 bg-indigo-400 rounded-full"></div></div>4</button>
+                    <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/5">
+                      <label className="block text-[9px] font-black text-indigo-700 dark:text-amber-500 uppercase tracking-widest mb-2 text-center">Agregar Cluster</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button onClick={() => addClusterToGarland('single')} className="py-2 bg-white dark:bg-white/5 text-indigo-700 dark:text-white border border-indigo-200 dark:border-white/10 rounded-lg text-[10px] font-bold hover:bg-indigo-50 dark:hover:bg-white/10 transition-colors shadow-sm flex flex-col items-center"><div className="w-3 h-3 bg-indigo-400 dark:bg-amber-500 rounded-full mb-1"></div>1</button>
+                        <button onClick={() => addClusterToGarland('tercia')} className="py-2 bg-white dark:bg-white/5 text-indigo-700 dark:text-white border border-indigo-200 dark:border-white/10 rounded-lg text-[10px] font-bold hover:bg-indigo-50 dark:hover:bg-white/10 transition-colors shadow-sm flex flex-col items-center"><div className="flex -space-x-1 mb-1"><div className="w-2.5 h-2.5 bg-indigo-400 dark:bg-amber-500 rounded-full"></div><div className="w-2.5 h-2.5 bg-indigo-400 dark:bg-amber-500 rounded-full z-10"></div><div className="w-2.5 h-2.5 bg-indigo-400 dark:bg-amber-500 rounded-full"></div></div>3</button>
+                        <button onClick={() => addClusterToGarland('cuarteto')} className="py-2 bg-white dark:bg-white/5 text-indigo-700 dark:text-white border border-indigo-200 dark:border-white/10 rounded-lg text-[10px] font-bold hover:bg-indigo-50 dark:hover:bg-white/10 transition-colors shadow-sm flex flex-col items-center"><div className="grid grid-cols-2 gap-[1px] mb-1"><div className="w-1.5 h-1.5 bg-indigo-400 dark:bg-amber-500 rounded-full"></div><div className="w-1.5 h-1.5 bg-indigo-400 dark:bg-amber-500 rounded-full"></div><div className="w-1.5 h-1.5 bg-indigo-400 dark:bg-amber-500 rounded-full"></div><div className="w-1.5 h-1.5 bg-indigo-400 dark:bg-amber-500 rounded-full"></div></div>4</button>
                       </div>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="space-y-2.5">
+                <div className="space-y-3">
                   {selectedElement.type === 'globo_individual' && (
                     <>
                       <div>
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Agrupación</label>
-                        <select value={selectedElement.clusterType || 'single'} onChange={(e) => { const newType = e.target.value; let newBalloons = []; if (newType === 'single') newBalloons = [{id:0, clusterId: 1, colorOverride: null}]; if (newType === 'tercia') newBalloons = [{id:0, clusterId: 1, colorOverride: null}, {id:1, clusterId: 1, colorOverride: null}, {id:2, clusterId: 1, colorOverride: null}]; if (newType === 'cuarteto') newBalloons = [{id:0, clusterId: 1, colorOverride: null}, {id:1, clusterId: 1, colorOverride: null}, {id:2, clusterId: 1, colorOverride: null}, {id:3, clusterId: 1, colorOverride: null}, {id:4, clusterId: 1, colorOverride: null}]; updateElementData(selectedId, { clusterType: newType, balloons: newBalloons }); }} className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs font-bold outline-none focus:border-indigo-400 shadow-inner">
+                        <label className="block text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Agrupación</label>
+                        <select value={selectedElement.clusterType || 'single'} onChange={(e) => { const newType = e.target.value; let newBalloons = []; if (newType === 'single') newBalloons = [{id:0, clusterId: 1, colorOverride: null}]; if (newType === 'tercia') newBalloons = [{id:0, clusterId: 1, colorOverride: null}, {id:1, clusterId: 1, colorOverride: null}, {id:2, clusterId: 1, colorOverride: null}]; if (newType === 'cuarteto') newBalloons = [{id:0, clusterId: 1, colorOverride: null}, {id:1, clusterId: 1, colorOverride: null}, {id:2, clusterId: 1, colorOverride: null}, {id:3, clusterId: 1, colorOverride: null}, {id:4, clusterId: 1, colorOverride: null}]; updateElementData(selectedId, { clusterType: newType, balloons: newBalloons }); }} className="w-full px-3 py-2 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-lg text-xs font-bold outline-none focus:border-indigo-400 dark:focus:border-amber-500 text-slate-800 dark:text-white transition-colors">
                           <option value="single">Suelto</option><option value="tercia">Tercia (3)</option><option value="cuarteto">Cuarteto (4)</option>
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Diámetro (In)</label>
-                        <select value={selectedElement.sizeInches || 11} onChange={(e) => updateElementData(selectedId, { sizeInches: parseFloat(e.target.value) })} className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs font-bold outline-none focus:border-indigo-400 shadow-inner">
+                        <label className="block text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 mt-2">Diámetro (Pulgadas)</label>
+                        <select value={selectedElement.sizeInches || 11} onChange={(e) => updateElementData(selectedId, { sizeInches: parseFloat(e.target.value) })} className="w-full px-3 py-2 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-lg text-xs font-bold outline-none focus:border-indigo-400 dark:focus:border-amber-500 text-slate-800 dark:text-white transition-colors">
                           <option value={5}>5"</option><option value={9}>9"</option><option value={11}>11"</option><option value={18}>18"</option><option value={24}>24"</option><option value={36}>36"</option>
                         </select>
                       </div>
@@ -5045,74 +5097,77 @@ const DecoracionView = ({ elements = [], setElements, addNotification }) => {
 
                   {selectedElement.type === 'globo_guirnalda' ? (
                     <div>
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Colores</label>
-                      <div className="flex flex-wrap gap-1.5 mb-2.5">
+                      <label className="block text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Paleta de Colores</label>
+                      <div className="flex flex-wrap gap-2 mb-4">
                         {PRESET_COLORS.map(color => {
                           const isSelected = selectedElement.colors?.includes(color);
                           return (
-                            <button key={color} onClick={() => toggleGarlandColor(selectedId, color)} className={`w-5 h-5 rounded-full shadow-sm border-2 transition-transform ${isSelected ? 'border-indigo-600 scale-110' : 'border-slate-200 hover:scale-110'}`} style={getTransparentStyle(color)} />
+                            <button key={color} onClick={() => toggleGarlandColor(selectedId, color)} className={`w-6 h-6 rounded-full shadow-sm border-2 transition-transform ${isSelected ? 'border-indigo-600 dark:border-amber-500 scale-110' : 'border-slate-200 dark:border-white/10 hover:scale-110'}`} style={getTransparentStyle(color)} />
                           );
                         })}
                       </div>
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Densidad (Globos)</label>
-                      <input type="number" min="3" max="300" value={selectedElement.balloonCount || 45} onChange={(e) => handleGarlandCountChange(selectedId, parseInt(e.target.value) || 45)} className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs font-bold text-indigo-600 outline-none focus:border-indigo-400 shadow-inner" />
+                      <label className="block text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Densidad (Cantidad de Globos)</label>
+                      <input type="number" min="3" max="300" value={selectedElement.balloonCount || 45} onChange={(e) => handleGarlandCountChange(selectedId, parseInt(e.target.value) || 45)} className="w-full px-3 py-2 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-lg text-xs font-black text-indigo-600 dark:text-amber-500 outline-none focus:border-indigo-400 dark:focus:border-amber-400 shadow-inner transition-colors" />
                     </div>
                   ) : (
                     <div>
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Color Base</label>
-                      <div className="flex flex-wrap gap-1.5">
-                        {PRESET_COLORS.map(color => (<button key={color} onClick={() => updateElementData(selectedId, { color })} className={`w-5 h-5 rounded-full shadow-sm border-2 transition-transform hover:scale-110 ${selectedElement.color === color ? 'border-indigo-500 scale-110' : 'border-slate-200'}`} style={getTransparentStyle(color)} />))}
-                        <label className="w-5 h-5 rounded-full shadow-sm border-2 border-dashed border-indigo-400 flex items-center justify-center cursor-pointer hover:bg-indigo-50 transition-colors bg-white"><PaintBucket size={10} className="text-indigo-600" /><input type="color" value={selectedElement.color} onChange={(e) => updateElementData(selectedId, { color: e.target.value })} className="opacity-0 absolute w-0 h-0" /></label>
+                      <label className="block text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Color del Mobiliario</label>
+                      <div className="flex flex-wrap gap-2">
+                        {PRESET_COLORS.map(color => (<button key={color} onClick={() => updateElementData(selectedId, { color })} className={`w-6 h-6 rounded-full shadow-sm border-2 transition-transform hover:scale-110 ${selectedElement.color === color ? 'border-indigo-500 dark:border-amber-500 scale-110' : 'border-slate-200 dark:border-white/10'}`} style={getTransparentStyle(color)} />))}
+                        <label className="w-6 h-6 rounded-full shadow-sm border-2 border-dashed border-indigo-400 dark:border-amber-500 flex items-center justify-center cursor-pointer hover:bg-indigo-50 dark:hover:bg-amber-500/10 transition-colors bg-white dark:bg-[#111]"><PaintBucket size={12} className="text-indigo-600 dark:text-amber-500" /><input type="color" value={selectedElement.color} onChange={(e) => updateElementData(selectedId, { color: e.target.value })} className="opacity-0 absolute w-0 h-0" /></label>
                       </div>
                     </div>
                   )}
 
                   {selectedElement.type === 'letras_neon' && (
-                    <div>
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Texto Neón</label>
-                      <input type="text" value={selectedElement.text} onChange={(e) => updateElementData(selectedId, { text: e.target.value })} className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs font-bold outline-none focus:border-indigo-400 shadow-inner" />
+                    <div className="mt-3">
+                      <label className="block text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Texto Neón</label>
+                      <input type="text" value={selectedElement.text} onChange={(e) => updateElementData(selectedId, { text: e.target.value })} className="w-full px-3 py-2 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-lg text-xs font-bold outline-none focus:border-indigo-400 dark:focus:border-amber-500 text-slate-800 dark:text-white shadow-inner transition-colors" />
                     </div>
                   )}
 
                   {selectedElement.type !== 'globo_individual' && (
-                    <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                      <div className="flex-1"><label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 text-center">Ancho(m)</label><input type="number" step="0.1" min="0.1" value={selectedElement.width} onChange={(e) => updateElementData(selectedId, { width: parseFloat(e.target.value) || 0.1 })} className="w-full px-1 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-bold outline-none text-center focus:border-indigo-400 shadow-inner" /></div>
-                      <div className="flex-1"><label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 text-center">Alto(m)</label><input type="number" step="0.1" min="0.1" value={selectedElement.height} onChange={(e) => updateElementData(selectedId, { height: parseFloat(e.target.value) || 0.1 })} className="w-full px-1 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-bold outline-none text-center focus:border-indigo-400 shadow-inner" /></div>
+                    <div className="flex items-center gap-3 pt-3 mt-2 border-t border-slate-100 dark:border-white/5 transition-colors">
+                      <div className="flex-1"><label className="block text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1 text-center">Ancho (m)</label><input type="number" step="0.1" min="0.1" value={selectedElement.width} onChange={(e) => updateElementData(selectedId, { width: parseFloat(e.target.value) || 0.1 })} className="w-full px-2 py-1.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-lg text-xs font-bold outline-none text-center focus:border-indigo-400 dark:focus:border-amber-500 text-slate-800 dark:text-white shadow-inner transition-colors" /></div>
+                      <div className="flex-1"><label className="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1 text-center">Alto (m)</label><input type="number" step="0.1" min="0.1" value={selectedElement.height} onChange={(e) => updateElementData(selectedId, { height: parseFloat(e.target.value) || 0.1 })} className="w-full px-2 py-1.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-lg text-xs font-bold outline-none text-center focus:border-indigo-400 dark:focus:border-amber-500 text-slate-800 dark:text-white shadow-inner transition-colors" /></div>
                     </div>
                   )}
                 </div>
               )}
               
-              {/* BOTONES DE CAPA Y BORRAR (SIEMPRE VISIBLES SI NO ESTÁS EDITANDO UN GLOBO AISLADO) */}
+              {/* BOTONES DE CAPA Y BORRAR */}
               {!editingGroupId && (
-                 <div className="flex items-center gap-1.5 pt-3 mt-3 border-t border-slate-100">
-                   <button onClick={() => changeZIndex(selectedId, 1)} className="flex-1 py-1.5 bg-slate-50 text-slate-600 border border-slate-200 rounded-md text-[10px] font-bold hover:bg-white hover:border-indigo-300 hover:text-indigo-600 flex items-center justify-center transition-colors shadow-sm"><ArrowUp size={12} className="mr-1"/> Frente</button>
-                   <button onClick={() => changeZIndex(selectedId, -1)} className="flex-1 py-1.5 bg-slate-50 text-slate-600 border border-slate-200 rounded-md text-[10px] font-bold hover:bg-white hover:border-indigo-300 hover:text-indigo-600 flex items-center justify-center transition-colors shadow-sm"><ArrowDown size={12} className="mr-1"/> Fondo</button>
-                   <button onClick={deleteSelected} className="flex-1 py-1.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-md text-[10px] font-bold hover:bg-rose-100 hover:border-rose-300 flex items-center justify-center transition-colors shadow-sm"><Trash2 size={12} className="mr-1"/> Borrar</button>
+                 <div className="flex items-center gap-2 pt-4 mt-4 border-t border-slate-100 dark:border-white/5 transition-colors">
+                   <button onClick={() => changeZIndex(selectedId, 1)} className="flex-1 py-2 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-white hover:border-indigo-300 dark:hover:border-white/20 hover:text-indigo-600 dark:hover:text-white flex items-center justify-center transition-colors shadow-sm"><ArrowUp size={12} className="mr-1"/> Frente</button>
+                   <button onClick={() => changeZIndex(selectedId, -1)} className="flex-1 py-2 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-white hover:border-indigo-300 dark:hover:border-white/20 hover:text-indigo-600 dark:hover:text-white flex items-center justify-center transition-colors shadow-sm"><ArrowDown size={12} className="mr-1"/> Fondo</button>
+                   <button onClick={deleteSelected} className="flex-1 py-2 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-rose-100 dark:hover:bg-rose-500/20 hover:border-rose-300 dark:hover:border-rose-500/40 flex items-center justify-center transition-colors shadow-sm"><Trash2 size={12} className="mr-1"/> Borrar</button>
                  </div>
               )}
             </div>
           )}
 
-          <div className="overflow-y-auto flex-1 hide-scrollbar p-4 space-y-5">
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-              <h3 className="font-bold text-slate-800 mb-2 text-xs uppercase tracking-wider flex items-center border-b border-slate-100 pb-2"><MapPin size={14} className="mr-1.5 text-rose-500"/> Escenario Real</h3>
+          <div className="overflow-y-auto flex-1 hide-scrollbar p-5 space-y-6">
+            <div className="bg-white dark:bg-[#0a0a0a] rounded-2xl shadow-sm dark:shadow-2xl border border-slate-200 dark:border-white/10 p-5 transition-colors">
+              <h3 className="font-bold text-slate-800 dark:text-white mb-3 text-[10px] uppercase tracking-widest flex items-center border-b border-slate-100 dark:border-white/5 pb-2 transition-colors"><MapPin size={14} className="mr-1.5 text-rose-500 dark:text-rose-400"/> Escenario Real</h3>
               {!bgImage ? (
-                <><input type="file" accept="image/*" ref={fileInputRefBg} onChange={handleBgUpload} className="hidden" /><button onClick={() => fileInputRefBg.current.click()} className="w-full py-3 bg-slate-50 text-slate-600 rounded-lg font-bold text-xs hover:bg-slate-100 hover:text-indigo-600 transition-colors flex items-center justify-center border-2 border-dashed border-slate-300"><ImageIcon size={16} className="mr-2"/> Subir Foto / Plano</button></>
+                <><input type="file" accept="image/*" ref={fileInputRefBg} onChange={handleBgUpload} className="hidden" /><button onClick={() => fileInputRefBg.current.click()} className="w-full py-4 bg-slate-50 dark:bg-[#111] text-slate-600 dark:text-slate-400 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-100 dark:hover:bg-white/5 hover:text-indigo-600 dark:hover:text-white transition-colors flex items-center justify-center border-2 border-dashed border-slate-300 dark:border-white/20"><ImageIcon size={16} className="mr-2"/> Subir Foto / Plano</button></>
               ) : (
-                <div className="space-y-2">
-                  <button onClick={() => setActiveTool('calibrate')} className={`w-full py-2.5 rounded-lg font-bold text-xs flex items-center justify-center transition-all shadow-sm ${activeTool === 'calibrate' ? 'bg-sky-500 text-white ring-2 ring-sky-200' : 'bg-sky-50 text-sky-600 hover:bg-sky-100 border border-sky-200'}`}><Spline size={14} className="mr-2"/> Calibrar Medidas</button>
-                  <button onClick={() => setActiveTool('move_bg')} className={`w-full py-2.5 rounded-lg font-bold text-xs flex items-center justify-center transition-all shadow-sm ${activeTool === 'move_bg' ? 'bg-emerald-500 text-white ring-2 ring-emerald-200' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200'}`}><Move size={14} className="mr-2"/> Mover Fondo</button>
-                  <button onClick={removeBackground} className="w-full py-2 bg-white border border-rose-200 text-rose-500 rounded-lg font-bold text-[10px] hover:bg-rose-50 transition-colors mt-1">Quitar Imagen</button>
+                <div className="space-y-2.5">
+                  <button onClick={() => setActiveTool('calibrate')} className={`w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center transition-all shadow-sm ${activeTool === 'calibrate' ? 'bg-sky-500 text-white ring-2 ring-sky-200' : 'bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20'}`}><Spline size={14} className="mr-2"/> Calibrar Medidas</button>
+                  <button onClick={() => setActiveTool('move_bg')} className={`w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center transition-all shadow-sm ${activeTool === 'move_bg' ? 'bg-emerald-500 text-white ring-2 ring-emerald-200' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20'}`}><Move size={14} className="mr-2"/> Mover Fondo</button>
+                  <button onClick={removeBackground} className="w-full py-2.5 bg-white dark:bg-transparent border border-rose-200 dark:border-rose-500/20 text-rose-500 dark:text-rose-400 rounded-xl font-black uppercase tracking-widest text-[9px] hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors mt-2">Quitar Imagen</button>
                 </div>
               )}
             </div>
 
             <div>
-              <h3 className="font-bold text-slate-800 mb-3 text-xs uppercase tracking-wider flex items-center"><Layers size={16} className="mr-2 text-indigo-500"/> Catálogo PRO</h3>
-              <div className="grid grid-cols-2 gap-2 pb-6">
+              <h3 className="font-bold text-slate-800 dark:text-white mb-4 text-[10px] uppercase tracking-widest flex items-center"><Layers size={14} className="mr-2 text-indigo-500 dark:text-amber-500"/> Catálogo PRO</h3>
+              <div className="grid grid-cols-2 gap-3 pb-6">
                 {DECO_CATALOG.map((item, idx) => (
-                  <div key={idx} draggable onDragStart={(e) => handleDragStart(e, item)} onClick={() => { const cx = (-pan.x / scale) + ((vp.w / 2) / scale) - (item.defaultW / 2); const cy = (-pan.y / scale) + ((vp.h / 2) / scale) - (item.defaultH / 2); createNewElement(item, cx, cy); }} className="bg-white p-2.5 rounded-xl border border-slate-200 text-center cursor-grab active:cursor-grabbing hover:border-pink-400 hover:shadow-md transition-all group" title="Haz clic para agregar al centro, o arrastra al lienzo"><div className="h-10 flex items-center justify-center mb-1.5 pointer-events-none group-hover:scale-110 transition-transform">{renderSidebarIcon(item)}</div><p className="text-[9px] font-bold text-slate-600 leading-tight pointer-events-none">{item.name}</p></div>
+                  <div key={idx} draggable onDragStart={(e) => handleDragStart(e, item)} onClick={() => { const cx = (-pan.x / scale) + ((vp.w / 2) / scale) - (item.defaultW / 2); const cy = (-pan.y / scale) + ((vp.h / 2) / scale) - (item.defaultH / 2); createNewElement(item, cx, cy); }} className="bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-slate-200 dark:border-white/10 text-center cursor-grab active:cursor-grabbing hover:border-pink-400 dark:hover:border-amber-500 hover:shadow-md transition-all group" title="Haz clic para agregar al centro, o arrastra al lienzo">
+                     <div className="h-10 flex items-center justify-center mb-2 pointer-events-none group-hover:scale-110 transition-transform">{renderSidebarIcon(item)}</div>
+                     <p className="text-[9px] font-bold text-slate-600 dark:text-slate-400 leading-tight pointer-events-none uppercase tracking-wider">{item.name}</p>
+                  </div>
                 ))}
               </div>
             </div>
@@ -5121,14 +5176,34 @@ const DecoracionView = ({ elements = [], setElements, addNotification }) => {
       </div>
 
       {calibrationModal && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl p-8 text-center border-4 border-sky-200"><div className="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner"><Maximize size={32} /></div><h3 className="font-black text-xl text-slate-800 mb-2">Escalar Fondo</h3><p className="text-slate-500 text-sm mb-6 leading-relaxed">¿Cuántos <b>metros reales</b> mide la línea azul que acabas de trazar en la foto?</p><div className="flex items-center justify-center bg-slate-50 border-2 border-slate-200 rounded-2xl mb-8 focus-within:border-sky-400 focus-within:bg-white transition-all shadow-inner"><input type="number" step="0.1" autoFocus placeholder="Ej. 2.5" value={realDistanceInput} onChange={(e) => setRealDistanceInput(e.target.value)} className="w-full p-4 bg-transparent outline-none font-black text-2xl text-center text-slate-800" /><span className="pr-5 font-bold text-slate-400 text-sm uppercase tracking-wider">metros</span></div><div className="flex space-x-4"><button onClick={() => { setCalibrationModal(null); setCalibrationLine(null); setActiveTool('select'); }} className="flex-1 p-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">Cancelar</button><button onClick={applyCalibration} className="flex-1 p-3 bg-sky-500 text-white rounded-xl font-bold shadow-lg hover:bg-sky-600 hover:shadow-sky-500/30 transition-all active:scale-95">Aplicar Escala</button></div></div>
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 text-center border-4 border-sky-200 dark:border-sky-500/30 transition-colors">
+             <div className="w-20 h-20 bg-sky-50 dark:bg-sky-500/10 text-sky-500 dark:text-sky-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner dark:border dark:border-sky-500/20"><Maximize size={36} /></div>
+             <h3 className="font-editorial font-black text-2xl text-slate-800 dark:text-white mb-2 transition-colors">Escalar Fondo</h3>
+             <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 leading-relaxed">¿Cuántos <b>metros reales</b> mide la línea azul que acabas de trazar en la foto?</p>
+             <div className="flex items-center justify-center bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/10 rounded-2xl mb-8 focus-within:border-sky-400 dark:focus-within:border-sky-500 transition-all shadow-inner">
+                <input type="number" step="0.1" autoFocus placeholder="Ej. 2.5" value={realDistanceInput} onChange={(e) => setRealDistanceInput(e.target.value)} className="w-full p-4 bg-transparent outline-none font-black text-3xl text-center text-slate-800 dark:text-white" />
+                <span className="pr-6 font-black text-slate-400 dark:text-slate-500 text-xs uppercase tracking-widest">metros</span>
+             </div>
+             <div className="flex space-x-3">
+                <button onClick={() => { setCalibrationModal(null); setCalibrationLine(null); setActiveTool('select'); }} className="flex-1 p-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Cancelar</button>
+                <button onClick={applyCalibration} className="flex-1 p-4 bg-sky-500 text-white dark:text-slate-900 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg hover:bg-sky-600 dark:hover:bg-sky-400 hover:shadow-sky-500/30 transition-all active:scale-95">Aplicar Escala</button>
+             </div>
+          </div>
         </div>
       )}
 
       {showClearConfirm && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl border border-rose-100"><div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4"><Trash2 size={32} /></div><h3 className="font-bold text-xl text-slate-800 mb-2">¿Borrar Diseño?</h3><p className="text-slate-500 mb-6 text-sm">Se eliminarán todos los muebles y fondos de este plano. Esta acción no se puede deshacer.</p><div className="flex space-x-3"><button onClick={() => setShowClearConfirm(false)} className="flex-1 p-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors">Cancelar</button><button onClick={executeClearAll} className="flex-1 p-3 bg-rose-500 text-white rounded-xl font-bold hover:bg-rose-600 transition-colors shadow-sm">Sí, Borrar Todo</button></div></div>
+        <div className="fixed inset-0 z-[9999] bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden p-8 text-center shadow-2xl border border-rose-100 dark:border-white/10 transition-colors">
+             <div className="w-16 h-16 bg-rose-100 dark:bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6 dark:border dark:border-rose-500/20"><Trash2 size={32} /></div>
+             <h3 className="font-editorial font-black text-2xl text-slate-800 dark:text-white mb-2 transition-colors">¿Borrar Diseño?</h3>
+             <p className="text-slate-500 dark:text-slate-400 mb-8 text-sm leading-relaxed">Se eliminarán todos los muebles y fondos de este plano. Esta acción no se puede deshacer.</p>
+             <div className="flex space-x-3">
+               <button onClick={() => setShowClearConfirm(false)} className="flex-1 p-4 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Cancelar</button>
+               <button onClick={executeClearAll} className="flex-1 p-4 bg-rose-500 text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-rose-600 transition-colors shadow-md dark:shadow-[0_0_15px_rgba(244,63,94,0.3)]">Sí, Borrar Todo</button>
+             </div>
+          </div>
         </div>
       )}
 
@@ -6845,7 +6920,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
 };
 
 // ==========================================
-// --- COMPONENTE: GALERÍA EN VIVO (ADMIN + CONFIGURACIÓN) ---
+// --- COMPONENTE: GALERÍA EN VIVO (DARK PREMIUM) ---
 // ==========================================
 const GaleriaView = ({ photos, addNotification }) => {
   const [showQR, setShowQR] = useState(false); 
@@ -6859,7 +6934,6 @@ const GaleriaView = ({ photos, addNotification }) => {
   const cloudName = "duy0mcqsh"; 
   const uploadPreset = "ml_default"; 
 
-  // 🔴 CORRECCIÓN: Enlaces con RUTAS LIMPIAS BAULIA
   const getCleanBaseUrl = () => window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
   
   const guestLink = `${getCleanBaseUrl()}/?modo=camara&e=${ID_DEL_EVENTO}`;
@@ -6972,58 +7046,59 @@ const GaleriaView = ({ photos, addNotification }) => {
   const renderTextWithHashtags = (text) => {
     if (!text) return null;
     return text.split(/(#[a-zA-Z0-9_áéíóúñÁÉÍÓÚÑ]+)/g).map((part, i) => {
-      if (part.startsWith('#')) return <span key={i} className="font-bold text-indigo-400">{part}</span>;
+      if (part.startsWith('#')) return <span key={i} className="font-bold text-indigo-500 dark:text-amber-500">{part}</span>;
       return part;
     });
   };
 
   return (
-    <div className="h-full flex flex-col space-y-4 pb-6 relative">
+    <div className="h-full flex flex-col space-y-4 pb-6 relative z-10 transition-colors duration-500">
       
-      <div className="bg-white px-4 py-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col xl:flex-row items-center justify-between gap-3 shrink-0">
+      <div className="bg-white dark:bg-[#0a0a0a] px-4 py-3 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col xl:flex-row items-center justify-between gap-4 shrink-0 transition-colors">
         <div className="flex items-center gap-3 w-full xl:w-auto shrink-0">
-          <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600"><ImageIcon size={20}/></div>
-          <h2 className="text-lg font-black text-slate-800 tracking-tight">Muro Social</h2>
+          <div className="w-10 h-10 bg-indigo-50 dark:bg-amber-500/10 rounded-xl flex items-center justify-center text-indigo-600 dark:text-amber-500"><ImageIcon size={20}/></div>
+          <h2 className="text-xl font-editorial font-black text-slate-800 dark:text-white tracking-tight">Muro Social</h2>
         </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-2.5 w-full xl:w-auto">
-          <div className="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-             <ShieldCheck size={14} className={`mr-1.5 ${config.moderacion ? 'text-amber-500' : 'text-slate-400'}`}/>
-             <span className="text-[10px] font-bold text-slate-600 mr-2">Moderación</span>
-             <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-8 h-4 rounded-full transition-colors ${config.moderacion ? 'bg-amber-500' : 'bg-slate-300'}`}>
+        <div className="flex flex-wrap items-center justify-end gap-3 w-full xl:w-auto">
+          <div className="flex items-center bg-slate-50 dark:bg-[#111] px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/5 transition-colors">
+             <ShieldCheck size={14} className={`mr-1.5 ${config.moderacion ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`}/>
+             <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 mr-2 uppercase tracking-widest">Moderación</span>
+             <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-8 h-4 rounded-full transition-colors ${config.moderacion ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
                 <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${config.moderacion ? 'translate-x-4' : 'translate-x-0'}`}></div>
              </button>
           </div>
 
-          <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-            <button onClick={() => updateConfig('modoPublico', true)} className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${config.modoPublico ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-200'}`}>Público</button>
-            <button onClick={() => updateConfig('modoPublico', false)} className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${!config.modoPublico ? 'bg-rose-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-200'}`}>Privado</button>
+          <div className="flex items-center bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200 dark:border-white/5 transition-colors">
+            <button onClick={() => updateConfig('modoPublico', true)} className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${config.modoPublico ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'}`}>Público</button>
+            <button onClick={() => updateConfig('modoPublico', false)} className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${!config.modoPublico ? 'bg-rose-500 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'}`}>Privado</button>
           </div>
 
-          <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus-within:border-indigo-500 transition-colors w-24 shrink-0">
-            <span className="text-slate-400 font-bold mr-1 text-xs">#</span>
-            <input type="text" value={config.hashtag?.replace('#', '') || ''} onChange={(e) => setConfig({...config, hashtag: '#' + e.target.value.replace(/\s+/g, '')})} onBlur={(e) => updateConfig('hashtag', config.hashtag)} placeholder="Boda" className="bg-transparent text-slate-800 font-bold text-xs outline-none w-full placeholder:text-slate-400"/>
+          <div className="flex items-center bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-lg px-3 py-1.5 focus-within:border-indigo-500 dark:focus-within:border-amber-500 transition-colors w-32 shrink-0">
+            <span className="text-slate-400 font-bold mr-1 text-sm">#</span>
+            <input type="text" value={config.hashtag?.replace('#', '') || ''} onChange={(e) => setConfig({...config, hashtag: '#' + e.target.value.replace(/\s+/g, '')})} onBlur={(e) => updateConfig('hashtag', config.hashtag)} placeholder="Boda" className="bg-transparent text-slate-800 dark:text-white font-bold text-xs outline-none w-full placeholder:text-slate-400"/>
           </div>
 
           <input type="file" accept="image/png" ref={fileInputRef} onChange={handleFrameUpload} className="hidden" />
-          <button onClick={() => fileInputRef.current.click()} className="flex items-center px-3 py-1.5 bg-sky-50 text-sky-600 rounded-lg text-xs font-bold hover:bg-sky-100 transition-all shadow-sm">
+          <button onClick={() => fileInputRef.current.click()} className="flex items-center px-4 py-2 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-lg text-[10px] uppercase tracking-widest font-bold hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 transition-all shadow-sm">
             <ImageIcon size={14} className="mr-1.5" /> Marco PNG
           </button>
 
-          <button onClick={downloadAllPhotos} disabled={isZipping} className={`flex items-center px-3 py-1.5 text-white rounded-lg text-xs font-bold transition-all shadow-sm ${isZipping ? 'bg-slate-400' : 'bg-emerald-500 hover:bg-emerald-600'}`}>
+          <button onClick={downloadAllPhotos} disabled={isZipping} className={`flex items-center px-4 py-2 text-white rounded-lg text-[10px] uppercase tracking-widest font-bold transition-all shadow-sm ${isZipping ? 'bg-slate-400 dark:bg-slate-600' : 'bg-emerald-500 hover:bg-emerald-600 dark:shadow-[0_0_10px_rgba(16,185,129,0.3)]'}`}>
             {isZipping ? <RefreshCw size={14} className="mr-1.5 animate-spin"/> : <Download size={14} className="mr-1.5"/>} ZIP
           </button>
 
-          <button onClick={() => setShowQR(true)} className="flex items-center px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-all shadow-sm"><QrCode size={14} className="mr-1.5" /> QR Mesas</button>
-          <button onClick={() => setShowProyectorModal(true)} className="flex items-center px-3 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-bold hover:bg-slate-900 transition-all shadow-sm"><PlayCircle size={14} className="mr-1.5" /> Pantallas</button>
+          <button onClick={() => setShowQR(true)} className="flex items-center px-4 py-2 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-lg text-[10px] uppercase tracking-widest font-bold hover:bg-indigo-700 dark:hover:bg-amber-400 transition-all shadow-md dark:shadow-[0_0_10px_rgba(245,158,11,0.3)]"><QrCode size={14} className="mr-1.5" /> QR Mesas</button>
+          <button onClick={() => setShowProyectorModal(true)} className="flex items-center px-4 py-2 bg-slate-800 dark:bg-white text-white dark:text-slate-900 rounded-lg text-[10px] uppercase tracking-widest font-bold hover:bg-slate-900 dark:hover:bg-slate-200 transition-all shadow-md"><PlayCircle size={14} className="mr-1.5" /> Pantallas</button>
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 overflow-y-auto bg-slate-50/50 custom-scrollbar">
+      <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl p-4 overflow-y-auto bg-slate-50/50 dark:bg-transparent custom-scrollbar transition-colors">
         {photos.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-slate-400">
+          <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
             <ImageIcon size={64} className="mb-4 opacity-20" />
-            <h3 className="text-xl font-bold text-slate-700">Aún no hay fotos</h3>
+            <h3 className="text-xl font-bold text-slate-700 dark:text-white font-editorial tracking-wide">Aún no hay fotos</h3>
+            <p className="text-sm font-medium mt-2">Invita a tus asistentes a escanear el QR.</p>
           </div>
         ) : (
           <div className="columns-2 md:columns-4 gap-4 pb-10">
@@ -7041,15 +7116,15 @@ const GaleriaView = ({ photos, addNotification }) => {
                   key={foto.id} 
                   onClick={() => setViewingPost(foto)} 
                   style={{ WebkitColumnBreakInside: 'avoid', pageBreakInside: 'avoid', breakInside: 'avoid' }}
-                  className={`group mb-4 w-full rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border cursor-pointer ${isPending ? 'border-amber-400 ring-2 ring-amber-200' : 'border-slate-200'}`}
+                  className={`group mb-4 w-full rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border cursor-pointer ${isPending ? 'border-amber-400 ring-2 ring-amber-200' : 'border-slate-200 dark:border-white/10'}`}
                 >
-                  <div className="relative w-full aspect-[3/4] bg-slate-200">
+                  <div className="relative w-full aspect-[3/4] bg-slate-200 dark:bg-slate-800">
                     <img src={portada} alt="Foto" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                     {config.marcoUrl && <img src={config.marcoUrl} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />}
                     
                     {isPending && (
-                       <div className="absolute top-2 left-2 z-20 bg-amber-500 text-white text-[10px] font-black px-2 py-1 rounded-full flex items-center shadow-lg">
-                          <AlertCircle size={12} className="mr-1"/> PENDIENTE
+                       <div className="absolute top-2 left-2 z-20 bg-amber-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full flex items-center shadow-lg uppercase tracking-widest">
+                          <AlertCircle size={12} className="mr-1.5"/> PENDIENTE
                        </div>
                     )}
 
@@ -7063,13 +7138,13 @@ const GaleriaView = ({ photos, addNotification }) => {
                       <div className="flex justify-end gap-2">
                         {isPending && (
                           <>
-                             <button onClick={(e) => { e.stopPropagation(); toggleApproval(foto, true); }} className="p-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full backdrop-blur-md shadow-md"><CheckCircle size={14} /></button>
-                             <button onClick={(e) => { e.stopPropagation(); toggleApproval(foto, false); }} className="p-2 bg-rose-500 hover:bg-rose-600 text-white rounded-full backdrop-blur-md shadow-md"><X size={14} /></button>
+                             <button onClick={(e) => { e.stopPropagation(); toggleApproval(foto, true); }} className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full backdrop-blur-md shadow-md"><CheckCircle size={16} /></button>
+                             <button onClick={(e) => { e.stopPropagation(); toggleApproval(foto, false); }} className="p-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-full backdrop-blur-md shadow-md"><X size={16} /></button>
                           </>
                         )}
                         {!isPending && (
-                          <button onClick={(e) => { e.stopPropagation(); handleDelete(foto.id); }} className="p-2 bg-white/20 hover:bg-rose-500 text-white rounded-full backdrop-blur-md transition-colors" title="Borrar Publicación">
-                            <Trash2 size={14} />
+                          <button onClick={(e) => { e.stopPropagation(); handleDelete(foto.id); }} className="p-2.5 bg-white/20 hover:bg-rose-500 text-white rounded-full backdrop-blur-md transition-colors" title="Borrar Publicación">
+                            <Trash2 size={16} />
                           </button>
                         )}
                       </div>
@@ -7102,16 +7177,16 @@ const GaleriaView = ({ photos, addNotification }) => {
       </div>
 
       {viewingPost && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
+            <div className="p-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50 dark:bg-white/5 shrink-0 transition-colors">
               <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 overflow-hidden mr-3"><img src={viewingPost.avatar || ''} className="w-full h-full object-cover"/></div>
-                <div><h3 className="font-bold text-slate-800 text-sm">{viewingPost.autor}</h3></div>
+                <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-amber-500/20 overflow-hidden mr-3 border border-transparent dark:border-amber-500/30"><img src={viewingPost.avatar || ''} className="w-full h-full object-cover"/></div>
+                <div><h3 className="font-bold text-slate-800 dark:text-white text-sm">{viewingPost.autor}</h3></div>
               </div>
-              <button onClick={() => setViewingPost(null)} className="p-2 bg-slate-200 rounded-full text-slate-600"><X size={16}/></button>
+              <button onClick={() => setViewingPost(null)} className="p-2 bg-slate-200 dark:bg-white/10 rounded-full text-slate-600 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20 transition-colors"><X size={16}/></button>
             </div>
-            <div className="flex-1 overflow-y-auto bg-white custom-scrollbar">
+            <div className="flex-1 overflow-y-auto bg-white dark:bg-[#050505] custom-scrollbar transition-colors">
               <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar bg-slate-900 relative">
                  {(viewingPost.urls || [viewingPost.url]).map((u, idx) => (
                    <div key={idx} className="w-full flex-shrink-0 snap-center relative">
@@ -7120,12 +7195,12 @@ const GaleriaView = ({ photos, addNotification }) => {
                    </div>
                  ))}
               </div>
-              <div className="p-5 flex justify-between">
-                <button onClick={() => handleDelete(viewingPost.id)} className="text-xs font-bold text-rose-500 bg-rose-50 px-4 py-2 rounded-xl">Borrar Todo</button>
+              <div className="p-5 flex justify-between bg-slate-50 dark:bg-[#0a0a0a] border-t border-slate-100 dark:border-white/5 transition-colors">
+                <button onClick={() => handleDelete(viewingPost.id)} className="text-[10px] font-black uppercase tracking-widest text-rose-500 bg-rose-50 dark:bg-rose-500/10 px-5 py-2.5 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors">Borrar Publicación</button>
                 {config.moderacion && viewingPost.status === 'pending' && (
                   <div className="flex gap-2">
-                    <button onClick={() => toggleApproval(viewingPost, false)} className="text-xs font-bold text-white bg-rose-500 px-4 py-2 rounded-xl shadow-md"><X size={14} className="inline mr-1"/> Rechazar</button>
-                    <button onClick={() => toggleApproval(viewingPost, true)} className="text-xs font-bold text-white bg-emerald-500 px-4 py-2 rounded-xl shadow-md"><CheckCircle size={14} className="inline mr-1"/> Aprobar</button>
+                    <button onClick={() => toggleApproval(viewingPost, false)} className="text-[10px] font-black uppercase tracking-widest text-white bg-rose-500 px-5 py-2.5 rounded-xl shadow-md hover:bg-rose-600 transition-colors"><X size={14} className="inline mr-1.5"/> Rechazar</button>
+                    <button onClick={() => toggleApproval(viewingPost, true)} className="text-[10px] font-black uppercase tracking-widest text-white bg-emerald-500 px-5 py-2.5 rounded-xl shadow-md hover:bg-emerald-600 transition-colors"><CheckCircle size={14} className="inline mr-1.5"/> Aprobar</button>
                   </div>
                 )}
               </div>
@@ -7135,17 +7210,17 @@ const GaleriaView = ({ photos, addNotification }) => {
       )}
 
       {showProyectorModal && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 relative animate-in zoom-in-95">
-             <button onClick={() => setShowProyectorModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-rose-500"><X size={20}/></button>
-             <div className="w-16 h-16 bg-slate-100 text-slate-800 rounded-full flex items-center justify-center mx-auto mb-4"><PlayCircle size={32}/></div>
-             <h3 className="font-black text-xl text-slate-800 mb-2 text-center">Modo Proyector</h3>
-             <button onClick={() => {navigator.clipboard.writeText(proyectorLink); if(addNotification) addNotification('Copiado', 'Enlace copiado al portapapeles', 'success');}} className="w-full py-3 mb-6 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 flex items-center justify-center"><Link size={18} className="mr-2"/> Copiar enlace directo</button>
-             <div className="border-t border-slate-200 pt-4">
-                <label className="block text-xs font-bold mb-2 text-slate-600 text-center">Enviar por WhatsApp</label>
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-8 relative animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
+             <button onClick={() => setShowProyectorModal(false)} className="absolute top-5 right-5 text-slate-400 hover:text-rose-500"><X size={20}/></button>
+             <div className="w-16 h-16 bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-white rounded-full flex items-center justify-center mx-auto mb-4 border border-transparent dark:border-white/10"><PlayCircle size={32}/></div>
+             <h3 className="font-editorial font-black text-2xl text-slate-800 dark:text-white mb-2 text-center transition-colors">Modo Proyector</h3>
+             <button onClick={() => {navigator.clipboard.writeText(proyectorLink); if(addNotification) addNotification('Copiado', 'Enlace copiado al portapapeles', 'success');}} className="w-full py-4 mb-6 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors uppercase tracking-widest text-[10px]"><Link size={16} className="mr-2"/> Copiar enlace directo</button>
+             <div className="border-t border-slate-200 dark:border-white/10 pt-6 transition-colors">
+                <label className="block text-[10px] font-bold mb-3 text-slate-600 dark:text-slate-400 text-center uppercase tracking-widest">Enviar al staff por WhatsApp</label>
                 <div className="flex gap-2">
-                  <input type="text" placeholder="Número a 10 dígitos..." value={djPhone} onChange={e=>setDjPhone(e.target.value)} className="w-full p-3 border border-slate-200 rounded-xl font-bold" />
-                  <button onClick={sendProyectorWhatsApp} className="px-5 bg-emerald-500 text-white rounded-xl"><Send size={18}/></button>
+                  <input type="text" placeholder="10 dígitos del DJ o Planner..." value={djPhone} onChange={e=>setDjPhone(e.target.value)} className="w-full p-4 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:border-emerald-500 transition-colors" />
+                  <button onClick={sendProyectorWhatsApp} className="px-6 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors shadow-md dark:shadow-[0_0_15px_rgba(16,185,129,0.3)]"><Send size={18}/></button>
                 </div>
              </div>
           </div>
@@ -7153,16 +7228,17 @@ const GaleriaView = ({ photos, addNotification }) => {
       )}
 
       {showQR && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-8 text-center relative animate-in zoom-in-95">
-            <button onClick={() => setShowQR(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-800 bg-slate-100 p-2 rounded-full"><X size={20}/></button>
-            <h3 className="font-black text-2xl text-slate-900 mb-2">Tu Código QR</h3>
-            <div className="bg-white p-2 rounded-2xl border-4 border-slate-100 inline-block mb-8 shadow-sm">
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-8 text-center relative animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
+            <button onClick={() => setShowQR(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-800 dark:hover:text-white bg-slate-100 dark:bg-white/10 p-2 rounded-full transition-colors"><X size={20}/></button>
+            <h3 className="font-editorial font-black text-2xl text-slate-900 dark:text-white mb-2 transition-colors">Tu Código QR</h3>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-6 font-bold">Para imprimir en mesas</p>
+            <div className="bg-white p-3 rounded-3xl border-4 border-slate-100 dark:border-white/5 inline-block mb-8 shadow-sm">
               <img src={qrUrl} alt="QR Code" className="w-48 h-48 mx-auto mix-blend-multiply" />
             </div>
             <div className="flex flex-col gap-3">
-              <button onClick={forceDownloadQR} className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 transition-colors text-white rounded-xl font-bold shadow-md"><Download size={18} className="inline mr-2"/> Descargar PNG</button>
-              <button onClick={() => {navigator.clipboard.writeText(guestLink); if(addNotification) addNotification('Copiado', 'Link manual copiado al portapapeles', 'success');}} className="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 flex items-center justify-center transition-colors"><Link size={18} className="mr-2"/> Copiar enlace manual</button>
+              <button onClick={forceDownloadQR} className="w-full py-4 bg-indigo-600 dark:bg-amber-500 hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors text-white dark:text-slate-900 rounded-xl font-black shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] uppercase tracking-widest text-[10px]"><Download size={16} className="inline mr-2"/> Descargar PNG</button>
+              <button onClick={() => {navigator.clipboard.writeText(guestLink); if(addNotification) addNotification('Copiado', 'Link manual copiado al portapapeles', 'success');}} className="w-full py-4 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors uppercase tracking-widest text-[10px]"><Link size={16} className="mr-2"/> Copiar enlace manual</button>
             </div>
           </div>
         </div>
