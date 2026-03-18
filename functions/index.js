@@ -86,41 +86,76 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
       console.log("Enviando correo VIP de bienvenida a:", cleanEmail);
       
       const emailHtml = `
-        <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-w: 600px; margin: 0 auto; padding: 0; background-color: #0a0a0a; color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-          
-          <div style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); padding: 40px 20px; text-align: center;">
-            <h1 style="color: #ffffff; font-size: 28px; margin: 0; letter-spacing: 2px; text-transform: uppercase;">Bienvenido a la Élite</h1>
-            <p style="color: #fef3c7; font-size: 14px; margin-top: 10px; font-weight: 300; letter-spacing: 1px;">Tu Bóveda Digital está lista</p>
-          </div>
-
-          <div style="padding: 40px 30px; background-color: #111111;">
-            <p style="font-size: 16px; line-height: 1.6; color: #cbd5e1; margin-top: 0;">Hola <strong style="color: #ffffff;">${nombre}</strong>,</p>
-            <p style="font-size: 16px; line-height: 1.6; color: #cbd5e1;">Es un honor para nosotros ser parte de tu evento. Hemos preparado tu <b>Panel de Control Premium</b>, diseñado para darte el poder absoluto sobre cada detalle de tu celebración sin el estrés habitual.</p>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #FAFAFA; margin: 0; padding: 20px; color: #1C1917; }
+            .container { max-w: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #EAEAEA; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+            .header { padding: 40px 20px; text-align: center; border-bottom: 1px solid #F5F5F5; }
+            .logo-text { font-family: 'Georgia', serif; font-size: 28px; font-weight: bold; color: #1C1917; letter-spacing: 2px; margin: 0; text-transform: uppercase; }
+            .gold-accent { color: #D4AF37; font-style: italic; }
+            .content { padding: 40px 30px; }
+            .greeting { font-size: 18px; color: #1C1917; margin-top: 0; }
+            .body-text { font-size: 15px; line-height: 1.6; color: #57534E; }
+            .credentials-box { margin: 35px 0; background-color: #FAFAFA; border: 1px solid #F5F5F5; border-radius: 8px; padding: 25px; text-align: center; }
+            .cred-label { margin: 0 0 15px 0; color: #D4AF37; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; }
+            .cred-item { margin: 10px 0; color: #78716C; font-size: 14px; }
+            .cred-value { color: #1C1917; font-size: 16px; font-weight: bold; }
+            .password-pill { font-family: monospace; background: #F5F5F5; padding: 6px 12px; border-radius: 6px; color: #1C1917; font-size: 16px; letter-spacing: 1px; border: 1px solid #EAEAEA; }
+            .btn-container { text-align: center; margin: 40px 0; }
+            .btn { display: inline-block; background-color: #1C1917; color: #FFFFFF !important; padding: 16px 40px; text-decoration: none; font-weight: bold; border-radius: 50px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+            .footer { background-color: #FAFAFA; padding: 30px 20px; text-align: center; border-top: 1px solid #EAEAEA; }
+            .footer-text { color: #A8A29E; font-size: 11px; margin: 0 0 5px 0; }
+            .help-text { font-size: 12px; color: #78716C; font-style: italic; margin-top: 20px; }
             
-            <div style="margin: 35px 0; background-color: #050505; border: 1px solid #333333; border-radius: 12px; padding: 25px; text-align: center;">
-              <p style="margin: 0 0 15px 0; color: #d97706; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">Tus Credenciales de Acceso Seguras</p>
-              <p style="margin: 10px 0; color: #94a3b8; font-size: 14px;">Usuario: <br><strong style="color: #ffffff; font-size: 16px;">${cleanEmail}</strong></p>
-              <p style="margin: 10px 0; color: #94a3b8; font-size: 14px;">Contraseña: <br><strong style="font-family: monospace; background: #1e293b; padding: 6px 12px; border-radius: 6px; color: #34d399; font-size: 16px; letter-spacing: 1px;">${passwordTemporal}</strong></p>
-              ${esRecurrente ? '<p style="margin-top: 15px; font-size: 12px; color: #f59e0b;"><i>¡Gracias por tu preferencia! Al iniciar sesión podrás saltar entre tus eventos.</i></p>' : '<p style="margin-top: 15px; font-size: 11px; color: #64748b;"><i>* Te recomendamos guardar este correo en un lugar seguro.</i></p>'}
+            @media (prefers-color-scheme: dark) {
+              body { background-color: #050505; color: #FFFFFF; }
+              .container { background-color: #111111; border-color: #222222; }
+              .header { border-color: #222222; }
+              .logo-text { color: #FFFFFF; }
+              .greeting { color: #FFFFFF; }
+              .body-text { color: #A8A29E; }
+              .credentials-box { background-color: #0A0A0A; border-color: #222222; }
+              .cred-value { color: #FFFFFF; }
+              .password-pill { background: #1C1917; color: #D4AF37; border-color: #333333; }
+              .btn { background-color: #D4AF37; color: #000000 !important; }
+              .footer { background-color: #0A0A0A; border-color: #222222; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1 class="logo-text">Baulia <span class="gold-accent">VIP</span></h1>
             </div>
 
-            <h3 style="color: #ffffff; font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">¿Qué sigue ahora?</h3>
-            <ul style="color: #cbd5e1; font-size: 14px; line-height: 1.8; padding-left: 20px; margin-bottom: 35px;">
-              <li style="margin-bottom: 10px;"><strong>1. Accede a tu Bóveda:</strong> Entra al panel usando el botón de abajo y tus credenciales.</li>
-              <li style="margin-bottom: 10px;"><strong>2. Diseña tu Espacio:</strong> Asigna lugares, mesas, y configura tu presupuesto.</li>
-              <li style="margin-bottom: 10px;"><strong>3. Relájate:</strong> Deja que la tecnología de Baulia haga el trabajo pesado mientras tú disfrutas.</li>
-            </ul>
+            <div class="content">
+              <p class="greeting">Hola <strong>${nombre}</strong>,</p>
+              <p class="body-text">Es un honor para nosotros acompañarte. Hemos preparado tu <b>Bóveda Premium</b>, diseñada para darte el poder absoluto sobre tu evento con la mayor elegancia.</p>
+              
+              <div class="credentials-box">
+                <p class="cred-label">Tus Credenciales de Acceso</p>
+                <p class="cred-item">Usuario: <br><span class="cred-value">${cleanEmail}</span></p>
+                <p class="cred-item">Contraseña: <br><span class="password-pill">${passwordTemporal}</span></p>
+                ${esRecurrente ? '<p class="help-text">Al iniciar sesión, podrás alternar fácilmente entre tus proyectos.</p>' : ''}
+                <p class="help-text" style="color: #D4AF37;">¿Olvidaste tu contraseña? Ve al panel, ingresa tu correo y haz clic en "Recuperar aquí".</p>
+              </div>
 
-            <div style="text-align: center;">
-              <a href="https://panel.baulia.com" style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000000; padding: 16px 40px; text-decoration: none; font-weight: bold; border-radius: 50px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);">Desbloquear mi Bóveda</a>
+              <div class="btn-container">
+                <a href="https://panel.baulia.com" class="btn">Desbloquear Bóveda</a>
+              </div>
+            </div>
+            
+            <div class="footer">
+              <p class="footer-text">Si necesitas asistencia, simplemente responde a este correo.</p>
+              <p class="footer-text" style="text-transform: uppercase; letter-spacing: 1px;">© ${new Date().getFullYear()} Baulia Premium Software</p>
             </div>
           </div>
-          
-          <div style="background-color: #050505; padding: 30px 20px; text-align: center; border-top: 1px solid #222222;">
-            <p style="color: #64748b; font-size: 12px; margin: 0 0 10px 0;">¿Necesitas ayuda? Responde a este correo y nuestro equipo VIP te asistirá al instante.</p>
-            <p style="color: #475569; font-size: 10px; margin: 0; text-transform: uppercase; letter-spacing: 1px;">© ${new Date().getFullYear()} Baulia Premium Software</p>
-          </div>
-        </div>
+        </body>
+        </html>
       `;
 
       await resend.emails.send({

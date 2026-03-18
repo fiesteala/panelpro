@@ -11086,7 +11086,7 @@ export default function App() {
     else root.classList.remove('dark');
   }, [isDarkMode]);
 
-  // Autenticación Global de Firebase (Soporte Multi-Evento)
+  // Autenticación Global de Firebase (Soporte Multi-Evento Seguro)
   useEffect(() => {
     if (!window.Html5QrcodeScanner && !document.getElementById('qr-script')) {
       const script = document.createElement('script');
@@ -11099,12 +11099,16 @@ export default function App() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         if (user && user.email) {
-          // 🔴 BUSCAMOS TODOS LOS EVENTOS DE ESTE CORREO
-          const q = query(collection(db, "usuarios"), where("email", "==", user.email.toLowerCase()), orderBy("createdAt", "desc"));
+          // 🔴 ELIMINAMOS EL ORDERBY DE LA CONSULTA PARA EVITAR EL ERROR DE ÍNDICE DE FIREBASE
+          const q = query(collection(db, "usuarios"), where("email", "==", user.email.toLowerCase()));
           const querySnapshot = await getDocs(q);
           
           if (!querySnapshot.empty) {
             const userEventsList = querySnapshot.docs.map(doc => doc.data());
+            
+            // 🔴 ORDENAMOS EN MEMORIA (De más nuevo a más viejo)
+            userEventsList.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+            
             const activeEvents = userEventsList.filter(e => e.status !== 'suspendido');
             
             if (activeEvents.length === 0) {
@@ -11112,7 +11116,6 @@ export default function App() {
                setAccountSuspended(true);
                setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
             } else {
-               // 🔴 REVISAMOS SI YA HABÍA ELEGIDO UNO, SI NO, LE CARGAMOS EL MÁS NUEVO
                const savedEventId = localStorage.getItem('eventmaster_currentEventId');
                let selectedEvent = activeEvents.find(e => e.eventId === savedEventId) || activeEvents[0];
                
@@ -11121,7 +11124,7 @@ export default function App() {
                  role: selectedEvent.role, 
                  plan: selectedEvent.plan, 
                  eventId: selectedEvent.eventId,
-                 availableEvents: activeEvents // Guardamos su lista de eventos
+                 availableEvents: activeEvents
                });
                localStorage.setItem('eventmaster_currentEventId', selectedEvent.eventId);
             }
@@ -11133,6 +11136,8 @@ export default function App() {
           setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
         }
       } catch (error) {
+        console.error("Error en Autenticación:", error); // Por si acaso, para ver en consola
+        await signOut(auth); // Forzamos salida si hay error para no dejar la pantalla congelada
         setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
       } finally {
         setIsCheckingAuth(false);
