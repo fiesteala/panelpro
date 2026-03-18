@@ -9511,7 +9511,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS (SISTEMA ANTI-ROBO HORMIGA Y FINANZAS) ---
+// --- COMPONENTE: CENTRO DE LICENCIAS Y FINANZAS B2B ---
 // ==========================================
 const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
@@ -9527,8 +9527,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   
   const [licencias, setLicencias] = useState([]);
   const [resenasList, setResenasList] = useState([]);
+  const [ventas, setVentas] = useState([]); // 🔴 NUEVO ESTADO PARA EL LIBRO MAYOR
+  
   const [correosVisibles, setCorreosVisibles] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Selector de Mes para el Corte de Caja (Por defecto el mes actual)
+  const currentMonthYear = new Date().toISOString().slice(0, 7);
+  const [mesSeleccionado, setMesSeleccionado] = useState(currentMonthYear);
 
   const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null });
 
@@ -9536,20 +9542,16 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const isSuperAdmin = authData?.role === 'superadmin';
   const isStaff = authData?.role === 'staff';
 
-  // 🔴 PRECIOS OFICIALES PARA EL CORTE DE CAJA
   const PRECIOS = { basico: 990, plata: 1490, oro: 1990, diamante: 2990 };
 
   const tiposDeEvento = [
     { id: 'boda', label: 'Boda', placeholder: 'Ej. Carlos y Sofia', labelNombre: 'Nombre de los Novios' },
     { id: 'xv_anos', label: 'XV Años', placeholder: 'Ej. Maria Fernanda', labelNombre: 'Nombre de la Quinceañera' },
     { id: 'cumpleanos', label: 'Cumpleaños', placeholder: 'Ej. Juan Perez', labelNombre: 'Nombre del Festejado' },
-    { id: 'bautizo', label: 'Bautizo', placeholder: 'Ej. Bautizo de Mateo', labelNombre: 'Nombre del Festejado' },
-    { id: 'empresarial', label: 'Empresarial', placeholder: 'Ej. Convencion Telcel', labelNombre: 'Nombre de la Empresa' },
-    { id: 'concierto', label: 'Concierto', placeholder: 'Ej. Festival Primavera', labelNombre: 'Nombre del Evento' },
-    { id: 'otro', label: 'Otro Evento', placeholder: 'Ej. Graduacion', labelNombre: 'Nombre del Evento' }
+    { id: 'empresarial', label: 'Empresarial', placeholder: 'Ej. Convencion Telcel', labelNombre: 'Nombre de la Empresa' }
   ];
 
-  const eventoSeleccionado = tiposDeEvento.find(t => t.id === formData.tipoEvento);
+  const eventoSeleccionado = tiposDeEvento.find(t => t.id === formData.tipoEvento) || tiposDeEvento[0];
 
   useEffect(() => {
     const unsubLic = onSnapshot(collection(db, "usuarios"), (snap) => {
@@ -9565,7 +9567,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       setResenasList(data);
     });
 
-    return () => { unsubLic(); unsubRes(); };
+    // 🔴 CONEXIÓN AL LIBRO MAYOR DE VENTAS INMUTABLE
+    const unsubVentas = onSnapshot(collection(db, "ventas"), (snap) => {
+      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      data.sort((a, b) => b.fecha?.toMillis() - a.fecha?.toMillis());
+      setVentas(data);
+    });
+
+    return () => { unsubLic(); unsubRes(); unsubVentas(); };
   }, []);
 
   const handleCreateLicense = async (e) => {
@@ -9578,13 +9587,11 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       let newPassword = Math.random().toString(36).slice(-8) + "!";
       let esClienteRecurrente = false;
 
-      // 🔴 INTENTAMOS CREAR EL USUARIO EN AUTH
       try {
         await createUserWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
         await signOut(secondaryAuth); 
       } catch (authError) {
-        if (authError.code === 'auth/email-already-in-use') {
-          // EL CLIENTE YA EXISTE. Es un cliente recurrente.
+        if (authError.code === 'auth/email-already-exists' || authError.code === 'auth/email-already-in-use') {
           esClienteRecurrente = true;
           newPassword = "Tu contraseña actual de Baulia"; 
         } else {
@@ -9592,22 +9599,25 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         }
       }
 
-      // CREAMOS LA NUEVA BÓVEDA EN FIRESTORE A SU MISMO CORREO
       await setDoc(doc(db, "usuarios", newEventId), { 
-        email: newEmail, 
-        role: formData.role, 
-        plan: formData.plan, 
-        tipoEvento: formData.tipoEvento, 
-        eventId: newEventId, 
-        nombres: formData.nombres, 
-        status: 'activo', 
-        urlInvitacion: formData.urlInvitacion, 
-        creadoPor: authData.email, 
-        referenciaPago: formData.referenciaPago, 
-        createdAt: serverTimestamp() 
+        email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, 
+        nombres: formData.nombres, status: 'activo', urlInvitacion: formData.urlInvitacion, creadoPor: authData.email, 
+        referenciaPago: formData.referenciaPago, createdAt: serverTimestamp() 
       });
 
       await setDoc(doc(db, "eventos", newEventId), { presupuestoTotal: 150000, nombres: formData.nombres, plan: formData.plan, tipoEvento: formData.tipoEvento });
+
+      // 🔴 REGISTRAMOS LA VENTA MANUAL EN EL LIBRO MAYOR
+      const mesAnioAct = new Date().toISOString().slice(0, 7);
+      await setDoc(doc(db, "ventas", newEventId), {
+        fecha: serverTimestamp(),
+        mesAnio: mesAnioAct,
+        monto: PRECIOS[formData.plan] || 0,
+        plan: formData.plan,
+        vendedor: authData.email,
+        referencia: formData.referenciaPago,
+        cliente: formData.nombres
+      });
 
       setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role, urlInvitacion: formData.urlInvitacion, esRecurrente: esClienteRecurrente });
       setClientPhone('');
@@ -9620,17 +9630,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const handleUpdateLicense = async (e) => {
     e.preventDefault();
     try {
-      await updateDoc(doc(db, "usuarios", editingLic.id), {
-        urlInvitacion: editingLic.urlInvitacion,
-        plan: editingLic.plan,
-        nombres: editingLic.nombres
-      });
-      setIsEditModalOpen(false);
-      setEditingLic(null);
+      await updateDoc(doc(db, "usuarios", editingLic.id), { urlInvitacion: editingLic.urlInvitacion, plan: editingLic.plan, nombres: editingLic.nombres });
+      setIsEditModalOpen(false); setEditingLic(null);
       setDialog({ isOpen: true, type: 'alert', title: 'Actualizado', message: 'Los datos se guardaron correctamente.' });
-    } catch (error) {
-      setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'No se pudo actualizar la licencia.' });
-    }
+    } catch (error) { setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'No se pudo actualizar la licencia.' }); }
   };
 
   const handleSendWhatsApp = () => {
@@ -9642,9 +9645,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     if (successData.plan === 'basico' || successData.plan === 'plata') {
       mensaje += `Tu invitación digital está casi lista. Podrás verla pronto en este enlace:\n🔗 ${successData.urlInvitacion || 'Enlace pendiente'}`;
     } else {
-      mensaje += `Tu Panel de Control Premium para tu ${tipoTexto} está listo.\n\nAccede a tu plataforma privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña temporal: ${successData.password}\n\n¡Guarda estos accesos, te servirán para gestionar todos los detalles!`;
+      mensaje += `Tu Panel de Control Premium para tu ${tipoTexto} está listo.\n\nAccede a tu plataforma privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña: ${successData.password}\n\n¡Guarda estos accesos, te servirán para gestionar todos los detalles!`;
     }
-    
     window.open(`https://wa.me/${clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
@@ -9655,31 +9657,47 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   };
 
   const handleDelete = (lic) => {
-    if (!isSuperAdmin) {
-      setDialog({ isOpen: true, type: 'alert', title: 'Acceso Denegado', message: 'Solo la Dirección puede eliminar cuentas permanentemente. Usa el botón "Suspender".' });
-      return;
-    }
-    setDialog({ isOpen: true, type: 'confirm', title: 'Eliminar Permanentemente', message: `⚠️ PELIGRO: ¿Seguro de eliminar la información de ${lic.nombres}?`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await deleteDoc(doc(db, "usuarios", lic.id)); await deleteDoc(doc(db, "eventos", lic.eventId)); } });
+    if (!isSuperAdmin) { setDialog({ isOpen: true, type: 'alert', title: 'Acceso Denegado', message: 'Solo la Dirección puede eliminar cuentas permanentemente. Usa el botón "Suspender".' }); return; }
+    setDialog({ isOpen: true, type: 'confirm', title: 'Eliminar Permanentemente', message: `⚠️ PELIGRO: ¿Seguro de eliminar la información de ${lic.nombres}? (El registro de ventas y finanzas NO se borrará, quedará como histórico).`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await deleteDoc(doc(db, "usuarios", lic.id)); await deleteDoc(doc(db, "eventos", lic.eventId)); } });
   };
-
-  const toggleVerCorreo = (id) => setCorreosVisibles(prev => ({ ...prev, [id]: !prev[id] }));
 
   const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
 
   const filteredLicencias = licencias.filter(lic => 
     (lic.nombres && lic.nombres.toLowerCase().includes(searchQuery.toLowerCase())) ||
     (lic.email && lic.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (lic.eventId && lic.eventId.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (lic.referenciaPago && lic.referenciaPago.toLowerCase().includes(searchQuery.toLowerCase()))
+    (lic.eventId && lic.eventId.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  // 🔴 CÁLCULO DE FINANZAS
-  const totalBasico = licencias.filter(l => l.plan === 'basico').length;
-  const totalPlata = licencias.filter(l => l.plan === 'plata').length;
-  const totalOro = licencias.filter(l => l.plan === 'oro').length;
-  const totalDiamante = licencias.filter(l => l.plan === 'diamante').length;
+  // 🔴 LÓGICA DEL CORTE FINANCIERO (ESTADO DE CUENTA)
+  // Obtenemos los meses únicos que existen en el historial para el dropdown
+  const mesesDisponibles = [...new Set(ventas.map(v => v.mesAnio))].sort().reverse();
+  if (!mesesDisponibles.includes(currentMonthYear)) mesesDisponibles.unshift(currentMonthYear);
 
-  const ingresoTotal = (totalBasico * PRECIOS.basico) + (totalPlata * PRECIOS.plata) + (totalOro * PRECIOS.oro) + (totalDiamante * PRECIOS.diamante);
+  // Filtramos las ventas para que solo muestre las del mes seleccionado
+  const ventasDelMes = ventas.filter(v => v.mesAnio === mesSeleccionado);
+  
+  const ingresoMensualTotal = ventasDelMes.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
+  
+  // Desglose de Ventas por Plan
+  const desglosePlanes = { basico: 0, plata: 0, oro: 0, diamante: 0 };
+  ventasDelMes.forEach(v => { if(desglosePlanes[v.plan] !== undefined) desglosePlanes[v.plan] += (Number(v.monto) || 0); });
+
+  // Función para exportar a Excel el corte del mes
+  const exportarCorteContador = () => {
+    const csvRows = ventasDelMes.map(v => {
+      const fechaLimpia = v.fecha?.toDate ? v.fecha.toDate().toLocaleDateString('es-MX') : 'Reciente';
+      return `${fechaLimpia},${v.cliente},${v.plan.toUpperCase()},${v.vendedor},${v.referencia},${v.monto}`;
+    });
+    const headers = "Fecha,Cliente,Plan Vendido,Vendedor,Referencia Bancaria,Monto MXN\n";
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURI(headers + csvRows.join("\n"));
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", `Corte_Baulia_${mesSeleccionado}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
@@ -9706,8 +9724,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           <span className="bg-black/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">
             {isSuperAdmin ? 'Nivel 3: Acceso Maestro' : 'Nivel 2: Workspace Staff'}
           </span>
-          <h2 className="text-3xl font-black flex items-center mb-2"><Building className="mr-3" size={36}/> {isSuperAdmin ? 'Centro de Licencias' : 'Panel Operativo'}</h2>
-          <p className="text-white/80 max-w-lg text-sm">Gestiona clientes, asigna planes, adjunta links de invitaciones y configura eventos.</p>
+          <h2 className="text-3xl font-black flex items-center mb-2"><Building className="mr-3" size={36}/> {isSuperAdmin ? 'Centro de Operaciones' : 'Panel Operativo'}</h2>
+          <p className="text-white/80 max-w-lg text-sm">Administra tus clientes o revisa el estado de cuenta y auditoría financiera inmutable.</p>
         </div>
         <div className="hidden md:flex w-24 h-24 bg-white/10 rounded-full items-center justify-center border-4 border-white/20 shadow-inner">
           {isSuperAdmin ? <Lock size={40} className="text-white" /> : <Users size={40} className="text-white" />}
@@ -9715,95 +9733,156 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="flex gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm w-full md:w-max">
+        <div className="flex gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm w-full md:w-max overflow-x-auto">
            <button onClick={() => setAdminTab('licencias')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'licencias' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
-             <Building size={16}/> Clientes
+             <Building size={16}/> Clientes Activos
            </button>
            {isSuperAdmin && (
-             <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 hover:bg-slate-100'}`}>
-               <Star size={16}/> Reseñas
-             </button>
+             <>
+               <button onClick={() => setAdminTab('finanzas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'finanzas' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-100'}`}>
+                 <PieChart size={16}/> Corte Financiero
+               </button>
+               <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 hover:bg-slate-100'}`}>
+                 <Star size={16}/> Reseñas
+               </button>
+             </>
            )}
         </div>
 
         {adminTab === 'licencias' && (
           <div className="relative w-full md:w-96">
             <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Buscar por correo, nombre, ID o Referencia..." 
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-sm"
-            />
+            <input type="text" placeholder="Buscar cliente por correo o nombre..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-sm" />
           </div>
         )}
       </div>
 
+      {/* 🔴 TAB 1: ESTADO DE CUENTA Y CORTE FINANCIERO (INMUTABLE) */}
+      {adminTab === 'finanzas' && isSuperAdmin && (
+        <div className="animate-in fade-in space-y-6">
+           
+           <div className="flex flex-col md:flex-row justify-between items-center bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+              <div className="flex items-center mb-4 md:mb-0">
+                <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mr-4"><Wallet size={24}/></div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Periodo a evaluar</p>
+                  <select value={mesSeleccionado} onChange={(e) => setMesSeleccionado(e.target.value)} className="text-xl font-black text-slate-800 bg-transparent outline-none cursor-pointer hover:text-emerald-600 transition-colors">
+                    {mesesDisponibles.map(m => {
+                      const date = new Date(m + '-02'); // Truco de zona horaria
+                      const mesNombre = date.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
+                      return <option key={m} value={m}>{mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1)} {m === currentMonthYear ? '(Mes Actual)' : ''}</option>
+                    })}
+                  </select>
+                </div>
+              </div>
+              <button onClick={exportarCorteContador} className="px-6 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold shadow-lg hover:bg-slate-800 transition-colors flex items-center">
+                <FileSpreadsheet size={18} className="mr-2 text-emerald-400"/> Descargar Excel para Contador
+              </button>
+           </div>
+
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-8 rounded-3xl shadow-xl text-white flex flex-col justify-center relative overflow-hidden">
+                 <div className="absolute -right-10 -top-10 opacity-10"><PieChart size={150}/></div>
+                 <p className="text-[10px] font-black text-emerald-100 uppercase tracking-widest mb-1 relative z-10">Ingresos del Mes Seleccionado</p>
+                 <h3 className="text-5xl font-black tracking-tight relative z-10">{formatMoney(ingresoMensualTotal)}</h3>
+                 <p className="text-xs text-emerald-100 mt-4 relative z-10">Se reinicia a $0 automáticamente el día 1 de cada mes.</p>
+              </div>
+
+              <div className="md:col-span-2 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-center">
+                 <h3 className="text-sm font-bold text-slate-800 mb-6 flex items-center"><TrendingDown size={18} className="mr-2 text-indigo-500"/> Desglose de ingresos por Producto</h3>
+                 
+                 <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1"><span className="text-slate-600">Plan Diamante</span> <span className="text-indigo-600">{formatMoney(desglosePlanes.diamante)}</span></div>
+                      <div className="w-full bg-slate-100 rounded-full h-2"><div className="bg-indigo-500 h-2 rounded-full" style={{ width: `${ingresoMensualTotal > 0 ? (desglosePlanes.diamante/ingresoMensualTotal)*100 : 0}%` }}></div></div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1"><span className="text-slate-600">Plan Oro</span> <span className="text-amber-500">{formatMoney(desglosePlanes.oro)}</span></div>
+                      <div className="w-full bg-slate-100 rounded-full h-2"><div className="bg-amber-400 h-2 rounded-full" style={{ width: `${ingresoMensualTotal > 0 ? (desglosePlanes.oro/ingresoMensualTotal)*100 : 0}%` }}></div></div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1"><span className="text-slate-600">Plan Plata & Básico</span> <span className="text-slate-400">{formatMoney(desglosePlanes.plata + desglosePlanes.basico)}</span></div>
+                      <div className="w-full bg-slate-100 rounded-full h-2"><div className="bg-slate-400 h-2 rounded-full" style={{ width: `${ingresoMensualTotal > 0 ? ((desglosePlanes.plata + desglosePlanes.basico)/ingresoMensualTotal)*100 : 0}%` }}></div></div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+
+           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mt-6">
+              <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                 <h3 className="font-bold text-slate-800 text-sm">Libro Mayor de Transacciones ({ventasDelMes.length})</h3>
+                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Inmutable ante borrados</span>
+              </div>
+              <div className="overflow-x-auto pb-10">
+                <table className="w-full text-left whitespace-nowrap">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[10px] uppercase tracking-widest">
+                    <tr>
+                      <th className="px-5 py-3 font-bold">Fecha</th>
+                      <th className="px-5 py-3 font-bold">Cliente / Evento</th>
+                      <th className="px-5 py-3 font-bold text-center">Plan Vendido</th>
+                      <th className="px-5 py-3 font-bold">Auditoría / Vendedor</th>
+                      <th className="px-5 py-3 font-bold text-right">Monto Registrado</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-xs">
+                    {ventasDelMes.length === 0 ? (
+                      <tr><td colSpan="5" className="px-5 py-12 text-center text-slate-400 font-medium text-sm">No hay ventas registradas en este mes.</td></tr>
+                    ) : (
+                      ventasDelMes.map((venta) => (
+                        <tr key={venta.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-5 py-4 font-medium text-slate-600">{venta.fecha?.toDate ? venta.fecha.toDate().toLocaleString('es-MX', {day: 'numeric', month: 'short', hour:'2-digit', minute:'2-digit'}) : 'Reciente'}</td>
+                          <td className="px-5 py-4 font-black text-slate-800">{venta.cliente}</td>
+                          <td className="px-5 py-4 text-center">
+                            <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${venta.plan === 'diamante' ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : venta.plan === 'oro' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                              {venta.plan}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4">
+                            <p className="text-[10px] font-black text-indigo-600">{venta.vendedor.split('@')[0]}</p>
+                            <p className="text-[9px] text-slate-400 uppercase tracking-widest mt-0.5">{venta.referencia}</p>
+                          </td>
+                          <td className="px-5 py-4 text-right font-black text-emerald-600 text-sm">
+                            {formatMoney(venta.monto)}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* 🔴 TAB 2: GESTIÓN DE CLIENTES Y NUEVAS VENTAS */}
       {adminTab === 'licencias' && (
         <div className="animate-in fade-in">
           
-          {/* 🔴 CORTE DE CAJA Y MÉTRICAS (Solo SuperAdmin) */}
-          {isSuperAdmin && (
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
-               <div onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '' }); }} className="col-span-2 md:col-span-1 bg-slate-900 p-5 rounded-2xl shadow-xl flex flex-col items-center justify-center text-center hover:scale-105 cursor-pointer transition-transform group border border-slate-700">
-                 <div className="w-12 h-12 bg-white/10 text-amber-400 rounded-full flex items-center justify-center mb-2 group-hover:bg-amber-500 group-hover:text-slate-900 transition-colors"><Plus size={24}/></div>
-                 <h3 className="text-[10px] font-black text-white uppercase tracking-widest mt-1">Vender Licencia</h3>
-               </div>
-
-               {/* TARJETA DE INGRESOS MAESTRA */}
-               <div className="col-span-2 md:col-span-1 bg-gradient-to-br from-emerald-500 to-emerald-600 p-5 rounded-2xl shadow-xl flex flex-col justify-center border border-emerald-400">
-                 <p className="text-[9px] font-black text-emerald-100 uppercase tracking-widest mb-1 flex items-center"><Wallet size={12} className="mr-1"/> Ingreso Teórico</p>
-                 <h3 className="text-2xl lg:text-3xl font-black text-white tracking-tight">{formatMoney(ingresoTotal)}</h3>
-               </div>
-               
-               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between"><span>Básico</span> <span>${PRECIOS.basico}</span></p>
-                 <h3 className="text-3xl font-black text-slate-700">{totalBasico}</h3>
-               </div>
-               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between"><span>Plata</span> <span>${PRECIOS.plata}</span></p>
-                 <h3 className="text-3xl font-black text-slate-700">{totalPlata}</h3>
-               </div>
-               <div className="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm flex flex-col justify-center bg-amber-50/50">
-                 <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1 flex justify-between"><span>Oro</span> <span>${PRECIOS.oro}</span></p>
-                 <h3 className="text-3xl font-black text-amber-700">{totalOro}</h3>
-               </div>
-               <div className="bg-white p-4 rounded-2xl border border-indigo-200 shadow-sm flex flex-col justify-center bg-indigo-50/50">
-                 <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest mb-1 flex justify-between"><span>Diamante</span> <span>${PRECIOS.diamante}</span></p>
-                 <h3 className="text-3xl font-black text-indigo-700">{totalDiamante}</h3>
-               </div>
-            </div>
-          )}
-
-          {isStaff && (
-            <div className="mb-6">
-              <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '' }); }} className="px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-colors flex items-center">
-                <Plus size={20} className="mr-2"/> Vender / Crear Licencia
-              </button>
-            </div>
-          )}
+          <div className="mb-6 flex gap-4">
+            <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '' }); }} className="px-8 py-4 bg-slate-900 text-white rounded-xl font-bold shadow-xl hover:bg-slate-800 transition-colors flex items-center hover:scale-105 transform">
+              <Plus size={20} className="mr-2 text-amber-500"/> Nueva Venta (Crear Bóveda)
+            </button>
+          </div>
 
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
              <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-               <h3 className="font-bold text-slate-800 text-sm">Directorio de Clientes ({filteredLicencias.length})</h3>
+               <h3 className="font-bold text-slate-800 text-sm">Directorio de Clientes Activos ({filteredLicencias.length})</h3>
              </div>
              <div className="overflow-x-auto pb-24">
-               <table className="w-full text-left whitespace-nowrap min-w-[1100px]">
+               <table className="w-full text-left whitespace-nowrap min-w-[1000px]">
                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[10px] uppercase tracking-widest">
                    <tr>
                      <th className="px-5 py-3 font-bold">Cliente / ID</th>
                      <th className="px-5 py-3 font-bold">Acceso (Correo)</th>
                      <th className="px-5 py-3 font-bold text-center">Plan</th>
                      <th className="px-5 py-3 font-bold">Link Invitación</th>
-                     {isSuperAdmin && <th className="px-5 py-3 font-bold">Auditoría de Venta</th>}
                      <th className="px-5 py-3 font-bold text-center">Estatus</th>
                      <th className="px-5 py-3 font-bold text-right">Controles</th>
                    </tr>
                  </thead>
                  <tbody className="divide-y divide-slate-100 text-xs">
                    {filteredLicencias.length === 0 ? (
-                     <tr><td colSpan={isSuperAdmin ? "7" : "6"} className="px-5 py-12 text-center text-slate-400 font-medium text-sm">No se encontraron resultados para tu búsqueda.</td></tr>
+                     <tr><td colSpan="6" className="px-5 py-12 text-center text-slate-400 font-medium text-sm">No se encontraron clientes.</td></tr>
                    ) : (
                      filteredLicencias.map((lic) => {
                        const estaSuspendido = lic.status === 'suspendido';
@@ -9841,17 +9920,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                <span className="text-[10px] text-slate-400 italic">Pendiente de subir</span>
                              )}
                            </td>
-                           {/* 🔴 AUDITORÍA: VISIBLE SOLO PARA EL CEO */}
-                           {isSuperAdmin && (
-                             <td className="px-5 py-4">
-                               <div className="bg-slate-50 border border-slate-200 p-2 rounded-lg max-w-[200px]">
-                                 <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center"><UserPlus size={10} className="mr-1"/> Vendedor:</p>
-                                 <p className="text-[10px] font-black text-indigo-600 mb-2 truncate" title={lic.creadoPor}>{lic.creadoPor ? lic.creadoPor : 'Stripe (Web)'}</p>
-                                 <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center"><Wallet size={10} className="mr-1"/> Ref. Pago:</p>
-                                 <p className="text-[10px] font-mono text-slate-700 font-bold truncate" title={lic.referenciaPago}>{lic.referenciaPago ? lic.referenciaPago : 'Automático Stripe'}</p>
-                               </div>
-                             </td>
-                           )}
                            <td className="px-5 py-4 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
                            <td className="px-5 py-4 text-right">
                               <div className="flex items-center justify-end space-x-2">
@@ -9859,7 +9927,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                 {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"><ExternalLink size={16} /></button>}
                                 <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors ${estaSuspendido ? 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200' : 'text-amber-600 bg-amber-100 hover:bg-amber-200'}`}><Power size={16} /></button>
                                 {isSuperAdmin && (
-                                  <button onClick={() => handleDelete(lic)} title="Eliminar Permanentemente" className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:text-white hover:bg-rose-500 transition-colors"><Trash2 size={16} /></button>
+                                  <button onClick={() => handleDelete(lic)} title="Eliminar Bóveda (Se conserva Finanzas)" className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:text-white hover:bg-rose-500 transition-colors"><Trash2 size={16} /></button>
                                 )}
                               </div>
                            </td>
@@ -9874,7 +9942,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         </div>
       )}
 
-      {/* MODAL PARA CREAR NUEVA LICENCIA (CON ANTI-ROBO) */}
+      {/* MODAL PARA CREAR NUEVA LICENCIA (CON ANTI-ROBO Y VINCULADA AL MAYOR) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -9882,15 +9950,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
               <form onSubmit={handleCreateLicense} className="p-8">
                 <div className="text-center mb-6">
                   <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4"><Key size={24} /></div>
-                  <h3 className="text-xl font-black text-slate-800">Vender / Crear Licencia</h3>
-                  <p className="text-xs text-slate-500 mt-1">El vendedor quedará registrado en la auditoría.</p>
+                  <h3 className="text-xl font-black text-slate-800">Registrar Venta Directa</h3>
+                  <p className="text-xs text-slate-500 mt-1">El vendedor y el monto quedarán registrados permanentemente en el libro mayor.</p>
                 </div>
                 
                 <div className="space-y-4 mb-6">
-                  {/* 🔴 CAMPO OBLIGATORIO ANTI-ROBO HORMIGA */}
                   <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
                     <label className="block text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-1.5 flex items-center"><Wallet size={12} className="mr-1"/> Referencia de Pago (Obligatorio)</label>
-                    <input type="text" required value={formData.referenciaPago} onChange={e => setFormData({...formData, referenciaPago: e.target.value})} placeholder="Ej: Pago en Efectivo, Transf Banorte..." className="w-full p-3 bg-white border border-emerald-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 text-sm" />
+                    <input type="text" required value={formData.referenciaPago} onChange={e => setFormData({...formData, referenciaPago: e.target.value})} placeholder="Ej: Pago en Efectivo, Transf BBVA..." className="w-full p-3 bg-white border border-emerald-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 text-sm" />
                   </div>
 
                   <div className="flex gap-4">
@@ -9914,28 +9981,28 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     <input type="text" autoFocus required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} placeholder={formData.role === 'planner' ? 'Ej. Elite Planners' : eventoSeleccionado.placeholder} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-900 text-sm" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-widest mb-1.5 flex items-center"><Mail size={12} className="mr-1.5" /> Correo de Acceso / Registro</label>
+                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-widest mb-1.5 flex items-center"><Mail size={12} className="mr-1.5" /> Correo de Acceso</label>
                     <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-800 text-sm" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Paquete Vendido</label>
                     <select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 text-sm cursor-pointer">
-                      <option value="basico">Plan Básico (Solo Invitación)</option>
-                      <option value="plata">Plan Plata (Sin Panel Completo)</option>
-                      <option value="oro">Plan Oro (Panel Maestro Estándar)</option>
-                      <option value="diamante">Plan Diamante (VIP Completo)</option>
+                      <option value="basico">Plan Básico ($990)</option>
+                      <option value="plata">Plan Plata ($1,490)</option>
+                      <option value="oro">Plan Oro ($1,990)</option>
+                      <option value="diamante">Plan Diamante ($2,990)</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex items-center"><Link size={12} className="mr-1.5"/> Link de la Invitación (Opcional por ahora)</label>
-                    <input type="url" value={formData.urlInvitacion} onChange={e => setFormData({...formData, urlInvitacion: e.target.value})} placeholder="https://baulia.com/bodas/ejemplo" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-medium text-sky-600 text-xs" />
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex items-center"><Link size={12} className="mr-1.5"/> Link Invitación URL (Opcional)</label>
+                    <input type="url" value={formData.urlInvitacion} onChange={e => setFormData({...formData, urlInvitacion: e.target.value})} placeholder="https://baulia.com/..." className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-medium text-sky-600 text-xs" />
                   </div>
                 </div>
 
                 <div className="flex space-x-3">
                   <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-200 transition-colors">Cancelar</button>
                   <button type="submit" disabled={isCreating} className="flex-1 py-3.5 bg-slate-900 text-white rounded-xl font-bold text-xs shadow-lg hover:bg-slate-800 disabled:bg-slate-400 transition-colors">
-                    {isCreating ? 'Procesando...' : 'Crear Licencia'}
+                    {isCreating ? 'Procesando...' : 'Crear Licencia y Registrar Venta'}
                   </button>
                 </div>
               </form>
@@ -9943,11 +10010,11 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
               <div className="p-8 text-center bg-slate-50">
                 <div className="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6"><CheckCircle size={40} /></div>
                 <h3 className="text-2xl font-black text-slate-800 mb-2">¡Accesos Creados!</h3>
-                <p className="text-sm text-slate-500 mb-6">La cuenta para <b>{successData.nombres}</b> se ha generado exitosamente.</p>
+                <p className="text-sm text-slate-500 mb-6">La venta se registró en el Libro Mayor por <b>{authData.email.split('@')[0]}</b>.</p>
                 
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 text-left text-sm mb-6 shadow-sm">
                   <p className="mb-3"><span className="text-slate-400 font-bold w-20 inline-block">Usuario:</span> <b className="text-slate-800">{successData.email}</b></p>
-                  <p><span className="text-slate-400 font-bold w-20 inline-block">Clave Temp:</span> <b className="text-slate-800 font-mono text-base">{successData.password}</b></p>
+                  <p><span className="text-slate-400 font-bold w-20 inline-block">Contraseña:</span> <b className="text-slate-800 font-mono text-base">{successData.password}</b></p>
                 </div>
 
                 <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl mb-6 shadow-sm">
@@ -9979,25 +10046,65 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                   <input type="text" required value={editingLic.nombres} onChange={e => setEditingLic({...editingLic, nombres: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-900 text-sm" />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Plan de la Plataforma</label>
-                  <select value={editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 text-sm cursor-pointer">
-                    <option value="basico">Plan Básico</option>
-                    <option value="plata">Plan Plata</option>
-                    <option value="oro">Plan Oro</option>
-                    <option value="diamante">Plan Diamante</option>
-                  </select>
-                </div>
-                <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex items-center"><Link size={12} className="mr-1.5"/> URL de su Invitación Pública</label>
                   <input type="url" value={editingLic.urlInvitacion || ''} onChange={e => setEditingLic({...editingLic, urlInvitacion: e.target.value})} placeholder="https://baulia.com/bodas/su-boda" className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-medium text-sky-600 text-sm" />
                 </div>
-                
+                <div className="bg-amber-50 text-amber-700 p-3 rounded-lg text-xs font-bold border border-amber-200 flex items-start">
+                  <AlertCircle size={16} className="mr-2 flex-shrink-0 mt-0.5" />
+                  Nota: El plan de facturación no se puede cambiar aquí porque altera el estado financiero. Cancela esta cuenta y crea una nueva si necesitas un upgrade.
+                </div>
                 <button type="submit" className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-slate-800 transition-colors mt-4">
                   Guardar Cambios
                 </button>
              </form>
           </div>
         </div>
+      )}
+
+      {/* PESTAÑA RESEÑAS */}
+      {adminTab === 'resenas' && (
+         <div className="animate-in fade-in">
+           {/* (Se mantiene exactamente igual tu código de reseñas, no se tocó nada aquí) */}
+           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 className="font-bold text-slate-800 text-sm">Reseñas de Clientes</h3>
+             </div>
+             <div className="p-6 grid grid-cols-1 gap-4">
+                {resenasList.length === 0 ? <p className="text-center text-slate-400 py-10">Aún no hay reseñas enviadas.</p> : null}
+                {resenasList.map(resena => (
+                   <div key={resena.id} className={`p-5 rounded-2xl border transition-colors ${resena.status === 'aprobada' ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-slate-50'}`}>
+                      <div className="flex justify-between items-start mb-3">
+                         <div>
+                            <div className="flex items-center gap-2 mb-1">
+                               <h4 className="font-black text-slate-900">{resena.authorName}</h4>
+                            </div>
+                            <p className="text-[10px] text-slate-500 uppercase tracking-widest">{resena.authorType}</p>
+                         </div>
+                         <div className="flex gap-1">
+                            {[1,2,3,4,5].map(s => <Star key={s} size={14} className={resena.rating >= s ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}/>)}
+                         </div>
+                      </div>
+                      <p className="text-slate-700 text-sm mb-4 font-medium italic">"{resena.comment}"</p>
+                      
+                      <div className="flex justify-between items-center border-t border-slate-200/60 pt-4 mt-2">
+                         <div>
+                            {resena.status === 'aprobada' 
+                              ? <span className="flex items-center text-[10px] font-black text-emerald-600 uppercase tracking-widest"><Globe size={14} className="mr-1"/> Pública</span>
+                              : <span className="flex items-center text-[10px] font-black text-slate-400 uppercase tracking-widest"><Lock size={14} className="mr-1"/> Oculta</span>
+                            }
+                         </div>
+                         <div className="flex gap-2">
+                            <button onClick={async () => { await deleteDoc(doc(db, "resenas", resena.id)); }} className="px-3 py-1.5 bg-white border border-slate-200 text-rose-500 rounded-lg text-xs font-bold hover:bg-rose-50 transition-colors">Borrar</button>
+                            <button onClick={async () => { await updateDoc(doc(db, "resenas", resena.id), { status: resena.status === 'aprobada' ? 'pendiente' : 'aprobada' }); }} className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-colors shadow-sm ${resena.status === 'aprobada' ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-emerald-500 text-white hover:bg-emerald-600'}`}>
+                               {resena.status === 'aprobada' ? 'Ocultar' : 'Aprobar'}
+                            </button>
+                         </div>
+                      </div>
+                   </div>
+                ))}
+             </div>
+          </div>
+         </div>
       )}
     </div>
   );

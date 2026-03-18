@@ -82,6 +82,18 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
         tipoEvento: 'boda'
       });
 
+      // 🔴 NUEVO: LIBRO MAYOR FINANCIERO INMUTABLE (Para tu Contador)
+      const mesAnioActual = new Date().toISOString().slice(0, 7); // Formato "YYYY-MM"
+      await admin.firestore().collection("ventas").doc(eventId).set({
+        fecha: admin.firestore.FieldValue.serverTimestamp(),
+        mesAnio: mesAnioActual,
+        monto: precioLimpio,
+        plan: planLimpio,
+        vendedor: 'Stripe (Web Automático)',
+        referencia: `Stripe: ${paymentIntent.id}`,
+        cliente: nombre
+      });
+
       // 🔴 EL CARTERO AUTOMÁTICO - CORREO VIP DE LUJO 💌
       console.log("Enviando correo VIP de bienvenida a:", cleanEmail);
       
