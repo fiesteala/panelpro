@@ -9331,33 +9331,55 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
          </div>
       </section>
 
-      {/* ================= FOOTER LEGAL Y DE CONFIANZA ================= */}
-      <footer className="border-t border-white/5 py-16 bg-[#050505] relative z-20">
-        <div className="max-w-7xl mx-auto px-6 sm:px-10 flex flex-col items-center">
-          
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-700 to-amber-400 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.5)]">
-               <span className="text-slate-900 font-editorial font-bold text-xl">B</span>
+      {/* ================= FOOTER LEGAL Y DE CONFIANZA (RESTAURADO PREMIUM) ================= */}
+      <footer className="bg-[#050505] pt-24 pb-12 border-t border-white/5 relative z-20">
+        <div className="max-w-7xl mx-auto px-6 md:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-3 mb-6">
+                 <BauliaLogo className="h-10 w-auto" forceWhite={true} />
+              </div>
+              <p className="text-slate-400 text-sm leading-relaxed max-w-sm mb-8">
+                El estándar de oro en gestión de eventos y diseño de invitaciones interactivas. Bóvedas privadas con tecnología de punta.
+              </p>
+              {/* Redes Sociales */}
+              <div className="flex gap-4">
+                <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconIG /></button>
+                <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconFB /></button>
+                <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconWA /></button>
+              </div>
             </div>
-            <span className="font-editorial text-2xl font-bold text-white tracking-widest">BAULIA</span>
+            
+            <div>
+              <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Plataforma</h4>
+              <ul className="space-y-4 text-sm text-slate-400">
+                <li><a href="#experiencia" className="hover:text-amber-500 transition-colors">La Experiencia</a></li>
+                <li><a href="#boveda" className="hover:text-amber-500 transition-colors">Características</a></li>
+                <li><a href="#planes" className="hover:text-amber-500 transition-colors">Planes y Precios</a></li>
+                <li><a href="#planners" className="hover:text-amber-500 transition-colors">Para Planners (B2B)</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Legal y Soporte</h4>
+              <ul className="space-y-4 text-sm text-slate-400">
+                <li><button onClick={() => setLegalModal('privacy')} className="hover:text-amber-500 transition-colors">Aviso de Privacidad</button></li>
+                <li><button onClick={() => setLegalModal('terms')} className="hover:text-amber-500 transition-colors">Términos y Condiciones</button></li>
+                <li><a href="#faq" className="hover:text-amber-500 transition-colors">Preguntas Frecuentes</a></li>
+                <li><button className="hover:text-amber-500 transition-colors">Contacto Soporte</button></li>
+              </ul>
+            </div>
           </div>
-
-          <div className="flex flex-wrap justify-center gap-6 text-xs text-slate-400 font-medium uppercase tracking-widest mb-10">
-            <button className="hover:text-amber-500 transition-colors">Nosotros</button>
-            <button className="hover:text-amber-500 transition-colors">Demos</button>
-            <button className="hover:text-amber-500 transition-colors">Aviso de Privacidad</button>
-            <button className="hover:text-amber-500 transition-colors">Términos y Condiciones</button>
+          
+          <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-3 px-5 py-2.5 bg-white/5 border border-white/10 rounded-full shadow-sm">
+               <ShieldCheck size={16} className="text-emerald-500" />
+               <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Pagos 100% seguros procesados por <span className="text-white">Stripe</span></span>
+            </div>
+            <p className="text-slate-500 text-[10px] uppercase tracking-widest text-center md:text-right">
+              © {new Date().getFullYear()} Baulia Premium Software. Todos los derechos reservados.
+            </p>
           </div>
-
-          {/* Sello de Seguridad */}
-          <div className="flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full mb-8">
-             <ShieldCheck size={16} className="text-emerald-500" />
-             <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Pagos 100% seguros procesados por <span className="text-white">Stripe</span></span>
-          </div>
-
-          <p className="text-slate-600 text-[10px] uppercase tracking-widest text-center">
-            © {new Date().getFullYear()} Baulia Premium Software. Todos los derechos reservados.
-          </p>
         </div>
       </footer>
 
