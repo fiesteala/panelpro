@@ -9331,56 +9331,61 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
          </div>
       </section>
 
-      {/* ================= FOOTER ORIGINAL RESTAURADO (CON AMOR 🇲🇽) ================= */}
-      <footer className="bg-[#050505] pt-24 pb-12 border-t border-white/5 relative z-20">
-        <div className="max-w-7xl mx-auto px-6 md:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-            <div className="md:col-span-2">
-              <BauliaLogo className="h-12 w-auto mb-6" forceWhite={true} />
-              <p className="text-slate-400 text-sm leading-relaxed max-w-sm mb-6">
-                El estándar de oro en gestión de eventos y diseño de invitaciones interactivas. Bóvedas privadas con tecnología de punta.
-              </p>
-              <div className="flex items-center gap-3 mb-8">
-                <span className="text-2xl">🇲🇽</span>
-                <span className="text-white text-xs font-bold uppercase tracking-widest">Hecho con amor en México</span>
+      {/* FOOTER VIP EDITORIAL */}
+      <footer className="border-t border-slate-200 dark:border-white/5 bg-white dark:bg-[#050505] pt-20 pb-10 relative z-10 transition-colors duration-700">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
+           <div className="md:col-span-2">
+              <div className="flex items-center gap-3 mb-6">
+                 <BauliaLogo className="h-10 w-auto" />
               </div>
-              {/* Redes Sociales */}
-              <div className="flex gap-4">
-                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconIG /></a>
-                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconFB /></a>
-                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconTK /></a>
-                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconWA /></a>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-light leading-relaxed max-w-sm mb-8 transition-colors">Software de gestión de élite. <br/>Elegancia en la invitación, poder absoluto en la ejecución.</p>
+              
+              <div className="flex space-x-3">
+                 <button onClick={() => window.open('https://instagram.com/TU_PERFIL', '_blank')} className="w-10 h-10 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="Instagram">
+                   <IconIG />
+                 </button>
+                 <button onClick={() => window.open('https://facebook.com/TU_PERFIL', '_blank')} className="w-10 h-10 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="Facebook">
+                   <IconFB />
+                 </button>
+                 <button onClick={() => window.open('https://tiktok.com/@TU_PERFIL', '_blank')} className="w-10 h-10 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="TikTok">
+                   <IconTK />
+                 </button>
+                 <button onClick={() => window.open('https://wa.me/525500000000', '_blank')} className="w-10 h-10 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="WhatsApp">
+                   <IconWA />
+                 </button>
               </div>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Plataforma</h4>
-              <ul className="space-y-4 text-sm text-slate-400">
-                <li><a href="#experiencia" className="hover:text-amber-500 transition-colors">La Experiencia</a></li>
-                <li><a href="#boveda" className="hover:text-amber-500 transition-colors">El Panel</a></li>
-                <li><a href="#planes" className="hover:text-amber-500 transition-colors">Planes y Precios</a></li>
+           </div>
+           
+           <div>
+              <h4 className="text-slate-900 dark:text-white font-bold mb-6 tracking-widest uppercase text-[10px] transition-colors">Plataforma</h4>
+              <ul className="space-y-4 text-xs text-slate-500 font-medium transition-colors">
+                 <li><a href="#experiencia" className="hover:text-slate-900 dark:hover:text-white transition-colors">Características</a></li>
+                 <li><a href="#planes" className="hover:text-slate-900 dark:hover:text-white transition-colors">Colección</a></li>
+                 <li><a href="#planners" className="hover:text-slate-900 dark:hover:text-white transition-colors">Para Planners</a></li>
+                 <li><button onClick={() => window.location.href = 'https://panel.baulia.com'} className="hover:text-slate-900 dark:hover:text-white transition-colors">Login Clientes</button></li>
               </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Contacto y Legal</h4>
-              <ul className="space-y-4 text-sm text-slate-400">
-                <li><a href="mailto:hola@baulia.com" className="hover:text-amber-500 transition-colors flex items-center gap-2 font-bold"><Mail size={16}/> hola@baulia.com</a></li>
-                <li><button onClick={() => setLegalModal('privacy')} className="hover:text-amber-500 transition-colors mt-4 block">Aviso de Privacidad</button></li>
-                <li><button onClick={() => setLegalModal('terms')} className="hover:text-amber-500 transition-colors">Términos y Condiciones</button></li>
+           </div>
+           
+           <div>
+              <h4 className="text-slate-900 dark:text-white font-bold mb-6 tracking-widest uppercase text-[10px] transition-colors">Compañía</h4>
+              <ul className="space-y-4 text-xs text-slate-500 font-medium transition-colors">
+                 <li><button onClick={() => setLegalModal('about')} className="hover:text-slate-900 dark:hover:text-white transition-colors">La Visión Baulia</button></li>
+                 <li><button onClick={() => window.open('mailto:hola@baulia.com')} className="hover:text-slate-900 dark:hover:text-white transition-colors flex items-center">hola@baulia.com</button></li>
               </ul>
-            </div>
-          </div>
-          
-          <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-3 px-5 py-2.5 bg-white/5 border border-white/10 rounded-full shadow-sm">
-               <ShieldCheck size={16} className="text-emerald-500" />
-               <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Pagos 100% seguros procesados por <span className="text-white">Stripe</span></span>
-            </div>
-            <p className="text-slate-500 text-[10px] uppercase tracking-widest text-center md:text-right">
-              © {new Date().getFullYear()} Baulia Premium Software. Todos los derechos reservados.
-            </p>
-          </div>
+           </div>
+
+           <div>
+              <h4 className="text-slate-900 dark:text-white font-bold mb-6 tracking-widest uppercase text-[10px] transition-colors">Legal</h4>
+              <ul className="space-y-4 text-xs text-slate-500 font-medium transition-colors">
+                 <li><button onClick={() => setLegalModal('terms')} className="hover:text-slate-900 dark:hover:text-white transition-colors">Términos de Servicio</button></li>
+                 <li><button onClick={() => setLegalModal('privacy')} className="hover:text-slate-900 dark:hover:text-white transition-colors">Aviso de Privacidad</button></li>
+              </ul>
+           </div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-6 border-t border-slate-200 dark:border-white/5 pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4 transition-colors">
+           <p className="text-[9px] text-slate-400 uppercase tracking-widest transition-colors">&copy; {new Date().getFullYear()} Baulia Technologies.</p>
+           <p className="text-[9px] text-slate-500 font-bold flex items-center uppercase tracking-widest transition-colors">Hecho con <Heart size={10} className="mx-1.5 fill-slate-300 dark:fill-slate-700 text-slate-300 dark:text-slate-700"/> en México.</p>
         </div>
       </footer>
 
