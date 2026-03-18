@@ -9355,7 +9355,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                  </button>
               </div>
            </div>
-           
+            
            <div>
               <h4 className="text-slate-900 dark:text-white font-bold mb-6 tracking-widest uppercase text-[10px] transition-colors">Plataforma</h4>
               <ul className="space-y-4 text-xs text-slate-500 font-medium transition-colors">
@@ -9365,7 +9365,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                  <li><button onClick={() => window.location.href = 'https://panel.baulia.com'} className="hover:text-slate-900 dark:hover:text-white transition-colors">Login Clientes</button></li>
               </ul>
            </div>
-           
+            
            <div>
               <h4 className="text-slate-900 dark:text-white font-bold mb-6 tracking-widest uppercase text-[10px] transition-colors">Compañía</h4>
               <ul className="space-y-4 text-xs text-slate-500 font-medium transition-colors">
@@ -9383,9 +9383,22 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
            </div>
         </div>
         
-        <div className="max-w-7xl mx-auto px-6 border-t border-slate-200 dark:border-white/5 pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4 transition-colors">
-           <p className="text-[9px] text-slate-400 uppercase tracking-widest transition-colors">&copy; {new Date().getFullYear()} Baulia Technologies.</p>
-           <p className="text-[9px] text-slate-500 font-bold flex items-center uppercase tracking-widest transition-colors">Hecho con <Heart size={10} className="mx-1.5 fill-slate-300 dark:fill-slate-700 text-slate-300 dark:text-slate-700"/> en México.</p>
+        <div className="max-w-7xl mx-auto px-6 border-t border-slate-200 dark:border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-6 transition-colors">
+           {/* 🔴 SELLO DE CONFIANZA INYECTADO (Requisito Legal) */}
+           <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl shadow-sm transition-colors">
+              <ShieldCheck size={16} className="text-emerald-500 dark:text-emerald-400" />
+              <span className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold">
+                Pagos encriptados y procesados por <span className="text-slate-800 dark:text-white">Stripe</span>
+              </span>
+           </div>
+
+           <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-right">
+             <p className="text-[9px] text-slate-400 uppercase tracking-widest transition-colors">&copy; {new Date().getFullYear()} Baulia Technologies.</p>
+             <div className="hidden md:block w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></div>
+             <p className="text-[9px] text-slate-500 font-bold flex items-center justify-center uppercase tracking-widest transition-colors">
+               Hecho con <Heart size={10} className="mx-1.5 fill-slate-300 dark:fill-slate-700 text-slate-300 dark:text-slate-700"/> en México.
+             </p>
+           </div>
         </div>
       </footer>
 
@@ -9416,12 +9429,19 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               ) : legalModal === 'privacy' ? (
                 <>
                   <p><strong>Última actualización:</strong> {new Date().toLocaleDateString('es-MX')}</p>
-                  <p>En cumplimiento con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) de México, <strong>Baulia Technologies</strong> ("Baulia", "nosotros" o "nuestro") expide el presente Aviso de Privacidad.</p>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white mt-8 mb-2 font-editorial transition-colors">1. Datos Recabados</h3>
-                  <p>Para la correcta prestación de nuestros servicios de gestión de eventos, Baulia recaba los siguientes datos personales:</p>
+                  <p>En cumplimiento con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) de México, <strong>Baulia Technologies</strong> expide el presente Aviso de Privacidad.</p>
+                  
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white mt-8 mb-2 font-editorial transition-colors">1. Protección de Pagos y Datos Financieros</h3>
+                  <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-xl text-emerald-800 dark:text-emerald-300 mb-4">
+                    <p><strong>Baulia NO recopila, NO procesa y NO almacena datos de tarjetas de crédito o débito.</strong></p>
+                    <p className="mt-2">Todas las transacciones financieras son procesadas de manera externa, encriptada y segura a través de <strong>Stripe, Inc.</strong>, un proveedor de pagos de nivel internacional certificado bajo las estrictas normas de seguridad bancaria <strong>PCI-DSS</strong> (Payment Card Industry Data Security Standard). Al realizar una compra, sus datos financieros viajan directamente a los servidores blindados de Stripe.</p>
+                  </div>
+
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white mt-8 mb-2 font-editorial transition-colors">2. Datos Recabados</h3>
+                  <p>Para la correcta prestación de nuestros servicios de gestión de eventos, Baulia únicamente almacena en servidores seguros de Google (Firebase):</p>
                   <ul className="list-disc pl-6 space-y-2 mt-2">
-                    <li><strong>Del Administrador:</strong> Nombre, correo, teléfono y datos del evento.</li>
-                    <li><strong>De los Invitados:</strong> Nombres, RSVP y fotografías subidas voluntariamente.</li>
+                    <li><strong>Del Administrador:</strong> Nombres, correo electrónico de contacto y datos generales del evento.</li>
+                    <li><strong>De los Invitados:</strong> Nombres, estado de confirmación de asistencia (RSVP) y fotografías subidas voluntariamente al muro social (las cuales pueden ser eliminadas en cualquier momento por el administrador).</li>
                   </ul>
                 </>
               ) : (
