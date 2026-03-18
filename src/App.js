@@ -9430,9 +9430,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS (RESTAURADO) Y MODERACIÓN ---
+// --- COMPONENTE: CENTRO DE LICENCIAS Y MODO DIOS ---
 // ==========================================
-const SuperAdminView = () => {
+const SuperAdminView = ({ onImpersonate }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente' });
@@ -9589,50 +9589,52 @@ const SuperAdminView = () => {
              <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center"><h3 className="font-bold text-slate-800 text-sm">Directorio de Eventos Generados</h3></div>
              <div className="overflow-x-auto">
                <table className="w-full text-left whitespace-nowrap min-w-[800px]">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[10px] uppercase tracking-widest">
-                    <tr><th className="px-5 py-3 font-bold">Cliente / ID</th><th className="px-5 py-3 font-bold">Acceso (Correo)</th><th className="px-5 py-3 font-bold text-center">Tipo</th><th className="px-5 py-3 font-bold text-center">Plan</th><th className="px-5 py-3 font-bold text-center">Estatus</th><th className="px-5 py-3 font-bold text-right">Controles</th></tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-xs">
-                     {licencias.length === 0 ? (
-                        <tr><td colSpan="6" className="px-5 py-8 text-center text-slate-400">Sin registros de eventos.</td></tr>
-                     ) : (
-                        licencias.map((lic) => {
-                          const tipoObj = tiposDeEvento.find(t => t.id === lic.tipoEvento);
-                          const etiquetaTipo = tipoObj ? tipoObj.label : 'Evento';
-                          const estaSuspendido = lic.status === 'suspendido';
-                          const correoVisible = correosVisibles[lic.id];
-                          
-                          return (
-                            <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40' : 'hover:bg-slate-50'}`}>
-                              <td className="px-5 py-3">
-                                <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800' : 'text-slate-800'}`}>
-                                  {lic.nombres || 'Sin Nombre'} 
-                                  {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
-                                </p>
-                                <p className="text-[10px] text-slate-400 font-mono mt-0.5">{lic.eventId}</p>
-                              </td>
-                              <td className="px-5 py-3">
-                                <div className="flex items-center text-slate-600 bg-slate-100/70 px-2 py-1.5 rounded-lg w-max border border-slate-200/50">
-                                  <span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span>
-                                  <button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 hover:text-indigo-600 transition-colors">
-                                    {correoVisible ? <EyeOff size={14} /> : <Eye size={14} />}
-                                  </button>
-                                </div>
-                              </td>
-                              <td className="px-5 py-3 text-center text-slate-500 font-bold text-[10px] uppercase tracking-wider">{etiquetaTipo}</td>
-                              <td className="px-5 py-3 text-center"><span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>{lic.plan}</span></td>
-                              <td className="px-5 py-3 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
-                              <td className="px-5 py-3 text-right">
-                                 <div className="flex items-center justify-end space-x-2">
-                                   <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors ${estaSuspendido ? 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200' : 'text-amber-600 bg-amber-100 hover:bg-amber-200'}`}><Power size={16} /></button>
-                                   <button onClick={() => handleDelete(lic)} title="Eliminar Permanentemente" className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:text-white hover:bg-rose-500 transition-colors"><Trash2 size={16} /></button>
-                                 </div>
-                              </td>
-                            </tr>
-                          )
-                        })
-                     )}
-                  </tbody>
+                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[10px] uppercase tracking-widest">
+                   <tr><th className="px-5 py-3 font-bold">Cliente / ID</th><th className="px-5 py-3 font-bold">Acceso (Correo)</th><th className="px-5 py-3 font-bold text-center">Tipo</th><th className="px-5 py-3 font-bold text-center">Plan</th><th className="px-5 py-3 font-bold text-center">Estatus</th><th className="px-5 py-3 font-bold text-right">Controles</th></tr>
+                 </thead>
+                 <tbody className="divide-y divide-slate-100 text-xs">
+                   {licencias.length === 0 ? (
+                     <tr><td colSpan="6" className="px-5 py-8 text-center text-slate-400">Sin registros de eventos.</td></tr>
+                   ) : (
+                     licencias.map((lic) => {
+                       const tipoObj = tiposDeEvento.find(t => t.id === lic.tipoEvento);
+                       const etiquetaTipo = tipoObj ? tipoObj.label : 'Evento';
+                       const estaSuspendido = lic.status === 'suspendido';
+                       const correoVisible = correosVisibles[lic.id];
+                       
+                       return (
+                         <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40' : 'hover:bg-slate-50'}`}>
+                           <td className="px-5 py-3">
+                             <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800' : 'text-slate-800'}`}>
+                               {lic.nombres || 'Sin Nombre'} 
+                               {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
+                             </p>
+                             <p className="text-[10px] text-slate-400 font-mono mt-0.5">{lic.eventId}</p>
+                           </td>
+                           <td className="px-5 py-3">
+                             <div className="flex items-center text-slate-600 bg-slate-100/70 px-2 py-1.5 rounded-lg w-max border border-slate-200/50">
+                               <span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span>
+                               <button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 hover:text-indigo-600 transition-colors">
+                                 {correoVisible ? <EyeOff size={14} /> : <Eye size={14} />}
+                               </button>
+                             </div>
+                           </td>
+                           <td className="px-5 py-3 text-center text-slate-500 font-bold text-[10px] uppercase tracking-wider">{etiquetaTipo}</td>
+                           <td className="px-5 py-3 text-center"><span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>{lic.plan}</span></td>
+                           <td className="px-5 py-3 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
+                           <td className="px-5 py-3 text-right">
+                              <div className="flex items-center justify-end space-x-2">
+                                {/* 🔴 AQUÍ ESTÁ EL BOTÓN DE MODO DIOS */}
+                                <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"><ExternalLink size={16} /></button>
+                                <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors ${estaSuspendido ? 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200' : 'text-amber-600 bg-amber-100 hover:bg-amber-200'}`}><Power size={16} /></button>
+                                <button onClick={() => handleDelete(lic)} title="Eliminar Permanentemente" className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:text-white hover:bg-rose-500 transition-colors"><Trash2 size={16} /></button>
+                              </div>
+                           </td>
+                         </tr>
+                       )
+                     })
+                   )}
+                 </tbody>
                </table>
              </div>
           </div>
@@ -10252,7 +10254,16 @@ const LoginScreen = () => {
 // --- COMPONENTE: PANEL DE ADMINISTRACIÓN PROTEGIDO ---
 // ==========================================
 const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
-  const { role: userRole, plan: userPlan, eventId } = authData;
+  const { role: originalUserRole, plan: originalUserPlan, eventId: originalEventId } = authData;
+  
+  // 🔴 ESTADOS PARA EL MODO DIOS (IMPERSONATION)
+  const [impersonating, setImpersonating] = useState(null);
+  
+  // Si estamos en Modo Dios, sobreescribimos los permisos y el ID del evento
+  const eventId = impersonating ? impersonating.id : originalEventId;
+  const userRole = impersonating ? impersonating.role : originalUserRole;
+  const userPlan = impersonating ? impersonating.plan : originalUserPlan;
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(userRole === 'superadmin' ? 'licencias' : 'dashboard');  
   
@@ -10291,7 +10302,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const prevGuestsRef = useRef([]);
 
   useEffect(() => {
-    if (userRole === 'superadmin') return;
+    if (userRole === 'superadmin' && !impersonating) return;
     setGlobalEventId(eventId);
 
     const unsubConfigMain = onSnapshot(doc(db, "eventos", eventId), (docSnap) => {
@@ -10339,11 +10350,12 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
     const unsubFotos = onSnapshot(collection(db, "eventos", eventId, "fotos"), (snap) => setPhotos(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
 
     return () => { unsubConfigMain(); unsubWhiteLabel(); unsubGuests(); unsubGastos(); unsubProv(); unsubMesas(); unsubTareas(); unsubTiming(); unsubMapa(); unsubDeco(); unsubFotos(); };
-  }, [eventId, userRole, addNotification]);
+  }, [eventId, userRole, impersonating, addNotification]);
 
   const renderContent = () => {
     switch(activeTab) {
-      case 'licencias': return userRole === 'superadmin' && typeof SuperAdminView !== 'undefined' ? <SuperAdminView /> : null;
+      // 🔴 LE PASAMOS LA FUNCIÓN AL SUPERADMIN PARA QUE ACTIVE EL MODO DIOS
+      case 'licencias': return originalUserRole === 'superadmin' && !impersonating && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} /> : null;
       case 'dashboard': return typeof DashboardView !== 'undefined' ? <DashboardView guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null; 
       case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
       case 'escaner': return userPlan === 'diamante' && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
@@ -10352,7 +10364,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'decoracion': return userPlan === 'diamante' && typeof DecoracionView !== 'undefined' ? <DecoracionView elements={decoElements} setElements={setDecoElements} addNotification={addNotification} /> : null; 
       case 'tareas': return typeof ChecklistView !== 'undefined' ? <ChecklistView tareas={tareas} addNotification={addNotification} /> : null;
       case 'timing': return typeof TimingView !== 'undefined' ? <TimingView timing={timing} setTiming={setTiming} addNotification={addNotification} /> : null;
-      case 'presupuesto': return typeof PresupuestoView !== 'undefined' ? <PresupuestoView gastos={gastos} setGastos={setGastos} proveedores={proveedores} setProveedores={setProveedores} presupuestoTotal={presupuestoTotal} setPresupuestoTotal={setPresupuestoTotal} addNotification={addNotification} /> : null;
+      case 'presupuesto': return typeof PresupuestoView !== 'undefined' ? <PresupuestoView gastos={gastos} setGastos={setGastos} proveedores={proveedores} setProveedores={setPresupuestoTotal} presupuestoTotal={presupuestoTotal} setPresupuestoTotal={setPresupuestoTotal} addNotification={addNotification} /> : null;
       case 'proveedores': return typeof ProveedoresView !== 'undefined' ? <ProveedoresView proveedores={proveedores} setProveedores={setProveedores} gastos={gastos} setGastos={setGastos} addNotification={addNotification} /> : null;
       case 'galeria': return userPlan === 'diamante' && typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} /> : null;
       case 'invitacion': return typeof InvitacionView !== 'undefined' ? <InvitacionView guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
@@ -10362,7 +10374,6 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   };
 
   return (
-    // 🔴 AQUÍ SE INYECTA EL MODO CLARO/OSCURO Y LAS LUCES GLOBALES
     <div className="flex h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans overflow-hidden text-slate-900 dark:text-slate-200 transition-colors duration-700 selection:bg-amber-500 selection:text-white relative">
       
       <style>{`
@@ -10370,7 +10381,18 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
         .font-editorial { font-family: 'Playfair Display', serif; }
       `}</style>
 
-      {/* 🔴 LUCES DE AMBIENTE GLOBALES (Ahora detrás del menú lateral también) */}
+      {/* 🔴 ALERTA ROJA DE MODO DIOS */}
+      {impersonating && (
+        <div className="absolute top-0 left-0 w-full bg-rose-600 text-white z-[9999] py-1.5 px-4 text-center text-xs font-black uppercase tracking-widest shadow-lg flex justify-center items-center">
+          <AlertTriangle size={14} className="mr-2" />
+          Estás en Modo Soporte viendo la bóveda de: {impersonating.nombre}
+          <button onClick={() => { setImpersonating(null); setActiveTab('licencias'); }} className="ml-6 bg-white text-rose-600 px-3 py-0.5 rounded shadow-sm hover:scale-105 transition-transform">
+            Salir y Volver a Admin
+          </button>
+        </div>
+      )}
+
+      {/* LUCES DE AMBIENTE GLOBALES */}
       <div className="absolute top-[-10%] left-[-5%] w-[50vw] h-[50vw] bg-amber-500/15 dark:bg-amber-600/20 blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
       <div className="absolute bottom-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-indigo-500/10 dark:bg-indigo-600/15 blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
       
@@ -10391,7 +10413,10 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       {typeof Sidebar !== 'undefined' && <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} userPlan={userPlan} agencyConfig={agencyConfig} isDarkMode={isDarkMode} />}
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
-        <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} />
+        {/* Desplazamos un poco el Header hacia abajo si el Modo Dios está activo para que no lo tape la alerta */}
+        <div className={`${impersonating ? 'pt-7' : ''} transition-all`}>
+          <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} />
+        </div>
         
         <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-5 lg:p-6 print:p-0 print:overflow-visible custom-scrollbar relative z-10">
           <div className="h-full max-w-7xl mx-auto print:max-w-none print:w-full">
