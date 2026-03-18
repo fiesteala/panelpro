@@ -9331,42 +9331,61 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
          </div>
       </section>
 
-      {/* ================= FOOTER LEGAL Y DE CONFIANZA (RESTAURADO PREMIUM) ================= */}
+      {/* ================= FOOTER PREMIUM ORIGINAL RESTAURADO ================= */}
       <footer className="bg-[#050505] pt-24 pb-12 border-t border-white/5 relative z-20">
         <div className="max-w-7xl mx-auto px-6 md:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-            <div className="md:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
+            
+            {/* Columna Izquierda - Marca y Orgullo */}
+            <div className="md:col-span-5">
               <div className="flex items-center gap-3 mb-6">
                  <BauliaLogo className="h-10 w-auto" forceWhite={true} />
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-sm mb-8">
+              <p className="text-slate-400 text-sm leading-relaxed max-w-sm mb-6">
                 El estándar de oro en gestión de eventos y diseño de invitaciones interactivas. Bóvedas privadas con tecnología de punta.
               </p>
-              {/* Redes Sociales */}
-              <div className="flex gap-4">
-                <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconIG /></button>
-                <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconFB /></button>
-                <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconWA /></button>
+              <div className="flex items-center gap-2 mb-8">
+                <span className="text-xl">🇲🇽</span>
+                <span className="text-white text-xs font-bold uppercase tracking-widest">Hecho con ❤️ en México</span>
+              </div>
+              {/* Redes Sociales Completas */}
+              <div className="flex gap-3">
+                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconIG /></a>
+                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconFB /></a>
+                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconTK /></a>
+                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconWA /></a>
               </div>
             </div>
             
-            <div>
+            {/* Columnas de Links */}
+            <div className="md:col-span-2">
               <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Plataforma</h4>
               <ul className="space-y-4 text-sm text-slate-400">
                 <li><a href="#experiencia" className="hover:text-amber-500 transition-colors">La Experiencia</a></li>
-                <li><a href="#boveda" className="hover:text-amber-500 transition-colors">Características</a></li>
+                <li><a href="#boveda" className="hover:text-amber-500 transition-colors">El Panel</a></li>
                 <li><a href="#planes" className="hover:text-amber-500 transition-colors">Planes y Precios</a></li>
                 <li><a href="#planners" className="hover:text-amber-500 transition-colors">Para Planners (B2B)</a></li>
               </ul>
             </div>
             
-            <div>
-              <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Legal y Soporte</h4>
+            <div className="md:col-span-2">
+              <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Legal</h4>
               <ul className="space-y-4 text-sm text-slate-400">
                 <li><button onClick={() => setLegalModal('privacy')} className="hover:text-amber-500 transition-colors">Aviso de Privacidad</button></li>
-                <li><button onClick={() => setLegalModal('terms')} className="hover:text-amber-500 transition-colors">Términos y Condiciones</button></li>
+                <li><button onClick={() => setLegalModal('terms')} className="hover:text-amber-500 transition-colors">Términos de Servicio</button></li>
+                <li><button onClick={() => setLegalModal('vision')} className="hover:text-amber-500 transition-colors">Nuestra Visión</button></li>
+              </ul>
+            </div>
+
+            <div className="md:col-span-3">
+              <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Soporte y Contacto</h4>
+              <ul className="space-y-4 text-sm text-slate-400">
                 <li><a href="#faq" className="hover:text-amber-500 transition-colors">Preguntas Frecuentes</a></li>
-                <li><button className="hover:text-amber-500 transition-colors">Contacto Soporte</button></li>
+                <li className="pt-2">
+                  <a href="mailto:hola@baulia.com" className="inline-flex items-center gap-2 text-amber-500 hover:text-amber-400 transition-colors font-bold">
+                    <Mail size={16} /> hola@baulia.com
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -9452,14 +9471,15 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS Y MODO DIOS ---
+// --- COMPONENTE: CENTRO DE LICENCIAS (SISTEMA ANTI-ROBO HORMIGA) ---
 // ==========================================
-const SuperAdminView = ({ onImpersonate }) => {
+const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '' });
+  // 🔴 NUEVO CAMPO: referenciaPago
+  const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '' });
   const [editingLic, setEditingLic] = useState(null);
 
   const [isCreating, setIsCreating] = useState(false);
@@ -9472,6 +9492,10 @@ const SuperAdminView = ({ onImpersonate }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null });
+
+  // Variables de Seguridad
+  const isSuperAdmin = authData?.role === 'superadmin';
+  const isStaff = authData?.role === 'staff';
 
   const tiposDeEvento = [
     { id: 'boda', label: 'Boda', placeholder: 'Ej. Carlos y Sofia', labelNombre: 'Nombre de los Novios' },
@@ -9488,7 +9512,8 @@ const SuperAdminView = ({ onImpersonate }) => {
   useEffect(() => {
     const unsubLic = onSnapshot(collection(db, "usuarios"), (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const clientes = data.filter(u => u.role !== 'superadmin');
+      // Ocultamos a los superadmins y al staff de la lista de clientes
+      const clientes = data.filter(u => u.role !== 'superadmin' && u.role !== 'staff');
       clientes.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
       setLicencias(clientes);
     });
@@ -9507,14 +9532,28 @@ const SuperAdminView = ({ onImpersonate }) => {
     setIsCreating(true);
     try {
       const slug = formData.nombres.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-      const newEventId = slug; 
+      const newEventId = slug + '-' + Math.random().toString(36).slice(-4); // Añadimos sufijo para evitar choques
       const newEmail = formData.email.trim().toLowerCase();
       const newPassword = Math.random().toString(36).slice(-8) + "!";
 
       await createUserWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
       await signOut(secondaryAuth); 
 
-      await setDoc(doc(db, "usuarios", newEventId), { email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, nombres: formData.nombres, status: 'activo', urlInvitacion: formData.urlInvitacion, createdAt: serverTimestamp() });
+      // 🔴 AQUÍ OCURRE LA MAGIA DE LA AUDITORÍA: Guardamos quién lo creó y la referencia de pago
+      await setDoc(doc(db, "usuarios", newEventId), { 
+        email: newEmail, 
+        role: formData.role, 
+        plan: formData.plan, 
+        tipoEvento: formData.tipoEvento, 
+        eventId: newEventId, 
+        nombres: formData.nombres, 
+        status: 'activo', 
+        urlInvitacion: formData.urlInvitacion, 
+        creadoPor: authData.email, // El correo del empleado
+        referenciaPago: formData.referenciaPago, // El folio del banco
+        createdAt: serverTimestamp() 
+      });
+
       await setDoc(doc(db, "eventos", newEventId), { presupuestoTotal: 150000, nombres: formData.nombres, plan: formData.plan, tipoEvento: formData.tipoEvento });
 
       setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role, urlInvitacion: formData.urlInvitacion });
@@ -9564,26 +9603,29 @@ const SuperAdminView = ({ onImpersonate }) => {
   };
 
   const handleDelete = (lic) => {
+    // 🔴 SEGURIDAD: Solo el SuperAdmin puede borrar
+    if (!isSuperAdmin) {
+      setDialog({ isOpen: true, type: 'alert', title: 'Acceso Denegado', message: 'Solo la Dirección puede eliminar cuentas permanentemente. Si el cliente canceló, usa el botón de "Suspender".' });
+      return;
+    }
     setDialog({ isOpen: true, type: 'confirm', title: 'Eliminar Permanentemente', message: `⚠️ PELIGRO EXTREMO: ¿Seguro de eliminar la información de ${lic.nombres}?`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await deleteDoc(doc(db, "usuarios", lic.id)); await deleteDoc(doc(db, "eventos", lic.eventId)); } });
   };
 
   const toggleVerCorreo = (id) => setCorreosVisibles(prev => ({ ...prev, [id]: !prev[id] }));
 
-  // Filtro de búsqueda
   const filteredLicencias = licencias.filter(lic => 
     (lic.nombres && lic.nombres.toLowerCase().includes(searchQuery.toLowerCase())) ||
     (lic.email && lic.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
     (lic.eventId && lic.eventId.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  // Estadísticas de Venta
   const totalBasico = licencias.filter(l => l.plan === 'basico').length;
   const totalPlata = licencias.filter(l => l.plan === 'plata').length;
   const totalOro = licencias.filter(l => l.plan === 'oro').length;
   const totalDiamante = licencias.filter(l => l.plan === 'diamante').length;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
+    <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
       {dialog.isOpen && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-white/20">
@@ -9602,26 +9644,32 @@ const SuperAdminView = ({ onImpersonate }) => {
         </div>
       )}
 
-      <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-3xl p-8 shadow-xl text-white flex items-center justify-between">
+      <div className={`bg-gradient-to-r ${isSuperAdmin ? 'from-amber-500 to-orange-600' : 'from-indigo-600 to-blue-700'} rounded-3xl p-8 shadow-xl text-white flex items-center justify-between`}>
         <div>
-          <span className="bg-black/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">Nivel 3: Acceso Maestro</span>
-          <h2 className="text-3xl font-black flex items-center mb-2"><Building className="mr-3" size={36}/> Centro de Licencias</h2>
-          <p className="text-amber-100 max-w-lg text-sm">Control global de la plataforma. Crea nuevos eventos, asigna planes, adjunta links de invitaciones y gestiona clientes.</p>
+          <span className="bg-black/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">
+            {isSuperAdmin ? 'Nivel 3: Acceso Maestro' : 'Nivel 2: Workspace Staff'}
+          </span>
+          <h2 className="text-3xl font-black flex items-center mb-2"><Building className="mr-3" size={36}/> {isSuperAdmin ? 'Centro de Licencias' : 'Panel Operativo'}</h2>
+          <p className="text-white/80 max-w-lg text-sm">Gestiona clientes, asigna planes, adjunta links de invitaciones y configura eventos.</p>
         </div>
-        <div className="hidden md:flex w-24 h-24 bg-white/10 rounded-full items-center justify-center border-4 border-white/20 shadow-inner"><Lock size={40} className="text-white" /></div>
+        <div className="hidden md:flex w-24 h-24 bg-white/10 rounded-full items-center justify-center border-4 border-white/20 shadow-inner">
+          {isSuperAdmin ? <Lock size={40} className="text-white" /> : <Users size={40} className="text-white" />}
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="flex gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm w-full md:w-max">
            <button onClick={() => setAdminTab('licencias')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'licencias' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
-             <Building size={16}/> Licencias
+             <Building size={16}/> Clientes
            </button>
-           <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 hover:bg-slate-100'}`}>
-             <Star size={16}/> Reseñas
-           </button>
+           {/* Solo el SuperAdmin modera reseñas */}
+           {isSuperAdmin && (
+             <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 hover:bg-slate-100'}`}>
+               <Star size={16}/> Reseñas
+             </button>
+           )}
         </div>
 
-        {/* BUSCADOR MAESTRO */}
         {adminTab === 'licencias' && (
           <div className="relative w-full md:w-96">
             <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -9639,30 +9687,41 @@ const SuperAdminView = ({ onImpersonate }) => {
       {adminTab === 'licencias' && (
         <div className="animate-in fade-in">
           
-          {/* MÉTRICAS DE VENTAS */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-             <div onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '' }); }} className="col-span-2 md:col-span-1 bg-slate-900 p-5 rounded-2xl shadow-xl flex flex-col items-center justify-center text-center hover:scale-105 cursor-pointer transition-transform group border border-slate-700">
-               <div className="w-12 h-12 bg-white/10 text-amber-400 rounded-full flex items-center justify-center mb-2 group-hover:bg-amber-500 group-hover:text-slate-900 transition-colors"><Plus size={24}/></div>
-               <h3 className="text-xs font-black text-white uppercase tracking-widest mt-1">Nueva Licencia</h3>
-             </div>
-             
-             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Plan Básico</p>
-               <h3 className="text-3xl font-black text-slate-700">{totalBasico}</h3>
-             </div>
-             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Plan Plata</p>
-               <h3 className="text-3xl font-black text-slate-700">{totalPlata}</h3>
-             </div>
-             <div className="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm flex flex-col justify-center bg-amber-50/50">
-               <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Plan Oro</p>
-               <h3 className="text-3xl font-black text-amber-700">{totalOro}</h3>
-             </div>
-             <div className="bg-white p-4 rounded-2xl border border-indigo-200 shadow-sm flex flex-col justify-center bg-indigo-50/50">
-               <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Plan Diamante</p>
-               <h3 className="text-3xl font-black text-indigo-700">{totalDiamante}</h3>
-             </div>
-          </div>
+          {/* 🔴 MÉTRICAS DE VENTAS (Solo visibles para el CEO/SuperAdmin) */}
+          {isSuperAdmin && (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+               <div onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '' }); }} className="col-span-2 md:col-span-1 bg-slate-900 p-5 rounded-2xl shadow-xl flex flex-col items-center justify-center text-center hover:scale-105 cursor-pointer transition-transform group border border-slate-700">
+                 <div className="w-12 h-12 bg-white/10 text-amber-400 rounded-full flex items-center justify-center mb-2 group-hover:bg-amber-500 group-hover:text-slate-900 transition-colors"><Plus size={24}/></div>
+                 <h3 className="text-xs font-black text-white uppercase tracking-widest mt-1">Nueva Licencia</h3>
+               </div>
+               
+               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
+                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Plan Básico</p>
+                 <h3 className="text-3xl font-black text-slate-700">{totalBasico}</h3>
+               </div>
+               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
+                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Plan Plata</p>
+                 <h3 className="text-3xl font-black text-slate-700">{totalPlata}</h3>
+               </div>
+               <div className="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm flex flex-col justify-center bg-amber-50/50">
+                 <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Plan Oro</p>
+                 <h3 className="text-3xl font-black text-amber-700">{totalOro}</h3>
+               </div>
+               <div className="bg-white p-4 rounded-2xl border border-indigo-200 shadow-sm flex flex-col justify-center bg-indigo-50/50">
+                 <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Plan Diamante</p>
+                 <h3 className="text-3xl font-black text-indigo-700">{totalDiamante}</h3>
+               </div>
+            </div>
+          )}
+
+          {/* Botón de crear licencia visible para Staff (ya que no ven el bloque de arriba) */}
+          {isStaff && (
+            <div className="mb-6">
+              <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '' }); }} className="px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-colors flex items-center">
+                <Plus size={20} className="mr-2"/> Vender / Crear Licencia
+              </button>
+            </div>
+          )}
 
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
              <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
@@ -9676,13 +9735,14 @@ const SuperAdminView = ({ onImpersonate }) => {
                      <th className="px-5 py-3 font-bold">Acceso (Correo)</th>
                      <th className="px-5 py-3 font-bold text-center">Plan</th>
                      <th className="px-5 py-3 font-bold">Link Invitación</th>
+                     {isSuperAdmin && <th className="px-5 py-3 font-bold text-center">Vendedor</th>}
                      <th className="px-5 py-3 font-bold text-center">Estatus</th>
                      <th className="px-5 py-3 font-bold text-right">Controles</th>
                    </tr>
                  </thead>
                  <tbody className="divide-y divide-slate-100 text-xs">
                    {filteredLicencias.length === 0 ? (
-                     <tr><td colSpan="6" className="px-5 py-12 text-center text-slate-400 font-medium text-sm">No se encontraron resultados para tu búsqueda.</td></tr>
+                     <tr><td colSpan={isSuperAdmin ? "7" : "6"} className="px-5 py-12 text-center text-slate-400 font-medium text-sm">No se encontraron resultados para tu búsqueda.</td></tr>
                    ) : (
                      filteredLicencias.map((lic) => {
                        const estaSuspendido = lic.status === 'suspendido';
@@ -9720,13 +9780,23 @@ const SuperAdminView = ({ onImpersonate }) => {
                                <span className="text-[10px] text-slate-400 italic">Pendiente de subir</span>
                              )}
                            </td>
+                           {/* 🔴 EL OJO QUE TODO LO VE: SOLO EL SUPERADMIN VE QUIÉN LO CREÓ */}
+                           {isSuperAdmin && (
+                             <td className="px-5 py-4 text-center">
+                               <p className="text-[10px] font-bold text-slate-600">{lic.creadoPor ? lic.creadoPor.split('@')[0] : 'Stripe/Web'}</p>
+                               {lic.referenciaPago && <p className="text-[8px] text-slate-400 uppercase tracking-widest mt-0.5" title={lic.referenciaPago}>Ref: {lic.referenciaPago.slice(0,6)}...</p>}
+                             </td>
+                           )}
                            <td className="px-5 py-4 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
                            <td className="px-5 py-4 text-right">
                               <div className="flex items-center justify-end space-x-2">
                                 <button onClick={() => { setEditingLic(lic); setIsEditModalOpen(true); }} title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"><Edit2 size={16} /></button>
                                 {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"><ExternalLink size={16} /></button>}
                                 <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors ${estaSuspendido ? 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200' : 'text-amber-600 bg-amber-100 hover:bg-amber-200'}`}><Power size={16} /></button>
-                                <button onClick={() => handleDelete(lic)} title="Eliminar Permanentemente" className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:text-white hover:bg-rose-500 transition-colors"><Trash2 size={16} /></button>
+                                {/* 🔴 SOLO EL SUPERADMIN PUEDE BORRAR DEFINITIVAMENTE */}
+                                {isSuperAdmin && (
+                                  <button onClick={() => handleDelete(lic)} title="Eliminar Permanentemente" className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:text-white hover:bg-rose-500 transition-colors"><Trash2 size={16} /></button>
+                                )}
                               </div>
                            </td>
                          </tr>
@@ -9740,7 +9810,7 @@ const SuperAdminView = ({ onImpersonate }) => {
         </div>
       )}
 
-      {/* MODAL PARA CREAR NUEVA LICENCIA */}
+      {/* MODAL PARA CREAR NUEVA LICENCIA (CON SISTEMA ANTI-ROBO) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -9748,11 +9818,17 @@ const SuperAdminView = ({ onImpersonate }) => {
               <form onSubmit={handleCreateLicense} className="p-8">
                 <div className="text-center mb-6">
                   <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4"><Key size={24} /></div>
-                  <h3 className="text-xl font-black text-slate-800">Generar Accesos</h3>
-                  <p className="text-xs text-slate-500 mt-1">Configura la bóveda para tu cliente.</p>
+                  <h3 className="text-xl font-black text-slate-800">Vender / Crear Licencia</h3>
+                  <p className="text-xs text-slate-500 mt-1">Tu usuario quedará registrado como el vendedor de esta cuenta.</p>
                 </div>
                 
                 <div className="space-y-4 mb-6">
+                  {/* 🔴 CAMPO OBLIGATORIO ANTI-ROBO HORMIGA */}
+                  <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+                    <label className="block text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-1.5 flex items-center"><Wallet size={12} className="mr-1"/> Referencia de Pago (Obligatorio)</label>
+                    <input type="text" required value={formData.referenciaPago} onChange={e => setFormData({...formData, referenciaPago: e.target.value})} placeholder="Folio de transferencia o 'Pago en Efectivo'" className="w-full p-3 bg-white border border-emerald-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 text-sm" />
+                  </div>
+
                   <div className="flex gap-4">
                     <div className="flex-1">
                       <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tipo de Evento</label>
@@ -9860,53 +9936,6 @@ const SuperAdminView = ({ onImpersonate }) => {
         </div>
       )}
 
-      {/* RESTO DEL COMPONENTE: PESTAÑA RESEÑAS */}
-      {adminTab === 'resenas' && (
-        <div className="animate-in fade-in">
-           {/* ... (Se mantiene la vista de reseñas que ya tenías) */}
-           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                <h3 className="font-bold text-slate-800 text-sm">Reseñas de Clientes</h3>
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Aprobadas se ven en baulia.com</span>
-             </div>
-             <div className="p-6 grid grid-cols-1 gap-4">
-                {resenasList.length === 0 ? <p className="text-center text-slate-400 py-10">Aún no hay reseñas enviadas.</p> : null}
-                {resenasList.map(resena => (
-                   <div key={resena.id} className={`p-5 rounded-2xl border transition-colors ${resena.status === 'aprobada' ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-slate-50'}`}>
-                      <div className="flex justify-between items-start mb-3">
-                         <div>
-                            <div className="flex items-center gap-2 mb-1">
-                               <h4 className="font-black text-slate-900">{resena.authorName}</h4>
-                               <button onClick={() => editResenaAuthor(resena)} className="text-slate-400 hover:text-indigo-600"><Edit2 size={14}/></button>
-                            </div>
-                            <p className="text-[10px] text-slate-500 uppercase tracking-widest">{resena.authorType} • Evento: {resena.eventId}</p>
-                         </div>
-                         <div className="flex gap-1">
-                            {[1,2,3,4,5].map(s => <Star key={s} size={14} className={resena.rating >= s ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}/>)}
-                         </div>
-                      </div>
-                      <p className="text-slate-700 text-sm mb-4 font-medium italic">"{resena.comment}"</p>
-                      
-                      <div className="flex justify-between items-center border-t border-slate-200/60 pt-4 mt-2">
-                         <div>
-                            {resena.status === 'aprobada' 
-                              ? <span className="flex items-center text-[10px] font-black text-emerald-600 uppercase tracking-widest"><Globe size={14} className="mr-1"/> Pública en Web</span>
-                              : <span className="flex items-center text-[10px] font-black text-slate-400 uppercase tracking-widest"><Lock size={14} className="mr-1"/> Oculta (Pendiente)</span>
-                            }
-                         </div>
-                         <div className="flex gap-2">
-                            <button onClick={() => deleteResena(resena.id)} className="px-3 py-1.5 bg-white border border-slate-200 text-rose-500 rounded-lg text-xs font-bold hover:bg-rose-50 transition-colors">Borrar</button>
-                            <button onClick={() => toggleResenaAprobacion(resena)} className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-colors shadow-sm ${resena.status === 'aprobada' ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-emerald-500 text-white hover:bg-emerald-600'}`}>
-                               {resena.status === 'aprobada' ? 'Ocultar' : 'Aprobar y Publicar'}
-                            </button>
-                         </div>
-                      </div>
-                   </div>
-                ))}
-             </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -10496,7 +10525,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const renderContent = () => {
     switch(activeTab) {
       // 🔴 LE PASAMOS LA FUNCIÓN AL SUPERADMIN PARA QUE ACTIVE EL MODO DIOS
-      case 'licencias': return originalUserRole === 'superadmin' && !impersonating && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} /> : null;
+      case 'licencias': return (originalUserRole === 'superadmin' || originalUserRole === 'staff') && !impersonating && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} authData={authData} /> : null;
       case 'dashboard': return typeof DashboardView !== 'undefined' ? <DashboardView guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null; 
       case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
       case 'escaner': return userPlan === 'diamante' && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
