@@ -2,11 +2,11 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { Resend } = require("resend");
 
-// 🔴 1. TU CLAVE SECRETA DE STRIPE (Empieza con sk_test_...)
+// 🔴 1. TU CLAVE SECRETA DE STRIPE
 const stripe = require("stripe")("sk_test_51TBrAV3BmYGrtpk6CaPVIyuSxJzcMyGEW8RZ5GwkTAwzLkNM06rijsWSN7NPihF1dvaSiTd6IF7r9SYQZZReRiDp00EYUGqzqO"); 
 const cors = require("cors")({ origin: true });
 
-// 🔴 2. TU LLAVE DE RESEND (El Cartero Automático)
+// 🔴 2. TU LLAVE DE RESEND
 const resend = new Resend("re_gs7VfBsA_nXDzjE181fhzFWD2TCCAcwCm");
 
 admin.initializeApp();
@@ -15,8 +15,9 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     try {
       const { paymentMethodId, plan, precio, nombre, email, fecha } = req.body;
+      const cleanEmail = email.trim().toLowerCase();
 
-      console.log(`Iniciando cobro para: ${email} por el plan ${plan}`);
+      console.log(`Iniciando cobro para: ${cleanEmail} por el plan ${plan}`);
 
       const precioLimpio = parseInt(precio.replace(/,/g, ''));
       
@@ -29,29 +30,47 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
         automatic_payment_methods: { enabled: true, allow_redirects: 'never' }
       });
 
-      console.log("Cobro exitoso. Creando Bóveda...");
+      console.log("Cobro exitoso. Creando Bóveda Multi-Tenant...");
 
-      // CREACIÓN DE USUARIO Y CONTRASEÑA EN FIREBASE
-      const passwordTemporal = Math.random().toString(36).slice(-8) + "Baulia!";
-      const userRecord = await admin.auth().createUser({
-        email: email.trim().toLowerCase(),
-        password: passwordTemporal,
-        displayName: nombre,
-      });
+      // 🔴 GENERAMOS UN ID ÚNICO PARA EL EVENTO (Igual que en SuperAdmin)
+      const slug = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      const eventId = slug + '-' + Math.random().toString(36).slice(-4);
 
-      const eventId = userRecord.uid; 
+      // CREACIÓN DE USUARIO Y CONTRASEÑA EN FIREBASE (CON SOPORTE A CLIENTES RECURRENTES)
+      let passwordTemporal = Math.random().toString(36).slice(-8) + "Baulia!";
+      let esRecurrente = false;
+
+      try {
+        await admin.auth().createUser({
+          email: cleanEmail,
+          password: passwordTemporal,
+          displayName: nombre,
+        });
+      } catch (authError) {
+        if (authError.code === 'auth/email-already-exists' || authError.code === 'auth/email-already-in-use') {
+          // EL CLIENTE YA EXISTE. ¡Excelente, es cliente frecuente!
+          esRecurrente = true;
+          passwordTemporal = "Tu contraseña actual de Baulia";
+          console.log(`Cliente recurrente detectado: ${cleanEmail}`);
+        } else {
+          throw authError; // Si es un error distinto, sí cortamos la operación
+        }
+      }
+
       const planLimpio = plan.toLowerCase().includes('diamante') ? 'diamante' : 'oro';
       const roleAsignado = plan.toLowerCase().includes('planner') ? 'planner' : 'cliente';
 
-      // CREACIÓN DE BASES DE DATOS
+      // CREACIÓN DE BASES DE DATOS USANDO EL EVENT_ID ÚNICO
       await admin.firestore().collection("usuarios").doc(eventId).set({
-        email: email.trim().toLowerCase(),
+        email: cleanEmail,
         role: roleAsignado,
         plan: planLimpio,
         tipoEvento: 'boda', 
         eventId: eventId,
         nombres: nombre,
         status: 'activo',
+        creadoPor: 'Stripe (Web Automático)',
+        referenciaPago: `Stripe: ${paymentIntent.id}`,
         createdAt: admin.firestore.FieldValue.serverTimestamp()
       });
 
@@ -63,8 +82,8 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
         tipoEvento: 'boda'
       });
 
-      // 🔴 3. EL CARTERO AUTOMÁTICO - CORREO VIP DE LUJO 💌
-      console.log("Enviando correo VIP de bienvenida a:", email);
+      // 🔴 EL CARTERO AUTOMÁTICO - CORREO VIP DE LUJO 💌
+      console.log("Enviando correo VIP de bienvenida a:", cleanEmail);
       
       const emailHtml = `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-w: 600px; margin: 0 auto; padding: 0; background-color: #0a0a0a; color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
@@ -80,9 +99,9 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
             
             <div style="margin: 35px 0; background-color: #050505; border: 1px solid #333333; border-radius: 12px; padding: 25px; text-align: center;">
               <p style="margin: 0 0 15px 0; color: #d97706; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">Tus Credenciales de Acceso Seguras</p>
-              <p style="margin: 10px 0; color: #94a3b8; font-size: 14px;">Usuario: <br><strong style="color: #ffffff; font-size: 16px;">${email.trim().toLowerCase()}</strong></p>
-              <p style="margin: 10px 0; color: #94a3b8; font-size: 14px;">Contraseña Temporal: <br><strong style="font-family: monospace; background: #1e293b; padding: 6px 12px; border-radius: 6px; color: #34d399; font-size: 18px; letter-spacing: 2px;">${passwordTemporal}</strong></p>
-              <p style="margin-top: 15px; font-size: 11px; color: #64748b;"><i>* Te recomendamos guardar este correo en un lugar seguro.</i></p>
+              <p style="margin: 10px 0; color: #94a3b8; font-size: 14px;">Usuario: <br><strong style="color: #ffffff; font-size: 16px;">${cleanEmail}</strong></p>
+              <p style="margin: 10px 0; color: #94a3b8; font-size: 14px;">Contraseña: <br><strong style="font-family: monospace; background: #1e293b; padding: 6px 12px; border-radius: 6px; color: #34d399; font-size: 16px; letter-spacing: 1px;">${passwordTemporal}</strong></p>
+              ${esRecurrente ? '<p style="margin-top: 15px; font-size: 12px; color: #f59e0b;"><i>¡Gracias por tu preferencia! Al iniciar sesión podrás saltar entre tus eventos.</i></p>' : '<p style="margin-top: 15px; font-size: 11px; color: #64748b;"><i>* Te recomendamos guardar este correo en un lugar seguro.</i></p>'}
             </div>
 
             <h3 style="color: #ffffff; font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">¿Qué sigue ahora?</h3>
@@ -106,8 +125,8 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
 
       await resend.emails.send({
         from: 'Equipo Baulia <hola@baulia.com>', 
-        to: email.trim().toLowerCase(),
-        subject: '🗝️ Tu Bóveda Digital está lista - Accesos Baulia',
+        to: cleanEmail,
+        subject: esRecurrente ? '🗝️ Tu nuevo evento está listo - Baulia' : '🗝️ Tu Bóveda Digital está lista - Accesos Baulia',
         html: emailHtml
       });
 
