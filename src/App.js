@@ -9457,13 +9457,19 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 const SuperAdminView = ({ onImpersonate }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente' });
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
+  const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '' });
+  const [editingLic, setEditingLic] = useState(null);
+
   const [isCreating, setIsCreating] = useState(false);
   const [successData, setSuccessData] = useState(null);
   const [clientPhone, setClientPhone] = useState('');
+  
   const [licencias, setLicencias] = useState([]);
   const [resenasList, setResenasList] = useState([]);
   const [correosVisibles, setCorreosVisibles] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null });
 
@@ -9508,10 +9514,10 @@ const SuperAdminView = ({ onImpersonate }) => {
       await createUserWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
       await signOut(secondaryAuth); 
 
-      await setDoc(doc(db, "usuarios", newEventId), { email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, nombres: formData.nombres, status: 'activo', createdAt: serverTimestamp() });
+      await setDoc(doc(db, "usuarios", newEventId), { email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, nombres: formData.nombres, status: 'activo', urlInvitacion: formData.urlInvitacion, createdAt: serverTimestamp() });
       await setDoc(doc(db, "eventos", newEventId), { presupuestoTotal: 150000, nombres: formData.nombres, plan: formData.plan, tipoEvento: formData.tipoEvento });
 
-      setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role });
+      setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role, urlInvitacion: formData.urlInvitacion });
       setClientPhone('');
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') setDialog({ isOpen: true, type: 'alert', title: 'Correo Duplicado', message: 'Este correo ya está registrado.' });
@@ -9520,18 +9526,41 @@ const SuperAdminView = ({ onImpersonate }) => {
     setIsCreating(false);
   };
 
+  const handleUpdateLicense = async (e) => {
+    e.preventDefault();
+    try {
+      await updateDoc(doc(db, "usuarios", editingLic.id), {
+        urlInvitacion: editingLic.urlInvitacion,
+        plan: editingLic.plan,
+        nombres: editingLic.nombres
+      });
+      setIsEditModalOpen(false);
+      setEditingLic(null);
+      setDialog({ isOpen: true, type: 'alert', title: 'Actualizado', message: 'Los datos de la licencia se guardaron correctamente.' });
+    } catch (error) {
+      setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'No se pudo actualizar la licencia.' });
+    }
+  };
+
   const handleSendWhatsApp = () => {
     if (clientPhone.length < 10) { setDialog({ isOpen: true, type: 'alert', title: 'Información Incompleta', message: 'Ingresa un número de 10 dígitos.' }); return; }
     const domain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://panel.baulia.com'; 
     const tipoTexto = successData.role === 'planner' ? 'Agencia / Organizador' : successData.tipoEvento;
-    const mensaje = `✨ ¡Hola ${successData.nombres}! Tu Panel de Control Premium para tu ${tipoTexto} está listo.\n\nAccede a tu plataforma privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña temporal: ${successData.password}\n\n¡Guarda estos accesos, te servirán para gestionar todos los detalles!`;
+    
+    let mensaje = `✨ ¡Hola ${successData.nombres}! `;
+    if (successData.plan === 'basico' || successData.plan === 'plata') {
+      mensaje += `Tu invitación digital está casi lista. Podrás verla pronto en este enlace:\n🔗 ${successData.urlInvitacion || 'Enlace pendiente'}`;
+    } else {
+      mensaje += `Tu Panel de Control Premium para tu ${tipoTexto} está listo.\n\nAccede a tu plataforma privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña temporal: ${successData.password}\n\n¡Guarda estos accesos, te servirán para gestionar todos los detalles!`;
+    }
+    
     window.open(`https://wa.me/${clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
   const toggleStatus = (lic) => {
     const nuevoEstatus = lic.status === 'suspendido' ? 'activo' : 'suspendido';
     const accionText = nuevoEstatus === 'suspendido' ? 'SUSPENDER' : 'ACTIVAR';
-    setDialog({ isOpen: true, type: 'confirm', title: `${accionText === 'SUSPENDER' ? 'Suspender' : 'Activar'} Licencia`, message: `¿Estás seguro que deseas ${accionText} la plataforma de ${lic.nombres}?`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await setDoc(doc(db, "usuarios", lic.id), { ...lic, status: nuevoEstatus }); } });
+    setDialog({ isOpen: true, type: 'confirm', title: `${accionText === 'SUSPENDER' ? 'Suspender' : 'Activar'} Licencia`, message: `¿Estás seguro que deseas ${accionText} la plataforma de ${lic.nombres}?`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await updateDoc(doc(db, "usuarios", lic.id), { status: nuevoEstatus }); } });
   };
 
   const handleDelete = (lic) => {
@@ -9540,29 +9569,21 @@ const SuperAdminView = ({ onImpersonate }) => {
 
   const toggleVerCorreo = (id) => setCorreosVisibles(prev => ({ ...prev, [id]: !prev[id] }));
 
-  const toggleResenaAprobacion = async (resena) => {
-    const nuevoStatus = resena.status === 'aprobada' ? 'pendiente' : 'aprobada';
-    await updateDoc(doc(db, "resenas", resena.id), { status: nuevoStatus });
-  };
+  // Filtro de búsqueda
+  const filteredLicencias = licencias.filter(lic => 
+    (lic.nombres && lic.nombres.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (lic.email && lic.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (lic.eventId && lic.eventId.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
-  const editResenaAuthor = async (resena) => {
-    const nuevoNombre = prompt("Edita el nombre público del autor (Ej. Familia Pérez):", resena.authorName);
-    if (nuevoNombre && nuevoNombre.trim() !== '') {
-      await updateDoc(doc(db, "resenas", resena.id), { authorName: nuevoNombre.trim() });
-    }
-  };
-
-  const deleteResena = async (resenaId) => {
-    if (window.confirm("¿Seguro de eliminar esta reseña permanentemente?")) {
-      await deleteDoc(doc(db, "resenas", resenaId));
-    }
-  };
-
-  const totalEventos = licencias.length;
+  // Estadísticas de Venta
+  const totalBasico = licencias.filter(l => l.plan === 'basico').length;
+  const totalPlata = licencias.filter(l => l.plan === 'plata').length;
+  const totalOro = licencias.filter(l => l.plan === 'oro').length;
   const totalDiamante = licencias.filter(l => l.plan === 'diamante').length;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
+    <div className="max-w-6xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
       {dialog.isOpen && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-white/20">
@@ -9585,55 +9606,99 @@ const SuperAdminView = ({ onImpersonate }) => {
         <div>
           <span className="bg-black/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">Nivel 3: Acceso Maestro</span>
           <h2 className="text-3xl font-black flex items-center mb-2"><Building className="mr-3" size={36}/> Centro de Licencias</h2>
-          <p className="text-amber-100 max-w-lg text-sm">Control global de la plataforma. Crea nuevos eventos, asigna planes y entrega credenciales directamente a tus clientes o Planners.</p>
+          <p className="text-amber-100 max-w-lg text-sm">Control global de la plataforma. Crea nuevos eventos, asigna planes, adjunta links de invitaciones y gestiona clientes.</p>
         </div>
         <div className="hidden md:flex w-24 h-24 bg-white/10 rounded-full items-center justify-center border-4 border-white/20 shadow-inner"><Lock size={40} className="text-white" /></div>
       </div>
 
-      <div className="flex gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm w-max">
-         <button onClick={() => setAdminTab('licencias')} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 ${adminTab === 'licencias' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
-           <Building size={16}/> Gestor de Licencias
-         </button>
-         <button onClick={() => setAdminTab('resenas')} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 hover:bg-slate-100'}`}>
-           <Star size={16}/> Moderar Reseñas {resenasList.filter(r => r.status === 'pendiente').length > 0 && <span className="bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full">{resenasList.filter(r => r.status === 'pendiente').length}</span>}
-         </button>
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="flex gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm w-full md:w-max">
+           <button onClick={() => setAdminTab('licencias')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'licencias' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
+             <Building size={16}/> Licencias
+           </button>
+           <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 hover:bg-slate-100'}`}>
+             <Star size={16}/> Reseñas
+           </button>
+        </div>
+
+        {/* BUSCADOR MAESTRO */}
+        {adminTab === 'licencias' && (
+          <div className="relative w-full md:w-96">
+            <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Buscar por correo, nombre o ID..." 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-sm"
+            />
+          </div>
+        )}
       </div>
 
       {adminTab === 'licencias' && (
         <div className="animate-in fade-in">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center"><div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-3"><Calendar size={24}/></div><h3 className="text-2xl font-black text-slate-800">{totalEventos}</h3><p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Eventos Activos</p></div>
-             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center"><div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mb-3"><Star size={24}/></div><h3 className="text-2xl font-black text-slate-800">{totalDiamante}</h3><p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Planes Diamante</p></div>
-             <div onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente' }); }} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center hover:border-emerald-400 cursor-pointer transition-colors group"><div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><Plus size={24}/></div><h3 className="text-sm font-black text-emerald-600 mt-2">NUEVA LICENCIA</h3><p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Crear Acceso</p></div>
+          
+          {/* MÉTRICAS DE VENTAS */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+             <div onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '' }); }} className="col-span-2 md:col-span-1 bg-slate-900 p-5 rounded-2xl shadow-xl flex flex-col items-center justify-center text-center hover:scale-105 cursor-pointer transition-transform group border border-slate-700">
+               <div className="w-12 h-12 bg-white/10 text-amber-400 rounded-full flex items-center justify-center mb-2 group-hover:bg-amber-500 group-hover:text-slate-900 transition-colors"><Plus size={24}/></div>
+               <h3 className="text-xs font-black text-white uppercase tracking-widest mt-1">Nueva Licencia</h3>
+             </div>
+             
+             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Plan Básico</p>
+               <h3 className="text-3xl font-black text-slate-700">{totalBasico}</h3>
+             </div>
+             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Plan Plata</p>
+               <h3 className="text-3xl font-black text-slate-700">{totalPlata}</h3>
+             </div>
+             <div className="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm flex flex-col justify-center bg-amber-50/50">
+               <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Plan Oro</p>
+               <h3 className="text-3xl font-black text-amber-700">{totalOro}</h3>
+             </div>
+             <div className="bg-white p-4 rounded-2xl border border-indigo-200 shadow-sm flex flex-col justify-center bg-indigo-50/50">
+               <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Plan Diamante</p>
+               <h3 className="text-3xl font-black text-indigo-700">{totalDiamante}</h3>
+             </div>
           </div>
 
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center"><h3 className="font-bold text-slate-800 text-sm">Directorio de Eventos Generados</h3></div>
-             <div className="overflow-x-auto">
-               <table className="w-full text-left whitespace-nowrap min-w-[800px]">
+             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+               <h3 className="font-bold text-slate-800 text-sm">Directorio de Clientes ({filteredLicencias.length})</h3>
+             </div>
+             <div className="overflow-x-auto pb-24">
+               <table className="w-full text-left whitespace-nowrap min-w-[1000px]">
                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[10px] uppercase tracking-widest">
-                   <tr><th className="px-5 py-3 font-bold">Cliente / ID</th><th className="px-5 py-3 font-bold">Acceso (Correo)</th><th className="px-5 py-3 font-bold text-center">Tipo</th><th className="px-5 py-3 font-bold text-center">Plan</th><th className="px-5 py-3 font-bold text-center">Estatus</th><th className="px-5 py-3 font-bold text-right">Controles</th></tr>
+                   <tr>
+                     <th className="px-5 py-3 font-bold">Cliente / ID</th>
+                     <th className="px-5 py-3 font-bold">Acceso (Correo)</th>
+                     <th className="px-5 py-3 font-bold text-center">Plan</th>
+                     <th className="px-5 py-3 font-bold">Link Invitación</th>
+                     <th className="px-5 py-3 font-bold text-center">Estatus</th>
+                     <th className="px-5 py-3 font-bold text-right">Controles</th>
+                   </tr>
                  </thead>
                  <tbody className="divide-y divide-slate-100 text-xs">
-                   {licencias.length === 0 ? (
-                     <tr><td colSpan="6" className="px-5 py-8 text-center text-slate-400">Sin registros de eventos.</td></tr>
+                   {filteredLicencias.length === 0 ? (
+                     <tr><td colSpan="6" className="px-5 py-12 text-center text-slate-400 font-medium text-sm">No se encontraron resultados para tu búsqueda.</td></tr>
                    ) : (
-                     licencias.map((lic) => {
-                       const tipoObj = tiposDeEvento.find(t => t.id === lic.tipoEvento);
-                       const etiquetaTipo = tipoObj ? tipoObj.label : 'Evento';
+                     filteredLicencias.map((lic) => {
                        const estaSuspendido = lic.status === 'suspendido';
                        const correoVisible = correosVisibles[lic.id];
+                       const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
                        
                        return (
                          <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40' : 'hover:bg-slate-50'}`}>
-                           <td className="px-5 py-3">
+                           <td className="px-5 py-4">
                              <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800' : 'text-slate-800'}`}>
                                {lic.nombres || 'Sin Nombre'} 
                                {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
                              </p>
                              <p className="text-[10px] text-slate-400 font-mono mt-0.5">{lic.eventId}</p>
                            </td>
-                           <td className="px-5 py-3">
+                           <td className="px-5 py-4">
                              <div className="flex items-center text-slate-600 bg-slate-100/70 px-2 py-1.5 rounded-lg w-max border border-slate-200/50">
                                <span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span>
                                <button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 hover:text-indigo-600 transition-colors">
@@ -9641,13 +9706,25 @@ const SuperAdminView = ({ onImpersonate }) => {
                                </button>
                              </div>
                            </td>
-                           <td className="px-5 py-3 text-center text-slate-500 font-bold text-[10px] uppercase tracking-wider">{etiquetaTipo}</td>
-                           <td className="px-5 py-3 text-center"><span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>{lic.plan}</span></td>
-                           <td className="px-5 py-3 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
-                           <td className="px-5 py-3 text-right">
+                           <td className="px-5 py-4 text-center">
+                             <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : lic.plan === 'oro' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                               {lic.plan}
+                             </span>
+                           </td>
+                           <td className="px-5 py-4 max-w-[200px] truncate">
+                             {lic.urlInvitacion ? (
+                               <a href={lic.urlInvitacion} target="_blank" rel="noreferrer" className="text-sky-500 hover:underline text-[10px] font-bold truncate block" title={lic.urlInvitacion}>
+                                 {lic.urlInvitacion}
+                               </a>
+                             ) : (
+                               <span className="text-[10px] text-slate-400 italic">Pendiente de subir</span>
+                             )}
+                           </td>
+                           <td className="px-5 py-4 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
+                           <td className="px-5 py-4 text-right">
                               <div className="flex items-center justify-end space-x-2">
-                                {/* 🔴 AQUÍ ESTÁ EL BOTÓN DE MODO DIOS */}
-                                <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"><ExternalLink size={16} /></button>
+                                <button onClick={() => { setEditingLic(lic); setIsEditModalOpen(true); }} title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"><Edit2 size={16} /></button>
+                                {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"><ExternalLink size={16} /></button>}
                                 <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors ${estaSuspendido ? 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200' : 'text-amber-600 bg-amber-100 hover:bg-amber-200'}`}><Power size={16} /></button>
                                 <button onClick={() => handleDelete(lic)} title="Eliminar Permanentemente" className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:text-white hover:bg-rose-500 transition-colors"><Trash2 size={16} /></button>
                               </div>
@@ -9663,9 +9740,131 @@ const SuperAdminView = ({ onImpersonate }) => {
         </div>
       )}
 
+      {/* MODAL PARA CREAR NUEVA LICENCIA */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            {!successData ? (
+              <form onSubmit={handleCreateLicense} className="p-8">
+                <div className="text-center mb-6">
+                  <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4"><Key size={24} /></div>
+                  <h3 className="text-xl font-black text-slate-800">Generar Accesos</h3>
+                  <p className="text-xs text-slate-500 mt-1">Configura la bóveda para tu cliente.</p>
+                </div>
+                
+                <div className="space-y-4 mb-6">
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tipo de Evento</label>
+                      <select value={formData.tipoEvento} onChange={e => setFormData({...formData, tipoEvento: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 text-xs cursor-pointer">
+                        {tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-1.5 flex items-center"><Users size={12} className="mr-1"/> Rol</label>
+                      <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full p-3 bg-indigo-50 border border-indigo-200 text-indigo-900 rounded-xl outline-none focus:border-indigo-500 font-black text-xs cursor-pointer">
+                        <option value="cliente">Cliente Final</option>
+                        <option value="planner">Agencia Planner</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-widest mb-1.5">{formData.role === 'planner' ? 'Nombre de la Agencia' : eventoSeleccionado.labelNombre}</label>
+                    <input type="text" autoFocus required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} placeholder={formData.role === 'planner' ? 'Ej. Elite Planners' : eventoSeleccionado.placeholder} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-900 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-widest mb-1.5 flex items-center"><Mail size={12} className="mr-1.5" /> Correo de Acceso / Registro</label>
+                    <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-800 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Paquete Vendido</label>
+                    <select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 text-sm cursor-pointer">
+                      <option value="basico">Plan Básico (Solo Invitación)</option>
+                      <option value="plata">Plan Plata (Sin Panel Completo)</option>
+                      <option value="oro">Plan Oro (Panel Maestro Estándar)</option>
+                      <option value="diamante">Plan Diamante (VIP Completo)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex items-center"><Link size={12} className="mr-1.5"/> Link de la Invitación (Opcional por ahora)</label>
+                    <input type="url" value={formData.urlInvitacion} onChange={e => setFormData({...formData, urlInvitacion: e.target.value})} placeholder="https://baulia.com/bodas/ejemplo" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-medium text-sky-600 text-xs" />
+                  </div>
+                </div>
+
+                <div className="flex space-x-3">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-200 transition-colors">Cancelar</button>
+                  <button type="submit" disabled={isCreating} className="flex-1 py-3.5 bg-slate-900 text-white rounded-xl font-bold text-xs shadow-lg hover:bg-slate-800 disabled:bg-slate-400 transition-colors">
+                    {isCreating ? 'Procesando...' : 'Crear Licencia'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="p-8 text-center bg-slate-50">
+                <div className="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6"><CheckCircle size={40} /></div>
+                <h3 className="text-2xl font-black text-slate-800 mb-2">¡Accesos Creados!</h3>
+                <p className="text-sm text-slate-500 mb-6">La cuenta para <b>{successData.nombres}</b> se ha generado exitosamente.</p>
+                
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 text-left text-sm mb-6 shadow-sm">
+                  <p className="mb-3"><span className="text-slate-400 font-bold w-20 inline-block">Usuario:</span> <b className="text-slate-800">{successData.email}</b></p>
+                  <p><span className="text-slate-400 font-bold w-20 inline-block">Clave Temp:</span> <b className="text-slate-800 font-mono text-base">{successData.password}</b></p>
+                </div>
+
+                <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl mb-6 shadow-sm">
+                  <label className="block text-xs font-black text-emerald-700 uppercase tracking-widest mb-3 text-left flex items-center"><MessageCircle size={14} className="mr-1.5"/> Enviar accesos por WhatsApp</label>
+                  <div className="flex space-x-2 mb-4">
+                    <span className="bg-emerald-100 text-emerald-700 font-bold p-3 rounded-xl flex items-center justify-center">+52</span>
+                    <input type="tel" placeholder="10 dígitos del cliente..." value={clientPhone} onChange={e => setClientPhone(e.target.value)} className="w-full p-3 bg-white border border-emerald-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-800" />
+                  </div>
+                  <button onClick={handleSendWhatsApp} className="w-full py-4 bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all active:scale-95 flex items-center justify-center">
+                    <Send size={18} className="mr-2" /> Enviar Mensaje
+                  </button>
+                </div>
+
+                <button onClick={() => setIsModalOpen(false)} className="w-full py-4 text-slate-500 font-bold hover:text-slate-800 transition-colors">Cerrar Ventana</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PARA EDITAR LICENCIA EXISTENTE */}
+      {isEditModalOpen && editingLic && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+             <div className="px-6 py-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center"><h3 className="font-bold text-lg text-slate-800">Editar Licencia</h3><button onClick={() => {setIsEditModalOpen(false); setEditingLic(null);}} className="text-slate-400 hover:text-slate-800"><X size={20}/></button></div>
+             <form onSubmit={handleUpdateLicense} className="p-6 space-y-5">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Nombre del Cliente / Evento</label>
+                  <input type="text" required value={editingLic.nombres} onChange={e => setEditingLic({...editingLic, nombres: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-900 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Plan de la Plataforma</label>
+                  <select value={editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 text-sm cursor-pointer">
+                    <option value="basico">Plan Básico</option>
+                    <option value="plata">Plan Plata</option>
+                    <option value="oro">Plan Oro</option>
+                    <option value="diamante">Plan Diamante</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex items-center"><Link size={12} className="mr-1.5"/> URL de su Invitación Pública</label>
+                  <input type="url" value={editingLic.urlInvitacion || ''} onChange={e => setEditingLic({...editingLic, urlInvitacion: e.target.value})} placeholder="https://baulia.com/bodas/su-boda" className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-medium text-sky-600 text-sm" />
+                </div>
+                
+                <button type="submit" className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-slate-800 transition-colors mt-4">
+                  Guardar Cambios
+                </button>
+             </form>
+          </div>
+        </div>
+      )}
+
+      {/* RESTO DEL COMPONENTE: PESTAÑA RESEÑAS */}
       {adminTab === 'resenas' && (
         <div className="animate-in fade-in">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+           {/* ... (Se mantiene la vista de reseñas que ya tenías) */}
+           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
              <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                 <h3 className="font-bold text-slate-800 text-sm">Reseñas de Clientes</h3>
                 <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Aprobadas se ven en baulia.com</span>
@@ -9705,86 +9904,6 @@ const SuperAdminView = ({ onImpersonate }) => {
                    </div>
                 ))}
              </div>
-          </div>
-        </div>
-      )}
-
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-            {!successData ? (
-              <form onSubmit={handleCreateLicense} className="p-8">
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4"><Key size={32} /></div>
-                  <h3 className="text-2xl font-black text-slate-800">Generar Accesos</h3>
-                  <p className="text-sm text-slate-500">Configura la bóveda privada para tu cliente.</p>
-                </div>
-                
-                <div className="space-y-5 mb-8">
-                  <div>
-                    <label className="block text-xs font-bold text-indigo-600 uppercase tracking-widest mb-2 flex items-center"><Users size={14} className="mr-1"/> Tipo de Cuenta</label>
-                    <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full p-4 bg-indigo-50 border border-indigo-200 text-indigo-900 rounded-xl outline-none focus:border-indigo-500 font-black cursor-pointer">
-                      <option value="cliente">Cliente Final (Novios/Festejados)</option>
-                      <option value="planner">Wedding Planner / Agencia</option>
-                    </select>
-                  </div>
-                  <div className="h-px w-full bg-slate-200 my-2"></div>
-                  
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Tipo de Evento</label>
-                    <select value={formData.tipoEvento} onChange={e => setFormData({...formData, tipoEvento: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 cursor-pointer">
-                      {tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">{formData.role === 'planner' ? 'Nombre de la Agencia' : eventoSeleccionado.labelNombre}</label>
-                    <input type="text" autoFocus required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} placeholder={formData.role === 'planner' ? 'Ej. Elite Planners' : eventoSeleccionado.placeholder} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-900" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2 flex items-center"><Mail size={14} className="mr-1.5" /> Correo de Acceso</label>
-                    <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-800" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Paquete Contratado</label>
-                    <select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 cursor-pointer">
-                      <option value="oro">Plan Oro (Básico)</option>
-                      <option value="diamante">Plan Diamante (VIP Completo)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex space-x-3">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">Cancelar</button>
-                  <button type="submit" disabled={isCreating} className="flex-1 py-4 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-slate-800 disabled:bg-slate-400 transition-colors">
-                    {isCreating ? 'Procesando...' : 'Crear Licencia'}
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="p-8 text-center bg-slate-50">
-                <div className="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6"><CheckCircle size={40} /></div>
-                <h3 className="text-2xl font-black text-slate-800 mb-2">¡Accesos Creados!</h3>
-                <p className="text-sm text-slate-500 mb-6">La cuenta para <b>{successData.nombres}</b> se ha generado exitosamente.</p>
-                
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 text-left text-sm mb-6 shadow-sm">
-                  <p className="mb-3"><span className="text-slate-400 font-bold w-20 inline-block">Usuario:</span> <b className="text-slate-800">{successData.email}</b></p>
-                  <p><span className="text-slate-400 font-bold w-20 inline-block">Clave Temp:</span> <b className="text-slate-800 font-mono text-base">{successData.password}</b></p>
-                </div>
-
-                <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl mb-6 shadow-sm">
-                  <label className="block text-xs font-black text-emerald-700 uppercase tracking-widest mb-3 text-left flex items-center"><MessageCircle size={14} className="mr-1.5"/> Enviar accesos al {successData.role === 'planner' ? 'Planner' : 'Cliente'}</label>
-                  <div className="flex space-x-2 mb-4">
-                    <span className="bg-emerald-100 text-emerald-700 font-bold p-3 rounded-xl flex items-center justify-center">+52</span>
-                    <input type="tel" placeholder="10 dígitos del cliente..." value={clientPhone} onChange={e => setClientPhone(e.target.value)} className="w-full p-3 bg-white border border-emerald-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-800" />
-                  </div>
-                  <button onClick={handleSendWhatsApp} className="w-full py-4 bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all active:scale-95 flex items-center justify-center">
-                    <Send size={18} className="mr-2" /> Enviar por WhatsApp
-                  </button>
-                </div>
-
-                <button onClick={() => setIsModalOpen(false)} className="w-full py-4 text-slate-500 font-bold hover:text-slate-800 transition-colors">Cerrar Ventana</button>
-              </div>
-            )}
           </div>
         </div>
       )}
