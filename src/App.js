@@ -6809,7 +6809,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
           ) : themeSetting === 'dark' ? (
             <Moon className="pointer-events-none" size={20} />
           ) : (
-            <svg className="pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg className="pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
           )}
         </button>
 
@@ -6884,7 +6884,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
                 <p className="text-[10px] text-amber-600 dark:text-amber-500 uppercase">ID: {ID_DEL_EVENTO}</p>
               </div>
               <div className="p-2">
-                {/* 🔴 NUEVO BOTÓN MULTI-EVENTO */}
+                {/* 🔴 BOTÓN MULTI-EVENTO */}
                 {authData?.availableEvents?.length > 1 && (
                    <button onClick={() => { setShowEventSwitcher(true); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2.5 text-sm text-indigo-600 dark:text-amber-500 font-bold hover:bg-indigo-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors flex items-center mb-1">
                      <RefreshCw size={16} className="mr-2.5"/> Cambiar Proyecto
@@ -6893,7 +6893,6 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
                 <button onClick={() => handleNavigate('invitacion')} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg transition-colors flex items-center"><ExternalLink size={16} className="mr-2.5"/> Ver Invitación App</button>
                 <button onClick={handleContactStaff} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg transition-colors flex items-center"><MessageCircle size={16} className="mr-2.5"/> Soporte Premium</button>
               </div>
-              {/* 🔴 ESTE BLOQUE FALTABA */}
               <div className="p-2 border-t border-slate-100 dark:border-white/5">
                 <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-sm text-rose-500 font-bold hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors flex items-center"><LogOut size={16} className="mr-2.5"/> Cerrar Sesión</button>
               </div>
@@ -6902,28 +6901,41 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
         </div>
 
       </div>
-      {/* MODAL CAMBIAR PROYECTO */}
+
+      {/* 🔴 MODAL CAMBIAR PROYECTO BLINDADO ANTI-CORTE */}
       {showEventSwitcher && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl p-6 border border-transparent dark:border-white/10 animate-in zoom-in-95 transition-colors">
-            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2 font-editorial">Tus Proyectos</h3>
-            <p className="text-sm text-slate-500 mb-6">Selecciona el evento que deseas administrar:</p>
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh] border border-transparent dark:border-white/10 animate-in zoom-in-95 transition-colors">
             
-            <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2 mb-6">
-              {authData.availableEvents.map(ev => {
-                const isActive = ev.eventId === authData.eventId;
-                return (
-                  <button key={ev.eventId} onClick={() => switchEvent(ev.eventId)} className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between ${isActive ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30' : 'bg-slate-50 dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-amber-400'}`}>
-                    <div>
-                      <p className={`font-bold text-lg ${isActive ? 'text-amber-700 dark:text-amber-500' : 'text-slate-800 dark:text-white'}`}>{ev.nombres}</p>
-                      <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-1 font-bold">{ev.tipoEvento} • Plan {ev.plan}</p>
-                    </div>
-                    {isActive && <CheckCircle size={20} className="text-amber-500"/>}
-                  </button>
-                )
-              })}
+            {/* Cabecera del Modal (Fija) */}
+            <div className="p-6 pb-4 border-b border-slate-100 dark:border-white/5 shrink-0">
+               <h3 className="text-xl font-black text-slate-800 dark:text-white mb-1 font-editorial">Tus Proyectos</h3>
+               <p className="text-xs text-slate-500">Selecciona el evento que deseas administrar:</p>
             </div>
-            <button onClick={() => setShowEventSwitcher(false)} className="w-full py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
+            
+            {/* Lista de eventos (Scrollable) */}
+            <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+              <div className="space-y-3">
+                {authData.availableEvents.map(ev => {
+                  const isActive = ev.eventId === authData.eventId;
+                  return (
+                    <button key={ev.eventId} onClick={() => switchEvent(ev.eventId)} className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-center ${isActive ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30' : 'bg-slate-50 dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-amber-400'}`}>
+                      <div className="flex-1 min-w-0 pr-3">
+                        <p className={`font-bold text-base truncate ${isActive ? 'text-amber-700 dark:text-amber-500' : 'text-slate-800 dark:text-white'}`}>{ev.nombres}</p>
+                        <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-1 font-bold truncate">{ev.tipoEvento} • Plan {ev.plan}</p>
+                      </div>
+                      {isActive && <CheckCircle size={20} className="text-amber-500 shrink-0"/>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Pie del Modal (Fijo) */}
+            <div className="p-6 pt-4 border-t border-slate-100 dark:border-white/5 shrink-0">
+               <button onClick={() => setShowEventSwitcher(false)} className="w-full py-3.5 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
+            </div>
+
           </div>
         </div>
       )}
