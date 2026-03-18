@@ -6702,11 +6702,12 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
 // ==========================================
 // --- COMPONENTE: CABECERA INTELIGENTE ---
 // ==========================================
-const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, bellAlerts, setBellAlerts, markAsRead, cycleTheme, themeSetting }) => {
+const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, bellAlerts, setBellAlerts, markAsRead, cycleTheme, themeSetting, authData, switchEvent }) => {
   const [showResults, setShowResults] = useState(false);
   const [showBellMenu, setShowBellMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const headerRef = useRef(null); 
+  const [showEventSwitcher, setShowEventSwitcher] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -6883,9 +6884,16 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
                 <p className="text-[10px] text-amber-600 dark:text-amber-500 uppercase">ID: {ID_DEL_EVENTO}</p>
               </div>
               <div className="p-2">
+                {/* 🔴 NUEVO BOTÓN MULTI-EVENTO */}
+                {authData?.availableEvents?.length > 1 && (
+                   <button onClick={() => { setShowEventSwitcher(true); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2.5 text-sm text-indigo-600 dark:text-amber-500 font-bold hover:bg-indigo-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors flex items-center mb-1">
+                     <RefreshCw size={16} className="mr-2.5"/> Cambiar Proyecto
+                   </button>
+                )}
                 <button onClick={() => handleNavigate('invitacion')} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg transition-colors flex items-center"><ExternalLink size={16} className="mr-2.5"/> Ver Invitación App</button>
                 <button onClick={handleContactStaff} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg transition-colors flex items-center"><MessageCircle size={16} className="mr-2.5"/> Soporte Premium</button>
               </div>
+              {/* 🔴 ESTE BLOQUE FALTABA */}
               <div className="p-2 border-t border-slate-100 dark:border-white/5">
                 <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-sm text-rose-500 font-bold hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors flex items-center"><LogOut size={16} className="mr-2.5"/> Cerrar Sesión</button>
               </div>
@@ -6894,6 +6902,31 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
         </div>
 
       </div>
+      {/* MODAL CAMBIAR PROYECTO */}
+      {showEventSwitcher && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl p-6 border border-transparent dark:border-white/10 animate-in zoom-in-95 transition-colors">
+            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2 font-editorial">Tus Proyectos</h3>
+            <p className="text-sm text-slate-500 mb-6">Selecciona el evento que deseas administrar:</p>
+            
+            <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2 mb-6">
+              {authData.availableEvents.map(ev => {
+                const isActive = ev.eventId === authData.eventId;
+                return (
+                  <button key={ev.eventId} onClick={() => switchEvent(ev.eventId)} className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between ${isActive ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30' : 'bg-slate-50 dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-amber-400'}`}>
+                    <div>
+                      <p className={`font-bold text-lg ${isActive ? 'text-amber-700 dark:text-amber-500' : 'text-slate-800 dark:text-white'}`}>{ev.nombres}</p>
+                      <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-1 font-bold">{ev.tipoEvento} • Plan {ev.plan}</p>
+                    </div>
+                    {isActive && <CheckCircle size={20} className="text-amber-500"/>}
+                  </button>
+                )
+              })}
+            </div>
+            <button onClick={() => setShowEventSwitcher(false)} className="w-full py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
@@ -9478,14 +9511,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS (SISTEMA ANTI-ROBO HORMIGA) ---
+// --- COMPONENTE: CENTRO DE LICENCIAS (SISTEMA ANTI-ROBO HORMIGA Y FINANZAS) ---
 // ==========================================
 const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  // 🔴 NUEVO CAMPO: referenciaPago
   const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '' });
   const [editingLic, setEditingLic] = useState(null);
 
@@ -9504,6 +9536,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const isSuperAdmin = authData?.role === 'superadmin';
   const isStaff = authData?.role === 'staff';
 
+  // 🔴 PRECIOS OFICIALES PARA EL CORTE DE CAJA
+  const PRECIOS = { basico: 990, plata: 1490, oro: 1990, diamante: 2990 };
+
   const tiposDeEvento = [
     { id: 'boda', label: 'Boda', placeholder: 'Ej. Carlos y Sofia', labelNombre: 'Nombre de los Novios' },
     { id: 'xv_anos', label: 'XV Años', placeholder: 'Ej. Maria Fernanda', labelNombre: 'Nombre de la Quinceañera' },
@@ -9519,7 +9554,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   useEffect(() => {
     const unsubLic = onSnapshot(collection(db, "usuarios"), (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // Ocultamos a los superadmins y al staff de la lista de clientes
       const clientes = data.filter(u => u.role !== 'superadmin' && u.role !== 'staff');
       clientes.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
       setLicencias(clientes);
@@ -9539,14 +9573,26 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     setIsCreating(true);
     try {
       const slug = formData.nombres.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-      const newEventId = slug + '-' + Math.random().toString(36).slice(-4); // Añadimos sufijo para evitar choques
+      const newEventId = slug + '-' + Math.random().toString(36).slice(-4); 
       const newEmail = formData.email.trim().toLowerCase();
-      const newPassword = Math.random().toString(36).slice(-8) + "!";
+      let newPassword = Math.random().toString(36).slice(-8) + "!";
+      let esClienteRecurrente = false;
 
-      await createUserWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
-      await signOut(secondaryAuth); 
+      // 🔴 INTENTAMOS CREAR EL USUARIO EN AUTH
+      try {
+        await createUserWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
+        await signOut(secondaryAuth); 
+      } catch (authError) {
+        if (authError.code === 'auth/email-already-in-use') {
+          // EL CLIENTE YA EXISTE. Es un cliente recurrente.
+          esClienteRecurrente = true;
+          newPassword = "Tu contraseña actual de Baulia"; 
+        } else {
+          throw authError; 
+        }
+      }
 
-      // 🔴 AQUÍ OCURRE LA MAGIA DE LA AUDITORÍA: Guardamos quién lo creó y la referencia de pago
+      // CREAMOS LA NUEVA BÓVEDA EN FIRESTORE A SU MISMO CORREO
       await setDoc(doc(db, "usuarios", newEventId), { 
         email: newEmail, 
         role: formData.role, 
@@ -9556,18 +9602,17 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         nombres: formData.nombres, 
         status: 'activo', 
         urlInvitacion: formData.urlInvitacion, 
-        creadoPor: authData.email, // El correo del empleado
-        referenciaPago: formData.referenciaPago, // El folio del banco
+        creadoPor: authData.email, 
+        referenciaPago: formData.referenciaPago, 
         createdAt: serverTimestamp() 
       });
 
       await setDoc(doc(db, "eventos", newEventId), { presupuestoTotal: 150000, nombres: formData.nombres, plan: formData.plan, tipoEvento: formData.tipoEvento });
 
-      setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role, urlInvitacion: formData.urlInvitacion });
+      setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role, urlInvitacion: formData.urlInvitacion, esRecurrente: esClienteRecurrente });
       setClientPhone('');
     } catch (error) {
-      if (error.code === 'auth/email-already-in-use') setDialog({ isOpen: true, type: 'alert', title: 'Correo Duplicado', message: 'Este correo ya está registrado.' });
-      else setDialog({ isOpen: true, type: 'alert', title: 'Error del Sistema', message: `Ocurrió un error al crear la licencia: ${error.message}` });
+      setDialog({ isOpen: true, type: 'alert', title: 'Error del Sistema', message: `Ocurrió un error al crear la licencia: ${error.message}` });
     }
     setIsCreating(false);
   };
@@ -9582,7 +9627,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       });
       setIsEditModalOpen(false);
       setEditingLic(null);
-      setDialog({ isOpen: true, type: 'alert', title: 'Actualizado', message: 'Los datos de la licencia se guardaron correctamente.' });
+      setDialog({ isOpen: true, type: 'alert', title: 'Actualizado', message: 'Los datos se guardaron correctamente.' });
     } catch (error) {
       setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'No se pudo actualizar la licencia.' });
     }
@@ -9610,26 +9655,31 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   };
 
   const handleDelete = (lic) => {
-    // 🔴 SEGURIDAD: Solo el SuperAdmin puede borrar
     if (!isSuperAdmin) {
-      setDialog({ isOpen: true, type: 'alert', title: 'Acceso Denegado', message: 'Solo la Dirección puede eliminar cuentas permanentemente. Si el cliente canceló, usa el botón de "Suspender".' });
+      setDialog({ isOpen: true, type: 'alert', title: 'Acceso Denegado', message: 'Solo la Dirección puede eliminar cuentas permanentemente. Usa el botón "Suspender".' });
       return;
     }
-    setDialog({ isOpen: true, type: 'confirm', title: 'Eliminar Permanentemente', message: `⚠️ PELIGRO EXTREMO: ¿Seguro de eliminar la información de ${lic.nombres}?`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await deleteDoc(doc(db, "usuarios", lic.id)); await deleteDoc(doc(db, "eventos", lic.eventId)); } });
+    setDialog({ isOpen: true, type: 'confirm', title: 'Eliminar Permanentemente', message: `⚠️ PELIGRO: ¿Seguro de eliminar la información de ${lic.nombres}?`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await deleteDoc(doc(db, "usuarios", lic.id)); await deleteDoc(doc(db, "eventos", lic.eventId)); } });
   };
 
   const toggleVerCorreo = (id) => setCorreosVisibles(prev => ({ ...prev, [id]: !prev[id] }));
 
+  const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
+
   const filteredLicencias = licencias.filter(lic => 
     (lic.nombres && lic.nombres.toLowerCase().includes(searchQuery.toLowerCase())) ||
     (lic.email && lic.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (lic.eventId && lic.eventId.toLowerCase().includes(searchQuery.toLowerCase()))
+    (lic.eventId && lic.eventId.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (lic.referenciaPago && lic.referenciaPago.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  // 🔴 CÁLCULO DE FINANZAS
   const totalBasico = licencias.filter(l => l.plan === 'basico').length;
   const totalPlata = licencias.filter(l => l.plan === 'plata').length;
   const totalOro = licencias.filter(l => l.plan === 'oro').length;
   const totalDiamante = licencias.filter(l => l.plan === 'diamante').length;
+
+  const ingresoTotal = (totalBasico * PRECIOS.basico) + (totalPlata * PRECIOS.plata) + (totalOro * PRECIOS.oro) + (totalDiamante * PRECIOS.diamante);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
@@ -9669,7 +9719,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
            <button onClick={() => setAdminTab('licencias')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'licencias' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
              <Building size={16}/> Clientes
            </button>
-           {/* Solo el SuperAdmin modera reseñas */}
            {isSuperAdmin && (
              <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 hover:bg-slate-100'}`}>
                <Star size={16}/> Reseñas
@@ -9682,7 +9731,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
             <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text" 
-              placeholder="Buscar por correo, nombre o ID..." 
+              placeholder="Buscar por correo, nombre, ID o Referencia..." 
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-sm"
@@ -9694,34 +9743,39 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       {adminTab === 'licencias' && (
         <div className="animate-in fade-in">
           
-          {/* 🔴 MÉTRICAS DE VENTAS (Solo visibles para el CEO/SuperAdmin) */}
+          {/* 🔴 CORTE DE CAJA Y MÉTRICAS (Solo SuperAdmin) */}
           {isSuperAdmin && (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
                <div onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '' }); }} className="col-span-2 md:col-span-1 bg-slate-900 p-5 rounded-2xl shadow-xl flex flex-col items-center justify-center text-center hover:scale-105 cursor-pointer transition-transform group border border-slate-700">
                  <div className="w-12 h-12 bg-white/10 text-amber-400 rounded-full flex items-center justify-center mb-2 group-hover:bg-amber-500 group-hover:text-slate-900 transition-colors"><Plus size={24}/></div>
-                 <h3 className="text-xs font-black text-white uppercase tracking-widest mt-1">Nueva Licencia</h3>
+                 <h3 className="text-[10px] font-black text-white uppercase tracking-widest mt-1">Vender Licencia</h3>
+               </div>
+
+               {/* TARJETA DE INGRESOS MAESTRA */}
+               <div className="col-span-2 md:col-span-1 bg-gradient-to-br from-emerald-500 to-emerald-600 p-5 rounded-2xl shadow-xl flex flex-col justify-center border border-emerald-400">
+                 <p className="text-[9px] font-black text-emerald-100 uppercase tracking-widest mb-1 flex items-center"><Wallet size={12} className="mr-1"/> Ingreso Teórico</p>
+                 <h3 className="text-2xl lg:text-3xl font-black text-white tracking-tight">{formatMoney(ingresoTotal)}</h3>
                </div>
                
                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Plan Básico</p>
+                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between"><span>Básico</span> <span>${PRECIOS.basico}</span></p>
                  <h3 className="text-3xl font-black text-slate-700">{totalBasico}</h3>
                </div>
                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Plan Plata</p>
+                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between"><span>Plata</span> <span>${PRECIOS.plata}</span></p>
                  <h3 className="text-3xl font-black text-slate-700">{totalPlata}</h3>
                </div>
                <div className="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm flex flex-col justify-center bg-amber-50/50">
-                 <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Plan Oro</p>
+                 <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1 flex justify-between"><span>Oro</span> <span>${PRECIOS.oro}</span></p>
                  <h3 className="text-3xl font-black text-amber-700">{totalOro}</h3>
                </div>
                <div className="bg-white p-4 rounded-2xl border border-indigo-200 shadow-sm flex flex-col justify-center bg-indigo-50/50">
-                 <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Plan Diamante</p>
+                 <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest mb-1 flex justify-between"><span>Diamante</span> <span>${PRECIOS.diamante}</span></p>
                  <h3 className="text-3xl font-black text-indigo-700">{totalDiamante}</h3>
                </div>
             </div>
           )}
 
-          {/* Botón de crear licencia visible para Staff (ya que no ven el bloque de arriba) */}
           {isStaff && (
             <div className="mb-6">
               <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '' }); }} className="px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-colors flex items-center">
@@ -9735,14 +9789,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                <h3 className="font-bold text-slate-800 text-sm">Directorio de Clientes ({filteredLicencias.length})</h3>
              </div>
              <div className="overflow-x-auto pb-24">
-               <table className="w-full text-left whitespace-nowrap min-w-[1000px]">
+               <table className="w-full text-left whitespace-nowrap min-w-[1100px]">
                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[10px] uppercase tracking-widest">
                    <tr>
                      <th className="px-5 py-3 font-bold">Cliente / ID</th>
                      <th className="px-5 py-3 font-bold">Acceso (Correo)</th>
                      <th className="px-5 py-3 font-bold text-center">Plan</th>
                      <th className="px-5 py-3 font-bold">Link Invitación</th>
-                     {isSuperAdmin && <th className="px-5 py-3 font-bold text-center">Vendedor</th>}
+                     {isSuperAdmin && <th className="px-5 py-3 font-bold">Auditoría de Venta</th>}
                      <th className="px-5 py-3 font-bold text-center">Estatus</th>
                      <th className="px-5 py-3 font-bold text-right">Controles</th>
                    </tr>
@@ -9787,11 +9841,15 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                <span className="text-[10px] text-slate-400 italic">Pendiente de subir</span>
                              )}
                            </td>
-                           {/* 🔴 EL OJO QUE TODO LO VE: SOLO EL SUPERADMIN VE QUIÉN LO CREÓ */}
+                           {/* 🔴 AUDITORÍA: VISIBLE SOLO PARA EL CEO */}
                            {isSuperAdmin && (
-                             <td className="px-5 py-4 text-center">
-                               <p className="text-[10px] font-bold text-slate-600">{lic.creadoPor ? lic.creadoPor.split('@')[0] : 'Stripe/Web'}</p>
-                               {lic.referenciaPago && <p className="text-[8px] text-slate-400 uppercase tracking-widest mt-0.5" title={lic.referenciaPago}>Ref: {lic.referenciaPago.slice(0,6)}...</p>}
+                             <td className="px-5 py-4">
+                               <div className="bg-slate-50 border border-slate-200 p-2 rounded-lg max-w-[200px]">
+                                 <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center"><UserPlus size={10} className="mr-1"/> Vendedor:</p>
+                                 <p className="text-[10px] font-black text-indigo-600 mb-2 truncate" title={lic.creadoPor}>{lic.creadoPor ? lic.creadoPor : 'Stripe (Web)'}</p>
+                                 <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center"><Wallet size={10} className="mr-1"/> Ref. Pago:</p>
+                                 <p className="text-[10px] font-mono text-slate-700 font-bold truncate" title={lic.referenciaPago}>{lic.referenciaPago ? lic.referenciaPago : 'Automático Stripe'}</p>
+                               </div>
                              </td>
                            )}
                            <td className="px-5 py-4 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
@@ -9800,7 +9858,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                 <button onClick={() => { setEditingLic(lic); setIsEditModalOpen(true); }} title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"><Edit2 size={16} /></button>
                                 {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"><ExternalLink size={16} /></button>}
                                 <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors ${estaSuspendido ? 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200' : 'text-amber-600 bg-amber-100 hover:bg-amber-200'}`}><Power size={16} /></button>
-                                {/* 🔴 SOLO EL SUPERADMIN PUEDE BORRAR DEFINITIVAMENTE */}
                                 {isSuperAdmin && (
                                   <button onClick={() => handleDelete(lic)} title="Eliminar Permanentemente" className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:text-white hover:bg-rose-500 transition-colors"><Trash2 size={16} /></button>
                                 )}
@@ -9817,7 +9874,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         </div>
       )}
 
-      {/* MODAL PARA CREAR NUEVA LICENCIA (CON SISTEMA ANTI-ROBO) */}
+      {/* MODAL PARA CREAR NUEVA LICENCIA (CON ANTI-ROBO) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -9826,14 +9883,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                 <div className="text-center mb-6">
                   <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4"><Key size={24} /></div>
                   <h3 className="text-xl font-black text-slate-800">Vender / Crear Licencia</h3>
-                  <p className="text-xs text-slate-500 mt-1">Tu usuario quedará registrado como el vendedor de esta cuenta.</p>
+                  <p className="text-xs text-slate-500 mt-1">El vendedor quedará registrado en la auditoría.</p>
                 </div>
                 
                 <div className="space-y-4 mb-6">
                   {/* 🔴 CAMPO OBLIGATORIO ANTI-ROBO HORMIGA */}
                   <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
                     <label className="block text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-1.5 flex items-center"><Wallet size={12} className="mr-1"/> Referencia de Pago (Obligatorio)</label>
-                    <input type="text" required value={formData.referenciaPago} onChange={e => setFormData({...formData, referenciaPago: e.target.value})} placeholder="Folio de transferencia o 'Pago en Efectivo'" className="w-full p-3 bg-white border border-emerald-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 text-sm" />
+                    <input type="text" required value={formData.referenciaPago} onChange={e => setFormData({...formData, referenciaPago: e.target.value})} placeholder="Ej: Pago en Efectivo, Transf Banorte..." className="w-full p-3 bg-white border border-emerald-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 text-sm" />
                   </div>
 
                   <div className="flex gap-4">
@@ -9942,7 +9999,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
@@ -10431,8 +10487,14 @@ const LoginScreen = () => {
 // --- COMPONENTE: PANEL DE ADMINISTRACIÓN PROTEGIDO ---
 // ==========================================
 const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
-  const { role: originalUserRole, plan: originalUserPlan, eventId: originalEventId } = authData;
+  const { role: originalUserRole, plan: originalUserPlan, eventId: originalEventId, availableEvents } = authData;
   
+  // 🔴 FUNCIÓN PARA CAMBIAR DE PROYECTO
+  const switchEvent = (newEventId) => {
+    localStorage.setItem('eventmaster_currentEventId', newEventId);
+    window.location.reload(); // Recargamos para que Firebase limpie y cargue la bóveda nueva
+  };
+
   // 🔴 ESTADOS PARA EL MODO DIOS (IMPERSONATION)
   const [impersonating, setImpersonating] = useState(null);
   
@@ -10592,7 +10654,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         {/* Desplazamos un poco el Header hacia abajo si el Modo Dios está activo para que no lo tape la alerta */}
         <div className={`${impersonating ? 'pt-7' : ''} transition-all`}>
-          <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} />
+          <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} authData={authData} switchEvent={switchEvent} />
         </div>
         
         <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-5 lg:p-6 print:p-0 print:overflow-visible custom-scrollbar relative z-10">
@@ -11024,7 +11086,7 @@ export default function App() {
     else root.classList.remove('dark');
   }, [isDarkMode]);
 
-  // Autenticación Global de Firebase
+  // Autenticación Global de Firebase (Soporte Multi-Evento)
   useEffect(() => {
     if (!window.Html5QrcodeScanner && !document.getElementById('qr-script')) {
       const script = document.createElement('script');
@@ -11037,28 +11099,41 @@ export default function App() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         if (user && user.email) {
-          const q = query(collection(db, "usuarios"), where("email", "==", user.email.toLowerCase()));
+          // 🔴 BUSCAMOS TODOS LOS EVENTOS DE ESTE CORREO
+          const q = query(collection(db, "usuarios"), where("email", "==", user.email.toLowerCase()), orderBy("createdAt", "desc"));
           const querySnapshot = await getDocs(q);
           
           if (!querySnapshot.empty) {
-            const userData = querySnapshot.docs[0].data();
+            const userEventsList = querySnapshot.docs.map(doc => doc.data());
+            const activeEvents = userEventsList.filter(e => e.status !== 'suspendido');
             
-            if (userData.status === 'suspendido') {
+            if (activeEvents.length === 0) {
                await signOut(auth);
                setAccountSuspended(true);
-               setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null });
+               setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
             } else {
-               setAuthData({ isAuthenticated: true, role: userData.role, plan: userData.plan, eventId: userData.eventId });
+               // 🔴 REVISAMOS SI YA HABÍA ELEGIDO UNO, SI NO, LE CARGAMOS EL MÁS NUEVO
+               const savedEventId = localStorage.getItem('eventmaster_currentEventId');
+               let selectedEvent = activeEvents.find(e => e.eventId === savedEventId) || activeEvents[0];
+               
+               setAuthData({ 
+                 isAuthenticated: true, 
+                 role: selectedEvent.role, 
+                 plan: selectedEvent.plan, 
+                 eventId: selectedEvent.eventId,
+                 availableEvents: activeEvents // Guardamos su lista de eventos
+               });
+               localStorage.setItem('eventmaster_currentEventId', selectedEvent.eventId);
             }
           } else {
             await signOut(auth);
-            setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null });
+            setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
           }
         } else {
-          setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null });
+          setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
         }
       } catch (error) {
-        setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null });
+        setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
       } finally {
         setIsCheckingAuth(false);
       }

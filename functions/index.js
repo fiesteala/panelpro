@@ -31,7 +31,7 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
 
       console.log("Cobro exitoso. Creando Bóveda...");
 
-      // CREACIÓN DE USUARIO Y CONTRASEÑA
+      // CREACIÓN DE USUARIO Y CONTRASEÑA EN FIREBASE
       const passwordTemporal = Math.random().toString(36).slice(-8) + "Baulia!";
       const userRecord = await admin.auth().createUser({
         email: email.trim().toLowerCase(),
@@ -63,42 +63,54 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
         tipoEvento: 'boda'
       });
 
-      // 🔴 3. EL CARTERO AUTOMÁTICO ENTRA EN ACCIÓN 💌
-      console.log("Enviando correo de bienvenida a:", email);
+      // 🔴 3. EL CARTERO AUTOMÁTICO - CORREO VIP DE LUJO 💌
+      console.log("Enviando correo VIP de bienvenida a:", email);
       
       const emailHtml = `
-        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; padding: 20px; background-color: #050505; color: #ffffff; border-radius: 10px;">
-          <h1 style="color: #f59e0b; text-align: center; margin-bottom: 5px;">¡Bienvenido a Baulia!</h1>
-          <p style="color: #cbd5e1; font-size: 16px; text-align: center; margin-top: 0;">Tu Bóveda Privada ha sido creada.</p>
+        <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-w: 600px; margin: 0 auto; padding: 0; background-color: #0a0a0a; color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
           
-          <p style="color: #cbd5e1; font-size: 16px; margin-top: 30px;">Hola <b>${nombre}</b>,</p>
-          <p style="color: #cbd5e1; font-size: 16px;">Tu pago ha sido procesado con éxito y tu plataforma está lista para usarse.</p>
-          
-          <div style="background-color: #111111; padding: 20px; border-radius: 8px; margin: 30px 0; border: 1px solid #333333;">
-            <p style="margin: 0 0 15px 0; color: #f59e0b; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">Tus Credenciales de Acceso</p>
-            <p style="margin: 8px 0; color: #ffffff; font-size: 15px;"><b>Usuario:</b> ${email.trim().toLowerCase()}</p>
-            <p style="margin: 8px 0; color: #ffffff; font-size: 15px;"><b>Contraseña temporal:</b> <span style="font-family: monospace; background: #222; padding: 4px 8px; border-radius: 4px; color: #6ee7b7;">${passwordTemporal}</span></p>
+          <div style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); padding: 40px 20px; text-align: center;">
+            <h1 style="color: #ffffff; font-size: 28px; margin: 0; letter-spacing: 2px; text-transform: uppercase;">Bienvenido a la Élite</h1>
+            <p style="color: #fef3c7; font-size: 14px; margin-top: 10px; font-weight: 300; letter-spacing: 1px;">Tu Bóveda Digital está lista</p>
           </div>
 
-          <p style="text-align: center; margin-top: 40px; margin-bottom: 40px;">
-            <a href="https://panel.baulia.com" style="background-color: #f59e0b; color: #050505; padding: 16px 32px; text-decoration: none; font-weight: bold; border-radius: 50px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Entrar a mi Panel</a>
-          </p>
+          <div style="padding: 40px 30px; background-color: #111111;">
+            <p style="font-size: 16px; line-height: 1.6; color: #cbd5e1; margin-top: 0;">Hola <strong style="color: #ffffff;">${nombre}</strong>,</p>
+            <p style="font-size: 16px; line-height: 1.6; color: #cbd5e1;">Es un honor para nosotros ser parte de tu evento. Hemos preparado tu <b>Panel de Control Premium</b>, diseñado para darte el poder absoluto sobre cada detalle de tu celebración sin el estrés habitual.</p>
+            
+            <div style="margin: 35px 0; background-color: #050505; border: 1px solid #333333; border-radius: 12px; padding: 25px; text-align: center;">
+              <p style="margin: 0 0 15px 0; color: #d97706; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">Tus Credenciales de Acceso Seguras</p>
+              <p style="margin: 10px 0; color: #94a3b8; font-size: 14px;">Usuario: <br><strong style="color: #ffffff; font-size: 16px;">${email.trim().toLowerCase()}</strong></p>
+              <p style="margin: 10px 0; color: #94a3b8; font-size: 14px;">Contraseña Temporal: <br><strong style="font-family: monospace; background: #1e293b; padding: 6px 12px; border-radius: 6px; color: #34d399; font-size: 18px; letter-spacing: 2px;">${passwordTemporal}</strong></p>
+              <p style="margin-top: 15px; font-size: 11px; color: #64748b;"><i>* Te recomendamos guardar este correo en un lugar seguro.</i></p>
+            </div>
+
+            <h3 style="color: #ffffff; font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">¿Qué sigue ahora?</h3>
+            <ul style="color: #cbd5e1; font-size: 14px; line-height: 1.8; padding-left: 20px; margin-bottom: 35px;">
+              <li style="margin-bottom: 10px;"><strong>1. Accede a tu Bóveda:</strong> Entra al panel usando el botón de abajo y tus credenciales.</li>
+              <li style="margin-bottom: 10px;"><strong>2. Diseña tu Espacio:</strong> Asigna lugares, mesas, y configura tu presupuesto.</li>
+              <li style="margin-bottom: 10px;"><strong>3. Relájate:</strong> Deja que la tecnología de Baulia haga el trabajo pesado mientras tú disfrutas.</li>
+            </ul>
+
+            <div style="text-align: center;">
+              <a href="https://panel.baulia.com" style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000000; padding: 16px 40px; text-decoration: none; font-weight: bold; border-radius: 50px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);">Desbloquear mi Bóveda</a>
+            </div>
+          </div>
           
-          <p style="color: #64748b; font-size: 11px; text-align: center; border-top: 1px solid #333; padding-top: 20px;">
-            Si tienes problemas para acceder, responde a este correo.<br><br>
-            © ${new Date().getFullYear()} Baulia Premium Software.
-          </p>
+          <div style="background-color: #050505; padding: 30px 20px; text-align: center; border-top: 1px solid #222222;">
+            <p style="color: #64748b; font-size: 12px; margin: 0 0 10px 0;">¿Necesitas ayuda? Responde a este correo y nuestro equipo VIP te asistirá al instante.</p>
+            <p style="color: #475569; font-size: 10px; margin: 0; text-transform: uppercase; letter-spacing: 1px;">© ${new Date().getFullYear()} Baulia Premium Software</p>
+          </div>
         </div>
       `;
 
       await resend.emails.send({
-        from: 'Baulia VIP <onboarding@resend.dev>', // Usamos el correo de prueba de Resend por ahora
+        from: 'Equipo Baulia <hola@baulia.com>', 
         to: email.trim().toLowerCase(),
-        subject: '🗝️ Tus accesos a la Bóveda Baulia',
+        subject: '🗝️ Tu Bóveda Digital está lista - Accesos Baulia',
         html: emailHtml
       });
 
-      // CONFIRMACIÓN A LA PÁGINA WEB
       res.status(200).send({ 
         success: true, 
         eventId: eventId,
