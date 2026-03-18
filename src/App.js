@@ -9331,25 +9331,21 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
          </div>
       </section>
 
-      {/* ================= FOOTER PREMIUM ORIGINAL RESTAURADO ================= */}
+      {/* ================= FOOTER ORIGINAL RESTAURADO (CON AMOR 🇲🇽) ================= */}
       <footer className="bg-[#050505] pt-24 pb-12 border-t border-white/5 relative z-20">
         <div className="max-w-7xl mx-auto px-6 md:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
-            
-            {/* Columna Izquierda - Marca y Orgullo */}
-            <div className="md:col-span-5">
-              <div className="flex items-center gap-3 mb-6">
-                 <BauliaLogo className="h-10 w-auto" forceWhite={true} />
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+            <div className="md:col-span-2">
+              <BauliaLogo className="h-12 w-auto mb-6" forceWhite={true} />
               <p className="text-slate-400 text-sm leading-relaxed max-w-sm mb-6">
                 El estándar de oro en gestión de eventos y diseño de invitaciones interactivas. Bóvedas privadas con tecnología de punta.
               </p>
-              <div className="flex items-center gap-2 mb-8">
-                <span className="text-xl">🇲🇽</span>
-                <span className="text-white text-xs font-bold uppercase tracking-widest">Hecho con ❤️ en México</span>
+              <div className="flex items-center gap-3 mb-8">
+                <span className="text-2xl">🇲🇽</span>
+                <span className="text-white text-xs font-bold uppercase tracking-widest">Hecho con amor en México</span>
               </div>
-              {/* Redes Sociales Completas */}
-              <div className="flex gap-3">
+              {/* Redes Sociales */}
+              <div className="flex gap-4">
                 <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconIG /></a>
                 <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconFB /></a>
                 <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-900 transition-colors"><IconTK /></a>
@@ -9357,35 +9353,21 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </div>
             </div>
             
-            {/* Columnas de Links */}
-            <div className="md:col-span-2">
+            <div>
               <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Plataforma</h4>
               <ul className="space-y-4 text-sm text-slate-400">
                 <li><a href="#experiencia" className="hover:text-amber-500 transition-colors">La Experiencia</a></li>
                 <li><a href="#boveda" className="hover:text-amber-500 transition-colors">El Panel</a></li>
                 <li><a href="#planes" className="hover:text-amber-500 transition-colors">Planes y Precios</a></li>
-                <li><a href="#planners" className="hover:text-amber-500 transition-colors">Para Planners (B2B)</a></li>
               </ul>
             </div>
             
-            <div className="md:col-span-2">
-              <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Legal</h4>
+            <div>
+              <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Contacto y Legal</h4>
               <ul className="space-y-4 text-sm text-slate-400">
-                <li><button onClick={() => setLegalModal('privacy')} className="hover:text-amber-500 transition-colors">Aviso de Privacidad</button></li>
-                <li><button onClick={() => setLegalModal('terms')} className="hover:text-amber-500 transition-colors">Términos de Servicio</button></li>
-                <li><button onClick={() => setLegalModal('vision')} className="hover:text-amber-500 transition-colors">Nuestra Visión</button></li>
-              </ul>
-            </div>
-
-            <div className="md:col-span-3">
-              <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6">Soporte y Contacto</h4>
-              <ul className="space-y-4 text-sm text-slate-400">
-                <li><a href="#faq" className="hover:text-amber-500 transition-colors">Preguntas Frecuentes</a></li>
-                <li className="pt-2">
-                  <a href="mailto:hola@baulia.com" className="inline-flex items-center gap-2 text-amber-500 hover:text-amber-400 transition-colors font-bold">
-                    <Mail size={16} /> hola@baulia.com
-                  </a>
-                </li>
+                <li><a href="mailto:hola@baulia.com" className="hover:text-amber-500 transition-colors flex items-center gap-2 font-bold"><Mail size={16}/> hola@baulia.com</a></li>
+                <li><button onClick={() => setLegalModal('privacy')} className="hover:text-amber-500 transition-colors mt-4 block">Aviso de Privacidad</button></li>
+                <li><button onClick={() => setLegalModal('terms')} className="hover:text-amber-500 transition-colors">Términos y Condiciones</button></li>
               </ul>
             </div>
           </div>
