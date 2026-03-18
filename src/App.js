@@ -9527,7 +9527,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   
   const [licencias, setLicencias] = useState([]);
   const [resenasList, setResenasList] = useState([]);
-  const [ventas, setVentas] = useState([]); // 🔴 NUEVO ESTADO PARA EL LIBRO MAYOR
+  const [ventas, setVentas] = useState([]); 
   
   const [correosVisibles, setCorreosVisibles] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
@@ -9554,23 +9554,30 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const eventoSeleccionado = tiposDeEvento.find(t => t.id === formData.tipoEvento) || tiposDeEvento[0];
 
   useEffect(() => {
+    // 🔴 FÓRMULA BLINDADA ANTI-CRASH PARA FECHAS
+    const getSafeTime = (field) => {
+      if (!field) return 0;
+      if (typeof field.toMillis === 'function') return field.toMillis();
+      if (field.seconds) return field.seconds * 1000;
+      return 0;
+    };
+
     const unsubLic = onSnapshot(collection(db, "usuarios"), (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const clientes = data.filter(u => u.role !== 'superadmin' && u.role !== 'staff');
-      clientes.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
+      clientes.sort((a, b) => getSafeTime(b.createdAt) - getSafeTime(a.createdAt));
       setLicencias(clientes);
     });
 
     const unsubRes = onSnapshot(collection(db, "resenas"), (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      data.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
+      data.sort((a, b) => getSafeTime(b.createdAt) - getSafeTime(a.createdAt));
       setResenasList(data);
     });
 
-    // 🔴 CONEXIÓN AL LIBRO MAYOR DE VENTAS INMUTABLE
     const unsubVentas = onSnapshot(collection(db, "ventas"), (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      data.sort((a, b) => b.fecha?.toMillis() - a.fecha?.toMillis());
+      data.sort((a, b) => getSafeTime(b.fecha) - getSafeTime(a.fecha));
       setVentas(data);
     });
 
@@ -9607,7 +9614,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
       await setDoc(doc(db, "eventos", newEventId), { presupuestoTotal: 150000, nombres: formData.nombres, plan: formData.plan, tipoEvento: formData.tipoEvento });
 
-      // 🔴 REGISTRAMOS LA VENTA MANUAL EN EL LIBRO MAYOR
       const mesAnioAct = new Date().toISOString().slice(0, 7);
       await setDoc(doc(db, "ventas", newEventId), {
         fecha: serverTimestamp(),
@@ -9661,6 +9667,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     setDialog({ isOpen: true, type: 'confirm', title: 'Eliminar Permanentemente', message: `⚠️ PELIGRO: ¿Seguro de eliminar la información de ${lic.nombres}? (El registro de ventas y finanzas NO se borrará, quedará como histórico).`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await deleteDoc(doc(db, "usuarios", lic.id)); await deleteDoc(doc(db, "eventos", lic.eventId)); } });
   };
 
+  const toggleVerCorreo = (id) => setCorreosVisibles(prev => ({ ...prev, [id]: !prev[id] }));
+
   const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
 
   const filteredLicencias = licencias.filter(lic => 
@@ -9669,21 +9677,22 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     (lic.eventId && lic.eventId.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  // 🔴 LÓGICA DEL CORTE FINANCIERO (ESTADO DE CUENTA)
-  // Obtenemos los meses únicos que existen en el historial para el dropdown
   const mesesDisponibles = [...new Set(ventas.map(v => v.mesAnio))].sort().reverse();
   if (!mesesDisponibles.includes(currentMonthYear)) mesesDisponibles.unshift(currentMonthYear);
 
-  // Filtramos las ventas para que solo muestre las del mes seleccionado
   const ventasDelMes = ventas.filter(v => v.mesAnio === mesSeleccionado);
-  
   const ingresoMensualTotal = ventasDelMes.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
   
-  // Desglose de Ventas por Plan
   const desglosePlanes = { basico: 0, plata: 0, oro: 0, diamante: 0 };
   ventasDelMes.forEach(v => { if(desglosePlanes[v.plan] !== undefined) desglosePlanes[v.plan] += (Number(v.monto) || 0); });
 
-  // Función para exportar a Excel el corte del mes
+  // 🔴 CONTADORES DE LICENCIAS RESTAURADOS
+  const totalesPorLicencia = licencias.reduce((acc, user) => {
+    const tipo = (user.plan || 'basico').toLowerCase().trim();
+    acc[tipo] = (acc[tipo] || 0) + 1;
+    return acc;
+  }, { basico: 0, plata: 0, oro: 0, diamante: 0 });
+
   const exportarCorteContador = () => {
     const csvRows = ventasDelMes.map(v => {
       const fechaLimpia = v.fecha?.toDate ? v.fecha.toDate().toLocaleDateString('es-MX') : 'Reciente';
@@ -9702,15 +9711,15 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
       {dialog.isOpen && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-white/20">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ${dialog.type === 'alert' ? 'bg-amber-100 text-amber-600' : 'bg-rose-100 text-rose-600'}`}>
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-transparent dark:border-white/20 transition-colors">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ${dialog.type === 'alert' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-500'}`}>
               {dialog.type === 'alert' ? <AlertTriangle size={32} /> : <AlertCircle size={32} />}
             </div>
-            <h3 className="text-xl font-black text-slate-800 mb-2">{dialog.title}</h3>
-            <p className="text-sm text-slate-500 mb-6">{dialog.message}</p>
+            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">{dialog.title}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">{dialog.message}</p>
             <div className="flex space-x-3">
-              {dialog.type === 'confirm' && <button onClick={() => setDialog({ ...dialog, isOpen: false })} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">Cancelar</button>}
+              {dialog.type === 'confirm' && <button onClick={() => setDialog({ ...dialog, isOpen: false })} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Cancelar</button>}
               <button onClick={() => { if(dialog.onConfirm) dialog.onConfirm(); else setDialog({ ...dialog, isOpen: false }); }} className={`flex-1 py-3.5 text-white rounded-xl font-bold shadow-lg transition-transform active:scale-95 ${dialog.type === 'alert' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/30'}`}>
                 {dialog.type === 'confirm' ? 'Sí, proceder' : 'Entendido'}
               </button>
@@ -9733,16 +9742,16 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="flex gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm w-full md:w-max overflow-x-auto">
-           <button onClick={() => setAdminTab('licencias')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'licencias' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
+        <div className="flex gap-4 bg-white dark:bg-[#0a0a0a] p-2 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm w-full md:w-max overflow-x-auto transition-colors">
+           <button onClick={() => setAdminTab('licencias')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'licencias' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
              <Building size={16}/> Clientes Activos
            </button>
            {isSuperAdmin && (
              <>
-               <button onClick={() => setAdminTab('finanzas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'finanzas' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-100'}`}>
+               <button onClick={() => setAdminTab('finanzas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'finanzas' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
                  <PieChart size={16}/> Corte Financiero
                </button>
-               <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 hover:bg-slate-100'}`}>
+               <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
                  <Star size={16}/> Reseñas
                </button>
              </>
@@ -9751,32 +9760,54 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
         {adminTab === 'licencias' && (
           <div className="relative w-full md:w-96">
-            <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input type="text" placeholder="Buscar cliente por correo o nombre..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-sm" />
+            <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+            <input type="text" placeholder="Buscar cliente por correo o nombre..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-12 pr-4 py-3 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-2xl text-sm text-slate-900 dark:text-white outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-sm transition-colors" />
           </div>
         )}
       </div>
+
+      {/* 🔴 NUEVO: CONTADORES VISUALES (SOLO EN LICENCIAS) */}
+      {adminTab === 'licencias' && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+          <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between transition-colors">
+             <div><p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Básico</p><p className="text-2xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.basico}</p></div>
+             <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400"><Users size={18}/></div>
+          </div>
+          <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between transition-colors">
+             <div><p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Plata</p><p className="text-2xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.plata}</p></div>
+             <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400"><Wallet size={18}/></div>
+          </div>
+          <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex items-center justify-between transition-colors">
+             <div><p className="text-[10px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">Oro</p><p className="text-2xl font-black text-amber-700 dark:text-amber-400">{totalesPorLicencia.oro}</p></div>
+             <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500"><ShieldCheck size={18}/></div>
+          </div>
+          <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 shadow-sm flex items-center justify-between transition-colors">
+             <div><p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Diamante</p><p className="text-2xl font-black text-indigo-700 dark:text-indigo-400">{totalesPorLicencia.diamante}</p></div>
+             <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400"><LayoutDashboard size={18}/></div>
+          </div>
+        </div>
+      )}
 
       {/* 🔴 TAB 1: ESTADO DE CUENTA Y CORTE FINANCIERO (INMUTABLE) */}
       {adminTab === 'finanzas' && isSuperAdmin && (
         <div className="animate-in fade-in space-y-6">
            
-           <div className="flex flex-col md:flex-row justify-between items-center bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+           <div className="flex flex-col md:flex-row justify-between items-center bg-white dark:bg-[#0a0a0a] p-5 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
               <div className="flex items-center mb-4 md:mb-0">
-                <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mr-4"><Wallet size={24}/></div>
+                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mr-4 border border-transparent dark:border-emerald-500/30"><Wallet size={24}/></div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Periodo a evaluar</p>
-                  <select value={mesSeleccionado} onChange={(e) => setMesSeleccionado(e.target.value)} className="text-xl font-black text-slate-800 bg-transparent outline-none cursor-pointer hover:text-emerald-600 transition-colors">
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Periodo a evaluar</p>
+                  <select value={mesSeleccionado} onChange={(e) => setMesSeleccionado(e.target.value)} className="text-xl font-black text-slate-800 dark:text-white bg-transparent outline-none cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                     {mesesDisponibles.map(m => {
-                      const date = new Date(m + '-02'); // Truco de zona horaria
+                      const date = new Date(m + '-02'); 
                       const mesNombre = date.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
-                      return <option key={m} value={m}>{mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1)} {m === currentMonthYear ? '(Mes Actual)' : ''}</option>
+                      return <option key={m} value={m} className="bg-white dark:bg-[#111]">{mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1)} {m === currentMonthYear ? '(Mes Actual)' : ''}</option>
                     })}
                   </select>
                 </div>
               </div>
-              <button onClick={exportarCorteContador} className="px-6 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold shadow-lg hover:bg-slate-800 transition-colors flex items-center">
-                <FileSpreadsheet size={18} className="mr-2 text-emerald-400"/> Descargar Excel para Contador
+              <button onClick={exportarCorteContador} className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold shadow-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center">
+                <FileSpreadsheet size={18} className="mr-2 text-emerald-400 dark:text-emerald-600"/> Descargar Excel
               </button>
            </div>
 
@@ -9788,34 +9819,34 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                  <p className="text-xs text-emerald-100 mt-4 relative z-10">Se reinicia a $0 automáticamente el día 1 de cada mes.</p>
               </div>
 
-              <div className="md:col-span-2 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                 <h3 className="text-sm font-bold text-slate-800 mb-6 flex items-center"><TrendingDown size={18} className="mr-2 text-indigo-500"/> Desglose de ingresos por Producto</h3>
+              <div className="md:col-span-2 bg-white dark:bg-[#0a0a0a] p-8 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-center transition-colors">
+                 <h3 className="text-sm font-bold text-slate-800 dark:text-white mb-6 flex items-center"><TrendingDown size={18} className="mr-2 text-indigo-500 dark:text-amber-500"/> Desglose de ingresos por Producto</h3>
                  
                  <div className="space-y-4">
                     <div>
-                      <div className="flex justify-between text-xs font-bold mb-1"><span className="text-slate-600">Plan Diamante</span> <span className="text-indigo-600">{formatMoney(desglosePlanes.diamante)}</span></div>
-                      <div className="w-full bg-slate-100 rounded-full h-2"><div className="bg-indigo-500 h-2 rounded-full" style={{ width: `${ingresoMensualTotal > 0 ? (desglosePlanes.diamante/ingresoMensualTotal)*100 : 0}%` }}></div></div>
+                      <div className="flex justify-between text-xs font-bold mb-1"><span className="text-slate-600 dark:text-slate-300">Plan Diamante</span> <span className="text-indigo-600 dark:text-indigo-400">{formatMoney(desglosePlanes.diamante)}</span></div>
+                      <div className="w-full bg-slate-100 dark:bg-[#111] rounded-full h-2"><div className="bg-indigo-500 dark:bg-indigo-400 h-2 rounded-full" style={{ width: `${ingresoMensualTotal > 0 ? (desglosePlanes.diamante/ingresoMensualTotal)*100 : 0}%` }}></div></div>
                     </div>
                     <div>
-                      <div className="flex justify-between text-xs font-bold mb-1"><span className="text-slate-600">Plan Oro</span> <span className="text-amber-500">{formatMoney(desglosePlanes.oro)}</span></div>
-                      <div className="w-full bg-slate-100 rounded-full h-2"><div className="bg-amber-400 h-2 rounded-full" style={{ width: `${ingresoMensualTotal > 0 ? (desglosePlanes.oro/ingresoMensualTotal)*100 : 0}%` }}></div></div>
+                      <div className="flex justify-between text-xs font-bold mb-1"><span className="text-slate-600 dark:text-slate-300">Plan Oro</span> <span className="text-amber-500 dark:text-amber-400">{formatMoney(desglosePlanes.oro)}</span></div>
+                      <div className="w-full bg-slate-100 dark:bg-[#111] rounded-full h-2"><div className="bg-amber-400 h-2 rounded-full" style={{ width: `${ingresoMensualTotal > 0 ? (desglosePlanes.oro/ingresoMensualTotal)*100 : 0}%` }}></div></div>
                     </div>
                     <div>
-                      <div className="flex justify-between text-xs font-bold mb-1"><span className="text-slate-600">Plan Plata & Básico</span> <span className="text-slate-400">{formatMoney(desglosePlanes.plata + desglosePlanes.basico)}</span></div>
-                      <div className="w-full bg-slate-100 rounded-full h-2"><div className="bg-slate-400 h-2 rounded-full" style={{ width: `${ingresoMensualTotal > 0 ? ((desglosePlanes.plata + desglosePlanes.basico)/ingresoMensualTotal)*100 : 0}%` }}></div></div>
+                      <div className="flex justify-between text-xs font-bold mb-1"><span className="text-slate-600 dark:text-slate-400">Plan Plata & Básico</span> <span className="text-slate-400">{formatMoney(desglosePlanes.plata + desglosePlanes.basico)}</span></div>
+                      <div className="w-full bg-slate-100 dark:bg-[#111] rounded-full h-2"><div className="bg-slate-400 dark:bg-slate-600 h-2 rounded-full" style={{ width: `${ingresoMensualTotal > 0 ? ((desglosePlanes.plata + desglosePlanes.basico)/ingresoMensualTotal)*100 : 0}%` }}></div></div>
                     </div>
                  </div>
               </div>
            </div>
 
-           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mt-6">
-              <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                 <h3 className="font-bold text-slate-800 text-sm">Libro Mayor de Transacciones ({ventasDelMes.length})</h3>
-                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Inmutable ante borrados</span>
+           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden mt-6 transition-colors">
+              <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
+                 <h3 className="font-bold text-slate-800 dark:text-white text-sm">Libro Mayor de Transacciones ({ventasDelMes.length})</h3>
+                 <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">Inmutable ante borrados</span>
               </div>
               <div className="overflow-x-auto pb-10">
                 <table className="w-full text-left whitespace-nowrap">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[10px] uppercase tracking-widest">
+                  <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest transition-colors">
                     <tr>
                       <th className="px-5 py-3 font-bold">Fecha</th>
                       <th className="px-5 py-3 font-bold">Cliente / Evento</th>
@@ -9824,24 +9855,24 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       <th className="px-5 py-3 font-bold text-right">Monto Registrado</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-xs">
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
                     {ventasDelMes.length === 0 ? (
-                      <tr><td colSpan="5" className="px-5 py-12 text-center text-slate-400 font-medium text-sm">No hay ventas registradas en este mes.</td></tr>
+                      <tr><td colSpan="5" className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">No hay ventas registradas en este mes.</td></tr>
                     ) : (
                       ventasDelMes.map((venta) => (
-                        <tr key={venta.id} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-5 py-4 font-medium text-slate-600">{venta.fecha?.toDate ? venta.fecha.toDate().toLocaleString('es-MX', {day: 'numeric', month: 'short', hour:'2-digit', minute:'2-digit'}) : 'Reciente'}</td>
-                          <td className="px-5 py-4 font-black text-slate-800">{venta.cliente}</td>
+                        <tr key={venta.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                          <td className="px-5 py-4 font-medium text-slate-600 dark:text-slate-300">{venta.fecha?.toDate ? venta.fecha.toDate().toLocaleString('es-MX', {day: 'numeric', month: 'short', hour:'2-digit', minute:'2-digit'}) : 'Reciente'}</td>
+                          <td className="px-5 py-4 font-black text-slate-800 dark:text-white">{venta.cliente}</td>
                           <td className="px-5 py-4 text-center">
-                            <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${venta.plan === 'diamante' ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : venta.plan === 'oro' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                            <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${venta.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : venta.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'}`}>
                               {venta.plan}
                             </span>
                           </td>
                           <td className="px-5 py-4">
-                            <p className="text-[10px] font-black text-indigo-600">{venta.vendedor.split('@')[0]}</p>
-                            <p className="text-[9px] text-slate-400 uppercase tracking-widest mt-0.5">{venta.referencia}</p>
+                            <p className="text-[10px] font-black text-indigo-600 dark:text-amber-500">{venta.vendedor.split('@')[0]}</p>
+                            <p className="text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">{venta.referencia}</p>
                           </td>
-                          <td className="px-5 py-4 text-right font-black text-emerald-600 text-sm">
+                          <td className="px-5 py-4 text-right font-black text-emerald-600 dark:text-emerald-400 text-sm">
                             {formatMoney(venta.monto)}
                           </td>
                         </tr>
@@ -9859,18 +9890,18 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         <div className="animate-in fade-in">
           
           <div className="mb-6 flex gap-4">
-            <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '' }); }} className="px-8 py-4 bg-slate-900 text-white rounded-xl font-bold shadow-xl hover:bg-slate-800 transition-colors flex items-center hover:scale-105 transform">
-              <Plus size={20} className="mr-2 text-amber-500"/> Nueva Venta (Crear Bóveda)
+            <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '' }); }} className="px-8 py-4 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-slate-800 dark:hover:bg-amber-400 transition-colors flex items-center hover:scale-105 transform">
+              <Plus size={20} className="mr-2 text-amber-500 dark:text-slate-900"/> Nueva Venta (Crear Bóveda)
             </button>
           </div>
 
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-               <h3 className="font-bold text-slate-800 text-sm">Directorio de Clientes Activos ({filteredLicencias.length})</h3>
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+             <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
+               <h3 className="font-bold text-slate-800 dark:text-white text-sm">Directorio de Clientes Activos ({filteredLicencias.length})</h3>
              </div>
              <div className="overflow-x-auto pb-24">
                <table className="w-full text-left whitespace-nowrap min-w-[1000px]">
-                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[10px] uppercase tracking-widest">
+                 <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest transition-colors">
                    <tr>
                      <th className="px-5 py-3 font-bold">Cliente / ID</th>
                      <th className="px-5 py-3 font-bold">Acceso (Correo)</th>
@@ -9880,9 +9911,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                      <th className="px-5 py-3 font-bold text-right">Controles</th>
                    </tr>
                  </thead>
-                 <tbody className="divide-y divide-slate-100 text-xs">
+                 <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
                    {filteredLicencias.length === 0 ? (
-                     <tr><td colSpan="6" className="px-5 py-12 text-center text-slate-400 font-medium text-sm">No se encontraron clientes.</td></tr>
+                     <tr><td colSpan="6" className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">No se encontraron clientes.</td></tr>
                    ) : (
                      filteredLicencias.map((lic) => {
                        const estaSuspendido = lic.status === 'suspendido';
@@ -9890,44 +9921,44 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                        const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
                        
                        return (
-                         <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40' : 'hover:bg-slate-50'}`}>
+                         <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40 dark:bg-rose-500/10' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
                            <td className="px-5 py-4">
-                             <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800' : 'text-slate-800'}`}>
+                             <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800 dark:text-rose-500' : 'text-slate-800 dark:text-white'}`}>
                                {lic.nombres || 'Sin Nombre'} 
-                               {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
+                               {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
                              </p>
-                             <p className="text-[10px] text-slate-400 font-mono mt-0.5">{lic.eventId}</p>
+                             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{lic.eventId}</p>
                            </td>
                            <td className="px-5 py-4">
-                             <div className="flex items-center text-slate-600 bg-slate-100/70 px-2 py-1.5 rounded-lg w-max border border-slate-200/50">
+                             <div className="flex items-center text-slate-600 dark:text-slate-300 bg-slate-100/70 dark:bg-white/5 px-2 py-1.5 rounded-lg w-max border border-slate-200/50 dark:border-white/10 transition-colors">
                                <span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span>
-                               <button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 hover:text-indigo-600 transition-colors">
+                               <button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-amber-500 transition-colors">
                                  {correoVisible ? <EyeOff size={14} /> : <Eye size={14} />}
                                </button>
                              </div>
                            </td>
                            <td className="px-5 py-4 text-center">
-                             <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : lic.plan === 'oro' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                             <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'}`}>
                                {lic.plan}
                              </span>
                            </td>
                            <td className="px-5 py-4 max-w-[200px] truncate">
                              {lic.urlInvitacion ? (
-                               <a href={lic.urlInvitacion} target="_blank" rel="noreferrer" className="text-sky-500 hover:underline text-[10px] font-bold truncate block" title={lic.urlInvitacion}>
+                               <a href={lic.urlInvitacion} target="_blank" rel="noreferrer" className="text-sky-500 dark:text-sky-400 hover:underline text-[10px] font-bold truncate block" title={lic.urlInvitacion}>
                                  {lic.urlInvitacion}
                                </a>
                              ) : (
-                               <span className="text-[10px] text-slate-400 italic">Pendiente de subir</span>
+                               <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">Pendiente de subir</span>
                              )}
                            </td>
                            <td className="px-5 py-4 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
                            <td className="px-5 py-4 text-right">
                               <div className="flex items-center justify-end space-x-2">
-                                <button onClick={() => { setEditingLic(lic); setIsEditModalOpen(true); }} title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"><Edit2 size={16} /></button>
-                                {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"><ExternalLink size={16} /></button>}
-                                <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors ${estaSuspendido ? 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200' : 'text-amber-600 bg-amber-100 hover:bg-amber-200'}`}><Power size={16} /></button>
+                                <button onClick={() => { setEditingLic(lic); setIsEditModalOpen(true); }} title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"><Edit2 size={16} /></button>
+                                {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-transparent dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"><ExternalLink size={16} /></button>}
+                                <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors border border-transparent ${estaSuspendido ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 hover:bg-emerald-200 dark:hover:bg-emerald-500/20 dark:border-emerald-500/20' : 'text-amber-600 dark:text-amber-500 bg-amber-100 dark:bg-amber-500/10 hover:bg-amber-200 dark:hover:bg-amber-500/20 dark:border-amber-500/20'}`}><Power size={16} /></button>
                                 {isSuperAdmin && (
-                                  <button onClick={() => handleDelete(lic)} title="Eliminar Bóveda (Se conserva Finanzas)" className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:text-white hover:bg-rose-500 transition-colors"><Trash2 size={16} /></button>
+                                  <button onClick={() => handleDelete(lic)} title="Eliminar Bóveda (Se conserva Finanzas)" className="p-2 rounded-lg text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-transparent dark:border-rose-500/20 hover:text-white hover:bg-rose-500 dark:hover:bg-rose-500 dark:hover:text-white transition-colors"><Trash2 size={16} /></button>
                                 )}
                               </div>
                            </td>
@@ -9944,32 +9975,32 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
       {/* MODAL PARA CREAR NUEVA LICENCIA (CON ANTI-ROBO Y VINCULADA AL MAYOR) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar border border-transparent dark:border-white/10 transition-colors">
             {!successData ? (
               <form onSubmit={handleCreateLicense} className="p-8">
                 <div className="text-center mb-6">
-                  <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4"><Key size={24} /></div>
-                  <h3 className="text-xl font-black text-slate-800">Registrar Venta Directa</h3>
-                  <p className="text-xs text-slate-500 mt-1">El vendedor y el monto quedarán registrados permanentemente en el libro mayor.</p>
+                  <div className="w-14 h-14 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-transparent dark:border-amber-500/30"><Key size={24} /></div>
+                  <h3 className="text-xl font-black text-slate-800 dark:text-white transition-colors">Registrar Venta Directa</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 transition-colors">El vendedor y el monto quedarán registrados permanentemente en el libro mayor.</p>
                 </div>
                 
                 <div className="space-y-4 mb-6">
-                  <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
-                    <label className="block text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-1.5 flex items-center"><Wallet size={12} className="mr-1"/> Referencia de Pago (Obligatorio)</label>
-                    <input type="text" required value={formData.referenciaPago} onChange={e => setFormData({...formData, referenciaPago: e.target.value})} placeholder="Ej: Pago en Efectivo, Transf BBVA..." className="w-full p-3 bg-white border border-emerald-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 text-sm" />
+                  <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-xl transition-colors">
+                    <label className="block text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Wallet size={12} className="mr-1"/> Referencia de Pago (Obligatorio)</label>
+                    <input type="text" required value={formData.referenciaPago} onChange={e => setFormData({...formData, referenciaPago: e.target.value})} placeholder="Ej: Pago en Efectivo, Transf BBVA..." className="w-full p-3 bg-white dark:bg-[#111] border border-emerald-200 dark:border-emerald-500/30 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
                   </div>
 
                   <div className="flex gap-4">
                     <div className="flex-1">
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tipo de Evento</label>
-                      <select value={formData.tipoEvento} onChange={e => setFormData({...formData, tipoEvento: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 text-xs cursor-pointer">
+                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Tipo de Evento</label>
+                      <select value={formData.tipoEvento} onChange={e => setFormData({...formData, tipoEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 dark:text-white text-xs cursor-pointer transition-colors">
                         {tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
                       </select>
                     </div>
                     <div className="flex-1">
-                      <label className="block text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-1.5 flex items-center"><Users size={12} className="mr-1"/> Rol</label>
-                      <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full p-3 bg-indigo-50 border border-indigo-200 text-indigo-900 rounded-xl outline-none focus:border-indigo-500 font-black text-xs cursor-pointer">
+                      <label className="block text-[10px] font-bold text-indigo-600 dark:text-amber-500 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Users size={12} className="mr-1"/> Rol</label>
+                      <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full p-3 bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/20 text-indigo-900 dark:text-amber-400 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 font-black text-xs cursor-pointer transition-colors">
                         <option value="cliente">Cliente Final</option>
                         <option value="planner">Agencia Planner</option>
                       </select>
@@ -9977,16 +10008,16 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-widest mb-1.5">{formData.role === 'planner' ? 'Nombre de la Agencia' : eventoSeleccionado.labelNombre}</label>
-                    <input type="text" autoFocus required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} placeholder={formData.role === 'planner' ? 'Ej. Elite Planners' : eventoSeleccionado.placeholder} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-900 text-sm" />
+                    <label className="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 transition-colors">{formData.role === 'planner' ? 'Nombre de la Agencia' : eventoSeleccionado.labelNombre}</label>
+                    <input type="text" autoFocus required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} placeholder={formData.role === 'planner' ? 'Ej. Elite Planners' : eventoSeleccionado.placeholder} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-widest mb-1.5 flex items-center"><Mail size={12} className="mr-1.5" /> Correo de Acceso</label>
-                    <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-800 text-sm" />
+                    <label className="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Mail size={12} className="mr-1.5" /> Correo de Acceso</label>
+                    <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-800 dark:text-white text-sm transition-colors" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Paquete Vendido</label>
-                    <select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 text-sm cursor-pointer">
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Paquete Vendido</label>
+                    <select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 dark:text-white text-sm cursor-pointer transition-colors">
                       <option value="basico">Plan Básico ($990)</option>
                       <option value="plata">Plan Plata ($1,490)</option>
                       <option value="oro">Plan Oro ($1,990)</option>
@@ -9994,41 +10025,41 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex items-center"><Link size={12} className="mr-1.5"/> Link Invitación URL (Opcional)</label>
-                    <input type="url" value={formData.urlInvitacion} onChange={e => setFormData({...formData, urlInvitacion: e.target.value})} placeholder="https://baulia.com/..." className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-medium text-sky-600 text-xs" />
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> Link Invitación URL (Opcional)</label>
+                    <input type="url" value={formData.urlInvitacion} onChange={e => setFormData({...formData, urlInvitacion: e.target.value})} placeholder="https://baulia.com/..." className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-medium text-sky-600 dark:text-sky-400 text-xs transition-colors" />
                   </div>
                 </div>
 
                 <div className="flex space-x-3">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-200 transition-colors">Cancelar</button>
-                  <button type="submit" disabled={isCreating} className="flex-1 py-3.5 bg-slate-900 text-white rounded-xl font-bold text-xs shadow-lg hover:bg-slate-800 disabled:bg-slate-400 transition-colors">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold text-xs hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Cancelar</button>
+                  <button type="submit" disabled={isCreating} className="flex-1 py-3.5 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-xs shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 disabled:opacity-50 transition-colors">
                     {isCreating ? 'Procesando...' : 'Crear Licencia y Registrar Venta'}
                   </button>
                 </div>
               </form>
             ) : (
-              <div className="p-8 text-center bg-slate-50">
-                <div className="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6"><CheckCircle size={40} /></div>
-                <h3 className="text-2xl font-black text-slate-800 mb-2">¡Accesos Creados!</h3>
-                <p className="text-sm text-slate-500 mb-6">La venta se registró en el Libro Mayor por <b>{authData.email.split('@')[0]}</b>.</p>
+              <div className="p-8 text-center bg-slate-50 dark:bg-transparent transition-colors">
+                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-transparent dark:border-emerald-500/30"><CheckCircle size={40} /></div>
+                <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2 transition-colors">¡Accesos Creados!</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 transition-colors">La venta se registró en el Libro Mayor por <b>{authData.email.split('@')[0]}</b>.</p>
                 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 text-left text-sm mb-6 shadow-sm">
-                  <p className="mb-3"><span className="text-slate-400 font-bold w-20 inline-block">Usuario:</span> <b className="text-slate-800">{successData.email}</b></p>
-                  <p><span className="text-slate-400 font-bold w-20 inline-block">Contraseña:</span> <b className="text-slate-800 font-mono text-base">{successData.password}</b></p>
+                <div className="bg-white dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 text-left text-sm mb-6 shadow-sm transition-colors">
+                  <p className="mb-3"><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Usuario:</span> <b className="text-slate-800 dark:text-white transition-colors">{successData.email}</b></p>
+                  <p><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Contraseña:</span> <b className="text-slate-800 dark:text-white font-mono text-base transition-colors">{successData.password}</b></p>
                 </div>
 
-                <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl mb-6 shadow-sm">
-                  <label className="block text-xs font-black text-emerald-700 uppercase tracking-widest mb-3 text-left flex items-center"><MessageCircle size={14} className="mr-1.5"/> Enviar accesos por WhatsApp</label>
+                <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 p-5 rounded-2xl mb-6 shadow-sm transition-colors">
+                  <label className="block text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-3 text-left flex items-center transition-colors"><MessageCircle size={14} className="mr-1.5"/> Enviar accesos por WhatsApp</label>
                   <div className="flex space-x-2 mb-4">
-                    <span className="bg-emerald-100 text-emerald-700 font-bold p-3 rounded-xl flex items-center justify-center">+52</span>
-                    <input type="tel" placeholder="10 dígitos del cliente..." value={clientPhone} onChange={e => setClientPhone(e.target.value)} className="w-full p-3 bg-white border border-emerald-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-800" />
+                    <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold p-3 rounded-xl flex items-center justify-center border border-transparent dark:border-emerald-500/30 transition-colors">+52</span>
+                    <input type="tel" placeholder="10 dígitos del cliente..." value={clientPhone} onChange={e => setClientPhone(e.target.value)} className="w-full p-3 bg-white dark:bg-[#111] border border-emerald-200 dark:border-emerald-500/30 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-800 dark:text-white transition-colors" />
                   </div>
-                  <button onClick={handleSendWhatsApp} className="w-full py-4 bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all active:scale-95 flex items-center justify-center">
+                  <button onClick={handleSendWhatsApp} className="w-full py-4 bg-emerald-500 text-white dark:text-slate-900 rounded-xl font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all active:scale-95 flex items-center justify-center">
                     <Send size={18} className="mr-2" /> Enviar Mensaje
                   </button>
                 </div>
 
-                <button onClick={() => setIsModalOpen(false)} className="w-full py-4 text-slate-500 font-bold hover:text-slate-800 transition-colors">Cerrar Ventana</button>
+                <button onClick={() => setIsModalOpen(false)} className="w-full py-4 text-slate-500 dark:text-slate-400 font-bold hover:text-slate-800 dark:hover:text-white transition-colors">Cerrar Ventana</button>
               </div>
             )}
           </div>
@@ -10037,23 +10068,23 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
       {/* MODAL PARA EDITAR LICENCIA EXISTENTE */}
       {isEditModalOpen && editingLic && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-             <div className="px-6 py-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center"><h3 className="font-bold text-lg text-slate-800">Editar Licencia</h3><button onClick={() => {setIsEditModalOpen(false); setEditingLic(null);}} className="text-slate-400 hover:text-slate-800"><X size={20}/></button></div>
+        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto border border-transparent dark:border-white/10 transition-colors">
+             <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors"><h3 className="font-bold text-lg text-slate-800 dark:text-white">Editar Licencia</h3><button onClick={() => {setIsEditModalOpen(false); setEditingLic(null);}} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button></div>
              <form onSubmit={handleUpdateLicense} className="p-6 space-y-5">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Nombre del Cliente / Evento</label>
-                  <input type="text" required value={editingLic.nombres} onChange={e => setEditingLic({...editingLic, nombres: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-900 text-sm" />
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Nombre del Cliente / Evento</label>
+                  <input type="text" required value={editingLic.nombres} onChange={e => setEditingLic({...editingLic, nombres: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex items-center"><Link size={12} className="mr-1.5"/> URL de su Invitación Pública</label>
-                  <input type="url" value={editingLic.urlInvitacion || ''} onChange={e => setEditingLic({...editingLic, urlInvitacion: e.target.value})} placeholder="https://baulia.com/bodas/su-boda" className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-medium text-sky-600 text-sm" />
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> URL de su Invitación Pública</label>
+                  <input type="url" value={editingLic.urlInvitacion || ''} onChange={e => setEditingLic({...editingLic, urlInvitacion: e.target.value})} placeholder="https://baulia.com/bodas/su-boda" className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-medium text-sky-600 dark:text-sky-400 text-sm transition-colors" />
                 </div>
-                <div className="bg-amber-50 text-amber-700 p-3 rounded-lg text-xs font-bold border border-amber-200 flex items-start">
+                <div className="bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 p-3 rounded-lg text-xs font-bold border border-amber-200 dark:border-amber-500/20 flex items-start transition-colors">
                   <AlertCircle size={16} className="mr-2 flex-shrink-0 mt-0.5" />
                   Nota: El plan de facturación no se puede cambiar aquí porque altera el estado financiero. Cancela esta cuenta y crea una nueva si necesitas un upgrade.
                 </div>
-                <button type="submit" className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-slate-800 transition-colors mt-4">
+                <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 transition-colors mt-4">
                   Guardar Cambios
                 </button>
              </form>
@@ -10064,38 +10095,37 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       {/* PESTAÑA RESEÑAS */}
       {adminTab === 'resenas' && (
          <div className="animate-in fade-in">
-           {/* (Se mantiene exactamente igual tu código de reseñas, no se tocó nada aquí) */}
-           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                <h3 className="font-bold text-slate-800 text-sm">Reseñas de Clientes</h3>
+           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+             <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
+                <h3 className="font-bold text-slate-800 dark:text-white text-sm">Reseñas de Clientes</h3>
              </div>
              <div className="p-6 grid grid-cols-1 gap-4">
-                {resenasList.length === 0 ? <p className="text-center text-slate-400 py-10">Aún no hay reseñas enviadas.</p> : null}
+                {resenasList.length === 0 ? <p className="text-center text-slate-400 dark:text-slate-500 py-10 transition-colors">Aún no hay reseñas enviadas.</p> : null}
                 {resenasList.map(resena => (
-                   <div key={resena.id} className={`p-5 rounded-2xl border transition-colors ${resena.status === 'aprobada' ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-slate-50'}`}>
+                   <div key={resena.id} className={`p-5 rounded-2xl border transition-colors ${resena.status === 'aprobada' ? 'border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/30 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111]'}`}>
                       <div className="flex justify-between items-start mb-3">
                          <div>
                             <div className="flex items-center gap-2 mb-1">
-                               <h4 className="font-black text-slate-900">{resena.authorName}</h4>
+                               <h4 className="font-black text-slate-900 dark:text-white transition-colors">{resena.authorName}</h4>
                             </div>
-                            <p className="text-[10px] text-slate-500 uppercase tracking-widest">{resena.authorType}</p>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest transition-colors">{resena.authorType}</p>
                          </div>
                          <div className="flex gap-1">
-                            {[1,2,3,4,5].map(s => <Star key={s} size={14} className={resena.rating >= s ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}/>)}
+                            {[1,2,3,4,5].map(s => <Star key={s} size={14} className={resena.rating >= s ? 'fill-amber-500 text-amber-500' : 'text-slate-300 dark:text-slate-700'}/>)}
                          </div>
                       </div>
-                      <p className="text-slate-700 text-sm mb-4 font-medium italic">"{resena.comment}"</p>
+                      <p className="text-slate-700 dark:text-slate-300 text-sm mb-4 font-medium italic transition-colors">"{resena.comment}"</p>
                       
-                      <div className="flex justify-between items-center border-t border-slate-200/60 pt-4 mt-2">
+                      <div className="flex justify-between items-center border-t border-slate-200/60 dark:border-white/5 pt-4 mt-2 transition-colors">
                          <div>
                             {resena.status === 'aprobada' 
-                              ? <span className="flex items-center text-[10px] font-black text-emerald-600 uppercase tracking-widest"><Globe size={14} className="mr-1"/> Pública</span>
-                              : <span className="flex items-center text-[10px] font-black text-slate-400 uppercase tracking-widest"><Lock size={14} className="mr-1"/> Oculta</span>
+                              ? <span className="flex items-center text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest transition-colors"><Globe size={14} className="mr-1"/> Pública</span>
+                              : <span className="flex items-center text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest transition-colors"><Lock size={14} className="mr-1"/> Oculta</span>
                             }
                          </div>
                          <div className="flex gap-2">
-                            <button onClick={async () => { await deleteDoc(doc(db, "resenas", resena.id)); }} className="px-3 py-1.5 bg-white border border-slate-200 text-rose-500 rounded-lg text-xs font-bold hover:bg-rose-50 transition-colors">Borrar</button>
-                            <button onClick={async () => { await updateDoc(doc(db, "resenas", resena.id), { status: resena.status === 'aprobada' ? 'pendiente' : 'aprobada' }); }} className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-colors shadow-sm ${resena.status === 'aprobada' ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-emerald-500 text-white hover:bg-emerald-600'}`}>
+                            <button onClick={async () => { await deleteDoc(doc(db, "resenas", resena.id)); }} className="px-3 py-1.5 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-rose-500 dark:text-rose-400 rounded-lg text-xs font-bold hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors">Borrar</button>
+                            <button onClick={async () => { await updateDoc(doc(db, "resenas", resena.id), { status: resena.status === 'aprobada' ? 'pendiente' : 'aprobada' }); }} className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-colors shadow-sm ${resena.status === 'aprobada' ? 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20' : 'bg-emerald-500 text-white dark:text-slate-900 hover:bg-emerald-600 dark:hover:bg-emerald-400'}`}>
                                {resena.status === 'aprobada' ? 'Ocultar' : 'Aprobar'}
                             </button>
                          </div>
