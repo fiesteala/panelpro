@@ -11086,7 +11086,7 @@ export default function App() {
     else root.classList.remove('dark');
   }, [isDarkMode]);
 
-  // Autenticación Global de Firebase (Soporte Multi-Evento Seguro)
+  // Autenticación Global de Firebase (Soporte Multi-Evento, Tiempo Real y Caducidad)
   useEffect(() => {
     if (!window.Html5QrcodeScanner && !document.getElementById('qr-script')) {
       const script = document.createElement('script');
@@ -11096,55 +11096,75 @@ export default function App() {
       document.body.appendChild(script);
     }
 
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubData = null;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       try {
         if (user && user.email) {
-          // 🔴 ELIMINAMOS EL ORDERBY DE LA CONSULTA PARA EVITAR EL ERROR DE ÍNDICE DE FIREBASE
+          // 🔴 AHORA ESCUCHAMOS EN TIEMPO REAL (onSnapshot en lugar de getDocs)
           const q = query(collection(db, "usuarios"), where("email", "==", user.email.toLowerCase()));
-          const querySnapshot = await getDocs(q);
           
-          if (!querySnapshot.empty) {
-            const userEventsList = querySnapshot.docs.map(doc => doc.data());
-            
-            // 🔴 ORDENAMOS EN MEMORIA (De más nuevo a más viejo)
-            userEventsList.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-            
-            const activeEvents = userEventsList.filter(e => e.status !== 'suspendido');
-            
-            if (activeEvents.length === 0) {
-               await signOut(auth);
-               setAccountSuspended(true);
-               setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
+          unsubData = onSnapshot(q, (querySnapshot) => {
+            if (!querySnapshot.empty) {
+              const userEventsList = querySnapshot.docs.map(doc => doc.data());
+              
+              // Ordenamos en memoria
+              userEventsList.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+              
+              // 🔴 FILTRO DE AUTO-CADUCIDAD (30 DÍAS) Y SUSPENDIDOS
+              const activeEvents = [];
+              const today = new Date();
+
+              for (const e of userEventsList) {
+                if (e.status === 'suspendido') continue;
+                
+                if (e.fechaEvento) {
+                  const eventDate = new Date(e.fechaEvento);
+                  const diffTime = today.getTime() - eventDate.getTime();
+                  const diffDays = diffTime / (1000 * 3600 * 24);
+                  
+                  // Si ya pasaron más de 30 días, lo ocultamos del cliente
+                  if (diffDays > 30) continue;
+                }
+                activeEvents.push(e);
+              }
+              
+              if (activeEvents.length === 0) {
+                 signOut(auth);
+                 setAccountSuspended(true);
+                 setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
+              } else {
+                 const savedEventId = localStorage.getItem('eventmaster_currentEventId');
+                 let selectedEvent = activeEvents.find(e => e.eventId === savedEventId) || activeEvents[0];
+                 
+                 setAuthData({ 
+                   isAuthenticated: true, 
+                   role: selectedEvent.role, 
+                   plan: selectedEvent.plan, 
+                   eventId: selectedEvent.eventId,
+                   availableEvents: activeEvents // 🔴 Esto activa el menú "Cambiar Proyecto"
+                 });
+                 localStorage.setItem('eventmaster_currentEventId', selectedEvent.eventId);
+              }
             } else {
-               const savedEventId = localStorage.getItem('eventmaster_currentEventId');
-               let selectedEvent = activeEvents.find(e => e.eventId === savedEventId) || activeEvents[0];
-               
-               setAuthData({ 
-                 isAuthenticated: true, 
-                 role: selectedEvent.role, 
-                 plan: selectedEvent.plan, 
-                 eventId: selectedEvent.eventId,
-                 availableEvents: activeEvents
-               });
-               localStorage.setItem('eventmaster_currentEventId', selectedEvent.eventId);
+              signOut(auth);
+              setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
             }
-          } else {
-            await signOut(auth);
-            setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
-          }
+          });
         } else {
           setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
         }
       } catch (error) {
-        console.error("Error en Autenticación:", error); // Por si acaso, para ver en consola
-        await signOut(auth); // Forzamos salida si hay error para no dejar la pantalla congelada
         setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
       } finally {
         setIsCheckingAuth(false);
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeAuth();
+      if (unsubData) unsubData(); // Limpiamos el radar al salir
+    };
   }, []);
 
   const cycleTheme = () => {
