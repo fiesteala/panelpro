@@ -268,7 +268,6 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
 // --- COMPONENTE: DASHBOARD VIEW (VISTA MAESTRA) ---
 // ==========================================
 const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tareas, setActiveTab, addNotification }) => {
-  const [exportViewOpen, setExportViewOpen] = useState(false);
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
 
   const totalPasses = guests.reduce((sum, guest) => sum + guest.passes, 0);
@@ -294,6 +293,7 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
   const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
   const isOverdue = (dateStr) => { if(!dateStr) return false; return new Date(dateStr) < new Date(); };
 
+  // 🔴 LÓGICA DE COLORES DINÁMICOS PARA EL PDF
   const currentEvent = authData?.availableEvents?.find(e => e.eventId === authData?.eventId);
   const plan = currentEvent?.plan || 'oro';
   const eventName = currentEvent?.nombres || 'Proyecto Baulia';
@@ -302,153 +302,52 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
   let accentColor = '#64748b'; 
   if (plan === 'diamante') {
       gradientStyle = 'linear-gradient(180deg, #eef2ff 0%, #ffffff 100%)';
-      accentColor = '#4f46e5';
+      accentColor = '#4f46e5'; // Indigo
   } else if (plan === 'oro') {
       gradientStyle = 'linear-gradient(180deg, #fffbeb 0%, #ffffff 100%)';
-      accentColor = '#d97706';
+      accentColor = '#d97706'; // Amber
   } else if (plan === 'plata') {
       gradientStyle = 'linear-gradient(180deg, #f1f5f9 0%, #ffffff 100%)';
-      accentColor = '#475569';
+      accentColor = '#475569'; // Slate
   }
 
-  // 🔴 DESCARGA INTELIGENTE DE REPORTE EJECUTIVO PDF
+  // 🔴 DESCARGA DIRECTA E INVISIBLE DEL REPORTE EJECUTIVO
   const triggerDashboardPdf = async () => {
     setIsPreparingPrint(true);
+    if(addNotification) addNotification('Preparando Documento', 'Generando formato ejecutivo...', 'info');
+    
     setTimeout(async () => {
       try {
         const { jsPDF } = await import('jspdf');
         const html2canvas = (await import('html2canvas')).default;
         
-        const element = document.querySelector('.dashboard-pdf-page');
-        const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+        const element = document.getElementById('hidden-executive-report');
+        const canvas = await html2canvas(element, { scale: 2, useCORS: true, logging: false });
         const imgData = canvas.toDataURL('image/jpeg', 1.0);
         
         const pdf = new jsPDF('p', 'mm', 'letter');
         pdf.addImage(imgData, 'JPEG', 0, 0, 215.9, 279.4);
-        pdf.save('Reporte-Ejecutivo-Baulia.pdf');
-        if(addNotification) addNotification('¡PDF Guardado!', 'Revisa tu carpeta de descargas.', 'success');
+        pdf.save(`Reporte-Ejecutivo-${eventName.replace(/\s+/g, '-')}.pdf`);
+        
+        if(addNotification) addNotification('¡Descarga Lista!', 'El reporte se guardó en tu dispositivo.', 'success');
       } catch (error) {
         console.error(error);
         if(addNotification) addNotification('Error', 'Fallo al generar el PDF.', 'error');
       }
       setIsPreparingPrint(false);
-      setExportViewOpen(false);
-    }, 500);
+    }, 800);
   };
 
-  if (exportViewOpen) {
-    return (
-      <div className="fixed inset-0 z-[120] bg-slate-900/95 flex flex-col overflow-hidden backdrop-blur-md">
-        <div className="bg-[#0a0a0a] text-white p-4 flex flex-col sm:flex-row justify-between items-center border-b border-white/10 shadow-lg print:hidden z-10 gap-4 shrink-0">
-          <div className="flex items-center space-x-4 w-full sm:w-auto">
-            <button onClick={() => setExportViewOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24}/></button>
-            <div>
-              <h3 className="font-bold text-sm">Estudio de Impresión</h3>
-              <p className="text-[10px] text-slate-400">Reporte Ejecutivo Elegante</p>
-            </div>
-          </div>
-          <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="w-full sm:w-auto px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl text-sm font-black flex items-center justify-center shadow-lg transition-all disabled:opacity-50">
-            {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
-            {isPreparingPrint ? 'Armando PDF...' : 'Descargar PDF'}
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8 relative">
-          <div className="dashboard-pdf-page bg-white shadow-[0_0_40px_rgba(0,0,0,0.5)] relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
-             
-             <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: accentColor }}></div>
-
-             <div className="flex justify-between items-center mb-12">
-                <div>
-                  <h1 className="text-4xl font-editorial font-bold text-slate-900 leading-none">Reporte Ejecutivo</h1>
-                  <p className="text-sm font-bold tracking-widest uppercase mt-2" style={{ color: accentColor }}>{eventName}</p>
-                </div>
-                <div className="text-right flex flex-col items-end">
-                  <BauliaLogo className="h-8" forceWhite={false} />
-                  <p className="text-[7px] text-slate-400 mt-1.5 uppercase tracking-[0.2em] font-bold">Tecnología de Baulia</p>
-                </div>
-             </div>
-
-             <div className="grid grid-cols-2 gap-10 mb-10">
-               <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60 backdrop-blur-sm">
-                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Logística de Asistentes</p>
-                  <p className="text-5xl font-editorial text-slate-900 mb-2">{totalPasses}</p>
-                  <p className="text-xs font-bold" style={{ color: accentColor }}>{confirmationPercentage}% Confirmación oficial</p>
-                  <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${confirmationPercentage}%`, backgroundColor: accentColor }}></div></div>
-               </div>
-               <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60 backdrop-blur-sm">
-                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Acomodo y Mesas</p>
-                  <p className="text-5xl font-editorial text-slate-900 mb-2">{totalMesas} <span className="text-lg text-slate-400 font-sans font-light">mesas</span></p>
-                  <p className="text-xs font-bold" style={{ color: accentColor }}>{capacidadTotalSillas} Sillas totales • {ocupacionPorcentaje}% Ocupación</p>
-                  <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${ocupacionPorcentaje}%`, backgroundColor: accentColor }}></div></div>
-               </div>
-             </div>
-
-             <div className="grid grid-cols-2 gap-10 mb-12">
-               <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60 backdrop-blur-sm">
-                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Estado de la Bóveda</p>
-                  <p className="text-5xl font-editorial text-slate-900 mb-2">${(totalEstimado / 1000).toFixed(1)}k</p>
-                  <p className="text-xs font-bold flex justify-between" style={{ color: accentColor }}>
-                    <span>Abonado: ${(totalPagado/1000).toFixed(1)}k</span>
-                  </p>
-                  <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${Math.min(budgetPercentage, 100)}%`, backgroundColor: accentColor }}></div></div>
-               </div>
-               <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60 backdrop-blur-sm">
-                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Avance de Planeación</p>
-                  <p className="text-5xl font-editorial text-slate-900 mb-2">{tareasPorcentaje}%</p>
-                  <p className="text-xs font-bold" style={{ color: accentColor }}>{tareasCompletadas} de {tareasTotal} objetivos listos</p>
-                  <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${tareasPorcentaje}%`, backgroundColor: accentColor }}></div></div>
-               </div>
-             </div>
-
-             <div className="grid grid-cols-2 gap-10">
-               <div>
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-800 mb-4 border-b border-slate-200 pb-2">Logística Inmediata</h3>
-                  {tareasPendientes.length === 0 ? <p className="text-xs text-slate-400 italic">El cronograma está limpio.</p> : (
-                    <ul className="space-y-3">
-                      {tareasPendientes.map(t => (
-                        <li key={t.id} className="text-xs text-slate-600 flex justify-between">
-                          <span className="font-medium pr-2 truncate">{t.titulo}</span>
-                          <span className="text-slate-400 shrink-0 font-mono text-[10px]">{t.fechaLimite || '-'}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-               </div>
-               <div>
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-800 mb-4 border-b border-slate-200 pb-2">Deudas Próximas</h3>
-                  {pagosPendientes.length === 0 ? <p className="text-xs text-slate-400 italic">Finanzas sanas.</p> : (
-                    <ul className="space-y-3">
-                      {pagosPendientes.map(p => (
-                        <li key={p.id} className="text-xs text-slate-600 flex justify-between">
-                          <span className="font-medium pr-2 truncate">{p.concepto}</span>
-                          <span className="font-black text-slate-900 shrink-0">{formatMoney(p.estimado - p.pagado)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-               </div>
-             </div>
-
-             <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
-                <span>Fecha de Emisión: {new Date().toLocaleDateString('es-MX')}</span>
-                <span>Confidencial • {eventName}</span>
-             </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Centro de Mando</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Monitoreo en tiempo real de la Bóveda.</p>
         </div>
-        <button onClick={() => setExportViewOpen(true)} className="px-5 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center">
-          <Download size={16} className="mr-2"/> Descargar Reporte
+        <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="px-5 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center disabled:opacity-50">
+          {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
+          {isPreparingPrint ? 'Generando PDF...' : 'Descargar Reporte'}
         </button>
       </div>
 
@@ -584,6 +483,92 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* 🔴 ÁREA INVISIBLE PARA EL RENDER DEL REPORTE EJECUTIVO (ESTILO SUTIL) */}
+      <div style={{ position: 'absolute', top: '-10000px', left: '-10000px', zIndex: -9999 }}>
+        <div id="hidden-executive-report" className="bg-white relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
+           
+           <div className="absolute top-0 left-0 w-full h-3" style={{ backgroundColor: accentColor }}></div>
+
+           <div className="flex justify-between items-center mb-12 mt-4">
+              <div>
+                <h1 className="text-5xl font-editorial font-bold text-slate-900 leading-none">Reporte Ejecutivo</h1>
+                <p className="text-base font-black tracking-[0.2em] uppercase mt-3" style={{ color: accentColor }}>{eventName}</p>
+              </div>
+              <div className="text-right flex flex-col items-end">
+                {/* 🔴 LOGO FORZADO A OSCURO PARA QUE DESTAQUE EN FONDO BLANCO */}
+                <BauliaLogo className="h-10" forceWhite={false} />
+                <p className="text-[8px] text-slate-400 mt-2 uppercase tracking-[0.3em] font-bold">Tecnología Inteligente</p>
+              </div>
+           </div>
+
+           <div className="grid grid-cols-2 gap-10 mb-10">
+             <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
+                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Logística de Asistentes</p>
+                <p className="text-5xl font-editorial text-slate-900 mb-2">{totalPasses}</p>
+                <p className="text-xs font-bold" style={{ color: accentColor }}>{confirmationPercentage}% Confirmación oficial</p>
+                <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${confirmationPercentage}%`, backgroundColor: accentColor }}></div></div>
+             </div>
+             <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
+                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Acomodo y Mesas</p>
+                <p className="text-5xl font-editorial text-slate-900 mb-2">{totalMesas} <span className="text-lg text-slate-400 font-sans font-light">mesas</span></p>
+                <p className="text-xs font-bold" style={{ color: accentColor }}>{capacidadTotalSillas} Sillas totales • {ocupacionPorcentaje}% Ocupación</p>
+                <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${ocupacionPorcentaje}%`, backgroundColor: accentColor }}></div></div>
+             </div>
+           </div>
+
+           <div className="grid grid-cols-2 gap-10 mb-12">
+             <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
+                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Estado de la Bóveda</p>
+                <p className="text-5xl font-editorial text-slate-900 mb-2">${(totalEstimado / 1000).toFixed(1)}k</p>
+                <p className="text-xs font-bold flex justify-between" style={{ color: accentColor }}>
+                  <span>Abonado: ${(totalPagado/1000).toFixed(1)}k</span>
+                </p>
+                <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${Math.min(budgetPercentage, 100)}%`, backgroundColor: accentColor }}></div></div>
+             </div>
+             <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
+                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Avance de Planeación</p>
+                <p className="text-5xl font-editorial text-slate-900 mb-2">{tareasPorcentaje}%</p>
+                <p className="text-xs font-bold" style={{ color: accentColor }}>{tareasCompletadas} de {tareasTotal} objetivos listos</p>
+                <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${tareasPorcentaje}%`, backgroundColor: accentColor }}></div></div>
+             </div>
+           </div>
+
+           <div className="grid grid-cols-2 gap-10">
+             <div>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-800 mb-4 border-b border-slate-200 pb-2">Logística Inmediata</h3>
+                {tareasPendientes.length === 0 ? <p className="text-xs text-slate-400 italic">El cronograma está limpio.</p> : (
+                  <ul className="space-y-3">
+                    {tareasPendientes.map(t => (
+                      <li key={t.id} className="text-xs text-slate-600 flex justify-between items-center border-b border-slate-100 pb-1.5 last:border-0">
+                        <span className="font-medium pr-2 truncate">{t.titulo}</span>
+                        <span className="text-slate-400 shrink-0 font-mono text-[10px]">{t.fechaLimite || '-'}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+             </div>
+             <div>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-800 mb-4 border-b border-slate-200 pb-2">Deudas Próximas</h3>
+                {pagosPendientes.length === 0 ? <p className="text-xs text-slate-400 italic">Finanzas sanas.</p> : (
+                  <ul className="space-y-3">
+                    {pagosPendientes.map(p => (
+                      <li key={p.id} className="text-xs text-slate-600 flex justify-between items-center border-b border-slate-100 pb-1.5 last:border-0">
+                        <span className="font-medium pr-2 truncate">{p.concepto}</span>
+                        <span className="font-black text-slate-900 shrink-0">{formatMoney(p.estimado - p.pagado)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+             </div>
+           </div>
+
+           <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
+              <span>Fecha de Emisión: {new Date().toLocaleDateString('es-MX')}</span>
+              <span>Confidencial • {eventName}</span>
+           </div>
         </div>
       </div>
     </div>
@@ -6886,13 +6871,39 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
     setShowProfileMenu(false);
   };
 
-  // 🔴 OBTENER EL NOMBRE DEL EVENTO ACTUAL
+  // 🔴 OBTENER EL NOMBRE Y PLAN DEL EVENTO ACTUAL
   const currentEvent = authData?.availableEvents?.find(e => e.eventId === authData.eventId);
   const eventName = currentEvent ? currentEvent.nombres : 'Proyecto Activo';
   const eventPlan = currentEvent ? currentEvent.plan : 'pro';
 
+  // 🔴 ESTILOS DINÁMICOS SEGÚN EL PLAN
+  const getPlanColors = (planName) => {
+    switch(planName?.toLowerCase()) {
+        case 'diamante': return { text: 'text-indigo-600 dark:text-indigo-400', gradient: 'from-indigo-400 to-purple-600' };
+        case 'oro': return { text: 'text-amber-600 dark:text-amber-500', gradient: 'from-amber-400 to-yellow-600' };
+        case 'plata': return { text: 'text-slate-600 dark:text-slate-400', gradient: 'from-slate-400 to-slate-600' };
+        default: return { text: 'text-emerald-600 dark:text-emerald-400', gradient: 'from-emerald-400 to-teal-600' };
+    }
+  };
+  const pColors = getPlanColors(eventPlan);
+
+  // 🔴 LÓGICA PARA OBTENER LAS INICIALES DEL EVENTO
+  const getInitials = (name) => {
+    if(!name) return 'VIP';
+    const words = name.split(' ').filter(w => w.length > 0 && w.toLowerCase() !== 'y' && w.toLowerCase() !== 'e');
+    if(words.length >= 2) return `${words[0][0]}${words[1][0]}`.toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+  };
+  const initials = getInitials(eventName);
+
   return (
     <>
+      {/* 🔴 INYECCIÓN DE CSS PARA LA ANIMACIÓN DEL ANILLO */}
+      <style>{`
+        @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-spin-slow { animation: spin-slow 4s linear infinite; }
+      `}</style>
+
       <header ref={headerRef} className="bg-white/60 dark:bg-[#050505]/60 backdrop-blur-2xl border-b border-slate-200/50 dark:border-white/5 h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden transition-colors duration-700">
         <div className="flex items-center flex-1">
           <button onClick={() => setIsOpen(true)} className="xl:hidden text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-white mr-4 transition-colors"><Menu size={24} /></button>
@@ -6916,7 +6927,6 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
         </div>
 
         <div className="flex items-center space-x-2 sm:space-x-4">
-          {/* INDICADORES RÁPIDOS */}
           <div className="hidden md:flex items-center bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 backdrop-blur-md rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 shadow-sm transition-colors">
             <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-600 dark:text-slate-400" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
             <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-amber-600 dark:text-amber-500 bg-amber-100/50 dark:bg-amber-500/10" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countConfirmados}</span></div>
@@ -6924,7 +6934,6 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
             <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-emerald-600 dark:text-emerald-400 bg-emerald-100/50 dark:bg-emerald-500/10" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countIngresos}</span></div>
           </div>
 
-          {/* BOTÓN DÍA/NOCHE */}
           <button onClick={(e) => { e.preventDefault(); cycleTheme(); }} className="p-2 text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-all rounded-full hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95" title={`Modo actual: ${themeSetting.toUpperCase()}`}>
             {themeSetting === 'auto' ? (
               <svg className="pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -6935,7 +6944,6 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
             )}
           </button>
 
-          {/* CAMPANITA */}
           <div className="relative">
             <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors rounded-full hover:bg-slate-200/50 dark:hover:bg-white/5">
               <Bell size={20} />
@@ -6984,18 +6992,23 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
             )}
           </div>
 
-          {/* PERFIL (CON NOMBRE DINÁMICO) */}
           <div className="relative">
             <button 
               onClick={() => {setShowProfileMenu(!showProfileMenu); setShowBellMenu(false); setShowResults(false);}} 
-              className="flex items-center space-x-2 sm:space-x-3 hover:bg-slate-200/50 dark:hover:bg-white/5 p-1 sm:p-1.5 rounded-xl transition-colors text-right border border-transparent hover:border-slate-200 dark:hover:border-white/10"
+              className="flex items-center space-x-2 sm:space-x-3 hover:bg-slate-200/50 dark:hover:bg-white/5 p-1 sm:p-1.5 rounded-xl transition-colors text-right border border-transparent hover:border-slate-200 dark:hover:border-white/10 group"
             >
               <div className="hidden sm:block pl-1 text-right">
                 <p className="text-xs font-bold text-slate-800 dark:text-white leading-tight truncate max-w-[130px]" title={eventName}>{eventName}</p>
-                <p className="text-[9px] text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase">Plan {eventPlan}</p>
+                {/* 🔴 TEXTO DE COLOR DINÁMICO */}
+                <p className={`text-[9px] ${pColors.text} font-bold tracking-widest uppercase transition-colors`}>Plan {eventPlan}</p>
               </div>
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-white font-black shadow-md text-sm shrink-0 border border-amber-300">
-                <Users size={16}/>
+              
+              {/* 🔴 MONOGRAMA CON ANILLO DE LUZ ANIMADO Y DINÁMICO */}
+              <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-white font-black shadow-md text-xs shrink-0 relative`}>
+                <div className={`absolute inset-[-2px] rounded-full bg-gradient-to-tr ${pColors.gradient} animate-spin-slow opacity-70 group-hover:opacity-100 transition-opacity`}></div>
+                <div className="absolute inset-[2px] rounded-full bg-slate-900 dark:bg-black flex items-center justify-center z-10">
+                   <span className={`bg-clip-text text-transparent bg-gradient-to-tr ${pColors.gradient} font-editorial text-sm tracking-widest`}>{initials}</span>
+                </div>
               </div>
             </button>
             
@@ -7003,7 +7016,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
               <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#0a0a0a] shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
                 <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 sm:hidden">
                   <p className="font-bold text-slate-800 dark:text-white text-sm truncate">{eventName}</p>
-                  <p className="text-[10px] text-amber-600 dark:text-amber-500 uppercase font-bold">Plan {eventPlan}</p>
+                  <p className={`text-[10px] ${pColors.text} uppercase font-bold`}>Plan {eventPlan}</p>
                 </div>
                 <div className="p-2">
                   {authData?.availableEvents?.length > 1 && (
@@ -7024,7 +7037,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
         </div>
       </header>
 
-      {/* 🔴 MODAL CAMBIAR PROYECTO BLINDADO ANTI-CORTE */}
+      {/* MODAL CAMBIAR PROYECTO BLINDADO ANTI-CORTE */}
       {showEventSwitcher && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh] border border-transparent dark:border-white/10 animate-in zoom-in-95 transition-colors">
