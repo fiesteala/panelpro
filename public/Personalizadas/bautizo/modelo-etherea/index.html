@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Bautizo Jazel Alor - Alta Costura</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -40,32 +40,19 @@
                         'shimmer': 'shimmer 2s infinite linear',
                     },
                     keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(15px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        kenBurns: {
-                            '0%': { transform: 'scale(1)' },
-                            '100%': { transform: 'scale(1.15)' },
-                        },
+                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(15px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        kenBurns: { '0%': { transform: 'scale(1)' }, '100%': { transform: 'scale(1.15)' } },
                         floatUp: {
                             '0%': { transform: 'translateY(110vh) scale(0.8)', opacity: '0' },
-                            '20%': { opacity: 'var(--max-opacity)' },
-                            '80%': { opacity: 'var(--max-opacity)' },
+                            '20%': { opacity: 'var(--max-opacity)' }, '80%': { opacity: 'var(--max-opacity)' },
                             '100%': { transform: 'translateY(-10vh) scale(1.2)', opacity: '0' },
                         },
                         floatCloud: {
                             '0%': { transform: 'translateX(-20vw) translateY(var(--y-offset)) scale(var(--scale)) rotate(var(--rot))' },
                             '100%': { transform: 'translateX(120vw) translateY(var(--y-offset)) scale(var(--scale)) rotate(var(--rot))' },
                         },
-                        bounceHorizontal: {
-                            '0%, 100%': { transform: 'translateX(0)' },
-                            '50%': { transform: 'translateX(10px)' },
-                        },
-                        shimmer: {
-                            '0%': { transform: 'translateX(-150%)' },
-                            '100%': { transform: 'translateX(150%)' }
-                        }
+                        bounceHorizontal: { '0%, 100%': { transform: 'translateX(0)' }, '50%': { transform: 'translateX(10px)' } },
+                        shimmer: { '0%': { transform: 'translateX(-150%)' }, '100%': { transform: 'translateX(150%)' } }
                     }
                 }
             }
@@ -73,51 +60,15 @@
     </script>
 
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            background-color: #FAF9F6;
-            -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        
-        .gold-border-thin {
-            border: 1px solid rgba(212, 175, 55, 0.4);
-        }
-
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 1.2s cubic-bezier(0.5, 0, 0, 1);
-        }
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .text-shadow-elegant {
-            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
-        }
+        html { scroll-behavior: smooth; }
+        body { background-color: #FAF9F6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+        .gold-border-thin { border: 1px solid rgba(212, 175, 55, 0.4); }
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 1.2s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .glass-card { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(212, 175, 55, 0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .text-shadow-elegant { text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6); }
     </style>
 </head>
 <body class="text-charcoal font-serif bg-ivory">
@@ -126,111 +77,43 @@
     <script type="text/babel">
         const { useState, useEffect, useRef, useMemo } = React;
 
-        // --- DICCIONARIO DE TRADUCCIONES ---
         const translations = {
             ES: {
-                tapToOpen: "Abrir Invitación",
-                welcomeGuest: "Nos alegra invitar a",
-                especiallyFor: "Especialmente para",
-                celebrating: "Celebramos el Bautizo de",
-                swipe: "Deslizar",
-                blessing: "Con la bendición de Dios",
-                celebrateLife: "Celebramos la vida de",
-                quote: "\"Hoy recibo la luz de Dios para que me guíe todos los días de mi vida.\"",
-                withParents: "En compañía de mis Padres",
-                withGodparents: "Y la guía de mis Padrinos",
-                saturday: "Sábado",
-                september: "Septiembre",
-                days: "Días", hrs: "Hrs", min: "Min", sec: "Seg",
-                church: "Ceremonia Religiosa",
-                reception: "Recepción",
-                viewMap: "Ver Ubicación",
-                addCalendar: "Agregar a Calendario",
-                forecast: "Pronóstico: 24°C, Parcialmente Soleado",
-                itinerary: "Itinerary",
-                lodgingTitle: "Hospedaje y Logística",
-                hotel: "Hotel Boutique Casa Diamante",
-                hotelDesc: "Menciona nuestro evento para obtener una tarifa especial en tu reservación.",
-                valet: "Valet Parking",
-                valetDesc: "Contaremos con servicio de acomodadores en la recepción para tu mayor comodidad.",
-                dressCode: "Código de Vestimenta",
-                elegant: "Elegante o Etiqueta",
-                dressDesc: "Nos encantaría que nos acompañen vistiendo tonos claros y neutros para mantener la armonía y pureza de esta celebración.",
-                women: "Ellas", men: "Ellos",
-                toGodparents: "A mis Padrinos...",
-                godparentsMsg: "\"Gracias por aceptar ser mi luz y guía en este camino, por amarme y por acompañarme en cada paso de mi vida.\"",
-                moments: "Nuestros Momentos",
-                gifts: "Mesa de Regalos",
-                giftsMsg: "El mejor regalo es tu presencia. Sin embargo, si deseas tener un detalle con Jazel, ponemos a tu disposición las siguientes opciones:",
-                goGifts: "Ir a la Mesa de Regalos",
-                envelopes: "Lluvia de Sobres",
-                envelopesMsg: "Se colocará un buzón en la recepción para los sobres, o si prefieres una transferencia:",
-                social: "Muro Social",
-                socialMsg: "Ayúdanos a capturar cada instante mágico. Sube tus fotos y videos usando nuestro hashtag oficial para compartir estos hermosos recuerdos.",
-                tryFilter: "Probar Filtro de Instagram",
-                accompany: "Acompáñanos...",
-                accompanyMsg: "\"Tu presencia es el regalo más hermoso para nosotros. Nos llenaría de inmensa alegría que compartieras este día tan especial a nuestro lado. Por favor, haznos saber si nos acompañarás.\"",
-                yes: "CONFIRMAR ASISTENCIA",
-                tl1_title: "Ceremonia Religiosa", tl1_desc: "El momento sagrado donde recibo la bendición.",
-                tl2_title: "Recepción", tl2_desc: "Brindis de bienvenida y acomodo de invitados.",
-                tl3_title: "Presentación", tl3_desc: "De los padrinos, papás y el bautizado.",
-                tl4_title: "Banquete", tl4_desc: "A disfrutar de una deliciosa comida en familia.",
-                tl5_title: "Pastel y Fotos", tl5_desc: "Guardando hermosos recuerdos para siempre.",
-                tl6_title: "Baile y Diversión", tl6_desc: "¡A celebrar juntos con muchísima alegría!"
+                tapToOpen: "Abrir Invitación", welcomeGuest: "Nos alegra invitar a", especiallyFor: "Especialmente para", celebrating: "Celebramos el Bautizo de",
+                swipe: "Deslizar", blessing: "Con la bendición de Dios", celebrateLife: "Celebramos la vida de", quote: "\"Hoy recibo la luz de Dios para que me guíe todos los días de mi vida.\"",
+                withParents: "En compañía de mis Padres", withGodparents: "Y la guía de mis Padrinos", saturday: "Sábado", september: "Septiembre",
+                days: "Días", hrs: "Hrs", min: "Min", sec: "Seg", church: "Ceremonia Religiosa", reception: "Recepción", viewMap: "Ver Ubicación",
+                addCalendar: "Agregar a Calendario", forecast: "Pronóstico: 24°C, Parcialmente Soleado", itinerary: "Itinerario", lodgingTitle: "Hospedaje y Logística",
+                hotel: "Hotel Boutique Casa Diamante", hotelDesc: "Menciona nuestro evento para obtener una tarifa especial en tu reservación.", valet: "Valet Parking", valetDesc: "Contaremos con servicio de acomodadores en la recepción para tu mayor comodidad.",
+                dressCode: "Código de Vestimenta", elegant: "Elegante o Etiqueta", dressDesc: "Nos encantaría que nos acompañen vistiendo tonos claros y neutros para mantener la armonía y pureza de esta celebración.",
+                women: "Ellas", men: "Ellos", toGodparents: "A mis Padrinos...", godparentsMsg: "\"Gracias por aceptar ser mi luz y guía en este camino, por amarme y por acompañarme en cada paso de mi vida.\"",
+                moments: "Nuestros Momentos", gifts: "Mesa de Regalos", giftsMsg: "El mejor regalo es tu presencia. Sin embargo, si deseas tener un detalle con Jazel, ponemos a tu disposición las siguientes opciones:",
+                goGifts: "Ir a la Mesa de Regalos", envelopes: "Lluvia de Sobres", envelopesMsg: "Se colocará un buzón en la recepción para los sobres, o si prefieres una transferencia:",
+                social: "Muro Social", socialMsg: "Ayúdanos a capturar cada instante mágico. Sube tus fotos y videos usando nuestro hashtag oficial para compartir estos hermosos recuerdos.", tryFilter: "Probar Filtro de Instagram",
+                accompany: "Acompáñanos...", accompanyMsg: "\"Tu presencia es el regalo más hermoso para nosotros. Nos llenaría de inmensa alegría que compartieras este día tan especial a nuestro lado. Por favor, haznos saber si nos acompañarás.\"",
+                tl1_title: "Ceremonia Religiosa", tl1_desc: "El momento sagrado donde recibo la bendición.", tl2_title: "Recepción", tl2_desc: "Brindis de bienvenida y acomodo de invitados.",
+                tl3_title: "Presentación", tl3_desc: "De los padrinos, papás y el bautizado.", tl4_title: "Banquete", tl4_desc: "A disfrutar de una deliciosa comida en familia.",
+                tl5_title: "Pastel y Fotos", tl5_desc: "Guardando hermosos recuerdos para siempre.", tl6_title: "Baile y Diversión", tl6_desc: "¡A celebrar juntos con muchísima alegría!"
             },
             EN: {
-                tapToOpen: "Open Invitation",
-                welcomeGuest: "We are delighted to invite",
-                especiallyFor: "Especially for",
-                celebrating: "Celebrating the Baptism of",
-                swipe: "Swipe",
-                blessing: "With God's blessing",
-                celebrateLife: "We celebrate the life of",
-                quote: "\"Today I receive God's light to guide me every day of my life.\"",
-                withParents: "Joined by my Parents",
-                withGodparents: "And the guidance of my Godparents",
-                saturday: "Saturday",
-                september: "September",
-                days: "Days", hrs: "Hrs", min: "Min", sec: "Sec",
-                church: "Religious Ceremony",
-                reception: "Reception",
-                viewMap: "View Location",
-                addCalendar: "Add to Calendar",
-                forecast: "Forecast: 75°F, Partly Sunny",
-                itinerary: "Itinerary",
-                lodgingTitle: "Lodging & Logistics",
-                hotel: "Casa Diamante Boutique Hotel",
-                hotelDesc: "Mention our event to get a special rate on your reservation.",
-                valet: "Valet Parking",
-                valetDesc: "We will have valet service at the reception for your convenience.",
-                dressCode: "Dress Code",
-                elegant: "Elegant or Formal",
-                dressDesc: "We would love for you to join us wearing light and neutral tones to maintain the harmony and purity of this celebration.",
-                women: "Women", men: "Men",
-                toGodparents: "To my Godparents...",
-                godparentsMsg: "\"Thank you for accepting to be my light and guide on this path, for loving me and accompanying me in every step of my life.\"",
-                moments: "Our Moments",
-                gifts: "Gift Registry",
-                giftsMsg: "The best gift is your presence. However, if you wish to have a detail with Jazel, we offer you the following options:",
-                goGifts: "Go to Gift Registry",
-                envelopes: "Wishing Well",
-                envelopesMsg: "A mailbox will be placed at the reception for envelopes, or if you prefer a bank transfer:",
-                social: "Social Wall",
-                socialMsg: "Help us capture every magical moment. Upload your photos and videos using our official hashtag to share these beautiful memories.",
-                tryFilter: "Try Instagram Filter",
-                accompany: "Join us...",
-                accompanyMsg: "\"Your presence is the most beautiful gift for us. It would fill us with immense joy if you shared this special day by our side. Please let us know if you will join us.\"",
-                yes: "CONFIRM ATTENDANCE",
-                tl1_title: "Religious Ceremony", tl1_desc: "The sacred moment where I receive the blessing.",
-                tl2_title: "Reception", tl2_desc: "Welcome toast and seating of guests.",
-                tl3_title: "Presentation", tl3_desc: "Of the godparents, parents, and the baptized.",
-                tl4_title: "Banquet", tl4_desc: "Enjoying a delicious meal with family.",
-                tl5_title: "Cake and Photos", tl5_desc: "Keeping beautiful memories forever.",
-                tl6_title: "Dance and Fun", tl6_desc: "Let's celebrate together with lots of joy!"
+                tapToOpen: "Open Invitation", welcomeGuest: "We are delighted to invite", especiallyFor: "Especially for", celebrating: "Celebrating the Baptism of",
+                swipe: "Swipe", blessing: "With God's blessing", celebrateLife: "We celebrate the life of", quote: "\"Today I receive God's light to guide me every day of my life.\"",
+                withParents: "Joined by my Parents", withGodparents: "And the guidance of my Godparents", saturday: "Saturday", september: "September",
+                days: "Days", hrs: "Hrs", min: "Min", sec: "Sec", church: "Religious Ceremony", reception: "Reception", viewMap: "View Location",
+                addCalendar: "Add to Calendar", forecast: "Forecast: 75°F, Partly Sunny", itinerary: "Itinerary", lodgingTitle: "Lodging & Logistics",
+                hotel: "Casa Diamante Boutique Hotel", hotelDesc: "Mention our event to get a special rate on your reservation.", valet: "Valet Parking", valetDesc: "We will have valet service at the reception for your convenience.",
+                dressCode: "Dress Code", elegant: "Elegant or Formal", dressDesc: "We would love for you to join us wearing light and neutral tones to maintain the harmony and purity of this celebration.",
+                women: "Women", men: "Men", toGodparents: "To my Godparents...", godparentsMsg: "\"Thank you for accepting to be my light and guide on this path, for loving me and accompanying me in every step of my life.\"",
+                moments: "Our Moments", gifts: "Gift Registry", giftsMsg: "The best gift is your presence. However, if you wish to have a detail with Jazel, we offer you the following options:",
+                goGifts: "Go to Gift Registry", envelopes: "Wishing Well", envelopesMsg: "A mailbox will be placed at the reception for envelopes, or if you prefer a bank transfer:",
+                social: "Social Wall", socialMsg: "Help us capture every magical moment. Upload your photos and videos using our official hashtag to share these beautiful memories.", tryFilter: "Try Instagram Filter",
+                accompany: "Join us...", accompanyMsg: "\"Your presence is the most beautiful gift for us. It would fill us with immense joy if you shared this special day by our side. Please let us know if you will join us.\"",
+                tl1_title: "Religious Ceremony", tl1_desc: "The sacred moment where I receive the blessing.", tl2_title: "Reception", tl2_desc: "Welcome toast and seating of guests.",
+                tl3_title: "Presentation", tl3_desc: "Of the godparents, parents, and the baptized.", tl4_title: "Banquet", tl4_desc: "Enjoying a delicious meal with family.",
+                tl5_title: "Cake and Photos", tl5_desc: "Keeping beautiful memories forever.", tl6_title: "Dance and Fun", tl6_desc: "Let's celebrate together with lots of joy!"
             }
         };
 
-        // --- ICONOS GENERALES ---
         const GlobeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10 15.3 15.3 0 0 1 4-10z"></path></svg>;
         const MapPinIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
         const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>;
@@ -244,7 +127,6 @@
         const HotelIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3"><path d="M3 21h18"/><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/><path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4"/></svg>;
         const CarIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.4-1.7-1-2.2V8c0-1.1-.9-2-2-2h-3l-3-3H9L6 6H4c-1.1 0-2 .9-2 2v2.8c-.6.5-1 1.3-1 2.2v3c0 .6.4 1 1 1h2"/><path d="M16 17v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2"/><path d="M12 17v-4"/></svg>;
 
-        // --- ICONOS DEL ITINERARIO ---
         const IconChurch = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M8 8h8"/></svg>;
         const IconGlass = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 22h8M12 15v7M12 15a6 6 0 0 0 6-6V3H6v6a6 6 0 0 0 6 6z"/></svg>;
         const IconSparkles = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3z"/></svg>;
@@ -252,7 +134,6 @@
         const IconCamera = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>;
         const IconMusic = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>;
 
-        // --- HOOK PARA FADE IN EN SCROLL ---
         const FadeInView = ({ children, className = "", delay = "0s" }) => {
             const domRef = useRef();
             const [isVisible, setVisible] = useState(false);
@@ -266,7 +147,6 @@
                         }
                     });
                 }, { threshold: 0.15 });
-                
                 if (domRef.current) observer.observe(domRef.current);
                 return () => observer.disconnect();
             }, []);
@@ -278,7 +158,6 @@
             );
         };
 
-        // --- COMPONENTES DE FONDO ---
         const LightParticles = () => {
             const particles = useMemo(() => Array.from({ length: 30 }).map((_, i) => ({
                 id: i, left: `${Math.random() * 100}%`, size: `${Math.random() * 4 + 2}px`, duration: `${Math.random() * 10 + 10}s`,
@@ -313,7 +192,6 @@
             );
         };
 
-        // --- CUENTA REGRESIVA ---
         const CountdownTimer = ({ targetDate, lang, t }) => {
             const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
@@ -333,10 +211,8 @@
             }, [targetDate]);
 
             const timeUnits = [
-                { label: t.days, value: timeLeft.days },
-                { label: t.hrs, value: timeLeft.hours },
-                { label: t.min, value: timeLeft.minutes },
-                { label: t.sec, value: timeLeft.seconds }
+                { label: t.days, value: timeLeft.days }, { label: t.hrs, value: timeLeft.hours },
+                { label: t.min, value: timeLeft.minutes }, { label: t.sec, value: timeLeft.seconds }
             ];
 
             return (
@@ -352,31 +228,26 @@
         };
 
         function App() {
-            // ESTADOS GENERALES
             const [isPlaying, setIsPlaying] = useState(false);
             const [lang, setLang] = useState('ES');
             const [scrollY, setScrollY] = useState(0);
             
-            // 🔴 FASE 4: Estados para el RSVP y Motor Baulia
             const [showRsvpModal, setShowRsvpModal] = useState(false);
             const [isConfirmed, setIsConfirmed] = useState(false);
             const [selectedPhoto, setSelectedPhoto] = useState(null);
-            
-            // EFECTO WOW: Estados de Apertura (Unboxing)
             const [hasOpened, setHasOpened] = useState(false);
             const [isOpening, setIsOpening] = useState(false);
 
-            // 🔴 NUEVO: Estado para el nombre del invitado y el ID del Evento
+            // 🔴 ESTADO DEL INVITADO
             const [guestName, setGuestName] = useState('');
-            const eventIdStr = "jazel-alor"; // <-- 🔴 ASEGÚRATE DE QUE ESTE SEA EL ID EN FIREBASE
+            const eventIdStr = "jazel-alor"; // ID DE TU BÓVEDA
             
             const urlParams = new URLSearchParams(window.location.search);
             const guestUid = urlParams.get('u') || '';
-
+            
             const audioRef = useRef(null);
             const t = translations[lang];
 
-            // 🔴 NUEVO: FETCH INTELIGENTE Y SEGURO A FIREBASE
             useEffect(() => {
                 if(guestUid) {
                     fetch(`https://firestore.googleapis.com/v1/projects/panel-de-control-intelig-db278/databases/(default)/documents/eventos/${eventIdStr}/invitados/${guestUid}`)
@@ -389,7 +260,6 @@
                 }
             }, [guestUid]);
 
-            // 🔴 FASE 4: Listener para el Iframe de RSVP
             useEffect(() => {
                 const handleMessage = (event) => {
                     if (event.data === 'rsvp_success') {
@@ -399,20 +269,6 @@
                 };
                 window.addEventListener('message', handleMessage);
                 return () => window.removeEventListener('message', handleMessage);
-            }, []);
-
-            // PROTECCIÓN ANTI-ROBO
-            useEffect(() => {
-                const preventDefault = (e) => e.preventDefault();
-                document.addEventListener('contextmenu', preventDefault);
-                document.addEventListener('selectstart', preventDefault);
-                document.addEventListener('dragstart', preventDefault);
-                
-                return () => {
-                    document.removeEventListener('contextmenu', preventDefault);
-                    document.removeEventListener('selectstart', preventDefault);
-                    document.removeEventListener('dragstart', preventDefault);
-                };
             }, []);
 
             useEffect(() => {
@@ -468,9 +324,6 @@
             return (
                 <div className="relative bg-ivory min-h-screen">
                     
-                    {/* ==========================================
-                        EFECTO WOW: PANTALLA DIGITAL UNBOXING
-                        ========================================== */}
                     {!hasOpened && (
                         <div className={`fixed inset-0 z-[5000] bg-ivory flex flex-col items-center justify-center transition-all duration-[1200ms] ease-in-out ${isOpening ? 'opacity-0 scale-110 pointer-events-none blur-sm' : 'opacity-100'}`}>
                             <div className="absolute inset-4 border border-champagne/30 rounded-[20px] pointer-events-none"></div>
@@ -484,13 +337,12 @@
                                     Bautizo de Jazel Alor
                                 </h2>
                                 
-                                {/* 🔴 SALUDO PERSONALIZADO AL INVITADO EN EL UNBOXING */}
                                 {guestName ? (
-                                    <div className="mb-12 flex flex-col items-center">
+                                    <div className="mb-12 flex flex-col items-center animate-pulse-slow">
                                         <p className="text-[10px] md:text-xs tracking-[0.3em] text-warm-grey uppercase mb-2 font-light">
                                             {t.especiallyFor}
                                         </p>
-                                        <h3 className="text-lg md:text-xl tracking-[0.2em] text-champagne uppercase font-semibold px-4 drop-shadow-sm">
+                                        <h3 className="text-lg md:text-xl tracking-[0.2em] text-champagne uppercase font-semibold px-4 drop-shadow-sm text-center">
                                             {guestName}
                                         </h3>
                                     </div>
@@ -509,7 +361,8 @@
                         </div>
                     )}
 
-                    <audio ref={audioRef} loop preload="auto"><source src="/Personalizadas/bautizo/modelo_etherea/cancion.mp3" type="audio/mpeg" /></audio>
+                    {/* 🔴 RUTAS CORREGIDAS CON LETRAS MINÚSCULAS Y GUION MEDIO, EXACTO A TU CARPETA */}
+                    <audio ref={audioRef} loop preload="auto"><source src="/personalizadas/bautizo/modelo-etherea/cancion.mp3" type="audio/mpeg" /></audio>
                     <EtherealBackground />
 
                     <div className="fixed top-6 right-6 z-[100] flex items-center space-x-4">
@@ -525,11 +378,8 @@
 
                     <header className="relative h-[100svh] w-full overflow-hidden flex flex-col items-center justify-center text-center z-10">
                         <div className="absolute inset-0 z-0 overflow-hidden" style={{ opacity: imageOpacity, filter: `blur(${imageBlur}px)` }}>
-                            <img 
-                                src="/Personalizadas/bautizo/modelo_etherea/portada.jpg" 
-                                alt="Bebé" 
-                                className="w-full h-full object-cover object-center animate-ken-burns"
-                            />
+                            {/* 🔴 RUTA CORREGIDA */}
+                            <img src="/personalizadas/bautizo/modelo-etherea/portada.jpg" alt="Bebé" className="w-full h-full object-cover object-center animate-ken-burns" />
                             <div className="absolute inset-0 bg-black/40"></div>
                             <LightParticles />
                             <div className="absolute bottom-0 w-full h-48 bg-gradient-to-t from-ivory to-transparent pointer-events-none z-10"></div>
@@ -541,9 +391,7 @@
 
                         <div className="relative z-10 w-full px-4 mt-20 transition-opacity duration-75" style={{ opacity: textOpacity }}>
                             <div className="animate-fade-in" style={{animationDelay: '0.5s'}}>
-                                <h2 className="text-champagne text-sm md:text-base tracking-[0.4em] uppercase mb-4 drop-shadow-lg font-bold">
-                                    {t.celebrating}
-                                </h2>
+                                <h2 className="text-champagne text-sm md:text-base tracking-[0.4em] uppercase mb-4 drop-shadow-lg font-bold">{t.celebrating}</h2>
                                 <h1 className="font-script text-7xl md:text-9xl lg:text-[10rem] text-champagne leading-none text-shadow-elegant">Jazel Alor</h1>
                             </div>
                         </div>
@@ -589,7 +437,7 @@
                             <p className="font-script text-4xl text-charcoal">Elena Torres</p>
                         </FadeInView>
 
-                        {/* 🔴 NUEVA BIENVENIDA CÁLIDA Y HUMANA (Justo arriba del reloj) */}
+                        {/* 🔴 BIENVENIDA CÁLIDA Y HUMANA (Arriba del reloj) */}
                         {guestName && (
                             <FadeInView className="w-full max-w-lg mb-10 text-center px-4">
                                 <div className="glass-card p-8 rounded-[20px] relative overflow-hidden group border border-champagne/30">
@@ -628,7 +476,8 @@
                             <FadeInView delay="0.1s">
                                 <div className="glass-card rounded-[20px] flex flex-col items-center text-center overflow-hidden">
                                     <div className="w-full h-48 md:h-56 relative">
-                                        <img src="/Personalizadas/bautizo/modelo_etherea/iglesia.jpg" alt="Iglesia" className="w-full h-full object-cover"/>
+                                        {/* 🔴 RUTA CORREGIDA */}
+                                        <img src="/personalizadas/bautizo/modelo-etherea/iglesia.jpg" alt="Iglesia" className="w-full h-full object-cover"/>
                                         <div className="absolute inset-0 bg-gradient-to-t from-white/80 to-transparent"></div>
                                     </div>
                                     <div className="p-8 md:p-10 flex flex-col items-center w-full -mt-10 relative z-10">
@@ -648,7 +497,8 @@
                             <FadeInView delay="0.2s">
                                 <div className="glass-card rounded-[20px] flex flex-col items-center text-center overflow-hidden">
                                     <div className="w-full h-48 md:h-56 relative">
-                                        <img src="/Personalizadas/bautizo/modelo_etherea/recepcion.jpg" alt="Recepción" className="w-full h-full object-cover"/>
+                                        {/* 🔴 RUTA CORREGIDA */}
+                                        <img src="/personalizadas/bautizo/modelo-etherea/recepcion.jpg" alt="Recepción" className="w-full h-full object-cover"/>
                                         <div className="absolute inset-0 bg-gradient-to-t from-white/80 to-transparent"></div>
                                     </div>
                                     <div className="p-8 md:p-10 flex flex-col items-center w-full -mt-10 relative z-10">
@@ -766,7 +616,8 @@
                             <div className="glass-card rounded-[20px] p-6 md:p-8 text-center relative">
                                 <div className="absolute top-4 left-4 right-4 bottom-4 border border-champagne/20 rounded-[12px] pointer-events-none"></div>
                                 <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden mb-8 border border-champagne/30 shadow-sm z-10">
-                                    <img src="/Personalizadas/bautizo/modelo_etherea/padrinos.jpg" alt="Mis Padrinos" className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"/>
+                                    {/* 🔴 RUTA CORREGIDA */}
+                                    <img src="/personalizadas/bautizo/modelo-etherea/padrinos.jpg" alt="Mis Padrinos" className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"/>
                                 </div>
                                 <div className="relative z-10 px-4">
                                     <h3 className="font-script text-4xl md:text-5xl text-champagne mb-4">{t.toGodparents}</h3>
@@ -783,11 +634,12 @@
                                 {[1, 2, 3, 4, 5, 6].map(num => (
                                     <div key={num} className="snap-center shrink-0 w-[80vw] md:w-[350px] glass-card p-3 rounded-2xl">
                                         <div className="overflow-hidden rounded-xl h-[400px] md:h-[450px]">
+                                            {/* 🔴 RUTAS CORREGIDAS EN EL .MAP */}
                                             <img 
-                                                src={`/Personalizadas/bautizo/modelo_etherea/foto${num}.jpg`} 
+                                                src={`/personalizadas/bautizo/modelo-etherea/foto${num}.jpg`} 
                                                 alt={`Recuerdo ${num}`} 
                                                 className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700 cursor-pointer" 
-                                                onClick={() => setSelectedPhoto(`/Personalizadas/bautizo/modelo_etherea/foto${num}.jpg`)}
+                                                onClick={() => setSelectedPhoto(`/personalizadas/bautizo/modelo-etherea/foto${num}.jpg`)}
                                             />
                                         </div>
                                     </div>
@@ -838,7 +690,7 @@
                             </div>
                         </FadeInView>
 
-                        {/* 🔴 FASE 4: BOTÓN DE CONFIRMACIÓN RSVP PRODUCCIÓN */}
+                        {/* 🔴 BOTÓN RSVP BLOQUEABLE CON COMPORTAMIENTO INTELIGENTE */}
                         <FadeInView delay="0.1s" className="w-full max-w-xl pb-10 mt-20">
                             <div className="flex flex-col items-center text-center">
                                 <div className="text-champagne mb-6 animate-bounce-slow">
@@ -862,8 +714,8 @@
 
                     </div>
 
-                    {/* 🔴 FOOTER DISCRETO BAULIA (TRANSLÚCIDO) */}
                     <footer className="relative z-30 w-full bg-white/20 backdrop-blur-md border-t border-champagne/20 text-center py-12 px-4 flex flex-col items-center pb-32">
+                        {/* 🔴 OCULTA LOGIN SI HAY INVITADO */}
                         {!guestUid && (
                             <a href="https://panel.baulia.com" className="text-charcoal/60 text-xs hover:text-champagne transition-colors uppercase tracking-widest mb-6 font-sans">
                                 ¿Eres el anfitrión? Iniciar Sesión
@@ -874,10 +726,10 @@
                         <span className="text-charcoal/70 text-xs tracking-[0.3em] uppercase mb-4">Tecnología por</span>
                         <a href="https://baulia.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity block mb-8">
                             
-                            {/* 🔴 LOGOTIPO SVG EN CHAMPAGNE, DIRECTO EN EL CÓDIGO */}
+                            {/* 🔴 LOGOTIPO SVG EN CHAMPAGNE */}
                             <svg viewBox="0 0 915 201" fill="none" xmlns="http://www.w3.org/2000/svg" style={{height: '40px', width: 'auto', overflow: 'visible', display: 'inline-block'}}>
                                 <style>{`.baulia-text { fill: #D4AF37; transition: fill 0.5s ease; } .baulia-diamond-animator { transform-origin: 100px 100px; transform: rotate(45deg) scale(0.8); transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); } .baulia-diamond-shape { fill: transparent; stroke: #D4AF37; stroke-width: 1.72px; transition: fill 0.5s ease, stroke-width 0.3s ease; } .baulia-b { fill: #D4AF37; transition: all 0.6s ease; transform-origin: 100px 100px; } svg:hover .baulia-diamond-animator { transform: rotate(135deg) scale(0.85); } svg:hover .baulia-diamond-shape { stroke-width: 3px; } svg:hover .baulia-b { transform: scale(1.05); fill: #FDF1A9; }`}</style>
-                                <g className="baulia-text"><path d="M265.12,78.58h-.35c0-2.04-.75-3.8-2.24-5.25-1.5-1.46-3.27-2.18-5.31-2.18h-1.42l-.12-1.18h9.44v8.62ZM265.12,143.97v8.62h-9.44l.12-1.18h1.42c2.05,0,3.82-.73,5.31-2.18,1.49-1.46,2.24-3.21,2.24-5.25h.35ZM272.44,69.96v82.62h-7.67v-82.62h7.67ZM279.17,69.96c5.51,0,10.17.83,13.99,2.48,3.82,1.65,6.71,3.95,8.68,6.91,1.97,2.95,2.95,6.39,2.95,10.33,0,3.3-.63,6.2-1.89,8.68-1.26,2.48-2.87,4.49-4.84,6.02-1.97,1.53-4.05,2.62-6.26,3.25,4.17.63,7.77,2.01,10.8,4.13,3.03,2.12,5.35,4.78,6.96,7.97,1.61,3.19,2.42,6.75,2.42,10.68,0,4.41-1.06,8.28-3.19,11.63-2.12,3.35-5.25,5.94-9.38,7.79-4.13,1.85-9.11,2.77-14.93,2.77h-13.1c.08-1.42.12-2.83.12-4.25h12.51c4.09,0,7.55-.73,10.39-2.18,2.83-1.46,5-3.6,6.49-6.43,1.49-2.83,2.24-6.22,2.24-10.15,0-4.41-.85-7.99-2.54-10.74-1.69-2.75-3.88-4.84-6.55-6.26-2.68-1.42-5.57-2.38-8.68-2.89-3.11-.51-6.08-.77-8.91-.77v-1.06c1.81,0,3.82-.2,6.02-.59,2.2-.39,4.33-1.18,6.37-2.36,2.04-1.18,3.74-2.93,5.08-5.25,1.34-2.32,2.01-5.37,2.01-9.15,0-3.54-.65-6.57-1.95-9.09-1.3-2.52-3.23-4.43-5.78-5.72-2.56-1.3-5.72-1.95-9.5-1.95h-10.86c0-.08-.1-.41-.29-1-.2-.59-.49-1.51-.89-2.77h12.51Z"/><path d="M381.98,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM407.36,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.86-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM424,120.36v3.54h-36.95v-3.54h36.95ZM407.36,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM429.31,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95,1.18-1.3,1.34-3.13.47-5.49Z"/><path d="M506.51,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM513.83,69.96v51.94c0,5.67,1.04,10.66,3.13,14.99,2.08,4.33,5.02,7.69,8.79,10.09,3.78,2.4,8.14,3.6,13.1,3.6,5.27,0,9.87-1.14,13.81-3.42,3.93-2.28,7-5.45,9.21-9.5,2.2-4.05,3.31-8.79,3.31-14.22v-53.47h5.55v53.47c0,6.14-1.32,11.51-3.95,16.11-2.64,4.6-6.36,8.2-11.15,10.8-4.8,2.6-10.39,3.9-16.76,3.9s-12.26-1.28-17.17-3.84c-4.92-2.56-8.73-6.14-11.45-10.74-2.71-4.6-4.07-9.97-4.07-16.11v-53.59h7.67ZM521.97,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38ZM538.73,61.58c1.65-1.81,3.31-3.6,4.96-5.37,1.65-1.77,3.32-3.5,5.02-5.19s3.36-3.32,5.02-4.9c.87.94,1.73,1.93,2.6,2.95.87,1.02,1.61,2.12,2.24,3.31-2.12,1.18-4.25,2.36-6.37,3.54-2.12,1.18-4.23,2.3-6.31,3.36-2.09,1.06-4.19,2.11-6.31,3.13l-.83-.83ZM565.53,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM578.86,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38Z"/><path d="M646.97,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM646.97,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM654.29,69.96v82.62h-7.67v-82.62h7.67ZM653.94,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18s-2.22,3.21-2.3,5.25h-.35ZM686.16,148.93v3.66h-32.22v-3.66h32.22ZM693.36,133.46l-6.85,19.12h-19.59l4.25-3.66c4.17,0,7.57-.65,10.21-1.95,2.64-1.3,4.78-3.13,6.43-5.49,1.65-2.36,3.11-5.04,4.37-8.03h1.18Z"/><path d="M758.75,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM758.75,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM766.07,69.96v82.62h-7.67v-82.62h7.67ZM765.72,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18-1.46,1.46-2.22,3.21-2.3,5.25h-.35ZM765.72,143.97h.35c.08,2.05.84,3.8,2.3,5.25,1.46,1.46,3.21,2.18,5.25,2.18h1.53v1.18h-9.44v-8.62Z"/><path d="M846.33,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM871.71,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.87-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM888.35,120.36v3.54h-36.95v-3.54h36.95ZM871.71,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM893.67,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95s1.34-3.13.47-5.49Z"/></g></svg>
+                                <g className="baulia-text"><path d="M265.12,78.58h-.35c0-2.04-.75-3.8-2.24-5.25-1.5-1.46-3.27-2.18-5.31-2.18h-1.42l-.12-1.18h9.44v8.62ZM265.12,143.97v8.62h-9.44l.12-1.18h1.42c2.05,0,3.82-.73,5.31-2.18,1.49-1.46,2.24-3.21,2.24-5.25h.35ZM272.44,69.96v82.62h-7.67v-82.62h7.67ZM279.17,69.96c5.51,0,10.17.83,13.99,2.48,3.82,1.65,6.71,3.95,8.68,6.91,1.97,2.95,2.95,6.39,2.95,10.33,0,3.3-.63,6.2-1.89,8.68-1.26,2.48-2.87,4.49-4.84,6.02-1.97,1.53-4.05,2.62-6.26,3.25,4.17.63,7.77,2.01,10.8,4.13,3.03,2.12,5.35,4.78,6.96,7.97,1.61,3.19,2.42,6.75,2.42,10.68,0,4.41-1.06,8.28-3.19,11.63-2.12,3.35-5.25,5.94-9.38,7.79-4.13,1.85-9.11,2.77-14.93,2.77h-13.1c.08-1.42.12-2.83.12-4.25h12.51c4.09,0,7.55-.73,10.39-2.18,2.83-1.46,5-3.6,6.49-6.43,1.49-2.83,2.24-6.22,2.24-10.15,0-4.41-.85-7.99-2.54-10.74-1.69-2.75-3.88-4.84-6.55-6.26-2.68-1.42-5.57-2.38-8.68-2.89-3.11-.51-6.08-.77-8.91-.77v-1.06c1.81,0,3.82-.2,6.02-.59,2.2-.39,4.33-1.18,6.37-2.36,2.04-1.18,3.74-2.93,5.08-5.25,1.34-2.32,2.01-5.37,2.01-9.15,0-3.54-.65-6.57-1.95-9.09-1.3-2.52-3.23-4.43-5.78-5.72-2.56-1.3-5.72-1.95-9.5-1.95h-10.86c0-.08-.1-.41-.29-1-.2-.59-.49-1.51-.89-2.77h12.51Z"/><path d="M381.98,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM407.36,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.86-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM424,120.36v3.54h-36.95v-3.54h36.95ZM407.36,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM429.31,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95,1.18-1.3,1.34-3.13.47-5.49Z"/><path d="M506.51,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM513.83,69.96v51.94c0,5.67,1.04,10.66,3.13,14.99,2.08,4.33,5.02,7.69,8.79,10.09,3.78,2.4,8.14,3.6,13.1,3.6,5.27,0,9.87-1.14,13.81-3.42,3.93-2.28,7-5.45,9.21-9.5,2.2-4.05,3.31-8.79,3.31-14.22v-53.47h5.55v53.47c0,6.14-1.32,11.51-3.95,16.11-2.64,4.6-6.36,8.2-11.15,10.8-4.8,2.6-10.39,3.9-16.76,3.9s-12.26-1.28-17.17-3.84c-4.92-2.56-8.73-6.14-11.45-10.74-2.71-4.6-4.07-9.97-4.07-16.11v-53.59h7.67ZM521.97,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38ZM538.73,61.58c1.65-1.81,3.31-3.6,4.96-5.37,1.65-1.77,3.32-3.5,5.02-5.19s3.36-3.32,5.02-4.9c.87.94,1.73,1.93,2.6,2.95.87,1.02,1.61,2.12,2.24,3.31-2.12,1.18-4.25,2.36-6.37,3.54-2.12,1.18-4.23,2.3-6.31,3.36-2.09,1.06-4.19,2.11-6.31,3.13l-.83-.83ZM565.53,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM578.86,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38Z"/><path d="M646.97,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM646.97,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM654.29,69.96v82.62h-7.67v-82.62h7.67ZM653.94,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18s-2.22,3.21-2.3,5.25h-.35ZM686.16,148.93v3.66h-32.22v-3.66h32.22ZM693.36,133.46l-6.85,19.12h-19.59l4.25-3.66c4.17,0,7.57-.65,10.21-1.95,2.64-1.3,4.78-3.13,6.43-5.49,1.65-2.36,3.11-5.04,4.37-8.03h1.18Z"/><path d="M758.75,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM758.75,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM766.07,69.96v82.62h-7.67v-82.62h7.67ZM765.72,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18-1.46,1.46-2.22,3.21-2.3,5.25h-.35ZM765.72,143.97h.35c.08,2.05.84,3.8,2.3,5.25,1.46,1.46,3.21,2.18,5.25,2.18h1.53v1.18h-9.44v-8.62Z"/><path d="M846.33,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM871.71,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.87-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM888.35,120.36v3.54h-36.95v-3.54h36.95ZM871.71,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM893.67,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95s1.34-3.13.47-5.49Z"/></g><g className="baulia-diamond-animator"><rect className="baulia-diamond-shape" x=".86" y=".86" width="198.64" height="198.64" transform="translate(0 200.36) rotate(-90)" strokeMiterlimit="10" /></g><path className="baulia-b" d="M116.87,94.54l6.01-.41c6.47,0,11.27,1.21,14.42,3.62,3.14,2.42,4.72,5.83,4.72,10.25s-2.01,9.59-6.01,15.51c-4.01,5.92-9.2,11.3-15.58,16.13h7.79c3.19,0,5.42-.14,6.7-.41,1.27-.27,2-.41,2.19-.41,1.27,0,1.91.68,1.91,2.05s-.91,2.1-2.73,2.19c-7.02,0-13.76-.09-20.23-.27-10.2,6.47-20.23,9.7-30.07,9.7-4.65,0-8.34-.87-11.07-2.6s-4.1-3.48-4.1-5.26.75-3.16,2.25-4.17c1.5-1,3.62-1.5,6.36-1.5,10.66,0,22.59.23,35.81.68,5.47-4.46,9.84-9.64,13.12-15.51,3.28-5.88,4.92-11.18,4.92-15.92,0-7.56-4.06-11.34-12.16-11.34-3.19,0-6.49.5-9.91,1.5-3.42,1-5.47,1.71-6.15,2.12s-1.12.61-1.3.61c-.55,0-.82-.39-.82-1.16s1.18-1.71,3.55-2.8c10.39-5.01,20.54-11.68,30.48-20.02,9.93-8.34,14.9-14.28,14.9-17.83,0-1.64-1.28-2.46-3.83-2.46-10.39.09-24.65,7.88-42.78,23.37-3.65,9.38-9.64,20.91-17.97,34.58-8.34,13.67-17.06,25.9-26.17,36.69-9.11,10.8-15.9,16.19-20.36,16.19-2.73,0-4.1-1.41-4.1-4.24,0-6.47,6.13-17.99,18.38-34.58,12.25-16.58,26.12-31.84,41.61-45.78,2.73-6.65,4.1-11.5,4.1-14.56s-.73-5.47-2.19-7.24c-1.46-1.78-3.6-3.08-6.42-3.9-4.46-1.18-9.18-1.78-14.14-1.78s-8.77.12-11.41.34c-2.64.23-5.86.68-9.64,1.37-3.78.68-6.86,1.87-9.22,3.55-2.37,1.69-3.55,3.83-3.55,6.42s1.27,4.6,3.83,6.01c2.55,1.41,5.67,2.39,9.36,2.94s7.36,1.14,11,1.78c3.64.64,6.74,1.89,9.29,3.76,2.55,1.87,3.83,4.49,3.83,7.86,0,.91-.2,1.37-.61,1.37s-.73-.14-.96-.41c-.23-.27-.62-.82-1.16-1.64-.82-1.18-2.03-2.1-3.62-2.73-1.59-.64-4.06-1.25-7.38-1.84-3.33-.59-6.47-1.23-9.43-1.91-2.96-.68-5.94-1.57-8.95-2.66-3.01-1.09-5.42-2.64-7.24-4.65-1.82-2-2.73-4.35-2.73-7.04s1.14-5.08,3.42-7.17c2.28-2.1,5.28-3.74,9.02-4.92,7.65-2.28,15.63-3.42,23.92-3.42,21.5,0,32.25,5.65,32.25,16.95,0,1-.23,2.51-.68,4.51,18.4-14.85,33.35-22.28,44.83-22.28,5.1,0,7.65,1.55,7.65,4.65,0,4.46-4.67,10.8-14.01,19-9.34,8.2-18.98,14.58-28.9,19.13ZM44.17,163.69c2.64,0,9.73-8.45,21.25-25.35,11.52-16.9,20.75-32.64,27.68-47.22-13.67,13.03-25.76,26.58-36.29,40.66-10.52,14.08-15.78,23.66-15.78,28.77,0,2.09,1.05,3.14,3.14,3.14ZM111,142.64l-24.74-.55c-7.02,0-10.52,1.05-10.52,3.14,0,1.18,1.18,2.3,3.55,3.35,2.37,1.05,5.1,1.57,8.2,1.57,8.11,0,15.94-2.5,23.51-7.52Z"/></svg>
                         </a>
                     </footer>
 
