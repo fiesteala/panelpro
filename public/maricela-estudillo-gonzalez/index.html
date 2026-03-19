@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Maricela - Mis 50 Años | Invitación Primavera Vibrante</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -120,7 +120,7 @@
             const [isModalOpen, setIsModalOpen] = useState(false);
             const [isConfirmed, setIsConfirmed] = useState(false);
             
-            // 🔴 NUEVO: ESTADO PARA EL NOMBRE DEL INVITADO
+            // 🔴 ESTADO PARA EL NOMBRE DEL INVITADO
             const [guestName, setGuestName] = useState('');
             const eventIdStr = "maricela-estudillo-gonzalez"; // ID EXACTO DE TU BÓVEDA
             
@@ -129,10 +129,9 @@
 
             const audioRef = useRef(null);
 
-            // 🔴 NUEVO: FETCH INTELIGENTE Y SEGURO A FIREBASE
+            // 🔴 FETCH INTELIGENTE Y SEGURO A FIREBASE
             useEffect(() => {
                 if(guestUid) {
-                    // Conexión silenciosa a tu base de datos para sacar el nombre del cliente
                     fetch(`https://firestore.googleapis.com/v1/projects/panel-de-control-intelig-db278/databases/(default)/documents/eventos/${eventIdStr}/invitados/${guestUid}`)
                     .then(res => res.json())
                     .then(data => {
@@ -205,21 +204,8 @@
                     </div>
 
                     <main className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
-                        
                         <div className="relative w-full max-w-lg flex flex-col items-center text-center mt-12 mb-20 animate-fade-in-up delay-300">
                             
-                            {/* 🔴 SALUDO PERSONALIZADO AL INVITADO (Aparece si la BD nos da su nombre) */}
-                            {guestName && (
-                                <div className="mb-6 z-20 px-6 py-3 bg-white/60 backdrop-blur-md rounded-2xl border border-gold/30 shadow-lg animate-pulse-slow">
-                                    <p className="font-sans text-[10px] md:text-xs tracking-[0.2em] uppercase text-gold-dark font-bold mb-1">
-                                        {language === 'ES' ? 'Pase VIP Para:' : 'VIP Pass For:'}
-                                    </p>
-                                    <p className="font-serif italic text-xl md:text-2xl text-spring-dark font-bold">
-                                        {guestName}
-                                    </p>
-                                </div>
-                            )}
-
                             <div className="mb-8 z-20 animate-pulse-slow">
                                 <img src="/maricela-estudillo-gonzalez/monograma.svg" alt="Monograma" className="w-20 h-20 md:w-24 md:h-24 mx-auto drop-shadow-md object-contain hover:scale-105 transition-transform duration-700" />
                             </div>
@@ -264,6 +250,28 @@
 
                     <div className="relative z-10 flex flex-col items-center w-full px-4 md:px-8 pb-10 space-y-32 md:space-y-40">
                         
+                        {/* 🔴 NUEVA BIENVENIDA CÁLIDA Y HUMANA (Justo arriba del reloj) */}
+                        {guestName && (
+                            <RevealOnScroll className="w-full max-w-2xl flex flex-col items-center text-center mt-4 mb-4 px-4">
+                                <div className="bg-white/60 backdrop-blur-xl border border-gold/30 p-8 rounded-[2rem] shadow-card-luxury relative overflow-hidden group">
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold to-transparent"></div>
+                                    <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-gold-dark font-bold mb-3 block flex items-center justify-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 text-spring-pink" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" /></svg>
+                                        {language === 'ES' ? 'Pase VIP Personal' : 'VIP Personal Pass'}
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 text-spring-pink" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" /></svg>
+                                    </span>
+                                    <h3 className="font-serif text-3xl md:text-4xl text-spring-dark mb-4">
+                                        {language === 'ES' ? '¡Qué alegría tenerte aquí,' : 'So glad to have you here,'} <br/><span className="text-spring-pink italic">{guestName}</span>!
+                                    </h3>
+                                    <p className="font-sans text-sm text-gray-600 leading-relaxed font-medium">
+                                        {language === 'ES' 
+                                            ? 'Este espacio fue diseñado especialmente para ti. Desliza hacia abajo para descubrir todos los detalles y confirmar tu asistencia.'
+                                            : 'This space was designed especially for you. Scroll down to discover all the details and RSVP.'}
+                                    </p>
+                                </div>
+                            </RevealOnScroll>
+                        )}
+
                         <RevealOnScroll className="w-full max-w-2xl flex flex-col items-center mt-10">
                             <span className="font-sans text-xs md:text-sm tracking-[0.4em] uppercase text-gold-warm font-medium mb-8">
                                 {language === 'ES' ? 'Faltan' : 'Time Left'}
@@ -499,6 +507,6 @@
         root.render(<App />);
     </script>
     <script> document.addEventListener('contextmenu', event => event.preventDefault()); document.onkeydown = function(e) { if(event.keyCode == 123) { return false; } if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; } if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { return false; } if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { return false; } if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; } } </script>
-    <style> body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; } </clipPath>
+    <style> body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; } </style>
 </body>
 </html>
