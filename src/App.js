@@ -6771,149 +6771,148 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
   };
 
   return (
-    <header ref={headerRef} className="bg-white/60 dark:bg-[#050505]/60 backdrop-blur-2xl border-b border-slate-200/50 dark:border-white/5 h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden transition-colors duration-700">
-      <div className="flex items-center flex-1">
-        <button onClick={() => setIsOpen(true)} className="xl:hidden text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-white mr-4 transition-colors"><Menu size={24} /></button>
-        
-        <div className="relative w-full max-w-md hidden sm:block">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
-          <input type="text" placeholder="Buscar en la bóveda..." value={globalSearch} onChange={(e) => {setGlobalSearch(e.target.value); setShowResults(true);}} className="w-full pl-10 pr-4 py-2 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 rounded-full text-sm text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-amber-300 dark:focus:border-amber-500/50 focus:bg-white dark:focus:bg-white/10 transition-all shadow-sm dark:shadow-none"/>
+    <>
+      <header ref={headerRef} className="bg-white/60 dark:bg-[#050505]/60 backdrop-blur-2xl border-b border-slate-200/50 dark:border-white/5 h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden transition-colors duration-700">
+        <div className="flex items-center flex-1">
+          <button onClick={() => setIsOpen(true)} className="xl:hidden text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-white mr-4 transition-colors"><Menu size={24} /></button>
           
-          {showResults && globalSearch.length > 1 && (
-            <div className="absolute top-full left-0 mt-2 w-full bg-white dark:bg-[#0a0a0a] shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 py-2 max-h-80 overflow-y-auto z-[100] animate-in fade-in transition-colors">
-              {searchResults.length === 0 ? <div className="p-4 text-center text-sm text-slate-500">No se encontraron resultados para "{globalSearch}"</div> : searchResults.map(res => (
-                  <button key={`${res.type}_${res.id}`} onClick={() => handleNavigate(res.tab)} className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-white/5 flex items-center border-b border-slate-100 dark:border-white/5 last:border-0 transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-white/5 text-amber-600 dark:text-amber-500 flex items-center justify-center mr-3 border border-transparent dark:border-white/10">{res.icon}</div>
-                    <div><p className="font-bold text-slate-800 dark:text-white text-sm">{res.text}</p><p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5">{res.type}</p></div>
-                  </button>
-                ))
-              }
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-2 sm:space-x-4">
-        {/* INDICADORES RÁPIDOS */}
-        <div className="hidden md:flex items-center bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 backdrop-blur-md rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 shadow-sm transition-colors">
-          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-600 dark:text-slate-400" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
-          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-amber-600 dark:text-amber-500 bg-amber-100/50 dark:bg-amber-500/10" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countConfirmados}</span></div>
-          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-rose-600 dark:text-rose-400 bg-rose-100/50 dark:bg-rose-500/10" title="Cancelaron"><X size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countCancelados}</span></div>
-          <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-emerald-600 dark:text-emerald-400 bg-emerald-100/50 dark:bg-emerald-500/10" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countIngresos}</span></div>
-        </div>
-
-        {/* BOTÓN DÍA/NOCHE REPARADO */}
-        <button onClick={(e) => { e.preventDefault(); cycleTheme(); }} className="p-2 text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-all rounded-full hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95" title={`Modo actual: ${themeSetting.toUpperCase()}`}>
-          {themeSetting === 'auto' ? (
-            <svg className="pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          ) : themeSetting === 'dark' ? (
-            <Moon className="pointer-events-none" size={20} />
-          ) : (
-            <svg className="pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-          )}
-        </button>
-
-        {/* CAMPANITA */}
-        <div className="relative">
-          <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors rounded-full hover:bg-slate-200/50 dark:hover:bg-white/5">
-            <Bell size={20} />
-            {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-white dark:border-[#050505] rounded-full text-[9px] font-bold text-white flex items-center justify-center animate-in zoom-in">{unreadCount}</span>}
-          </button>
-          
-          {showBellMenu && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-[#0a0a0a] shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
-              <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center">
-                <h4 className="font-bold text-slate-800 dark:text-white">Centro de Atención</h4>
-                {bellAlerts.length > 0 && <button onClick={(e) => { e.stopPropagation(); setBellAlerts([]); }} className="text-[10px] text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 font-bold">Limpiar historial</button>}
-              </div>
-              <div className="max-h-80 overflow-y-auto custom-scrollbar">
-                {allAlerts.length === 0 ? (
-                  <div className="p-8 text-center text-slate-500"><CheckCircle size={32} className="mx-auto mb-2 text-emerald-500/50"/> ¡Todo al día! No tienes notificaciones.</div>
-                ) : (
-                  allAlerts.map(alert => (
-                    <div 
-                      key={alert.id} 
-                      className={`w-full text-left px-4 py-3 flex items-start transition-colors group cursor-pointer border-b border-slate-50 dark:border-white/5
-                        ${alert.isRead ? 'bg-white dark:bg-transparent opacity-60 hover:bg-slate-50 dark:hover:bg-white/5' : 'bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10'} 
-                      `} 
-                      onClick={(e) => { 
-                        e.stopPropagation();
-                        if(markAsRead && !alert.isDynamic) markAsRead(alert.id); 
-                        if(alert.tab) { handleNavigate(alert.tab); } else { setShowBellMenu(false); }
-                      }}
-                    >
-                      <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-500 dark:text-emerald-400' : alert.type === 'danger' ? 'text-rose-500 dark:text-rose-400' : alert.type === 'warning' ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-500 dark:text-indigo-400'}`}>
-                        {alert.type === 'success' ? <CheckCircle size={16}/> : alert.type === 'warning' || alert.type === 'danger' ? <AlertCircle size={16}/> : <Bell size={16}/>}
-                      </div>
-                      <div className="flex-1">
-                        <p className={`text-sm leading-tight ${alert.isRead ? 'font-medium text-slate-500 dark:text-slate-400' : 'font-bold text-slate-800 dark:text-white'}`}>{alert.title}</p>
-                        <p className={`text-[10px] mt-1 leading-snug ${alert.isRead ? 'text-slate-400 dark:text-slate-500' : 'text-slate-500 dark:text-slate-400 font-medium'}`}>{alert.message}</p>
-                      </div>
-                      {!alert.isDynamic && (
-                        <button onClick={(e) => { e.stopPropagation(); setBellAlerts(prev => prev.filter(a => a.id !== alert.id)); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 transition-opacity ml-2">
-                          <X size={14}/>
-                        </button>
-                      )}
-                    </div>
+          <div className="relative w-full max-w-md hidden sm:block">
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
+            <input type="text" placeholder="Buscar en la bóveda..." value={globalSearch} onChange={(e) => {setGlobalSearch(e.target.value); setShowResults(true);}} className="w-full pl-10 pr-4 py-2 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 rounded-full text-sm text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-amber-300 dark:focus:border-amber-500/50 focus:bg-white dark:focus:bg-white/10 transition-all shadow-sm dark:shadow-none"/>
+            
+            {showResults && globalSearch.length > 1 && (
+              <div className="absolute top-full left-0 mt-2 w-full bg-white dark:bg-[#0a0a0a] shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 py-2 max-h-80 overflow-y-auto z-[100] animate-in fade-in transition-colors">
+                {searchResults.length === 0 ? <div className="p-4 text-center text-sm text-slate-500">No se encontraron resultados para "{globalSearch}"</div> : searchResults.map(res => (
+                    <button key={`${res.type}_${res.id}`} onClick={() => handleNavigate(res.tab)} className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-white/5 flex items-center border-b border-slate-100 dark:border-white/5 last:border-0 transition-colors">
+                      <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-white/5 text-amber-600 dark:text-amber-500 flex items-center justify-center mr-3 border border-transparent dark:border-white/10">{res.icon}</div>
+                      <div><p className="font-bold text-slate-800 dark:text-white text-sm">{res.text}</p><p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5">{res.type}</p></div>
+                    </button>
                   ))
-                )}
+                }
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* PERFIL */}
-        <div className="relative">
-          <button 
-            onClick={() => {setShowProfileMenu(!showProfileMenu); setShowBellMenu(false); setShowResults(false);}} 
-            className="flex items-center space-x-2 sm:space-x-3 hover:bg-slate-200/50 dark:hover:bg-white/5 p-1 sm:p-1.5 rounded-xl transition-colors text-right border border-transparent hover:border-slate-200 dark:hover:border-white/10"
-          >
-            <div className="hidden sm:block pl-1">
-              <p className="text-xs font-bold text-slate-800 dark:text-white leading-tight">Proyecto Activo</p>
-              <p className="text-[9px] text-amber-600 dark:text-amber-500 font-medium tracking-widest uppercase">ID: {ID_DEL_EVENTO.slice(0,8)}...</p>
-            </div>
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-white font-black shadow-md text-sm shrink-0 border border-amber-300">
-              <Users size={16}/>
-            </div>
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          {/* INDICADORES RÁPIDOS */}
+          <div className="hidden md:flex items-center bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 backdrop-blur-md rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 shadow-sm transition-colors">
+            <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-600 dark:text-slate-400" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
+            <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-amber-600 dark:text-amber-500 bg-amber-100/50 dark:bg-amber-500/10" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countConfirmados}</span></div>
+            <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-rose-600 dark:text-rose-400 bg-rose-100/50 dark:bg-rose-500/10" title="Cancelaron"><X size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countCancelados}</span></div>
+            <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-emerald-600 dark:text-emerald-400 bg-emerald-100/50 dark:bg-emerald-500/10" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countIngresos}</span></div>
+          </div>
+
+          {/* BOTÓN DÍA/NOCHE */}
+          <button onClick={(e) => { e.preventDefault(); cycleTheme(); }} className="p-2 text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-all rounded-full hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95" title={`Modo actual: ${themeSetting.toUpperCase()}`}>
+            {themeSetting === 'auto' ? (
+              <svg className="pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            ) : themeSetting === 'dark' ? (
+              <Moon className="pointer-events-none" size={20} />
+            ) : (
+              <svg className="pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            )}
           </button>
-          
-          {showProfileMenu && (
-            <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#0a0a0a] shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
-              <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 sm:hidden">
-                <p className="font-bold text-slate-800 dark:text-white text-sm">Proyecto Activo</p>
-                <p className="text-[10px] text-amber-600 dark:text-amber-500 uppercase">ID: {ID_DEL_EVENTO}</p>
+
+          {/* CAMPANITA */}
+          <div className="relative">
+            <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors rounded-full hover:bg-slate-200/50 dark:hover:bg-white/5">
+              <Bell size={20} />
+              {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-white dark:border-[#050505] rounded-full text-[9px] font-bold text-white flex items-center justify-center animate-in zoom-in">{unreadCount}</span>}
+            </button>
+            
+            {showBellMenu && (
+              <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-[#0a0a0a] shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
+                <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center">
+                  <h4 className="font-bold text-slate-800 dark:text-white">Centro de Atención</h4>
+                  {bellAlerts.length > 0 && <button onClick={(e) => { e.stopPropagation(); setBellAlerts([]); }} className="text-[10px] text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 font-bold">Limpiar historial</button>}
+                </div>
+                <div className="max-h-80 overflow-y-auto custom-scrollbar">
+                  {allAlerts.length === 0 ? (
+                    <div className="p-8 text-center text-slate-500"><CheckCircle size={32} className="mx-auto mb-2 text-emerald-500/50"/> ¡Todo al día! No tienes notificaciones.</div>
+                  ) : (
+                    allAlerts.map(alert => (
+                      <div 
+                        key={alert.id} 
+                        className={`w-full text-left px-4 py-3 flex items-start transition-colors group cursor-pointer border-b border-slate-50 dark:border-white/5
+                          ${alert.isRead ? 'bg-white dark:bg-transparent opacity-60 hover:bg-slate-50 dark:hover:bg-white/5' : 'bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10'} 
+                        `} 
+                        onClick={(e) => { 
+                          e.stopPropagation();
+                          if(markAsRead && !alert.isDynamic) markAsRead(alert.id); 
+                          if(alert.tab) { handleNavigate(alert.tab); } else { setShowBellMenu(false); }
+                        }}
+                      >
+                        <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-500 dark:text-emerald-400' : alert.type === 'danger' ? 'text-rose-500 dark:text-rose-400' : alert.type === 'warning' ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-500 dark:text-indigo-400'}`}>
+                          {alert.type === 'success' ? <CheckCircle size={16}/> : alert.type === 'warning' || alert.type === 'danger' ? <AlertCircle size={16}/> : <Bell size={16}/>}
+                        </div>
+                        <div className="flex-1">
+                          <p className={`text-sm leading-tight ${alert.isRead ? 'font-medium text-slate-500 dark:text-slate-400' : 'font-bold text-slate-800 dark:text-white'}`}>{alert.title}</p>
+                          <p className={`text-[10px] mt-1 leading-snug ${alert.isRead ? 'text-slate-400 dark:text-slate-500' : 'text-slate-500 dark:text-slate-400 font-medium'}`}>{alert.message}</p>
+                        </div>
+                        {!alert.isDynamic && (
+                          <button onClick={(e) => { e.stopPropagation(); setBellAlerts(prev => prev.filter(a => a.id !== alert.id)); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 transition-opacity ml-2">
+                            <X size={14}/>
+                          </button>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
-              <div className="p-2">
-                {/* 🔴 BOTÓN MULTI-EVENTO */}
-                {authData?.availableEvents?.length > 1 && (
-                   <button onClick={() => { setShowEventSwitcher(true); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2.5 text-sm text-indigo-600 dark:text-amber-500 font-bold hover:bg-indigo-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors flex items-center mb-1">
-                     <RefreshCw size={16} className="mr-2.5"/> Cambiar Proyecto
-                   </button>
-                )}
-                <button onClick={() => handleNavigate('invitacion')} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg transition-colors flex items-center"><ExternalLink size={16} className="mr-2.5"/> Ver Invitación App</button>
-                <button onClick={handleContactStaff} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg transition-colors flex items-center"><MessageCircle size={16} className="mr-2.5"/> Soporte Premium</button>
+            )}
+          </div>
+
+          {/* PERFIL */}
+          <div className="relative">
+            <button 
+              onClick={() => {setShowProfileMenu(!showProfileMenu); setShowBellMenu(false); setShowResults(false);}} 
+              className="flex items-center space-x-2 sm:space-x-3 hover:bg-slate-200/50 dark:hover:bg-white/5 p-1 sm:p-1.5 rounded-xl transition-colors text-right border border-transparent hover:border-slate-200 dark:hover:border-white/10"
+            >
+              <div className="hidden sm:block pl-1">
+                <p className="text-xs font-bold text-slate-800 dark:text-white leading-tight">Proyecto Activo</p>
+                <p className="text-[9px] text-amber-600 dark:text-amber-500 font-medium tracking-widest uppercase">ID: {ID_DEL_EVENTO.slice(0,8)}...</p>
               </div>
-              <div className="p-2 border-t border-slate-100 dark:border-white/5">
-                <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-sm text-rose-500 font-bold hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors flex items-center"><LogOut size={16} className="mr-2.5"/> Cerrar Sesión</button>
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-white font-black shadow-md text-sm shrink-0 border border-amber-300">
+                <Users size={16}/>
               </div>
-            </div>
-          )}
+            </button>
+            
+            {showProfileMenu && (
+              <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#0a0a0a] shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
+                <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 sm:hidden">
+                  <p className="font-bold text-slate-800 dark:text-white text-sm">Proyecto Activo</p>
+                  <p className="text-[10px] text-amber-600 dark:text-amber-500 uppercase">ID: {ID_DEL_EVENTO}</p>
+                </div>
+                <div className="p-2">
+                  {authData?.availableEvents?.length > 1 && (
+                     <button onClick={() => { setShowEventSwitcher(true); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2.5 text-sm text-indigo-600 dark:text-amber-500 font-bold hover:bg-indigo-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors flex items-center mb-1">
+                       <RefreshCw size={16} className="mr-2.5"/> Cambiar Proyecto
+                     </button>
+                  )}
+                  <button onClick={() => handleNavigate('invitacion')} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg transition-colors flex items-center"><ExternalLink size={16} className="mr-2.5"/> Ver Invitación App</button>
+                  <button onClick={handleContactStaff} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg transition-colors flex items-center"><MessageCircle size={16} className="mr-2.5"/> Soporte Premium</button>
+                </div>
+                <div className="p-2 border-t border-slate-100 dark:border-white/5">
+                  <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-sm text-rose-500 font-bold hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors flex items-center"><LogOut size={16} className="mr-2.5"/> Cerrar Sesión</button>
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
+      </header>
 
-      </div>
-
-      {/* 🔴 MODAL CAMBIAR PROYECTO BLINDADO ANTI-CORTE */}
+      {/* 🔴 AHORA EL MODAL DE CAMBIO DE PROYECTO ESTÁ LIBRE, FUERA DE LA BARRA 🔴 */}
       {showEventSwitcher && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh] border border-transparent dark:border-white/10 animate-in zoom-in-95 transition-colors">
             
-            {/* Cabecera del Modal (Fija) */}
             <div className="p-6 pb-4 border-b border-slate-100 dark:border-white/5 shrink-0">
                <h3 className="text-xl font-black text-slate-800 dark:text-white mb-1 font-editorial">Tus Proyectos</h3>
                <p className="text-xs text-slate-500">Selecciona el evento que deseas administrar:</p>
             </div>
             
-            {/* Lista de eventos (Scrollable) */}
             <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
               <div className="space-y-3">
                 {authData.availableEvents.map(ev => {
@@ -6931,7 +6930,6 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
               </div>
             </div>
 
-            {/* Pie del Modal (Fijo) */}
             <div className="p-6 pt-4 border-t border-slate-100 dark:border-white/5 shrink-0">
                <button onClick={() => setShowEventSwitcher(false)} className="w-full py-3.5 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
             </div>
@@ -6939,7 +6937,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 };
 
