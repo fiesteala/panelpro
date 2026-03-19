@@ -120,6 +120,7 @@
             const [isModalOpen, setIsModalOpen] = useState(false);
             const [isConfirmed, setIsConfirmed] = useState(false);
             
+            // 🔴 ESTADO PARA EL NOMBRE DEL INVITADO
             const [guestName, setGuestName] = useState('');
             const eventIdStr = "maricela-estudillo-gonzalez"; // ID EXACTO DE TU BÓVEDA
             
@@ -128,6 +129,7 @@
 
             const audioRef = useRef(null);
 
+            // 🔴 FETCH INTELIGENTE Y SEGURO A FIREBASE
             useEffect(() => {
                 if(guestUid) {
                     fetch(`https://firestore.googleapis.com/v1/projects/panel-de-control-intelig-db278/databases/(default)/documents/eventos/${eventIdStr}/invitados/${guestUid}`)
@@ -248,6 +250,7 @@
 
                     <div className="relative z-10 flex flex-col items-center w-full px-4 md:px-8 pb-10 space-y-32 md:space-y-40">
                         
+                        {/* 🔴 NUEVA BIENVENIDA CÁLIDA Y HUMANA (Justo arriba del reloj) */}
                         {guestName && (
                             <RevealOnScroll className="w-full max-w-2xl flex flex-col items-center text-center mt-4 mb-4 px-4">
                                 <div className="bg-white/60 backdrop-blur-xl border border-gold/30 p-8 rounded-[2rem] shadow-card-luxury relative overflow-hidden group">
@@ -405,6 +408,7 @@
                             </div>
                         </RevealOnScroll>
 
+                        {/* 🔴 BOTÓN RSVP GIGANTE CON BLOQUEO ANTI-DOBLE CONFIRMACIÓN */}
                         <RevealOnScroll className="w-full max-w-xl pb-10 mt-10">
                             <div className="flex flex-col items-center text-center">
                                 <div className="text-spring-pink mb-4 animate-pulse">
@@ -473,7 +477,6 @@
                                                     <rect className="baulia-diamond-shape" x=".86" y=".86" width="198.64" height="198.64" transform="translate(0 200.36) rotate(-90)" strokeMiterlimit="10" />
                                                 </g>
                                                 <path className="baulia-b" d="M116.87,94.54l6.01-.41c6.47,0,11.27,1.21,14.42,3.62,3.14,2.42,4.72,5.83,4.72,10.25s-2.01,9.59-6.01,15.51c-4.01,5.92-9.2,11.3-15.58,16.13h7.79c3.19,0,5.42-.14,6.7-.41,1.27-.27,2-.41,2.19-.41,1.27,0,1.91.68,1.91,2.05s-.91,2.1-2.73,2.19c-7.02,0-13.76-.09-20.23-.27-10.2,6.47-20.23,9.7-30.07,9.7-4.65,0-8.34-.87-11.07-2.6s-4.1-3.48-4.1-5.26.75-3.16,2.25-4.17c1.5-1,3.62-1.5,6.36-1.5,10.66,0,22.59.23,35.81.68,5.47-4.46,9.84-9.64,13.12-15.51,3.28-5.88,4.92-11.18,4.92-15.92,0-7.56-4.06-11.34-12.16-11.34-3.19,0-6.49.5-9.91,1.5-3.42,1-5.47,1.71-6.15,2.12s-1.12.61-1.3.61c-.55,0-.82-.39-.82-1.16s1.18-1.71,3.55-2.8c10.39-5.01,20.54-11.68,30.48-20.02,9.93-8.34,14.9-14.28,14.9-17.83,0-1.64-1.28-2.46-3.83-2.46-10.39.09-24.65,7.88-42.78,23.37-3.65,9.38-9.64,20.91-17.97,34.58-8.34,13.67-17.06,25.9-26.17,36.69-9.11,10.8-15.9,16.19-20.36,16.19-2.73,0-4.1-1.41-4.1-4.24,0-6.47,6.13-17.99,18.38-34.58,12.25-16.58,26.12-31.84,41.61-45.78,2.73-6.65,4.1-11.5,4.1-14.56s-.73-5.47-2.19-7.24c-1.46-1.78-3.6-3.08-6.42-3.9-4.46-1.18-9.18-1.78-14.14-1.78s-8.77.12-11.41.34c-2.64.23-5.86.68-9.64,1.37-3.78.68-6.86,1.87-9.22,3.55-2.37,1.69-3.55,3.83-3.55,6.42s1.27,4.6,3.83,6.01c2.55,1.41,5.67,2.39,9.36,2.94s7.36,1.14,11,1.78c3.64.64,6.74,1.89,9.29,3.76,2.55,1.87,3.83,4.49,3.83,7.86,0,.91-.2,1.37-.61,1.37s-.73-.14-.96-.41c-.23-.27-.62-.82-1.16-1.64-.82-1.18-2.03-2.1-3.62-2.73-1.59-.64-4.06-1.25-7.38-1.84-3.33-.59-6.47-1.23-9.43-1.91-2.96-.68-5.94-1.57-8.95-2.66-3.01-1.09-5.42-2.64-7.24-4.65-1.82-2-2.73-4.35-2.73-7.04s1.14-5.08,3.42-7.17c2.28-2.1,5.28-3.74,9.02-4.92,7.65-2.28,15.63-3.42,23.92-3.42,21.5,0,32.25,5.65,32.25,16.95,0,1-.23,2.51-.68,4.51,18.4-14.85,33.35-22.28,44.83-22.28,5.1,0,7.65,1.55,7.65,4.65,0,4.46-4.67,10.8-14.01,19-9.34,8.2-18.98,14.58-28.9,19.13ZM44.17,163.69c2.64,0,9.73-8.45,21.25-25.35,11.52-16.9,20.75-32.64,27.68-47.22-13.67,13.03-25.76,26.58-36.29,40.66-10.52,14.08-15.78,23.66-15.78,28.77,0,2.09,1.05,3.14,3.14,3.14ZM111,142.64l-24.74-.55c-7.02,0-10.52,1.05-10.52,3.14,0,1.18,1.18,2.3,3.55,3.35,2.37,1.05,5.1,1.57,8.2,1.57,8.11,0,15.94-2.5,23.51-7.52Z"/>
-                                                </g>
                                             </svg>
                                             
                                             <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-spring-dark text-white font-sans text-[10px] tracking-widest uppercase shadow-md group-hover:bg-gold-dark transition-colors">
@@ -489,6 +492,7 @@
                         </div>
                     </footer>
 
+                    {/* 🔴 EL IFRAME APUNTA A PANEL.BAULIA.COM AHORA */}
                     {isModalOpen && (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-white/10 backdrop-blur-md animate-fade-in-up">
                             <div className="relative w-full max-w-4xl h-[90vh] md:h-[85vh] flex flex-col items-center justify-center">
@@ -532,7 +536,7 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
-    <script> document.addEventListener('contextmenu', event => event.preventDefault()); document.onkeydown = function(e) { if(event.keyCode == 123) { return false; } if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; } if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { return false; } if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { return false; } if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; } } </script>
+    <script> document.addEventListener('contextmenu', e => e.preventDefault()); document.onkeydown = function(e) { if(e.keyCode == 123) { return false; } if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; } if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { return false; } if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { return false; } if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; } } </script>
     <style> body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; } </style>
 </body>
 </html>
