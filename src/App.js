@@ -5747,7 +5747,7 @@ const TimingView = ({ timing, setTiming, addNotification }) => {
 // ==========================================
 // --- COMPONENTE: PRESUPUESTO (DARK PREMIUM) ---
 // ==========================================
-const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presupuestoTotal, setPresupuestoTotal, addNotification }) => {
+const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedores, presupuestoTotal, setPresupuestoTotal, addNotification }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({ concepto: '', categoria: 'Lugar', estimado: '', fechaLimite: '' });
   const [paymentProcess, setPaymentProcess] = useState(null);
@@ -5755,11 +5755,7 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
   const [historyModal, setHistoryModal] = useState(null);
   const [editGastoModal, setEditGastoModal] = useState(null);
   const [viewMode, setViewMode] = useState('table'); 
-  const [viewReceipt, setViewReceipt] = useState(null);
-  
-  const [exportViewOpen, setExportViewOpen] = useState(false);
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
-  
   const [isEditingBudget, setIsEditingBudget] = useState(false);
   const [tempBudget, setTempBudget] = useState(presupuestoTotal);
 
@@ -5774,9 +5770,28 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
   const totalEstimado = safeGastos.reduce((sum, g) => sum + g.estimado, 0);
   const totalPagado = safeGastos.reduce((sum, g) => sum + g.pagado, 0);
   const totalDeuda = totalEstimado - totalPagado;
+  const budgetPercentage = presupuestoTotal > 0 ? Math.round((totalEstimado / presupuestoTotal) * 100) : 0;
 
   const gastosPorCategoria = safeGastos.reduce((acc, g) => { acc[g.categoria] = (acc[g.categoria] || 0) + g.estimado; return acc; }, {});
   
+  // 🔴 ESTILOS DINÁMICOS SEGÚN EL PLAN
+  const currentEvent = authData?.availableEvents?.find(e => e.eventId === authData?.eventId);
+  const plan = currentEvent?.plan || 'oro';
+  const eventName = currentEvent?.nombres || 'Proyecto Baulia';
+
+  let gradientStyle = 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)';
+  let accentColor = '#64748b'; 
+  if (plan === 'diamante') {
+      gradientStyle = 'linear-gradient(180deg, #eef2ff 0%, #ffffff 100%)';
+      accentColor = '#4f46e5';
+  } else if (plan === 'oro') {
+      gradientStyle = 'linear-gradient(180deg, #fffbeb 0%, #ffffff 100%)';
+      accentColor = '#d97706';
+  } else if (plan === 'plata') {
+      gradientStyle = 'linear-gradient(180deg, #f1f5f9 0%, #ffffff 100%)';
+      accentColor = '#475569';
+  }
+
   const handleSaveGasto = async (e) => {
     e.preventDefault();
     const nuevoId = Date.now().toString();
@@ -5838,10 +5853,59 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
     if (addNotification) addNotification('Cancelado', 'Servicio cancelado con éxito.', 'warning');
   };
 
+  // 🔴 EXPORTACIÓN INTELIGENTE A EXCEL (.xls hack para estilos)
   const exportData = () => {
-    const data = safeGastos.map(g => ({ Concepto: g.concepto, Categoria: g.categoria, Total: g.estimado, Pagado: g.pagado, Deuda: g.estimado - g.pagado, Fecha_Limite: g.fechaLimite || 'N/A' }));
-    exportToCSV("presupuesto_evento.csv", data);
-    if (addNotification) addNotification('Descarga Iniciada', 'Tu archivo Excel se está descargando.', 'success');
+    if (addNotification) addNotification('Generando Excel', 'Preparando documento financiero corporativo...', 'info');
+
+    let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="utf-8"><style>
+      table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }
+      th { background-color: #0f172a; color: #ffffff; padding: 12px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; }
+      td { padding: 10px; border: 1px solid #cbd5e1; }
+      .currency { text-align: right; }
+      .center { text-align: center; }
+      .header { background-color: #f8fafc; font-size: 22px; font-weight: bold; padding: 20px; text-align: left; }
+      .summary-box { background-color: #f1f5f9; font-weight: bold; font-size: 14px; text-align: center; }
+      .deuda-activa { color: #d97706; font-weight: bold; }
+      .deuda-saldada { color: #16a34a; font-weight: bold; }
+    </style></head><body>`;
+
+    html += `<table>
+      <tr><td colspan="6" class="header">Bóveda Financiera Baulia - ${eventName}</td></tr>
+      <tr><td colspan="6" style="text-align: right; color: #64748b;">Fecha de emisión: ${new Date().toLocaleDateString('es-MX')}</td></tr>
+      <tr><td colspan="6"></td></tr>
+      <tr>
+        <td colspan="2" class="summary-box">Presupuesto Global:<br><span style="font-size: 18px; color: #0f172a;">${formatMoney(presupuestoTotal)}</span></td>
+        <td colspan="2" class="summary-box">Capital Pagado:<br><span style="font-size: 18px; color: #16a34a;">${formatMoney(totalPagado)}</span></td>
+        <td colspan="2" class="summary-box">Deuda Restante:<br><span style="font-size: 18px; color: #d97706;">${formatMoney(totalDeuda)}</span></td>
+      </tr>
+      <tr><td colspan="6"></td></tr>
+      <tr>
+        <th>Concepto / Proveedor</th><th>Categoría</th><th>Límite de Pago</th><th>Costo Estimado</th><th>Abonado</th><th>Por Pagar</th>
+      </tr>`;
+
+    safeGastos.forEach(g => {
+      const deuda = g.estimado - g.pagado;
+      html += `<tr>
+        <td style="font-weight: bold;">${g.concepto}</td>
+        <td class="center">${g.categoria}</td>
+        <td class="center">${g.fechaLimite || 'Sin Fecha'}</td>
+        <td class="currency">${formatMoney(g.estimado)}</td>
+        <td class="currency" style="color: #16a34a;">${formatMoney(g.pagado)}</td>
+        <td class="currency ${deuda > 0 ? 'deuda-activa' : 'deuda-saldada'}">${deuda > 0 ? formatMoney(deuda) : 'Saldado'}</td>
+      </tr>`;
+    });
+
+    html += `</table></body></html>`;
+
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Presupuesto_Baulia_${eventName.replace(/\s+/g, '_')}.xls`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const guardarPresupuestoNube = async () => {
@@ -5860,131 +5924,72 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
   const isOverdue = (dateStr, deuda) => { if(!dateStr || deuda <= 0) return false; return new Date(dateStr) < new Date(); };
   const gastosConFecha = safeGastos.filter(g => g.fechaLimite && (g.estimado - g.pagado) > 0).sort((a,b) => new Date(a.fechaLimite) - new Date(b.fechaLimite));
 
+  // 🔴 PDF DIRECTO VIP PARA PRESUPUESTO
   const triggerPdfDownload = async () => {
     setIsPreparingPrint(true);
+    if(addNotification) addNotification('Preparando Documento', 'Generando formato financiero VIP...', 'info');
+
     setTimeout(async () => {
       try {
         const { jsPDF } = await import('jspdf');
         const html2canvas = (await import('html2canvas')).default;
-        const pages = document.querySelectorAll('.finance-pdf-page');
+        
+        const pages = document.querySelectorAll('.hidden-finance-pdf-page');
         const pdf = new jsPDF('p', 'mm', 'letter');
 
         for (let i = 0; i < pages.length; i++) {
-           const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-           const imgData = canvas.toDataURL('image/jpeg', 0.95);
+           const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, logging: false });
+           const imgData = canvas.toDataURL('image/jpeg', 1.0);
            if (i > 0) pdf.addPage();
            pdf.addImage(imgData, 'JPEG', 0, 0, 215.9, 279.4);
         }
-        pdf.save('Reporte-Financiero.pdf');
-        if(addNotification) addNotification('¡PDF Guardado!', 'Revisa tu carpeta de descargas.', 'success');
+        
+        pdf.save(`Reporte-Financiero-${eventName.replace(/\s+/g, '-')}.pdf`);
+        if(addNotification) addNotification('¡Descarga Lista!', 'El reporte se guardó en tu dispositivo.', 'success');
       } catch (error) {
+        console.error(error);
         if(addNotification) addNotification('Error', 'Fallo al generar el PDF.', 'error');
       }
       setIsPreparingPrint(false);
-      setExportViewOpen(false);
-    }, 500);
+    }, 800);
   };
 
-  if (exportViewOpen) {
-    const PAGE_1_LIMIT = 10;
-    const PAGE_N_LIMIT = 20;
-    const firstPageItems = safeGastos.slice(0, PAGE_1_LIMIT);
-    const extraItems = safeGastos.slice(PAGE_1_LIMIT);
-    const extraPages = [];
-    for(let i=0; i<extraItems.length; i+=PAGE_N_LIMIT) extraPages.push(extraItems.slice(i, i+PAGE_N_LIMIT));
+  // Lógica de paginación para el PDF oculto
+  const PAGE_1_LIMIT = 8;
+  const PAGE_N_LIMIT = 15;
+  const firstPageItems = safeGastos.slice(0, PAGE_1_LIMIT);
+  const extraItems = safeGastos.slice(PAGE_1_LIMIT);
+  const extraPages = [];
+  for(let i=0; i<extraItems.length; i+=PAGE_N_LIMIT) extraPages.push(extraItems.slice(i, i+PAGE_N_LIMIT));
 
-    const renderTableRows = (rows) => (
-      <table className="w-full text-left text-sm border-collapse">
-        <thead>
-          <tr className="bg-slate-100 text-slate-800 border-b-2 border-slate-800">
-            <th className="px-3 py-3 font-bold">Concepto</th>
-            <th className="px-3 py-3 font-bold">Categoría</th>
-            <th className="px-3 py-3 font-bold text-right">Costo Total</th>
-            <th className="px-3 py-3 font-bold text-right">Abonado</th>
-            <th className="px-3 py-3 font-bold text-right">Falta Pagar</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((gasto) => {
-            const deuda = gasto.estimado - gasto.pagado;
-            return (
-              <tr key={`print_${gasto.id}`} className="border-b border-slate-200">
-                <td className="px-3 py-3 font-bold text-slate-800">{gasto.concepto}</td>
-                <td className="px-3 py-3 text-slate-600 text-xs">{gasto.categoria}</td>
-                <td className="px-3 py-3 text-right font-medium">{formatMoney(gasto.estimado)}</td>
-                <td className="px-3 py-3 text-right font-bold text-emerald-600">{formatMoney(gasto.pagado)}</td>
-                <td className="px-3 py-3 text-right font-bold text-amber-600">{deuda > 0 ? formatMoney(deuda) : <span className="text-slate-400 text-[10px] uppercase tracking-wider font-bold bg-slate-100 px-2 py-1 rounded">Saldado</span>}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    );
-
-    return (
-      <div className="fixed inset-0 z-[120] bg-slate-900/95 flex flex-col overflow-hidden">
-        <div className="bg-[#0a0a0a] text-white p-4 flex flex-col sm:flex-row justify-between items-center border-b border-white/10 z-10 gap-4 shrink-0">
-          <div className="flex items-center space-x-4">
-            <button onClick={() => setExportViewOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24}/></button>
-            <div>
-              <h3 className="font-bold text-sm">Reporte Financiero</h3>
-              <p className="text-[10px] text-slate-400 uppercase tracking-widest">Paginado Tamaño Carta</p>
-            </div>
-          </div>
-          <button onClick={triggerPdfDownload} disabled={isPreparingPrint} className="w-full sm:w-auto px-5 py-2.5 bg-amber-500 text-slate-900 rounded-xl text-sm font-black flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all disabled:opacity-50">
-            {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
-            {isPreparingPrint ? 'Preparando...' : 'Descargar PDF'}
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto bg-[#111] flex flex-col items-center py-8 gap-8 relative custom-scrollbar">
-          <div className="finance-pdf-page bg-white shadow-2xl shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden', position: 'relative' }}>
-            <header className="flex justify-between items-center border-b-2 border-slate-200 pb-4 mb-6">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-slate-800 rounded flex items-center justify-center text-white font-black text-xl mr-3">E</div>
-                <div><h2 className="text-xl font-black text-slate-800 tracking-wider">EVENT MASTER</h2><p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Plataforma Premium</p></div>
-              </div>
-              <div className="text-right">
-                <h1 className="text-xl font-serif text-slate-900 italic">Reporte Financiero</h1>
-              </div>
-            </header>
-
-            <div className="flex justify-between items-center border-y-2 border-slate-800 py-4 mb-6">
-              <div className="text-center flex-1 border-r border-slate-200">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Presupuesto</p>
-                <p className="text-xl font-black text-slate-800">{formatMoney(presupuestoTotal)}</p>
-              </div>
-              <div className="text-center flex-1 border-r border-slate-200">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Estimado</p>
-                <p className="text-xl font-black text-slate-800">{formatMoney(totalEstimado)}</p>
-              </div>
-              <div className="text-center flex-1 border-r border-slate-200">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Pagado</p>
-                <p className="text-xl font-black text-emerald-600">{formatMoney(totalPagado)}</p>
-              </div>
-              <div className="text-center flex-1">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Deuda</p>
-                <p className="text-xl font-black text-amber-600">{formatMoney(totalDeuda)}</p>
-              </div>
-            </div>
-            
-            <main>{renderTableRows(firstPageItems)}</main>
-            <div className="absolute bottom-6 right-6 text-[10px] font-bold text-slate-400">Página 1 de {1 + extraPages.length}</div>
-          </div>
-
-          {extraPages.map((pageRows, pIdx) => (
-            <div key={`extrapage_${pIdx}`} className="finance-pdf-page bg-white shadow-2xl shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden', position: 'relative' }}>
-               <header className="border-b-2 border-slate-800 pb-3 mb-6">
-                 <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">Reporte Financiero (Cont.)</h1>
-               </header>
-               <main>{renderTableRows(pageRows)}</main>
-               <div className="absolute bottom-6 right-6 text-[10px] font-bold text-slate-400">Página {pIdx + 2} de {1 + extraPages.length}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const renderTableRows = (rows) => (
+    <table className="w-full text-left text-sm border-collapse">
+      <thead>
+        <tr className="border-b-2" style={{ borderColor: accentColor }}>
+          <th className="px-2 py-3 font-black text-slate-800 uppercase tracking-widest text-[10px]">Concepto / Servicio</th>
+          <th className="px-2 py-3 font-black text-slate-800 uppercase tracking-widest text-[10px] text-right">Costo Total</th>
+          <th className="px-2 py-3 font-black text-slate-800 uppercase tracking-widest text-[10px] text-right">Abonado</th>
+          <th className="px-2 py-3 font-black text-slate-800 uppercase tracking-widest text-[10px] text-right">Deuda</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((gasto) => {
+          const deuda = gasto.estimado - gasto.pagado;
+          return (
+            <tr key={`print_${gasto.id}`} className="border-b border-slate-200/60">
+              <td className="px-2 py-4">
+                 <p className="font-bold text-slate-900 text-sm leading-none">{gasto.concepto}</p>
+                 <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">{gasto.categoria} {gasto.fechaLimite ? `• Límite: ${gasto.fechaLimite}` : ''}</p>
+              </td>
+              <td className="px-2 py-4 text-right font-medium text-slate-600">{formatMoney(gasto.estimado)}</td>
+              <td className="px-2 py-4 text-right font-bold text-emerald-600">{formatMoney(gasto.pagado)}</td>
+              <td className="px-2 py-4 text-right font-bold" style={{ color: deuda > 0 ? accentColor : '#10b981' }}>{deuda > 0 ? formatMoney(deuda) : 'Saldado'}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
 
   return (
     <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500 z-10">
@@ -5998,14 +6003,16 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
             <button onClick={()=>setViewMode('table')} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center transition-colors ${viewMode === 'table' ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><LayoutGrid size={14} className="mr-2"/> Tabla</button>
             <button onClick={()=>setViewMode('calendar')} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center transition-colors ${viewMode === 'calendar' ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><CalendarDays size={14} className="mr-2"/> Fechas</button>
           </div>
-          <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><FileDown size={14} className="mr-2 text-amber-500"/> Reporte</button>
+          <button onClick={triggerPdfDownload} disabled={isPreparingPrint} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors disabled:opacity-50">
+            {isPreparingPrint ? <RefreshCw size={14} className="mr-2 animate-spin"/> : <FileDown size={14} className="mr-2 text-amber-500"/>} 
+            Reporte PDF
+          </button>
           <button onClick={exportData} className="hidden sm:flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><Download size={14} className="mr-2 text-indigo-500 dark:text-indigo-400"/> Excel</button>
           <button onClick={() => { setFormData({ concepto: '', categoria: 'Lugar', estimado: '', fechaLimite: '' }); setIsFormOpen(true); }} className="flex items-center px-5 py-2 bg-amber-500 text-slate-900 rounded-xl font-black text-sm shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all"><Plus size={16} className="mr-1.5" /> Gasto</button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {/* TARJETA 1 */}
         <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <div className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-3 flex justify-between items-center z-10 relative transition-colors">
@@ -6025,21 +6032,18 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
           )}
         </div>
 
-        {/* TARJETA 2 */}
         <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
           <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <div className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-3 flex items-center z-10 relative transition-colors"><PieChart size={14} className="mr-2 text-sky-500 dark:text-sky-400"/> Costo Estimado</div>
           <h3 className="text-3xl lg:text-4xl font-editorial text-slate-900 dark:text-white mt-auto z-10 relative tracking-wide transition-colors">{formatMoney(totalEstimado)}</h3>
         </div>
 
-        {/* TARJETA 3 */}
         <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <div className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-3 flex items-center z-10 relative transition-colors"><DollarSign size={14} className="mr-2 text-emerald-500 dark:text-emerald-400"/> Capital Pagado</div>
           <h3 className="text-3xl lg:text-4xl font-editorial text-emerald-600 dark:text-emerald-400 mt-auto z-10 relative tracking-wide transition-colors">{formatMoney(totalPagado)}</h3>
         </div>
 
-        {/* TARJETA 4 */}
         <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <div className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-3 flex items-center z-10 relative transition-colors"><TrendingDown size={14} className="mr-2 text-amber-500"/> Deuda Restante</div>
@@ -6145,6 +6149,67 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
         </div>
       )}
 
+      {/* 🔴 ÁREA INVISIBLE PARA EL RENDER DEL REPORTE EJECUTIVO (ESTILO SUTIL) */}
+      <div style={{ position: 'absolute', top: '-10000px', left: '-10000px', zIndex: -9999 }}>
+        <div className="hidden-finance-pdf-page bg-white relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
+           
+           <div className="absolute top-0 left-0 w-full h-3" style={{ backgroundColor: accentColor }}></div>
+
+           <div className="flex justify-between items-center mb-12 mt-4">
+              <div>
+                <h1 className="text-5xl font-editorial font-bold text-slate-900 leading-none">Bóveda Financiera</h1>
+                <p className="text-base font-black tracking-[0.2em] uppercase mt-3" style={{ color: accentColor }}>{eventName}</p>
+              </div>
+              <div className="text-right flex flex-col items-end">
+                {/* 🔴 LOGO FORZADO A OSCURO PARA QUE DESTAQUE EN FONDO BLANCO */}
+                <BauliaLogo className="h-10" forceWhite={false} />
+                <p className="text-[8px] text-slate-400 mt-2 uppercase tracking-[0.3em] font-bold">Tecnología Inteligente</p>
+              </div>
+           </div>
+
+           <div className="grid grid-cols-3 gap-6 mb-10">
+             <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
+                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Presupuesto Global</p>
+                <p className="text-3xl font-editorial text-slate-900">{formatMoney(presupuestoTotal)}</p>
+             </div>
+             <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
+                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Capital Pagado</p>
+                <p className="text-3xl font-editorial text-emerald-600">{formatMoney(totalPagado)}</p>
+             </div>
+             <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
+                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1" style={{ color: accentColor }}>Deuda Restante</p>
+                <p className="text-3xl font-editorial font-bold" style={{ color: accentColor }}>{formatMoney(totalDeuda)}</p>
+             </div>
+           </div>
+
+           <main>{renderTableRows(firstPageItems)}</main>
+           
+           <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
+              <span>Fecha de Emisión: {new Date().toLocaleDateString('es-MX')}</span>
+              <span>Página 1 de {1 + extraPages.length}</span>
+           </div>
+        </div>
+
+        {/* PÁGINAS EXTRA DEL PDF OCULTO */}
+        {extraPages.map((pageRows, pIdx) => (
+          <div key={`hidden_finance_page_${pIdx}`} className="hidden-finance-pdf-page bg-white relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
+             <div className="absolute top-0 left-0 w-full h-3" style={{ backgroundColor: accentColor }}></div>
+             <div className="flex justify-between items-center mb-8 mt-4">
+                <h1 className="text-3xl font-editorial font-bold text-slate-900 leading-none">Desglose (Cont.)</h1>
+                <p className="text-sm font-black tracking-[0.2em] uppercase" style={{ color: accentColor }}>{eventName}</p>
+             </div>
+             <main>{renderTableRows(pageRows)}</main>
+             <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
+                <span>Fecha de Emisión: {new Date().toLocaleDateString('es-MX')}</span>
+                <span>Página {pIdx + 2} de {1 + extraPages.length}</span>
+             </div>
+          </div>
+        ))}
+      </div>
+
+      {/* MODALES OMITIDOS EN ESTA RESPUESTA (SE MANTIENEN IGUAL QUE ANTES PARA NO ROMPER NADA, COMO EDITAR, PAGAR Y BORRAR) */}
+      {/* ... */}
+      
       {/* MODAL DE EDICIÓN RESPONSIVO */}
       {editGastoModal && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
@@ -6163,7 +6228,6 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
         </div>
       )}
 
-      {/* OTROS MODALES OMITIDOS PARA BREVEDAD, PERO SIGUEN EL MISMO PATRÓN DE RESPONSIVIDAD. EL HISTORIAL Y REGISTRO DE ABONO ESTÁN ABAJO: */}
       {historyModal && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
@@ -6215,6 +6279,7 @@ const PresupuestoView = ({ gastos, setGastos, proveedores, setProveedores, presu
           </div>
         </div>
       )}
+
     </div>
   );
 };
@@ -10878,7 +10943,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'decoracion': return userPlan === 'diamante' && typeof DecoracionView !== 'undefined' ? <DecoracionView elements={decoElements} setElements={setDecoElements} addNotification={addNotification} /> : null; 
       case 'tareas': return typeof ChecklistView !== 'undefined' ? <ChecklistView tareas={tareas} addNotification={addNotification} /> : null;
       case 'timing': return typeof TimingView !== 'undefined' ? <TimingView timing={timing} setTiming={setTiming} addNotification={addNotification} /> : null;
-      case 'presupuesto': return typeof PresupuestoView !== 'undefined' ? <PresupuestoView gastos={gastos} setGastos={setGastos} proveedores={proveedores} setProveedores={setPresupuestoTotal} presupuestoTotal={presupuestoTotal} setPresupuestoTotal={setPresupuestoTotal} addNotification={addNotification} /> : null;
+      case 'presupuesto': return typeof PresupuestoView !== 'undefined' ? <PresupuestoView authData={authData} gastos={gastos} setGastos={setGastos} proveedores={proveedores} setProveedores={setProveedores} presupuestoTotal={presupuestoTotal} setPresupuestoTotal={setPresupuestoTotal} addNotification={addNotification} /> : null;
       case 'proveedores': return typeof ProveedoresView !== 'undefined' ? <ProveedoresView proveedores={proveedores} setProveedores={setProveedores} gastos={gastos} setGastos={setGastos} addNotification={addNotification} /> : null;
       case 'galeria': return userPlan === 'diamante' && typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} /> : null;
       case 'invitacion': return typeof InvitacionView !== 'undefined' ? <InvitacionView guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 

@@ -126,18 +126,6 @@
             );
         };
 
-        // --- Component: Floating Buy Button (MODO DEMO) ---
-        const FloatingBuyButton = () => {
-            return (
-                <button 
-                    onClick={() => window.parent.location.href = 'https://baulia.com/#planes'}
-                    className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999999] bg-champagne text-luxury-black px-6 py-3 rounded-full font-sans text-[10px] md:text-xs tracking-[0.2em] uppercase shadow-[0_4px_25px_rgba(212,175,55,0.4)] hover:bg-white hover:scale-105 transition-all duration-500 font-bold whitespace-nowrap backdrop-blur-md flex items-center gap-2"
-                >
-                    ✨ Adquirir esta tecnología
-                </button>
-            );
-        };
-
         // --- Component: Language Translator ---
         const LanguageTranslator = () => {
             const [lang, setLang] = useState('ES');
@@ -725,15 +713,36 @@
             );
         };
 
-        // --- Component: RSVP / Modal Interactivo (MODO DEMO RESTAURADO) ---
+        // --- Component: RSVP / Modal Interactivo con Iframe ---
         const RSVP = () => {
             const [isOpen, setIsOpen] = useState(false);
-            const [isSubmitted, setIsSubmitted] = useState(false);
+            const [isSuccess, setIsSuccess] = useState(false);
+            const [guestUid, setGuestUid] = useState('');
 
-            const handleSubmit = (e) => {
-                e.preventDefault(); 
-                setIsSubmitted(true); 
-            };
+            useEffect(() => {
+                try {
+                    const params = new URLSearchParams(window.location.search);
+                    const u = params.get('u');
+                    if (u) {
+                        setGuestUid(u);
+                    }
+                } catch (e) {
+                    console.error("Error al leer parámetro u", e);
+                }
+            }, []);
+
+            useEffect(() => {
+                const handleMessage = (event) => {
+                    if (event.data === 'rsvp_success') {
+                        setIsOpen(false);
+                        setIsSuccess(true);
+                    }
+                };
+                window.addEventListener('message', handleMessage);
+                return () => window.removeEventListener('message', handleMessage);
+            }, []);
+
+            const iframeSrc = `https://baulia.com/?modo=invitacion&e=maricela-estudillo-gonzalez&u=${guestUid}&iframe=true&card=0A0A0A&btn=D4AF37&txt=F9F9F9&font=Montserrat`;
 
             return (
                 <section className="py-16 md:py-32 px-6 w-full flex flex-col items-center justify-center text-center relative pb-24 md:pb-48">
@@ -744,64 +753,37 @@
                         Nuestra mayor ilusión es celebrar este nuevo capítulo con las personas que han iluminado nuestra historia. Nos encantaría saber si contaremos con tu grata compañía.
                     </p>
                     
-                    <button 
-                        onClick={() => {setIsOpen(true); setIsSubmitted(false);}} 
-                        className="font-sans text-xs tracking-[0.3em] uppercase text-luxury-black bg-champagne hover:bg-white hover:scale-105 px-12 py-5 transition-all duration-500 font-bold shadow-[0_4px_25px_rgba(212,175,55,0.2)]"
-                    >
-                        Confirmar Asistencia
-                    </button>
+                    {!isSuccess ? (
+                        <button 
+                            onClick={() => setIsOpen(true)} 
+                            className="font-sans text-xs tracking-[0.3em] uppercase text-luxury-black bg-champagne hover:bg-white hover:scale-105 px-12 py-5 transition-all duration-500 font-bold shadow-[0_4px_25px_rgba(212,175,55,0.2)]"
+                        >
+                            Confirmar Asistencia
+                        </button>
+                    ) : (
+                        <div className="flex flex-col items-center animate-fade-in p-8 border border-champagne/30 bg-white/5 backdrop-blur-sm rounded-lg mt-4">
+                            <div className="w-16 h-16 rounded-full border-[0.5px] border-champagne flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
+                                <svg className="w-8 h-8 text-champagne" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <h3 className="font-serif text-2xl text-champagne mb-2">¡Gracias por confirmar!</h3>
+                            <p className="font-sans text-[10px] uppercase tracking-widest text-white/60">Tu respuesta ha sido registrada exitosamente.</p>
+                        </div>
+                    )}
 
                     {isOpen && (
                         <div className="fixed inset-0 z-[99999] bg-black/40 backdrop-blur-xl flex items-center justify-center p-4 md:p-8">
-                            <div className="bg-[#0A0A0A] border border-champagne/30 p-8 md:p-12 w-full max-w-lg relative animate-fade-in shadow-2xl rounded-2xl">
-                                <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 text-white/50 hover:text-white text-xl p-2 transition-colors z-10">
+                            <div className="w-full max-w-2xl h-[85vh] relative animate-fade-in flex flex-col justify-center items-center">
+                                <button onClick={() => setIsOpen(false)} className="absolute -top-10 md:-top-12 right-0 text-white/70 hover:text-white text-3xl p-2 transition-colors z-10">
                                     ✕
                                 </button>
                                 
-                                {!isSubmitted ? (
-                                    <form onSubmit={handleSubmit} className="flex flex-col gap-8 text-left">
-                                        <div className="text-center mb-2">
-                                            <span className="font-sans text-[9px] tracking-[0.3em] text-champagne/80 uppercase block mb-2">Modo de Prueba</span>
-                                            <h3 className="font-serif text-3xl text-white font-light">Generar Pase QR</h3>
-                                        </div>
-
-                                        <div className="flex flex-col gap-2">
-                                            <label className="font-sans text-[9px] tracking-[0.2em] text-white/60 uppercase">Nombre y Apellido</label>
-                                            <input 
-                                                type="text" 
-                                                required 
-                                                placeholder="Ej. Alejandro Garza" 
-                                                className="bg-transparent border-b border-white/20 text-white font-serif text-xl py-2 focus:outline-none focus:border-champagne transition-colors w-full placeholder-white/20" 
-                                            />
-                                        </div>
-
-                                        <div className="flex flex-col gap-2">
-                                            <label className="font-sans text-[9px] tracking-[0.2em] text-white/60 uppercase">Pases a confirmar</label>
-                                            <select className="bg-transparent border-b border-white/20 text-white font-serif text-xl py-2 focus:outline-none focus:border-champagne transition-colors w-full appearance-none cursor-pointer">
-                                                <option value="1" className="bg-[#0A0A0A]">1 Pase</option>
-                                                <option value="2" className="bg-[#0A0A0A]">2 Pases</option>
-                                                <option value="3" className="bg-[#0A0A0A]">3 Pases</option>
-                                            </select>
-                                        </div>
-
-                                        <button type="submit" className="mt-6 font-sans text-xs tracking-[0.3em] uppercase text-luxury-black bg-champagne hover:bg-white px-8 py-4 transition-all duration-500 text-center font-bold rounded-full shadow-[0_0_15px_rgba(212,175,55,0.3)]">
-                                            Generar Pase QR
-                                        </button>
-                                    </form>
-                                ) : (
-                                    <div className="flex flex-col items-center text-center py-10 animate-fade-in">
-                                        <div className="w-20 h-20 rounded-full border-[0.5px] border-champagne flex items-center justify-center mb-8 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
-                                            <span className="text-3xl">✨</span>
-                                        </div>
-                                        <h3 className="font-serif text-3xl text-champagne mb-6 font-light">¡Excelente!</h3>
-                                        <p className="font-sans text-xs text-white/80 leading-loose tracking-[0.1em] mb-8">
-                                            En una versión real, esto le generaría un código QR único a tu invitado.
-                                        </p>
-                                        <p className="font-sans text-[11px] text-champagne uppercase tracking-[0.2em] font-bold">
-                                            ¡Crea tu propio evento en Baulia para desbloquear esta función!
-                                        </p>
-                                    </div>
-                                )}
+                                <iframe 
+                                    src={iframeSrc} 
+                                    allowTransparency="true" 
+                                    className="w-full h-full max-h-[85vh] border-none rounded-2xl mx-auto shadow-2xl bg-transparent"
+                                ></iframe>
                             </div>
                         </div>
                     )}
@@ -908,32 +890,23 @@
             return (
                 <div className="relative min-h-screen w-full bg-luxury-black overflow-hidden">
                     
-                    {/* BOTÓN FLOTANTE GLOBAL - SIEMPRE VISIBLE EN EL TOP LEVEL */}
-                    <FloatingBuyButton />
-
                     {/* --- PANTALLA DE INICIO / SOBRE --- */}
                     <div className={`fixed inset-0 z-[999999] bg-luxury-black flex flex-col items-center justify-center w-full min-h-[100svh] px-6 text-center transition-transform duration-[1200ms] ease-in-out ${isEnvelopeOpened ? 'translate-y-[-100%] pointer-events-none' : 'translate-y-0'}`}>
                         {/* Textura de fondo sutil del sobre */}
                         <div className="absolute inset-0 bg-[url('/demos/boda/portada.jpg')] bg-cover bg-center opacity-10 grayscale mix-blend-overlay"></div>
                         <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/60 to-black/90"></div>
                         
-                        <div className="relative z-10 flex flex-col items-center justify-center w-full">
-                            {/* Monograma */}
-                            <div className="transform scale-50 md:scale-75 origin-center mb-8 md:mb-12">
+                        <div className="relative z-10 flex flex-col items-center justify-center gap-6 md:gap-10">
+                            <div className="transform scale-75 md:scale-100 origin-center mb-4">
                                 <Monogram />
                             </div>
+                            <span className="font-sans text-[10px] md:text-xs tracking-[0.4em] text-champagne uppercase mt-4">
+                                Invitación Especial
+                            </span>
+                            <span className="font-script text-white text-6xl md:text-8xl text-shadow-luxury leading-tight max-w-xl px-4 mb-8">
+                                {guestName ? `Para ${guestName}` : "Para Ti"}
+                            </span>
                             
-                            {/* Textos centrales */}
-                            <div className="flex flex-col items-center gap-4 md:gap-6 mb-12 md:mb-16">
-                                <span className="font-sans text-[10px] md:text-[11px] tracking-[0.4em] text-champagne uppercase">
-                                    Invitación Especial
-                                </span>
-                                <span className="font-script text-white text-6xl md:text-8xl text-shadow-luxury leading-tight max-w-xl px-4">
-                                    {guestName ? `Para ${guestName}` : "Para Ti"}
-                                </span>
-                            </div>
-                            
-                            {/* Botón */}
                             <button 
                                 onClick={handleOpenInvitation}
                                 className="group relative px-10 py-5 bg-transparent border border-champagne/40 hover:border-champagne hover:bg-champagne/10 transition-all duration-700 overflow-hidden"
@@ -1010,7 +983,7 @@
                             <FadeInSection><GiftRegistry /></FadeInSection>
                             <FadeInSection><SocialWall /></FadeInSection>
                             
-                            {/* Secciones de Cierre / Demo */}
+                            {/* Secciones de Cierre / Producción Real */}
                             <FadeInSection><RSVP /></FadeInSection>
                             <FadeInSection><Footer /></FadeInSection>
                         </div>
