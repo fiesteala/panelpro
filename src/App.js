@@ -1084,18 +1084,20 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
     e.preventDefault();
     const nuevoId = Date.now().toString();
     const pNum = Number(newGuest.passes) || 1;
+    const ninos = Number(newGuest.childrenPasses) || 0; // 🔴 Extraemos los niños
     
     const initSubGuests = Array(pNum).fill(null).map((_, i) => ({
       id: `usr_${nuevoId}_${i}`,
       name: i === 0 ? newGuest.name : `Acompañante ${i+1}`,
-      isChild: false,
+      // 🔴 Los últimos pases de la lista los marcamos como niños automáticamente
+      isChild: i >= (pNum - ninos), 
       entered: false
     }));
 
     const datosInvitado = {
       name: newGuest.name, 
       passes: pNum, 
-      childrenPasses: Number(newGuest.childrenPasses) || 0,
+      childrenPasses: ninos,
       phone: newGuest.phone, 
       status: newGuest.status, 
       side: addModal.side, 
