@@ -267,7 +267,8 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
 // ==========================================
 // --- COMPONENTE: DASHBOARD VIEW (VISTA MAESTRA) ---
 // ==========================================
-const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setActiveTab, addNotification }) => {
+const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tareas, setActiveTab, addNotification }) => {
+  const [exportViewOpen, setExportViewOpen] = useState(false);
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
 
   const totalPasses = guests.reduce((sum, guest) => sum + guest.passes, 0);
@@ -293,7 +294,24 @@ const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setAc
   const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
   const isOverdue = (dateStr) => { if(!dateStr) return false; return new Date(dateStr) < new Date(); };
 
-  // 🔴 DESCARGA DIRECTA DE PDF (Mantenemos el fondo blanco forzado para la impresión PDF)
+  const currentEvent = authData?.availableEvents?.find(e => e.eventId === authData?.eventId);
+  const plan = currentEvent?.plan || 'oro';
+  const eventName = currentEvent?.nombres || 'Proyecto Baulia';
+
+  let gradientStyle = 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)';
+  let accentColor = '#64748b'; 
+  if (plan === 'diamante') {
+      gradientStyle = 'linear-gradient(180deg, #eef2ff 0%, #ffffff 100%)';
+      accentColor = '#4f46e5';
+  } else if (plan === 'oro') {
+      gradientStyle = 'linear-gradient(180deg, #fffbeb 0%, #ffffff 100%)';
+      accentColor = '#d97706';
+  } else if (plan === 'plata') {
+      gradientStyle = 'linear-gradient(180deg, #f1f5f9 0%, #ffffff 100%)';
+      accentColor = '#475569';
+  }
+
+  // 🔴 DESCARGA INTELIGENTE DE REPORTE EJECUTIVO PDF
   const triggerDashboardPdf = async () => {
     setIsPreparingPrint(true);
     setTimeout(async () => {
@@ -301,36 +319,136 @@ const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setAc
         const { jsPDF } = await import('jspdf');
         const html2canvas = (await import('html2canvas')).default;
         
-        const element = document.getElementById('dashboard-export-area');
-        // Forzamos fondo blanco al PDF aunque el panel sea negro
-        const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const element = document.querySelector('.dashboard-pdf-page');
+        const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
         
         const pdf = new jsPDF('p', 'mm', 'letter');
-        const pdfWidth = 215.9;
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save('Resumen-Boveda.pdf');
+        pdf.addImage(imgData, 'JPEG', 0, 0, 215.9, 279.4);
+        pdf.save('Reporte-Ejecutivo-Baulia.pdf');
         if(addNotification) addNotification('¡PDF Guardado!', 'Revisa tu carpeta de descargas.', 'success');
       } catch (error) {
         console.error(error);
         if(addNotification) addNotification('Error', 'Fallo al generar el PDF.', 'error');
       }
       setIsPreparingPrint(false);
+      setExportViewOpen(false);
     }, 500);
   };
 
+  if (exportViewOpen) {
+    return (
+      <div className="fixed inset-0 z-[120] bg-slate-900/95 flex flex-col overflow-hidden backdrop-blur-md">
+        <div className="bg-[#0a0a0a] text-white p-4 flex flex-col sm:flex-row justify-between items-center border-b border-white/10 shadow-lg print:hidden z-10 gap-4 shrink-0">
+          <div className="flex items-center space-x-4 w-full sm:w-auto">
+            <button onClick={() => setExportViewOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24}/></button>
+            <div>
+              <h3 className="font-bold text-sm">Estudio de Impresión</h3>
+              <p className="text-[10px] text-slate-400">Reporte Ejecutivo Elegante</p>
+            </div>
+          </div>
+          <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="w-full sm:w-auto px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl text-sm font-black flex items-center justify-center shadow-lg transition-all disabled:opacity-50">
+            {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
+            {isPreparingPrint ? 'Armando PDF...' : 'Descargar PDF'}
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8 relative">
+          <div className="dashboard-pdf-page bg-white shadow-[0_0_40px_rgba(0,0,0,0.5)] relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
+             
+             <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: accentColor }}></div>
+
+             <div className="flex justify-between items-center mb-12">
+                <div>
+                  <h1 className="text-4xl font-editorial font-bold text-slate-900 leading-none">Reporte Ejecutivo</h1>
+                  <p className="text-sm font-bold tracking-widest uppercase mt-2" style={{ color: accentColor }}>{eventName}</p>
+                </div>
+                <div className="text-right flex flex-col items-end">
+                  <BauliaLogo className="h-8" forceWhite={false} />
+                  <p className="text-[7px] text-slate-400 mt-1.5 uppercase tracking-[0.2em] font-bold">Tecnología de Baulia</p>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-2 gap-10 mb-10">
+               <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60 backdrop-blur-sm">
+                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Logística de Asistentes</p>
+                  <p className="text-5xl font-editorial text-slate-900 mb-2">{totalPasses}</p>
+                  <p className="text-xs font-bold" style={{ color: accentColor }}>{confirmationPercentage}% Confirmación oficial</p>
+                  <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${confirmationPercentage}%`, backgroundColor: accentColor }}></div></div>
+               </div>
+               <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60 backdrop-blur-sm">
+                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Acomodo y Mesas</p>
+                  <p className="text-5xl font-editorial text-slate-900 mb-2">{totalMesas} <span className="text-lg text-slate-400 font-sans font-light">mesas</span></p>
+                  <p className="text-xs font-bold" style={{ color: accentColor }}>{capacidadTotalSillas} Sillas totales • {ocupacionPorcentaje}% Ocupación</p>
+                  <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${ocupacionPorcentaje}%`, backgroundColor: accentColor }}></div></div>
+               </div>
+             </div>
+
+             <div className="grid grid-cols-2 gap-10 mb-12">
+               <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60 backdrop-blur-sm">
+                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Estado de la Bóveda</p>
+                  <p className="text-5xl font-editorial text-slate-900 mb-2">${(totalEstimado / 1000).toFixed(1)}k</p>
+                  <p className="text-xs font-bold flex justify-between" style={{ color: accentColor }}>
+                    <span>Abonado: ${(totalPagado/1000).toFixed(1)}k</span>
+                  </p>
+                  <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${Math.min(budgetPercentage, 100)}%`, backgroundColor: accentColor }}></div></div>
+               </div>
+               <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60 backdrop-blur-sm">
+                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Avance de Planeación</p>
+                  <p className="text-5xl font-editorial text-slate-900 mb-2">{tareasPorcentaje}%</p>
+                  <p className="text-xs font-bold" style={{ color: accentColor }}>{tareasCompletadas} de {tareasTotal} objetivos listos</p>
+                  <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${tareasPorcentaje}%`, backgroundColor: accentColor }}></div></div>
+               </div>
+             </div>
+
+             <div className="grid grid-cols-2 gap-10">
+               <div>
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-800 mb-4 border-b border-slate-200 pb-2">Logística Inmediata</h3>
+                  {tareasPendientes.length === 0 ? <p className="text-xs text-slate-400 italic">El cronograma está limpio.</p> : (
+                    <ul className="space-y-3">
+                      {tareasPendientes.map(t => (
+                        <li key={t.id} className="text-xs text-slate-600 flex justify-between">
+                          <span className="font-medium pr-2 truncate">{t.titulo}</span>
+                          <span className="text-slate-400 shrink-0 font-mono text-[10px]">{t.fechaLimite || '-'}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+               </div>
+               <div>
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-800 mb-4 border-b border-slate-200 pb-2">Deudas Próximas</h3>
+                  {pagosPendientes.length === 0 ? <p className="text-xs text-slate-400 italic">Finanzas sanas.</p> : (
+                    <ul className="space-y-3">
+                      {pagosPendientes.map(p => (
+                        <li key={p.id} className="text-xs text-slate-600 flex justify-between">
+                          <span className="font-medium pr-2 truncate">{p.concepto}</span>
+                          <span className="font-black text-slate-900 shrink-0">{formatMoney(p.estimado - p.pagado)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+               </div>
+             </div>
+
+             <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
+                <span>Fecha de Emisión: {new Date().toLocaleDateString('es-MX')}</span>
+                <span>Confidencial • {eventName}</span>
+             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6" id="dashboard-export-area">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Centro de Mando</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Monitoreo en tiempo real de la Bóveda.</p>
         </div>
-        <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="px-5 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center disabled:opacity-50">
-          {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
-          {isPreparingPrint ? 'Preparando...' : 'Descargar Reporte'}
+        <button onClick={() => setExportViewOpen(true)} className="px-5 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center">
+          <Download size={16} className="mr-2"/> Descargar Reporte
         </button>
       </div>
 
@@ -399,7 +517,6 @@ const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setAc
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* TAREAS PRÓXIMAS */}
         <div className="bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col transition-colors">
           <div className="p-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 rounded-t-2xl transition-colors">
             <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-sm transition-colors"><ListTodo size={16} className="mr-2 text-indigo-500 dark:text-indigo-400"/> Prioridades Logísticas</h3>
@@ -433,7 +550,6 @@ const DashboardView = ({ guests, tables, gastos, presupuestoTotal, tareas, setAc
           </div>
         </div>
 
-        {/* PAGOS PENDIENTES */}
         <div className="bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col transition-colors">
           <div className="p-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 rounded-t-2xl transition-colors">
             <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-sm transition-colors"><AlertTriangle size={16} className="mr-2 text-amber-500"/> Alertas Financieras</h3>
@@ -6770,6 +6886,11 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
     setShowProfileMenu(false);
   };
 
+  // 🔴 OBTENER EL NOMBRE DEL EVENTO ACTUAL
+  const currentEvent = authData?.availableEvents?.find(e => e.eventId === authData.eventId);
+  const eventName = currentEvent ? currentEvent.nombres : 'Proyecto Activo';
+  const eventPlan = currentEvent ? currentEvent.plan : 'pro';
+
   return (
     <>
       <header ref={headerRef} className="bg-white/60 dark:bg-[#050505]/60 backdrop-blur-2xl border-b border-slate-200/50 dark:border-white/5 h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden transition-colors duration-700">
@@ -6810,7 +6931,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
             ) : themeSetting === 'dark' ? (
               <Moon className="pointer-events-none" size={20} />
             ) : (
-              <svg className="pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              <svg className="pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
             )}
           </button>
 
@@ -6863,15 +6984,15 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
             )}
           </div>
 
-          {/* PERFIL */}
+          {/* PERFIL (CON NOMBRE DINÁMICO) */}
           <div className="relative">
             <button 
               onClick={() => {setShowProfileMenu(!showProfileMenu); setShowBellMenu(false); setShowResults(false);}} 
               className="flex items-center space-x-2 sm:space-x-3 hover:bg-slate-200/50 dark:hover:bg-white/5 p-1 sm:p-1.5 rounded-xl transition-colors text-right border border-transparent hover:border-slate-200 dark:hover:border-white/10"
             >
-              <div className="hidden sm:block pl-1">
-                <p className="text-xs font-bold text-slate-800 dark:text-white leading-tight">Proyecto Activo</p>
-                <p className="text-[9px] text-amber-600 dark:text-amber-500 font-medium tracking-widest uppercase">ID: {ID_DEL_EVENTO.slice(0,8)}...</p>
+              <div className="hidden sm:block pl-1 text-right">
+                <p className="text-xs font-bold text-slate-800 dark:text-white leading-tight truncate max-w-[130px]" title={eventName}>{eventName}</p>
+                <p className="text-[9px] text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase">Plan {eventPlan}</p>
               </div>
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-white font-black shadow-md text-sm shrink-0 border border-amber-300">
                 <Users size={16}/>
@@ -6881,8 +7002,8 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
             {showProfileMenu && (
               <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#0a0a0a] shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
                 <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 sm:hidden">
-                  <p className="font-bold text-slate-800 dark:text-white text-sm">Proyecto Activo</p>
-                  <p className="text-[10px] text-amber-600 dark:text-amber-500 uppercase">ID: {ID_DEL_EVENTO}</p>
+                  <p className="font-bold text-slate-800 dark:text-white text-sm truncate">{eventName}</p>
+                  <p className="text-[10px] text-amber-600 dark:text-amber-500 uppercase font-bold">Plan {eventPlan}</p>
                 </div>
                 <div className="p-2">
                   {authData?.availableEvents?.length > 1 && (
@@ -6903,7 +7024,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
         </div>
       </header>
 
-      {/* 🔴 AHORA EL MODAL DE CAMBIO DE PROYECTO ESTÁ LIBRE, FUERA DE LA BARRA 🔴 */}
+      {/* 🔴 MODAL CAMBIAR PROYECTO BLINDADO ANTI-CORTE */}
       {showEventSwitcher && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh] border border-transparent dark:border-white/10 animate-in zoom-in-95 transition-colors">
@@ -10636,16 +10757,13 @@ const LoginScreen = () => {
 const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const { role: originalUserRole, plan: originalUserPlan, eventId: originalEventId, availableEvents } = authData;
   
-  // 🔴 FUNCIÓN PARA CAMBIAR DE PROYECTO
   const switchEvent = (newEventId) => {
     localStorage.setItem('eventmaster_currentEventId', newEventId);
-    window.location.reload(); // Recargamos para que Firebase limpie y cargue la bóveda nueva
+    window.location.reload(); 
   };
 
-  // 🔴 ESTADOS PARA EL MODO DIOS (IMPERSONATION)
   const [impersonating, setImpersonating] = useState(null);
   
-  // Si estamos en Modo Dios, sobreescribimos los permisos y el ID del evento
   const eventId = impersonating ? impersonating.id : originalEventId;
   const userRole = impersonating ? impersonating.role : originalUserRole;
   const userPlan = impersonating ? impersonating.plan : originalUserPlan;
@@ -10740,9 +10858,9 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
 
   const renderContent = () => {
     switch(activeTab) {
-      // 🔴 LE PASAMOS LA FUNCIÓN AL SUPERADMIN PARA QUE ACTIVE EL MODO DIOS
       case 'licencias': return (originalUserRole === 'superadmin' || originalUserRole === 'staff') && !impersonating && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} authData={authData} /> : null;
-      case 'dashboard': return typeof DashboardView !== 'undefined' ? <DashboardView guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null; 
+      // 🔴 AQUÍ PASAMOS AUTHDATA PARA EL REPORTE DE LUJO
+      case 'dashboard': return typeof DashboardView !== 'undefined' ? <DashboardView authData={authData} guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null; 
       case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
       case 'escaner': return userPlan === 'diamante' && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
       case 'mesas': return userPlan === 'diamante' && typeof MesasView !== 'undefined' ? <MesasView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
@@ -10767,7 +10885,6 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
         .font-editorial { font-family: 'Playfair Display', serif; }
       `}</style>
 
-      {/* 🔴 ALERTA ROJA DE MODO DIOS */}
       {impersonating && (
         <div className="absolute top-0 left-0 w-full bg-rose-600 text-white z-[9999] py-1.5 px-4 text-center text-xs font-black uppercase tracking-widest shadow-lg flex justify-center items-center">
           <AlertTriangle size={14} className="mr-2" />
@@ -10778,7 +10895,6 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
         </div>
       )}
 
-      {/* LUCES DE AMBIENTE GLOBALES */}
       <div className="absolute top-[-10%] left-[-5%] w-[50vw] h-[50vw] bg-amber-500/15 dark:bg-amber-600/20 blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
       <div className="absolute bottom-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-indigo-500/10 dark:bg-indigo-600/15 blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
       
@@ -10799,7 +10915,6 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       {typeof Sidebar !== 'undefined' && <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} userPlan={userPlan} agencyConfig={agencyConfig} isDarkMode={isDarkMode} />}
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
-        {/* Desplazamos un poco el Header hacia abajo si el Modo Dios está activo para que no lo tape la alerta */}
         <div className={`${impersonating ? 'pt-7' : ''} transition-all`}>
           <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} authData={authData} switchEvent={switchEvent} />
         </div>
