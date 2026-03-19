@@ -6294,10 +6294,7 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
 
   const handleSaveProveedor = async (e) => {
       e.preventDefault();
-      if (formData.facebook && !formData.facebook.includes('facebook.com') && !formData.facebook.includes('instagram.com')) {
-         if(addNotification) addNotification('Enlace Inválido', 'Por favor ingresa un link válido de Facebook o Instagram.', 'warning');
-         return;
-      }
+      // 🔴 CERO FRICCIÓN: Se eliminó la validación estricta de URL aquí.
 
       if (editingProvId) {
          const prov = safeProveedores.find(p => p.id === editingProvId);
@@ -6661,14 +6658,14 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
             <form onSubmit={handleSaveProveedor} className="p-6 overflow-y-auto shrink custom-scrollbar">
               
               <div className="mb-6 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 p-4 rounded-2xl flex items-start text-indigo-800 dark:text-indigo-300 text-xs font-medium shadow-sm transition-colors">
-                <CheckCircle size={16} className="mr-3 mt-0.5 flex-shrink-0 text-indigo-500 dark:text-indigo-400"/>
-                <p>Por seguridad de tu evento y para garantizar reseñas reales, vinculamos a cada proveedor con su página oficial. Así evitamos fraudes y duplicados en nuestra comunidad.</p>
+                <Info size={16} className="mr-3 mt-0.5 flex-shrink-0 text-indigo-500 dark:text-indigo-400"/>
+                <p><b>Tip Experto:</b> Si agregas las redes sociales o página web de tu proveedor, nos ayudas a crear una comunidad más segura y te habilitará la opción de calificar su servicio al finalizar tu evento.</p>
               </div>
 
               <div className="grid grid-cols-2 gap-5 mb-6">
                 <div className="col-span-2">
-                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Enlace de Facebook o Instagram</label>
-                  <input type="url" readOnly={isFromGlobal} placeholder="Ej. https://facebook.com/..." value={formData.facebook} onChange={e=>setFormData({...formData, facebook: e.target.value})} className={`w-full p-3.5 border rounded-xl outline-none shadow-sm transition-colors text-sm ${isFromGlobal ? 'bg-slate-100 dark:bg-[#111] border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-600' : 'bg-white dark:bg-[#050505] border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:border-indigo-500 dark:focus:border-amber-500'}`} />
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Enlace / Redes Sociales (Opcional)</label>
+                  <input type="text" readOnly={isFromGlobal} placeholder="Ej. instagram.com/djparty o www.su-pagina.com" value={formData.facebook} onChange={e=>setFormData({...formData, facebook: e.target.value})} className={`w-full p-3.5 border rounded-xl outline-none shadow-sm transition-colors text-sm ${isFromGlobal ? 'bg-slate-100 dark:bg-[#111] border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-600' : 'bg-white dark:bg-[#050505] border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:border-indigo-500 dark:focus:border-amber-500'}`} />
                   {isFromGlobal && <p className="text-[10px] text-indigo-500 dark:text-amber-500 font-bold uppercase tracking-widest mt-2 flex items-center"><Lock size={10} className="mr-1"/> Bloqueado. Este dato proviene de la Bóveda Global.</p>}
                 </div>
                 <div className="col-span-2 md:col-span-1"><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Empresa / Nombre</label><input type="text" required value={formData.nombre} onChange={e=>setFormData({...formData, nombre: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white text-sm font-bold transition-colors" /></div>
