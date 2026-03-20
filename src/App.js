@@ -10954,9 +10954,11 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const renderContent = () => {
     switch(activeTab) {
       case 'licencias': return (originalUserRole === 'superadmin' || originalUserRole === 'staff') && !impersonating && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} authData={authData} /> : null;
-      // 🔴 AQUÍ PASAMOS AUTHDATA PARA EL REPORTE DE LUJO
       case 'dashboard': return typeof DashboardView !== 'undefined' ? <DashboardView authData={authData} guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null; 
-      case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={currentEvent?.tipoEvento} /> : null; 
+      
+      // 🔴 AQUÍ ESTÁ LA LÍNEA REPARADA: Lee el tipoEvento de forma segura desde authData
+      case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={authData?.availableEvents?.find(e => e.eventId === eventId)?.tipoEvento} /> : null; 
+      
       case 'escaner': return userPlan === 'diamante' && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
       case 'mesas': return userPlan === 'diamante' && typeof MesasView !== 'undefined' ? <MesasView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
       case 'mapa': return userPlan === 'diamante' && typeof MapaView !== 'undefined' ? <MapaView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} globalSearch={globalSearch} elements={mapElements} setElements={setMapElements} /> : null;
