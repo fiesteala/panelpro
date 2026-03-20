@@ -1724,8 +1724,8 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
   // 🔴 CONSTRUCCIÓN DE LA URL SEGURA PARA EL IFRAME
   let iframeUrl = '';
   if (urlInvitacion) {
-    // Le decimos a la invitación web que cargue la info de este usuario en específico y active el modo seguro
     const separator = urlInvitacion.includes('?') ? '&' : '?';
+    // 🔴 INYECTAMOS PREVIEW=1 PARA BLOQUEAR LA BASE DE DATOS
     iframeUrl = `${urlInvitacion}${separator}u=${selectedGuestId || ''}&preview=1`;
   }
 
@@ -1736,7 +1736,7 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
       <div className="flex-1 flex flex-col max-h-full min-h-0 bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
         <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] transition-colors">
           <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center"><Smartphone size={20} className="mr-2 text-indigo-500 dark:text-amber-500"/> Simulador en Vivo</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Selecciona una familia para ver cómo funciona su pase personal.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Selecciona una familia para ver cómo funciona su pase en tu diseño real.</p>
           <div className="mt-4 relative">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
             <input type="text" placeholder="Buscar familia para simular..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050505] text-slate-800 dark:text-white rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-400 dark:focus:ring-amber-500 transition-colors" />
@@ -1770,6 +1770,7 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
              <Link size={48} className="text-slate-300 dark:text-slate-600 mb-4"/>
              <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2 font-editorial">Falta el Enlace</h3>
              <p className="text-slate-500 dark:text-slate-400 text-sm">No se ha guardado el enlace de la invitación web para este evento.</p>
+             <p className="text-xs text-slate-400 mt-4 border border-slate-200 dark:border-white/10 p-3 rounded-xl">Ve a "Centro de Operaciones" y edita la licencia del cliente para agregar la URL.</p>
           </div>
         ) : (
           <div className="w-[320px] h-[650px] bg-black rounded-[3rem] p-2.5 shadow-2xl relative border-[6px] border-slate-800 flex-shrink-0">
@@ -10487,7 +10488,8 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
 
   const urlParams = new URLSearchParams(window.location.search);
   const isIframe = urlParams.get('iframe') === 'true';
-  // 🔴 DETECTOR DE MODO SEGURO (BÓVEDA DE CLIENTE)
+  
+  // 🔴 DETECTOR DE MODO SEGURO (BÓVEDA DE CLIENTE O VISTA PREVIA)
   const isPreviewMode = urlParams.get('preview') === '1';
   
   const t_bg = urlParams.get('bg') ? `#${urlParams.get('bg')}` : '#f8fafc'; 
@@ -10557,9 +10559,9 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     e.preventDefault();
     setFormError('');
 
-    // 🔴 BLINDAJE DE SEGURIDAD PARA EL PANEL
+    // 🔴 BLINDAJE DE SEGURIDAD: Si está en el Panel, bloqueamos el Firebase
     if (isPreviewMode) {
-      alert("🔒 MODO VISTA PREVIA\nEsta es una simulación segura. Los cambios no se guardarán en la base de datos para proteger la información de tus invitados.");
+      alert("🔒 MODO VISTA PREVIA\nEsta es una simulación segura para el Panel. En la invitación real, al darle clic a este botón los datos se guardarían en la base de datos y cambiaría el estatus a Confirmado.");
       return;
     }
 
@@ -10640,8 +10642,8 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
           
           {/* 🔴 AVISO DE MODO SIMULACRO */}
           {isPreviewMode && (
-            <div className="bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest py-1.5 text-center shadow-lg rounded-t-xl animate-pulse">
-               Modo Vista Previa Segura
+            <div className="bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest py-1.5 text-center shadow-lg rounded-t-xl animate-pulse flex justify-center items-center">
+               <Lock size={12} className="mr-1"/> Vista Previa Protegida
             </div>
           )}
 
@@ -10704,7 +10706,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                   <div className="border-t pt-3 mt-4 flex items-center justify-between p-2 rounded-lg" style={{ borderColor: `${t_txt}15`, backgroundColor: isIframe ? 'transparent' : `${t_bg}40` }}>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-widest">¿Pases extra?</p>
-                      <p className="text-[10px] opacity-70">Sujeto a confirmación.</p>
+                      <p className="text-[8px] text-slate-400 leading-tight">Sujeto a disponibilidad.</p>
                     </div>
                     <div style={{ backgroundColor: t_card, borderColor: `${t_txt}30` }} className="flex items-center border rounded-md p-0.5 shadow-sm">
                       <button type="button" onClick={() => setExtraRequested(Math.max(0, extraRequested - 1))} className="px-2 py-0.5 text-lg font-bold hover:opacity-50">-</button>
@@ -10918,7 +10920,9 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   // 🔴 OBTENEMOS LOS DATOS REALES PARA MANDARLOS A LOS COMPONENTES
   const isSuperAdminMode = originalUserRole === 'superadmin' && !impersonating;
   const activeEventData = impersonating || authData?.availableEvents?.find(e => e.eventId === eventId) || {};
-  const currentEventType = activeEventData.tipoEvento || 'boda';
+  
+  // 🔴 CORRECCIÓN CLAVE: Si no hay tipo de evento, por defecto es 'general', así no sale el botón de Boda.
+  const currentEventType = activeEventData.tipoEvento || 'general';
   const currentEventPlan = activeEventData.plan || 'diamante';
   const currentEventName = activeEventData.nombres || activeEventData.nombre || 'Evento Baulia';
 
@@ -10939,13 +10943,14 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'proveedores': return typeof ProveedoresView !== 'undefined' ? <ProveedoresView proveedores={proveedores} setProveedores={setProveedores} gastos={gastos} setGastos={setGastos} addNotification={addNotification} /> : null;
       case 'galeria': return userPlan === 'diamante' && typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} /> : null;
       
-      // 🔴 AQUÍ PASAMOS LA URL AL SIMULADOR DEL IPHONE
+      // 🔴 AQUÍ PASAMOS LA URL REAL DE LA INVITACIÓN
       case 'invitacion': return typeof InvitacionView !== 'undefined' ? <InvitacionView guests={guests} urlInvitacion={activeEventData?.urlInvitacion} /> : null; 
       
       case 'configuracion': return userRole === 'planner' && typeof ConfiguracionMaestraView !== 'undefined' ? <ConfiguracionMaestraView agencyConfig={agencyConfig} addNotification={addNotification} /> : null;
       default: return <div className="p-8 text-center text-slate-500 font-bold">Módulo bloqueado o en construcción.</div>;
     }
   };
+
   return (
     <div className="flex h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans overflow-hidden text-slate-900 dark:text-slate-200 transition-colors duration-700 selection:bg-amber-500 selection:text-white relative">
       
@@ -10957,7 +10962,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       {impersonating && (
         <div className="absolute top-0 left-0 w-full bg-rose-600 text-white z-[9999] py-1.5 px-4 text-center text-xs font-black uppercase tracking-widest shadow-lg flex justify-center items-center">
           <AlertTriangle size={14} className="mr-2" />
-          Estás en Modo Soporte viendo la bóveda de: {impersonating.nombre}
+          Estás en Modo Soporte viendo la bóveda de: {impersonating.nombres || impersonating.nombre}
           <button onClick={() => { setImpersonating(null); setActiveTab('licencias'); }} className="ml-6 bg-white text-rose-600 px-3 py-0.5 rounded shadow-sm hover:scale-105 transition-transform">
             Salir y Volver a Admin
           </button>
