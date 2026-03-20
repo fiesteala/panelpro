@@ -1725,7 +1725,6 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
   let iframeUrl = '';
   if (urlInvitacion) {
     const separator = urlInvitacion.includes('?') ? '&' : '?';
-    // INYECTAMOS PREVIEW=1 PARA BLOQUEAR LA BASE DE DATOS
     iframeUrl = `${urlInvitacion}${separator}u=${selectedGuestId || ''}&preview=1`;
   }
 
@@ -1763,10 +1762,10 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
       </div>
 
       {/* PANEL DERECHO: SIMULADOR MINIMALISTA DE ALTA COSTURA */}
-      <div className="w-full lg:w-[420px] flex-shrink-0 flex flex-col justify-start">
+      <div className="w-full lg:w-[400px] flex-shrink-0 flex flex-col justify-start h-[700px]">
         
         {!urlInvitacion ? (
-          <div className="w-full h-full min-h-[600px] flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
+          <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
              <Link size={56} className="text-slate-300 dark:text-slate-600 mb-6"/>
              <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 font-editorial">Falta el Enlace</h3>
              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-[250px]">No se ha guardado el enlace de la invitación web para este evento.</p>
@@ -1776,29 +1775,24 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
              </div>
           </div>
         ) : (
-          <div className="w-full h-full min-h-[650px] flex flex-col items-center justify-center p-5 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden transition-colors">
+          <div className="w-full h-full bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden flex flex-col transition-colors">
              
              {/* Badge de seguridad superior */}
-             <div className="absolute top-0 inset-x-0 flex justify-center z-20">
+             <div className="absolute top-0 inset-x-0 flex justify-center z-20 pointer-events-none">
                 <span className="bg-rose-500 text-white text-[9px] font-black uppercase tracking-widest py-1 px-4 rounded-b-lg shadow-md flex items-center">
                    <Lock size={10} className="mr-1.5"/> Simulación Segura
                 </span>
              </div>
 
              {guest ? (
-               <div className="relative w-full h-full rounded-[2rem] overflow-hidden bg-slate-50 dark:bg-[#111] flex items-center justify-center border border-slate-200 dark:border-white/5 transition-colors">
-                  {/* 🔴 ENGAÑANDO AL IFRAME: Forzamos un contenedor tamaño iPhone exacto y lo escalamos para que quepa bonito */}
-                  <div className="absolute top-1/2 left-1/2" style={{ width: '390px', height: '844px', transform: 'translate(-50%, -50%) scale(0.72)' }}>
-                     <iframe 
-                       key={iframeUrl}
-                       src={iframeUrl} 
-                       className="w-full h-full border-none bg-white rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-white/10"
-                       title="Invitacion Simulada"
-                     ></iframe>
-                  </div>
-               </div>
+                <iframe 
+                   key={iframeUrl}
+                   src={iframeUrl} 
+                   className="w-full h-full border-none mt-6" 
+                   title="Invitacion Simulada"
+                ></iframe>
              ) : (
-               <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-[#111] rounded-[2rem] border border-slate-100 dark:border-white/5 transition-colors">
+               <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 transition-colors">
                  <Users size={32} className="mb-3 opacity-20"/>
                  <span className="text-xs font-bold uppercase tracking-widest">Selecciona un invitado</span>
                </div>
