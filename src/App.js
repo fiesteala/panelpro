@@ -9751,7 +9751,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     { id: 'boda', label: 'Boda', placeholder: 'Ej. Carlos y Sofia', labelNombre: 'Nombre de los Novios' },
     { id: 'xv_anos', label: 'XV Años', placeholder: 'Ej. Maria Fernanda', labelNombre: 'Nombre de la Quinceañera' },
     { id: 'cumpleanos', label: 'Cumpleaños', placeholder: 'Ej. Juan Perez', labelNombre: 'Nombre del Festejado' },
-    { id: 'empresarial', label: 'Empresarial', placeholder: 'Ej. Convencion Telcel', labelNombre: 'Nombre de la Empresa' }
+    { id: 'empresarial', label: 'Empresarial', placeholder: 'Ej. Convencion Telcel', labelNombre: 'Nombre de la Empresa' },
+    { id: 'general', label: 'General / Otro', placeholder: 'Ej. Posada Anual', labelNombre: 'Nombre del Evento' }
   ];
 
   const eventoSeleccionado = tiposDeEvento.find(t => t.id === formData.tipoEvento) || tiposDeEvento[0];
@@ -9836,14 +9837,58 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     setIsCreating(false);
   };
 
+  // 🔴 LÓGICA MAESTRA: Actualización de Licencia y Upgrade Seguro
   const handleUpdateLicense = async (e) => {
     e.preventDefault();
     try {
-      // 🔴 AQUÍ INYECTAMOS LA EDICIÓN DEL TIPO DE EVENTO
-      await updateDoc(doc(db, "usuarios", editingLic.id), { urlInvitacion: editingLic.urlInvitacion, plan: editingLic.plan, nombres: editingLic.nombres, tipoEvento: editingLic.tipoEvento });
-      setIsEditModalOpen(false); setEditingLic(null);
-      setDialog({ isOpen: true, type: 'alert', title: 'Bóveda Actualizada', message: 'Los cambios se guardaron correctamente en la nube.' });
-    } catch (error) { setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'No se pudo actualizar la licencia.' }); }
+      const oldPrice = PRECIOS[editingLic.originalPlan] || 0;
+      const newPrice = PRECIOS[editingLic.plan] || 0;
+
+      // 1. Bloqueo de Downgrade
+      if (newPrice < oldPrice) {
+         setDialog({ isOpen: true, type: 'alert', title: 'Acción no permitida', message: 'No se puede reducir (downgrade) el plan de un cliente. Solo se permiten Upgrades a planes superiores.' });
+         return;
+      }
+
+      // 2. Limpieza de datos (Evitar Firebase Undefined Error)
+      const safeUrl = editingLic.urlInvitacion || "";
+      const safeNombre = editingLic.nombres || "";
+      const safeTipo = editingLic.tipoEvento || "general";
+
+      // 3. Actualizamos tabla de Usuarios
+      await updateDoc(doc(db, "usuarios", editingLic.id), { 
+        urlInvitacion: safeUrl, 
+        plan: editingLic.plan, 
+        nombres: safeNombre, 
+        tipoEvento: safeTipo 
+      });
+
+      // 4. Actualizamos tabla de Eventos
+      try {
+        await updateDoc(doc(db, "eventos", editingLic.eventId), {
+           nombres: safeNombre,
+           plan: editingLic.plan,
+           tipoEvento: safeTipo
+        });
+      } catch(err) { console.log("Doc evento no listo", err); }
+
+      // 5. Si hubo Upgrade, actualizamos el Libro Mayor de Finanzas
+      if (newPrice > oldPrice) {
+         try {
+           await updateDoc(doc(db, "ventas", editingLic.eventId), {
+              plan: editingLic.plan,
+              monto: newPrice
+           });
+         } catch(err) { console.log("Doc venta no listo", err); }
+      }
+
+      setIsEditModalOpen(false); 
+      setEditingLic(null);
+      setDialog({ isOpen: true, type: 'alert', title: 'Bóveda Actualizada', message: newPrice > oldPrice ? 'El Upgrade se realizó y el estado financiero se actualizó.' : 'Los cambios se guardaron correctamente.' });
+    } catch (error) { 
+      console.error(error);
+      setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'Fallo al conectar con la base de datos: ' + error.message }); 
+    }
   };
 
   const handleSendWhatsApp = () => {
@@ -10163,8 +10208,11 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                            <td className="px-5 py-4 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
                            <td className="px-5 py-4 text-right">
                               <div className="flex items-center justify-end space-x-2">
-                                <button onClick={() => { setEditingLic(lic); setIsEditModalOpen(true); }} title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"><Edit2 size={16} /></button>
-                                {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-transparent dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"><ExternalLink size={16} /></button>}
+                                {/* 🔴 EL BOTÓN EDITA ENVÍA EL PLAN ORIGINAL PARA COMPARAR */}
+                                <button onClick={() => { setEditingLic({...lic, originalPlan: lic.plan}); setIsEditModalOpen(true); }} title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"><Edit2 size={16} /></button>
+                                
+                                {/* 🔴 EL BOTÓN ENTRAR ENVÍA TODOS LOS DATOS PARA EVITAR QUE SE PIERDAN ADENTRO */}
+                                {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan, tipoEvento: lic.tipoEvento || 'general', urlInvitacion: lic.urlInvitacion || '' })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-transparent dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"><ExternalLink size={16} /></button>}
                                 <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors border border-transparent ${estaSuspendido ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 hover:bg-emerald-200 dark:hover:bg-emerald-500/20 dark:border-emerald-500/20' : 'text-amber-600 dark:text-amber-500 bg-amber-100 dark:bg-amber-500/10 hover:bg-amber-200 dark:hover:bg-amber-500/20 dark:border-amber-500/20'}`}><Power size={16} /></button>
                                 {isSuperAdmin && (
                                   <button onClick={() => handleDelete(lic)} title="Eliminar Bóveda (Se conserva Finanzas)" className="p-2 rounded-lg text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-transparent dark:border-rose-500/20 hover:text-white hover:bg-rose-500 dark:hover:bg-rose-500 dark:hover:text-white transition-colors"><Trash2 size={16} /></button>
@@ -10182,7 +10230,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         </div>
       )}
 
-      {/* MODALES OMITIDOS PARA BREVEDAD (Nueva Licencia, etc. se mantienen igual) */}
+      {/* MODALES OMITIDOS PARA BREVEDAD (Nueva Licencia se mantiene igual) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar border border-transparent dark:border-white/10 transition-colors">
@@ -10275,7 +10323,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         </div>
       )}
 
-      {/* 🔴 MODAL PARA EDITAR LICENCIA EXISTENTE (CON TIPO DE EVENTO INCLUIDO) */}
+      {/* 🔴 MODAL PARA EDITAR LICENCIA EXISTENTE (CON UPGRADE Y TIPO DE EVENTO) */}
       {isEditModalOpen && editingLic && (
         <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto border border-transparent dark:border-white/10 transition-colors">
@@ -10283,7 +10331,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
              <form onSubmit={handleUpdateLicense} className="p-6 space-y-5">
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Nombre del Cliente / Evento</label>
-                  <input type="text" required value={editingLic.nombres} onChange={e => setEditingLic({...editingLic, nombres: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                  <input type="text" required value={editingLic.nombres || ''} onChange={e => setEditingLic({...editingLic, nombres: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> URL de su Invitación Pública</label>
@@ -10293,7 +10341,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Tipo de Evento</label>
-                    <select value={editingLic.tipoEvento || 'boda'} onChange={e => setEditingLic({...editingLic, tipoEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
+                    <select value={editingLic.tipoEvento || 'general'} onChange={e => setEditingLic({...editingLic, tipoEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
                       {tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
                     </select>
                   </div>
@@ -10305,9 +10353,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                   </div>
                 </div>
 
-                <div className="bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 p-3 rounded-lg text-xs font-bold border border-amber-200 dark:border-amber-500/20 flex items-start transition-colors">
+                <div className="bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 p-3 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-500/20 flex items-start transition-colors">
                   <AlertCircle size={16} className="mr-2 flex-shrink-0 mt-0.5" />
-                  Nota: El plan de facturación no se puede cambiar aquí porque altera el estado financiero. Cancela esta cuenta y crea una nueva si necesitas un upgrade.
+                  Nota: Puedes subir (Upgrade) el plan del cliente. El sistema actualizará el estado financiero automáticamente. No se permiten reducciones de plan.
                 </div>
                 <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 transition-colors mt-4">
                   Guardar Cambios
@@ -10315,6 +10363,51 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
              </form>
           </div>
         </div>
+      )}
+
+      {/* PESTAÑA RESEÑAS */}
+      {adminTab === 'resenas' && (
+         <div className="animate-in fade-in">
+           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+             <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
+                <h3 className="font-bold text-slate-800 dark:text-white text-sm">Reseñas de Clientes</h3>
+             </div>
+             <div className="p-6 grid grid-cols-1 gap-4">
+                {resenasList.length === 0 ? <p className="text-center text-slate-400 dark:text-slate-500 py-10 transition-colors">Aún no hay reseñas enviadas.</p> : null}
+                {resenasList.map(resena => (
+                   <div key={resena.id} className={`p-5 rounded-2xl border transition-colors ${resena.status === 'aprobada' ? 'border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/30 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111]'}`}>
+                      <div className="flex justify-between items-start mb-3">
+                         <div>
+                            <div className="flex items-center gap-2 mb-1">
+                               <h4 className="font-black text-slate-900 dark:text-white transition-colors">{resena.authorName}</h4>
+                            </div>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest transition-colors">{resena.authorType}</p>
+                         </div>
+                         <div className="flex gap-1">
+                            {[1,2,3,4,5].map(s => <Star key={s} size={14} className={resena.rating >= s ? 'fill-amber-500 text-amber-500' : 'text-slate-300 dark:text-slate-700'}/>)}
+                         </div>
+                      </div>
+                      <p className="text-slate-700 dark:text-slate-300 text-sm mb-4 font-medium italic transition-colors">"{resena.comment}"</p>
+                      
+                      <div className="flex justify-between items-center border-t border-slate-200/60 dark:border-white/5 pt-4 mt-2 transition-colors">
+                         <div>
+                            {resena.status === 'aprobada' 
+                              ? <span className="flex items-center text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest transition-colors"><Globe size={14} className="mr-1"/> Pública</span>
+                              : <span className="flex items-center text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest transition-colors"><Lock size={14} className="mr-1"/> Oculta</span>
+                            }
+                         </div>
+                         <div className="flex gap-2">
+                            <button onClick={async () => { await deleteDoc(doc(db, "resenas", resena.id)); }} className="px-3 py-1.5 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-rose-500 dark:text-rose-400 rounded-lg text-xs font-bold hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors">Borrar</button>
+                            <button onClick={async () => { await updateDoc(doc(db, "resenas", resena.id), { status: resena.status === 'aprobada' ? 'pendiente' : 'aprobada' }); }} className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-colors shadow-sm ${resena.status === 'aprobada' ? 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20' : 'bg-emerald-500 text-white dark:text-slate-900 hover:bg-emerald-600 dark:hover:bg-emerald-400'}`}>
+                               {resena.status === 'aprobada' ? 'Ocultar' : 'Aprobar'}
+                            </button>
+                         </div>
+                      </div>
+                   </div>
+                ))}
+             </div>
+          </div>
+         </div>
       )}
     </div>
   );
