@@ -1725,7 +1725,7 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
   let iframeUrl = '';
   if (urlInvitacion) {
     const separator = urlInvitacion.includes('?') ? '&' : '?';
-    // 🔴 INYECTAMOS PREVIEW=1 PARA BLOQUEAR LA BASE DE DATOS
+    // INYECTAMOS PREVIEW=1 PARA BLOQUEAR LA BASE DE DATOS
     iframeUrl = `${urlInvitacion}${separator}u=${selectedGuestId || ''}&preview=1`;
   }
 
@@ -1733,71 +1733,76 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
     <div className="h-full flex flex-col lg:flex-row gap-6 pb-6 relative overflow-hidden transition-colors">
       
       {/* PANEL IZQUIERDO: LISTA DE INVITADOS */}
-      <div className="flex-1 flex flex-col max-h-full min-h-0 bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
-        <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] transition-colors">
+      <div className="flex-1 flex flex-col max-h-full min-h-0 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+        <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] transition-colors">
           <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center"><Smartphone size={20} className="mr-2 text-indigo-500 dark:text-amber-500"/> Simulador en Vivo</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Selecciona una familia para ver cómo funciona su pase en tu diseño real.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">Selecciona una familia para ver cómo funciona su pase en tu diseño real.</p>
           <div className="mt-4 relative">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-            <input type="text" placeholder="Buscar familia para simular..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050505] text-slate-800 dark:text-white rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-400 dark:focus:ring-amber-500 transition-colors" />
+            <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input type="text" placeholder="Buscar familia para simular..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-3 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050505] text-slate-800 dark:text-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-amber-500/20 focus:border-indigo-400 dark:focus:border-amber-500 transition-colors" />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2 custom-scrollbar bg-slate-50/50 dark:bg-transparent">
+        <div className="flex-1 overflow-y-auto p-3 custom-scrollbar bg-slate-50/50 dark:bg-transparent">
           {filteredGuests.length > 0 ? (
-            <ul className="space-y-1">
+            <ul className="space-y-1.5">
               {filteredGuests.map(g => (
                 <li key={g.id}>
-                  <button onClick={() => setSelectedGuestId(g.id)} className={`w-full text-left p-3 rounded-xl transition-all flex items-center justify-between ${selectedGuestId === g.id ? 'bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/30 shadow-sm' : 'hover:bg-slate-50 dark:hover:bg-white/5 border border-transparent'}`}>
+                  <button onClick={() => setSelectedGuestId(g.id)} className={`w-full text-left p-3.5 rounded-xl transition-all flex items-center justify-between ${selectedGuestId === g.id ? 'bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/30 shadow-sm' : 'hover:bg-slate-50 dark:hover:bg-white/5 border border-transparent'}`}>
                     <div>
                       <p className={`font-bold text-sm ${selectedGuestId === g.id ? 'text-indigo-900 dark:text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>{g.name}</p>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{g.originalPasses || g.passes} Pases | <span className={`uppercase font-bold ${g.status === 'cancelado' ? 'text-rose-500' : g.status === 'confirmado' ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`}>{g.status.replace('_', ' ')}</span></p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{g.originalPasses || g.passes} Pases | <span className={`uppercase font-bold tracking-wider ${g.status === 'cancelado' ? 'text-rose-500' : g.status === 'confirmado' ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`}>{g.status.replace('_', ' ')}</span></p>
                     </div>
-                    {selectedGuestId === g.id && <ArrowRight size={16} className="text-indigo-500 dark:text-amber-500"/>}
+                    {selectedGuestId === g.id && <ArrowRight size={18} className="text-indigo-500 dark:text-amber-500"/>}
                   </button>
                 </li>
               ))}
             </ul>
-          ) : <div className="p-8 text-center text-slate-400 text-sm border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl m-2">No se encontraron invitados.</div>}
+          ) : <div className="p-10 text-center text-slate-400 text-sm border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl m-2">No se encontraron invitados.</div>}
         </div>
       </div>
 
-      {/* PANEL DERECHO: IPHONE MOCKUP CON IFRAME REAL */}
-      <div className="w-full lg:w-[380px] flex-shrink-0 flex justify-center items-start pt-4 lg:pt-0 overflow-y-auto hide-scrollbar">
+      {/* PANEL DERECHO: SIMULADOR MINIMALISTA DE ALTA COSTURA */}
+      <div className="w-full lg:w-[420px] flex-shrink-0 flex flex-col justify-start">
         
         {!urlInvitacion ? (
-          <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#0a0a0a] rounded-[3rem] border border-slate-200 dark:border-white/10 shadow-sm">
-             <Link size={48} className="text-slate-300 dark:text-slate-600 mb-4"/>
-             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2 font-editorial">Falta el Enlace</h3>
-             <p className="text-slate-500 dark:text-slate-400 text-sm">No se ha guardado el enlace de la invitación web para este evento.</p>
-             <p className="text-xs text-slate-400 mt-4 border border-slate-200 dark:border-white/10 p-3 rounded-xl">Ve a "Centro de Operaciones" y edita la licencia del cliente para agregar la URL.</p>
+          <div className="w-full h-full min-h-[600px] flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
+             <Link size={56} className="text-slate-300 dark:text-slate-600 mb-6"/>
+             <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 font-editorial">Falta el Enlace</h3>
+             <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-[250px]">No se ha guardado el enlace de la invitación web para este evento.</p>
+             <div className="mt-8 border border-slate-200 dark:border-white/10 p-4 rounded-xl bg-slate-50 dark:bg-white/5 text-xs text-slate-500 dark:text-slate-400 text-left flex items-start transition-colors">
+                <Info size={16} className="mr-2.5 shrink-0 mt-0.5 text-indigo-400 dark:text-amber-500"/>
+                <p>Ve a "Centro de Operaciones" y edita la licencia del cliente para agregar la URL.</p>
+             </div>
           </div>
         ) : (
-          <div className="w-[320px] h-[650px] bg-black rounded-[3rem] p-2.5 shadow-2xl relative border-[6px] border-slate-800 flex-shrink-0">
-            {/* Isla Dinámica */}
-            <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-full z-20 flex justify-end items-center pr-2">
-              <div className="w-2 h-2 rounded-full bg-indigo-900/50 mr-1 animate-pulse"></div>
-            </div>
-            
-            {/* 🔴 EL IFRAME QUE CARGA LA INVITACIÓN REAL */}
-            <div className="w-full h-full bg-[#111] rounded-[2.2rem] overflow-hidden relative">
-              {guest ? (
-                <iframe 
-                  key={iframeUrl}
-                  src={iframeUrl} 
-                  className="w-full h-full border-none bg-white"
-                  title="Invitacion"
-                ></iframe>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-500 text-xs">Selecciona un invitado.</div>
-              )}
-            </div>
+          <div className="w-full h-full min-h-[650px] flex flex-col items-center justify-center p-5 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden transition-colors">
+             
+             {/* Badge de seguridad superior */}
+             <div className="absolute top-0 inset-x-0 flex justify-center z-20">
+                <span className="bg-rose-500 text-white text-[9px] font-black uppercase tracking-widest py-1 px-4 rounded-b-lg shadow-md flex items-center">
+                   <Lock size={10} className="mr-1.5"/> Simulación Segura
+                </span>
+             </div>
 
-            {/* Botones Físicos Simulados */}
-            <div className="absolute top-24 -left-[9px] w-1 h-8 bg-slate-700 rounded-l-md"></div>
-            <div className="absolute top-36 -left-[9px] w-1 h-12 bg-slate-700 rounded-l-md"></div>
-            <div className="absolute top-52 -left-[9px] w-1 h-12 bg-slate-700 rounded-l-md"></div>
-            <div className="absolute top-36 -right-[9px] w-1 h-16 bg-slate-700 rounded-r-md"></div>
+             {guest ? (
+               <div className="relative w-full h-full rounded-[2rem] overflow-hidden bg-slate-50 dark:bg-[#111] flex items-center justify-center border border-slate-200 dark:border-white/5 transition-colors">
+                  {/* 🔴 ENGAÑANDO AL IFRAME: Forzamos un contenedor tamaño iPhone exacto y lo escalamos para que quepa bonito */}
+                  <div className="absolute top-1/2 left-1/2" style={{ width: '390px', height: '844px', transform: 'translate(-50%, -50%) scale(0.72)' }}>
+                     <iframe 
+                       key={iframeUrl}
+                       src={iframeUrl} 
+                       className="w-full h-full border-none bg-white rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-white/10"
+                       title="Invitacion Simulada"
+                     ></iframe>
+                  </div>
+               </div>
+             ) : (
+               <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-[#111] rounded-[2rem] border border-slate-100 dark:border-white/5 transition-colors">
+                 <Users size={32} className="mb-3 opacity-20"/>
+                 <span className="text-xs font-bold uppercase tracking-widest">Selecciona un invitado</span>
+               </div>
+             )}
           </div>
         )}
       </div>
