@@ -997,9 +997,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
   const [exportViewOpen, setExportViewOpen] = useState(false);
   const [exportCols, setExportCols] = useState({ nombre: true, pases: true, estatus: true, telefono: true, mesa: true });
-  const [splitBySide, setSplitBySide] = useState(false); // 🔴 Estado para el botón de Novio/Novia en el PDF
+  const [splitBySide, setSplitBySide] = useState(false); 
 
   const [isPreparingListPrint, setIsPreparingListPrint] = useState(false);
+  const [isPreparingQRPrint, setIsPreparingQRPrint] = useState(false);
 
   const safeGuests = guests || [];
 
@@ -1079,6 +1080,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
     const linkPersonalizado = `${baseDomain}/${ID_DEL_EVENTO}?u=${parentGuest.id}`;
     
+    // Sin emojis raros
     const msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
 
     if (phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -1136,9 +1138,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       return;
     }
     
+    setIsPreparingQRPrint(true);
     if(addNotification) addNotification('Preparando Archivo', 'Generando pulseras QR de alta resolución...', 'info');
 
-    // 🔴 Hacemos el trabajo invisible y lanzamos el PDF
     setTimeout(async () => {
       try {
         const { jsPDF } = await import('jspdf');
@@ -1146,14 +1148,12 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
         const wristbandPages = chunkArray(allIndividualsForQR, 10);
         
-        // Creamos un contenedor temporal INVISIBLE
         const tempContainer = document.createElement('div');
         tempContainer.style.position = 'absolute';
         tempContainer.style.left = '-9999px';
         tempContainer.style.top = '-9999px';
         document.body.appendChild(tempContainer);
         
-        // Renderizamos las páginas en el contenedor temporal usando React
         const root = ReactDOM.createRoot(tempContainer);
         
         const QRPagesToRender = wristbandPages.map((page, pageIdx) => (
@@ -1188,7 +1188,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         
         root.render(<>{QRPagesToRender}</>);
         
-        // Esperamos a que los QRs se pinten
         await new Promise(resolve => setTimeout(resolve, 1500));
         
         const html2canvas = (await import('html2canvas')).default;
@@ -1209,6 +1208,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         console.error(error);
         if(addNotification) addNotification('Error', 'Fallo al generar el PDF.', 'error');
       }
+      setIsPreparingQRPrint(false);
     }, 100);
   };
 
@@ -1267,7 +1267,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     document.body.removeChild(link);
   };
 
-  // 🔴 3. DESCARGA PDF DE LISTA DE INVITADOS (ESTUDIO DE IMPRESIÓN)
+  // 🔴 3. DESCARGA PDF DE LISTA DE INVITADOS (ESTUDIO DE IMPRESIÓN ELEGANTE)
   const triggerListPdfDownload = async () => {
     setIsPreparingListPrint(true);
     setTimeout(async () => {
@@ -1293,7 +1293,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   return (
     <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500">
       
-      {/* 🔴 VISTA DE EXPORTACIÓN ESTILO "REPORTE EJECUTIVO" DE WORD (CON Z-INDEX ALTO Y ESTILOS NATIVOS) */}
+      {/* 🔴 VISTA DE EXPORTACIÓN ESTILO "WORD" (Elegante) */}
       {exportViewOpen && (() => {
           const allList = getFlattenedGuests(invitadosFiltrados);
           let listToRender = [];
@@ -1316,7 +1316,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           const extraPages = [];
           for(let i=0; i<extraItems.length; i+=PAGE_N_LIMIT) extraPages.push(extraItems.slice(i, i+PAGE_N_LIMIT));
 
-          // 🔴 ESTILOS DINÁMICOS SEGÚN EL PLAN
+          // ESTILOS DINÁMICOS SEGÚN EL PLAN (Para el Documento Blanco)
           let gradientStyle = 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)';
           let accentColor = '#64748b'; 
           if (userPlan === 'diamante') { gradientStyle = 'linear-gradient(180deg, #eef2ff 0%, #ffffff 100%)'; accentColor = '#4f46e5'; }
@@ -1335,8 +1335,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row, idx) => {
-                  if (row.isHeader) return <tr key={`hdr_${idx}`}><td colSpan="5" className="py-4 text-sm font-black uppercase tracking-widest" style={{ color: accentColor }}>{row.title}</td></tr>;
+                {rows.map(row => {
+                  if (row.isHeader) return <tr key={`hdr_${row.title}`}><td colSpan="5" className="py-4 text-sm font-black uppercase tracking-widest" style={{ color: accentColor }}>{row.title}</td></tr>;
                   return (
                     <tr key={`print_${row._rowId}`} className={`border-b border-slate-200/60 ${row.parentGuest.status === 'cancelado' ? 'opacity-40 line-through' : ''}`}>
                       {exportCols.nombre && (
@@ -1358,10 +1358,11 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           );
 
           return (
-            <div className="fixed inset-0 z-[120] bg-slate-900/95 flex flex-col overflow-hidden backdrop-blur-md">
+            <div className="fixed inset-0 z-[9999] bg-slate-900 flex flex-col overflow-hidden">
               
-              <div className="bg-[#0a0a0a] text-white p-4 flex flex-col sm:flex-row items-center justify-between border-b border-white/10 shadow-lg print:hidden z-10 gap-4 shrink-0">
-                <div className="flex items-center space-x-4 w-full sm:w-auto">
+              {/* BARRA DE HERRAMIENTAS INTERACTIVA */}
+              <div className="h-20 bg-[#0a0a0a] text-white px-6 flex items-center justify-between shrink-0 border-b border-white/10 shadow-xl print:hidden">
+                <div className="flex items-center space-x-4">
                   <button onClick={() => setExportViewOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24}/></button>
                   <div>
                     <h3 className="font-bold text-sm">Estudio de Impresión</h3>
@@ -1369,11 +1370,11 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   </div>
                 </div>
                 
-                <div className="flex flex-wrap items-center justify-center gap-4 w-full sm:w-auto">
+                <div className="flex items-center gap-4">
                   
                   {isWeddingMode && (
                     <div className="flex items-center bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors" onClick={() => setSplitBySide(!splitBySide)}>
-                       <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mr-3">Lado Novios</span>
+                       <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mr-3">Separar Lados</span>
                        <div className={`relative w-8 h-4 rounded-full transition-colors ${splitBySide ? 'bg-amber-500' : 'bg-slate-700'}`}>
                           <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${splitBySide ? 'translate-x-4' : 'translate-x-0'}`}></div>
                        </div>
@@ -1389,7 +1390,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   </div>
 
                   <div className="flex items-center gap-2">
-                     <button onClick={() => window.print()} className="px-5 py-2.5 bg-white text-slate-900 hover:bg-slate-200 rounded-xl text-sm font-bold flex items-center shadow-lg transition-all hidden sm:flex">
+                     <button onClick={() => window.print()} className="px-5 py-2.5 bg-white text-slate-900 hover:bg-slate-200 rounded-xl text-sm font-bold flex items-center shadow-lg transition-all">
                        <Printer size={16} className="mr-2"/> Imprimir
                      </button>
                      <button onClick={exportToExcel} className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold flex items-center shadow-lg transition-all hidden md:flex">
@@ -1403,7 +1404,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8 bg-[#111] print:bg-white print:p-0 print:overflow-visible">
+              {/* CONTENEDOR DE PÁGINAS A4 */}
+              <div className="flex-1 overflow-y-auto bg-[#111] p-8 flex flex-col items-center gap-8 custom-scrollbar print:bg-white print:p-0 print:overflow-visible">
                 
                 <style>{`
                   @media print {
@@ -1426,13 +1428,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                       <BauliaLogo className="h-10" forceWhite={false} />
                     </div>
                   </header>
-                  
-                  <div className="grid grid-cols-4 gap-4 mb-8">
-                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Total Pases</p><p className="text-2xl font-editorial text-slate-900">{totalPases}</p></div>
-                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Confirmados</p><p className="text-2xl font-editorial" style={{ color: accentColor }}>{totalConfirmados}</p></div>
-                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Ya Ingresaron</p><p className="text-2xl font-editorial text-emerald-600">{totalIngresos}</p></div>
-                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Niños (Incluidos)</p><p className="text-2xl font-editorial text-sky-600">{totalNinos}</p></div>
-                  </div>
 
                   <main>{renderTableRows(firstPageItems)}</main>
                   <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
@@ -1460,18 +1455,18 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           );
       })()}
 
+      {/* 🔴 INTERFAZ NORMAL DE INVITADOS CON BOTONES CORREGIDOS */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
         <div>
           <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">Gestión de Invitados</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Control de asistencia, pases y credenciales.</p>
         </div>
         
-        {/* 🔴 NOMBRES DE LOS BOTONES ACTUALIZADOS */}
         <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
           <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Exportar Lista</button>
-          
-          <button onClick={triggerQRPdfDownload} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors">
-             <QrCode size={14} className="mr-1.5 text-indigo-600 dark:text-indigo-400"/> Generar Pulseras VIP
+          <button onClick={triggerQRPdfDownload} disabled={isPreparingQRPrint} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors disabled:opacity-50">
+             {isPreparingQRPrint ? <RefreshCw size={14} className="mr-1.5 text-indigo-600 dark:text-indigo-400 animate-spin"/> : <QrCode size={14} className="mr-1.5 text-indigo-600 dark:text-indigo-400"/>} 
+             {isPreparingQRPrint ? 'Generando...' : 'Generar Pulseras VIP'}
           </button>
 
           {isWeddingMode ? (
@@ -1651,7 +1646,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     <option value="por_invitar">Por Invitar</option><option value="pendiente">Pendiente</option><option value="confirmado">Confirmado</option><option value="cancelado">Canceló</option>
                   </select>
                 </div>
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Asignados</label><input type="number" min="0" required value={editModal.guest.passes} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, passes: Number(e.target.value) }})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-indigo-600 dark:text-amber-500 font-black text-center transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Totales</label><input type="number" min="0" required value={editModal.guest.passes} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, passes: Number(e.target.value) }})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-indigo-600 dark:text-amber-500 font-black text-center transition-colors" /></div>
               </div>
               <button type="submit" className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-4 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors">Guardar Cambios</button>
             </form>
@@ -7003,7 +6998,7 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
 // ==========================================
 // --- COMPONENTE: CABECERA INTELIGENTE ---
 // ==========================================
-const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, bellAlerts, setBellAlerts, markAsRead, cycleTheme, themeSetting, authData, switchEvent }) => {
+const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, bellAlerts, setBellAlerts, markAsRead, cycleTheme, themeSetting, authData, switchEvent, isSuperAdminMode, eventName, eventPlan }) => {
   const [showResults, setShowResults] = useState(false);
   const [showBellMenu, setShowBellMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -7033,12 +7028,9 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
   const isOverdue = (dateStr, deuda) => { if(!dateStr || deuda <= 0) return false; return new Date(dateStr) < new Date(); };
   const overdueGastos = (data?.gastos || []).filter(g => isOverdue(g.fechaLimite, g.estimado - g.pagado));
   
-  // 🔴 LÓGICA DE CEO: Detectamos si estamos en el mando central absoluto
-  const isSuperAdminMode = authData?.role === 'superadmin' && !authData?.eventId;
-
-  // 🔴 Si es SuperAdmin, NO le mostramos alertas de pagos de clientes
+  // 🔴 NOTIFICACIONES EXCLUSIVAS (Dueño vs Cliente)
   const dynamicAlerts = isSuperAdminMode ? [
-     { id: 'admin_sys', title: 'Mando Central', message: 'Sistema operando al 100%.', tab: 'licencias', type: 'info', isDynamic: true, isRead: false }
+     { id: 'admin_sys', title: 'Mando Central', message: 'Sistema operando al 100%.', tab: 'licencias', type: 'success', isDynamic: true, isRead: false }
   ] : [
     ...overdueGastos.map(g => ({ id: `g_${g.id}`, title: 'Pago Vencido', message: `Adeudo en: ${g.concepto}`, tab: 'presupuesto', type: 'danger', isDynamic: true, isRead: false })),
     ...(data?.guests || []).filter(g => g.extraRequested > 0).map(g => ({ id: `ext_${g.id}`, title: 'Pases Extra', message: `${g.name} solicita +${g.extraRequested} pases.`, tab: 'invitados', type: 'warning', isDynamic: true, isRead: false }))
@@ -7076,10 +7068,6 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
     window.open('https://wa.me/525512345678?text=Hola,%20necesito%20ayuda%20con%20mi%20panel%20EventMaster', '_blank');
     setShowProfileMenu(false);
   };
-
-  const currentEvent = authData?.availableEvents?.find(e => e.eventId === authData.eventId);
-  const eventName = currentEvent ? currentEvent.nombres : 'Proyecto Activo';
-  const eventPlan = currentEvent ? currentEvent.plan : 'pro';
 
   const getPlanColors = (planName) => {
     switch(planName?.toLowerCase()) {
@@ -7178,8 +7166,8 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
                           if(alert.tab) { handleNavigate(alert.tab); } else { setShowBellMenu(false); }
                         }}
                       >
-                        <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-500 dark:text-emerald-400' : alert.type === 'danger' ? 'text-rose-500 dark:text-rose-400' : alert.type === 'warning' ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-500 dark:text-indigo-400'}`}>
-                          {alert.type === 'success' ? <CheckCircle size={16}/> : alert.type === 'warning' || alert.type === 'danger' ? <AlertCircle size={16}/> : <Bell size={16}/>}
+                        <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-500 dark:text-emerald-400' : alert.type === 'danger' ? 'text-rose-500 dark:text-rose-400' : alert.type === 'warning' ? 'text-amber-500 dark:text-amber-400' : alert.type === 'info' ? 'text-sky-500 dark:text-sky-400' : 'text-indigo-500 dark:text-indigo-400'}`}>
+                          {alert.type === 'success' ? <CheckCircle size={16}/> : alert.type === 'warning' || alert.type === 'danger' ? <AlertCircle size={16}/> : alert.type === 'info' ? <Building size={16}/> : <Bell size={16}/>}
                         </div>
                         <div className="flex-1">
                           <p className={`text-sm leading-tight ${alert.isRead ? 'font-medium text-slate-500 dark:text-slate-400' : 'font-bold text-slate-800 dark:text-white'}`}>{alert.title}</p>
@@ -7204,14 +7192,14 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
               className="flex items-center space-x-2 sm:space-x-3 hover:bg-slate-200/50 dark:hover:bg-white/5 p-1 sm:p-1.5 rounded-xl transition-colors text-right border border-transparent hover:border-slate-200 dark:hover:border-white/10 group"
             >
               <div className="hidden sm:block pl-1 text-right">
-                <p className="text-xs font-bold text-slate-800 dark:text-white leading-tight truncate max-w-[130px]" title={eventName}>{eventName}</p>
-                <p className={`text-[9px] ${isSuperAdminMode ? 'text-amber-500' : pColors.text} font-bold tracking-widest uppercase transition-colors`}>{isSuperAdminMode ? 'MANDO CENTRAL' : `Plan ${eventPlan}`}</p>
+                <p className="text-xs font-bold text-slate-800 dark:text-white leading-tight truncate max-w-[130px]" title={eventName}>{isSuperAdminMode ? 'Mando Central' : eventName}</p>
+                <p className={`text-[9px] ${isSuperAdminMode ? 'text-amber-500' : pColors.text} font-bold tracking-widest uppercase transition-colors`}>{isSuperAdminMode ? 'SUPER ADMIN' : `Plan ${eventPlan}`}</p>
               </div>
               
               <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-white font-black shadow-md text-xs shrink-0 relative`}>
-                <div className={`absolute inset-[-2px] rounded-full bg-gradient-to-tr ${isSuperAdminMode ? 'from-amber-400 to-amber-600' : pColors.gradient} animate-spin-slow opacity-70 group-hover:opacity-100 transition-opacity`}></div>
+                <div className={`absolute inset-[-2px] rounded-full bg-gradient-to-tr ${isSuperAdminMode ? 'from-amber-400 to-orange-500' : pColors.gradient} animate-spin-slow opacity-70 group-hover:opacity-100 transition-opacity`}></div>
                 <div className="absolute inset-[2px] rounded-full bg-slate-900 dark:bg-black flex items-center justify-center z-10">
-                   <span className={`bg-clip-text text-transparent bg-gradient-to-tr ${isSuperAdminMode ? 'from-amber-400 to-amber-600' : pColors.gradient} font-editorial text-sm tracking-widest`}>{isSuperAdminMode ? 'BM' : initials}</span>
+                   <span className={`bg-clip-text text-transparent bg-gradient-to-tr ${isSuperAdminMode ? 'from-amber-400 to-orange-500' : pColors.gradient} font-editorial text-sm tracking-widest`}>{isSuperAdminMode ? 'BM' : initials}</span>
                 </div>
               </div>
             </button>
@@ -7219,16 +7207,16 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
             {showProfileMenu && (
               <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#0a0a0a] shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
                 <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 sm:hidden">
-                  <p className="font-bold text-slate-800 dark:text-white text-sm truncate">{eventName}</p>
-                  <p className={`text-[10px] ${pColors.text} uppercase font-bold`}>Plan {eventPlan}</p>
+                  <p className="font-bold text-slate-800 dark:text-white text-sm truncate">{isSuperAdminMode ? 'Mando Central' : eventName}</p>
+                  <p className={`text-[10px] ${isSuperAdminMode ? 'text-amber-500' : pColors.text} uppercase font-bold`}>{isSuperAdminMode ? 'SUPER ADMIN' : `Plan ${eventPlan}`}</p>
                 </div>
                 <div className="p-2">
-                  {authData?.availableEvents?.length > 1 && (
+                  {authData?.availableEvents?.length > 1 && !isSuperAdminMode && (
                      <button onClick={() => { setShowEventSwitcher(true); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2.5 text-sm text-indigo-600 dark:text-amber-500 font-bold hover:bg-indigo-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors flex items-center mb-1">
                        <RefreshCw size={16} className="mr-2.5"/> Cambiar Proyecto
                      </button>
                   )}
-                  <button onClick={() => handleNavigate('invitacion')} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg transition-colors flex items-center"><ExternalLink size={16} className="mr-2.5"/> Ver Invitación App</button>
+                  {!isSuperAdminMode && <button onClick={() => handleNavigate('invitacion')} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg transition-colors flex items-center"><ExternalLink size={16} className="mr-2.5"/> Ver Invitación App</button>}
                   <button onClick={handleContactStaff} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg transition-colors flex items-center"><MessageCircle size={16} className="mr-2.5"/> Soporte Premium</button>
                 </div>
                 <div className="p-2 border-t border-slate-100 dark:border-white/5">
@@ -7241,16 +7229,13 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
         </div>
       </header>
 
-      {/* MODAL CAMBIAR PROYECTO BLINDADO ANTI-CORTE */}
       {showEventSwitcher && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh] border border-transparent dark:border-white/10 animate-in zoom-in-95 transition-colors">
-            
             <div className="p-6 pb-4 border-b border-slate-100 dark:border-white/5 shrink-0">
                <h3 className="text-xl font-black text-slate-800 dark:text-white mb-1 font-editorial">Tus Proyectos</h3>
                <p className="text-xs text-slate-500">Selecciona el evento que deseas administrar:</p>
             </div>
-            
             <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
               <div className="space-y-3">
                 {authData.availableEvents.map(ev => {
@@ -7267,11 +7252,9 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
                 })}
               </div>
             </div>
-
             <div className="p-6 pt-4 border-t border-slate-100 dark:border-white/5 shrink-0">
                <button onClick={() => setShowEventSwitcher(false)} className="w-full py-3.5 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
             </div>
-
           </div>
         </div>
       )}
@@ -11052,13 +11035,20 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
     return () => { unsubConfigMain(); unsubWhiteLabel(); unsubGuests(); unsubGastos(); unsubProv(); unsubMesas(); unsubTareas(); unsubTiming(); unsubMapa(); unsubDeco(); unsubFotos(); };
   }, [eventId, userRole, impersonating, addNotification]);
 
+  // 🔴 OBTENEMOS LOS DATOS REALES PARA MANDARLOS A LOS COMPONENTES
+  const isSuperAdminMode = originalUserRole === 'superadmin' && !impersonating;
+  const activeEventData = impersonating || authData?.availableEvents?.find(e => e.eventId === eventId) || {};
+  const currentEventType = activeEventData.tipoEvento || 'boda';
+  const currentEventPlan = activeEventData.plan || 'diamante';
+  const currentEventName = activeEventData.nombres || activeEventData.nombre || 'Evento Baulia';
+
   const renderContent = () => {
     switch(activeTab) {
-      case 'licencias': return (originalUserRole === 'superadmin' || originalUserRole === 'staff') && !impersonating && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} authData={authData} /> : null;
+      case 'licencias': return isSuperAdminMode && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} authData={authData} /> : null;
       case 'dashboard': return typeof DashboardView !== 'undefined' ? <DashboardView authData={authData} guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null; 
       
-      // 🔴 AQUÍ PASAMOS LOS DATOS DEL EVENTO Y EL PLAN AL PDF DE INVITADOS
-      case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={authData?.availableEvents?.find(e => e.eventId === eventId)?.tipoEvento} userPlan={userPlan} eventName={authData?.availableEvents?.find(e => e.eventId === eventId)?.nombres || 'Evento Baulia'} /> : null; 
+      // 🔴 AQUÍ PASAMOS TODOS LOS DATOS AL INVITADOSVIEW
+      case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={currentEventType} userPlan={currentEventPlan} eventName={currentEventName} /> : null; 
       
       case 'escaner': return userPlan === 'diamante' && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
       case 'mesas': return userPlan === 'diamante' && typeof MesasView !== 'undefined' ? <MesasView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
@@ -11110,7 +11100,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
         ))}
       </div>
 
-      {typeof Sidebar !== 'undefined' && !(originalUserRole === 'superadmin' && !impersonating) && (
+      {typeof Sidebar !== 'undefined' && !isSuperAdminMode && (
         <Sidebar 
           isOpen={sidebarOpen} 
           setIsOpen={setSidebarOpen} 
@@ -11125,7 +11115,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         <div className={`${impersonating ? 'pt-7' : ''} transition-all`}>
-          <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} authData={authData} switchEvent={switchEvent} />
+          <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} authData={authData} switchEvent={switchEvent} isSuperAdminMode={isSuperAdminMode} eventName={currentEventName} eventPlan={currentEventPlan} />
         </div>
         
         <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-5 lg:p-6 print:p-0 print:overflow-visible custom-scrollbar relative z-10">
