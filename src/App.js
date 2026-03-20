@@ -983,7 +983,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 // ==========================================
 // --- COMPONENTE: INVITADOS (DARK PREMIUM) ---
 // ==========================================
-const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento }) => {
+const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento, userPlan, eventName }) => {
   const isWeddingMode = tipoEvento === 'boda'; 
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -997,9 +997,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento 
 
   const [exportViewOpen, setExportViewOpen] = useState(false);
   const [exportCols, setExportCols] = useState({ nombre: true, pases: true, estatus: true, telefono: true, mesa: true });
+  const [splitBySide, setSplitBySide] = useState(false); // 🔴 Estado para el botón de Novio/Novia en el PDF
 
   const [isPreparingListPrint, setIsPreparingListPrint] = useState(false);
-  const [isPreparingQRPrint, setIsPreparingQRPrint] = useState(false);
 
   const safeGuests = guests || [];
 
@@ -1079,7 +1079,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento 
     const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
     const linkPersonalizado = `${baseDomain}/${ID_DEL_EVENTO}?u=${parentGuest.id}`;
     
-    // 🔴 Mensaje limpio sin emojis corruptos
     const msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
 
     if (phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -1130,23 +1129,70 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento 
   const toggleCol = (col) => setExportCols(prev => ({ ...prev, [col]: !prev[col] }));
 
   // 🔴 1. DESCARGA DIRECTA DE PULSERAS (Invisible en pantalla)
-  const allIndividualsForQR = safeGuests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').flatMap(g => (g.subGuests || []).map(sg => ({ ...sg, familyName: g.name, familyId: g.id })));
-  const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
-  const wristbandPages = chunkArray(allIndividualsForQR, 10);
-
   const triggerQRPdfDownload = async () => {
+    const allIndividualsForQR = safeGuests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').flatMap(g => (g.subGuests || []).map(sg => ({ ...sg, familyName: g.name, familyId: g.id })));
     if (allIndividualsForQR.length === 0) {
       if(addNotification) addNotification('Sin Confirmados', 'Nadie ha confirmado asistencia para imprimir pulseras.', 'warning');
       return;
     }
-    setIsPreparingQRPrint(true);
+    
     if(addNotification) addNotification('Preparando Archivo', 'Generando pulseras QR de alta resolución...', 'info');
 
+    // 🔴 Hacemos el trabajo invisible y lanzamos el PDF
     setTimeout(async () => {
       try {
         const { jsPDF } = await import('jspdf');
+        
+        const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+        const wristbandPages = chunkArray(allIndividualsForQR, 10);
+        
+        // Creamos un contenedor temporal INVISIBLE
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '-9999px';
+        document.body.appendChild(tempContainer);
+        
+        // Renderizamos las páginas en el contenedor temporal usando React
+        const root = ReactDOM.createRoot(tempContainer);
+        
+        const QRPagesToRender = wristbandPages.map((page, pageIdx) => (
+           <div key={pageIdx} className="hidden-qr-pdf-page bg-white relative shrink-0" style={{ width: '25cm', height: '19cm', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflow: 'hidden', padding: 0, margin: 0 }}>
+             {page.map((ind) => {
+               const link = window.location.origin + window.location.pathname + '?modo=camara&e=' + ID_DEL_EVENTO + '&u=' + ind.id;
+               const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`;
+               return (
+                 <div key={ind.id} style={{ width: '25cm', height: '1.9cm', borderBottom: '1px dashed #cbd5e1', display: 'flex', boxSizing: 'border-box', backgroundColor: 'white', margin: 0 }}>
+                    <div style={{ width: '2.5cm', height: '100%', backgroundColor: '#f1f5f9', borderRight: '1px dashed #94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: '8px', color: '#94a3b8', transform: 'rotate(-90deg)', letterSpacing: '1px' }}>PEGAMENTO</span>
+                    </div>
+                    <div style={{ flex: 1, padding: '0 1cm', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                      <div style={{ fontSize: '14px', fontWeight: '900', color: '#0f172a', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{ind.name || 'Invitado (Sin Nombre)'}</div>
+                      <div style={{ fontSize: '10px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>({ind.familyName})</div>
+                    </div>
+                    <div style={{ width: '6cm', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '0.5cm', gap: '10px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                        <span style={{ fontSize: '8px', fontWeight: 'bold', color: '#64748b' }}>CÓDIGO MANUAL</span>
+                        <span style={{ fontSize: '14px', fontWeight: '900', fontFamily: 'monospace', color: '#0f172a', backgroundColor: '#f1f5f9', padding: '2px 4px', borderRadius: '4px' }}>{ind.id}</span>
+                      </div>
+                      <img src={qrUrl} alt="QR" style={{ width: '1.5cm', height: '1.5cm', mixBlendMode: 'multiply' }} />
+                    </div>
+                 </div>
+               )
+             })}
+             {Array.from({ length: 10 - page.length }).map((_, i) => (
+                <div key={`empty_${i}`} style={{ width: '25cm', height: '1.9cm', borderBottom: '1px dashed #e2e8f0', backgroundColor: '#f8fafc', boxSizing: 'border-box', margin: 0 }}></div>
+             ))}
+           </div>
+        ));
+        
+        root.render(<>{QRPagesToRender}</>);
+        
+        // Esperamos a que los QRs se pinten
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
         const html2canvas = (await import('html2canvas')).default;
-        const pages = document.querySelectorAll('.hidden-qr-pdf-page');
+        const pages = tempContainer.querySelectorAll('.hidden-qr-pdf-page');
         const pdf = new jsPDF({ orientation: 'landscape', unit: 'cm', format: [19, 25] });
         
         for (let i = 0; i < pages.length; i++) {
@@ -1155,40 +1201,18 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento 
            if (i > 0) pdf.addPage([19, 25], 'landscape');
            pdf.addImage(imgData, 'JPEG', 0, 0, 25, 19);
         }
+        
         pdf.save('Pulseras-VIP-Ingreso.pdf');
+        document.body.removeChild(tempContainer);
         if(addNotification) addNotification('¡Pulseras Listas!', 'Revisa tu carpeta de descargas.', 'success');
       } catch (error) {
         console.error(error);
         if(addNotification) addNotification('Error', 'Fallo al generar el PDF.', 'error');
       }
-      setIsPreparingQRPrint(false);
-    }, 800);
+    }, 100);
   };
 
-  // 🔴 2. DESCARGA PDF DE LISTA DE INVITADOS
-  const triggerListPdfDownload = async () => {
-    setIsPreparingListPrint(true);
-    setTimeout(async () => {
-      try {
-        const { jsPDF } = await import('jspdf');
-        const html2canvas = (await import('html2canvas')).default;
-        const pages = document.querySelectorAll('.list-pdf-page');
-        const pdf = new jsPDF('p', 'mm', 'letter');
-        for (let i = 0; i < pages.length; i++) {
-           const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false });
-           const imgData = canvas.toDataURL('image/jpeg', 0.95);
-           if (i > 0) pdf.addPage();
-           pdf.addImage(imgData, 'JPEG', 0, 0, 215.9, 279.4);
-        }
-        pdf.save('Reporte-Lista-Invitados.pdf');
-        if(addNotification) addNotification('¡PDF Guardado!', 'Revisa tu carpeta de descargas.', 'success');
-      } catch (error) {}
-      setIsPreparingListPrint(false);
-      setExportViewOpen(false);
-    }, 800);
-  };
-
-  // 🔴 3. DESCARGA EXCEL DE LISTA DE INVITADOS
+  // 🔴 2. DESCARGA EXCEL DE LISTA DE INVITADOS
   const exportToExcel = () => {
     if (addNotification) addNotification('Generando Excel', 'Preparando documento corporativo...', 'info');
     const allList = getFlattenedGuests(invitadosFiltrados);
@@ -1237,163 +1261,204 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento 
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `Lista_Invitados_EventMaster.xls`;
+    link.download = `Lista_Invitados_${eventName?.replace(/\s+/g, '_') || 'EventMaster'}.xls`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // 🔴 VISTA DE EXPORTACIÓN ESTILO "REPORTE EJECUTIVO"
-  if (exportViewOpen) {
-    const allList = getFlattenedGuests(invitadosFiltrados);
-    const PAGE_1_LIMIT = 20; // Ajustado para el nuevo header elegante
-    const PAGE_N_LIMIT = 32;
-    const firstPageItems = allList.slice(0, PAGE_1_LIMIT);
-    const extraItems = allList.slice(PAGE_1_LIMIT);
-    const extraPages = [];
-    for(let i=0; i<extraItems.length; i+=PAGE_N_LIMIT) extraPages.push(extraItems.slice(i, i+PAGE_N_LIMIT));
-
-    const renderTableRows = (rows) => (
-      <table className="w-full text-left text-xs whitespace-nowrap border-collapse">
-        <thead>
-          <tr className="border-b-2 border-slate-400">
-            {exportCols.nombre && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px] w-1/3">Nombre del Asistente</th>}
-            {exportCols.pases && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px] text-center">Pase</th>}
-            {exportCols.estatus && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px] text-center">Estatus</th>}
-            {exportCols.telefono && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px]">Teléfono (Titular)</th>}
-            {exportCols.mesa && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px]">Mesa</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map(row => (
-            <tr key={`print_${row._rowId}`} className={`border-b border-slate-200/60 ${row.parentGuest.status === 'cancelado' ? 'opacity-40 line-through' : ''}`}>
-              {exportCols.nombre && (
-                <td className="py-3 px-2">
-                  <span className={`${row.isMain ? 'font-bold text-slate-900' : 'text-slate-600'} text-sm`}>{row.displayName}</span> 
-                  {row.isChild && <span className="ml-1 text-[9px] uppercase tracking-widest text-slate-400 font-bold">(Niño)</span>}
-                  {row.isMissing && <span className="ml-1 text-[9px] uppercase tracking-widest text-amber-500 font-bold">Por registrar</span>}
-                </td>
-              )}
-              {exportCols.pases && <td className="py-3 px-2 text-center font-bold text-indigo-600 text-sm">{row.isMain ? row.passes : ''}</td>}
-              {exportCols.estatus && <td className="py-3 px-2 text-center"><span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">{row.parentGuest.status.replace('_', ' ')}</span></td>}
-              {exportCols.telefono && <td className="py-3 px-2 text-slate-500 font-mono">{row.isMain ? (row.parentGuest.phone || '-') : ''}</td>}
-              {exportCols.mesa && <td className="py-3 px-2 text-slate-700 font-bold">{row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : <span className="text-slate-300 font-normal italic">Sin mesa</span>}</td>}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
-
-    return (
-      <div className="fixed inset-0 z-[120] bg-slate-900/95 flex flex-col overflow-hidden backdrop-blur-md">
-        <div className="bg-[#0a0a0a] text-white p-4 flex flex-col sm:flex-row items-center justify-between border-b border-white/10 shadow-lg print:hidden z-10 gap-4">
-          <div className="flex items-center space-x-4">
-            <button onClick={() => setExportViewOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24}/></button>
-            <div><h3 className="font-bold text-sm">Estudio de Impresión</h3><p className="text-[10px] text-slate-400">Listas formateadas a Tamaño Carta.</p></div>
-          </div>
-          
-          <div className="flex flex-wrap items-center gap-2 justify-center bg-white/5 p-1 rounded-xl border border-white/10">
-            <button onClick={() => toggleCol('nombre')} className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.nombre ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Nombre</button>
-            <button onClick={() => toggleCol('pases')} className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.pases ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Pases</button>
-            <button onClick={() => toggleCol('estatus')} className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.estatus ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Estatus</button>
-            <button onClick={() => toggleCol('telefono')} className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.telefono ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Teléfono</button>
-            <button onClick={() => toggleCol('mesa')} className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.mesa ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Mesa</button>
-          </div>
-
-          <div className="flex items-center gap-2">
-             <button onClick={exportToExcel} className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold flex items-center shadow-lg transition-all">
-               <FileSpreadsheet size={16} className="mr-2"/> Excel
-             </button>
-             <button onClick={triggerListPdfDownload} disabled={isPreparingListPrint} className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl text-sm font-black flex items-center shadow-lg transition-all disabled:opacity-50">
-               {isPreparingListPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
-               {isPreparingListPrint ? 'Preparando...' : 'Descargar PDF'}
-             </button>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8">
-          
-          <div className="list-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)' }}>
-            <div className="absolute top-0 left-0 w-full h-3 bg-slate-400"></div>
-            
-            <header className="flex justify-between items-center pb-8 pt-4">
-              <div>
-                <h1 className="text-4xl font-editorial font-bold text-slate-900 leading-none">Lista de Asistencia</h1>
-                <p className="text-sm font-black tracking-[0.2em] uppercase mt-2 text-slate-500">Reporte Oficial de Acceso</p>
-              </div>
-              <div className="text-right flex flex-col items-end">
-                <BauliaLogo className="h-10" forceWhite={false} />
-              </div>
-            </header>
-            
-            <div className="grid grid-cols-4 gap-4 mb-8">
-               <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Total Pases</p><p className="text-2xl font-editorial text-slate-900">{totalPases}</p></div>
-               <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Confirmados</p><p className="text-2xl font-editorial text-amber-600">{totalConfirmados}</p></div>
-               <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Ya Ingresaron</p><p className="text-2xl font-editorial text-emerald-600">{totalIngresos}</p></div>
-               <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Niños (Incluidos)</p><p className="text-2xl font-editorial text-sky-600">{totalNinos}</p></div>
-            </div>
-
-            <main>{renderTableRows(firstPageItems)}</main>
-            <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
-              <span>Fecha de Emisión: {new Date().toLocaleDateString('es-MX')}</span>
-              <span>Página 1 de {1 + extraPages.length}</span>
-            </div>
-          </div>
-
-          {extraPages.map((pageRows, pIdx) => (
-            <div key={`extrapage_${pIdx}`} className="list-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)' }}>
-               <div className="absolute top-0 left-0 w-full h-3 bg-slate-400"></div>
-               <header className="flex justify-between items-center pb-6 pt-4 border-b border-slate-200 mb-6">
-                 <h1 className="text-2xl font-editorial font-bold text-slate-900 leading-none">Lista de Asistencia (Cont.)</h1>
-                 <p className="text-xs font-black tracking-[0.2em] uppercase text-slate-400">Reporte Oficial</p>
-               </header>
-               <main>{renderTableRows(pageRows)}</main>
-               <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
-                 <span>Fecha de Emisión: {new Date().toLocaleDateString('es-MX')}</span>
-                 <span>Página {pIdx + 2} de {1 + extraPages.length}</span>
-               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  // 🔴 3. DESCARGA PDF DE LISTA DE INVITADOS (ESTUDIO DE IMPRESIÓN)
+  const triggerListPdfDownload = async () => {
+    setIsPreparingListPrint(true);
+    setTimeout(async () => {
+      try {
+        const { jsPDF } = await import('jspdf');
+        const html2canvas = (await import('html2canvas')).default;
+        const pages = document.querySelectorAll('.list-pdf-page');
+        const pdf = new jsPDF('p', 'mm', 'letter');
+        for (let i = 0; i < pages.length; i++) {
+           const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false });
+           const imgData = canvas.toDataURL('image/jpeg', 0.95);
+           if (i > 0) pdf.addPage();
+           pdf.addImage(imgData, 'JPEG', 0, 0, 215.9, 279.4);
+        }
+        pdf.save(`Reporte-Lista-${eventName?.replace(/\s+/g, '-') || 'Invitados'}.pdf`);
+        if(addNotification) addNotification('¡PDF Guardado!', 'Revisa tu carpeta de descargas.', 'success');
+      } catch (error) {}
+      setIsPreparingListPrint(false);
+      setExportViewOpen(false);
+    }, 800);
+  };
 
   return (
     <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500">
       
-      {/* 🔴 ÁREA INVISIBLE PARA RENDER DE PULSERAS (SE DESCARGAN DIRECTO) */}
-      <div style={{ position: 'absolute', top: '-10000px', left: '-10000px', zIndex: -9999 }}>
-        {wristbandPages.map((page, pageIdx) => (
-           <div key={pageIdx} className="hidden-qr-pdf-page bg-white relative shrink-0" style={{ width: '25cm', height: '19cm', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflow: 'hidden', padding: 0, margin: 0 }}>
-             {page.map((ind) => {
-               const link = window.location.origin + window.location.pathname + '?modo=camara&e=' + ID_DEL_EVENTO + '&u=' + ind.id;
-               const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`;
-               return (
-                 <div key={ind.id} style={{ width: '25cm', height: '1.9cm', borderBottom: '1px dashed #cbd5e1', display: 'flex', boxSizing: 'border-box', backgroundColor: 'white', margin: 0 }}>
-                    <div style={{ width: '2.5cm', height: '100%', backgroundColor: '#f1f5f9', borderRight: '1px dashed #94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <span style={{ fontSize: '8px', color: '#94a3b8', transform: 'rotate(-90deg)', letterSpacing: '1px' }}>PEGAMENTO</span>
+      {/* 🔴 VISTA DE EXPORTACIÓN ESTILO "REPORTE EJECUTIVO" DE WORD (CON Z-INDEX ALTO Y ESTILOS NATIVOS) */}
+      {exportViewOpen && (() => {
+          const allList = getFlattenedGuests(invitadosFiltrados);
+          let listToRender = [];
+
+          if (isWeddingMode && splitBySide) {
+             const novia = allList.filter(r => r.parentGuest.side === 'novia');
+             const novio = allList.filter(r => r.parentGuest.side === 'novio');
+             const general = allList.filter(r => r.parentGuest.side === 'general' || !r.parentGuest.side);
+             if(novia.length > 0) { listToRender.push({ isHeader: true, title: 'Invitados de la Novia' }); listToRender = listToRender.concat(novia); }
+             if(novio.length > 0) { listToRender.push({ isHeader: true, title: 'Invitados del Novio' }); listToRender = listToRender.concat(novio); }
+             if(general.length > 0) { listToRender.push({ isHeader: true, title: 'General / Otros' }); listToRender = listToRender.concat(general); }
+          } else {
+             listToRender = allList;
+          }
+
+          const PAGE_1_LIMIT = 20; 
+          const PAGE_N_LIMIT = 32;
+          const firstPageItems = listToRender.slice(0, PAGE_1_LIMIT);
+          const extraItems = listToRender.slice(PAGE_1_LIMIT);
+          const extraPages = [];
+          for(let i=0; i<extraItems.length; i+=PAGE_N_LIMIT) extraPages.push(extraItems.slice(i, i+PAGE_N_LIMIT));
+
+          // 🔴 ESTILOS DINÁMICOS SEGÚN EL PLAN
+          let gradientStyle = 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)';
+          let accentColor = '#64748b'; 
+          if (userPlan === 'diamante') { gradientStyle = 'linear-gradient(180deg, #eef2ff 0%, #ffffff 100%)'; accentColor = '#4f46e5'; }
+          else if (userPlan === 'oro') { gradientStyle = 'linear-gradient(180deg, #fffbeb 0%, #ffffff 100%)'; accentColor = '#d97706'; }
+          else if (userPlan === 'plata') { gradientStyle = 'linear-gradient(180deg, #f1f5f9 0%, #ffffff 100%)'; accentColor = '#475569'; }
+
+          const renderTableRows = (rows) => (
+            <table className="w-full text-left text-xs whitespace-nowrap border-collapse">
+              <thead>
+                <tr className="border-b-2 border-slate-400">
+                  {exportCols.nombre && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px] w-1/3">Nombre del Asistente</th>}
+                  {exportCols.pases && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px] text-center">Pase</th>}
+                  {exportCols.estatus && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px] text-center">Estatus</th>}
+                  {exportCols.telefono && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px]">Teléfono (Titular)</th>}
+                  {exportCols.mesa && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px]">Mesa</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, idx) => {
+                  if (row.isHeader) return <tr key={`hdr_${idx}`}><td colSpan="5" className="py-4 text-sm font-black uppercase tracking-widest" style={{ color: accentColor }}>{row.title}</td></tr>;
+                  return (
+                    <tr key={`print_${row._rowId}`} className={`border-b border-slate-200/60 ${row.parentGuest.status === 'cancelado' ? 'opacity-40 line-through' : ''}`}>
+                      {exportCols.nombre && (
+                        <td className="py-3 px-2">
+                          <span className={`${row.isMain ? 'font-bold text-slate-900' : 'text-slate-600'} text-sm`}>{row.displayName}</span> 
+                          {row.isChild && <span className="ml-1 text-[9px] uppercase tracking-widest text-slate-400 font-bold">(Niño)</span>}
+                          {row.isMissing && <span className="ml-1 text-[9px] uppercase tracking-widest text-amber-500 font-bold">Por registrar</span>}
+                        </td>
+                      )}
+                      {exportCols.pases && <td className="py-3 px-2 text-center font-bold text-indigo-600 text-sm">{row.isMain ? row.passes : ''}</td>}
+                      {exportCols.estatus && <td className="py-3 px-2 text-center"><span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">{row.parentGuest.status.replace('_', ' ')}</span></td>}
+                      {exportCols.telefono && <td className="py-3 px-2 text-slate-500 font-mono">{row.isMain ? (row.parentGuest.phone || '-') : ''}</td>}
+                      {exportCols.mesa && <td className="py-3 px-2 text-slate-700 font-bold">{row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : <span className="text-slate-300 font-normal italic">Sin mesa</span>}</td>}
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          );
+
+          return (
+            <div className="fixed inset-0 z-[120] bg-slate-900/95 flex flex-col overflow-hidden backdrop-blur-md">
+              
+              <div className="bg-[#0a0a0a] text-white p-4 flex flex-col sm:flex-row items-center justify-between border-b border-white/10 shadow-lg print:hidden z-10 gap-4 shrink-0">
+                <div className="flex items-center space-x-4 w-full sm:w-auto">
+                  <button onClick={() => setExportViewOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24}/></button>
+                  <div>
+                    <h3 className="font-bold text-sm">Estudio de Impresión</h3>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-widest">Documento formateado a Tamaño Carta</p>
+                  </div>
+                </div>
+                
+                <div className="flex flex-wrap items-center justify-center gap-4 w-full sm:w-auto">
+                  
+                  {isWeddingMode && (
+                    <div className="flex items-center bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors" onClick={() => setSplitBySide(!splitBySide)}>
+                       <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mr-3">Lado Novios</span>
+                       <div className={`relative w-8 h-4 rounded-full transition-colors ${splitBySide ? 'bg-amber-500' : 'bg-slate-700'}`}>
+                          <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${splitBySide ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                       </div>
                     </div>
-                    <div style={{ flex: 1, padding: '0 1cm', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                      <div style={{ fontSize: '14px', fontWeight: '900', color: '#0f172a', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{ind.name || 'Invitado (Sin Nombre)'}</div>
-                      <div style={{ fontSize: '10px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>({ind.familyName})</div>
+                  )}
+
+                  <div className="flex items-center bg-white/5 p-1 rounded-xl border border-white/10">
+                    <button onClick={() => toggleCol('nombre')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.nombre ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Nombre</button>
+                    <button onClick={() => toggleCol('pases')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.pases ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Pases</button>
+                    <button onClick={() => toggleCol('estatus')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.estatus ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Estatus</button>
+                    <button onClick={() => toggleCol('telefono')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.telefono ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Teléfono</button>
+                    <button onClick={() => toggleCol('mesa')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.mesa ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Mesa</button>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                     <button onClick={() => window.print()} className="px-5 py-2.5 bg-white text-slate-900 hover:bg-slate-200 rounded-xl text-sm font-bold flex items-center shadow-lg transition-all hidden sm:flex">
+                       <Printer size={16} className="mr-2"/> Imprimir
+                     </button>
+                     <button onClick={exportToExcel} className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold flex items-center shadow-lg transition-all hidden md:flex">
+                       <FileSpreadsheet size={16} className="mr-2"/> Excel
+                     </button>
+                     <button onClick={triggerListPdfDownload} disabled={isPreparingListPrint} className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-black flex items-center shadow-lg transition-all disabled:opacity-50">
+                       {isPreparingListPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
+                       {isPreparingListPrint ? 'Preparando...' : 'Descargar PDF'}
+                     </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8 bg-[#111] print:bg-white print:p-0 print:overflow-visible">
+                
+                <style>{`
+                  @media print {
+                    body * { visibility: hidden; }
+                    .list-pdf-page, .list-pdf-page * { visibility: visible; }
+                    .list-pdf-page { position: absolute; left: 0; top: 0; margin: 0; box-shadow: none; width: 100%; page-break-after: always; }
+                    .print\\:hidden { display: none !important; }
+                  }
+                `}</style>
+
+                <div className="list-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
+                  <div className="absolute top-0 left-0 w-full h-3" style={{ backgroundColor: accentColor }}></div>
+                  
+                  <header className="flex justify-between items-center pb-8 pt-4">
+                    <div>
+                      <h1 className="text-4xl font-editorial font-bold text-slate-900 leading-none">Reporte de Asistencia</h1>
+                      <p className="text-sm font-black tracking-[0.2em] uppercase mt-2 text-slate-500">{eventName || 'Evento Baulia'}</p>
                     </div>
-                    <div style={{ width: '6cm', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '0.5cm', gap: '10px' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <span style={{ fontSize: '8px', fontWeight: 'bold', color: '#64748b' }}>CÓDIGO MANUAL</span>
-                        <span style={{ fontSize: '14px', fontWeight: '900', fontFamily: 'monospace', color: '#0f172a', backgroundColor: '#f1f5f9', padding: '2px 4px', borderRadius: '4px' }}>{ind.id}</span>
-                      </div>
-                      <img src={qrUrl} alt="QR" style={{ width: '1.5cm', height: '1.5cm', mixBlendMode: 'multiply' }} />
+                    <div className="text-right flex flex-col items-end">
+                      <BauliaLogo className="h-10" forceWhite={false} />
                     </div>
-                 </div>
-               )
-             })}
-             {Array.from({ length: 10 - page.length }).map((_, i) => (
-                <div key={`empty_${i}`} style={{ width: '25cm', height: '1.9cm', borderBottom: '1px dashed #e2e8f0', backgroundColor: '#f8fafc', boxSizing: 'border-box', margin: 0 }}></div>
-             ))}
-           </div>
-         ))}
-      </div>
+                  </header>
+                  
+                  <div className="grid grid-cols-4 gap-4 mb-8">
+                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Total Pases</p><p className="text-2xl font-editorial text-slate-900">{totalPases}</p></div>
+                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Confirmados</p><p className="text-2xl font-editorial" style={{ color: accentColor }}>{totalConfirmados}</p></div>
+                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Ya Ingresaron</p><p className="text-2xl font-editorial text-emerald-600">{totalIngresos}</p></div>
+                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Niños (Incluidos)</p><p className="text-2xl font-editorial text-sky-600">{totalNinos}</p></div>
+                  </div>
+
+                  <main>{renderTableRows(firstPageItems)}</main>
+                  <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
+                    <span>Fecha de Emisión: {new Date().toLocaleDateString('es-MX')}</span>
+                    <span>Página 1 de {1 + extraPages.length}</span>
+                  </div>
+                </div>
+
+                {extraPages.map((pageRows, pIdx) => (
+                  <div key={`extrapage_${pIdx}`} className="list-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
+                     <div className="absolute top-0 left-0 w-full h-3" style={{ backgroundColor: accentColor }}></div>
+                     <header className="flex justify-between items-center pb-6 pt-4 mb-6 border-b-2 border-slate-400">
+                       <h1 className="text-2xl font-editorial font-bold text-slate-900 leading-none">Reporte de Asistencia (Cont.)</h1>
+                       <p className="text-xs font-black tracking-[0.2em] uppercase" style={{ color: accentColor }}>{eventName}</p>
+                     </header>
+                     <main>{renderTableRows(pageRows)}</main>
+                     <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
+                       <span>Fecha de Emisión: {new Date().toLocaleDateString('es-MX')}</span>
+                       <span>Página {pIdx + 2} de {1 + extraPages.length}</span>
+                     </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+      })()}
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
         <div>
@@ -1401,17 +1466,18 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento 
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Control de asistencia, pases y credenciales.</p>
         </div>
         
+        {/* 🔴 NOMBRES DE LOS BOTONES ACTUALIZADOS */}
         <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
           <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Exportar Lista</button>
-          <button onClick={triggerQRPdfDownload} disabled={isPreparingQRPrint} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors disabled:opacity-50">
-             {isPreparingQRPrint ? <RefreshCw size={14} className="mr-1.5 text-indigo-600 dark:text-indigo-400 animate-spin"/> : <QrCode size={14} className="mr-1.5 text-indigo-600 dark:text-indigo-400"/>} 
-             {isPreparingQRPrint ? 'Generando...' : 'Generar Pulseras VIP'}
+          
+          <button onClick={triggerQRPdfDownload} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors">
+             <QrCode size={14} className="mr-1.5 text-indigo-600 dark:text-indigo-400"/> Generar Pulseras VIP
           </button>
 
           {isWeddingMode ? (
             <div className="flex gap-1.5">
-              <button onClick={() => handleOpenAdd('novia')} className="flex items-center px-4 py-2 bg-rose-500 text-white rounded-xl text-xs font-bold hover:bg-rose-600 shadow-md transition-colors"><UserPlus size={14} className="mr-1"/> Novia</button>
-              <button onClick={() => handleOpenAdd('novio')} className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-md transition-colors"><UserPlus size={14} className="mr-1"/> Novio</button>
+              <button onClick={() => handleOpenAdd('novia')} className="flex items-center px-4 py-2 bg-rose-500 text-white rounded-xl text-xs font-bold hover:bg-rose-600 shadow-md transition-colors"><UserPlus size={14} className="mr-1"/> + Invitado Novia</button>
+              <button onClick={() => handleOpenAdd('novio')} className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-md transition-colors"><UserPlus size={14} className="mr-1"/> + Invitado Novio</button>
             </div>
           ) : (
             <button onClick={() => handleOpenAdd('general')} className="flex items-center px-4 py-2 bg-amber-500 text-slate-900 rounded-xl text-xs font-black shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-colors"><UserPlus size={14} className="mr-1"/> + Nuevo Invitado</button>
@@ -6967,9 +7033,10 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
   const isOverdue = (dateStr, deuda) => { if(!dateStr || deuda <= 0) return false; return new Date(dateStr) < new Date(); };
   const overdueGastos = (data?.gastos || []).filter(g => isOverdue(g.fechaLimite, g.estimado - g.pagado));
   
-  // 🔴 LÓGICA DE DUEÑO: Ocultamos notificaciones de clientes si eres SuperAdmin
+  // 🔴 LÓGICA DE CEO: Detectamos si estamos en el mando central absoluto
   const isSuperAdminMode = authData?.role === 'superadmin' && !authData?.eventId;
 
+  // 🔴 Si es SuperAdmin, NO le mostramos alertas de pagos de clientes
   const dynamicAlerts = isSuperAdminMode ? [
      { id: 'admin_sys', title: 'Mando Central', message: 'Sistema operando al 100%.', tab: 'licencias', type: 'info', isDynamic: true, isRead: false }
   ] : [
@@ -7062,7 +7129,8 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
         </div>
 
         <div className="flex items-center space-x-2 sm:space-x-4">
-          {/* 🔴 DUEÑO: OCULTAMOS LOS CONTADORES DEL CLIENTE AQUÍ */}
+          
+          {/* 🔴 OCULTAMOS LOS CONTADORES SI ERES EL SUPERADMIN */}
           {!isSuperAdminMode && (
             <div className="hidden md:flex items-center bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 backdrop-blur-md rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 shadow-sm transition-colors">
               <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-600 dark:text-slate-400" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
@@ -7078,7 +7146,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
             ) : themeSetting === 'dark' ? (
               <Moon className="pointer-events-none" size={20} />
             ) : (
-              <svg className="pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              <svg className="pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 5.64l1.42-1.42"/></svg>
             )}
           </button>
 
