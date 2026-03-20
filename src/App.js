@@ -1084,12 +1084,12 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
     e.preventDefault();
     const nuevoId = Date.now().toString();
     const pNum = Number(newGuest.passes) || 1;
-    const ninos = Number(newGuest.childrenPasses) || 0; // 🔴 Extraemos los niños
+    const ninos = Number(newGuest.childrenPasses) || 0;
     
+    // 🔴 LA LÓGICA REPARADA: Si pido 4 pases y 2 niños. Los últimos 2 (índices 2 y 3) serán marcados como niños.
     const initSubGuests = Array(pNum).fill(null).map((_, i) => ({
       id: `usr_${nuevoId}_${i}`,
       name: i === 0 ? newGuest.name : `Acompañante ${i+1}`,
-      // 🔴 Los últimos pases de la lista los marcamos como niños automáticamente
       isChild: i >= (pNum - ninos), 
       entered: false
     }));
@@ -1097,7 +1097,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
     const datosInvitado = {
       name: newGuest.name, 
       passes: pNum, 
-      childrenPasses: ninos,
+      childrenPasses: ninos, // 🔴 GUARDAMOS EL NÚMERO DE NIÑOS
       phone: newGuest.phone, 
       status: newGuest.status, 
       side: addModal.side, 
@@ -1111,6 +1111,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
     
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", nuevoId), datosInvitado);
     setAddModal({ open: false, side: 'general' });
+    setNewGuest({ name: '', passes: 1, childrenPasses: 0, phone: '', status: 'por_invitar' }); // Limpiar al guardar
   };
 
   const handleSaveEdit = async (e) => {
@@ -10560,9 +10561,13 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
             const totalLimit = gData.originalPasses || gData.passes; 
             const currentSubs = gData.subGuests || [];
             
+            // 🔴 LÓGICA REPARADA: Respetamos si el pase es de adulto o niño desde la BD
             const newTemp = Array(totalLimit).fill(null).map((_, i) => {
               if (currentSubs[i]) return { ...currentSubs[i], willAttend: true };
-              return { name: i === 0 ? gData.name : '', isChild: false, willAttend: isFirstTime, id: `s_new_${Date.now()}_${i}` };
+              
+              // Si es un pase nuevo (por ejemplo, si agregaste más lugares después)
+              const esMenor = gData.childrenPasses > 0 && i >= (totalLimit - gData.childrenPasses);
+              return { name: i === 0 ? gData.name : '', isChild: esMenor, willAttend: isFirstTime, id: `s_new_${Date.now()}_${i}` };
             });
             setTempSubGuests(newTemp);
           }
@@ -10989,7 +10994,19 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
         ))}
       </div>
 
-      {typeof Sidebar !== 'undefined' && <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} userPlan={userPlan} agencyConfig={agencyConfig} isDarkMode={isDarkMode} />}
+      {/* 🔴 REGLA DE ORO: Si eres superadmin y NO estás impostando a un cliente, el menú lateral DEBE desaparecer. */}
+      {typeof Sidebar !== 'undefined' && !(userRole === 'superadmin' && !impersonating) && (
+        <Sidebar 
+          isOpen={sidebarOpen} 
+          setIsOpen={setSidebarOpen} 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          userRole={userRole} 
+          userPlan={userPlan} 
+          agencyConfig={agencyConfig} 
+          isDarkMode={isDarkMode} 
+        />
+      )}
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         <div className={`${impersonating ? 'pt-7' : ''} transition-all`}>
