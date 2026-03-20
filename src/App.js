@@ -989,7 +989,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
   const [filtroLado, setFiltroLado] = useState('Todos');
 
   const [addModal, setAddModal] = useState({ open: false, side: 'general' });
-  const [newGuest, setNewGuest] = useState({ name: '', passes: 1, childrenPasses: 0, phone: '', status: 'por_invitar' });
+  const [newGuest, setNewGuest] = useState({ name: '', adultPasses: 1, childrenPasses: 0, phone: '', status: 'por_invitar' });
   const [editModal, setEditModal] = useState({ open: false, guest: null });
   const [deleteModal, setDeleteModal] = useState(null);
   
@@ -1006,7 +1006,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
   const safeGuests = guests || [];
 
   const handleOpenAdd = (side) => {
-    setNewGuest({ name: '', passes: 1, childrenPasses: 0, phone: '', status: 'por_invitar' });
+    setNewGuest({ name: '', adultPasses: 1, childrenPasses: 0, phone: '', status: 'por_invitar' });
     setAddModal({ open: true, side });
   };
 
@@ -1083,21 +1083,23 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
   const handleSaveGuest = async (e) => {
     e.preventDefault();
     const nuevoId = Date.now().toString();
-    const pNum = Number(newGuest.passes) || 1;
-    const ninos = Number(newGuest.childrenPasses) || 0;
     
-    // 🔴 LA LÓGICA REPARADA: Si pido 4 pases y 2 niños. Los últimos 2 (índices 2 y 3) serán marcados como niños.
+    // 🔴 LA NUEVA LÓGICA: Adultos + Niños = Gran Total
+    const adultos = Number(newGuest.adultPasses) || 1;
+    const ninos = Number(newGuest.childrenPasses) || 0;
+    const pNum = adultos + ninos; // El Total Real
+    
     const initSubGuests = Array(pNum).fill(null).map((_, i) => ({
       id: `usr_${nuevoId}_${i}`,
-      name: i === 0 ? newGuest.name : `Acompañante ${i+1}`,
-      isChild: i >= (pNum - ninos), 
+      name: i === 0 ? newGuest.name : (i >= adultos ? `Niño ${i - adultos + 1}` : `Acompañante ${i+1}`),
+      isChild: i >= adultos, 
       entered: false
     }));
 
     const datosInvitado = {
       name: newGuest.name, 
       passes: pNum, 
-      childrenPasses: ninos, // 🔴 GUARDAMOS EL NÚMERO DE NIÑOS
+      childrenPasses: ninos,
       phone: newGuest.phone, 
       status: newGuest.status, 
       side: addModal.side, 
@@ -1111,7 +1113,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
     
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", nuevoId), datosInvitado);
     setAddModal({ open: false, side: 'general' });
-    setNewGuest({ name: '', passes: 1, childrenPasses: 0, phone: '', status: 'por_invitar' }); // Limpiar al guardar
   };
 
   const handleSaveEdit = async (e) => {
@@ -1507,8 +1508,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
               <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre o Familia</label><input type="text" required value={newGuest.name} onChange={e=>setNewGuest({...newGuest, name: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
               <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" required value={newGuest.phone} onChange={e=>setNewGuest({...newGuest, phone: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" placeholder="10 dígitos" /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Totales</label><input type="number" min="1" required value={newGuest.passes} onChange={e=>setNewGuest({...newGuest, passes: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-indigo-600 dark:text-amber-500 font-black text-center transition-colors" /></div>
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Niños Permitidos</label><input type="number" min="0" max={newGuest.passes} required value={newGuest.childrenPasses} onChange={e=>setNewGuest({...newGuest, childrenPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sky-600 dark:text-sky-400 font-black text-center transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Adultos</label><input type="number" min="1" required value={newGuest.adultPasses} onChange={e=>setNewGuest({...newGuest, adultPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-indigo-600 dark:text-amber-500 font-black text-center transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Niños</label><input type="number" min="0" required value={newGuest.childrenPasses} onChange={e=>setNewGuest({...newGuest, childrenPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sky-600 dark:text-sky-400 font-black text-center transition-colors" /></div>
               </div>
               <button type="submit" className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-4 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors">Guardar Invitado</button>
             </form>
