@@ -983,8 +983,10 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 // ==========================================
 // --- COMPONENTE: INVITADOS (DARK PREMIUM) ---
 // ==========================================
-const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
-  const [isWeddingMode, setIsWeddingMode] = useState(true); 
+const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento }) => {
+  // 🔴 MODO BODA AUTOMÁTICO
+  const isWeddingMode = tipoEvento === 'boda'; 
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroLado, setFiltroLado] = useState('Todos');
 
@@ -997,7 +999,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
 
   const [exportViewOpen, setExportViewOpen] = useState(false);
   const [qrStudioOpen, setQrStudioOpen] = useState(false);
-  const [separateLists, setSeparateLists] = useState(true);
   const [exportCols, setExportCols] = useState({ nombre: true, pases: true, estatus: true, telefono: true, mesa: true });
 
   const [isPreparingListPrint, setIsPreparingListPrint] = useState(false);
@@ -1053,7 +1054,17 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
         flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.passes, isMain: true, isChild: false, pin: null, entered: false });
       } else {
         guest.subGuests.forEach((sg, idx) => {
-          flattened.push({ _rowId: sg.id, parentGuest: guest, displayName: sg.name, passes: guest.passes, isMain: idx === 0, isChild: sg.isChild, pin: sg.id, entered: sg.entered });
+          flattened.push({ 
+            _rowId: sg.id, 
+            parentGuest: guest, 
+            displayName: sg.name || (sg.isChild ? 'Niño (Por registrar)' : 'Acompañante (Por registrar)'), 
+            passes: guest.passes, 
+            isMain: idx === 0, 
+            isChild: sg.isChild, 
+            pin: sg.id, 
+            entered: sg.entered,
+            isEmptyName: !sg.name
+          });
         });
         const faltantes = (guest.passes || 0) - guest.subGuests.length;
         if (faltantes > 0 && (guest.status === 'pendiente' || guest.status === 'por_invitar')) {
@@ -1066,32 +1077,32 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
 
   const flattenedList = getFlattenedGuests(invitadosFiltrados);
 
+  // 🔴 SOLUCIÓN ANTI-POPUPS: Abrir WhatsApp de inmediato
   const handleSendWhatsApp = async (parentGuest) => {
-    const nuevoStatus = parentGuest.status === 'por_invitar' ? 'pendiente' : parentGuest.status;
-    const updatedGuest = { ...parentGuest, sent: true, status: nuevoStatus };
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", parentGuest.id), updatedGuest);
-    
+    const phone = parentGuest.phone ? parentGuest.phone.replace(/\D/g,'') : '';
     const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
     const linkPersonalizado = `${baseDomain}/${ID_DEL_EVENTO}?u=${parentGuest.id}`;
     
     const msg = `✨ ¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n🔗 ${linkPersonalizado}\n\n¡No faltes!`;
 
-    const phone = parentGuest.phone ? parentGuest.phone.replace(/\D/g,'') : '';
     if (phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+
+    const nuevoStatus = parentGuest.status === 'por_invitar' ? 'pendiente' : parentGuest.status;
+    const updatedGuest = { ...parentGuest, sent: true, status: nuevoStatus };
+    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", parentGuest.id), updatedGuest);
   };
 
+  // 🔴 LÓGICA DE ACOMPAÑANTES EN BLANCO Y SUMA CORRECTA
   const handleSaveGuest = async (e) => {
     e.preventDefault();
     const nuevoId = Date.now().toString();
-    
-    // 🔴 LA NUEVA LÓGICA: Adultos + Niños = Gran Total
     const adultos = Number(newGuest.adultPasses) || 1;
-    const ninos = Number(newGuest.childrenPasses) || 0;
-    const pNum = adultos + ninos; // El Total Real
+    const ninos = Number(newGuest.childrenPasses) || 0; 
+    const pNum = adultos + ninos;
     
     const initSubGuests = Array(pNum).fill(null).map((_, i) => ({
       id: `usr_${nuevoId}_${i}`,
-      name: i === 0 ? newGuest.name : (i >= adultos ? `Niño ${i - adultos + 1}` : `Acompañante ${i+1}`),
+      name: i === 0 ? newGuest.name : '', 
       isChild: i >= adultos, 
       entered: false
     }));
@@ -1131,7 +1142,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
 
   const toggleCol = (col) => setExportCols(prev => ({ ...prev, [col]: !prev[col] }));
 
-  // (Funciones de descarga PDF omitidas por brevedad, mantienen el fondo blanco para imprimir)
+  // (PDF functions omitted from internal rendering logic but kept structure intact)
   const triggerListPdfDownload = async () => {
     setIsPreparingListPrint(true);
     setTimeout(async () => {
@@ -1176,7 +1187,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
     }, 500);
   };
 
-  // Vistas de Exportación (Forzadas a blanco siempre para impresión)
   if (exportViewOpen) {
     const allList = getFlattenedGuests(invitadosFiltrados);
     const PAGE_1_LIMIT = 26;
@@ -1338,13 +1348,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
         </div>
         
         <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
-          <div className="flex items-center bg-white dark:bg-[#0a0a0a] p-1 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
-            <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-2 ml-2">Boda</span>
-            <button onClick={() => setIsWeddingMode(!isWeddingMode)} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
-              <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
-            </button>
-          </div>
-
           <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Reportes PDF</button>
           <button onClick={() => setQrStudioOpen(true)} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><QrCode size={14} className="mr-1.5 text-indigo-600 dark:text-indigo-400"/> Imprimir QRs</button>
 
@@ -1403,7 +1406,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
                   <td className="px-5 py-3">
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1.5">
-                        <span className={`${row.isMain ? 'font-bold text-slate-800 dark:text-white' : 'font-normal text-slate-600 dark:text-slate-300'} ${row.isMissing ? 'text-amber-500 italic' : ''} ${row.parentGuest.status === 'cancelado' ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>
+                        <span className={`${row.isMain ? 'font-bold text-slate-800 dark:text-white' : 'font-normal text-slate-600 dark:text-slate-300'} ${row.isMissing || row.isEmptyName ? 'text-amber-500 italic' : ''} ${row.parentGuest.status === 'cancelado' ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>
                           {row.displayName}
                         </span>
                         {isWeddingMode && !row.isMissing && row.parentGuest.side && (
@@ -1470,48 +1473,31 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
                   </td>
                 </tr>
               ))}
-              {flattenedList.length === 0 && <tr><td colSpan="8" className="px-4 py-12 text-center text-slate-400 dark:text-slate-500 font-medium">No se encontraron invitados que coincidan con la búsqueda.</td></tr>}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* MODALES CON ESTILO DARK/PREMIUM */}
-      {qrModal && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl relative border-4 border-slate-200 dark:border-white/10 transition-colors">
-            <button onClick={() => setQrModal(null)} className="absolute top-4 right-4 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white bg-white dark:bg-[#111] p-2 rounded-full z-10 shadow-md transition-colors"><X size={16}/></button>
-            <div className="h-32 bg-slate-800 relative bg-[url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80')] bg-cover bg-center">
-              <div className="absolute inset-0 bg-black/60"></div>
-              <div className="absolute bottom-4 left-0 w-full text-center text-white"><p className="text-[10px] font-black tracking-[0.3em] uppercase">Pase Personal VIP</p></div>
-            </div>
-            <div className="p-8 text-center">
-              <h3 className="text-2xl font-editorial font-black text-slate-900 dark:text-white leading-tight mb-2 transition-colors">{qrModal.displayName}</h3>
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-6 font-bold">Titular: {qrModal.parentGuest.name}</p>
-              
-              <div className="inline-block border-4 border-slate-100 dark:border-white/5 bg-white p-3 rounded-2xl mb-6 shadow-sm">
-                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent((window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com') + '/' + ID_DEL_EVENTO + '?u=' + (qrModal.pin || qrModal.parentGuest?.id || ''))}`} alt="QR" className="w-40 h-40 mix-blend-multiply" />
-              </div>
-              
-              <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-2 font-bold">Código Manual</p>
-              <p className="text-xl font-mono font-black text-indigo-600 dark:text-amber-500 bg-indigo-50 dark:bg-amber-500/10 border border-transparent dark:border-amber-500/20 py-2 rounded-xl tracking-[0.2em]">{qrModal.pin}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {addModal.open && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors">
             <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 transition-colors"><h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-wide">Nuevo Invitado</h3><button onClick={() => setAddModal({ open: false, side: 'general' })} className="text-slate-400 hover:text-slate-800 dark:hover:text-white"><X size={20}/></button></div>
-            <form onSubmit={handleSaveGuest} className="p-6 space-y-5">
-              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre o Familia</label><input type="text" required value={newGuest.name} onChange={e=>setNewGuest({...newGuest, name: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
-              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" required value={newGuest.phone} onChange={e=>setNewGuest({...newGuest, phone: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" placeholder="10 dígitos" /></div>
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Adultos</label><input type="number" min="1" required value={newGuest.adultPasses} onChange={e=>setNewGuest({...newGuest, adultPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-indigo-600 dark:text-amber-500 font-black text-center transition-colors" /></div>
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Niños</label><input type="number" min="0" required value={newGuest.childrenPasses} onChange={e=>setNewGuest({...newGuest, childrenPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sky-600 dark:text-sky-400 font-black text-center transition-colors" /></div>
+            <form onSubmit={handleSaveGuest} className="p-6">
+              
+              <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 p-4 rounded-xl mb-5 text-xs text-indigo-800 dark:text-indigo-400 flex items-start shadow-sm transition-colors">
+                <Info size={18} className="mr-2 flex-shrink-0 mt-0.5"/>
+                <span className="leading-relaxed"><b>¡No pidas nombres a tus clientes!</b> El sistema creará lugares vacíos. El titular los llenará con los nombres reales al abrir su invitación en su celular.</span>
               </div>
-              <button type="submit" className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-4 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors">Guardar Invitado</button>
+
+              <div className="space-y-5">
+                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre del Titular o Familia</label><input type="text" required value={newGuest.name} onChange={e=>setNewGuest({...newGuest, name: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" required value={newGuest.phone} onChange={e=>setNewGuest({...newGuest, phone: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" placeholder="10 dígitos" /></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Adultos</label><input type="number" min="1" required value={newGuest.adultPasses} onChange={e=>setNewGuest({...newGuest, adultPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-indigo-600 dark:text-amber-500 font-black text-center transition-colors" /></div>
+                  <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Niños</label><input type="number" min="0" required value={newGuest.childrenPasses} onChange={e=>setNewGuest({...newGuest, childrenPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sky-600 dark:text-sky-400 font-black text-center transition-colors" /></div>
+                </div>
+              </div>
+              <button type="submit" className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-6 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors">Guardar Invitado</button>
             </form>
           </div>
         </div>
@@ -1560,6 +1546,30 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification }) => {
                <button onClick={()=>setDeleteModal(null)} className="flex-1 py-4 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
                <button onClick={executeDeleteGuest} className="flex-1 py-4 bg-rose-500 text-white rounded-xl font-black hover:bg-rose-600 transition-colors shadow-md dark:shadow-[0_0_15px_rgba(244,63,94,0.3)] uppercase tracking-widest text-[10px]">Sí, Eliminar</button>
              </div>
+          </div>
+        </div>
+      )}
+      
+      {/* 🔴 MODAL QR FALTANTE AGREGADO AQUÍ */}
+      {qrModal && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl relative border-4 border-slate-200 dark:border-white/10 transition-colors">
+            <button onClick={() => setQrModal(null)} className="absolute top-4 right-4 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white bg-white dark:bg-[#111] p-2 rounded-full z-10 shadow-md transition-colors"><X size={16}/></button>
+            <div className="h-32 bg-slate-800 relative bg-[url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80')] bg-cover bg-center">
+              <div className="absolute inset-0 bg-black/60"></div>
+              <div className="absolute bottom-4 left-0 w-full text-center text-white"><p className="text-[10px] font-black tracking-[0.3em] uppercase">Pase Personal VIP</p></div>
+            </div>
+            <div className="p-8 text-center">
+              <h3 className="text-2xl font-editorial font-black text-slate-900 dark:text-white leading-tight mb-2 transition-colors">{qrModal.displayName}</h3>
+              <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-6 font-bold">Titular: {qrModal.parentGuest.name}</p>
+              
+              <div className="inline-block border-4 border-slate-100 dark:border-white/5 bg-white p-3 rounded-2xl mb-6 shadow-sm">
+                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent((window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com') + '/' + ID_DEL_EVENTO + '?u=' + (qrModal.pin || qrModal.parentGuest?.id || ''))}`} alt="QR" className="w-40 h-40 mix-blend-multiply" />
+              </div>
+              
+              <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-2 font-bold">Código Manual</p>
+              <p className="text-xl font-mono font-black text-indigo-600 dark:text-amber-500 bg-indigo-50 dark:bg-amber-500/10 border border-transparent dark:border-amber-500/20 py-2 rounded-xl tracking-[0.2em]">{qrModal.pin}</p>
+            </div>
           </div>
         </div>
       )}
@@ -1716,17 +1726,19 @@ const InvitacionView = ({ guests, setGuests, addNotification }) => {
                           </label>
                         </div>
                         {sg.willAttend && (
-                          <div className="space-y-2">
-                             <input 
-                               type="text" placeholder="Nombre de la persona..." 
-                               value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)}
-                               className="w-full p-2 border border-slate-200 rounded-md text-[10px] outline-none focus:border-indigo-400 bg-white"
-                             />
-                             {/* 🔴 CHECKBOX LIMPIO Y PERFECTO */}
-                             <label className="flex items-center space-x-2 cursor-pointer pt-1">
-                                <input type="checkbox" checked={sg.isChild || false} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-4 h-4 accent-indigo-600" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">Es un Niño (Menor)</span>
-                             </label>
+                          <div className="space-y-2 mt-2 pt-2 border-t animate-in fade-in" style={{ borderColor: `${t_txt}10` }}>
+                            {/* 🔴 IMPORTANTE: Placeholder Inteligente y Claro */}
+                            <input 
+                              type="text" required 
+                              placeholder={sg.isChild ? "Nombre del niño / menor..." : (idx === 0 ? "Tu nombre..." : "Nombre del adulto acompañante...")} 
+                              value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)} 
+                              style={themeInput} className="w-full p-2 border rounded-md text-base font-medium outline-none" 
+                            />
+                            {/* Dejamos el Checkbox para que el invitado confirme si es niño o no */}
+                            <label className="flex items-center space-x-2 cursor-pointer pt-0.5">
+                               <input type="checkbox" checked={sg.isChild || false} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-3.5 h-3.5 accent-indigo-600" />
+                               <span className="text-xs font-medium uppercase tracking-wider opacity-80">Pase de Menor / Niño</span>
+                            </label>
                           </div>
                         )}
                       </div>
@@ -10944,7 +10956,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'licencias': return (originalUserRole === 'superadmin' || originalUserRole === 'staff') && !impersonating && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} authData={authData} /> : null;
       // 🔴 AQUÍ PASAMOS AUTHDATA PARA EL REPORTE DE LUJO
       case 'dashboard': return typeof DashboardView !== 'undefined' ? <DashboardView authData={authData} guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null; 
-      case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
+      case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={currentEvent?.tipoEvento} /> : null; 
       case 'escaner': return userPlan === 'diamante' && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
       case 'mesas': return userPlan === 'diamante' && typeof MesasView !== 'undefined' ? <MesasView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
       case 'mapa': return userPlan === 'diamante' && typeof MapaView !== 'undefined' ? <MapaView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} globalSearch={globalSearch} elements={mapElements} setElements={setMapElements} /> : null;
