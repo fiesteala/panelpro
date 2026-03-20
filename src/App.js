@@ -1246,80 +1246,139 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento 
   // 🔴 VISTA DE EXPORTACIÓN ESTILO "REPORTE EJECUTIVO"
   if (exportViewOpen) {
     const allList = getFlattenedGuests(invitadosFiltrados);
-    const PAGE_1_LIMIT = 20; // Ajustado para el nuevo header elegante
-    const PAGE_N_LIMIT = 32;
-    const firstPageItems = allList.slice(0, PAGE_1_LIMIT);
-    const extraItems = allList.slice(PAGE_1_LIMIT);
+    const [splitBySide, setSplitBySide] = useState(false);
+
+    // Lógica para separar por lado si es boda
+    let listToRender = [];
+    if (isWeddingMode && splitBySide) {
+       const novio = allList.filter(r => r.parentGuest.side === 'novio');
+       const novia = allList.filter(r => r.parentGuest.side === 'novia');
+       const general = allList.filter(r => r.parentGuest.side === 'general' || !r.parentGuest.side);
+       if(novia.length > 0) { listToRender.push({ isHeader: true, title: 'Lado de la Novia' }); listToRender = listToRender.concat(novia); }
+       if(novio.length > 0) { listToRender.push({ isHeader: true, title: 'Lado del Novio' }); listToRender = listToRender.concat(novio); }
+       if(general.length > 0) { listToRender.push({ isHeader: true, title: 'General / Otros' }); listToRender = listToRender.concat(general); }
+    } else {
+       listToRender = allList;
+    }
+
+    const PAGE_1_LIMIT = 26;
+    const PAGE_N_LIMIT = 36;
+    
+    // Paginación manual para el preview
+    const firstPageItems = listToRender.slice(0, PAGE_1_LIMIT);
+    const extraItems = listToRender.slice(PAGE_1_LIMIT);
     const extraPages = [];
     for(let i=0; i<extraItems.length; i+=PAGE_N_LIMIT) extraPages.push(extraItems.slice(i, i+PAGE_N_LIMIT));
+
+    // 🔴 ESTILOS DINÁMICOS SEGÚN EL PLAN
+    let gradientStyle = 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)';
+    let accentColor = '#64748b'; 
+    if (userPlan === 'diamante') { gradientStyle = 'linear-gradient(180deg, #eef2ff 0%, #ffffff 100%)'; accentColor = '#4f46e5'; }
+    else if (userPlan === 'oro') { gradientStyle = 'linear-gradient(180deg, #fffbeb 0%, #ffffff 100%)'; accentColor = '#d97706'; }
+    else if (userPlan === 'plata') { gradientStyle = 'linear-gradient(180deg, #f1f5f9 0%, #ffffff 100%)'; accentColor = '#475569'; }
 
     const renderTableRows = (rows) => (
       <table className="w-full text-left text-xs whitespace-nowrap border-collapse">
         <thead>
-          <tr className="border-b-2 border-slate-400">
-            {exportCols.nombre && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px] w-1/3">Nombre del Asistente</th>}
-            {exportCols.pases && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px] text-center">Pase</th>}
-            {exportCols.estatus && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px] text-center">Estatus</th>}
-            {exportCols.telefono && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px]">Teléfono (Titular)</th>}
-            {exportCols.mesa && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px]">Mesa</th>}
+          <tr className="border-b-2" style={{ borderColor: accentColor }}>
+            {exportCols.nombre && <th className="py-2 font-black uppercase tracking-widest text-[9px] w-1/3" style={{ color: accentColor }}>Nombre del Asistente</th>}
+            {exportCols.pases && <th className="px-2 py-2 font-black uppercase tracking-widest text-[9px] text-center" style={{ color: accentColor }}>Pase</th>}
+            {exportCols.estatus && <th className="px-2 py-2 font-black uppercase tracking-widest text-[9px] text-center" style={{ color: accentColor }}>Estatus</th>}
+            {exportCols.telefono && <th className="px-2 py-2 font-black uppercase tracking-widest text-[9px]" style={{ color: accentColor }}>Teléfono (Titular)</th>}
+            {exportCols.mesa && <th className="px-2 py-2 font-black uppercase tracking-widest text-[9px]" style={{ color: accentColor }}>Mesa</th>}
           </tr>
         </thead>
         <tbody>
-          {rows.map(row => (
-            <tr key={`print_${row._rowId}`} className={`border-b border-slate-200/60 ${row.parentGuest.status === 'cancelado' ? 'opacity-40 line-through' : ''}`}>
-              {exportCols.nombre && (
-                <td className="py-3 px-2">
-                  <span className={`${row.isMain ? 'font-bold text-slate-900' : 'text-slate-600'} text-sm`}>{row.displayName}</span> 
-                  {row.isChild && <span className="ml-1 text-[9px] uppercase tracking-widest text-slate-400 font-bold">(Niño)</span>}
-                  {row.isMissing && <span className="ml-1 text-[9px] uppercase tracking-widest text-amber-500 font-bold">Por registrar</span>}
-                </td>
-              )}
-              {exportCols.pases && <td className="py-3 px-2 text-center font-bold text-indigo-600 text-sm">{row.isMain ? row.passes : ''}</td>}
-              {exportCols.estatus && <td className="py-3 px-2 text-center"><span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">{row.parentGuest.status.replace('_', ' ')}</span></td>}
-              {exportCols.telefono && <td className="py-3 px-2 text-slate-500 font-mono">{row.isMain ? (row.parentGuest.phone || '-') : ''}</td>}
-              {exportCols.mesa && <td className="py-3 px-2 text-slate-700 font-bold">{row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : <span className="text-slate-300 font-normal italic">Sin mesa</span>}</td>}
-            </tr>
-          ))}
+          {rows.map((row, idx) => {
+            if (row.isHeader) {
+               return <tr key={`hdr_${idx}`}><td colSpan="5" className="py-4 text-sm font-black uppercase tracking-widest" style={{ color: accentColor }}>{row.title}</td></tr>;
+            }
+            return (
+              <tr key={`print_${row._rowId}`} className={`border-b border-slate-200/50 ${row.parentGuest.status === 'cancelado' ? 'opacity-40 line-through' : ''}`}>
+                {exportCols.nombre && (
+                  <td className="py-2.5">
+                    <span className={`${row.isMain ? 'font-bold text-slate-900' : 'text-slate-600'} text-sm`}>{row.displayName}</span> 
+                    {row.isChild && <span className="ml-1 text-[8px] uppercase tracking-widest text-slate-400 font-bold">(Niño)</span>}
+                    {row.isMissing && <span className="ml-1 text-[8px] uppercase tracking-widest text-amber-500 font-bold">Por registrar</span>}
+                  </td>
+                )}
+                {exportCols.pases && <td className="px-2 py-2.5 text-center font-bold text-sm" style={{ color: accentColor }}>{row.isMain ? row.passes : ''}</td>}
+                {exportCols.estatus && <td className="px-2 py-2.5 text-center"><span className="text-[8px] font-bold uppercase tracking-widest text-slate-500">{row.parentGuest.status.replace('_', ' ')}</span></td>}
+                {exportCols.telefono && <td className="px-2 py-2.5 text-slate-500 font-mono text-[10px]">{row.isMain ? (row.parentGuest.phone || '-') : ''}</td>}
+                {exportCols.mesa && <td className="px-2 py-2.5 text-slate-700 font-bold text-[10px]">{row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : <span className="text-slate-300 font-normal italic">Sin mesa</span>}</td>}
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     );
 
     return (
       <div className="fixed inset-0 z-[120] bg-slate-900/95 flex flex-col overflow-hidden backdrop-blur-md">
-        <div className="bg-[#0a0a0a] text-white p-4 flex flex-col sm:flex-row items-center justify-between border-b border-white/10 shadow-lg print:hidden z-10 gap-4">
-          <div className="flex items-center space-x-4">
+        
+        {/* BARRA DE HERRAMIENTAS INTERACTIVA (No se imprime) */}
+        <div className="bg-[#0a0a0a] text-white p-4 flex flex-col md:flex-row items-center justify-between border-b border-white/10 shadow-lg print:hidden z-10 gap-4 shrink-0">
+          <div className="flex items-center space-x-4 w-full md:w-auto">
             <button onClick={() => setExportViewOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24}/></button>
-            <div><h3 className="font-bold text-sm">Estudio de Impresión</h3><p className="text-[10px] text-slate-400">Listas formateadas a Tamaño Carta.</p></div>
+            <div>
+              <h3 className="font-bold text-sm">Estudio de Impresión de Alta Costura</h3>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest">Documento formateado a Tamaño Carta</p>
+            </div>
           </div>
           
-          <div className="flex flex-wrap items-center gap-2 justify-center bg-white/5 p-1 rounded-xl border border-white/10">
-            <button onClick={() => toggleCol('nombre')} className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.nombre ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Nombre</button>
-            <button onClick={() => toggleCol('pases')} className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.pases ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Pases</button>
-            <button onClick={() => toggleCol('estatus')} className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.estatus ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Estatus</button>
-            <button onClick={() => toggleCol('telefono')} className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.telefono ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Teléfono</button>
-            <button onClick={() => toggleCol('mesa')} className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.mesa ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Mesa</button>
-          </div>
+          <div className="flex flex-wrap items-center justify-center gap-4 w-full md:w-auto">
+            
+            {isWeddingMode && (
+              <div className="flex items-center bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
+                 <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mr-3">Separar Lados</span>
+                 <button onClick={() => setSplitBySide(!splitBySide)} className={`relative w-8 h-4 rounded-full transition-colors ${splitBySide ? 'bg-amber-500' : 'bg-slate-700'}`}>
+                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${splitBySide ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                 </button>
+              </div>
+            )}
 
-          <div className="flex items-center gap-2">
-             <button onClick={exportToExcel} className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold flex items-center shadow-lg transition-all">
-               <FileSpreadsheet size={16} className="mr-2"/> Excel
-             </button>
-             <button onClick={triggerListPdfDownload} disabled={isPreparingListPrint} className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl text-sm font-black flex items-center shadow-lg transition-all disabled:opacity-50">
-               {isPreparingListPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
-               {isPreparingListPrint ? 'Preparando...' : 'Descargar PDF'}
-             </button>
+            <div className="flex items-center bg-white/5 p-1 rounded-xl border border-white/10">
+              <button onClick={() => toggleCol('nombre')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.nombre ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Nombre</button>
+              <button onClick={() => toggleCol('pases')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.pases ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Pases</button>
+              <button onClick={() => toggleCol('estatus')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.estatus ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Estatus</button>
+              <button onClick={() => toggleCol('telefono')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.telefono ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Teléfono</button>
+              <button onClick={() => toggleCol('mesa')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.mesa ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Mesa</button>
+            </div>
+
+            <div className="flex items-center gap-2">
+               <button onClick={() => window.print()} className="px-5 py-2.5 bg-white text-slate-900 hover:bg-slate-200 rounded-xl text-sm font-bold flex items-center shadow-lg transition-all">
+                 <Printer size={16} className="mr-2"/> Imprimir
+               </button>
+               <button onClick={exportToExcel} className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold flex items-center shadow-lg transition-all hidden md:flex">
+                 <FileSpreadsheet size={16} className="mr-2"/> Excel
+               </button>
+               <button onClick={triggerListPdfDownload} disabled={isPreparingListPrint} className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-black flex items-center shadow-lg transition-all disabled:opacity-50">
+                 {isPreparingListPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
+                 {isPreparingListPrint ? 'Preparando...' : 'Descargar PDF'}
+               </button>
+            </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8">
+        {/* CONTENEDOR DEL DOCUMENTO TIPO WORD (Páginas A4) */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8 bg-[#111] print:bg-white print:p-0 print:overflow-visible">
           
-          <div className="list-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)' }}>
-            <div className="absolute top-0 left-0 w-full h-3 bg-slate-400"></div>
+          <style>{`
+            @media print {
+              body * { visibility: hidden; }
+              .list-pdf-page, .list-pdf-page * { visibility: visible; }
+              .list-pdf-page { position: absolute; left: 0; top: 0; margin: 0; box-shadow: none; width: 100%; page-break-after: always; }
+              .print\\:hidden { display: none !important; }
+            }
+          `}</style>
+
+          <div className="list-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
+            <div className="absolute top-0 left-0 w-full h-3" style={{ backgroundColor: accentColor }}></div>
             
             <header className="flex justify-between items-center pb-8 pt-4">
               <div>
-                <h1 className="text-4xl font-editorial font-bold text-slate-900 leading-none">Lista de Asistencia</h1>
-                <p className="text-sm font-black tracking-[0.2em] uppercase mt-2 text-slate-500">Reporte Oficial de Acceso</p>
+                <h1 className="text-4xl font-editorial font-bold text-slate-900 leading-none">Reporte de Asistencia</h1>
+                <p className="text-sm font-black tracking-[0.2em] uppercase mt-2 text-slate-500">{eventName}</p>
               </div>
               <div className="text-right flex flex-col items-end">
                 <BauliaLogo className="h-10" forceWhite={false} />
@@ -1328,7 +1387,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento 
             
             <div className="grid grid-cols-4 gap-4 mb-8">
                <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Total Pases</p><p className="text-2xl font-editorial text-slate-900">{totalPases}</p></div>
-               <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Confirmados</p><p className="text-2xl font-editorial text-amber-600">{totalConfirmados}</p></div>
+               <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Confirmados</p><p className="text-2xl font-editorial" style={{ color: accentColor }}>{totalConfirmados}</p></div>
                <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Ya Ingresaron</p><p className="text-2xl font-editorial text-emerald-600">{totalIngresos}</p></div>
                <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Niños (Incluidos)</p><p className="text-2xl font-editorial text-sky-600">{totalNinos}</p></div>
             </div>
@@ -1341,11 +1400,11 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento 
           </div>
 
           {extraPages.map((pageRows, pIdx) => (
-            <div key={`extrapage_${pIdx}`} className="list-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)' }}>
-               <div className="absolute top-0 left-0 w-full h-3 bg-slate-400"></div>
-               <header className="flex justify-between items-center pb-6 pt-4 border-b border-slate-200 mb-6">
-                 <h1 className="text-2xl font-editorial font-bold text-slate-900 leading-none">Lista de Asistencia (Cont.)</h1>
-                 <p className="text-xs font-black tracking-[0.2em] uppercase text-slate-400">Reporte Oficial</p>
+            <div key={`extrapage_${pIdx}`} className="list-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
+               <div className="absolute top-0 left-0 w-full h-3" style={{ backgroundColor: accentColor }}></div>
+               <header className="flex justify-between items-center pb-6 pt-4 mb-6">
+                 <h1 className="text-2xl font-editorial font-bold text-slate-900 leading-none">Reporte de Asistencia (Cont.)</h1>
+                 <p className="text-xs font-black tracking-[0.2em] uppercase" style={{ color: accentColor }}>{eventName}</p>
                </header>
                <main>{renderTableRows(pageRows)}</main>
                <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
@@ -6967,7 +7026,11 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
   const isOverdue = (dateStr, deuda) => { if(!dateStr || deuda <= 0) return false; return new Date(dateStr) < new Date(); };
   const overdueGastos = (data?.gastos || []).filter(g => isOverdue(g.fechaLimite, g.estimado - g.pagado));
   
-  const dynamicAlerts = [
+  // 🔴 LÓGICA DE CEO: Detectamos si estamos en el mando central
+  const isSuperAdminMode = authData?.role === 'superadmin' && !authData?.eventId;
+
+  // 🔴 Si es SuperAdmin, NO le mostramos alertas de pagos de clientes
+  const dynamicAlerts = isSuperAdminMode ? [] : [
     ...overdueGastos.map(g => ({ id: `g_${g.id}`, title: 'Pago Vencido', message: `Adeudo en: ${g.concepto}`, tab: 'presupuesto', type: 'danger', isDynamic: true, isRead: false })),
     ...(data?.guests || []).filter(g => g.extraRequested > 0).map(g => ({ id: `ext_${g.id}`, title: 'Pases Extra', message: `${g.name} solicita +${g.extraRequested} pases.`, tab: 'invitados', type: 'warning', isDynamic: true, isRead: false }))
   ];
@@ -7061,12 +7124,15 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
         </div>
 
         <div className="flex items-center space-x-2 sm:space-x-4">
-          <div className="hidden md:flex items-center bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 backdrop-blur-md rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 shadow-sm transition-colors">
-            <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-600 dark:text-slate-400" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
-            <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-amber-600 dark:text-amber-500 bg-amber-100/50 dark:bg-amber-500/10" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countConfirmados}</span></div>
-            <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-rose-600 dark:text-rose-400 bg-rose-100/50 dark:bg-rose-500/10" title="Cancelaron"><X size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countCancelados}</span></div>
-            <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-emerald-600 dark:text-emerald-400 bg-emerald-100/50 dark:bg-emerald-500/10" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countIngresos}</span></div>
-          </div>
+          {/* 🔴 OCULTAMOS CONTADORES DE INVITADOS AL DUEÑO */}
+          {!isSuperAdminMode && (
+            <div className="hidden md:flex items-center bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 backdrop-blur-md rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 shadow-sm transition-colors">
+              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-600 dark:text-slate-400" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
+              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-amber-600 dark:text-amber-500 bg-amber-100/50 dark:bg-amber-500/10" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countConfirmados}</span></div>
+              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-rose-600 dark:text-rose-400 bg-rose-100/50 dark:rose-500/10" title="Cancelaron"><X size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countCancelados}</span></div>
+              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-emerald-600 dark:text-emerald-400 bg-emerald-100/50 dark:bg-emerald-500/10" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countIngresos}</span></div>
+            </div>
+          )}
 
           <button onClick={(e) => { e.preventDefault(); cycleTheme(); }} className="p-2 text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-all rounded-full hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95" title={`Modo actual: ${themeSetting.toUpperCase()}`}>
             {themeSetting === 'auto' ? (
@@ -9810,13 +9876,11 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const [correosVisibles, setCorreosVisibles] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Selector de Mes para el Corte de Caja (Por defecto el mes actual)
   const currentMonthYear = new Date().toISOString().slice(0, 7);
   const [mesSeleccionado, setMesSeleccionado] = useState(currentMonthYear);
 
   const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null });
 
-  // Variables de Seguridad
   const isSuperAdmin = authData?.role === 'superadmin';
   const isStaff = authData?.role === 'staff';
 
@@ -9832,7 +9896,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const eventoSeleccionado = tiposDeEvento.find(t => t.id === formData.tipoEvento) || tiposDeEvento[0];
 
   useEffect(() => {
-    // 🔴 FÓRMULA BLINDADA ANTI-CRASH PARA FECHAS
     const getSafeTime = (field) => {
       if (!field) return 0;
       if (typeof field.toMillis === 'function') return field.toMillis();
@@ -9905,6 +9968,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
       setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role, urlInvitacion: formData.urlInvitacion, esRecurrente: esClienteRecurrente });
       setClientPhone('');
+      setDialog({ isOpen: true, type: 'alert', title: 'Nueva Licencia Creada', message: `La bóveda para ${formData.nombres} está lista y operativa.` });
     } catch (error) {
       setDialog({ isOpen: true, type: 'alert', title: 'Error del Sistema', message: `Ocurrió un error al crear la licencia: ${error.message}` });
     }
@@ -9914,9 +9978,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const handleUpdateLicense = async (e) => {
     e.preventDefault();
     try {
-      await updateDoc(doc(db, "usuarios", editingLic.id), { urlInvitacion: editingLic.urlInvitacion, plan: editingLic.plan, nombres: editingLic.nombres });
+      await updateDoc(doc(db, "usuarios", editingLic.id), { urlInvitacion: editingLic.urlInvitacion, plan: editingLic.plan, nombres: editingLic.nombres, tipoEvento: editingLic.tipoEvento });
       setIsEditModalOpen(false); setEditingLic(null);
-      setDialog({ isOpen: true, type: 'alert', title: 'Actualizado', message: 'Los datos se guardaron correctamente.' });
+      setDialog({ isOpen: true, type: 'alert', title: 'Bóveda Actualizada', message: 'Los cambios se guardaron correctamente en la nube.' });
     } catch (error) { setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'No se pudo actualizar la licencia.' }); }
   };
 
@@ -9964,7 +10028,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const desglosePlanes = { basico: 0, plata: 0, oro: 0, diamante: 0 };
   ventasDelMes.forEach(v => { if(desglosePlanes[v.plan] !== undefined) desglosePlanes[v.plan] += (Number(v.monto) || 0); });
 
-  // 🔴 CONTADORES DE LICENCIAS RESTAURADOS
   const totalesPorLicencia = licencias.reduce((acc, user) => {
     const tipo = (user.plan || 'basico').toLowerCase().trim();
     acc[tipo] = (acc[tipo] || 0) + 1;
@@ -10044,7 +10107,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         )}
       </div>
 
-      {/* 🔴 NUEVO: CONTADORES VISUALES (SOLO EN LICENCIAS) */}
       {adminTab === 'licencias' && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
           <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between transition-colors">
@@ -10066,7 +10128,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         </div>
       )}
 
-      {/* 🔴 TAB 1: ESTADO DE CUENTA Y CORTE FINANCIERO (INMUTABLE) */}
       {adminTab === 'finanzas' && isSuperAdmin && (
         <div className="animate-in fade-in space-y-6">
            
@@ -10122,6 +10183,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                  <h3 className="font-bold text-slate-800 dark:text-white text-sm">Libro Mayor de Transacciones ({ventasDelMes.length})</h3>
                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">Inmutable ante borrados</span>
               </div>
+              
+              {/* 🔴 TABLA DE VENTAS (LIBRO MAYOR) - RESTAURADA A SU FORMA ORIGINAL CORRECTA */}
               <div className="overflow-x-auto pb-10">
                 <table className="w-full text-left whitespace-nowrap">
                   <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest transition-colors">
@@ -10159,11 +10222,11 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                   </tbody>
                 </table>
               </div>
+
            </div>
         </div>
       )}
 
-      {/* 🔴 TAB 2: GESTIÓN DE CLIENTES Y NUEVAS VENTAS */}
       {adminTab === 'licencias' && (
         <div className="animate-in fade-in">
           
@@ -10177,12 +10240,16 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
              <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
                <h3 className="font-bold text-slate-800 dark:text-white text-sm">Directorio de Clientes Activos ({filteredLicencias.length})</h3>
              </div>
+             
+             {/* 🔴 TABLA DE DIRECTORIO DE CLIENTES CON LA COLUMNA DE "TIPO DE EVENTO" INCORPORADA */}
              <div className="overflow-x-auto pb-24">
                <table className="w-full text-left whitespace-nowrap min-w-[1000px]">
                  <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest transition-colors">
                    <tr>
                      <th className="px-5 py-3 font-bold">Cliente / ID</th>
                      <th className="px-5 py-3 font-bold">Acceso (Correo)</th>
+                     {/* 🔴 NUEVA COLUMNA: TIPO DE EVENTO */}
+                     <th className="px-5 py-3 font-bold text-center">Tipo</th>
                      <th className="px-5 py-3 font-bold text-center">Plan</th>
                      <th className="px-5 py-3 font-bold">Link Invitación</th>
                      <th className="px-5 py-3 font-bold text-center">Estatus</th>
@@ -10191,7 +10258,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                  </thead>
                  <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
                    {filteredLicencias.length === 0 ? (
-                     <tr><td colSpan="6" className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">No se encontraron clientes.</td></tr>
+                     <tr><td colSpan="7" className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">No se encontraron clientes.</td></tr>
                    ) : (
                      filteredLicencias.map((lic) => {
                        const estaSuspendido = lic.status === 'suspendido';
@@ -10215,6 +10282,12 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                </button>
                              </div>
                            </td>
+                           
+                           {/* 🔴 CELDA TIPO DE EVENTO */}
+                           <td className="px-5 py-4 text-center">
+                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lic.tipoEvento || 'Boda'}</span>
+                           </td>
+
                            <td className="px-5 py-4 text-center">
                              <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'}`}>
                                {lic.plan}
@@ -10251,7 +10324,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         </div>
       )}
 
-      {/* MODAL PARA CREAR NUEVA LICENCIA (CON ANTI-ROBO Y VINCULADA AL MAYOR) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar border border-transparent dark:border-white/10 transition-colors">
@@ -10344,7 +10416,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         </div>
       )}
 
-      {/* MODAL PARA EDITAR LICENCIA EXISTENTE */}
+      {/* 🔴 MODAL PARA EDITAR LICENCIA EXISTENTE (CON TIPO DE EVENTO INCLUIDO) */}
       {isEditModalOpen && editingLic && (
         <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto border border-transparent dark:border-white/10 transition-colors">
@@ -10358,6 +10430,23 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                   <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> URL de su Invitación Pública</label>
                   <input type="url" value={editingLic.urlInvitacion || ''} onChange={e => setEditingLic({...editingLic, urlInvitacion: e.target.value})} placeholder="https://baulia.com/bodas/su-boda" className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-medium text-sky-600 dark:text-sky-400 text-sm transition-colors" />
                 </div>
+                
+                {/* 🔴 AQUÍ ESTÁ EL SELECTOR DE TIPO DE EVENTO Y PLAN */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Tipo de Evento</label>
+                    <select value={editingLic.tipoEvento || 'boda'} onChange={e => setEditingLic({...editingLic, tipoEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
+                      {tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Plan</label>
+                    <select value={editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
+                      <option value="basico">Básico</option><option value="plata">Plata</option><option value="oro">Oro</option><option value="diamante">Diamante</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div className="bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 p-3 rounded-lg text-xs font-bold border border-amber-200 dark:border-amber-500/20 flex items-start transition-colors">
                   <AlertCircle size={16} className="mr-2 flex-shrink-0 mt-0.5" />
                   Nota: El plan de facturación no se puede cambiar aquí porque altera el estado financiero. Cancela esta cuenta y crea una nueva si necesitas un upgrade.
@@ -10370,7 +10459,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         </div>
       )}
 
-      {/* PESTAÑA RESEÑAS */}
       {adminTab === 'resenas' && (
          <div className="animate-in fade-in">
            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
@@ -11012,8 +11100,8 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'licencias': return (originalUserRole === 'superadmin' || originalUserRole === 'staff') && !impersonating && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} authData={authData} /> : null;
       case 'dashboard': return typeof DashboardView !== 'undefined' ? <DashboardView authData={authData} guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null; 
       
-      // 🔴 AQUÍ ESTÁ LA LÍNEA REPARADA: Lee el tipoEvento de forma segura desde authData
-      case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={authData?.availableEvents?.find(e => e.eventId === eventId)?.tipoEvento} /> : null; 
+      // 🔴 AQUÍ PASAMOS EL PLAN Y NOMBRE PARA EL REPORTE DE IMPRESIÓN
+      case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={authData?.availableEvents?.find(e => e.eventId === eventId)?.tipoEvento} userPlan={userPlan} eventName={authData?.availableEvents?.find(e => e.eventId === eventId)?.nombres || 'Evento Baulia'} /> : null; 
       
       case 'escaner': return userPlan === 'diamante' && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
       case 'mesas': return userPlan === 'diamante' && typeof MesasView !== 'undefined' ? <MesasView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
