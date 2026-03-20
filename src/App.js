@@ -1729,10 +1729,10 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
   }
 
   return (
-    <div className="h-full flex flex-col lg:flex-row gap-6 pb-6 relative overflow-hidden transition-colors">
+    <div className="h-full flex flex-col lg:flex-row gap-6 pb-6 relative overflow-hidden transition-colors items-stretch">
       
       {/* PANEL IZQUIERDO: LISTA DE INVITADOS */}
-      <div className="flex-1 flex flex-col max-h-full min-h-0 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+      <div className="flex-1 flex flex-col h-full min-h-0 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
         <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] transition-colors">
           <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center"><Smartphone size={20} className="mr-2 text-indigo-500 dark:text-amber-500"/> Simulador en Vivo</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">Selecciona una familia para ver cómo funciona su pase en tu diseño real.</p>
@@ -1762,7 +1762,7 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
       </div>
 
       {/* PANEL DERECHO: SIMULADOR MINIMALISTA DE ALTA COSTURA */}
-      <div className="w-full lg:w-[400px] flex-shrink-0 flex flex-col justify-start h-[700px]">
+      <div className="w-full lg:w-[400px] flex-shrink-0 flex flex-col h-full">
         
         {!urlInvitacion ? (
           <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
@@ -1775,9 +1775,9 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
              </div>
           </div>
         ) : (
-          <div className="w-full h-full bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden flex flex-col transition-colors">
+          <div className="w-full flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden transition-colors">
              
-             {/* Badge de seguridad superior */}
+             {/* 🔴 Badge de seguridad superior (Z-Index alto, pointer-events none para no bloquear clicks) */}
              <div className="absolute top-0 inset-x-0 flex justify-center z-20 pointer-events-none">
                 <span className="bg-rose-500 text-white text-[9px] font-black uppercase tracking-widest py-1 px-4 rounded-b-lg shadow-md flex items-center">
                    <Lock size={10} className="mr-1.5"/> Simulación Segura
@@ -1785,14 +1785,15 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
              </div>
 
              {guest ? (
+                // 🔴 Iframe absoluto, ocupando todo el espacio, sin margen superior, z-index base (10)
                 <iframe 
                    key={iframeUrl}
                    src={iframeUrl} 
-                   className="w-full h-full border-none mt-6" 
+                   className="absolute inset-0 w-full h-full border-none rounded-[2rem] z-10" 
                    title="Invitacion Simulada"
                 ></iframe>
              ) : (
-               <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 transition-colors">
+               <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 transition-colors z-10 relative">
                  <Users size={32} className="mb-3 opacity-20"/>
                  <span className="text-xs font-bold uppercase tracking-widest">Selecciona un invitado</span>
                </div>
