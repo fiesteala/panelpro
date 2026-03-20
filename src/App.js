@@ -984,7 +984,14 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 // --- COMPONENTE: INVITADOS (DARK PREMIUM) ---
 // ==========================================
 const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento, userPlan, eventName }) => {
-  const isWeddingMode = tipoEvento === 'boda'; 
+  // 🔴 LÓGICA DE BODA RESTAURADA (Con Botón Toggle)
+  const isBodaType = tipoEvento === 'boda';
+  const [isWeddingMode, setIsWeddingMode] = useState(isBodaType);
+
+  // Asegurar que se sincronice si cambias de evento en el dropdown
+  useEffect(() => {
+    setIsWeddingMode(tipoEvento === 'boda');
+  }, [tipoEvento]);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroLado, setFiltroLado] = useState('Todos');
@@ -1080,7 +1087,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
     const linkPersonalizado = `${baseDomain}/${ID_DEL_EVENTO}?u=${parentGuest.id}`;
     
-    // Sin emojis raros
     const msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
 
     if (phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -1130,7 +1136,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
   const toggleCol = (col) => setExportCols(prev => ({ ...prev, [col]: !prev[col] }));
 
-  // 🔴 1. DESCARGA DIRECTA DE PULSERAS (Invisible en pantalla)
   const triggerQRPdfDownload = async () => {
     const allIndividualsForQR = safeGuests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').flatMap(g => (g.subGuests || []).map(sg => ({ ...sg, familyName: g.name, familyId: g.id })));
     if (allIndividualsForQR.length === 0) {
@@ -1212,7 +1217,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     }, 100);
   };
 
-  // 🔴 2. DESCARGA EXCEL DE LISTA DE INVITADOS
   const exportToExcel = () => {
     if (addNotification) addNotification('Generando Excel', 'Preparando documento corporativo...', 'info');
     const allList = getFlattenedGuests(invitadosFiltrados);
@@ -1267,7 +1271,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     document.body.removeChild(link);
   };
 
-  // 🔴 3. DESCARGA PDF DE LISTA DE INVITADOS (ESTUDIO DE IMPRESIÓN ELEGANTE)
   const triggerListPdfDownload = async () => {
     setIsPreparingListPrint(true);
     setTimeout(async () => {
@@ -1293,7 +1296,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   return (
     <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500">
       
-      {/* 🔴 VISTA DE EXPORTACIÓN ESTILO "WORD" (Elegante) */}
       {exportViewOpen && (() => {
           const allList = getFlattenedGuests(invitadosFiltrados);
           let listToRender = [];
@@ -1316,7 +1318,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           const extraPages = [];
           for(let i=0; i<extraItems.length; i+=PAGE_N_LIMIT) extraPages.push(extraItems.slice(i, i+PAGE_N_LIMIT));
 
-          // ESTILOS DINÁMICOS SEGÚN EL PLAN (Para el Documento Blanco)
           let gradientStyle = 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)';
           let accentColor = '#64748b'; 
           if (userPlan === 'diamante') { gradientStyle = 'linear-gradient(180deg, #eef2ff 0%, #ffffff 100%)'; accentColor = '#4f46e5'; }
@@ -1404,8 +1405,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 </div>
               </div>
 
-              {/* CONTENEDOR DE PÁGINAS A4 */}
-              <div className="flex-1 overflow-y-auto bg-[#111] p-8 flex flex-col items-center gap-8 custom-scrollbar print:bg-white print:p-0 print:overflow-visible">
+              {/* CONTENEDOR DEL DOCUMENTO TIPO WORD (Páginas A4) */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8 bg-[#111] print:bg-white print:p-0 print:overflow-visible">
                 
                 <style>{`
                   @media print {
@@ -1428,6 +1429,13 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                       <BauliaLogo className="h-10" forceWhite={false} />
                     </div>
                   </header>
+                  
+                  <div className="grid grid-cols-4 gap-4 mb-8">
+                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Total Pases</p><p className="text-2xl font-editorial text-slate-900">{totalPases}</p></div>
+                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Confirmados</p><p className="text-2xl font-editorial" style={{ color: accentColor }}>{totalConfirmados}</p></div>
+                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Ya Ingresaron</p><p className="text-2xl font-editorial text-emerald-600">{totalIngresos}</p></div>
+                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Niños (Incluidos)</p><p className="text-2xl font-editorial text-sky-600">{totalNinos}</p></div>
+                  </div>
 
                   <main>{renderTableRows(firstPageItems)}</main>
                   <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
@@ -1455,7 +1463,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           );
       })()}
 
-      {/* 🔴 INTERFAZ NORMAL DE INVITADOS CON BOTONES CORREGIDOS */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
         <div>
           <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">Gestión de Invitados</h2>
@@ -1464,10 +1471,20 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         
         <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
           <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Exportar Lista</button>
-          <button onClick={triggerQRPdfDownload} disabled={isPreparingQRPrint} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors disabled:opacity-50">
-             {isPreparingQRPrint ? <RefreshCw size={14} className="mr-1.5 text-indigo-600 dark:text-indigo-400 animate-spin"/> : <QrCode size={14} className="mr-1.5 text-indigo-600 dark:text-indigo-400"/>} 
-             {isPreparingQRPrint ? 'Generando...' : 'Generar Pulseras VIP'}
+          
+          <button onClick={triggerQRPdfDownload} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors">
+             <QrCode size={14} className="mr-1.5 text-indigo-600 dark:text-indigo-400"/> Generar Pulseras VIP
           </button>
+
+          {/* 🔴 BOTÓN MODO BODA (SOLO SI EL TIPO DE EVENTO ES BODA) */}
+          {isBodaType && (
+            <div className="flex items-center bg-white dark:bg-[#0a0a0a] p-1 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
+              <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-2 ml-2">Boda</span>
+              <button onClick={() => setIsWeddingMode(!isWeddingMode)} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
+              </button>
+            </div>
+          )}
 
           {isWeddingMode ? (
             <div className="flex gap-1.5">
@@ -1527,7 +1544,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                         <span className={`${row.isMain ? 'font-bold text-slate-800 dark:text-white' : 'font-normal text-slate-600 dark:text-slate-300'} ${row.isMissing || row.isEmptyName ? 'text-amber-500 italic' : ''} ${row.parentGuest.status === 'cancelado' ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>
                           {row.displayName}
                         </span>
-                        {isWeddingMode && !row.isMissing && row.parentGuest.side && (
+                        {isWeddingMode && !row.isMissing && row.parentGuest.side && row.parentGuest.side !== 'general' && (
                           <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${row.parentGuest.side === 'novia' ? 'bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : 'bg-indigo-100 text-indigo-600 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20'}`}>
                             {row.parentGuest.side}
                           </span>
@@ -1695,239 +1712,95 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 };
 
 // ==========================================
-// --- COMPONENTE: VISTA PREVIA INVITACIÓN (APP) ---
+// --- COMPONENTE: VISTA PREVIA INVITACIÓN EN EL PANEL ---
 // ==========================================
-const InvitacionView = ({ guests, setGuests, addNotification }) => {
+const InvitacionView = ({ guests, urlInvitacion }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGuestId, setSelectedGuestId] = useState(guests[0]?.id || null);
-  const guest = guests.find(g => g.id === selectedGuestId) || guests[0];
-  const [isConfirming, setIsConfirming] = useState(false);
   
-  const [tempSubGuests, setTempSubGuests] = useState([]);
-  const [extraRequested, setExtraRequested] = useState(0);
-
-  const extrasAprobados = (guest?.passes > (guest?.originalPasses || guest?.passes)) ? guest.passes - guest.originalPasses : 0;
-
-  useEffect(() => {
-    setIsConfirming(false);
-  }, [selectedGuestId]);
-
-  const handleOpenEdit = () => {
-    if (!guest) return;
-    setExtraRequested(guest.extraRequested || 0);
-    
-    const isFirstTime = guest.status === 'pendiente' || guest.status === 'por_invitar';
-    const totalLimit = guest.originalPasses || guest.passes; 
-    const currentSubs = guest.subGuests || [];
-    
-    const newTemp = Array(totalLimit).fill(null).map((_, i) => {
-      if (currentSubs[i]) {
-        return { ...currentSubs[i], willAttend: true };
-      } else {
-        return { name: '', isChild: false, willAttend: isFirstTime, id: `s_new_${Date.now()}_${i}` };
-      }
-    });
-    
-    setTempSubGuests(newTemp);
-    setIsConfirming(true); 
-  };
-
-  const handleSubGuestChange = (index, field, value) => {
-    const newSubGuests = [...tempSubGuests];
-    newSubGuests[index] = { ...newSubGuests[index], [field]: value };
-    setTempSubGuests(newSubGuests);
-  };
-
-  const handleConfirmRSVP = async () => {
-    if (!guest) return;
-    
-    const attendingGuests = tempSubGuests.filter(sg => sg.willAttend);
-    const isCancelled = attendingGuests.length === 0;
-
-    if (!isCancelled) {
-      const emptyNames = attendingGuests.filter(sg => !sg.name.trim());
-      if(emptyNames.length > 0) {
-        alert("Por favor, ingresa el nombre de todos los que SÍ asistirán.");
-        return;
-      }
-    }
-
-    const updatedGuest = {
-      ...guest,
-      passes: isCancelled ? 0 : attendingGuests.length, 
-      status: isCancelled ? 'cancelado' : 'confirmado',
-      extraRequested: extraRequested,
-      subGuests: attendingGuests.map((sg, i) => ({
-        id: sg.id?.startsWith('s_new') ? `usr_${guest.id}_${i}` : sg.id,
-        name: sg.name, isChild: sg.isChild, entered: false
-      }))
-    };
-    
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), updatedGuest);
-    setIsConfirming(false);
-  };
-
   const filteredGuests = guests.filter(g => g.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const guest = guests.find(g => g.id === selectedGuestId) || guests[0];
 
-  if (!guest) return <div className="p-8 text-center text-slate-500">No hay invitados en la lista para simular.</div>;
+  // 🔴 CONSTRUCCIÓN DE LA URL SEGURA PARA EL IFRAME
+  let iframeUrl = '';
+  if (urlInvitacion) {
+    // Le decimos a la invitación web que cargue la info de este usuario en específico y active el modo seguro
+    const separator = urlInvitacion.includes('?') ? '&' : '?';
+    iframeUrl = `${urlInvitacion}${separator}u=${selectedGuestId || ''}&preview=1`;
+  }
 
   return (
-    <div className="h-full flex flex-col lg:flex-row gap-6 pb-6 relative overflow-hidden">
+    <div className="h-full flex flex-col lg:flex-row gap-6 pb-6 relative overflow-hidden transition-colors">
       
-      {/* PANEL IZQUIERDO: LISTA */}
-      <div className="flex-1 flex flex-col max-h-full min-h-0 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100 bg-slate-50">
-          <h2 className="text-xl font-bold text-slate-800">Simulador de Invitación</h2>
-          <div className="mt-3 relative">
+      {/* PANEL IZQUIERDO: LISTA DE INVITADOS */}
+      <div className="flex-1 flex flex-col max-h-full min-h-0 bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+        <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] transition-colors">
+          <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center"><Smartphone size={20} className="mr-2 text-indigo-500 dark:text-amber-500"/> Simulador en Vivo</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Selecciona una familia para ver cómo funciona su pase personal.</p>
+          <div className="mt-4 relative">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-            <input type="text" placeholder="Buscar familia para simular..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-400" />
+            <input type="text" placeholder="Buscar familia para simular..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050505] text-slate-800 dark:text-white rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-400 dark:focus:ring-amber-500 transition-colors" />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2">
+        <div className="flex-1 overflow-y-auto p-2 custom-scrollbar bg-slate-50/50 dark:bg-transparent">
           {filteredGuests.length > 0 ? (
             <ul className="space-y-1">
               {filteredGuests.map(g => (
                 <li key={g.id}>
-                  <button onClick={() => setSelectedGuestId(g.id)} className={`w-full text-left p-3 rounded-xl transition-all flex items-center justify-between ${selectedGuestId === g.id ? 'bg-indigo-50 border border-indigo-200' : 'hover:bg-slate-50 border border-transparent'}`}>
+                  <button onClick={() => setSelectedGuestId(g.id)} className={`w-full text-left p-3 rounded-xl transition-all flex items-center justify-between ${selectedGuestId === g.id ? 'bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/30 shadow-sm' : 'hover:bg-slate-50 dark:hover:bg-white/5 border border-transparent'}`}>
                     <div>
-                      <p className={`font-bold text-sm ${selectedGuestId === g.id ? 'text-indigo-900' : 'text-slate-700'}`}>{g.name}</p>
-                      <p className="text-[10px] text-slate-500 mt-0.5">{g.originalPasses || g.passes} Pases | <span className={`uppercase font-bold ${g.status === 'cancelado' ? 'text-rose-500' : g.status === 'confirmado' ? 'text-amber-500' : 'text-slate-400'}`}>{g.status.replace('_', ' ')}</span></p>
+                      <p className={`font-bold text-sm ${selectedGuestId === g.id ? 'text-indigo-900 dark:text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>{g.name}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{g.originalPasses || g.passes} Pases | <span className={`uppercase font-bold ${g.status === 'cancelado' ? 'text-rose-500' : g.status === 'confirmado' ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`}>{g.status.replace('_', ' ')}</span></p>
                     </div>
+                    {selectedGuestId === g.id && <ArrowRight size={16} className="text-indigo-500 dark:text-amber-500"/>}
                   </button>
                 </li>
               ))}
             </ul>
-          ) : <div className="p-8 text-center text-slate-400 text-sm">No se encontraron invitados.</div>}
+          ) : <div className="p-8 text-center text-slate-400 text-sm border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl m-2">No se encontraron invitados.</div>}
         </div>
       </div>
 
-      {/* PANEL DERECHO: CELULAR */}
+      {/* PANEL DERECHO: IPHONE MOCKUP CON IFRAME REAL */}
       <div className="w-full lg:w-[380px] flex-shrink-0 flex justify-center items-start pt-4 lg:pt-0 overflow-y-auto hide-scrollbar">
-        <div className="w-[320px] h-[650px] bg-slate-900 rounded-[3rem] p-3 shadow-2xl relative border-4 border-slate-300 flex-shrink-0">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-900 rounded-b-2xl z-20"></div>
-          <div className="w-full h-full bg-[#fdfbf7] rounded-[2.2rem] overflow-y-auto overflow-x-hidden hide-scrollbar relative">
-            
-            <div className="h-40 bg-slate-200 relative bg-[url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80')] bg-cover bg-center">
-              <div className="absolute inset-0 bg-black/40"></div>
-              <div className="absolute bottom-4 left-0 w-full text-center text-white px-4">
-                <p className="text-[9px] tracking-[0.2em] uppercase mb-1">NUESTRA BODA</p>
-                <h1 className="text-xl font-serif">Ana & Luis</h1>
-              </div>
-            </div>
-
-            <div className="p-5 text-center">
-              {extrasAprobados > 0 && guest.status === 'confirmado' && (
-                 <div className="mb-4 bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-300 p-3 rounded-2xl shadow-sm animate-in fade-in zoom-in">
-                    <p className="text-[10px] font-black text-amber-800 uppercase tracking-widest mb-1 flex items-center justify-center"><CheckCircle size={12} className="mr-1"/> ¡Buenas noticias!</p>
-                    <p className="text-xs text-amber-900 font-bold leading-tight">Tus {extrasAprobados} pases extra han sido aprobados. Tienes {guest.passes} lugares en total.</p>
-                 </div>
-              )}
-
-              <p className="text-[9px] text-slate-500 uppercase tracking-widest mb-1">Pase Exclusivo Para</p>
-              <h3 className="text-lg font-bold text-slate-800 mb-5 leading-tight">{guest.name}</h3>
-
-              {isConfirming ? (
-                 <div className="bg-white p-4 rounded-xl shadow-lg border border-slate-100 mb-6 text-left animate-in slide-in-from-bottom-4">
-                  <h4 className="font-bold text-slate-800 text-xs mb-1 text-center">Confirmación de Pases</h4>
-                  <p className="text-[9px] text-slate-500 text-center mb-4">Selecciona quiénes asistirán e ingresa sus nombres.</p>
-                  
-                  <div className="space-y-2 mb-4">
-                    {tempSubGuests.map((sg, idx) => (
-                      <div key={idx} className={`p-2.5 rounded-lg border transition-colors ${sg.willAttend ? 'bg-slate-50 border-slate-300' : 'bg-slate-100/50 border-slate-200 opacity-60'}`}>
-                        <div className="flex justify-between items-center mb-1.5">
-                          <label className="text-[10px] font-bold text-slate-600">Pase #{idx + 1}</label>
-                          <label className="flex items-center space-x-1.5 cursor-pointer">
-                            <input type="checkbox" checked={sg.willAttend} onChange={(e) => handleSubGuestChange(idx, 'willAttend', e.target.checked)} className="rounded text-indigo-600 w-3 h-3" />
-                            <span className="text-[9px] font-bold uppercase text-slate-500">{sg.willAttend ? 'Asistirá' : 'No asistirá'}</span>
-                          </label>
-                        </div>
-                        {sg.willAttend && (
-                          <div className="space-y-2 mt-2 pt-2 border-t animate-in fade-in" style={{ borderColor: `${t_txt}10` }}>
-                            {/* 🔴 IMPORTANTE: Placeholder Inteligente y Claro */}
-                            <input 
-                              type="text" required 
-                              placeholder={sg.isChild ? "Nombre del niño / menor..." : (idx === 0 ? "Tu nombre..." : "Nombre del adulto acompañante...")} 
-                              value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)} 
-                              style={themeInput} className="w-full p-2 border rounded-md text-base font-medium outline-none" 
-                            />
-                            {/* Dejamos el Checkbox para que el invitado confirme si es niño o no */}
-                            <label className="flex items-center space-x-2 cursor-pointer pt-0.5">
-                               <input type="checkbox" checked={sg.isChild || false} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-3.5 h-3.5 accent-indigo-600" />
-                               <span className="text-xs font-medium uppercase tracking-wider opacity-80">Pase de Menor / Niño</span>
-                            </label>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mb-4 border-t border-slate-200 pt-3 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-700">¿Necesitas pases extra?</p>
-                      <p className="text-[8px] text-slate-400 leading-tight">Sujeto a disponibilidad.</p>
-                    </div>
-                    <div className="flex items-center bg-slate-100 rounded-lg p-1">
-                      <button onClick={() => setExtraRequested(Math.max(0, extraRequested - 1))} className="p-1 text-slate-500"><Minus size={12}/></button>
-                      <span className="text-xs font-bold w-6 text-center">{extraRequested}</span>
-                      <button onClick={() => setExtraRequested(extraRequested + 1)} className="p-1 text-indigo-600"><Plus size={12}/></button>
-                    </div>
-                  </div>
-
-                  <button onClick={() => handleConfirmRSVP()} className="w-full py-2.5 bg-slate-900 text-white rounded-lg font-bold text-xs shadow-md hover:bg-slate-800 transition-colors">
-                    {tempSubGuests.filter(s => s.willAttend).length === 0 ? 'Declinar Invitación' : 'Enviar Confirmación'}
-                  </button>
-                  <button onClick={() => setIsConfirming(false)} className="w-full py-2 mt-1 text-[10px] font-bold text-slate-400 hover:text-slate-600">Cancelar</button>
-                </div>
-              ) : guest.status === 'confirmado' || guest.status === 'ingreso' ? (
-                <div className="bg-white p-4 rounded-xl shadow-lg border border-slate-100 mb-6 animate-in zoom-in">
-                  <p className="text-amber-600 text-[10px] font-bold uppercase tracking-wider mb-2 flex items-center justify-center"><CheckCircle size={14} className="mr-1"/> Asistencia Confirmada</p>
-                  <p className="text-[10px] text-slate-500 mb-3">Tus lugares están reservados.</p>
-                  
-                  <div className="bg-slate-50 p-3 rounded-lg text-left border border-slate-100">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase mb-2 text-center">Asistentes ({guest.subGuests?.length || 0})</p>
-                    <ul className="space-y-1.5">
-                      {guest.subGuests && guest.subGuests.length > 0 ? (
-                        guest.subGuests.map((sg, idx) => (
-                          <li key={idx} className="text-xs font-semibold text-slate-700 flex items-center justify-between border-b border-slate-200 pb-1 last:border-0">
-                            <span className="truncate mr-2">{sg.name} {sg.isChild && <span className="text-[8px] text-indigo-500 bg-indigo-50 px-1 ml-1 rounded uppercase tracking-widest">Niño</span>}</span>
-                          </li>
-                        ))
-                      ) : <li className="text-[10px] text-slate-500 text-center italic">Sin nombres</li>}
-                    </ul>
-                  </div>
-                  {guest.extraRequested > 0 && (
-                    <div className="mt-3 p-2 bg-indigo-50 text-indigo-700 rounded-lg text-[9px] font-bold">
-                      Solicitaste {guest.extraRequested} pase(s) extra. Esperando respuesta.
-                    </div>
-                  )}
-                  <button onClick={handleOpenEdit} className="mt-4 text-[10px] font-bold text-slate-400 underline hover:text-indigo-600">Modificar Asistentes</button>
-                </div>
-              ) : guest.status === 'cancelado' ? (
-                <div className="bg-rose-50 p-4 rounded-xl border border-rose-100 mb-6 animate-in zoom-in">
-                  <p className="text-rose-600 text-xs font-bold mb-2">Asistencia Declinada</p>
-                  <p className="text-[10px] text-slate-500">Lamentamos que no puedas acompañarnos. Tus lugares han sido liberados.</p>
-                  <button onClick={handleOpenEdit} className="mt-4 text-[10px] font-bold text-slate-400 underline hover:text-rose-600">Cambiar de opinión</button>
-                </div>
-              ) : (
-                <div className="bg-white p-5 rounded-xl shadow-lg border border-slate-100 mb-6">
-                  <div className="bg-slate-50 border border-slate-100 p-3 rounded-xl mb-4 text-center shadow-inner">
-                    <p className="text-[10px] text-slate-600 leading-relaxed">
-                      Entra a <b>Confirmar Asistencia</b> para gestionar tus pases, solicitar extras o declinar la invitación.
-                    </p>
-                  </div>
-                  <p className="text-xs font-bold text-slate-700 mb-4">Tienes {guest.originalPasses || guest.passes} pases reservados.</p>
-                  <div className="space-y-3">
-                    <button onClick={handleOpenEdit} className="w-full py-3.5 bg-slate-900 text-white rounded-xl text-xs font-bold shadow-lg hover:scale-105 transition-transform">
-                      Confirmar Asistencia
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+        
+        {!urlInvitacion ? (
+          <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#0a0a0a] rounded-[3rem] border border-slate-200 dark:border-white/10 shadow-sm">
+             <Link size={48} className="text-slate-300 dark:text-slate-600 mb-4"/>
+             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2 font-editorial">Falta el Enlace</h3>
+             <p className="text-slate-500 dark:text-slate-400 text-sm">No se ha guardado el enlace de la invitación web para este evento.</p>
           </div>
-        </div>
+        ) : (
+          <div className="w-[320px] h-[650px] bg-black rounded-[3rem] p-2.5 shadow-2xl relative border-[6px] border-slate-800 flex-shrink-0">
+            {/* Isla Dinámica */}
+            <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-full z-20 flex justify-end items-center pr-2">
+              <div className="w-2 h-2 rounded-full bg-indigo-900/50 mr-1 animate-pulse"></div>
+            </div>
+            
+            {/* 🔴 EL IFRAME QUE CARGA LA INVITACIÓN REAL */}
+            <div className="w-full h-full bg-[#111] rounded-[2.2rem] overflow-hidden relative">
+              {guest ? (
+                <iframe 
+                  key={iframeUrl}
+                  src={iframeUrl} 
+                  className="w-full h-full border-none bg-white"
+                  title="Invitacion"
+                ></iframe>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-slate-500 text-xs">Selecciona un invitado.</div>
+              )}
+            </div>
+
+            {/* Botones Físicos Simulados */}
+            <div className="absolute top-24 -left-[9px] w-1 h-8 bg-slate-700 rounded-l-md"></div>
+            <div className="absolute top-36 -left-[9px] w-1 h-12 bg-slate-700 rounded-l-md"></div>
+            <div className="absolute top-52 -left-[9px] w-1 h-12 bg-slate-700 rounded-l-md"></div>
+            <div className="absolute top-36 -right-[9px] w-1 h-16 bg-slate-700 rounded-r-md"></div>
+          </div>
+        )}
       </div>
+
     </div>
   );
 };
@@ -10614,6 +10487,8 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
 
   const urlParams = new URLSearchParams(window.location.search);
   const isIframe = urlParams.get('iframe') === 'true';
+  // 🔴 DETECTOR DE MODO SEGURO (BÓVEDA DE CLIENTE)
+  const isPreviewMode = urlParams.get('preview') === '1';
   
   const t_bg = urlParams.get('bg') ? `#${urlParams.get('bg')}` : '#f8fafc'; 
   const t_card = urlParams.get('card') ? `#${urlParams.get('card')}` : '#ffffff'; 
@@ -10625,10 +10500,8 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const themeCard = { backgroundColor: t_card, borderColor: `${t_txt}20`, color: t_txt };
   const themeBtn = { backgroundColor: t_btn, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.1em' };
   
-  // Fondo de inputs más sutil
   const themeInput = { backgroundColor: isIframe ? 'rgba(255,255,255,0.3)' : `${t_bg}50`, color: t_txt, borderColor: `${t_txt}30` };
 
-  // 🔴 INYECCIÓN ANTI-ZOOM PARA MÓVILES
   useEffect(() => {
     let meta = document.querySelector('meta[name="viewport"]');
     if (!meta) {
@@ -10636,7 +10509,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
       meta.name = "viewport";
       document.head.appendChild(meta);
     }
-    // Fuerza a la escala 1.0 y prohíbe al usuario hacer zoom
     meta.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
   }, []);
 
@@ -10658,11 +10530,9 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
             const totalLimit = gData.originalPasses || gData.passes; 
             const currentSubs = gData.subGuests || [];
             
-            // 🔴 LÓGICA REPARADA: Respetamos si el pase es de adulto o niño desde la BD
             const newTemp = Array(totalLimit).fill(null).map((_, i) => {
               if (currentSubs[i]) return { ...currentSubs[i], willAttend: true };
               
-              // Si es un pase nuevo (por ejemplo, si agregaste más lugares después)
               const esMenor = gData.childrenPasses > 0 && i >= (totalLimit - gData.childrenPasses);
               return { name: i === 0 ? gData.name : '', isChild: esMenor, willAttend: isFirstTime, id: `s_new_${Date.now()}_${i}` };
             });
@@ -10685,8 +10555,16 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
 
   const handleRSVPSubmit = async (e) => {
     e.preventDefault();
-    setRsvpStatus('submitting');
     setFormError('');
+
+    // 🔴 BLINDAJE DE SEGURIDAD PARA EL PANEL
+    if (isPreviewMode) {
+      alert("🔒 MODO VISTA PREVIA\nEsta es una simulación segura. Los cambios no se guardarán en la base de datos para proteger la información de tus invitados.");
+      return;
+    }
+
+    setRsvpStatus('submitting');
+    
     try {
       if (guestUid && guestInfo) {
         const attendingGuests = tempSubGuests.filter(sg => sg.willAttend);
@@ -10744,7 +10622,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   return (
     <div style={themeContainer} className="relative pb-16 flex items-center justify-center p-3 sm:p-4 overflow-hidden">
       
-      {/* 🔴 PARCHE DE CRISTAL Y ANTI-ZOOM HORIZONTAL */}
       {isIframe && (
         <style>{`
           html, body, #root { 
@@ -10760,7 +10637,15 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
 
       {showRSVP && (
         <div className="w-full max-w-sm mx-auto z-50 animate-in slide-in-from-bottom-8 duration-500">
-          <div style={themeCard} className={`w-full rounded-2xl p-4 sm:p-5 border max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar ${isIframe ? 'shadow-[0_8px_30px_rgba(0,0,0,0.12)]' : 'shadow-xl'}`}>
+          
+          {/* 🔴 AVISO DE MODO SIMULACRO */}
+          {isPreviewMode && (
+            <div className="bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest py-1.5 text-center shadow-lg rounded-t-xl animate-pulse">
+               Modo Vista Previa Segura
+            </div>
+          )}
+
+          <div style={themeCard} className={`w-full ${isPreviewMode ? 'rounded-b-2xl' : 'rounded-2xl'} p-4 sm:p-5 border max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar ${isIframe ? 'shadow-[0_8px_30px_rgba(0,0,0,0.12)]' : 'shadow-xl'}`}>
             
             <div className="text-center mb-5 border-b pb-3" style={{ borderColor: `${t_txt}15` }}>
                <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-widest leading-tight">Confirmación</h3>
@@ -10776,10 +10661,8 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
             
             <form onSubmit={handleRSVPSubmit} className="space-y-4">
               
-              {/* CAMPO TELÉFONO COMPACTO */}
               <div className="p-3 rounded-xl border" style={{ borderColor: `${t_txt}20` }}>
                 <label className="block text-xs font-bold uppercase tracking-widest mb-1.5 flex items-center opacity-90"><Phone size={14} className="mr-1.5"/> WhatsApp de Contacto</label>
-                {/* 🔴 IMPORTANTE: text-base (16px) EVITA EL ZOOM EN IPHONE */}
                 <input type="tel" required value={guestPhone} onChange={e => setGuestPhone(e.target.value)} style={themeInput} className="w-full p-2.5 border rounded-lg outline-none font-medium text-base" placeholder="10 dígitos" />
               </div>
 
@@ -10802,15 +10685,15 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                         
                         {sg.willAttend && (
                           <div className="space-y-2 mt-2 pt-2 border-t animate-in fade-in" style={{ borderColor: `${t_txt}10` }}>
-                            {/* 🔴 IMPORTANTE: text-base (16px) EVITA EL ZOOM EN IPHONE */}
                             <input 
-                              type="text" required placeholder="Nombre del asistente..." 
+                              type="text" required 
+                              placeholder={sg.isChild ? "Nombre del niño / menor..." : (idx === 0 ? "Tu nombre..." : "Nombre del adulto acompañante...")} 
                               value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)} 
                               style={themeInput} className="w-full p-2 border rounded-md text-base font-medium outline-none" 
                             />
                             <label className="flex items-center space-x-2 cursor-pointer pt-0.5">
                                <input type="checkbox" checked={sg.isChild || false} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-3.5 h-3.5 accent-indigo-600" />
-                               <span className="text-xs font-medium uppercase tracking-wider opacity-80">Menor de edad</span>
+                               <span className="text-xs font-medium uppercase tracking-wider opacity-80">Pase de Menor / Niño</span>
                             </label>
                           </div>
                         )}
@@ -10818,7 +10701,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                     ))}
                   </div>
 
-                  {/* SOLICITAR PASES EXTRA COMPACTO */}
                   <div className="border-t pt-3 mt-4 flex items-center justify-between p-2 rounded-lg" style={{ borderColor: `${t_txt}15`, backgroundColor: isIframe ? 'transparent' : `${t_bg}40` }}>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-widest">¿Pases extra?</p>
@@ -10846,14 +10728,12 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                 </div>
               )}
               
-              {/* ALERTA DE ERROR COMPACTA */}
               {formError && (
                  <div className="bg-rose-500/10 border border-rose-500/30 text-rose-600 p-2.5 rounded-lg font-bold text-xs flex items-center shadow-sm animate-in shake">
                     <AlertCircle size={16} className="mr-1.5 flex-shrink-0"/> {formError}
                  </div>
               )}
 
-              {/* BOTÓN SUBMIT COMPACTO PERO PODEROSO */}
               <button type="submit" disabled={rsvpStatus === 'submitting'} style={{...themeBtn, opacity: (!guestInfo || tempSubGuests.filter(s => s.willAttend).length > 0) ? 1 : 0.8 }} className="w-full py-3.5 rounded-xl font-bold text-sm sm:text-base shadow-lg hover:scale-[1.02] transition-transform mt-5 border-b-4 border-black/20">
                 {rsvpStatus === 'submitting' ? 'Enviando...' : (!guestInfo || tempSubGuests.filter(s => s.willAttend).length > 0 ? 'Confirmar Asistencia' : 'Declinar Invitación')}
               </button>
@@ -11047,7 +10927,6 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'licencias': return isSuperAdminMode && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} authData={authData} /> : null;
       case 'dashboard': return typeof DashboardView !== 'undefined' ? <DashboardView authData={authData} guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null; 
       
-      // 🔴 AQUÍ PASAMOS TODOS LOS DATOS AL INVITADOSVIEW
       case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={currentEventType} userPlan={currentEventPlan} eventName={currentEventName} /> : null; 
       
       case 'escaner': return userPlan === 'diamante' && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
@@ -11059,12 +10938,14 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'presupuesto': return typeof PresupuestoView !== 'undefined' ? <PresupuestoView authData={authData} gastos={gastos} setGastos={setGastos} proveedores={proveedores} setProveedores={setProveedores} presupuestoTotal={presupuestoTotal} setPresupuestoTotal={setPresupuestoTotal} addNotification={addNotification} /> : null;
       case 'proveedores': return typeof ProveedoresView !== 'undefined' ? <ProveedoresView proveedores={proveedores} setProveedores={setProveedores} gastos={gastos} setGastos={setGastos} addNotification={addNotification} /> : null;
       case 'galeria': return userPlan === 'diamante' && typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} /> : null;
-      case 'invitacion': return typeof InvitacionView !== 'undefined' ? <InvitacionView guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
+      
+      // 🔴 AQUÍ PASAMOS LA URL AL SIMULADOR DEL IPHONE
+      case 'invitacion': return typeof InvitacionView !== 'undefined' ? <InvitacionView guests={guests} urlInvitacion={activeEventData?.urlInvitacion} /> : null; 
+      
       case 'configuracion': return userRole === 'planner' && typeof ConfiguracionMaestraView !== 'undefined' ? <ConfiguracionMaestraView agencyConfig={agencyConfig} addNotification={addNotification} /> : null;
       default: return <div className="p-8 text-center text-slate-500 font-bold">Módulo bloqueado o en construcción.</div>;
     }
   };
-
   return (
     <div className="flex h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans overflow-hidden text-slate-900 dark:text-slate-200 transition-colors duration-700 selection:bg-amber-500 selection:text-white relative">
       
