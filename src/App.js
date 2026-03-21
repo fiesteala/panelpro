@@ -9240,12 +9240,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           
           {/* Textos y Categorías del Showroom */}
           <div className="w-full lg:w-1/2 text-center lg:text-left flex flex-col items-center lg:items-start z-20">
-            <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Muestras de Nuestro Talento</span>
+            <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Inspiración Baulia</span>
             <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 mb-6">
-              Elige el traje a la medida <br className="hidden lg:block"/><span className="italic text-slate-500 dark:text-slate-400">para tu evento.</span>
+              Tu evento es único. <br className="hidden lg:block"/><span className="italic text-slate-500 dark:text-slate-400">Tu invitación también.</span>
             </h2>
             <p className="text-base text-slate-600 dark:text-slate-400 mb-10 max-w-lg font-light leading-relaxed transition-colors duration-700">
-              Lo que ves aquí es solo una pequeñísima fracción de nuestra creatividad. En Baulia somos expertos en diseño; cada invitación se crea <b>100% desde cero y a la medida</b>, adaptando colores, tipografías y proporciones al nivel de tu evento. No pondremos un diseño temático en una boda glamurosa, ni un diseño sobrio en una fiesta vibrante. Estás en manos de profesionales.
+              Explora estas galerías interactivas y descubre nuestra capacidad tecnológica. Estas pantallas son solo piezas de inspiración: en Baulia no usamos plantillas genéricas. Cada proyecto es una obra de alta costura, diseñada desde cero para reflejar la esencia, los colores y el prestigio de tu celebración.
             </p>
 
             <div className="flex flex-wrap justify-center lg:justify-start gap-2 w-full mb-8">
@@ -9255,7 +9255,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   onClick={() => setActiveCategory(demo.id)}
                   className={`px-4 py-2.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all border ${activeCategory === demo.id ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white dark:bg-white/5 text-slate-500 border-slate-300 dark:border-white/20 hover:border-slate-500 dark:hover:border-white/50 hover:text-slate-800 dark:hover:text-white'}`}
                 >
-                  {demo.label}
+                  {demo.label.split(' ')[0]}
                 </button>
               ))}
             </div>
