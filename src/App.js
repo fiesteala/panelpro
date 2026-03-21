@@ -9017,7 +9017,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const isSuperAdminMode = JSON.parse(localStorage.getItem('isSuperAdminMode'));
   const [legalModal, setLegalModal] = useState(null);
   
-  // 🔴 NUEVOS ESTADOS PARA EL CHECKOUT
   const [checkoutModal, setCheckoutModal] = useState(null);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   
@@ -9025,11 +9024,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [accentColor, setAccentColor] = useState('amber');
   const [liveReviews, setLiveReviews] = useState([]);
 
-  // 🔴 AGREGAMOS EL ESTADO PARA LA CUENTA REGRESIVA CON MINUTOS
   const [countdown, setCountdown] = useState({ dias: 0, horas: 0, minutos: 0 });
 
   useEffect(() => {
-    // Definimos una fecha de ejemplo para la cuenta regresiva
     const targetDate = new Date();
     targetDate.setDate(targetDate.getDate() + 155); 
     targetDate.setHours(targetDate.getHours() + 12);
@@ -9048,7 +9045,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       }
     };
     updateCountdown();
-    const timer = setInterval(updateCountdown, 60000); // Actualizar cada minuto
+    const timer = setInterval(updateCountdown, 60000); 
     return () => clearInterval(timer);
   }, []);
 
@@ -9071,7 +9068,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     { icon: Star, title: "Invitación Digital", description: "Mucho más que un enlace. Una obra de arte interactiva con diseño exclusivo para tu evento.", badge: 'Premium' },
     { icon: CheckCircle, title: "RSVP Inteligente", description: "Panel de control para gestionar asistencias en tiempo real con estadísticas precisas.", badge: 'Misión Crítica' },
     { icon: LayoutDashboard, title: "Showroom", description: "Acceso exclusivo para ver demos, seleccionar planes y configurar tu bóveda.", badge: 'Panel VIP' },
-    { icon: Smartphone, title: "Inmersivo", description: "Navegación fluida, monogramas interactivos y experiencias para tus invitados.", badge: 'Experiencia' },
+    { icon: Layers, title: "Inmersivo", description: "Navegación fluida, monogramas interactivos y experiencias para tus invitados.", badge: 'Experiencia' },
   ];
 
   const testimonios = [
@@ -9165,17 +9162,15 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </section>
       
-      {/* SECCIÓN DESTACADA: DISEÑO INMERSIVO (CORRECCIÓN TOTAL DEL LAYOUT) */}
+      {/* SECCIÓN DESTACADA: DISEÑO INMERSIVO */}
       <section id="inmersivo" className="max-w-7xl mx-auto px-6 py-16">
-        <div className="bg-white dark:bg-[#0a0a0a] rounded-[3rem] p-10 md:p-16 border border-slate-100 dark:border-white/5 shadow-2xl transition-colors relative">
+        <div className="bg-white dark:bg-[#0a0a0a] rounded-[3rem] p-10 md:p-16 border border-slate-100 dark:border-white/5 shadow-2xl transition-colors relative overflow-hidden">
            
-           <div className="relative flex flex-col md:flex-row items-center md:items-start justify-between">
+           <div className="relative flex flex-col md:flex-row items-center md:items-start justify-between z-10">
                
-              {/* 🔴 NUEVO LAYOUT: MONOGRAMA / TEXTO A LA IZQUIERDA */}
               <div className="w-full md:w-1/2 text-left md:pr-16 mb-16 md:mb-0 relative z-10">
-                 <div className="absolute top-0 left-0 w-32 h-32 rounded-full bgColor-primary/10 -translate-x-12 -translate-y-12 blur-3xl transition-colors"></div>
+                 <div className="absolute top-0 left-0 w-32 h-32 rounded-full bg-indigo-500/10 dark:bg-amber-500/10 -translate-x-12 -translate-y-12 blur-3xl transition-colors"></div>
                  
-                 {/* BLOQUE DEL MONOGRAMA */}
                  <div className="mb-10 p-6 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 inline-flex items-center gap-4 transition-colors">
                     <span className="text-4xl font-editorial font-black text-slate-200 dark:text-white/20 transition-colors">C&S</span>
                     <p className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 transition-colors">Monograma Inmersivo <br/>Diseño 'Aurora'</p>
@@ -9184,12 +9179,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                  <h2 className="text-5xl font-black text-slate-800 dark:text-white tracking-tighter leading-tight mb-8 transition-colors">Donde la Tecnología se <span className="font-editorial text-indigo-600 dark:text-amber-500 transition-colors">Enamora</span> del Diseño</h2>
                  
                  <div className="space-y-4">
-                     {[ { icon: Zap, text: "Navegación 360° fluida sin recargas." }, { icon: Eye, text: "Efectos visuales y monogramas interactivos." }, { icon: Heart, text: "Un diseño que conecta con tus invitados." }
+                     {[ { icon: Wand2, text: "Navegación 360° fluida sin recargas." }, { icon: Eye, text: "Efectos visuales y monogramas interactivos." }, { icon: Heart, text: "Un diseño que conecta con tus invitados." }
                      ].map((item, idx) => <p key={idx} className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors"><item.icon size={16} className="text-indigo-600 dark:text-amber-500 mr-2.5 transition-colors"/><span className="flex-1">{item.text}</span></p>)}
                  </div>
               </div>
 
-              {/* 🔴 NUEVO LAYOUT: FOTOS STACKED A LA DERECHA (SIN ENCIMARSE CON MONOGRAMA) */}
               <div className="w-full md:w-1/2 flex items-center justify-center relative">
                  <div className="relative w-full max-w-sm h-96 flex items-center justify-center">
                     <div className="absolute top-0 left-10 w-60 h-80 bg-slate-200 dark:bg-slate-700 rounded-2xl shadow-xl transition-all hover:scale-105 hover:z-10 rotate-[-8deg]"></div>
@@ -9201,7 +9195,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </div>
            </div>
 
-           <div className="absolute bottom-10 left-10 text-[80px] font-editorial font-black text-slate-100 dark:text-white/5 transition-colors">360°</div>
+           <div className="absolute bottom-4 left-10 text-[80px] font-editorial font-black text-slate-100 dark:text-white/5 transition-colors pointer-events-none">360°</div>
         </div>
       </section>
       
@@ -9229,15 +9223,15 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       <section className="bg-slate-900 dark:bg-[#0a0a0a] text-white py-12 px-6 border-y border-white/5 transition-colors">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-10">
           <p className="text-xs font-black uppercase tracking-widest text-slate-400 transition-colors">Próximo Lanzamiento de Invitación Inmersiva</p>
-          <div className="flex space-x-5 text-center items-center">
+          <div className="flex space-x-3 sm:space-x-5 text-center items-center">
             {Object.entries(countdown).map(([label, value]) => (
-              <div key={label} className="flex flex-col p-4 bg-white/5 rounded-2xl border border-white/10 transition-colors">
-                <span className="text-4xl font-black transition-colors">{String(value).padStart(2, '0')}</span>
-                <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 transition-colors">{label}</span>
+              <div key={label} className="flex flex-col p-4 bg-white/5 rounded-2xl border border-white/10 transition-colors w-20">
+                <span className="text-3xl sm:text-4xl font-black transition-colors">{String(value).padStart(2, '0')}</span>
+                <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-slate-400 transition-colors">{label}</span>
               </div>
             ))}
           </div>
-          <button onClick={() => window.location.href = '/?modo=showcase'} className="text-sm font-black uppercase tracking-widest px-8 py-3 bg-white/10 text-white rounded-full transition-all hover:bg-white/15 active:scale-95">Quiero la mía</button>
+          <button onClick={() => window.location.href = '/?modo=showcase'} className="text-xs font-black uppercase tracking-widest px-8 py-4 bg-white/10 text-white rounded-full transition-all hover:bg-white/15 active:scale-95 border border-white/20">Quiero la mía</button>
         </div>
       </section>
 
@@ -9361,10 +9355,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       {/* FINAL CTA: INVITACIÓN A AGENDAR */}
       <section className="bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 py-24 px-6 text-center transition-colors">
          <div className="max-w-3xl mx-auto">
-            <Zap size={48} className="mx-auto mb-8 text-white/60 dark:text-slate-900/40 transition-colors"/>
+            <Wand2 size={48} className="mx-auto mb-8 text-white/60 dark:text-slate-900/40 transition-colors"/>
             <h2 className="text-5xl font-black tracking-tighter leading-tight mb-6 transition-colors">¿Estás Listo para el Siguiente Nivel en Invitaciones?</h2>
             <p className="text-lg text-white/80 dark:text-slate-900/80 mb-12 max-w-xl mx-auto transition-colors">Visita el Showroom y descubre nuestros planes exclusivos diseñados para cada tipo de evento.</p>
-            <button onClick={() => window.location.href = '/?modo=showcase'} className="px-12 py-5 bg-white dark:bg-slate-900 text-indigo-700 dark:text-white rounded-full font-black text-sm uppercase tracking-widest transition-all hover:scale-105 shadow-xl shadow-black/10">Explorar Showroom (Demo)</button>
+            <button onClick={() => window.location.href = '/?modo=showcase'} className="px-12 py-5 bg-white dark:bg-slate-900 text-indigo-700 dark:text-white rounded-full font-black text-sm uppercase tracking-widest transition-all hover:scale-105 shadow-xl shadow-black/10 border border-white/20">Explorar Showroom (Demo)</button>
          </div>
       </section>
       
