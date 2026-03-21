@@ -9011,7 +9011,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2 SHOWROOM + DIRECT SALES) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2.1: HERO VIDEO + SHOWROOM) ---
 // ==========================================
 const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [legalModal, setLegalModal] = useState(null);
@@ -9026,12 +9026,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [activeCategory, setActiveCategory] = useState('boda');
 
   const demos = {
-    boda: { id: 'boda', label: 'Boda Clásica', url: '/demos/boda/index.html' },
-    xv: { id: 'xv', label: 'XV Años', url: '/demos/xv/index.html' },
-    cumple_formal: { id: 'cumple_formal', label: 'Cumpleaños', url: '/demos/cumple_formal/index.html' },
-    infantil: { id: 'infantil', label: 'Infantil', url: '/demos/infantil/index.html' },
-    bautizo: { id: 'bautizo', label: 'Bautizo', url: '/demos/bautizo/index.html' },
-    corporativo: { id: 'corporativo', label: 'Empresarial', url: '/demos/corporativo/index.html' }
+    boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica, tipografías finas y paletas sobrias. El estándar de alta costura nupcial.' },
+    xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón, animaciones dinámicas y energía vibrante para la mejor noche.' },
+    cumple_formal: { id: 'cumple_formal', label: 'Cumpleaños Formal', url: '/demos/cumple_formal/index.html', desc: 'Diseños sofisticados para celebrar décadas con mucho estilo y elegancia.' },
+    infantil: { id: 'infantil', label: 'Fiestas Infantiles', url: '/demos/infantil/index.html', desc: 'Temáticas inmersivas al 100%. Llevamos a los niños al universo de sus personajes.' },
+    bautizo: { id: 'bautizo', label: 'Bautizos / Comunión', url: '/demos/bautizo/index.html', desc: 'Tonos pastel, acuarelas suaves y diseños angelicales para momentos íntimos.' },
+    corporativo: { id: 'corporativo', label: 'Empresarial / Galas', url: '/demos/corporativo/index.html', desc: 'Seriedad, branding corporativo y logística estricta para eventos de marca.' }
   };
   const currentDemo = demos[activeCategory];
 
@@ -9070,10 +9070,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const IconTK = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v7.2c0 1.63-.31 3.23-1.11 4.6-1.18 2.01-3.21 3.44-5.5 3.86-2.5.46-5.22-.09-7.25-1.67-1.95-1.52-3.13-3.87-3.2-6.38-.08-2.82 1.25-5.61 3.54-7.24 1.48-1.06 3.32-1.5 5.12-1.37v4.03c-1.04-.15-2.15.02-3.05.62-.92.6-1.53 1.57-1.64 2.66-.1 1.05.28 2.11 1.02 2.85.76.76 1.86 1.1 2.92 1.03 1.16-.08 2.21-.71 2.78-1.7.35-.61.54-1.32.55-2.03V.02z"/></svg>;
 
   const accentThemes = {
-    amber: { text: 'text-amber-500', bg: 'bg-amber-500' },
-    rose: { text: 'text-rose-500', bg: 'bg-rose-500' },
-    emerald: { text: 'text-emerald-500', bg: 'bg-emerald-500' },
-    indigo: { text: 'text-indigo-500', bg: 'bg-indigo-500' }
+    amber: { text: 'text-amber-500', bg: 'bg-amber-500', glow: 'shadow-[0_0_40px_rgba(245,158,11,0.4)]' },
+    rose: { text: 'text-rose-500', bg: 'bg-rose-500', glow: 'shadow-[0_0_40px_rgba(244,63,94,0.4)]' },
+    emerald: { text: 'text-emerald-500', bg: 'bg-emerald-500', glow: 'shadow-[0_0_40px_rgba(16,185,129,0.4)]' },
+    indigo: { text: 'text-indigo-500', bg: 'bg-indigo-500', glow: 'shadow-[0_0_40px_rgba(99,102,241,0.4)]' }
   };
 
   return (
@@ -9092,7 +9092,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 flex flex-col max-h-[90vh]">
             <div className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 shrink-0">
               <div className="flex justify-between items-center mb-1">
-                <h3 className="font-editorial font-bold text-2xl text-slate-900 dark:text-white">Adquirir Licencia</h3>
+                <h3 className="font-editorial font-bold text-2xl text-slate-900 dark:text-white">Activar Licencia</h3>
                 <button onClick={() => setCheckoutModal(null)} className="text-slate-400 hover:text-rose-500"><X size={20}/></button>
               </div>
               <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold flex items-center"><Lock size={12} className="mr-1 text-emerald-500"/> Entorno Seguro</p>
@@ -9143,9 +9143,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                <BauliaLogo className="h-8 md:h-10 w-auto" />
             </a>
           <div className="hidden lg:flex gap-8 text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-            <a href="#experiencia" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">La Experiencia</a>
-            <a href="#boveda" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">El Panel</a>
-            <a href="#planes" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Colección</a>
+            <a href="#showroom" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">La Colección</a>
+            <a href="#experiencia" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Características</a>
+            <a href="#boveda" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">El Software</a>
           </div>
           <div className="flex items-center gap-4">
             <button onClick={cycleTheme} className="text-slate-400 hover:text-amber-600 dark:text-slate-500 dark:hover:text-amber-400 transition-colors" title={`Modo: ${themeSetting.toUpperCase()}`}>
@@ -9164,9 +9164,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </nav>
 
-      {/* HERO SECTION CON SHOWROOM INCRUSTADO */}
+      {/* HERO SECTION: EL VIDEO DEL PODER DE BAULIA */}
       <section className="relative min-h-[90vh] pt-32 pb-20 px-4 md:px-8 max-w-7xl mx-auto z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
-        
         {/* Izquierda: Textos y CTAs */}
         <div className="w-full lg:w-1/2 text-center lg:text-left flex flex-col items-center lg:items-start">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest mb-8 backdrop-blur-md shadow-sm">
@@ -9187,8 +9186,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             <a href="#planes" className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.4)] border border-amber-400">
               Adquirir Licencia <ArrowRight size={18} className="ml-3"/>
             </a>
-            <a href="#experiencia" className="px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
-              Ver Experiencia
+            <a href="#showroom" className="px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
+              Explorar Diseños
             </a>
           </div>
 
@@ -9206,57 +9205,95 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           </div>
         </div>
 
-        {/* Derecha: El Showroom (iPhone Interactivo) */}
-        <div className="w-full lg:w-1/2 relative flex flex-col items-center lg:items-end mt-12 lg:mt-0 perspective-[1000px] z-20">
-          
-          <div className="relative w-full max-w-[320px] md:max-w-[380px] aspect-[9/16] bg-slate-900 rounded-[3rem] border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.4)] overflow-hidden transform lg:-rotate-y-6 lg:rotate-x-2 hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-700">
-              {/* Isla Dinámica simulada */}
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-20 flex justify-end items-center pr-2">
-                <div className="w-2 h-2 rounded-full bg-slate-800/80 mr-1"></div>
-                <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
-              </div>
+        {/* Derecha: Placeholder del VIDEO DEMO */}
+        <div className="w-full lg:w-1/2 relative flex justify-center lg:justify-end mt-12 lg:mt-0 perspective-[1000px]">
+          {/* Aquí inyectaremos el iframe de YouTube o Vimeo de Screen Studio */}
+          <div className="relative w-full max-w-[600px] aspect-video bg-slate-900 rounded-[2rem] border border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.4)] overflow-hidden transform lg:-rotate-y-6 lg:rotate-x-2 hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-700 flex items-center justify-center group cursor-pointer">
               
-              {/* El iFrame Interactivo */}
-              <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-[#111] relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-black z-0"></div>
+              
+              <div className="relative z-10 flex flex-col items-center justify-center text-center p-6">
+                  <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <PlayCircle size={32} className="text-amber-500 animate-pulse"/>
+                  </div>
+                  <h3 className="text-white font-editorial text-2xl font-bold mb-2">Conoce el Panel Baulia</h3>
+                  <p className="text-slate-400 text-xs">Video Demostrativo del Software</p>
+              </div>
+
+              {/* Nota para el CEO: Reemplazar este div con el iframe real de YouTube/Vimeo después */}
+          </div>
+          
+          {/* Elementos flotantes decorativos */}
+          <div className="absolute -bottom-6 left-6 md:left-12 bg-white/90 dark:bg-black/80 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-200 dark:border-white/10 animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-300 z-20">
+              <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-500"><CheckCircle size={20}/></div>
+                  <div>
+                      <p className="text-xs font-black uppercase text-slate-800 dark:text-white">RSVP Confirmado</p>
+                      <p className="text-[10px] text-slate-500">Familia Torres (4 Pases)</p>
+                  </div>
+              </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN NUEVA: EL SHOWROOM INTERACTIVO (IPHONE 16 PRO MAX) */}
+      <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#0a0a0a] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-center justify-between gap-16">
+          
+          {/* Textos y Categorías del Showroom */}
+          <div className="w-full lg:w-1/2 text-center lg:text-left flex flex-col items-center lg:items-start">
+            <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Catálogo de Alta Costura</span>
+            <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 mb-6">
+              Elige el traje a la medida <br className="hidden lg:block"/><span className="italic text-slate-500 dark:text-slate-400">para tu evento.</span>
+            </h2>
+            <p className="text-lg text-slate-600 dark:text-slate-400 mb-10 max-w-lg font-light leading-relaxed transition-colors duration-700">
+              {currentDemo.desc} Al adquirir tu licencia, podrás seleccionar cualquiera de estos temas premium y personalizar colores, tipografías y fotografías desde tu panel.
+            </p>
+
+            <div className="flex flex-wrap justify-center lg:justify-start gap-3 w-full">
+              {Object.values(demos).map(demo => (
+                <button 
+                  key={demo.id} 
+                  onClick={() => setActiveCategory(demo.id)}
+                  className={`px-5 py-3 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all border ${activeCategory === demo.id ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white dark:bg-white/5 text-slate-500 border-slate-300 dark:border-white/20 hover:border-slate-500 dark:hover:border-white/50 hover:text-slate-800 dark:hover:text-white'}`}
+                >
+                  {demo.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* El IPHONE 16 PRO MAX REALISTA */}
+          <div className="w-full lg:w-1/2 flex justify-center lg:justify-end relative">
+            <div className="relative w-[300px] sm:w-[360px] aspect-[430/932] bg-black rounded-[3.5rem] border-[12px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.3)] overflow-hidden flex-shrink-0">
+                {/* Isla Dinámica */}
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 w-[32%] h-[32px] bg-black rounded-full z-20 flex justify-end items-center pr-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-800/80 mr-1.5"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-indigo-900/50"></div>
+                </div>
+                
+                {/* El iFrame adaptado perfectamente al 100% de la pantalla */}
                 <iframe 
                   src={currentDemo.url} 
-                  className="absolute top-0 left-0 border-0"
+                  className="absolute inset-0 w-full h-full border-0 bg-[#111]"
                   title={`Demo ${currentDemo.label}`}
-                  style={{ 
-                     width: '390px', 
-                     height: '844px', 
-                     transform: 'scale(0.78)', 
-                     transformOrigin: 'top left' 
-                  }}
                 ></iframe>
-              </div>
+            </div>
 
-              {/* Botón flotante para ver en grande */}
-              <button onClick={() => window.open(currentDemo.url, '_blank')} className="absolute bottom-6 right-6 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full font-bold text-[10px] text-white uppercase tracking-widest flex items-center transition-colors shadow-2xl z-50">
-                Ver Completo <ExternalLink size={12} className="ml-2"/>
-              </button>
+            {/* Decoración del Showroom */}
+            <div className="absolute -bottom-6 -right-6 lg:right-10 bg-white/90 dark:bg-black/80 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-200 dark:border-white/10 animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-500 z-20 hidden sm:block">
+              <p className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1 text-center">Diseño Interactivo</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold text-center">Interactúa con el teléfono 👉</p>
+            </div>
           </div>
-
-          {/* Botones de Selección de Categoría */}
-          <div className="flex flex-wrap justify-center lg:justify-end gap-2 mt-8 max-w-[400px]">
-            {Object.values(demos).map(demo => (
-              <button 
-                key={demo.id} 
-                onClick={() => setActiveCategory(demo.id)}
-                className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${activeCategory === demo.id ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-transparent text-slate-500 border-slate-300 dark:border-white/20 hover:border-slate-500 dark:hover:border-white/50 hover:text-slate-800 dark:hover:text-white'}`}
-              >
-                {demo.label.split(' ')[0]}
-              </button>
-            ))}
-          </div>
-
+          
         </div>
       </section>
 
       {/* BENTO BOX: INVITACIONES INTERACTIVAS */}
       <section id="experiencia" className="py-24 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
         <div className="mb-16 text-center md:text-left">
-          <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Fase 1: La Invitación</span>
+          <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Detalles de Alta Costura</span>
           <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700">Más que una invitación.<br/><span className="italic text-slate-500 dark:text-slate-400">Una experiencia táctil.</span></h2>
         </div>
 
