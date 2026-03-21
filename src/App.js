@@ -9011,7 +9011,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2.1: HERO VIDEO + SHOWROOM) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2.2: SHOWROOM RESPONSIVO + COPY PRO) ---
 // ==========================================
 const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [legalModal, setLegalModal] = useState(null);
@@ -9026,12 +9026,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [activeCategory, setActiveCategory] = useState('boda');
 
   const demos = {
-    boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica, tipografías finas y paletas sobrias. El estándar de alta costura nupcial.' },
-    xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón, animaciones dinámicas y energía vibrante para la mejor noche.' },
-    cumple_formal: { id: 'cumple_formal', label: 'Cumpleaños Formal', url: '/demos/cumple_formal/index.html', desc: 'Diseños sofisticados para celebrar décadas con mucho estilo y elegancia.' },
-    infantil: { id: 'infantil', label: 'Fiestas Infantiles', url: '/demos/infantil/index.html', desc: 'Temáticas inmersivas al 100%. Llevamos a los niños al universo de sus personajes.' },
-    bautizo: { id: 'bautizo', label: 'Bautizos / Comunión', url: '/demos/bautizo/index.html', desc: 'Tonos pastel, acuarelas suaves y diseños angelicales para momentos íntimos.' },
-    corporativo: { id: 'corporativo', label: 'Empresarial / Galas', url: '/demos/corporativo/index.html', desc: 'Seriedad, branding corporativo y logística estricta para eventos de marca.' }
+    boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica y paletas sobrias. El estándar de alta costura nupcial.' },
+    xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón y energía vibrante para la mejor noche de tu vida.' },
+    cumple_formal: { id: 'cumple_formal', label: 'Cumpleaños / Social', url: '/demos/cumple_formal/index.html', desc: 'Sofisticación pura para celebrar décadas con mucho estilo.' },
+    infantil: { id: 'infantil', label: 'Fiestas Temáticas', url: '/demos/infantil/index.html', desc: 'Llevamos la temática al máximo nivel con inmersión total.' },
+    bautizo: { id: 'bautizo', label: 'Bautizos / Comunión', url: '/demos/bautizo/index.html', desc: 'Tonos pastel y diseños angelicales para momentos íntimos.' },
+    corporativo: { id: 'corporativo', label: 'Empresarial / Galas', url: '/demos/corporativo/index.html', desc: 'Branding corporativo impecable y logística estricta.' }
   };
   const currentDemo = demos[activeCategory];
 
@@ -9219,8 +9219,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   <h3 className="text-white font-editorial text-2xl font-bold mb-2">Conoce el Panel Baulia</h3>
                   <p className="text-slate-400 text-xs">Video Demostrativo del Software</p>
               </div>
-
-              {/* Nota para el CEO: Reemplazar este div con el iframe real de YouTube/Vimeo después */}
           </div>
           
           {/* Elementos flotantes decorativos */}
@@ -9237,53 +9235,69 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* SECCIÓN NUEVA: EL SHOWROOM INTERACTIVO (IPHONE 16 PRO MAX) */}
-      <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#0a0a0a] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700">
+      <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#0a0a0a] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-center justify-between gap-16">
           
           {/* Textos y Categorías del Showroom */}
-          <div className="w-full lg:w-1/2 text-center lg:text-left flex flex-col items-center lg:items-start">
-            <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Catálogo de Alta Costura</span>
+          <div className="w-full lg:w-1/2 text-center lg:text-left flex flex-col items-center lg:items-start z-20">
+            <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Muestras de Nuestro Talento</span>
             <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 mb-6">
               Elige el traje a la medida <br className="hidden lg:block"/><span className="italic text-slate-500 dark:text-slate-400">para tu evento.</span>
             </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 mb-10 max-w-lg font-light leading-relaxed transition-colors duration-700">
-              {currentDemo.desc} Al adquirir tu licencia, podrás seleccionar cualquiera de estos temas premium y personalizar colores, tipografías y fotografías desde tu panel.
+            <p className="text-base text-slate-600 dark:text-slate-400 mb-10 max-w-lg font-light leading-relaxed transition-colors duration-700">
+              Lo que ves aquí es solo una pequeñísima fracción de nuestra creatividad. En Baulia somos expertos en diseño; cada invitación se crea <b>100% desde cero y a la medida</b>, adaptando colores, tipografías y proporciones al nivel de tu evento. No pondremos un diseño temático en una boda glamurosa, ni un diseño sobrio en una fiesta vibrante. Estás en manos de profesionales.
             </p>
 
-            <div className="flex flex-wrap justify-center lg:justify-start gap-3 w-full">
+            <div className="flex flex-wrap justify-center lg:justify-start gap-2 w-full mb-8">
               {Object.values(demos).map(demo => (
                 <button 
                   key={demo.id} 
                   onClick={() => setActiveCategory(demo.id)}
-                  className={`px-5 py-3 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all border ${activeCategory === demo.id ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white dark:bg-white/5 text-slate-500 border-slate-300 dark:border-white/20 hover:border-slate-500 dark:hover:border-white/50 hover:text-slate-800 dark:hover:text-white'}`}
+                  className={`px-4 py-2.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all border ${activeCategory === demo.id ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white dark:bg-white/5 text-slate-500 border-slate-300 dark:border-white/20 hover:border-slate-500 dark:hover:border-white/50 hover:text-slate-800 dark:hover:text-white'}`}
                 >
                   {demo.label}
                 </button>
               ))}
             </div>
+
+            <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 p-5 rounded-2xl shadow-sm text-left max-w-lg w-full transition-colors">
+               <p className="font-bold text-slate-800 dark:text-white mb-1">{currentDemo.label}</p>
+               <p className="text-sm text-slate-500 dark:text-slate-400">{currentDemo.desc}</p>
+            </div>
+
+            <button className="mt-10 px-8 py-4 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm">
+               Descubre la Anatomía de nuestras Invitaciones
+            </button>
+
           </div>
 
-          {/* El IPHONE 16 PRO MAX REALISTA */}
-          <div className="w-full lg:w-1/2 flex justify-center lg:justify-end relative">
-            <div className="relative w-[300px] sm:w-[360px] aspect-[430/932] bg-black rounded-[3.5rem] border-[12px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.3)] overflow-hidden flex-shrink-0">
+          {/* El IPHONE 16 PRO MAX REALISTA (PROPORCIONES Y RESOLUCIÓN EXACTA) */}
+          <div className="w-full lg:w-1/2 flex justify-center lg:justify-end relative z-10">
+            
+            {/* Contenedor que simula el tamaño visual del teléfono */}
+            <div style={{ width: '322px', height: '670px' }} className="relative bg-black rounded-[3.5rem] border-[12px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.3)] overflow-hidden flex-shrink-0 mx-auto lg:mr-0">
+                
                 {/* Isla Dinámica */}
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 w-[32%] h-[32px] bg-black rounded-full z-20 flex justify-end items-center pr-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-slate-800/80 mr-1.5"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-indigo-900/50"></div>
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[30%] h-[30px] bg-black rounded-full z-20 flex justify-end items-center pr-2">
+                  <div className="w-2 h-2 rounded-full bg-slate-800/80 mr-1"></div>
+                  <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
                 </div>
                 
-                {/* El iFrame adaptado perfectamente al 100% de la pantalla */}
-                <iframe 
-                  src={currentDemo.url} 
-                  className="absolute inset-0 w-full h-full border-0 bg-[#111]"
-                  title={`Demo ${currentDemo.label}`}
-                ></iframe>
+                {/* El iFrame Renderizado a la resolución exacta del iPhone 16 Pro Max y escalado */}
+                <div className="absolute top-0 left-0 w-[430px] h-[932px] origin-top-left bg-[#111]" style={{ transform: 'scale(0.693)' }}>
+                  <iframe 
+                    src={currentDemo.url} 
+                    className="w-full h-full border-0"
+                    title={`Demo ${currentDemo.label}`}
+                  ></iframe>
+                </div>
+
             </div>
 
             {/* Decoración del Showroom */}
             <div className="absolute -bottom-6 -right-6 lg:right-10 bg-white/90 dark:bg-black/80 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-200 dark:border-white/10 animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-500 z-20 hidden sm:block">
               <p className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1 text-center">Diseño Interactivo</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold text-center">Interactúa con el teléfono 👉</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold text-center">Interactúa con la pantalla 👉</p>
             </div>
           </div>
           
