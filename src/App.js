@@ -9310,7 +9310,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* ========================================== */}
-      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (CORRECCIÓN FINAL: ESCALADO PERFECTO APPLE) */}
+      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (POSICIONES RESTAURADAS + IFRAMES CORREGIDOS) */}
       {/* ========================================== */}
       <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#050505] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden flex items-center">
         {/* Glow de ambiente sutil */}
@@ -9367,7 +9367,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA/CENTRO: Composición de Dispositivos */}
+                    {/* COLUMNA DERECHA/CENTRO: Composición de Dispositivos (POSICIONES RESTAURADAS) */}
                     <div className="w-7/12 xl:w-2/3 relative h-full flex items-center justify-end z-20">
                         
                         {/* --- 🔴 MACBOOK DE FONDO (Con Espacios Simétricos) --- */}
@@ -9376,9 +9376,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 {/* Notch */}
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-6 bg-black rounded-b-2xl z-30"></div>
                                 
-                                {/* Pantalla Mac (Escalada para forzar versión escritorio) */}
+                                {/* 🔴 CORRECCIÓN: Pantalla Mac (Escalada para forzar versión escritorio) */}
                                 <div className="w-full flex-1 bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
-                                    {/* MAGIA DE ESCALA: 200% y luego scale(0.5) para engañar al responsive */}
                                     <iframe src={currentDemo.url} className="absolute top-0 left-0 border-0 origin-top-left" style={{ width: '200%', height: '200%', transform: 'scale(0.5)' }} title={`Mac Demo ${currentDemo.label}`}></iframe>
                                 </div>
                                 
@@ -9402,7 +9401,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                     <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
                                   </div>
                                   
-                                  {/* SOLUCIÓN IPHONE: Contenedor estricto de 430x932 escalado a 0.6511 desde la esquina superior izquierda */}
+                                  {/* 🔴 CORRECCIÓN: SOLUCIÓN IPHONE (Escala perfecta sin cortes) */}
                                   <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] z-10">
                                       <div className="absolute top-0 left-0 w-[430px] h-[932px] origin-top-left" style={{ transform: 'scale(0.6511)' }}>
                                           <iframe src={currentDemo.url} className="w-full h-full border-0" title={`iPhone Demo ${currentDemo.label}`}></iframe>
