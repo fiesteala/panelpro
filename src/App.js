@@ -11692,6 +11692,14 @@ const ShowcaseSimulatorView = () => {
   const [checkoutStep, setCheckoutStep] = useState(0); 
   const [planSeleccionado, setPlanSeleccionado] = useState(null);
 
+  // 🔴 NUEVO BLINDAJE: Detecta si el cliente regresa de "Pantalla Completa" queriendo comprar
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('checkout') === '1') {
+      setCheckoutStep(1);
+    }
+  }, []);
+
   // 🔴 LA MAGIA DE LA COMUNICACIÓN: Escuchamos al archivo HTML dentro del Iframe
   useEffect(() => {
     const escucharMensajeDelIframe = (event) => {
