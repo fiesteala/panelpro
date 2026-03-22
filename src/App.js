@@ -9310,7 +9310,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* ========================================== */}
-      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (POSICIONES RESTAURADAS + IFRAMES CORREGIDOS) */}
+      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (ESCALAS Y COMPOSICIÓN APPLE PERFECTAS) */}
       {/* ========================================== */}
       <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#050505] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden flex items-center">
         {/* Glow de ambiente sutil */}
@@ -9318,38 +9318,38 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 w-full flex flex-col items-center">
 
-            {/* 🔴 EL MARCO DE SECCIÓN (Caja gris estilo Apple) */}
+            {/* 🔴 EL MARCO DE SECCIÓN (Caja gris estilo Apple con todo adentro) */}
             {!isMobileDevice ? (
-                <RevealSection delay={200} className="w-full relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 items-stretch flex group p-10 lg:p-12 xl:p-14 min-h-[650px]">
+                <RevealSection delay={200} className="w-full relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 flex group p-12 min-h-[680px]">
                     
                     {/* Glow interno sutil superior */}
                     <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white dark:from-[#080808] to-transparent opacity-40 z-0 transition-colors pointer-events-none"></div>
 
                     {/* COLUMNA IZQUIERDA: Texto, Título, Controles y Botón */}
-                    <div className="w-5/12 xl:w-1/3 relative z-30 flex flex-col justify-between h-full pt-10 pb-6 transition-colors gap-8">
+                    <div className="w-5/12 xl:w-1/3 relative z-30 flex flex-col justify-center h-full gap-10 py-6">
                         
                         <div className="flex flex-col gap-6">
                             {/* Eyebrow y Título */}
                             <div className="flex flex-col gap-3">
-                                <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-[10px] block transition-colors">Inspiración Baulia</span>
-                                <h2 className="text-3xl lg:text-4xl xl:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 leading-tight">
+                                <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs block transition-colors">Inspiración Baulia</span>
+                                <h2 className="text-4xl md:text-5xl lg:text-6xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 leading-tight">
                                     Tu evento es único. <br className="hidden md:block"/> tu invitación también.
                                 </h2>
                             </div>
                             
                             {/* Parrafo Baulia */}
-                            <p className="text-sm lg:text-base text-slate-600 dark:text-slate-400 font-light leading-relaxed transition-colors duration-700 max-w-sm">
+                            <p className="text-base lg:text-lg text-slate-600 dark:text-slate-400 font-light leading-relaxed transition-colors duration-700 max-w-md">
                                 Explora estas galerías interactivas. En Baulia no usamos plantillas genéricas; operamos como un estudio de alta costura digital. Nuestro equipo programa cada invitación <b>100% desde cero</b>, adaptando la estética al nivel de tu evento.
                             </p>
                         </div>
 
-                        <div className="flex flex-col gap-10">
+                        <div className="flex flex-col gap-8">
                             {/* Dropdown de Categorías Baulia */}
                             <div className="relative w-full max-w-[280px] z-10">
                                 <select
                                     value={activeCategory}
                                     onChange={(e) => setActiveCategory(e.target.value)}
-                                    className="w-full appearance-none bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white py-3.5 px-5 rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-sm focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
+                                    className="w-full appearance-none bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white py-4 px-6 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-sm focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
                                 >
                                     {Object.values(demos).map(demo => (
                                         <option key={demo.id} value={demo.id}>{demo.label}</option>
@@ -9361,59 +9361,62 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             </div>
 
                             {/* Botón descriptivo Baulia */}
-                            <button className="w-full sm:w-max px-6 py-3.5 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm flex items-center justify-center transition-colors">
+                            <button className="w-full sm:w-max px-8 py-4 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm flex items-center justify-center">
                                  Descubre la Anatomía de nuestras Invitaciones
                             </button>
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA/CENTRO: Composición de Dispositivos (POSICIONES RESTAURADAS) */}
-                    <div className="w-7/12 xl:w-2/3 relative h-full flex items-center justify-end z-20">
+                    {/* COLUMNA DERECHA/CENTRO: Composición de Dispositivos Perfecta */}
+                    <div className="w-7/12 xl:w-2/3 relative flex items-center justify-end z-20">
                         
-                        {/* --- 🔴 MACBOOK DE FONDO (Con Espacios Simétricos) --- */}
-                        <div className="absolute top-[12.5%] bottom-[12.5%] right-[-10%] w-[75%] z-10 flex items-center transition-transform duration-700 pointer-events-auto">
-                            <div className="relative w-full aspect-[16/10] bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-colors duration-700 h-full">
+                        {/* Contenedor relativo que agrupa Mac e iPhone para centrarlos a lo alto y empujarlos a la derecha */}
+                        <div className="relative w-full max-w-[850px] translate-x-[15%]">
+                            
+                            {/* --- 🔴 MACBOOK DE FONDO (Escala forzada a escritorio) --- */}
+                            <div className="relative w-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-colors duration-700 pointer-events-auto">
                                 {/* Notch */}
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-6 bg-black rounded-b-2xl z-30"></div>
                                 
-                                {/* 🔴 CORRECCIÓN: Pantalla Mac (Escalada para forzar versión escritorio) */}
-                                <div className="w-full flex-1 bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
-                                    <iframe src={currentDemo.url} className="absolute top-0 left-0 border-0 origin-top-left" style={{ width: '200%', height: '200%', transform: 'scale(0.5)' }} title={`Mac Demo ${currentDemo.label}`}></iframe>
+                                {/* Pantalla Mac - 250% reducida al 40% para forzar la vista ultra-wide de escritorio */}
+                                <div className="w-full aspect-[16/10] bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
+                                    <iframe src={currentDemo.url} className="absolute top-0 left-0 border-0 origin-top-left" style={{ width: '250%', height: '250%', transform: 'scale(0.4)' }} title={`Mac Demo ${currentDemo.label}`}></iframe>
                                 </div>
                                 
                                 {/* Base Mac */}
-                                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-[105%] h-4 bg-slate-400 dark:bg-slate-700 rounded-b-3xl shadow-xl z-30 transition-colors">
+                                <div className="relative w-[105%] -left-[2.5%] h-4 bg-slate-400 dark:bg-slate-700 rounded-b-3xl shadow-xl z-30 transition-colors">
                                    <div className="w-40 h-1.5 bg-slate-300 dark:bg-slate-600 mx-auto rounded-b-md"></div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* --- 🔴 IPHONE AL FRENTE (Medidas Reales y Exactas) --- */}
-                        <div className="absolute bottom-[10.5%] left-[8%] xl:left-[12%] z-20 transition-transform duration-700 hover:scale-[1.02] pointer-events-none">
-                              <div 
-                                ref={showroomPhoneRef}
-                                style={{ width: '280px', height: '606px' }} 
-                                className={`relative bg-black rounded-[3.5rem] border-[10px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto transition-all duration-1000 ease-out origin-bottom ${isPhoneVisible ? 'translate-y-0 rotate-x-0 rotate-y-0 scale-100 opacity-100' : 'translate-y-32 rotate-x-[20deg] scale-95 opacity-0'}`}
-                              >
-                                  {/* Isla Dinámica Escalada */}
-                                  <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[30%] h-[24px] bg-black rounded-full z-30 flex justify-end items-center pr-2">
-                                    <div className="w-2 h-2 rounded-full bg-slate-800/80 mr-1.5"></div>
-                                    <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
-                                  </div>
-                                  
-                                  {/* 🔴 CORRECCIÓN: SOLUCIÓN IPHONE (Escala perfecta sin cortes) */}
-                                  <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] z-10">
-                                      <div className="absolute top-0 left-0 w-[430px] h-[932px] origin-top-left" style={{ transform: 'scale(0.6511)' }}>
-                                          <iframe src={currentDemo.url} className="w-full h-full border-0" title={`iPhone Demo ${currentDemo.label}`}></iframe>
+                            {/* --- 🔴 IPHONE AL FRENTE (Alineado al Bottom, Escala Móvil Exacta) --- */}
+                            {/* bottom-0 lo ancla a la base de la laptop. left-[-15%] lo traslapa. */}
+                            <div className="absolute bottom-0 left-[-15%] xl:left-[-5%] z-40 transition-transform duration-700 hover:scale-[1.02] pointer-events-none">
+                                  <div 
+                                    ref={showroomPhoneRef}
+                                    style={{ width: '220px', height: '477px' }} 
+                                    className={`relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto transition-all duration-1000 ease-out origin-bottom ${isPhoneVisible ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'}`}
+                                  >
+                                      {/* Isla Dinámica */}
+                                      <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-[30%] h-[16px] bg-black rounded-full z-20 flex justify-end items-center pr-1.5">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-800/80 mr-1"></div>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
+                                      </div>
+                                      
+                                      {/* Contenedor lógico del iPhone 430x932 escalado exactamente a 0.5116 para medir 220x476.8 */}
+                                      <div className="absolute inset-0 overflow-hidden rounded-[2rem] z-10 bg-[#111]">
+                                          <div className="absolute top-0 left-0 w-[430px] h-[932px] origin-top-left" style={{ transform: 'scale(0.5116)' }}>
+                                              <iframe src={currentDemo.url} className="w-full h-full border-0" title={`iPhone Demo ${currentDemo.label}`}></iframe>
+                                          </div>
                                       </div>
                                   </div>
-                              </div>
+                            </div>
                         </div>
                     </div>
 
                 </RevealSection>
             ) : (
-                /* 🔴 PLACEHOLDER MÓVIL */
+                /* 🔴 PLACEHOLDER MÓVIL (Simple) */
                 <RevealSection delay={200} className="w-full bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-3xl p-8 text-center transition-colors">
                      <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20 text-amber-500">
                          <Smartphone size={32}/>
