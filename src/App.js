@@ -9532,7 +9532,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     <div className="w-7/12 xl:w-2/3 relative flex items-center justify-end z-20">
                         
                         {/* Contenedor relativo que agrupa Mac e iPhone para centrarlos a lo alto y empujarlos a la derecha */}
-                        <div className="relative w-full max-w-[850px] translate-x-[15%]">
+                        <div className="relative w-full max-w-[850px] translate-x-[25%]">
                             
                             {/* --- 🔴 MACBOOK DE FONDO (Escala forzada a escritorio) --- */}
                             <div className="relative w-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-colors duration-700 pointer-events-auto">
@@ -9566,14 +9566,14 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                       
                                       {/* ✅ RESTAURADO: Escala original segura (no desborda) pero más alta (1005px) para tapar lo negro */}
                                       <div className="absolute inset-0 overflow-hidden rounded-[1.8rem] z-10 bg-[#111] flex items-center justify-center">
-                                        <div className="w-[478px] h-[1040px] origin-center flex-shrink-0" style={{ transform: 'scale(0.46)' }}>
-                                          <iframe
-                                            src={currentDemo.url}
-                                            className="w-full h-full border-0"
-                                            title={`iPhone Demo ${currentDemo.label}`}
-                                          ></iframe>
-                                        </div>
-                                      </div>
+    <div className="w-[390px] h-[845px] origin-center flex-shrink-0" style={{ transform: 'scale(0.46)' }}>
+        <iframe
+            src={currentDemo.url}
+            className="w-full h-full border-0"
+            title={`iPhone Demo ${currentDemo.label}`}
+        ></iframe>
+    </div>
+</div>
                                   </div>
                             </div>
                         </div>
