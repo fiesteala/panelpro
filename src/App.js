@@ -9039,9 +9039,7 @@ const RevealSection = ({ children, className = '', delay = 0 }) => {
 // --- COMPONENTE: REVISTA EDITORIAL (ANATOMÍA DE LA INVITACIÓN) ---
 // ==========================================
 const AnatomyOverlay = ({ onClose }) => {
-  const MonogramPlaceholder = ({ className }) => <div className={`${className} font-monogram text-white text-3xl flex items-center justify-center bg-slate-200 dark:bg-white/5 rounded-2xl`}>A&R</div>;
-  const IconIG = () => <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 1.727-6.98 6.077-.058 1.28-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 1.718 6.781 6.077 6.98 1.28.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-1.718 6.979-6.077.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-1.717-6.78-6.077-6.98-1.28-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>;
-
+  // Los 24 elementos categorizados lógicamente en 4 Features Editoriales
   const sections = [
     {
       title: "Identidad Visual",
@@ -9184,7 +9182,7 @@ const AnatomyOverlay = ({ onClose }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 3.0: SHOWROOM APPLE EDITORIAL) ---
+// --- COMPONENTE PRINCIPAL: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 3.0: SHOWROOM APPLE EDITORIAL) ---
 // ==========================================
 const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [legalModal, setLegalModal] = useState(null);
@@ -9195,6 +9193,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [accentColor, setAccentColor] = useState('amber');
   const [liveReviews, setLiveReviews] = useState([]);
   
+  // 🔴 ESTADO PARA ABRIR LA REVISTA
+  const [showAnatomy, setShowAnatomy] = useState(false);
+
   // 🔴 ESTADOS PARA EL SHOWROOM INCRUSTADO
   const [activeCategory, setActiveCategory] = useState('boda');
   const [isMobileDevice, setIsMobileDevice] = useState(false);
@@ -9303,13 +9304,18 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white transition-colors duration-700 overflow-x-hidden relative">
       
-      {/* 🔴 BOTÓN FLOTANTE DE WHATSAPP (VENTAS) */}
-      <a href="https://wa.me/525512345678?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20Baulia" target="_blank" rel="noreferrer" className="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-[0_10px_20px_rgba(16,185,129,0.4)] hover:scale-110 hover:bg-emerald-400 transition-all z-50 group flex items-center justify-center">
-        <MessageCircle size={28} />
-        <span className="absolute right-full mr-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
-          Habla con Ventas
-        </span>
-      </a>
+      {/* 🔴 INCRUSTACIÓN DE LA REVISTA (AÑADE ESTA LÍNEA) */}
+      {showAnatomy && <AnatomyOverlay onClose={() => setShowAnatomy(false)} />}
+
+      {/* 🔴 OCULTAMOS EL BOTÓN DE WHATSAPP SI LA REVISTA ESTÁ ABIERTA */}
+      {!showAnatomy && (
+        <a href="https://wa.me/525512345678?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20Baulia" target="_blank" rel="noreferrer" className="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-[0_10px_20px_rgba(16,185,129,0.4)] hover:scale-110 hover:bg-emerald-400 transition-all z-50 group flex items-center justify-center">
+          <MessageCircle size={28} />
+          <span className="absolute right-full mr-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
+            Habla con Ventas
+          </span>
+        </a>
+      )}
 
       {/* MODAL CHECKOUT */}
       {checkoutModal && (
@@ -9358,9 +9364,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         .font-monogram { font-family: 'Great Vibes', cursive; }
       `}</style>
 
-      {/* LUCES DE AMBIENTE SUTILES */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 dark:bg-amber-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
-      <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-500/5 dark:bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
+      {/* 🔴 ENVUELVE TODO EL CONTENIDO PRINCIPAL PARA OCULTARLO CUANDO LA REVISTA SE ABRA */}
+      <div className={`${showAnatomy ? 'hidden' : 'block'}`}>
+        
+        {/* LUCES DE AMBIENTE SUTILES */}
+        <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 dark:bg-amber-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
+        <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-500/5 dark:bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
 
       {/* NAVEGACIÓN FLOTANTE */}
       <nav className="fixed w-full z-50 top-0 pt-4 md:pt-6 px-4 md:px-8 pointer-events-none">
@@ -9511,7 +9520,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             </div>
 
                             {/* Botón descriptivo Baulia */}
-                            <button className="w-full sm:w-max px-8 py-4 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm flex items-center justify-center">
+                            <button onClick={() => setShowAnatomy(true)} className="w-full sm:w-max px-8 py-4 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm flex items-center justify-center">
                                  Descubre la Anatomía de nuestras Invitaciones
                             </button>
                         </div>
@@ -9573,6 +9582,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                      </div>
                      <p className="text-slate-900 dark:text-white font-editorial text-xl font-bold mb-2 transition-colors">Vívelo en tu Teléfono</p>
                      <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 transition-colors">Selecciona una categoría arriba para abrir la demostración interactiva a pantalla completa en tu dispositivo.</p>
+                     <button onClick={() => setShowAnatomy(true)} className="w-full px-6 py-3 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm">
+                        Descubre nuestra Anatomía
+                     </button>
                 </RevealSection>
             )}
 
@@ -10056,6 +10068,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
            </div>
         </div>
       </footer>
+
+      </div> {/* <--- 🔴 ESTE ES EL DIV QUE CIERRA EL ENVOLTORIO QUE ABRISTE ARRIBA */}
 
       {/* MODALES LEGALES Y ACERCA DE (OVERLAYS) */}
       {legalModal && (
