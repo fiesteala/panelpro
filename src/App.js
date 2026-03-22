@@ -9564,11 +9564,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
                                       </div>
                                       
-                                      {/* 🔴 SOLUCIÓN IPHONE: Uso de flex y origin-center para centrar perfectamente el iframe escalado */}
-                                      <div className="absolute inset-0 overflow-hidden rounded-[1.8rem] z-10 bg-[#111] flex items-center justify-center">
-                                          <div className="w-[430px] h-[932px] origin-center flex-shrink-0" style={{ transform: 'scale(0.475)' }}>
-                                              <iframe src={currentDemo.url} className="w-full h-full border-0" title={`iPhone Demo ${currentDemo.label}`}></iframe>
-                                          </div>
+                                      {/* ✅ CORRECCIÓN FINAL: El iframe ocupa el 100% de la pantalla, sin bordes negros */}
+                                      <div className="absolute inset-0 overflow-hidden rounded-[1.8rem] z-10 bg-[#111]">
+                                        <iframe src={currentDemo.url} className="w-full h-full border-0" title={`iPhone Demo ${currentDemo.label}`}></iframe>
                                       </div>
                                   </div>
                             </div>
