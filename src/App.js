@@ -9034,7 +9034,7 @@ const RevealSection = ({ children, className = '', delay = 0 }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2.9: SHOWROOM APPLE STYLE FIXED) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 3.0: SHOWROOM APPLE EDITORIAL) ---
 // ==========================================
 const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [legalModal, setLegalModal] = useState(null);
@@ -9097,7 +9097,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón y energía vibrante para la mejor noche de tu vida.' },
     baby_shower: { id: 'baby_shower', label: 'Baby Shower / Revelación', url: '/demos/baby_shower/index.html', desc: 'Ternura, interactividad y emoción para recibir a la nueva vida.' },
     cumple_formal: { id: 'cumple_formal', label: 'Cumpleaños / Social', url: '/demos/cumple_formal/index.html', desc: 'Sofisticación pura para celebrar décadas con mucho estilo.' },
-    tematicas: { id: 'tematicas', label: 'Fiestas Temáticas', url: '/demos/infantil/index.html', desc: 'Llevamos cualquier concepto al máximo nivel con inmersión total para todas las edades.' }, // Mantiene la ruta infantil para Minecraft
+    tematicas: { id: 'tematicas', label: 'Fiestas Temáticas', url: '/demos/infantil/index.html', desc: 'Llevamos cualquier concepto al máximo nivel con inmersión total para todas las edades.' }, 
     bautizo: { id: 'bautizo', label: 'Bautizos / Comunión', url: '/demos/bautizo/index.html', desc: 'Tonos pastel y diseños angelicales para momentos íntimos en familia.' },
     corporativo: { id: 'corporativo', label: 'Corporativo / Galas', url: '/demos/corporativo/index.html', desc: 'Convenciones, conciertos y lanzamientos de marca con logística blindada.' }
   };
@@ -9105,7 +9105,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
   const handleViewDemo = (demoUrl) => {
     if (isMobileDevice) window.location.href = `${demoUrl}?origin=landing`;
-    else window.open(demoUrl, '_blank');
   };
 
   useEffect(() => {
@@ -9151,78 +9150,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
   const currentNotif = heroNotifications[notifIndex];
 
-  // 🔴 FUNCIÓN AUXILIAR PARA RENDERIZAR MODALES LEGALES (EVITA ERRORES JSX)
-  const renderLegalContent = () => {
-    if (legalModal === 'terms') {
-      return (
-        <div className="space-y-4">
-          <p><strong>Última actualización:</strong> {new Date().toLocaleDateString('es-MX')}</p>
-          <p>Bienvenido a Baulia. Estos Términos de Servicio ("Términos") regulan el uso de nuestra plataforma web, panel de control y servicios relacionados. Al acceder o utilizar Baulia, usted ("el Usuario", "el Cliente" o "el Planner") acepta estar sujeto a estos Términos.</p>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white mt-8 mb-2 font-editorial transition-colors">1. Descripción del Servicio</h3>
-          <p>Baulia provee un entorno digital (Software as a Service) para la gestión y logística de eventos, que incluye pero no se limita a: creación de invitaciones web, gestión de confirmaciones (RSVP), acomodo de mesas, control financiero, muros sociales interactivos y escaneo de pases QR.</p>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white mt-8 mb-2 font-editorial transition-colors">2. Pagos y Suscripciones</h3>
-          <p>El pago del Servicio consiste en una tarifa única por evento. La licencia otorga acceso al panel de control desde el momento del pago hasta 30 días naturales posteriores a la fecha del evento programado.</p>
-        </div>
-      );
-    }
-    if (legalModal === 'privacy') {
-      return (
-        <div className="space-y-4">
-          <p><strong>Última actualización:</strong> {new Date().toLocaleDateString('es-MX')}</p>
-          <p>En cumplimiento con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) de México, <strong>Baulia Technologies</strong> expide el presente Aviso de Privacidad.</p>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white mt-8 mb-2 font-editorial transition-colors">1. Protección de Pagos y Datos Financieros</h3>
-          <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-xl text-emerald-800 dark:text-emerald-300 mb-4">
-            <p><strong>Baulia NO recopila, NO procesa y NO almacena datos de tarjetas de crédito o débito.</strong></p>
-            <p className="mt-2">Todas las transacciones financieras son procesadas de manera externa, encriptada y segura a través de <strong>Stripe, Inc.</strong>, un proveedor de pagos de nivel internacional certificado bajo las estrictas normas de seguridad bancaria <strong>PCI-DSS</strong>.</p>
-          </div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white mt-8 mb-2 font-editorial transition-colors">2. Datos Recabados</h3>
-          <p>Para la correcta prestación de nuestros servicios de gestión de eventos, Baulia únicamente almacena en servidores seguros de Google (Firebase):</p>
-          <ul className="list-disc pl-6 space-y-2 mt-2">
-            <li><strong>Del Administrador:</strong> Nombres, correo electrónico de contacto y datos generales del evento.</li>
-            <li><strong>De los Invitados:</strong> Nombres, estado de confirmación de asistencia (RSVP) y fotografías subidas voluntariamente al muro social.</li>
-          </ul>
-        </div>
-      );
-    }
-    if (legalModal === 'about_us') {
-      return (
-        <div className="space-y-4">
-          <div className="flex flex-col items-center text-center mb-8 mt-4">
-            <BauliaLogo className="h-12 w-auto mb-6 opacity-80" />
-            <h3 className="text-2xl font-editorial font-medium text-slate-900 dark:text-white tracking-widest uppercase transition-colors">Nuestra Historia</h3>
-          </div>
-          <p className="mb-4">Nacimos de una premisa simple pero poderosa: la tecnología detrás de los eventos más importantes de tu vida no debería ser aburrida, genérica ni complicada. Debería ser tan espectacular como el evento mismo.</p>
-          <p className="mb-4">En Baulia, operamos como un Estudio de Alta Costura Digital. Somos un equipo de diseñadores, ingenieros de software y expertos en hospitalidad obsesionados con la perfección. Fusionamos el arte del diseño inmersivo con el poder del código moderno para crear una experiencia impecable desde que se envía la primera invitación, hasta el último baile de la noche.</p>
-          <p className="mb-4">Nuestra Bóveda Inteligente no es solo un gestor de invitados, es tu Centro de Comando. Hemos ayudado a cientos de anfitriones y agencias a eliminar el estrés de la planificación, dándoles el control absoluto para que puedan enfocarse en lo que realmente importa: celebrar el amor, el éxito y la vida.</p>
-        </div>
-      );
-    }
-    return (
-      <div className="space-y-4">
-        <div className="flex flex-col items-center text-center mb-12 mt-4">
-          <BauliaLogo className="h-12 w-auto mb-6 opacity-80" />
-          <h3 className="text-2xl font-editorial font-medium text-slate-900 dark:text-white tracking-widest uppercase transition-colors">El Estándar de Oro</h3>
-        </div>
-        <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 p-8 rounded-3xl mb-8 transition-colors">
-          <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-4 font-editorial transition-colors">Nuestra Misión</h4>
-          <p className="leading-relaxed text-slate-700 dark:text-slate-300 transition-colors">
-            Transformar la gestión de eventos mediante tecnología premium, brindando a anfitriones y <i>planners</i> el <b>control absoluto</b>, y a los invitados una experiencia inolvidable.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-5 border border-slate-200 dark:border-white/5 rounded-2xl bg-white dark:bg-[#050505] transition-colors">
-            <span className="text-slate-900 dark:text-white font-bold text-xs block mb-1">01. Cero Caos</span>
-            <p className="text-xs">Diseñamos interfaces que reducen la ansiedad al mínimo.</p>
-          </div>
-          <div className="p-5 border border-slate-200 dark:border-white/5 rounded-2xl bg-white dark:bg-[#050505] transition-colors">
-            <span className="text-slate-900 dark:text-white font-bold text-xs block mb-1">02. Lujo Digital</span>
-            <p className="text-xs">El software debe ser tan elegante como el evento mismo.</p>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white transition-colors duration-700 overflow-x-hidden relative">
       
@@ -9234,6 +9161,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </span>
       </a>
 
+      {/* MODAL CHECKOUT */}
       {checkoutModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 flex flex-col max-h-[90vh]">
@@ -9258,6 +9186,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       )}
 
+      {/* MODAL ÉXITO PAGO */}
       {checkoutSuccess && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 text-center border border-transparent dark:border-white/10 animate-in zoom-in-95">
@@ -9381,98 +9310,94 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* ========================================== */}
-      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (ESTILO APPLE COMPLETO) */}
+      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (ESTILO APPLE COMPACTO) */}
       {/* ========================================== */}
-      <section id="showroom" className="py-24 md:py-32 bg-slate-50 dark:bg-[#050505] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden">
+      <section id="showroom" className="py-20 bg-slate-50 dark:bg-[#050505] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden flex items-center">
+        {/* Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber-500/5 dark:bg-amber-600/10 blur-[150px] rounded-full pointer-events-none"></div>
 
-        <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-0 min-h-[70vh]">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 w-full">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-0">
             
-            {/* IZQUIERDA: Textos y Controles */}
-            <RevealSection className="w-full lg:w-5/12 flex flex-col justify-center z-20 xl:pl-10">
-              <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Inspiración Baulia</span>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 mb-6 leading-tight">
+            {/* IZQUIERDA: Textos y Controles (Más compactos) */}
+            <RevealSection className="w-full lg:w-5/12 flex flex-col justify-center z-20 xl:pl-10 py-10">
+              <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-[10px] mb-3 block">Inspiración Baulia</span>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 mb-4 leading-tight">
                 Tu evento es único. <br className="hidden md:block"/> tu invitación también.
               </h2>
-              <p className="text-base lg:text-lg text-slate-600 dark:text-slate-400 font-light leading-relaxed transition-colors duration-700 mb-8">
-                Explora estas galerías interactivas. En Baulia no usamos plantillas genéricas; operamos como un estudio de alta costura digital. Nuestro equipo de ingenieros y diseñadores programa cada invitación <b>100% desde cero</b>, adaptando la arquitectura y la estética al nivel de tu evento. Estás en manos de profesionales.
+              <p className="text-sm lg:text-base text-slate-600 dark:text-slate-400 font-light leading-relaxed transition-colors duration-700 mb-6 max-w-md">
+                Explora estas galerías interactivas. En Baulia no usamos plantillas genéricas; operamos como un estudio de alta costura digital. Nuestro equipo programa cada invitación <b>100% desde cero</b>, adaptando la estética al nivel de tu evento.
               </p>
 
-              {/* Botones de Categoría */}
-              <div className="flex flex-wrap gap-2 mb-8">
-                {Object.values(demos).map(demo => (
-                  <button 
-                    key={demo.id} 
-                    onClick={() => {
-                      setActiveCategory(demo.id);
-                      if (isMobileDevice) handleViewDemo(demo.url);
-                    }}
-                    className={`px-5 py-3.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all border text-left flex items-center ${activeCategory === demo.id ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)]' : 'bg-white dark:bg-white/5 text-slate-500 border-slate-200 dark:border-white/10 hover:border-amber-500/50 hover:text-slate-800 dark:hover:text-white'}`}
-                  >
-                    {demo.label}
-                  </button>
-                ))}
+              {/* Dropdown de Categorías (Desplegable) */}
+              <div className="relative w-full max-w-[280px] mb-6">
+                <select
+                  value={activeCategory}
+                  onChange={(e) => {
+                    setActiveCategory(e.target.value);
+                    if (isMobileDevice) handleViewDemo(demos[e.target.value].url);
+                  }}
+                  className="w-full appearance-none bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white py-3.5 px-5 rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-sm focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
+                >
+                  {Object.values(demos).map(demo => (
+                    <option key={demo.id} value={demo.id}>{demo.label}</option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center px-5 pointer-events-none text-amber-500">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
               </div>
 
               {/* Info de la categoria actual */}
-              <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 p-6 rounded-3xl shadow-sm text-left mb-8 transition-colors">
-                 <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-2">{currentDemo.label}</h3>
-                 <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-4">{currentDemo.desc}</p>
+              <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 p-4 rounded-2xl shadow-sm text-left mb-6 transition-colors max-w-[320px]">
+                 <h3 className="font-bold text-base text-slate-800 dark:text-white mb-1">{currentDemo.label}</h3>
+                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">{currentDemo.desc}</p>
                  <div className="flex flex-wrap gap-2">
-                    <span className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Diseño Adaptativo</span>
-                    <span className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">RSVP Integrado</span>
+                    <span className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 text-[9px] font-bold px-2 py-1 rounded uppercase tracking-wider">Diseño Adaptativo</span>
+                    <span className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 text-[9px] font-bold px-2 py-1 rounded uppercase tracking-wider">RSVP Integrado</span>
                  </div>
               </div>
 
-              <button className="w-full sm:w-max px-8 py-4 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm flex items-center justify-center">
+              <button className="w-full sm:w-max px-6 py-3 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm flex items-center justify-center">
                  Descubre la Anatomía de nuestras Invitaciones
               </button>
             </RevealSection>
 
-            {/* DERECHA: Composición Apple (Mac de fondo cortada + iPhone al frente) */}
-            <div className="w-full lg:w-7/12 relative h-[650px] lg:h-[800px] flex items-center justify-center lg:justify-start z-10 mt-10 lg:mt-0">
+            {/* DERECHA: Composición Apple (Mac más a la derecha, iPhone más pequeño al frente) */}
+            <div className="w-full lg:w-7/12 relative h-[500px] lg:h-[650px] flex items-center justify-center lg:justify-start z-10 mt-8 lg:mt-0">
               
               {!isMobileDevice ? (
                 <>
-                  {/* 🔴 MACBOOK DE FONDO (Cortada a la derecha, mostrando el poder responsivo) */}
-                  <div className="hidden lg:block absolute right-[-45%] xl:right-[-30%] top-1/2 -translate-y-1/2 w-[900px] xl:w-[1000px] z-10 opacity-90 transition-all duration-1000">
+                  {/* 🔴 MACBOOK DE FONDO (Empujada más a la derecha para estilo editorial) */}
+                  <div className="hidden lg:block absolute right-[-50%] xl:right-[-40%] top-1/2 -translate-y-1/2 w-[900px] xl:w-[1100px] z-10 opacity-95 transition-all duration-1000">
                     <div className="relative w-full aspect-[16/10] bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col">
-                        {/* Notch */}
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-6 bg-black rounded-b-2xl z-30"></div>
-                        {/* Pantalla (Iframe Desktop) */}
                         <div className="w-full h-full bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5">
-                            <iframe src={currentDemo.url} className="absolute inset-0 w-full h-full border-0 pointer-events-none opacity-90" title={`Mac Demo ${currentDemo.label}`}></iframe>
+                            <iframe src={currentDemo.url} className="absolute inset-0 w-full h-full border-0 pointer-events-none" title={`Mac Demo ${currentDemo.label}`}></iframe>
                         </div>
-                        {/* Base de la Mac */}
                         <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-[105%] h-4 bg-slate-400 dark:bg-slate-700 rounded-b-3xl shadow-xl z-30">
                            <div className="w-40 h-1.5 bg-slate-300 dark:bg-slate-600 mx-auto rounded-b-md"></div>
                         </div>
                     </div>
                   </div>
 
-                  {/* 🔴 IPHONE AL FRENTE (Traslapando la Mac por la izquierda) */}
-                  <div className="relative z-30 lg:translate-x-10 xl:translate-x-24 transform transition-transform duration-700 hover:scale-[1.02]">
+                  {/* 🔴 IPHONE AL FRENTE (Más pequeño y sobrepuesto) */}
+                  <div className="relative z-30 lg:translate-x-12 xl:translate-x-20 transform transition-transform duration-700 hover:scale-[1.02]">
                       <div 
                         ref={showroomPhoneRef}
-                        style={{ width: '322px', height: '670px' }} 
-                        className={`relative bg-black rounded-[3.5rem] border-[12px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto z-10 transform transition-all duration-1000 ease-out origin-bottom ${isPhoneVisible ? 'translate-y-0 rotate-x-0 rotate-y-0 scale-100 opacity-100' : 'translate-y-32 rotate-x-[20deg] scale-95 opacity-0'}`}
+                        style={{ width: '260px', height: '563px' }} 
+                        className={`relative bg-black rounded-[3rem] border-[10px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto z-10 transform transition-all duration-1000 ease-out origin-bottom ${isPhoneVisible ? 'translate-y-0 rotate-x-0 rotate-y-0 scale-100 opacity-100' : 'translate-y-32 rotate-x-[20deg] scale-95 opacity-0'}`}
                       >
-                          {/* Isla Dinámica */}
-                          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[30%] h-[30px] bg-black rounded-full z-20 flex justify-end items-center pr-2">
-                            <div className="w-2.5 h-2.5 rounded-full bg-slate-800/80 mr-1.5"></div>
-                            <div className="w-2.5 h-2.5 rounded-full bg-indigo-900/50"></div>
+                          {/* Isla Dinámica Escalada */}
+                          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[30%] h-[24px] bg-black rounded-full z-20 flex justify-end items-center pr-2">
+                            <div className="w-2 h-2 rounded-full bg-slate-800/80 mr-1.5"></div>
+                            <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
                           </div>
-                          {/* Pantalla iPhone (Iframe Escalado) */}
-                          <div className="absolute top-0 left-0 w-[430px] h-[932px] origin-top-left bg-[#111]" style={{ transform: 'scale(0.693)' }}>
+                          {/* Pantalla iPhone (Iframe Escalado a 0.604 para caber exacto en 260px) */}
+                          <div className="absolute top-0 left-0 w-[430px] h-[932px] origin-top-left bg-[#111]" style={{ transform: 'scale(0.604)' }}>
                             <iframe src={currentDemo.url} className="w-full h-full border-0" title={`iPhone Demo ${currentDemo.label}`}></iframe>
                           </div>
                       </div>
-                      
-                      {/* Botón Flotante de Pantalla Completa anclado al teléfono */}
-                      <button onClick={() => handleViewDemo(currentDemo.url)} className={`absolute -bottom-6 left-1/2 -translate-x-1/2 px-6 py-3.5 bg-slate-900/90 dark:bg-white/10 hover:bg-slate-800 dark:hover:bg-white/20 backdrop-blur-xl border border-slate-700 dark:border-white/20 rounded-full font-bold text-[10px] text-white uppercase tracking-widest flex items-center transition-all duration-700 shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-40 w-max ${isPhoneVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                        Ver Pantalla Completa <ExternalLink size={14} className="ml-2"/>
-                      </button>
                   </div>
                 </>
             ) : (
@@ -9483,7 +9408,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                          <Smartphone size={32}/>
                      </div>
                      <p className="text-white font-editorial text-xl font-bold mb-2">Vívelo en tu Teléfono</p>
-                     <p className="text-slate-400 text-sm mb-6">Toca una categoría a la izquierda para ver la demo a pantalla completa en tu dispositivo real.</p>
+                     <p className="text-slate-400 text-sm mb-6 leading-relaxed">Selecciona una categoría arriba para abrir la demostración interactiva a pantalla completa en tu dispositivo real.</p>
                  </RevealSection>
               </div>
             )}
@@ -9985,7 +9910,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </div>
             
             <div className="p-6 md:p-10 overflow-y-auto flex-1 text-slate-600 dark:text-slate-400 text-sm leading-relaxed space-y-6 custom-scrollbar transition-colors font-light">
-              {legalModal === 'terms' ? (
+              {legalModal === 'terms' && (
                 <div className="space-y-4">
                   <p><strong>Última actualización:</strong> {new Date().toLocaleDateString('es-MX')}</p>
                   <p>Bienvenido a Baulia. Estos Términos de Servicio ("Términos") regulan el uso de nuestra plataforma web, panel de control y servicios relacionados. Al acceder o utilizar Baulia, usted ("el Usuario", "el Cliente" o "el Planner") acepta estar sujeto a estos Términos.</p>
@@ -9994,7 +9919,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   <h3 className="text-base font-bold text-slate-900 dark:text-white mt-8 mb-2 font-editorial transition-colors">2. Pagos y Suscripciones</h3>
                   <p>El pago del Servicio consiste en una tarifa única por evento. La licencia otorga acceso al panel de control desde el momento del pago hasta 30 días naturales posteriores a la fecha del evento programado.</p>
                 </div>
-              ) : legalModal === 'privacy' ? (
+              )}
+              {legalModal === 'privacy' && (
                 <div className="space-y-4">
                   <p><strong>Última actualización:</strong> {new Date().toLocaleDateString('es-MX')}</p>
                   <p>En cumplimiento con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) de México, <strong>Baulia Technologies</strong> expide el presente Aviso de Privacidad.</p>
@@ -10012,7 +9938,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     <li><strong>De los Invitados:</strong> Nombres, estado de confirmación de asistencia (RSVP) y fotografías subidas voluntariamente al muro social.</li>
                   </ul>
                 </div>
-              ) : legalModal === 'about_us' ? (
+              )}
+              {legalModal === 'about_us' && (
                 <div className="space-y-4">
                   <div className="flex flex-col items-center text-center mb-8 mt-4">
                     <BauliaLogo className="h-12 w-auto mb-6 opacity-80" />
@@ -10022,7 +9949,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   <p className="mb-4">En Baulia, operamos como un Estudio de Alta Costura Digital. Somos un equipo de diseñadores, ingenieros de software y expertos en hospitalidad obsesionados con la perfección. Fusionamos el arte del diseño inmersivo con el poder del código moderno para crear una experiencia impecable desde que se envía la primera invitación, hasta el último baile de la noche.</p>
                   <p className="mb-4">Nuestra Bóveda Inteligente no es solo un gestor de invitados, es tu Centro de Comando. Hemos ayudado a cientos de anfitriones y agencias a eliminar el estrés de la planificación, dándoles el control absoluto para que puedan enfocarse en lo que realmente importa: celebrar el amor, el éxito y la vida.</p>
                 </div>
-              ) : (
+              )}
+              {legalModal === 'about' && (
                 <div className="space-y-4">
                   <div className="flex flex-col items-center text-center mb-12 mt-4">
                     <BauliaLogo className="h-12 w-auto mb-6 opacity-80" />
