@@ -9310,7 +9310,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* ========================================== */}
-      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (ESCALAS Y COMPOSICIÓN APPLE PERFECTAS) */}
+      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (CORRECCIÓN FINAL: IPHONE CENTRADO E INTERACTIVO) */}
       {/* ========================================== */}
       <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#050505] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden flex items-center">
         {/* Glow de ambiente sutil */}
@@ -9320,7 +9320,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
             {/* 🔴 EL MARCO DE SECCIÓN (Caja gris estilo Apple con todo adentro) */}
             {!isMobileDevice ? (
-                <RevealSection delay={200} className="w-full relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 flex group p-12 min-h-[680px]">
+                <RevealSection delay={200} className="w-full relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 items-stretch flex group p-12 min-h-[680px]">
                     
                     {/* Glow interno sutil superior */}
                     <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white dark:from-[#080808] to-transparent opacity-40 z-0 transition-colors pointer-events-none"></div>
@@ -9389,23 +9389,23 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 </div>
                             </div>
 
-                            {/* --- 🔴 IPHONE AL FRENTE (Alineado al Bottom, Escala Móvil Exacta) --- */}
-                            {/* bottom-0 lo ancla a la base de la laptop. left-[-15%] lo traslapa. */}
-                            <div className="absolute bottom-0 left-[-15%] xl:left-[-5%] z-40 transition-transform duration-700 hover:scale-[1.02] pointer-events-none">
+                            {/* --- 🔴 IPHONE AL FRENTE (Centrado, Escala Móvil Exacta e Interactivo) --- */}
+                            {/* Cambio clave: pointer-events-auto para que el cliente pueda hacer scroll */}
+                            <div className="absolute bottom-0 left-[-15%] xl:left-[-5%] z-40 transition-transform duration-700 hover:scale-[1.02] pointer-events-auto">
                                   <div 
                                     ref={showroomPhoneRef}
                                     style={{ width: '220px', height: '477px' }} 
                                     className={`relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto transition-all duration-1000 ease-out origin-bottom ${isPhoneVisible ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'}`}
                                   >
                                       {/* Isla Dinámica */}
-                                      <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-[30%] h-[16px] bg-black rounded-full z-20 flex justify-end items-center pr-1.5">
+                                      <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-[30%] h-[16px] bg-black rounded-full z-30 flex justify-end items-center pr-1.5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-slate-800/80 mr-1"></div>
                                         <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
                                       </div>
                                       
-                                      {/* Contenedor lógico del iPhone 430x932 escalado exactamente a 0.5116 para medir 220x476.8 */}
-                                      <div className="absolute inset-0 overflow-hidden rounded-[2rem] z-10 bg-[#111]">
-                                          <div className="absolute top-0 left-0 w-[430px] h-[932px] origin-top-left" style={{ transform: 'scale(0.5116)' }}>
+                                      {/* 🔴 SOLUCIÓN IPHONE: Uso de flex y origin-center para centrar perfectamente el iframe escalado */}
+                                      <div className="absolute inset-0 overflow-hidden rounded-[1.8rem] z-10 bg-[#111] flex items-center justify-center">
+                                          <div className="w-[430px] h-[932px] origin-center flex-shrink-0" style={{ transform: 'scale(0.475)' }}>
                                               <iframe src={currentDemo.url} className="w-full h-full border-0" title={`iPhone Demo ${currentDemo.label}`}></iframe>
                                           </div>
                                       </div>
