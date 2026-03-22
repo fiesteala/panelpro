@@ -9034,6 +9034,152 @@ const RevealSection = ({ children, className = '', delay = 0 }) => {
 };
 
 // ==========================================
+// --- COMPONENTE: REVISTA EDITORIAL (ANATOMÍA DE LA INVITACIÓN) ---
+// ==========================================
+const AnatomyOverlay = ({ onClose }) => {
+  // Los 24 elementos categorizados lógicamente en 4 Features Editoriales
+  const sections = [
+    {
+      title: "Identidad Visual",
+      subtitle: "01",
+      desc: "El primer impacto. Diseñamos la estética de tu evento para que la elegancia sea inmediata e inolvidable.",
+      items: [
+        { name: 'Monograma', icon: <Type size={28} strokeWidth={1}/>, desc: 'Tus iniciales entrelazadas con tipografía clásica en el centro de la pantalla.' },
+        { name: 'Monograma Personalizado', icon: <Sparkles size={28} strokeWidth={1}/>, desc: 'Un emblema único, forjado a medida para complementar el aura de tu evento.' },
+        { name: 'Fotos de Portada', icon: <ImageIcon size={28} strokeWidth={1}/>, desc: 'Imágenes inmersivas y full-screen que dan la bienvenida con dramatismo y clase.' },
+        { name: 'Fotos de Galería', icon: <LayoutGrid size={28} strokeWidth={1}/>, desc: 'Un mosaico visual fluido donde tus invitados exploran tu historia.' },
+        { name: 'Fotos de Novios', icon: <Camera size={28} strokeWidth={1}/>, desc: 'Una selección curada de la sesión principal de los grandes protagonistas.' }
+      ]
+    },
+    {
+      title: "La Narrativa",
+      subtitle: "02",
+      desc: "Tu celebración es una historia. Envolvemos a tus invitados en la esencia y emoción de las familias anfitrionas.",
+      items: [
+        { name: 'Nombres y Frases', icon: <Quote size={28} strokeWidth={1}/>, desc: 'Títulos majestuosos y citas que expresan la personalidad de la pareja.' },
+        { name: 'Nombre de los Padres', icon: <Heart size={28} strokeWidth={1}/>, desc: 'El espacio de máximo honor para reconocer a los pilares de la familia.' },
+        { name: 'Padrinos', icon: <Users size={28} strokeWidth={1}/>, desc: 'Reconocimiento con estilo editorial a quienes acompañan este gran paso.' },
+        { name: 'Frase General', icon: <BookOpenText size={28} strokeWidth={1}/>, desc: 'El lema emotivo o poesía que dictará el tono completo de la noche.' },
+        { name: 'Save the Date', icon: <CalendarDays size={28} strokeWidth={1}/>, desc: 'Una pre-invitación digital para asegurar la asistencia de los más queridos.' }
+      ]
+    },
+    {
+      title: "Logística y Precisión",
+      subtitle: "03",
+      desc: "Información blindada y elegante. Coordinamos cada detalle para que tus invitados tengan el control en sus manos.",
+      items: [
+        { name: 'Cuenta Regresiva', icon: <Clock size={28} strokeWidth={1}/>, desc: 'Un reloj vivo y minimalista marcando los segundos exactos hacia el gran día.' },
+        { name: 'Mapas GPS', icon: <MapPin size={28} strokeWidth={1}/>, desc: 'Rutas directas y geolocalizadas a la ceremonia y la recepción con un solo tap.' },
+        { name: 'Calendario', icon: <CheckSquare size={28} strokeWidth={1}/>, desc: 'Sincronización instantánea con Apple, Google u Outlook Calendar.' },
+        { name: 'Itinerario', icon: <ListTree size={28} strokeWidth={1}/>, desc: 'El cronograma visual (timeline) del evento, desplegado minuto a minuto.' },
+        { name: 'Código de Vestimenta', icon: <Shirt size={28} strokeWidth={1}/>, desc: 'Guía de estilo y etiqueta ilustrada para mantener la estética perfecta.' },
+        { name: 'Recomendación de Hospedaje', icon: <Hotel size={28} strokeWidth={1}/>, desc: 'Selección de hoteles con tarifas preferenciales para invitados foráneos.' },
+        { name: 'Clima', icon: <CloudSun size={28} strokeWidth={1}/>, desc: 'Pronóstico meteorológico en tiempo real para prever cualquier detalle.' },
+        { name: 'Traducción', icon: <Languages size={28} strokeWidth={1}/>, desc: 'Invitación adaptable en múltiples idiomas para tus invitados internacionales.' }
+      ]
+    },
+    {
+      title: "Interacción",
+      subtitle: "04",
+      desc: "Más que una simple invitación, una experiencia táctil que conecta a los invitados con la fiesta antes de llegar.",
+      items: [
+        { name: 'Confirmación (RSVP)', icon: <Ticket size={28} strokeWidth={1}/>, desc: 'Gestión de asistencia blindada por número de pases. Cero colados.' },
+        { name: 'Mesa de Regalos', icon: <Gift size={28} strokeWidth={1}/>, desc: 'Recepción de aportaciones en efectivo directo a tus cuentas, sin comisiones.' },
+        { name: 'Reproductor de Música', icon: <CirclePlay size={28} strokeWidth={1}/>, desc: 'Ambienta la experiencia visual con la canción principal de tu celebración.' },
+        { name: '# de Instagram', icon: <Hash size={28} strokeWidth={1}/>, desc: 'El hashtag oficial con enlace directo para indexar todos los recuerdos.' },
+        { name: 'Filtro de Instagram', icon: <Smartphone size={28} strokeWidth={1}/>, desc: 'Lente de Realidad Aumentada (AR) exclusivo para embellecer sus historias.' },
+        { name: 'Álbum Digital', icon: <SquareUser size={28} strokeWidth={1}/>, desc: 'Muro social integrado donde todos los invitados inmortalizan sus fotografías.' }
+      ]
+    }
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[9999] bg-[#fafafa] dark:bg-[#080808] overflow-y-auto animate-in slide-in-from-bottom-10 fade-in duration-700 custom-scrollbar text-slate-900 dark:text-white transition-colors">
+      
+      {/* NAVEGACIÓN FLOTANTE MINIMALISTA */}
+      <nav className="sticky top-0 w-full bg-[#fafafa]/80 dark:bg-[#080808]/80 backdrop-blur-2xl z-50 px-6 md:px-12 py-6 flex justify-between items-center border-b border-slate-200 dark:border-white/10 transition-colors">
+        <span className="font-editorial text-2xl font-bold tracking-widest uppercase">Baulia <span className="font-light italic">Magazine</span></span>
+        <button onClick={onClose} className="group flex items-center text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+          Cerrar Edición <X size={20} className="ml-2 transform group-hover:rotate-90 transition-transform duration-300"/>
+        </button>
+      </nav>
+
+      <main className="max-w-[1200px] mx-auto px-6 md:px-12 pt-20 pb-32">
+        
+        {/* PORTADA DE LA REVISTA (HERO EDITORIAL) */}
+        <header className="mb-32">
+          <p className="text-amber-600 dark:text-amber-500 font-bold tracking-[0.4em] uppercase text-[10px] mb-8 text-center md:text-left">La Colección · Ingeniería & Arte</p>
+          
+          <div className="flex flex-col md:flex-row gap-12 items-start">
+            <h1 className="text-7xl md:text-8xl lg:text-[140px] font-editorial font-black tracking-tighter leading-[0.85] w-full md:w-3/5">
+              Anatomía <br/>
+              <span className="italic font-light text-slate-400 dark:text-slate-500">del diseño.</span>
+            </h1>
+            
+            {/* LETRA CAPITULAR Y TEXTO ENVOLVENTE (FLOAT CSS) */}
+            <div className="w-full md:w-2/5 pt-4">
+              <div className="text-lg md:text-xl font-light leading-relaxed text-justify text-slate-600 dark:text-slate-400 block">
+                <span className="float-left text-[110px] leading-[80px] pt-2 pr-5 font-editorial font-black text-slate-900 dark:text-white transition-colors">
+                  C
+                </span>
+                ada elemento que compone nuestras invitaciones es programado minuciosamente desde cero. En Baulia rechazamos las plantillas genéricas. Creemos en la arquitectura de software aplicada al diseño de alta costura, forjando experiencias inmersivas, táctiles y logísticamente blindadas para el evento más importante de tu vida.
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* FEATURES EDITORIALES (SECCIONES) */}
+        <div className="space-y-32">
+          {sections.map((sec, i) => (
+            <section key={i} className="relative border-t-2 border-slate-900 dark:border-white pt-12 flex flex-col lg:flex-row gap-16 transition-colors">
+              
+              {/* COLUMNA IZQUIERDA: TÍTULO Y DESCRIPCIÓN DE LA SECCIÓN */}
+              <div className="lg:w-1/3 relative">
+                 <h2 className="absolute -top-16 -left-6 text-[180px] font-editorial font-black text-slate-100 dark:text-white/5 pointer-events-none select-none transition-colors leading-none z-0">
+                    {sec.subtitle}
+                 </h2>
+                 <div className="relative z-10 pt-4">
+                    <h3 className="text-4xl md:text-5xl font-editorial font-bold mb-6 leading-tight">{sec.title}</h3>
+                    <p className="text-slate-500 dark:text-slate-400 font-light text-lg italic leading-relaxed">{sec.desc}</p>
+                 </div>
+              </div>
+              
+              {/* COLUMNA DERECHA: ELEMENTOS CON TEXTO ENVOLVENTE (GRID DINÁMICO) */}
+              <div className="lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
+                {sec.items.map((item, j) => (
+                  <div key={j} className="relative group">
+                    {/* USO DE FLOAT PARA QUE EL TEXTO RODE EL ÍCONO (ESTILO REVISTA) */}
+                    <div className="float-left mr-5 mt-1 text-slate-300 dark:text-slate-600 group-hover:text-amber-500 transition-colors duration-500">
+                      {item.icon}
+                    </div>
+                    <div className="block">
+                      <h4 className="font-bold text-base md:text-lg tracking-wide mb-1.5 uppercase">{item.name}</h4>
+                      <p className="text-sm font-light text-slate-500 dark:text-slate-400 leading-relaxed">
+                        {item.desc}
+                      </p>
+                    </div>
+                    {/* Línea divisoria minimalista (Solo visible en hover para mantener limpio el diseño) */}
+                    <div className="w-full h-px bg-amber-500/0 group-hover:bg-amber-500/50 mt-6 transition-colors duration-500 clear-both"></div>
+                  </div>
+                ))}
+              </div>
+
+            </section>
+          ))}
+        </div>
+
+        {/* PIE DE PÁGINA EDITORIAL */}
+        <footer className="mt-40 border-t border-slate-200 dark:border-white/10 pt-12 flex flex-col md:flex-row justify-between items-center text-slate-400 text-xs font-bold uppercase tracking-widest transition-colors">
+          <span>Baulia Technologies Inc.</span>
+          <span className="mt-4 md:mt-0">El nuevo estándar para celebrar</span>
+        </footer>
+
+      </main>
+    </div>
+  );
+};
+
+// ==========================================
 // --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 3.0: SHOWROOM APPLE EDITORIAL) ---
 // ==========================================
 const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
