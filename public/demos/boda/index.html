@@ -129,18 +129,20 @@
         // --- Component: Floating Buy Button (MODO DEMO) ---
         const FloatingBuyButton = () => {
             return (
-                <button 
-  onClick={() => {
-    if (window.self !== window.top) {
-      window.parent.postMessage('open_checkout', '*');
-    } else {
-      window.location.href = '/?modo=showcase&checkout=1';
-    }
-  }} 
-  className="w-full py-4 rounded-full font-black text-sm uppercase tracking-widest shadow-xl transition-all transform hover:scale-105 active:scale-95 bg-white text-slate-900 border border-white/20 mt-8 relative z-20"
->
-  Adquirir esta Tecnología
-</button>
+        <div className="fixed bottom-6 inset-x-6 z-[9999] pointer-events-auto">
+          <button 
+            onClick={() => {
+              if (window.self !== window.top) {
+                window.parent.postMessage('open_checkout', '*');
+              } else {
+                window.location.href = '/?modo=showcase&checkout=1';
+              }
+            }} 
+            className="w-full py-4 bg-amber-500 text-slate-900 rounded-full font-black text-sm uppercase tracking-widest shadow-[0_10px_25px_rgba(245,158,11,0.5)] transform hover:scale-105 active:scale-95 transition-all border border-amber-400"
+          >
+            Adquirir esta Tecnología
+          </button>
+        </div>
             );
         };
 
