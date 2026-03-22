@@ -9011,7 +9011,30 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2.4: ANIMACIONES & STORYTELLING) ---
+// --- MICRO-COMPONENTE: ANIMACIÓN AL SCROLL (Efecto Apple) ---
+// ==========================================
+const RevealSection = ({ children, className = '', delay = 0 }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const domRef = useRef();
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) setIsVisible(true);
+    }, { threshold: 0.15 });
+    
+    if (domRef.current) observer.observe(domRef.current);
+    return () => { if (domRef.current) observer.unobserve(domRef.current); }
+  }, []);
+  
+  return (
+    <div ref={domRef} className={`transition-all duration-1000 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
+      {children}
+    </div>
+  );
+};
+
+// ==========================================
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2.5: COPY LUXURY + ANIMACIONES SCROLL) ---
 // ==========================================
 const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [legalModal, setLegalModal] = useState(null);
@@ -9029,7 +9052,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   // 🔴 ESTADOS PARA NOTIFICACIONES DINÁMICAS (HERO)
   const [notifIndex, setNotifIndex] = useState(0);
   
-  // 🔴 ESTADOS PARA ANIMACIÓN AL HACER SCROLL (SHOWROOM)
+  // 🔴 ESTADOS PARA ANIMACIÓN AL HACER SCROLL (SHOWROOM IPHONE)
   const showroomPhoneRef = useRef(null);
   const [isPhoneVisible, setIsPhoneVisible] = useState(false);
 
@@ -9054,7 +9077,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     return () => window.removeEventListener('resize', checkDevice);
   }, []);
 
-  // Intersection Observer para el iPhone del Showroom
+  // Intersection Observer exclusivo para el iPhone del Showroom (Efecto 3D)
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -9068,13 +9091,15 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     return () => { if (showroomPhoneRef.current) observer.unobserve(showroomPhoneRef.current); };
   }, []);
 
+  // 🔴 CATÁLOGO DE DEMOS ACTUALIZADO
   const demos = {
     boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica y paletas sobrias. El estándar de alta costura nupcial.' },
     xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón y energía vibrante para la mejor noche de tu vida.' },
+    baby_shower: { id: 'baby_shower', label: 'Baby Shower / Revelación', url: '/demos/baby_shower/index.html', desc: 'Ternura, interactividad y emoción para recibir a la nueva vida.' },
     cumple_formal: { id: 'cumple_formal', label: 'Cumpleaños / Social', url: '/demos/cumple_formal/index.html', desc: 'Sofisticación pura para celebrar décadas con mucho estilo.' },
-    infantil: { id: 'infantil', label: 'Fiestas Temáticas', url: '/demos/infantil/index.html', desc: 'Llevamos la temática al máximo nivel con inmersión total.' },
-    bautizo: { id: 'bautizo', label: 'Bautizos / Comunión', url: '/demos/bautizo/index.html', desc: 'Tonos pastel y diseños angelicales para momentos íntimos.' },
-    corporativo: { id: 'corporativo', label: 'Empresarial / Galas', url: '/demos/corporativo/index.html', desc: 'Branding corporativo impecable y logística estricta.' }
+    tematicas: { id: 'tematicas', label: 'Fiestas Temáticas', url: '/demos/tematicas/index.html', desc: 'Llevamos cualquier concepto al máximo nivel con inmersión total para todas las edades.' },
+    bautizo: { id: 'bautizo', label: 'Bautizos / Comunión', url: '/demos/bautizo/index.html', desc: 'Tonos pastel y diseños angelicales para momentos íntimos en familia.' },
+    corporativo: { id: 'corporativo', label: 'Corporativo / Galas', url: '/demos/corporativo/index.html', desc: 'Convenciones, conciertos y lanzamientos de marca con logística blindada.' }
   };
   const currentDemo = demos[activeCategory];
 
@@ -9129,7 +9154,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white transition-colors duration-700 overflow-x-hidden relative">
       
-      {/* 🔴 BOTÓN FLOTANTE DE WHATSAPP (VENTAS) */}
+      {/* BOTÓN FLOTANTE DE WHATSAPP (VENTAS) */}
       <a href="https://wa.me/525512345678?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20Baulia" target="_blank" rel="noreferrer" className="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-[0_10px_20px_rgba(16,185,129,0.4)] hover:scale-110 hover:bg-emerald-400 transition-all z-50 group flex items-center justify-center">
         <MessageCircle size={28} />
         <span className="absolute right-full mr-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
@@ -9176,12 +9201,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       )}
 
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
-        .font-editorial { font-family: 'Playfair Display', serif; }
-        .font-monogram { font-family: 'Great Vibes', cursive; }
-      `}</style>
-
       {/* LUCES DE AMBIENTE SUTILES */}
       <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 dark:bg-amber-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
       <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-500/5 dark:bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
@@ -9216,47 +9235,48 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
       {/* HERO SECTION: EL VIDEO DEL PODER DE BAULIA */}
       <section className="relative min-h-[90vh] pt-32 pb-20 px-4 md:px-8 max-w-7xl mx-auto z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
-        {/* Izquierda: Textos y CTAs */}
         <div className="w-full lg:w-1/2 text-center lg:text-left flex flex-col items-center lg:items-start">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest mb-8 backdrop-blur-md shadow-sm">
-            <Star size={12} className="fill-amber-500 dark:fill-amber-400"/>
-            <span className="text-slate-700 dark:text-white/80">Software Premium para Eventos</span>
-          </div>
-
-          <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-medium text-slate-900 dark:text-white mb-6 tracking-tight leading-[1.05] font-editorial transition-colors duration-700">
-            El nuevo estándar <br className="hidden md:block"/> 
-            <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-yellow-600 to-amber-700 dark:from-amber-200 dark:via-amber-400 dark:to-yellow-600 pr-2">para celebrar.</span>
-          </h1>
-
-          <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl font-light leading-relaxed transition-colors duration-700">
-            Baulia es la bóveda digital que fusiona <b>invitaciones interactivas de lujo</b> con el software de gestión y control de accesos más poderoso del mercado.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto relative mb-10">
-            <a href="#planes" className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.4)] border border-amber-400">
-              Adquirir Licencia <ArrowRight size={18} className="ml-3"/>
-            </a>
-            <a href="#showroom" className="px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
-              Explorar Diseños
-            </a>
-          </div>
-
-          {/* Social Proof */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 text-slate-500 dark:text-slate-400 text-xs font-medium border-t border-slate-200 dark:border-white/10 pt-6 w-full lg:w-max">
-            <div className="flex -space-x-2">
-              {[1,2,3,4,5].map(i => <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-[#050505] bg-slate-200 dark:bg-slate-800"></div>)}
+          <RevealSection>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest mb-8 backdrop-blur-md shadow-sm">
+              <Star size={12} className="fill-amber-500 dark:fill-amber-400"/>
+              <span className="text-slate-700 dark:text-white/80">Software Premium para Eventos</span>
             </div>
-            <div className="text-center sm:text-left">
-              <div className="flex items-center justify-center sm:justify-start gap-1 mb-1">
-                  {[1,2,3,4,5].map(s => <Star key={s} size={12} className="fill-amber-500 text-amber-500"/>)}
+            
+            <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-medium text-slate-900 dark:text-white mb-6 tracking-tight leading-[1.05] font-editorial transition-colors duration-700">
+              El nuevo estándar <br className="hidden md:block"/> 
+              <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-yellow-600 to-amber-700 dark:from-amber-200 dark:via-amber-400 dark:to-yellow-600 pr-2">para celebrar.</span>
+            </h1>
+
+            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl font-light leading-relaxed transition-colors duration-700">
+              Baulia es la bóveda digital que fusiona <b>invitaciones interactivas de lujo</b> con el software de gestión y control de accesos más poderoso del mercado.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto relative mb-10">
+              <a href="#planes" className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.4)] border border-amber-400">
+                Adquirir Licencia <ArrowRight size={18} className="ml-3"/>
+              </a>
+              <a href="#showroom" className="px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
+                Explorar Diseños
+              </a>
+            </div>
+
+            {/* Social Proof */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 text-slate-500 dark:text-slate-400 text-xs font-medium border-t border-slate-200 dark:border-white/10 pt-6 w-full lg:w-max">
+              <div className="flex -space-x-2">
+                {[1,2,3,4,5].map(i => <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-[#050505] bg-slate-200 dark:bg-slate-800"></div>)}
               </div>
-              <p>Confiado por más de <b className="text-slate-800 dark:text-white">500+ Planners</b> en México.</p>
+              <div className="text-center sm:text-left">
+                <div className="flex items-center justify-center sm:justify-start gap-1 mb-1">
+                    {[1,2,3,4,5].map(s => <Star key={s} size={12} className="fill-amber-500 text-amber-500"/>)}
+                </div>
+                <p>Confiado por más de <b className="text-slate-800 dark:text-white">500+ Planners</b> en México.</p>
+              </div>
             </div>
-          </div>
+          </RevealSection>
         </div>
 
         {/* Derecha: Placeholder del VIDEO DEMO */}
-        <div className="w-full lg:w-1/2 relative flex justify-center lg:justify-end mt-12 lg:mt-0 perspective-[1000px]">
+        <RevealSection delay={200} className="w-full lg:w-1/2 relative flex justify-center lg:justify-end mt-12 lg:mt-0 perspective-[1000px]">
           <div className="relative w-full max-w-[600px] aspect-video bg-slate-900 rounded-[2rem] border border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.4)] overflow-hidden transform lg:-rotate-y-6 lg:rotate-x-2 hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-700 flex items-center justify-center group cursor-pointer">
               <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-black z-0"></div>
               <div className="relative z-10 flex flex-col items-center justify-center text-center p-6">
@@ -9268,7 +9288,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </div>
           </div>
           
-          {/* 🔴 NOTIFICACIONES DINÁMICAS (NUEVO) */}
           <div key={notifIndex} className="absolute -bottom-6 left-6 md:left-12 bg-white/95 dark:bg-black/90 backdrop-blur-md p-4 rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 animate-in slide-in-from-bottom-5 fade-in duration-500 z-20">
               <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${currentNotif.bg} ${currentNotif.color}`}>
@@ -9280,7 +9299,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   </div>
               </div>
           </div>
-        </div>
+        </RevealSection>
       </section>
 
       {/* SECCIÓN NUEVA: EL SHOWROOM INTERACTIVO (CONTEXTUAL DISPOSITIVO + ANIMACIÓN AL SCROLL) */}
@@ -9288,13 +9307,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-center justify-between gap-16">
           
           {/* Textos y Categorías del Showroom */}
-          <div className="w-full lg:w-1/2 text-center lg:text-left flex flex-col items-center lg:items-start z-20">
+          <RevealSection className="w-full lg:w-1/2 text-center lg:text-left flex flex-col items-center lg:items-start z-20">
             <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Inspiración Baulia</span>
             <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 mb-6">
               Tu evento es único. <br className="hidden lg:block"/><span className="italic text-slate-500 dark:text-slate-400">Tu invitación también.</span>
             </h2>
             <p className="text-base text-slate-600 dark:text-slate-400 mb-10 max-w-lg font-light leading-relaxed transition-colors duration-700">
-              Explora estas galerías interactivas y descubre nuestra capacidad tecnológica. Estas pantallas son solo piezas de inspiración: en Baulia no usamos plantillas genéricas. Cada proyecto es una obra de alta costura, diseñada desde cero para reflejar la esencia, los colores y el prestigio de tu celebración.
+              Explora estas galerías interactivas y descubre nuestra capacidad tecnológica. Estas pantallas son solo el lienzo de inspiración: en Baulia operamos como un estudio de alta costura digital. Nuestro equipo de ingenieros y diseñadores programa cada invitación <b>100% desde cero</b>, adaptando la arquitectura y la estética al nivel de tu evento. Estás en manos de profesionales.
             </p>
 
             {/* Botones de Categoría */}
@@ -9308,7 +9327,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   }}
                   className={`px-4 py-2.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all border ${activeCategory === demo.id ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white dark:bg-white/5 text-slate-500 border-slate-300 dark:border-white/20 hover:border-slate-500 dark:hover:border-white/50 hover:text-slate-800 dark:hover:text-white'}`}
                 >
-                  {demo.label.split(' ')[0]}
+                  {demo.label.split(' / ')[0]}
                 </button>
               ))}
             </div>
@@ -9322,7 +9341,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                Descubre la Anatomía de nuestras Invitaciones
             </button>
 
-          </div>
+          </RevealSection>
 
           {/* El Simulación del Teléfono (Animación Scroll) */}
           <div className="w-full lg:w-1/2 flex justify-center lg:justify-end relative z-10 perspective-[1200px]">
@@ -9360,13 +9379,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
             {/* PLACEHOLDER MÓVIL */}
             {isMobileDevice && (
-                <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-2xl text-center w-full max-w-sm mt-8">
+                <RevealSection delay={200} className="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-2xl text-center w-full max-w-sm mt-8">
                     <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20 text-amber-500">
                         <Smartphone size={32}/>
                     </div>
                     <p className="text-white font-editorial text-lg font-bold mb-2">Vívelo en tu Teléfono</p>
                     <p className="text-slate-400 text-sm mb-6">Toca una categoría a la izquierda para ver la demo a pantalla completa en tu dispositivo real.</p>
-                </div>
+                </RevealSection>
             )}
           </div>
           
@@ -9375,14 +9394,14 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
       {/* BENTO BOX: INVITACIONES INTERACTIVAS */}
       <section id="experiencia" className="py-24 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
-        <div className="mb-16 text-center md:text-left">
+        <RevealSection className="mb-16 text-center md:text-left">
           <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Detalles de Alta Costura</span>
           <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700">Más que una invitación.<br/><span className="italic text-slate-500 dark:text-slate-400">Una experiencia táctil.</span></h2>
-        </div>
+        </RevealSection>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[280px]">
-          {/* TARJETA 1: GALERÍA Y MONOGRAMA */}
-          <div className="md:col-span-2 md:row-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-10 md:p-12 border border-slate-200 dark:border-white/10 flex flex-col justify-end relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
+          {/* TARJETA 1 */}
+          <RevealSection delay={100} className="md:col-span-2 md:row-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-10 md:p-12 border border-slate-200 dark:border-white/10 flex flex-col justify-end relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
             <div className={`absolute inset-0 opacity-5 dark:opacity-10 transition-colors duration-700 ${accentThemes[accentColor].bg}`}></div>
             <div className="absolute top-10 right-0 md:right-10 w-full md:w-56 h-64 pointer-events-none perspective-[1000px] flex items-center justify-center">
                <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 1" className="absolute w-40 h-52 object-cover rounded-xl border-[4px] border-white dark:border-[#111] transform rotate-[10deg] translate-x-12 translate-y-4 group-hover:rotate-[20deg] group-hover:translate-x-20 shadow-xl transition-all duration-700 ease-out" />
@@ -9399,10 +9418,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-3 leading-tight transition-colors duration-500">Diseño Inmersivo</h3>
                <p className="text-slate-600 dark:text-slate-400 text-base leading-relaxed transition-colors duration-500">Galerías fotográficas, logotipos manuscritos y paletas de color <b>adaptativas</b> que reflejan la elegancia de tu evento.</p>
             </div>
-          </div>
+          </RevealSection>
 
-          {/* TARJETA 2: CUENTA REGRESIVA */}
-          <div className="md:col-span-2 bg-slate-100 dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 md:p-10 border border-slate-200 dark:border-white/10 flex items-center justify-between relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
+          {/* TARJETA 2 */}
+          <RevealSection delay={200} className="md:col-span-2 bg-slate-100 dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 md:p-10 border border-slate-200 dark:border-white/10 flex items-center justify-between relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
             <div>
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 transition-colors">Cuenta Regresiva</h3>
               <p className="text-slate-500 dark:text-slate-400 text-sm max-w-[200px] transition-colors">El latido de tu evento en tiempo real.</p>
@@ -9423,70 +9442,80 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 <span className="text-[9px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-bold mt-1 block">Seg</span>
               </div>
             </div>
-          </div>
+          </RevealSection>
 
-          {/* TARJETA 3: RSVP */}
-          <div onMouseEnter={() => setFakeRsvp(true)} onMouseLeave={() => setFakeRsvp(false)} className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[2.5rem] p-8 flex flex-col justify-between relative overflow-hidden transform hover:scale-[1.02] transition-all shadow-sm dark:shadow-none cursor-pointer group">
-             <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-             <div className="flex justify-between items-start relative z-10">
-               <div>
-                 <h3 className="text-2xl font-bold leading-tight mb-2 text-slate-900 dark:text-white">RSVP<br/>Inteligente</h3>
-                 <p className="text-slate-500 dark:text-slate-400 text-sm">Pasa el cursor / Toca</p>
+          {/* TARJETA 3 */}
+          <RevealSection delay={300} className="h-full">
+            <div onMouseEnter={() => setFakeRsvp(true)} onMouseLeave={() => setFakeRsvp(false)} className="h-full bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[2.5rem] p-8 flex flex-col justify-between relative overflow-hidden transform hover:scale-[1.02] transition-all shadow-sm dark:shadow-none cursor-pointer group">
+               <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+               <div className="flex justify-between items-start relative z-10">
+                 <div>
+                   <h3 className="text-2xl font-bold leading-tight mb-2 text-slate-900 dark:text-white">RSVP<br/>Inteligente</h3>
+                   <p className="text-slate-500 dark:text-slate-400 text-sm">Pasa el cursor / Toca</p>
+                 </div>
+                 <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-sm border transition-colors duration-500 ${fakeRsvp ? 'bg-emerald-500 border-emerald-500' : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'}`}>
+                   {fakeRsvp ? <CheckCircle size={24} className="text-white animate-in zoom-in duration-300"/> : <UserPlus size={24} className="text-slate-400"/>}
+                 </div>
                </div>
-               <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-sm border transition-colors duration-500 ${fakeRsvp ? 'bg-emerald-500 border-emerald-500' : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'}`}>
-                 {fakeRsvp ? <CheckCircle size={24} className="text-white animate-in zoom-in duration-300"/> : <UserPlus size={24} className="text-slate-400"/>}
+            </div>
+          </RevealSection>
+
+          {/* TARJETA 4 */}
+          <RevealSection delay={400} className="h-full">
+            <div className="h-full bg-slate-50 dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
+               <div className="absolute inset-0 opacity-[0.03] dark:opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMWgyMHYyMEgxVjF6IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')]"></div>
+               <div className="absolute right-8 top-8 w-12 h-12 flex items-center justify-center">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-slate-400 dark:bg-white opacity-20 animate-ping"></span>
+                  <div className="relative w-3 h-3 bg-slate-800 dark:bg-white rounded-full shadow-lg"></div>
                </div>
-             </div>
-          </div>
+               <div className="relative z-10 mt-auto">
+                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 transition-colors">Logística GPS</h3>
+                 <p className="text-slate-500 dark:text-slate-400 text-sm max-w-[200px] transition-colors">Rutas precisas a la ceremonia y recepción.</p>
+               </div>
+            </div>
+          </RevealSection>
 
-          {/* TARJETA 4: MAPA */}
-          <div className="bg-slate-50 dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
-             <div className="absolute inset-0 opacity-[0.03] dark:opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMWgyMHYyMEgxVjF6IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')]"></div>
-             <div className="absolute right-8 top-8 w-12 h-12 flex items-center justify-center">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-slate-400 dark:bg-white opacity-20 animate-ping"></span>
-                <div className="relative w-3 h-3 bg-slate-800 dark:bg-white rounded-full shadow-lg"></div>
-             </div>
-             <div className="relative z-10 mt-auto">
-               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 transition-colors">Logística GPS</h3>
-               <p className="text-slate-500 dark:text-slate-400 text-sm max-w-[200px] transition-colors">Rutas precisas a la ceremonia y recepción.</p>
-             </div>
-          </div>
+          {/* TARJETA 5 */}
+          <RevealSection delay={100} className="md:col-span-2 h-full">
+            <div className="h-full bg-slate-900 dark:bg-white rounded-[2.5rem] p-8 md:p-10 border border-transparent flex items-center justify-between relative overflow-hidden group shadow-xl transition-colors duration-700">
+               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
+               <div className="relative z-10 max-w-[200px] md:max-w-[280px]">
+                 <h3 className="text-2xl font-bold text-white dark:text-slate-900 mb-2 flex items-center transition-colors"><QrCode size={24} className="mr-2 opacity-70"/> Accesos QR</h3>
+                 <p className="text-slate-400 dark:text-slate-500 text-sm transition-colors">Cada invitado recibe un boleto digital único e intransferible. Adiós a los colados.</p>
+               </div>
+               <div className="relative z-10 w-24 h-24 bg-white dark:bg-slate-100 rounded-3xl p-3 shadow-lg group-hover:scale-105 transition-transform flex items-center justify-center">
+                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VIP-PASS-123`} alt="QR Code VIP" className="w-full h-full mix-blend-multiply opacity-80" />
+               </div>
+            </div>
+          </RevealSection>
 
-          {/* TARJETA 5: PASES QR */}
-          <div className="md:col-span-2 bg-slate-900 dark:bg-white rounded-[2.5rem] p-8 md:p-10 border border-transparent flex items-center justify-between relative overflow-hidden group shadow-xl transition-colors duration-700">
-             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-             <div className="relative z-10 max-w-[200px] md:max-w-[280px]">
-               <h3 className="text-2xl font-bold text-white dark:text-slate-900 mb-2 flex items-center transition-colors"><QrCode size={24} className="mr-2 opacity-70"/> Accesos QR</h3>
-               <p className="text-slate-400 dark:text-slate-500 text-sm transition-colors">Cada invitado recibe un boleto digital único e intransferible. Adiós a los colados.</p>
-             </div>
-             <div className="relative z-10 w-24 h-24 bg-white dark:bg-slate-100 rounded-3xl p-3 shadow-lg group-hover:scale-105 transition-transform flex items-center justify-center">
-                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VIP-PASS-123`} alt="QR Code VIP" className="w-full h-full mix-blend-multiply opacity-80" />
-             </div>
-          </div>
+          {/* TARJETA 6 */}
+          <RevealSection delay={200} className="h-full">
+            <div className="h-full bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:border-slate-300 dark:hover:border-white/20 transition-colors relative overflow-hidden shadow-sm dark:shadow-none">
+               <div className="w-12 h-12 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mb-4 group-hover:-translate-y-1 transition-transform border border-slate-100 dark:border-white/5">
+                 <Wallet size={20} className="text-slate-700 dark:text-slate-300" />
+               </div>
+               <div className="relative z-10">
+                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 transition-colors">Mesa de Regalos</h3>
+                 <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">Recibe efectivo directo en tus cuentas, sin comisiones.</p>
+               </div>
+            </div>
+          </RevealSection>
 
-          {/* TARJETA 6: MESA REGALOS */}
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:border-slate-300 dark:hover:border-white/20 transition-colors relative overflow-hidden shadow-sm dark:shadow-none">
-             <div className="w-12 h-12 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mb-4 group-hover:-translate-y-1 transition-transform border border-slate-100 dark:border-white/5">
-               <Wallet size={20} className="text-slate-700 dark:text-slate-300" />
-             </div>
-             <div className="relative z-10">
-               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 transition-colors">Mesa de Regalos</h3>
-               <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">Recibe efectivo directo en tus cuentas, sin comisiones.</p>
-             </div>
-          </div>
-
-          {/* TARJETA 7: ITINERARIO */}
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:border-slate-300 dark:hover:border-white/20 transition-colors relative overflow-hidden shadow-sm dark:shadow-none">
-             <div className="space-y-3 mb-6 relative z-10 opacity-70 group-hover:opacity-100 transition-opacity">
-               <div className="flex items-center gap-3"><div className="w-2 h-2 bg-amber-500 rounded-full"></div><div className="h-1 w-16 bg-slate-200 dark:bg-white/20 rounded-full"></div></div>
-               <div className="flex items-center gap-3"><div className="w-2 h-2 border border-slate-400 rounded-full"></div><div className="h-1 w-12 bg-slate-100 dark:bg-white/10 rounded-full"></div></div>
-               <div className="flex items-center gap-3"><div className="w-2 h-2 border border-slate-400 rounded-full"></div><div className="h-1 w-20 bg-slate-100 dark:bg-white/10 rounded-full"></div></div>
-             </div>
-             <div className="relative z-10">
-               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 transition-colors">Itinerario</h3>
-               <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">El minuto a minuto elegante y ordenado.</p>
-             </div>
-          </div>
+          {/* TARJETA 7 */}
+          <RevealSection delay={300} className="h-full">
+            <div className="h-full bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:border-slate-300 dark:hover:border-white/20 transition-colors relative overflow-hidden shadow-sm dark:shadow-none">
+               <div className="space-y-3 mb-6 relative z-10 opacity-70 group-hover:opacity-100 transition-opacity">
+                 <div className="flex items-center gap-3"><div className="w-2 h-2 bg-amber-500 rounded-full"></div><div className="h-1 w-16 bg-slate-200 dark:bg-white/20 rounded-full"></div></div>
+                 <div className="flex items-center gap-3"><div className="w-2 h-2 border border-slate-400 rounded-full"></div><div className="h-1 w-12 bg-slate-100 dark:bg-white/10 rounded-full"></div></div>
+                 <div className="flex items-center gap-3"><div className="w-2 h-2 border border-slate-400 rounded-full"></div><div className="h-1 w-20 bg-slate-100 dark:bg-white/10 rounded-full"></div></div>
+               </div>
+               <div className="relative z-10">
+                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 transition-colors">Itinerario</h3>
+                 <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">El minuto a minuto elegante y ordenado.</p>
+               </div>
+            </div>
+          </RevealSection>
 
         </div>
       </section>
@@ -9495,7 +9524,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       <section id="boveda" className="py-32 relative z-10 border-y border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/50 transition-colors duration-700">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex flex-col lg:flex-row gap-16 items-center">
-            <div className="lg:w-1/2">
+            <RevealSection className="lg:w-1/2">
               <span className="text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase text-xs mb-4 block flex items-center"><Lock size={14} className="mr-2"/> Fase 2: La Ejecución</span>
               <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white mb-8 tracking-tight leading-tight transition-colors">Tu evento, bajo tu <span className="italic text-slate-500">dominio absoluto.</span></h2>
               <p className="text-slate-600 dark:text-slate-400 text-lg mb-10 font-light leading-relaxed transition-colors">Olvídate de los excels desordenados y las libretas perdidas. Baulia te entrega el Centro de Comando para administrar cada detalle desde tu iPad o computadora.</p>
@@ -9518,9 +9547,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   </div>
                 ))}
               </div>
-            </div>
+            </RevealSection>
 
-            <div className="lg:w-1/2 w-full relative perspective-[1000px]">
+            <RevealSection delay={200} className="lg:w-1/2 w-full relative perspective-[1000px]">
               <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 dark:from-indigo-500/20 to-amber-500/10 dark:to-amber-500/20 blur-[120px] rounded-full pointer-events-none transition-colors"></div>
               <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 p-3 shadow-2xl dark:shadow-[0_30px_80px_rgba(0,0,0,0.8)] relative z-10 transform md:rotate-y-[-5deg] md:rotate-x-[2deg] hover:rotate-y-0 hover:rotate-x-0 transition-all duration-1000">
                 <div className="bg-slate-50 dark:bg-slate-950 rounded-[1.5rem] border border-slate-100 dark:border-white/5 h-[500px] w-full overflow-hidden flex flex-col relative transition-colors">
@@ -9547,22 +9576,22 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                    </div>
                 </div>
               </div>
-            </div>
+            </RevealSection>
           </div>
         </div>
       </section>
 
       {/* SECCIÓN: TESTIMONIOS */}
       <section className="py-24 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-16">
+        <RevealSection className="text-center mb-16">
           <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">El Estándar de la Industria</span>
           <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700">Lo que dicen de nosotros.</h2>
-        </div>
+        </RevealSection>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
            {liveReviews.length > 0 ? (
              liveReviews.slice(0, 3).map((review, idx) => (
-               <div key={review.id} className={`bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative ${idx === 1 ? 'transform lg:-translate-y-4 shadow-xl dark:bg-slate-900 dark:border-slate-800' : ''}`}>
+               <RevealSection key={review.id} delay={idx * 150} className={`bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative ${idx === 1 ? 'transform lg:-translate-y-4 shadow-xl dark:bg-slate-900 dark:border-slate-800' : ''}`}>
                   <Quote className="absolute top-8 right-8 text-slate-100 dark:text-white/5" size={48} />
                   <div className="flex gap-1 mb-6">
                     {[1,2,3,4,5].map(star => <Star key={star} size={16} className={review.rating >= star ? "fill-amber-500 text-amber-500" : "text-slate-200 dark:text-slate-800"}/>)}
@@ -9579,28 +9608,28 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                        <p className="text-[10px] text-slate-500 uppercase tracking-widest">{review.authorType}</p>
                      </div>
                   </div>
-               </div>
+               </RevealSection>
              ))
            ) : (
              <>
-               <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative">
+               <RevealSection delay={100} className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative">
                   <Quote className="absolute top-8 right-8 text-slate-100 dark:text-white/5" size={48} />
                   <div className="flex gap-1 mb-6"><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/></div>
                   <p className="text-slate-600 dark:text-slate-300 text-lg font-light leading-relaxed mb-8 relative z-10 italic">"Usar Baulia fue la mejor decisión para nuestra boda. La invitación quedó hermosa y todo fue automatizado."</p>
                   <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center font-bold text-slate-500">S</div><div><h4 className="font-bold text-slate-900 dark:text-white text-sm">Sofía & Mauricio</h4><p className="text-[10px] text-slate-500 uppercase tracking-widest">Anfitriones</p></div></div>
-               </div>
-               <div className="bg-slate-900 dark:bg-white rounded-[2rem] p-8 border border-transparent flex flex-col justify-between shadow-xl transition-colors duration-500 relative transform lg:-translate-y-4">
+               </RevealSection>
+               <RevealSection delay={200} className="bg-slate-900 dark:bg-white rounded-[2rem] p-8 border border-transparent flex flex-col justify-between shadow-xl transition-colors duration-500 relative transform lg:-translate-y-4">
                   <Quote className="absolute top-8 right-8 text-white/5 dark:text-slate-900/5" size={48} />
                   <div className="flex gap-1 mb-6"><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/></div>
                   <p className="text-slate-300 dark:text-slate-700 text-lg font-light leading-relaxed mb-8 relative z-10 italic">"Como Planner, esta plataforma me ahorra 15 horas de logística. El escáner de QR en la puerta nos da un control brutal."</p>
                   <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-full bg-white/20 dark:bg-slate-900/10 flex items-center justify-center font-editorial text-white dark:text-slate-900 text-lg font-bold">EG</div><div><h4 className="font-bold text-white dark:text-slate-900 text-sm">Estudio Gala</h4><p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">Agencia Planner</p></div></div>
-               </div>
-               <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative">
+               </RevealSection>
+               <RevealSection delay={300} className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-500 relative">
                   <Quote className="absolute top-8 right-8 text-slate-100 dark:text-white/5" size={48} />
                   <div className="flex gap-1 mb-6"><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/><Star size={16} className="fill-amber-500 text-amber-500"/></div>
                   <p className="text-slate-600 dark:text-slate-300 text-lg font-light leading-relaxed mb-8 relative z-10 italic">"El Muro Social proyectado fue la sensación. Además, la mesa de regalos en efectivo directo a mi cuenta nos salvó."</p>
                   <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center font-bold text-slate-500">F</div><div><h4 className="font-bold text-slate-900 dark:text-white text-sm">Familia Torres</h4><p className="text-[10px] text-slate-500 uppercase tracking-widest">Anfitriones</p></div></div>
-               </div>
+               </RevealSection>
              </>
            )}
         </div>
@@ -9609,7 +9638,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       {/* SECCIÓN B2B: PLANNERS */}
       <section id="planners" className="py-24 relative z-10 overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="bg-slate-900 dark:bg-[#0a0a0a] rounded-[3rem] p-10 md:p-20 border border-slate-800 dark:border-white/10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between shadow-2xl transition-colors duration-700">
+          <RevealSection className="bg-slate-900 dark:bg-[#0a0a0a] rounded-[3rem] p-10 md:p-20 border border-slate-800 dark:border-white/10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between shadow-2xl transition-colors duration-700">
              <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/5 dark:bg-white/5 rounded-full blur-[100px] pointer-events-none transition-colors duration-700"></div>
              
              <div className="md:w-1/2 relative z-10 mb-12 md:mb-0">
@@ -9638,7 +9667,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                    </div>
                 </div>
              </div>
-          </div>
+          </RevealSection>
         </div>
       </section>
 
@@ -9646,7 +9675,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       {/* SECCIÓN DE PRECIOS: DIRECT SALES */}
       {/* ========================================== */}
       <div id="planes" className="py-24 px-4 max-w-7xl mx-auto z-10 relative">
-        <div className="text-center mb-20">
+        <RevealSection className="text-center mb-20">
           <span className="px-4 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-black uppercase tracking-[0.2em] border border-amber-500/20 shadow-sm">
             Adquiere tu Bóveda
           </span>
@@ -9656,12 +9685,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-sm md:text-base transition-colors">
             Obtén acceso inmediato al Panel de Control. Organiza tu evento y activa tus invitaciones digitales hoy mismo. <b>Único pago, sin mensualidades.</b>
           </p>
-        </div>
+        </RevealSection>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-center">
           
           {/* PAQUETE 1: BÁSICO */}
-          <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
+          <RevealSection delay={100} className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
             <h3 className="text-xl font-serif text-slate-900 dark:text-white mb-2">Básico</h3>
             <p className="text-xs text-slate-500 mb-6 h-8">La elegancia esencial para tu evento.</p>
             <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
@@ -9676,10 +9705,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             <button onClick={() => setCheckoutModal({ plan: 'Básico', precio: '990.00' })} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
               Comprar Paquete Básico
             </button>
-          </div>
+          </RevealSection>
 
           {/* PAQUETE 2: PLATA */}
-          <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
+          <RevealSection delay={200} className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
             <h3 className="text-xl font-serif text-slate-900 dark:text-white mb-2">Plata</h3>
             <p className="text-xs text-slate-500 mb-6 h-8">Recupera tu inversión con regalos en efectivo.</p>
             <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
@@ -9694,10 +9723,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             <button onClick={() => setCheckoutModal({ plan: 'Plata', precio: '1,490.00' })} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
               Comprar Paquete Plata
             </button>
-          </div>
+          </RevealSection>
 
           {/* PAQUETE 3: ORO (ESTRELLA - DESTACADO) */}
-          <div className="bg-slate-900 dark:bg-[#111111] rounded-3xl p-8 border-2 border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.15)] transform md:-translate-y-4 relative z-10">
+          <RevealSection delay={300} className="bg-slate-900 dark:bg-[#111111] rounded-3xl p-8 border-2 border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.15)] transform md:-translate-y-4 relative z-10">
             <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md">
               El Más Popular
             </div>
@@ -9716,10 +9745,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           <button onClick={() => setCheckoutModal({ plan: 'Oro VIP', precio: '1,990.00' })} className="w-full py-4 rounded-full bg-gradient-to-r from-amber-500 to-yellow-600 text-white text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-lg">
               Comprar Paquete Oro
             </button>
-          </div>
+          </RevealSection>
 
           {/* PAQUETE 4: DIAMANTE */}
-          <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
+          <RevealSection delay={400} className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative">
             <h3 className="text-xl font-serif text-slate-900 dark:text-white mb-2">Diamante VIP</h3>
             <p className="text-xs text-slate-500 mb-6 h-8">La suite definitiva para Planners y eventos TOP.</p>
             <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
@@ -9734,16 +9763,16 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20el%20Plan%20Diamante', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
               Contactar Ventas
             </button>
-          </div>
+          </RevealSection>
 
         </div>
       </div>
 
       {/* PREGUNTAS FRECUENTES (FAQ) */}
       <section id="faq" className="py-24 px-4 md:px-8 max-w-4xl mx-auto relative z-10">
-         <div className="text-center mb-16">
+         <RevealSection className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white mb-4 transition-colors">Preguntas Frecuentes</h2>
-         </div>
+         </RevealSection>
          <div className="space-y-2">
             {[
                { q: '¿Mis invitados tienen que descargar alguna App?', a: 'No, cero descargas. Todo funciona fluidamente desde el navegador de cualquier celular inteligente (Safari o Chrome).' },
@@ -9751,15 +9780,17 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                { q: '¿Por cuánto tiempo tendré acceso a mi panel?', a: 'Tendrás acceso total a tu panel desde el día de tu compra hasta 30 días naturales después de la fecha de tu evento, permitiendo descargar tus fotos y reportes.' },
                { q: '¿Soy Planner, puedo usar el mismo panel para varias bodas?', a: '¡Sí! Contamos con licencias B2B. Gestiona ilimitadas bodas al mismo tiempo bajo tu propia marca corporativa.' }
             ].map((faq, idx) => (
-               <details key={idx} className="group bg-transparent border-b border-slate-200 dark:border-white/10 py-6 transition-colors duration-300 cursor-pointer">
-                 <summary className="font-bold text-base text-slate-800 dark:text-white list-none flex justify-between items-center select-none outline-none transition-colors">
-                   {faq.q}
-                   <span className="text-slate-400 group-open:rotate-45 transition-transform duration-300"><Plus size={20} /></span>
-                 </summary>
-                 <p className="mt-4 text-slate-500 dark:text-slate-400 leading-relaxed text-sm font-light animate-in fade-in transition-colors pr-8">
-                   {faq.a}
-                 </p>
-               </details>
+               <RevealSection key={idx} delay={idx * 100}>
+                 <details className="group bg-transparent border-b border-slate-200 dark:border-white/10 py-6 transition-colors duration-300 cursor-pointer">
+                   <summary className="font-bold text-base text-slate-800 dark:text-white list-none flex justify-between items-center select-none outline-none transition-colors">
+                     {faq.q}
+                     <span className="text-slate-400 group-open:rotate-45 transition-transform duration-300"><Plus size={20} /></span>
+                   </summary>
+                   <p className="mt-4 text-slate-500 dark:text-slate-400 leading-relaxed text-sm font-light animate-in fade-in transition-colors pr-8">
+                     {faq.a}
+                   </p>
+                 </details>
+               </RevealSection>
             ))}
          </div>
       </section>
@@ -9771,7 +9802,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               <div className="flex items-center gap-3 mb-6">
                  <BauliaLogo className="h-10 w-auto" />
               </div>
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-light leading-relaxed max-w-sm mb-8 transition-colors">Software de gestión de élite. <br/>Elegancia en la invitación, poder absoluto en la ejecución.</p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-light leading-relaxed max-w-sm mb-8 transition-colors">Estudio de tecnología y alta costura digital. <br/>Elegancia en la invitación, poder absoluto en la ejecución.</p>
               
               <div className="flex space-x-3">
                  <button onClick={() => window.open('https://instagram.com/TU_PERFIL', '_blank')} className="w-10 h-10 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="Instagram">
@@ -9884,8 +9915,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     <h3 className="text-2xl font-editorial font-medium text-slate-900 dark:text-white tracking-widest uppercase transition-colors">Nuestra Historia</h3>
                   </div>
                   <p className="mb-4">Nacimos de una premisa simple pero poderosa: la tecnología detrás de los eventos más importantes de tu vida no debería ser aburrida, genérica ni complicada. Debería ser tan espectacular como el evento mismo.</p>
-                  <p className="mb-4">En Baulia, somos un equipo de diseñadores, ingenieros y <i>wedding planners</i> obsesionados con la perfección. Fusionamos la elegancia de la alta costura con el poder del software moderno para crear una experiencia inmersiva desde el momento en que se envía la primera invitación, hasta el último baile de la noche.</p>
-                  <p className="mb-4">Nuestra Bóveda Inteligente no es solo un gestor de invitados, es tu centro de comando. Hemos ayudado a cientos de anfitriones y agencias a eliminar el estrés de la planificación, permitiéndoles enfocarse en lo que realmente importa: celebrar el amor y la vida.</p>
+                  <p className="mb-4">En Baulia, operamos como un estudio de Alta Costura Digital. Somos un equipo de diseñadores, ingenieros de software y expertos en hospitalidad obsesionados con la perfección. Fusionamos el arte del diseño inmersivo con el poder del código moderno para crear una experiencia impecable desde que se envía la primera invitación, hasta el último baile de la noche.</p>
+                  <p className="mb-4">Nuestra Bóveda Inteligente no es solo un gestor de invitados, es tu Centro de Comando. Hemos ayudado a cientos de anfitriones y agencias a eliminar el estrés de la planificación, dándoles el control absoluto para que puedan enfocarse en lo que realmente importa: celebrar el amor, el éxito y la vida.</p>
                 </>
               ) : (
                 <>
