@@ -9034,7 +9034,7 @@ const RevealSection = ({ children, className = '', delay = 0 }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2.7: SHOWROOM ESTILO REVISTA) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2.6: BOTONES COMPLETOS Y FOOTER MISIÓN) ---
 // ==========================================
 const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [legalModal, setLegalModal] = useState(null);
@@ -9091,7 +9091,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     return () => { if (showroomPhoneRef.current) observer.unobserve(showroomPhoneRef.current); };
   }, []);
 
-  // 🔴 CATÁLOGO DE DEMOS ACTUALIZADO
+  // 🔴 CATÁLOGO DE DEMOS ACTUALIZADO (Nombres completos)
   const demos = {
     boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica y paletas sobrias. El estándar de alta costura nupcial.' },
     xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón y energía vibrante para la mejor noche de tu vida.' },
@@ -9310,7 +9310,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
       {/* SECCIÓN NUEVA: EL SHOWROOM INTERACTIVO (CONTEXTUAL DISPOSITIVO + ANIMACIÓN AL SCROLL) */}
       <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#0a0a0a] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-center justify-between gap-16">
           
           {/* Textos y Categorías del Showroom */}
           <RevealSection className="w-full lg:w-1/2 text-center lg:text-left flex flex-col items-center lg:items-start z-20">
@@ -9318,7 +9318,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 mb-6">
               Tu evento es único. <br className="hidden lg:block"/><span className="italic text-slate-500 dark:text-slate-400">Tu invitación también.</span>
             </h2>
-            <p className="text-base lg:text-lg text-slate-600 dark:text-slate-400 mb-10 max-w-xl font-light leading-relaxed transition-colors duration-700">
+            <p className="text-base text-slate-600 dark:text-slate-400 mb-10 max-w-lg font-light leading-relaxed transition-colors duration-700">
               Explora estas galerías interactivas y descubre nuestra capacidad tecnológica. Estas pantallas son solo el lienzo de inspiración: en Baulia operamos como un estudio de alta costura digital. Nuestro equipo de ingenieros y diseñadores programa cada invitación <b>100% desde cero</b>, adaptando la arquitectura y la estética al nivel de tu evento. Estás en manos de profesionales.
             </p>
 
@@ -9350,7 +9350,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           </RevealSection>
 
           {/* El Simulación del Teléfono (Animación Scroll) */}
-          <div className="w-full lg:w-1/2 flex justify-center lg:justify-start relative z-10 perspective-[1200px] mt-10 lg:mt-0 pl-0 lg:pl-10">
+          <div className="w-full lg:w-1/2 flex justify-center lg:justify-end relative z-10 perspective-[1200px]">
             
             {/* 🔴 MARCO DEL IPHONE (Con Animación Inclinada a Recta) */}
             {!isMobileDevice && (
@@ -9809,9 +9809,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                  <BauliaLogo className="h-10 w-auto" />
               </div>
               
-              <h4 className="text-slate-900 dark:text-white font-bold mb-4 tracking-widest uppercase text-[10px] transition-colors">Nuestra Misión</h4>
+              <h4 className="text-slate-900 dark:text-white font-bold mb-4 tracking-widest uppercase text-[10px]">Nuestra Misión</h4>
               <p className="text-slate-500 dark:text-slate-400 text-sm font-light leading-relaxed max-w-sm mb-8 transition-colors">
-                Elevar el estándar de la industria mediante diseño de alta costura y software de gestión de élite. Elegancia en la invitación, poder absoluto en la ejecución.
+                Elevar el estándar de la industria. <br/>Elegancia en la invitación, poder absoluto en la ejecución.
               </p>
               
               <div className="flex space-x-3">
@@ -9925,7 +9925,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     <h3 className="text-2xl font-editorial font-medium text-slate-900 dark:text-white tracking-widest uppercase transition-colors">Nuestra Historia</h3>
                   </div>
                   <p className="mb-4">Nacimos de una premisa simple pero poderosa: la tecnología detrás de los eventos más importantes de tu vida no debería ser aburrida, genérica ni complicada. Debería ser tan espectacular como el evento mismo.</p>
-                  <p className="mb-4">En Baulia, operamos como un Estudio de Alta Costura Digital. Somos un equipo de diseñadores, ingenieros de software y expertos en hospitalidad obsesionados con la perfección. Fusionamos el arte del diseño inmersivo con el poder del código moderno para crear una experiencia impecable desde que se envía la primera invitación, hasta el último baile de la noche.</p>
+                  <p className="mb-4">En Baulia, operamos como un estudio de Alta Costura Digital. Somos un equipo de diseñadores, ingenieros de software y expertos en hospitalidad obsesionados con la perfección. Fusionamos el arte del diseño inmersivo con el poder del código moderno para crear una experiencia impecable desde que se envía la primera invitación, hasta el último baile de la noche.</p>
                   <p className="mb-4">Nuestra Bóveda Inteligente no es solo un gestor de invitados, es tu Centro de Comando. Hemos ayudado a cientos de anfitriones y agencias a eliminar el estrés de la planificación, dándoles el control absoluto para que puedan enfocarse en lo que realmente importa: celebrar el amor, el éxito y la vida.</p>
                 </>
               ) : (
