@@ -8928,7 +8928,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           paymentMethodId: paymentMethod.id,
-          plan: planSeleccionado.nombre,
+          plan: planSeleccionado.plan, // 🔴 CORRECCIÓN: Ahora envía .plan correctamente
           precio: planSeleccionado.precio,
           nombre: nombre,
           email: email,
@@ -8942,7 +8942,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         // ¡Magia! Se cobró el dinero y se creó la Bóveda en Firebase.
         onSuccess(resultado, planSeleccionado);
       } else {
-        // Stripe rechazó la tarjeta (sin fondos, bloqueada, etc.)
+        // Stripe rechazó la tarjeta
         setErrorTexto(resultado.error || "Transacción declinada por el banco.");
       }
     } catch (err) {
@@ -8959,7 +8959,8 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex justify-between items-center mb-6">
            <div>
              <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-1">Plan Seleccionado</p>
-             <p className="text-white font-editorial text-xl">{planSeleccionado.nombre}</p>
+             {/* 🔴 CORRECCIÓN: Renderiza .plan en vez de .nombre */}
+             <p className="text-white font-editorial text-xl">{planSeleccionado.plan}</p>
            </div>
            <div className="text-right">
              <p className="text-white font-black text-2xl">${planSeleccionado.precio}</p>
@@ -9087,7 +9088,8 @@ const AnatomyOverlay = ({ onClose }) => {
       items: [
         { name: 'Confirmación (RSVP)', icon: <Ticket size={28} strokeWidth={1}/>, desc: 'Gestión de asistencia blindada por número de pases. Cero colados.' },
         { name: 'Mesa de Regalos', icon: <Gift size={28} strokeWidth={1}/>, desc: 'Recepción de aportaciones en efectivo directo a tus cuentas, sin comisiones.' },
-        { name: 'Reproductor de Música', icon: <CirclePlay size={28} strokeWidth={1}/>, desc: 'Ambienta la experiencia visual con la canción principal de tu celebración.' },
+        // 🔴 AQUÍ ESTABA EL ERROR DEL ÍCONO QUE CRASHEABA EL BOTÓN
+        { name: 'Reproductor de Música', icon: <PlayCircle size={28} strokeWidth={1}/>, desc: 'Ambienta la experiencia visual con la canción principal de tu celebración.' },
         { name: '# de Instagram', icon: <Hash size={28} strokeWidth={1}/>, desc: 'El hashtag oficial con enlace directo para indexar todos los recuerdos.' },
         { name: 'Filtro de Instagram', icon: <Smartphone size={28} strokeWidth={1}/>, desc: 'Lente de Realidad Aumentada (AR) exclusivo para embellecer sus historias.' },
         { name: 'Álbum Digital', icon: <SquareUser size={28} strokeWidth={1}/>, desc: 'Muro social integrado donde todos los invitados inmortalizan sus fotografías.' }
