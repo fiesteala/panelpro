@@ -9310,7 +9310,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* ========================================== */}
-      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (CORREGIDO: REPLICA EXACTA APPLE EDITORIAL 3.0) */}
+      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (CORREGIDO: REPLICA EXACTA APPLE EDITORIAL 4.0) */}
       {/* ========================================== */}
       <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#050505] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden flex items-center">
         {/* Glow de ambiente sutil */}
@@ -9320,17 +9320,17 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             
             {/* 🔴 Títulos y Eyebrow ya NO van afuera */}
 
-            {/* 🔴 2. EL MARCO DE SECCIÓN (rounded, dark gray, clipped overflow, flex containers inside) */}
+            {/* 🔴 EL MARCO DE SECCIÓN (rounded, dark gray, clipped overflow, flex containers inside) */}
             {!isMobileDevice ? (
-                <RevealSection delay={200} className="w-full aspect-[16/9] relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 items-stretch flex group">
+                <RevealSection delay={200} className="w-full aspect-[16/9] relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 items-stretch flex group p-10 lg:p-12 xl:p-14">
                     
                     {/* Glow interno sutil superior */}
                     <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white dark:from-[#080808] to-transparent opacity-40 z-0 transition-colors"></div>
 
                     {/* COLUMNA IZQUIERDA: Texto, Título, Controles y Botón (TODO DENTRO DEL MARCO) */}
-                    <div className="w-1/3 relative z-30 flex flex-col justify-between p-12 lg:p-16 h-full transition-colors">
+                    <div className="w-1/3 relative z-30 flex flex-col justify-between h-full pt-10 pb-6 transition-colors gap-8">
                         
-                        <div className="flex flex-col gap-6 pt-6">
+                        <div className="flex flex-col gap-6">
                             {/* Eyebrow y Título */}
                             <div className="flex flex-col gap-3">
                                 <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-[10px] block transition-colors">Inspiración Baulia</span>
@@ -9345,7 +9345,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             </p>
                         </div>
 
-                        <div className="flex flex-col gap-10 pb-6">
+                        <div className="flex flex-col gap-10">
                             {/* Dropdown de Categorías Baulia */}
                             <div className="relative w-full max-w-[280px] z-10">
                                 <select
@@ -9369,12 +9369,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA/CENTRO: Composición de Dispositivos (Grandes & Completos) */}
+                    {/* COLUMNA DERECHA/CENTRO: Composición de Dispositivos (Redimensionados & Reubicados) */}
                     <div className="w-2/3 relative h-full">
                         
-                        {/* --- 🔴 MACBOOK DE FONDO (Más grande, sit sits almost flush top-bottom, right corner) --- */}
-                        {/* Aumentado tamaño (w-110%) y posicionado para cubrir top-bottom con margen mínimo. */}
-                        <div className="absolute top-[4%] bottom-[4%] right-[-12%] w-[110%] z-10 flex items-center transition-transform duration-700 pointer-events-auto">
+                        {/* --- 🔴 MACBOOK DE FONDO (Más pequeña, a la derecha, top/bottom margin double) --- */}
+                        {/* Reducido tamaño (w-75%) y posicionado para cubrir top-bottom con margen doble (top-[12.5%]). */}
+                        <div className="absolute top-[12.5%] bottom-[12.5%] right-[-10%] w-[75%] z-10 flex items-center transition-transform duration-700 pointer-events-auto">
                             <div className="relative w-full aspect-[16/10] bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-colors duration-700 h-full">
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-6 bg-black rounded-b-2xl z-30"></div>
                                 
@@ -9390,25 +9390,26 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             </div>
                         </div>
 
-                        {/* --- 🔴 IPHONE AL FRENTE (Más chico, completamente visible, overlap) --- */}
-                        {/* Escala reducida ~30% (w-200px), posicionado para estar COMPLETO dentro de la caja. */}
-                        <div className="absolute bottom-[8%] left-[8%] z-20 transition-transform duration-700 hover:scale-[1.02] pointer-events-none">
+                        {/* --- 🔴 IPHONE AL FRENTE (Más grande, esquina inferior izquierda, overlap exacto) --- */}
+                        {/* Escala aumentada (~30%, w-280px), posicionado exactamente en la esquina inferior izquierda del contenedor. */}
+                        {/* Base alineada con la base de la Mac. Half-on/half-off Mac screen body. */}
+                        <div className="absolute bottom-[10.5%] left-[8%] xl:left-[12%] z-20 transition-transform duration-700 hover:scale-[1.02] pointer-events-none">
                               <div 
                                 ref={showroomPhoneRef}
-                                style={{ width: '200px', height: '433px' }} 
-                                className={`relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto transition-all duration-1000 ease-out origin-bottom ${isPhoneVisible ? 'translate-y-0 rotate-x-0 rotate-y-0 scale-100 opacity-100' : 'translate-y-32 rotate-x-[20deg] scale-95 opacity-0'}`}
+                                style={{ width: '280px', height: '606px' }} 
+                                className={`relative bg-black rounded-[3rem] border-[10px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto transition-all duration-1000 ease-out origin-bottom ${isPhoneVisible ? 'translate-y-0 rotate-x-0 rotate-y-0 scale-100 opacity-100' : 'translate-y-32 rotate-x-[20deg] scale-95 opacity-0'}`}
                               >
                                   {/* Isla Dinámica Escalada */}
-                                  <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-[30%] h-[18px] bg-black rounded-full z-20 flex justify-end items-center pr-1.5">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-slate-800/80 mr-1"></div>
-                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
+                                  <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[30%] h-[24px] bg-black rounded-full z-20 flex justify-end items-center pr-2">
+                                    <div className="w-2 h-2 rounded-full bg-slate-800/80 mr-1.5"></div>
+                                    <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
                                   </div>
                                   
-                                  {/* ESCALADO DE CONTENIDO DE INVITACIÓN (PERFECT FIT A 200PX) */}
+                                  {/* ESCALADO NATURAL DE CONTENIDO DE INVITACIÓN (PERFECT FIT A 280PX) */}
                                   <div className="absolute inset-0 flex items-center justify-center">
-                                      {/* Contenedor lógico del iPhone (430x932) reducido por escala ~0.465 para encajar en 200px físicos */}
-                                      <div className="relative w-[430px] h-[932px] transform origin-center flex items-center justify-center" style={{ transform: 'scale(0.465)' }}>
-                                          <iframe src={currentDemo.url} className="w-full h-full border-0 rounded-[2.5rem]" title={`iPhone Demo ${currentDemo.label}`}></iframe>
+                                      {/* Contenedor lógico del iPhone (430x932) reducido por escala ~0.604 para encajar en 280px físicos */}
+                                      <div className="relative w-[430px] h-[932px] transform origin-center flex items-center justify-center" style={{ transform: 'scale(0.604)' }}>
+                                          <iframe src={currentDemo.url} className="w-full h-full border-0 rounded-[3rem]" title={`iPhone Demo ${currentDemo.label}`}></iframe>
                                       </div>
                                   </div>
                               </div>
@@ -9423,7 +9424,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                          <Smartphone size={32}/>
                      </div>
                      <p className="text-slate-900 dark:text-white font-editorial text-xl font-bold mb-2 transition-colors">Vívelo en tu Teléfono</p>
-                     <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed transition-colors leading-relaxed transition-colors">Selecciona una categoría arriba para abrir la demostración interactiva a pantalla completa en tu dispositivo.</p>
+                     <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed transition-colors leading-relaxed transition-colors">Selecciona una categoría arriba para abrir la demostración interactiva a pantalla completa en tu dispositivo real.</p>
                 </RevealSection>
             )}
 
