@@ -9566,8 +9566,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                       
                                       {/* ✅ RESTAURADO: Escala original segura (no desborda) pero más alta (1005px) para tapar lo negro */}
                                       <div className="absolute inset-0 overflow-hidden rounded-[1.8rem] z-10 bg-[#111] flex items-center justify-center">
-                                        <div className="w-[430px] h-[1005px] origin-center flex-shrink-0" style={{ transform: 'scale(0.475)' }}>
-                                          <iframe src={currentDemo.url} className="w-full h-full border-0" title={`iPhone Demo ${currentDemo.label}`}></iframe>
+                                        <div className="w-[478px] h-[1040px] origin-center flex-shrink-0" style={{ transform: 'scale(0.46)' }}>
+                                          <iframe
+                                            src={currentDemo.url}
+                                            className="w-full h-full border-0"
+                                            title={`iPhone Demo ${currentDemo.label}`}
+                                          ></iframe>
                                         </div>
                                       </div>
                                   </div>
