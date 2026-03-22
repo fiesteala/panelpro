@@ -9034,7 +9034,7 @@ const RevealSection = ({ children, className = '', delay = 0 }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2.9: SHOWROOM APPLE ALINEACIÓN PERFECTA) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 3.0: SHOWROOM APPLE EDITORIAL) ---
 // ==========================================
 const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [legalModal, setLegalModal] = useState(null);
@@ -9091,13 +9091,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     return () => { if (showroomPhoneRef.current) observer.unobserve(showroomPhoneRef.current); };
   }, []);
 
-  // 🔴 CATÁLOGO DE DEMOS
+  // 🔴 CATÁLOGO DE DEMOS (Rutas locales respetadas para no romper tu VS Code)
   const demos = {
     boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica y paletas sobrias. El estándar de alta costura nupcial.' },
     xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón y energía vibrante para la mejor noche de tu vida.' },
     baby_shower: { id: 'baby_shower', label: 'Baby Shower / Revelación', url: '/demos/baby_shower/index.html', desc: 'Ternura, interactividad y emoción para recibir a la nueva vida.' },
     cumple_formal: { id: 'cumple_formal', label: 'Cumpleaños / Social', url: '/demos/cumple_formal/index.html', desc: 'Sofisticación pura para celebrar décadas con mucho estilo.' },
-    tematicas: { id: 'tematicas', label: 'Fiestas Temáticas', url: '/demos/infantil/index.html', desc: 'Llevamos cualquier concepto al máximo nivel con inmersión total para todas las edades.' },
+    tematicas: { id: 'tematicas', label: 'Fiestas Temáticas', url: '/demos/infantil/index.html', desc: 'Llevamos cualquier concepto al máximo nivel con inmersión total para todas las edades.' }, 
     bautizo: { id: 'bautizo', label: 'Bautizos / Comunión', url: '/demos/bautizo/index.html', desc: 'Tonos pastel y diseños angelicales para momentos íntimos en familia.' },
     corporativo: { id: 'corporativo', label: 'Corporativo / Galas', url: '/demos/corporativo/index.html', desc: 'Convenciones, conciertos y lanzamientos de marca con logística blindada.' }
   };
@@ -9105,7 +9105,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
   const handleViewDemo = (demoUrl) => {
     if (isMobileDevice) window.location.href = `${demoUrl}?origin=landing`;
-    else window.open(demoUrl, '_blank');
   };
 
   useEffect(() => {
@@ -9139,6 +9138,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
   const IconFB = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>;
   const IconIG = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 1.727-6.98 6.077-.058 1.28-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 1.718 6.781 6.077 6.98 1.28.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-1.718 6.979-6.077.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-1.717-6.78-6.077-6.98-1.28-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>;
+  const IconWA = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.88-.653-1.473-1.46-1.646-1.757-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>;
+  const IconTK = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v7.2c0 1.63-.31 3.23-1.11 4.6-1.18 2.01-3.21 3.44-5.5 3.86-2.5.46-5.22-.09-7.25-1.67-1.95-1.52-3.13-3.87-3.2-6.38-.08-2.82 1.25-5.61 3.54-7.24 1.48-1.06 3.32-1.5 5.12-1.37v4.03c-1.04-.15-2.15.02-3.05.62-.92.6-1.53 1.57-1.64 2.66-.1 1.05.28 2.11 1.02 2.85.76.76 1.86 1.1 2.92 1.03 1.16-.08 2.21-.71 2.78-1.7.35-.61.54-1.32.55-2.03V.02z"/></svg>;
 
   const accentThemes = {
     amber: { text: 'text-amber-500', bg: 'bg-amber-500', glow: 'shadow-[0_0_40px_rgba(245,158,11,0.4)]' },
@@ -9152,7 +9153,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white transition-colors duration-700 overflow-x-hidden relative">
       
-      {/* 🔴 BOTÓN FLOTANTE DE WHATSAPP */}
+      {/* 🔴 BOTÓN FLOTANTE DE WHATSAPP (VENTAS) */}
       <a href="https://wa.me/525512345678?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20Baulia" target="_blank" rel="noreferrer" className="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-[0_10px_20px_rgba(16,185,129,0.4)] hover:scale-110 hover:bg-emerald-400 transition-all z-50 group flex items-center justify-center">
         <MessageCircle size={28} />
         <span className="absolute right-full mr-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
@@ -9160,6 +9161,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </span>
       </a>
 
+      {/* MODAL CHECKOUT */}
       {checkoutModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 flex flex-col max-h-[90vh]">
@@ -9170,15 +9172,21 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </div>
               <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold flex items-center"><Lock size={12} className="mr-1 text-emerald-500"/> Entorno Seguro</p>
             </div>
+            
             <div className="p-6 overflow-y-auto flex-1 custom-scrollbar bg-slate-50 dark:bg-transparent">
               <Elements stripe={stripePromise}>
-                <CheckoutForm planSeleccionado={checkoutModal} onSuccess={handlePaymentSuccess} onCancel={() => setCheckoutModal(null)} />
+                <CheckoutForm 
+                  planSeleccionado={checkoutModal} 
+                  onSuccess={handlePaymentSuccess} 
+                  onCancel={() => setCheckoutModal(null)} 
+                />
               </Elements>
             </div>
           </div>
         </div>
       )}
 
+      {/* MODAL ÉXITO PAGO */}
       {checkoutSuccess && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 text-center border border-transparent dark:border-white/10 animate-in zoom-in-95">
@@ -9232,7 +9240,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </nav>
 
-      {/* HERO SECTION */}
+      {/* HERO SECTION: EL VIDEO DEL PODER DE BAULIA */}
       <section className="relative min-h-[90vh] pt-32 pb-20 px-4 md:px-8 max-w-[1400px] mx-auto z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
         <div className="w-full lg:w-1/2 text-center lg:text-left flex flex-col items-center lg:items-start xl:pl-10">
           <RevealSection>
@@ -9259,6 +9267,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </a>
             </div>
 
+            {/* Social Proof */}
             <div className="flex flex-col sm:flex-row items-center gap-4 text-slate-500 dark:text-slate-400 text-xs font-medium border-t border-slate-200 dark:border-white/10 pt-6 w-full lg:w-max">
               <div className="flex -space-x-2">
                 {[1,2,3,4,5].map(i => <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-[#050505] bg-slate-200 dark:bg-slate-800"></div>)}
@@ -9301,7 +9310,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* ========================================== */}
-      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (REPLICA EXACTA APPLE EDITORIAL) */}
+      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (CORRECCIÓN FINAL: LAYOUT APPLE) */}
       {/* ========================================== */}
       <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#050505] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden flex items-center">
         {/* Glow de ambiente sutil */}
@@ -9309,93 +9318,96 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 w-full flex flex-col items-center">
             
-            {/* EL MARCO DE SECCIÓN (rounded, dark gray, clipped overflow) */}
+            {/* EL MARCO DE SECCIÓN (Caja gris estilo Apple) */}
             {!isMobileDevice ? (
-                <RevealSection delay={200} className="w-full relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 flex flex-col lg:flex-row group min-h-[600px] lg:min-h-[750px]">
+                <RevealSection delay={200} className="w-full relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 flex group p-12 min-h-[650px]">
                     
                     {/* Glow interno sutil superior */}
                     <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white dark:from-[#080808] to-transparent opacity-40 z-0 transition-colors pointer-events-none"></div>
 
-                    {/* COLUMNA IZQUIERDA: Texto, Título, Controles y Botón */}
-                    <div className="w-full lg:w-5/12 relative z-30 flex flex-col justify-center p-10 lg:p-16 h-full transition-colors gap-10">
+                    {/* COLUMNA IZQUIERDA: Textos originales y controles */}
+                    <div className="w-5/12 xl:w-1/3 relative z-30 flex flex-col justify-between h-full py-4 gap-8">
                         
                         <div className="flex flex-col gap-6">
-                            {/* Eyebrow y Título */}
                             <div className="flex flex-col gap-3">
-                                <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-[10px] block transition-colors">Inspiración Baulia</span>
+                                <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs block transition-colors">Inspiración Baulia</span>
                                 <h2 className="text-4xl md:text-5xl lg:text-6xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 leading-tight">
-                                    Tu evento es único. <br className="hidden md:block"/> tu invitación también.
+                                    Tu evento es único. <br className="hidden xl:block"/> tu invitación también.
                                 </h2>
                             </div>
                             
-                            {/* Parrafo Baulia */}
                             <p className="text-base lg:text-lg text-slate-600 dark:text-slate-400 font-light leading-relaxed transition-colors duration-700 max-w-md">
-                                Exploramos estas galerías interactivas. En Baulia no usamos plantillas genéricas; operamos como un estudio de alta costura digital. Nuestro equipo programa cada invitación <b>100% desde cero</b>, adaptando la estética al nivel de tu evento.
+                                Explora estas galerías interactivas. En Baulia no usamos plantillas genéricas; operamos como un estudio de alta costura digital. Nuestro equipo programa cada invitación <b>100% desde cero</b>, adaptando la estética al nivel de tu evento.
                             </p>
                         </div>
 
-                        <div className="flex flex-col gap-8">
-                            {/* Dropdown de Categorías Baulia */}
+                        <div className="flex flex-col gap-8 mt-auto">
                             <div className="relative w-full max-w-[280px] z-10">
                                 <select
                                     value={activeCategory}
                                     onChange={(e) => setActiveCategory(e.target.value)}
-                                    className="w-full appearance-none bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white py-4 px-5 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-sm focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
+                                    className="w-full appearance-none bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white py-4 px-6 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-sm focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
                                 >
                                     {Object.values(demos).map(demo => (
                                         <option key={demo.id} value={demo.id}>{demo.label}</option>
                                     ))}
                                 </select>
-                                <div className="absolute inset-y-0 right-0 flex items-center px-5 pointer-events-none text-amber-500">
+                                <div className="absolute inset-y-0 right-0 flex items-center px-6 pointer-events-none text-amber-500">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                                 </div>
                             </div>
 
-                            {/* Botón descriptivo Baulia */}
-                            <button className="w-full sm:w-max px-6 py-4 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm flex items-center justify-center transition-colors">
+                            <button className="w-full sm:w-max px-8 py-4 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm flex items-center justify-center">
                                  Descubre la Anatomía de nuestras Invitaciones
                             </button>
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA: Composición de Dispositivos Apple Style */}
-                    <div className="w-full lg:w-7/12 relative flex items-center justify-end h-full min-h-[500px]">
+                    {/* COLUMNA DERECHA: Composición Mac + iPhone (Alineación perfecta) */}
+                    <div className="w-7/12 xl:w-2/3 relative flex items-center justify-end z-20">
                         
-                        {/* Wrapper contenedor de dispositivos (centrado vertical, anclado a la derecha) */}
-                        <div className="relative w-[95%] xl:w-[85%] right-[-10%] flex items-end">
+                        {/* WRAPPER DE LA MAC (Centrado verticalmente con flex, sobresale a la derecha) */}
+                        <div className="relative w-[110%] translate-x-[10%] flex flex-col justify-center">
                             
                             {/* --- 🔴 MACBOOK DE FONDO --- */}
-                            <div className="relative w-full aspect-[16/10] bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col pointer-events-auto">
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-5 bg-black rounded-b-2xl z-30"></div>
-                                <div className="w-full flex-1 bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5">
+                            <div className="relative w-full aspect-[16/10] bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-colors duration-700 pointer-events-auto">
+                                {/* Notch */}
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-6 bg-black rounded-b-2xl z-30"></div>
+                                
+                                {/* Pantalla Mac */}
+                                <div className="w-full flex-1 bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
                                     <iframe src={currentDemo.url} className="absolute inset-0 w-full h-full border-0" title={`Mac Demo ${currentDemo.label}`}></iframe>
                                 </div>
-                                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-[105%] h-4 bg-slate-400 dark:bg-slate-700 rounded-b-3xl shadow-xl z-30">
-                                    <div className="w-40 h-1.5 bg-slate-300 dark:bg-slate-600 mx-auto rounded-b-md"></div>
+                                
+                                {/* Base Mac */}
+                                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-[105%] h-4 bg-slate-400 dark:bg-slate-700 rounded-b-3xl shadow-xl z-30 transition-colors">
+                                   <div className="w-40 h-1.5 bg-slate-300 dark:bg-slate-600 mx-auto rounded-b-md"></div>
                                 </div>
                             </div>
 
                             {/* --- 🔴 IPHONE AL FRENTE --- */}
-                            {/* Posicionado `bottom-[-12px]` para quedar exactamente al nivel de la base de la laptop */}
-                            <div className="absolute left-[-10%] xl:left-[-5%] bottom-[-12px] z-20 pointer-events-none transition-transform duration-700 hover:scale-[1.02]">
-                                <div 
-                                  ref={showroomPhoneRef}
-                                  style={{ width: '224px', height: '485px' }} 
-                                  className={`relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 transition-all duration-1000 ease-out origin-bottom ${isPhoneVisible ? 'translate-y-0 rotate-x-0 rotate-y-0 scale-100 opacity-100' : 'translate-y-32 rotate-x-[20deg] scale-95 opacity-0'}`}
-                                >
-                                    <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-[30%] h-[18px] bg-black rounded-full z-20 flex justify-end items-center pr-1.5">
+                            {/* Alineado a la base (-bottom-3 coincide exacto con la base de la lap) */}
+                            {/* Más pequeño (215px) y movido a la izquierda (-15%) para el traslape perfecto */}
+                            <div className="absolute -bottom-3 left-[-15%] xl:left-[-10%] z-40 transition-transform duration-700 hover:scale-[1.02] pointer-events-none">
+                                  <div 
+                                    ref={showroomPhoneRef}
+                                    style={{ width: '215px', height: '466px' }} 
+                                    className={`relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto transition-all duration-1000 ease-out origin-bottom ${isPhoneVisible ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'}`}
+                                  >
+                                      {/* Isla Dinámica */}
+                                      <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-[30%] h-[16px] bg-black rounded-full z-20 flex justify-end items-center pr-1.5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-slate-800/80 mr-1"></div>
                                         <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
-                                    </div>
-                                    {/* Factor de escala 0.5209 (224 / 430) para renderizado perfecto sin cortes */}
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="relative w-[430px] h-[932px] transform origin-center flex items-center justify-center" style={{ transform: 'scale(0.52)' }}>
-                                            <iframe src={currentDemo.url} className="w-full h-full border-0 rounded-[3rem]" title={`iPhone Demo ${currentDemo.label}`}></iframe>
-                                        </div>
-                                    </div>
-                                </div>
+                                      </div>
+                                      
+                                      {/* Iframe Nativo y Centrado */}
+                                      <div className="absolute inset-0 flex items-center justify-center">
+                                          <div className="relative w-[430px] h-[932px] transform origin-center flex items-center justify-center" style={{ transform: 'scale(0.5)' }}>
+                                              <iframe src={currentDemo.url} className="w-full h-full border-0 rounded-[3rem]" title={`iPhone Demo ${currentDemo.label}`}></iframe>
+                                          </div>
+                                      </div>
+                                  </div>
                             </div>
-
                         </div>
                     </div>
 
@@ -9407,10 +9419,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                          <Smartphone size={32}/>
                      </div>
                      <p className="text-slate-900 dark:text-white font-editorial text-xl font-bold mb-2 transition-colors">Vívelo en tu Teléfono</p>
-                     <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed transition-colors leading-relaxed transition-colors">Selecciona una categoría arriba para abrir la demostración interactiva a pantalla completa en tu dispositivo.</p>
+                     <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 transition-colors">Selecciona una categoría arriba para abrir la demostración interactiva a pantalla completa en tu dispositivo.</p>
                 </RevealSection>
             )}
-
         </div>
       </section>
 
