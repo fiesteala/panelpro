@@ -9011,7 +9011,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2.3: UX CONTEXTUAL Y BOTÓN FLOTANTE) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2.4: ANIMACIONES & STORYTELLING) ---
 // ==========================================
 const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [legalModal, setLegalModal] = useState(null);
@@ -9024,17 +9024,48 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   
   // 🔴 ESTADOS PARA EL SHOWROOM INCRUSTADO
   const [activeCategory, setActiveCategory] = useState('boda');
-
-  // Detectar si es dispositivo móvil para cambiar la UI del Showroom
   const [isMobileDevice, setIsMobileDevice] = useState(false);
 
+  // 🔴 ESTADOS PARA NOTIFICACIONES DINÁMICAS (HERO)
+  const [notifIndex, setNotifIndex] = useState(0);
+  
+  // 🔴 ESTADOS PARA ANIMACIÓN AL HACER SCROLL (SHOWROOM)
+  const showroomPhoneRef = useRef(null);
+  const [isPhoneVisible, setIsPhoneVisible] = useState(false);
+
+  const heroNotifications = [
+    { title: 'RSVP Confirmado', desc: 'Familia Fuentes (4 Pases)', icon: <CheckCircle size={20}/>, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-500/20' },
+    { title: 'Pago Registrado', desc: 'Anticipo Banquete ($15,000)', icon: <Wallet size={20}/>, color: 'text-amber-500', bg: 'bg-amber-100 dark:bg-amber-500/20' },
+    { title: 'Nuevo Proveedor', desc: 'Estudio Fotográfico Gala', icon: <Store size={20}/>, color: 'text-indigo-500', bg: 'bg-indigo-100 dark:bg-indigo-500/20' },
+    { title: 'Alerta Operativa', desc: 'Cita con decorador (Mañana)', icon: <Clock size={20}/>, color: 'text-rose-500', bg: 'bg-rose-100 dark:bg-rose-500/20' },
+  ];
+
   useEffect(() => {
-    const checkDevice = () => {
-      setIsMobileDevice(window.innerWidth < 1024); // lg breakpoint
-    };
+    const interval = setInterval(() => {
+      setNotifIndex(prev => (prev + 1) % heroNotifications.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const checkDevice = () => setIsMobileDevice(window.innerWidth < 1024);
     checkDevice();
     window.addEventListener('resize', checkDevice);
     return () => window.removeEventListener('resize', checkDevice);
+  }, []);
+
+  // Intersection Observer para el iPhone del Showroom
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsPhoneVisible(true);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    if (showroomPhoneRef.current) observer.observe(showroomPhoneRef.current);
+    return () => { if (showroomPhoneRef.current) observer.unobserve(showroomPhoneRef.current); };
   }, []);
 
   const demos = {
@@ -9047,13 +9078,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   };
   const currentDemo = demos[activeCategory];
 
-  // 🔴 LÓGICA DE NAVEGACIÓN CONTEXTUAL
   const handleViewDemo = (demoUrl) => {
-    if (isMobileDevice) {
-      window.location.href = `${demoUrl}?origin=landing`;
-    } else {
-      window.open(demoUrl, '_blank');
-    }
+    if (isMobileDevice) window.location.href = `${demoUrl}?origin=landing`;
+    else window.open(demoUrl, '_blank');
   };
 
   useEffect(() => {
@@ -9096,6 +9123,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     emerald: { text: 'text-emerald-500', bg: 'bg-emerald-500', glow: 'shadow-[0_0_40px_rgba(16,185,129,0.4)]' },
     indigo: { text: 'text-indigo-500', bg: 'bg-indigo-500', glow: 'shadow-[0_0_40px_rgba(99,102,241,0.4)]' }
   };
+
+  const currentNotif = heroNotifications[notifIndex];
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white transition-colors duration-700 overflow-x-hidden relative">
@@ -9212,7 +9241,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </a>
           </div>
 
-          {/* Social Proof (Prueba Social Inmediata) */}
+          {/* Social Proof */}
           <div className="flex flex-col sm:flex-row items-center gap-4 text-slate-500 dark:text-slate-400 text-xs font-medium border-t border-slate-200 dark:border-white/10 pt-6 w-full lg:w-max">
             <div className="flex -space-x-2">
               {[1,2,3,4,5].map(i => <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-[#050505] bg-slate-200 dark:bg-slate-800"></div>)}
@@ -9228,11 +9257,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
         {/* Derecha: Placeholder del VIDEO DEMO */}
         <div className="w-full lg:w-1/2 relative flex justify-center lg:justify-end mt-12 lg:mt-0 perspective-[1000px]">
-          {/* Aquí inyectaremos el iframe de YouTube o Vimeo de Screen Studio */}
           <div className="relative w-full max-w-[600px] aspect-video bg-slate-900 rounded-[2rem] border border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.4)] overflow-hidden transform lg:-rotate-y-6 lg:rotate-x-2 hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-700 flex items-center justify-center group cursor-pointer">
-              
               <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-black z-0"></div>
-              
               <div className="relative z-10 flex flex-col items-center justify-center text-center p-6">
                   <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <PlayCircle size={32} className="text-amber-500 animate-pulse"/>
@@ -9242,20 +9268,22 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </div>
           </div>
           
-          {/* Elementos flotantes decorativos */}
-          <div className="absolute -bottom-6 left-6 md:left-12 bg-white/90 dark:bg-black/80 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-200 dark:border-white/10 animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-300 z-20">
+          {/* 🔴 NOTIFICACIONES DINÁMICAS (NUEVO) */}
+          <div key={notifIndex} className="absolute -bottom-6 left-6 md:left-12 bg-white/95 dark:bg-black/90 backdrop-blur-md p-4 rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 animate-in slide-in-from-bottom-5 fade-in duration-500 z-20">
               <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-500"><CheckCircle size={20}/></div>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${currentNotif.bg} ${currentNotif.color}`}>
+                    {currentNotif.icon}
+                  </div>
                   <div>
-                      <p className="text-xs font-black uppercase text-slate-800 dark:text-white">RSVP Confirmado</p>
-                      <p className="text-[10px] text-slate-500">Familia Torres (4 Pases)</p>
+                      <p className="text-xs font-black uppercase text-slate-800 dark:text-white">{currentNotif.title}</p>
+                      <p className="text-[10px] text-slate-500">{currentNotif.desc}</p>
                   </div>
               </div>
           </div>
         </div>
       </section>
 
-      {/* SECCIÓN NUEVA: EL SHOWROOM INTERACTIVO (CONTEXTUAL DISPOSITIVO) */}
+      {/* SECCIÓN NUEVA: EL SHOWROOM INTERACTIVO (CONTEXTUAL DISPOSITIVO + ANIMACIÓN AL SCROLL) */}
       <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#0a0a0a] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-center justify-between gap-16">
           
@@ -9269,16 +9297,14 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               Explora estas galerías interactivas y descubre nuestra capacidad tecnológica. Estas pantallas son solo piezas de inspiración: en Baulia no usamos plantillas genéricas. Cada proyecto es una obra de alta costura, diseñada desde cero para reflejar la esencia, los colores y el prestigio de tu celebración.
             </p>
 
-            {/* Botones de Categoría - Acción contextual basada en dispositivo */}
+            {/* Botones de Categoría */}
             <div className="flex flex-wrap justify-center lg:justify-start gap-2 w-full mb-8">
               {Object.values(demos).map(demo => (
                 <button 
                   key={demo.id} 
                   onClick={() => {
                     setActiveCategory(demo.id);
-                    if (isMobileDevice) {
-                        handleViewDemo(demo.url); // Navegación directa en móvil al tocar categoría
-                    }
+                    if (isMobileDevice) handleViewDemo(demo.url);
                   }}
                   className={`px-4 py-2.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all border ${activeCategory === demo.id ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white dark:bg-white/5 text-slate-500 border-slate-300 dark:border-white/20 hover:border-slate-500 dark:hover:border-white/50 hover:text-slate-800 dark:hover:text-white'}`}
                 >
@@ -9298,21 +9324,24 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
           </div>
 
-          {/* El Simulación del Teléfono (Oculto en móvil, visible en desktop) */}
-          <div className="w-full lg:w-1/2 flex justify-center lg:justify-end relative z-10">
+          {/* El Simulación del Teléfono (Animación Scroll) */}
+          <div className="w-full lg:w-1/2 flex justify-center lg:justify-end relative z-10 perspective-[1200px]">
             
-            {/* 🔴 MARCO DEL IPHONE (Solo visible si NO es dispositivo móvil) */}
+            {/* 🔴 MARCO DEL IPHONE (Con Animación Inclinada a Recta) */}
             {!isMobileDevice && (
                 <div className="relative">
-                  <div style={{ width: '322px', height: '670px' }} className="relative bg-black rounded-[3.5rem] border-[12px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.3)] overflow-hidden flex-shrink-0 mx-auto lg:mr-0 z-10">
-                      
+                  <div 
+                    ref={showroomPhoneRef}
+                    style={{ width: '322px', height: '670px' }} 
+                    className={`relative bg-black rounded-[3.5rem] border-[12px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.3)] overflow-hidden flex-shrink-0 mx-auto lg:mr-0 z-10 transform transition-all duration-1000 ease-out origin-bottom ${isPhoneVisible ? 'lg:translate-y-0 lg:rotate-x-0 lg:rotate-y-0 lg:scale-100 opacity-100' : 'lg:translate-y-32 lg:rotate-x-[30deg] lg:-rotate-y-12 lg:scale-90 opacity-0 lg:opacity-100'}`}
+                  >
                       {/* Isla Dinámica */}
                       <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[30%] h-[30px] bg-black rounded-full z-20 flex justify-end items-center pr-2">
                         <div className="w-2 h-2 rounded-full bg-slate-800/80 mr-1"></div>
                         <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
                       </div>
                       
-                      {/* El iFrame Renderizado a la resolución exacta del iPhone 16 Pro Max y escalado */}
+                      {/* El iFrame */}
                       <div className="absolute top-0 left-0 w-[430px] h-[932px] origin-top-left bg-[#111]" style={{ transform: 'scale(0.693)' }}>
                         <iframe 
                           src={currentDemo.url} 
@@ -9323,26 +9352,20 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   </div>
 
                   {/* 🔴 BOTÓN FLOTANTE PANTALLA COMPLETA */}
-                  <button onClick={() => handleViewDemo(currentDemo.url)} className="absolute -bottom-4 -left-4 lg:-left-8 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-full font-bold text-[10px] text-white uppercase tracking-widest flex items-center transition-colors shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-30">
+                  <button onClick={() => handleViewDemo(currentDemo.url)} className={`absolute -bottom-4 -left-4 lg:-left-8 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-full font-bold text-[10px] text-white uppercase tracking-widest flex items-center transition-all duration-1000 shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-30 ${isPhoneVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                     Ver pantalla completa <ExternalLink size={14} className="ml-2"/>
                   </button>
-
-                  {/* Etiqueta Decorativa */}
-                  <div className="absolute -top-6 -right-6 lg:-right-10 bg-white/90 dark:bg-black/80 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-200 dark:border-white/10 animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-500 z-20">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1 text-center">Diseño Interactivo</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-bold text-center">Interactúa con la pantalla 👉</p>
-                  </div>
                 </div>
             )}
 
-            {/* 🔴 PLACEHOLDER/AVISO EN MÓVIL (En lugar del teléfono) */}
+            {/* PLACEHOLDER MÓVIL */}
             {isMobileDevice && (
                 <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-2xl text-center w-full max-w-sm mt-8">
                     <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20 text-amber-500">
                         <Smartphone size={32}/>
                     </div>
                     <p className="text-white font-editorial text-lg font-bold mb-2">Vívelo en tu Teléfono</p>
-                    <p className="text-slate-400 text-sm mb-6">Toca una categoría a la izquierda para ver la demo en pantalla completa en tu dispositivo real.</p>
+                    <p className="text-slate-400 text-sm mb-6">Toca una categoría a la izquierda para ver la demo a pantalla completa en tu dispositivo real.</p>
                 </div>
             )}
           </div>
@@ -9353,7 +9376,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       {/* BENTO BOX: INVITACIONES INTERACTIVAS */}
       <section id="experiencia" className="py-24 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
         <div className="mb-16 text-center md:text-left">
-          <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Fase 1: La Invitación</span>
+          <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Detalles de Alta Costura</span>
           <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700">Más que una invitación.<br/><span className="italic text-slate-500 dark:text-slate-400">Una experiencia táctil.</span></h2>
         </div>
 
@@ -9748,7 +9771,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               <div className="flex items-center gap-3 mb-6">
                  <BauliaLogo className="h-10 w-auto" />
               </div>
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-light leading-relaxed max-w-sm mb-8 transition-colors">Software de gestión de élite. <br/>Elegancia en la invitation, poder absoluto en la ejecución.</p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-light leading-relaxed max-w-sm mb-8 transition-colors">Software de gestión de élite. <br/>Elegancia en la invitación, poder absoluto en la ejecución.</p>
               
               <div className="flex space-x-3">
                  <button onClick={() => window.open('https://instagram.com/TU_PERFIL', '_blank')} className="w-10 h-10 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="Instagram">
@@ -9779,6 +9802,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
            <div>
               <h4 className="text-slate-900 dark:text-white font-bold mb-6 tracking-widest uppercase text-[10px] transition-colors">Compañía</h4>
               <ul className="space-y-4 text-xs text-slate-500 font-medium transition-colors">
+                 <li><button onClick={() => setLegalModal('about_us')} className="hover:text-slate-900 dark:hover:text-white transition-colors">Quiénes Somos</button></li>
                  <li><button onClick={() => setLegalModal('about')} className="hover:text-slate-900 dark:hover:text-white transition-colors">La Visión Baulia</button></li>
                  <li><button onClick={() => window.open('mailto:hola@baulia.com')} className="hover:text-slate-900 dark:hover:text-white transition-colors flex items-center">hola@baulia.com</button></li>
               </ul>
@@ -9818,7 +9842,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             
             <div className="p-6 md:p-8 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-[#050505] shrink-0 transition-colors">
               <h2 className="text-xl font-editorial font-bold text-slate-900 dark:text-white tracking-wide transition-colors">
-                {legalModal === 'terms' ? 'Términos de Servicio' : legalModal === 'privacy' ? 'Aviso de Privacidad' : 'La Visión Baulia'}
+                {legalModal === 'terms' ? 'Términos de Servicio' : legalModal === 'privacy' ? 'Aviso de Privacidad' : legalModal === 'about_us' ? 'Quiénes Somos' : 'La Visión Baulia'}
               </h2>
               <button onClick={() => setLegalModal(null)} className="p-2 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors text-slate-500 border border-slate-200 dark:border-transparent">
                 <X size={16} />
@@ -9852,6 +9876,16 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     <li><strong>Del Administrador:</strong> Nombres, correo electrónico de contacto y datos generales del evento.</li>
                     <li><strong>De los Invitados:</strong> Nombres, estado de confirmación de asistencia (RSVP) y fotografías subidas voluntariamente al muro social (las cuales pueden ser eliminadas en cualquier momento por el administrador).</li>
                   </ul>
+                </>
+              ) : legalModal === 'about_us' ? (
+                <>
+                  <div className="flex flex-col items-center text-center mb-8 mt-4">
+                    <BauliaLogo className="h-12 w-auto mb-6 opacity-80" />
+                    <h3 className="text-2xl font-editorial font-medium text-slate-900 dark:text-white tracking-widest uppercase transition-colors">Nuestra Historia</h3>
+                  </div>
+                  <p className="mb-4">Nacimos de una premisa simple pero poderosa: la tecnología detrás de los eventos más importantes de tu vida no debería ser aburrida, genérica ni complicada. Debería ser tan espectacular como el evento mismo.</p>
+                  <p className="mb-4">En Baulia, somos un equipo de diseñadores, ingenieros y <i>wedding planners</i> obsesionados con la perfección. Fusionamos la elegancia de la alta costura con el poder del software moderno para crear una experiencia inmersiva desde el momento en que se envía la primera invitación, hasta el último baile de la noche.</p>
+                  <p className="mb-4">Nuestra Bóveda Inteligente no es solo un gestor de invitados, es tu centro de comando. Hemos ayudado a cientos de anfitriones y agencias a eliminar el estrés de la planificación, permitiéndoles enfocarse en lo que realmente importa: celebrar el amor y la vida.</p>
                 </>
               ) : (
                 <>
