@@ -14,7 +14,7 @@ import {
   DollarSign, PieChart, TrendingDown, Upload, Building, Landmark, History, Phone, Mail, Calendar, Eye, EyeOff, MessageSquare, 
   FileSignature, AlertCircle, Star, Image as ImageIcon, CalendarDays, FileDown, 
   ListTodo, CheckCircle2, Circle, PlayCircle, AlignLeft, MapPin, ShieldCheck, Printer, Scan, Camera, Navigation as NavigationIcon, Navigation, MoreVertical,
-  Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Image, Key, Power, Quote, Check
+  Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Key, Power, Quote, Check
 } from 'lucide-react';
 
 // 🔴 CONEXIÓN A STRIPE (Reemplaza con tu clave Publicable de Stripe)
@@ -9011,7 +9011,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
 };
 
 // ==========================================
-// --- MICRO-COMPONENTE: ANIMACIÓN AL SCROLL ---
+// --- MICRO-COMPONENTE: ANIMACIÓN AL SCROLL (Efecto Apple) ---
 // ==========================================
 const RevealSection = ({ children, className = '', delay = 0 }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -9037,30 +9037,61 @@ const RevealSection = ({ children, className = '', delay = 0 }) => {
 // --- COMPONENTE: REVISTA EDITORIAL (ANATOMÍA) ---
 // ==========================================
 const AnatomyOverlay = ({ onClose }) => {
+  const MonogramPlaceholder = ({ className }) => <div className={`${className} font-monogram text-white text-3xl flex items-center justify-center bg-slate-200 dark:bg-white/5 rounded-2xl`}>A&R</div>;
+  const IconIG = () => <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 1.727-6.98 6.077-.058 1.28-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 1.718 6.781 6.077 6.98 1.28.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-1.718 6.979-6.077.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-1.717-6.78-6.077-6.98-1.28-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>;
+
   const sections = [
     {
       title: "El Arte Visual",
       subtitle: "01",
       desc: "La primera impresión lo es todo. Diseñamos la identidad gráfica de tu evento para que el impacto sea inmediato e inolvidable.",
-      items: ["Fotos de portada", "Fotos de galería", "Fotos de novios", "Monograma", "Monograma personalizado"]
+      items: [
+        { name: 'Monograma / Logo', icon: <MonogramPlaceholder className="w-12 h-12 opacity-50"/>, desc: 'Iniciales manuscritas o logotipo central.' },
+        { name: 'Diseño Personalizado', icon: <Sparkles size={20}/>, desc: 'Un emblema único basado en tu paleta y estilo.' },
+        { name: 'Fotos de Portada', icon: <ImageIcon size={20}/>, desc: 'Imágenes inmersivas, cinemáticas y full-screen.' },
+        { name: 'Fotos de Galería', icon: <LayoutGrid size={20}/>, desc: 'Mosaico de imágenes donde exploran tu historia.' },
+        { name: 'Fotos de Novios', icon: <Camera size={20}/>, desc: 'Selección curada de vuestra sesión principal.' }
+      ]
     },
     {
       title: "La Narrativa",
       subtitle: "02",
       desc: "Cada celebración tiene una historia que contar. Envolvemos a tus invitados en la esencia de los protagonistas y sus familias.",
-      items: ["Nombre y frases de los novios", "Nombre de los padres", "Padrinos", "Frase general del evento", "Save the date"]
+      items: [
+        { name: 'Nombre y Frases', icon: <Quote size={20}/>, desc: 'Citas que expresan la esencia de los protagonistas.' },
+        { name: 'Nombre de Padres', icon: <Heart size={20}/>, desc: 'Espacio de honor para los pilares de la familia.' },
+        { name: 'Padrinos / Testigos', icon: <Users size={20}/>, desc: 'Reconocimiento a las personas clave elegidas.' },
+        { name: 'Frase del Evento', icon: <BookOpenText size={20}/>, desc: 'El lema que define el tono de la celebración.' },
+        { name: 'Save the Date', icon: <CalendarDays size={20}/>, desc: 'Pre-invitación digital para reservar la fecha.' }
+      ]
     },
     {
       title: "La Precisión",
       subtitle: "03",
       desc: "Logística blindada y elegante. Coordinamos cada detalle para que tus invitados tengan toda la información en la palma de su mano.",
-      items: ["Cuenta regresiva", "Mapas GPS", "Calendario", "Itinerario", "Código de vestimenta", "Recomendación de hospedaje", "Clima", "Traducción"]
+      items: [
+        { name: 'Cuenta Regresiva', icon: <Clock size={20}/>, desc: 'Un countdown animado hacia el gran momento.' },
+        { name: 'Mapas GPS', icon: <MapPin size={20}/>, desc: 'Rutas precisas y geolocalizadas al evento.' },
+        { name: 'Calendario', icon: <CheckSquare size={20}/>, desc: 'Agrega el evento a calendarios con un toque.' },
+        { name: 'Itinerario', icon: <ListTree size={20}/>, desc: 'Cronograma visual minuto a minuto.' },
+        { name: 'Código de Vestimenta', icon: <Shirt size={20}/>, desc: 'Guía visual (Dress Code) para los invitados.' },
+        { name: 'Hospedaje', icon: <Hotel size={20}/>, desc: 'Hoteles cercanos con tarifas preferenciales.' },
+        { name: 'Clima', icon: <CloudSun size={20}/>, desc: 'Pronóstico en tiempo real para la fecha.' },
+        { name: 'Traducción', icon: <Languages size={20}/>, desc: 'Invitación multi-idioma automática.' }
+      ]
     },
     {
       title: "La Interacción",
       subtitle: "04",
       desc: "Más que una invitación, una experiencia táctil y social. Conectamos a tus invitados con el ambiente antes de que empiece la fiesta.",
-      items: ["Reproductor de música", "Mesa de regalos", "Confirmación (RSVP)", "# de Instagram", "Filtro de Instagram", "Album Digital"]
+      items: [
+        { name: 'Reproductor Musical', icon: <CirclePlay size={20}/>, desc: 'Ambienta con la canción principal de tu evento.' },
+        { name: 'Mesa de Regalos', icon: <Gift size={20}/>, desc: 'Recibe regalos en efectivo directo a tu cuenta.' },
+        { name: 'Confirmación RSVP', icon: <Ticket size={20}/>, desc: 'Gestión blindada de pases. Cero colados.' },
+        { name: '# de Instagram', icon: <Hash size={20}/>, desc: 'Hashtag oficial para indexar recuerdos.' },
+        { name: 'Filtro Instagram', icon: <IconIG/>, desc: 'Filtro AR exclusivo para historias.' },
+        { name: 'Album Digital', icon: <SquareUser size={20}/>, desc: 'Muro social proyectado en pantallas en vivo.' }
+      ]
     }
   ];
 
@@ -9104,9 +9135,14 @@ const AnatomyOverlay = ({ onClose }) => {
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
                       {sec.items.map((item, j) => (
-                        <div key={j} className="flex items-start text-slate-800 dark:text-slate-200 text-sm md:text-base border-t border-slate-100 dark:border-white/5 pt-4 transition-colors">
-                           <span className="text-amber-500 mr-3 mt-1.5 text-[10px]">✦</span> 
-                           <span className="font-medium tracking-wide">{item}</span>
+                        <div key={j} className="flex flex-col text-slate-800 dark:text-slate-200 border-t border-slate-100 dark:border-white/5 pt-4 transition-colors">
+                           <div className="flex items-center mb-1">
+                             <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-white/5 flex items-center justify-center text-amber-600 dark:text-amber-500 mr-3 shadow-inner border border-slate-100 dark:border-white/5 shrink-0">
+                               {item.icon}
+                             </div>
+                             <span className="font-bold text-sm tracking-wide">{item.name}</span>
+                           </div>
+                           <p className="text-xs text-slate-500 dark:text-slate-400 font-light pl-11 leading-relaxed">{item.desc}</p>
                         </div>
                       ))}
                     </div>
@@ -9165,7 +9201,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     }, { threshold: 0.1 });
     if (showroomPhoneRef.current) observer.observe(showroomPhoneRef.current);
     return () => { if (showroomPhoneRef.current) observer.unobserve(showroomPhoneRef.current); };
-  }, [showAnatomy]); // Se re-ejecuta si cerramos la revista
+  }, [showAnatomy]); 
 
   const demos = {
     boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica y paletas sobrias. El estándar de alta costura nupcial.' },
@@ -9284,7 +9320,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </div>
               <div className="flex items-center gap-4">
                 <button onClick={cycleTheme} className="text-slate-400 hover:text-amber-600 dark:text-slate-500 dark:hover:text-amber-400 transition-colors" title={`Modo: ${themeSetting.toUpperCase()}`}>
-                  {themeSetting === 'auto' ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> : themeSetting === 'dark' ? <Moon size={20} /> : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>}
+                  {themeSetting === 'auto' ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> : themeSetting === 'dark' ? <Moon size={20} /> : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 5.64l1.42-1.42"/></svg>}
                 </button>
                 <button onClick={() => window.location.href = 'https://panel.baulia.com'} className="text-[10px] md:text-xs font-black uppercase tracking-widest text-white dark:text-slate-900 bg-slate-900 dark:bg-white px-5 py-2.5 md:px-6 md:py-3 rounded-full hover:scale-105 transition-transform shadow-md">Acceso Clientes</button>
               </div>
