@@ -9034,7 +9034,7 @@ const RevealSection = ({ children, className = '', delay = 0 }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2.5: COPY LUXURY + ANIMACIONES SCROLL) ---
+// --- COMPONENTE: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 2.6: BOTONES COMPLETOS Y FOOTER MISIÓN) ---
 // ==========================================
 const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [legalModal, setLegalModal] = useState(null);
@@ -9091,7 +9091,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     return () => { if (showroomPhoneRef.current) observer.unobserve(showroomPhoneRef.current); };
   }, []);
 
-  // 🔴 CATÁLOGO DE DEMOS ACTUALIZADO
+  // 🔴 CATÁLOGO DE DEMOS ACTUALIZADO (Nombres completos)
   const demos = {
     boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica y paletas sobrias. El estándar de alta costura nupcial.' },
     xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón y energía vibrante para la mejor noche de tu vida.' },
@@ -9154,7 +9154,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white transition-colors duration-700 overflow-x-hidden relative">
       
-      {/* BOTÓN FLOTANTE DE WHATSAPP (VENTAS) */}
+      {/* 🔴 BOTÓN FLOTANTE DE WHATSAPP (VENTAS) */}
       <a href="https://wa.me/525512345678?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20Baulia" target="_blank" rel="noreferrer" className="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-[0_10px_20px_rgba(16,185,129,0.4)] hover:scale-110 hover:bg-emerald-400 transition-all z-50 group flex items-center justify-center">
         <MessageCircle size={28} />
         <span className="absolute right-full mr-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
@@ -9200,6 +9200,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           </div>
         </div>
       )}
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+        .font-editorial { font-family: 'Playfair Display', serif; }
+        .font-monogram { font-family: 'Great Vibes', cursive; }
+      `}</style>
 
       {/* LUCES DE AMBIENTE SUTILES */}
       <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 dark:bg-amber-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
@@ -9327,7 +9333,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   }}
                   className={`px-4 py-2.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all border ${activeCategory === demo.id ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white dark:bg-white/5 text-slate-500 border-slate-300 dark:border-white/20 hover:border-slate-500 dark:hover:border-white/50 hover:text-slate-800 dark:hover:text-white'}`}
                 >
-                  {demo.label.split(' / ')[0]}
+                  {demo.label}
                 </button>
               ))}
             </div>
@@ -9802,7 +9808,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               <div className="flex items-center gap-3 mb-6">
                  <BauliaLogo className="h-10 w-auto" />
               </div>
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-light leading-relaxed max-w-sm mb-8 transition-colors">Estudio de tecnología y alta costura digital. <br/>Elegancia en la invitación, poder absoluto en la ejecución.</p>
+              
+              <h4 className="text-slate-900 dark:text-white font-bold mb-4 tracking-widest uppercase text-[10px]">Nuestra Misión</h4>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-light leading-relaxed max-w-sm mb-8 transition-colors">
+                Elevar el estándar de la industria. <br/>Elegancia en la invitación, poder absoluto en la ejecución.
+              </p>
               
               <div className="flex space-x-3">
                  <button onClick={() => window.open('https://instagram.com/TU_PERFIL', '_blank')} className="w-10 h-10 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="Instagram">
