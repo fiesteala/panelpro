@@ -9310,7 +9310,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* ========================================== */}
-      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (CORREGIDO: REPLICADO EXACTO APPLE EDITORIAL) */}
+      {/* 🔴 SECCIÓN: SHOWROOM INTERACTIVO (CORREGIDO: REPLICA EXACTA APPLE EDITORIAL 3.0) */}
       {/* ========================================== */}
       <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#050505] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden flex items-center">
         {/* Glow de ambiente sutil */}
@@ -9318,55 +9318,68 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 w-full flex flex-col items-center">
             
-            {/* 🔴 1. Títulos y Eyebrow (AFUERA DEL MARCO - CENTRADO) */}
-            <RevealSection className="text-center mb-16 max-w-2xl mx-auto flex flex-col items-center">
-                <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-[10px] mb-3 block transition-colors">Inspiración Baulia</span>
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 mb-4 leading-tight">
-                    Tu evento es único. <br className="hidden md:block"/> tu invitación también.
-                </h2>
-            </RevealSection>
+            {/* 🔴 Títulos y Eyebrow ya NO van afuera */}
 
             {/* 🔴 2. EL MARCO DE SECCIÓN (rounded, dark gray, clipped overflow, flex containers inside) */}
             {!isMobileDevice ? (
-                <RevealSection delay={200} className="w-full aspect-[16/10] xl:aspect-[16/9] relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 p-12 lg:p-16 flex gap-12 group">
+                <RevealSection delay={200} className="w-full aspect-[16/9] relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 items-stretch flex group">
                     
                     {/* Glow interno sutil superior */}
                     <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white dark:from-[#080808] to-transparent opacity-40 z-0 transition-colors"></div>
 
-                    {/* COLUMNA IZQUIERDA: Texto y Controles (DENTRO DEL MARCO) */}
-                    <div className="w-1/3 relative z-30 flex flex-col justify-start gap-8 pt-10">
-                        {/* Parrafo Baulia */}
-                        <p className="text-sm lg:text-base text-slate-600 dark:text-slate-400 font-light leading-relaxed transition-colors duration-700 max-w-sm">
-                            Explora estas galerías interactivas. En Baulia no usamos plantillas genéricas; operamos como un estudio de alta costura digital. Nuestro equipo programa cada invitación <b>100% desde cero</b>, adaptando la estética al nivel de tu evento.
-                        </p>
-
-                        {/* Dropdown de Categorías Baulia */}
-                        <div className="relative w-full max-w-[280px] z-10">
-                            <select
-                                value={activeCategory}
-                                onChange={(e) => setActiveCategory(e.target.value)}
-                                className="w-full appearance-none bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white py-3.5 px-5 rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-sm focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
-                            >
-                                {Object.values(demos).map(demo => (
-                                    <option key={demo.id} value={demo.id}>{demo.label}</option>
-                                ))}
-                            </select>
-                            <div className="absolute inset-y-0 right-0 flex items-center px-5 pointer-events-none text-amber-500">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    {/* COLUMNA IZQUIERDA: Texto, Título, Controles y Botón (TODO DENTRO DEL MARCO) */}
+                    <div className="w-1/3 relative z-30 flex flex-col justify-between p-12 lg:p-16 h-full transition-colors">
+                        
+                        <div className="flex flex-col gap-6 pt-6">
+                            {/* Eyebrow y Título */}
+                            <div className="flex flex-col gap-3">
+                                <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-[10px] block transition-colors">Inspiración Baulia</span>
+                                <h2 className="text-3xl lg:text-4xl xl:text-5xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 leading-tight">
+                                    Tu evento es único. <br className="hidden md:block"/> tu invitación también.
+                                </h2>
                             </div>
+                            
+                            {/* Parrafo Baulia */}
+                            <p className="text-sm lg:text-base text-slate-600 dark:text-slate-400 font-light leading-relaxed transition-colors duration-700 max-w-sm">
+                                Exploramos estas galerías interactivas. En Baulia no usamos plantillas genéricas; operamos como un estudio de alta costura digital. Nuestro equipo programa cada invitación <b>100% desde cero</b>, adaptando la estética al nivel de tu evento.
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col gap-10 pb-6">
+                            {/* Dropdown de Categorías Baulia */}
+                            <div className="relative w-full max-w-[280px] z-10">
+                                <select
+                                    value={activeCategory}
+                                    onChange={(e) => setActiveCategory(e.target.value)}
+                                    className="w-full appearance-none bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white py-3.5 px-5 rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-sm focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
+                                >
+                                    {Object.values(demos).map(demo => (
+                                        <option key={demo.id} value={demo.id}>{demo.label}</option>
+                                    ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-0 flex items-center px-5 pointer-events-none text-amber-500">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                            </div>
+
+                            {/* Botón descriptivo Baulia */}
+                            <button className="w-full sm:w-max px-6 py-3.5 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm flex items-center justify-center transition-colors">
+                                 Descubre la Anatomía de nuestras Invitaciones
+                            </button>
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA/CENTRO: Composición de Dispositivos (Interactivas & Clipped) */}
+                    {/* COLUMNA DERECHA/CENTRO: Composición de Dispositivos (Grandes & Completos) */}
                     <div className="w-2/3 relative h-full">
                         
-                        {/* --- 🔴 MACBOOK DE FONDO (Detrás, Derecho, Recortado) - Z-10 pointer-events-auto habilitado --- */}
-                        <div className="absolute bottom-[-15%] right-[-15%] xl:right-[-10%] top-[-5%] w-[85%] xl:w-[75%] z-10 flex items-center transition-transform duration-700 pointer-events-auto">
-                            <div className="relative w-full aspect-[16/10] bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-colors duration-700">
+                        {/* --- 🔴 MACBOOK DE FONDO (Más grande, sit sits almost flush top-bottom, right corner) --- */}
+                        {/* Aumentado tamaño (w-110%) y posicionado para cubrir top-bottom con margen mínimo. */}
+                        <div className="absolute top-[4%] bottom-[4%] right-[-12%] w-[110%] z-10 flex items-center transition-transform duration-700 pointer-events-auto">
+                            <div className="relative w-full aspect-[16/10] bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-colors duration-700 h-full">
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-6 bg-black rounded-b-2xl z-30"></div>
                                 
                                 {/* Pantalla Interactiva de la Mac ( pointer-events-auto habilitado) */}
-                                <div className="w-full h-full bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
+                                <div className="w-full flex-1 bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
                                     <iframe src={currentDemo.url} className="absolute inset-0 w-full h-full border-0" title={`Mac Demo ${currentDemo.label}`}></iframe>
                                 </div>
                                 
@@ -9377,25 +9390,25 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             </div>
                         </div>
 
-                        {/* --- 🔴 IPHONE AL FRENTE (Frente, Esquina Inferior Izquierda, Overlap) - Z-20 pointer-events-auto habilitado --- */}
-                        {/* Posicionado para overlapping bottom-left corner of Mac screen area. */}
-                        <div className="absolute bottom-[-10%] left-[5%] xl:left-[10%] z-20 transition-transform duration-700 hover:scale-[1.02] pointer-events-auto">
+                        {/* --- 🔴 IPHONE AL FRENTE (Más chico, completamente visible, overlap) --- */}
+                        {/* Escala reducida ~30% (w-200px), posicionado para estar COMPLETO dentro de la caja. */}
+                        <div className="absolute bottom-[8%] left-[8%] z-20 transition-transform duration-700 hover:scale-[1.02] pointer-events-none">
                               <div 
                                 ref={showroomPhoneRef}
-                                style={{ width: '280px', height: '606px' }} 
-                                className={`relative bg-black rounded-[3.5rem] border-[10px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto transition-all duration-1000 ease-out origin-bottom ${isPhoneVisible ? 'translate-y-0 rotate-x-0 rotate-y-0 scale-100 opacity-100' : 'translate-y-32 rotate-x-[20deg] scale-95 opacity-0'}`}
+                                style={{ width: '200px', height: '433px' }} 
+                                className={`relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto transition-all duration-1000 ease-out origin-bottom ${isPhoneVisible ? 'translate-y-0 rotate-x-0 rotate-y-0 scale-100 opacity-100' : 'translate-y-32 rotate-x-[20deg] scale-95 opacity-0'}`}
                               >
-                                  {/* Isla Dinámica */}
-                                  <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[30%] h-[24px] bg-black rounded-full z-20 flex justify-end items-center pr-2">
-                                    <div className="w-2 h-2 rounded-full bg-slate-800/80 mr-1.5"></div>
-                                    <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
+                                  {/* Isla Dinámica Escalada */}
+                                  <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-[30%] h-[18px] bg-black rounded-full z-20 flex justify-end items-center pr-1.5">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-slate-800/80 mr-1"></div>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
                                   </div>
                                   
-                                  {/* ESCALADO DE CONTENIDO DE INVITACIÓN (PERFECT FIT) */}
+                                  {/* ESCALADO DE CONTENIDO DE INVITACIÓN (PERFECT FIT A 200PX) */}
                                   <div className="absolute inset-0 flex items-center justify-center">
-                                      {/* Contenedor lógico del iPhone (430x932) reducido por escala ~0.604 para encajar en 280px físicos */}
-                                      <div className="relative w-[430px] h-[932px] transform origin-center flex items-center justify-center" style={{ transform: 'scale(0.604)' }}>
-                                          <iframe src={currentDemo.url} className="w-full h-full border-0 rounded-[3rem]" title={`iPhone Demo ${currentDemo.label}`}></iframe>
+                                      {/* Contenedor lógico del iPhone (430x932) reducido por escala ~0.465 para encajar en 200px físicos */}
+                                      <div className="relative w-[430px] h-[932px] transform origin-center flex items-center justify-center" style={{ transform: 'scale(0.465)' }}>
+                                          <iframe src={currentDemo.url} className="w-full h-full border-0 rounded-[2.5rem]" title={`iPhone Demo ${currentDemo.label}`}></iframe>
                                       </div>
                                   </div>
                               </div>
@@ -9410,14 +9423,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                          <Smartphone size={32}/>
                      </div>
                      <p className="text-slate-900 dark:text-white font-editorial text-xl font-bold mb-2 transition-colors">Vívelo en tu Teléfono</p>
-                     <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 transition-colors leading-relaxed transition-colors">Selecciona una categoría arriba para abrir la demostración interactiva a pantalla completa en tu dispositivo.</p>
+                     <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed transition-colors leading-relaxed transition-colors">Selecciona una categoría arriba para abrir la demostración interactiva a pantalla completa en tu dispositivo.</p>
                 </RevealSection>
             )}
 
-            {/* BOTÓN INFERIOR (AFUERA DEL MARCO) */}
-            <button className="w-full sm:w-max px-6 py-3 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm flex items-center justify-center mt-16 mb-10 transition-colors">
-                 Descubre la Anatomía de nuestras Invitaciones
-            </button>
+            {/* BOTÓN INFERIOR ya NO va afuera */}
 
         </div>
       </section>
