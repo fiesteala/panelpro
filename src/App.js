@@ -9564,9 +9564,19 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
                                       </div>
                                       
-                                      {/* ✅ CORRECCIÓN FINAL: El iframe ocupa el 100% de la pantalla, sin bordes negros */}
+                                      {/* 🔴 SOLUCIÓN MATEMÁTICA: Escala perfecta sin deformar */}
                                       <div className="absolute inset-0 overflow-hidden rounded-[1.8rem] z-10 bg-[#111]">
-                                        <iframe src={currentDemo.url} className="w-full h-full border-0" title={`iPhone Demo ${currentDemo.label}`}></iframe>
+                                          <iframe 
+                                            src={currentDemo.url} 
+                                            className="border-0" 
+                                            title={`iPhone Demo ${currentDemo.label}`}
+                                            style={{
+                                              width: '390px',
+                                              height: '845px',
+                                              transform: 'scale(0.564)',
+                                              transformOrigin: 'top left'
+                                            }}
+                                          ></iframe>
                                       </div>
                                   </div>
                             </div>
@@ -11902,8 +11912,8 @@ const ShowcaseSimulatorView = () => {
                  title={`Demo ${currentDemo.label}`}
                  style={{ 
                     width: '390px', 
-                    height: '844px', 
-                    transform: 'scale(0.78)', 
+                    height: '792px', 
+                    transform: 'scale(0.82)', 
                     transformOrigin: 'top left' 
                  }}
                ></iframe>
