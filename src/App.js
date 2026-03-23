@@ -10531,71 +10531,135 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* SECCIÓN: EL PANEL (BÓVEDA) */}
-      <section id="boveda" className="py-32 relative z-10 border-y border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/50 transition-colors duration-700">
+      <section id="boveda" className="py-32 relative z-10 border-y border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/50 transition-colors duration-700 overflow-hidden">
+        
+        <style>{`
+          @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 200%; }
+          }
+        `}</style>
+
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex flex-col lg:flex-row gap-16 items-center">
-            <RevealSection className="lg:w-1/2">
+            
+            <RevealSection className="lg:w-1/2 w-full z-10">
               <span className="text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase text-xs mb-4 block flex items-center"><Lock size={14} className="mr-2"/> Fase 2: La Ejecución</span>
-              <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white mb-8 tracking-tight leading-tight transition-colors">Tu evento, bajo tu <span className="italic text-slate-500">dominio absoluto.</span></h2>
+              <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white mb-6 tracking-tight leading-tight transition-colors">Tu evento, bajo tu <br/><span className="italic text-slate-500">dominio absoluto.</span></h2>
               
-              <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 font-light leading-relaxed transition-colors">Olvídate de los excels desordenados y las libretas perdidas. Baulia te entrega el Centro de Comando para administrar cada detalle desde tu iPad o computadora.</p>
+              <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 font-light leading-relaxed transition-colors">Olvídate de los excels desordenados y las libretas perdidas. Baulia te entrega el Centro de Comando definitivo para administrar cada detalle desde tu iPad o computadora.</p>
               
-              {/* 🔴 NUEVO BOTÓN PARA ABRIR LA REVISTA DEL PANEL (ESTILO TECH) */}
+              {/* BOTÓN PARA ABRIR LA REVISTA DEL PANEL */}
               <button 
                 onClick={() => setShowPanelAnatomy(true)} 
-                className="mb-10 px-8 py-4 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-800 hover:shadow-xl hover:-translate-y-1 transition-all shadow-md flex items-center justify-center w-full sm:w-max"
+                className="mb-10 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-slate-200 hover:shadow-xl hover:-translate-y-1 transition-all shadow-md flex items-center justify-center w-full sm:w-max group"
               >
-                <Settings2 size={16} className="mr-2 text-indigo-400" /> Explorar Arquitectura del Panel
+                <Settings2 size={16} className="mr-2.5 text-amber-500 group-hover:rotate-90 transition-transform duration-500" /> Explorar Arquitectura del Panel
               </button>
 
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {[
                   { i: <LayoutGrid strokeWidth={1.5}/>, t: 'Acomodo de Mesas Visual', d: 'Dibuja el croquis del salón y arrastra a tus invitados a sus sillas.' },
                   { i: <Scan strokeWidth={1.5}/>, t: 'Check-in con Escáner QR', d: 'Tus accesos son blindados. El staff escanea la pulsera en la entrada.' },
                   { i: <Wallet strokeWidth={1.5}/>, t: 'Inteligencia Financiera', d: 'Controla pagos, abonos a proveedores y fechas límite.' },
                   { i: <Camera strokeWidth={1.5}/>, t: 'Muro Social en Vivo', d: 'Las fotos que suben tus invitados se proyectan al instante.' }
                 ].map((item, idx) => (
-                  <div key={idx} className="flex items-start">
-                    <div className="w-12 h-12 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-800 dark:text-white shrink-0 mr-6 shadow-sm dark:shadow-none transition-colors">
+                  <div key={idx} className="flex items-start group">
+                    <div className="w-12 h-12 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-800 dark:text-white shrink-0 mr-6 shadow-sm group-hover:border-amber-500 group-hover:text-amber-500 transition-colors duration-300">
                       {item.i}
                     </div>
                     <div className="pt-1">
                       <h4 className="font-bold text-lg text-slate-900 dark:text-slate-100 mb-1 transition-colors">{item.t}</h4>
-                      <p className="text-slate-500 dark:text-slate-500 text-sm leading-relaxed transition-colors">{item.d}</p>
+                      <p className="text-slate-500 text-sm leading-relaxed transition-colors">{item.d}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </RevealSection>
 
-            <RevealSection delay={200} className="lg:w-1/2 w-full relative perspective-[1000px]">
-              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 dark:from-indigo-500/20 to-amber-500/10 dark:to-amber-500/20 blur-[120px] rounded-full pointer-events-none transition-colors"></div>
-              <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 p-3 shadow-2xl dark:shadow-[0_30px_80px_rgba(0,0,0,0.8)] relative z-10 transform md:rotate-y-[-5deg] md:rotate-x-[2deg] hover:rotate-y-0 hover:rotate-x-0 transition-all duration-1000">
-                <div className="bg-slate-50 dark:bg-slate-950 rounded-[1.5rem] border border-slate-100 dark:border-white/5 h-[500px] w-full overflow-hidden flex flex-col relative transition-colors">
-                   <div className="h-12 border-b border-slate-200 dark:border-white/5 flex items-center px-4 gap-2 bg-white dark:bg-black/50 shrink-0 transition-colors">
-                     <div className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700"></div>
-                     <div className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700"></div>
-                     <div className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700"></div>
-                   </div>
-                   <div className="flex-1 p-4 flex gap-4">
-                     <div className="w-1/4 h-full bg-white dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/5 flex flex-col gap-3 p-3 transition-colors shadow-sm dark:shadow-none">
-                        <div className="w-full h-6 bg-slate-100 dark:bg-white/10 rounded-md mb-2 transition-colors"></div>
-                        <div className="w-3/4 h-3 bg-slate-100 dark:bg-white/5 rounded-full transition-colors"></div>
-                        <div className="w-full h-3 bg-slate-100 dark:bg-white/5 rounded-full transition-colors"></div>
-                     </div>
-                     <div className="flex-1 flex flex-col gap-4">
-                       <div className="flex gap-3 h-20 shrink-0">
-                         <div className="flex-1 bg-white dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-300 dark:text-slate-600 transition-colors shadow-sm dark:shadow-none"><Users size={20}/></div>
-                         <div className="flex-1 bg-white dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-300 dark:text-slate-600 transition-colors shadow-sm dark:shadow-none"><Wallet size={20}/></div>
-                       </div>
-                       <div className="flex-1 bg-white dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/5 flex items-center justify-center relative overflow-hidden transition-colors shadow-sm dark:shadow-none">
-                          <BauliaLogo size={60} className="opacity-5 dark:opacity-10 absolute text-slate-900 dark:text-white" />
-                       </div>
-                     </div>
+            {/* MOCKUP MACBOOK ANIMADO */}
+            <RevealSection delay={200} className="lg:w-1/2 w-full relative perspective-[1200px]">
+              {/* Luces de fondo */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-amber-500/20 blur-[100px] rounded-full pointer-events-none transition-colors"></div>
+              
+              {/* Computadora */}
+              <div className="relative z-10 transform md:-rotate-y-12 md:rotate-x-6 hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-1000 ease-out mx-auto max-w-[800px] w-[120%] lg:w-[140%] -ml-[10%] lg:-ml-[20%]">
+                
+                {/* Pantalla y Marco */}
+                <div className="relative w-full bg-[#111] rounded-t-3xl border-[8px] sm:border-[12px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden">
+                   {/* Cámara Mac */}
+                   <div className="absolute top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-slate-900 rounded-full border border-slate-700 z-50"></div>
+                   
+                   {/* Interfaz del Panel Baulia Simulada */}
+                   <div className="w-full aspect-[16/10] bg-[#050505] flex text-white relative">
+                      
+                      {/* Sidebar Simulado */}
+                      <div className="w-1/4 h-full border-r border-white/5 bg-[#0a0a0a] p-4 flex flex-col">
+                         <div className="flex items-center gap-2 mb-8">
+                            <BauliaLogo className="h-4 w-auto opacity-80" forceWhite={true}/>
+                         </div>
+                         <div className="space-y-3">
+                            <div className="h-6 w-full bg-white/10 rounded-md flex items-center px-3"><div className="w-3 h-3 rounded bg-amber-500/50 mr-2"></div><div className="h-2 w-12 bg-white/20 rounded"></div></div>
+                            <div className="h-6 w-full bg-transparent rounded-md flex items-center px-3"><div className="w-3 h-3 rounded bg-white/10 mr-2"></div><div className="h-2 w-16 bg-white/10 rounded"></div></div>
+                            <div className="h-6 w-full bg-transparent rounded-md flex items-center px-3"><div className="w-3 h-3 rounded bg-white/10 mr-2"></div><div className="h-2 w-10 bg-white/10 rounded"></div></div>
+                         </div>
+                         <div className="mt-auto h-8 bg-white/5 rounded-lg flex items-center px-3 gap-2">
+                            <div className="w-4 h-4 rounded-full bg-amber-500"></div><div className="h-2 w-10 bg-white/20 rounded"></div>
+                         </div>
+                      </div>
+
+                      {/* Main Content Simulado */}
+                      <div className="flex-1 h-full p-6 flex flex-col relative overflow-hidden">
+                         {/* Header interno */}
+                         <div className="flex justify-between items-center mb-6">
+                            <div>
+                               <div className="h-4 w-32 bg-white/20 rounded mb-1.5"></div>
+                               <div className="h-2 w-20 bg-white/10 rounded"></div>
+                            </div>
+                            <div className="h-8 w-24 bg-amber-500 rounded-lg opacity-80"></div>
+                         </div>
+
+                         {/* Tarjetas de Datos Animadas */}
+                         <div className="grid grid-cols-3 gap-4 mb-6">
+                            <div className="bg-[#111] border border-white/5 p-4 rounded-xl shadow-lg">
+                               <div className="h-2 w-16 bg-white/10 rounded mb-3"></div>
+                               <div className="h-6 w-12 bg-white/30 rounded mb-3"></div>
+                               <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden"><div className="bg-emerald-500 h-full w-[85%] animate-pulse"></div></div>
+                            </div>
+                            <div className="bg-[#111] border border-white/5 p-4 rounded-xl shadow-lg">
+                               <div className="h-2 w-20 bg-white/10 rounded mb-3"></div>
+                               <div className="h-6 w-16 bg-white/30 rounded mb-3"></div>
+                               <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden"><div className="bg-amber-500 h-full w-[45%] animate-pulse"></div></div>
+                            </div>
+                            <div className="bg-[#111] border border-white/5 p-4 rounded-xl shadow-lg">
+                               <div className="h-2 w-16 bg-white/10 rounded mb-3"></div>
+                               <div className="h-6 w-10 bg-white/30 rounded mb-3"></div>
+                               <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden"><div className="bg-rose-500 h-full w-[25%] animate-pulse"></div></div>
+                            </div>
+                         </div>
+
+                         {/* Gráfica/Lista Inferior */}
+                         <div className="flex-1 bg-[#111] border border-white/5 rounded-xl p-4 flex flex-col gap-3">
+                            <div className="h-3 w-24 bg-white/10 rounded mb-2"></div>
+                            <div className="flex items-center gap-4"><div className="w-6 h-6 rounded-full bg-white/10"></div><div className="flex-1 h-8 bg-white/5 rounded-lg"></div></div>
+                            <div className="flex items-center gap-4"><div className="w-6 h-6 rounded-full bg-white/10"></div><div className="w-3/4 h-8 bg-white/5 rounded-lg"></div></div>
+                            <div className="flex items-center gap-4"><div className="w-6 h-6 rounded-full bg-white/10"></div><div className="w-5/6 h-8 bg-white/5 rounded-lg"></div></div>
+                         </div>
+
+                         {/* Efecto de luz pasando */}
+                         <div className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/5 to-transparent transform skew-x-[-20deg] animate-[shimmer_3s_infinite]"></div>
+                      </div>
                    </div>
                 </div>
+
+                {/* Base Mac */}
+                <div className="relative w-[104%] -left-[2%] h-3 sm:h-5 bg-slate-300 dark:bg-slate-700 rounded-b-xl sm:rounded-b-3xl shadow-2xl z-30 transition-colors border-b-2 sm:border-b-4 border-slate-400 dark:border-slate-800 flex justify-center">
+                   <div className="w-1/4 h-1 sm:h-1.5 bg-slate-400 dark:bg-slate-600 rounded-b-md"></div>
+                </div>
+
               </div>
             </RevealSection>
+
           </div>
         </div>
       </section>
@@ -10849,6 +10913,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                  <li><a href="#experiencia" className="hover:text-slate-900 dark:hover:text-white transition-colors">Características</a></li>
                  <li><a href="#planes" className="hover:text-slate-900 dark:hover:text-white transition-colors">Colección</a></li>
                  <li><a href="#planners" className="hover:text-slate-900 dark:hover:text-white transition-colors">Para Planners</a></li>
+                 <li><button onClick={() => setShowPanelAnatomy(true)} className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Arquitectura del Sistema</button></li>
                  <li><button onClick={() => window.location.href = 'https://panel.baulia.com'} className="hover:text-slate-900 dark:hover:text-white transition-colors">Login Clientes</button></li>
               </ul>
            </div>
