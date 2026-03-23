@@ -9852,9 +9852,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       {showAnatomy && <AnatomyOverlay onClose={() => setShowAnatomy(false)} />}
       {showPanelAnatomy && <PanelAnatomyOverlay onClose={() => setShowPanelAnatomy(false)} />}
 
-      {/* OCULTAMOS EL BOTÓN DE WHATSAPP SI LA REVISTA ESTÁ ABIERTA */}
-      {!showAnatomy && (
-        <a href="https://wa.me/525512345678?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20Baulia" target="_blank" rel="noreferrer" className="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-[0_10px_20px_rgba(16,185,129,0.4)] hover:scale-110 hover:bg-emerald-400 transition-all z-50 group flex items-center justify-center">
+      {/* OCULTAMOS EL BOTÓN DE WHATSAPP SI ALGUNA REVISTA ESTÁ ABIERTA */}
+      {!showAnatomy && !showPanelAnatomy && (
+        <a href="https://wa.me/525512345678?text=Hola,%20quiero..." target="_blank" rel="noreferrer" className="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-[0_10px_20px_rgba(16,185,129,0.4)] hover:scale-110 hover:bg-emerald-400 transition-all z-50 group flex items-center justify-center">
           <MessageCircle size={28} />
           <span className="absolute right-full mr-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
             Habla con Ventas
