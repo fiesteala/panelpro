@@ -9082,284 +9082,300 @@ const AnatomyOverlay = ({ onClose }) => {
   );
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-[#FDFBF7] dark:bg-[#080808] overflow-y-auto animate-in slide-in-from-bottom-10 fade-in duration-700 custom-scrollbar text-[#2A2A2A] dark:text-white transition-colors font-sans">
+    // 🔴 OVERLAY OSCURO (EFECTO APPLE) CON DESENFOQUE
+    <div className="fixed inset-0 z-[9999] bg-slate-900/60 dark:bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 lg:p-8 animate-in fade-in duration-500 font-sans text-[#2A2A2A] dark:text-white">
       
-      {/* NAVEGACIÓN FLOTANTE */}
-      <nav className="sticky top-0 w-full bg-[#FDFBF7]/90 dark:bg-[#080808]/90 backdrop-blur-2xl z-50 px-6 md:px-12 py-4 flex justify-between items-center border-b border-[#D4AF37]/20 dark:border-white/10 transition-colors">
-        <span className="font-editorial text-xl font-bold tracking-widest uppercase text-[#D4AF37]">Baulia <span className="font-light italic text-[#2A2A2A] dark:text-white">Magazine</span></span>
-        <button onClick={onClose} className="group flex items-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-[#D4AF37] dark:text-slate-400 dark:hover:text-[#D4AF37] transition-colors">
-          Cerrar Edición <X size={16} className="ml-2 transform group-hover:rotate-90 transition-transform duration-300"/>
-        </button>
-      </nav>
-
-      <main className="max-w-[1000px] mx-auto px-6 md:px-12 pt-16 pb-20">
+      {/* 🔴 CAJA FLOTANTE REDONDEADA */}
+      <div className="w-full max-w-[1100px] h-[96vh] sm:h-[90vh] bg-[#FDFBF7] dark:bg-[#080808] rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col relative overflow-hidden animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-700 border border-slate-200 dark:border-white/10 transition-colors">
         
-        {/* PORTADA DE LA REVISTA (HERO EDITORIAL) */}
-        <header className="mb-16 border-b border-[#D4AF37]/20 dark:border-white/10 pb-16">
-          <p className="text-[#8DB580] dark:text-[#8DB580] font-bold tracking-[0.4em] uppercase text-[10px] mb-6 text-center md:text-left">La Colección · Primavera Vibrante</p>
+        {/* NAVEGACIÓN PEGADA ARRIBA (DENTRO DE LA CAJA) */}
+        <nav className="sticky top-0 w-full bg-[#FDFBF7]/90 dark:bg-[#080808]/90 backdrop-blur-xl z-50 px-5 sm:px-10 py-4 flex justify-between items-center border-b border-[#D4AF37]/20 dark:border-white/10 transition-colors shrink-0">
+          <span className="font-editorial text-lg sm:text-xl font-bold tracking-widest uppercase text-[#D4AF37]">Baulia <span className="font-light italic text-[#2A2A2A] dark:text-white">Magazine</span></span>
+          <button onClick={onClose} className="group flex items-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-[#D4AF37] dark:text-slate-400 dark:hover:text-[#D4AF37] transition-colors bg-slate-100 dark:bg-white/5 px-3 py-1.5 rounded-full sm:bg-transparent sm:px-0 sm:py-0">
+            <span className="hidden sm:block">Cerrar Edición</span> <X size={16} className="sm:ml-2 transform group-hover:rotate-90 transition-transform duration-300"/>
+          </button>
+        </nav>
+
+        {/* ÁREA ESCROLEABLE */}
+        <main className="flex-1 overflow-y-auto custom-scrollbar px-5 sm:px-10 lg:px-16 pt-10 sm:pt-16 pb-24">
           
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            <h1 className="text-6xl md:text-8xl lg:text-[120px] font-editorial font-black tracking-tighter leading-[0.85] w-full md:w-3/5 text-[#2A2A2A] dark:text-white">
-              Anatomía <br/>
-              <span className="italic font-light text-[#D4AF37]">del diseño.</span>
-            </h1>
+          {/* PORTADA DE LA REVISTA (HERO EDITORIAL) */}
+          <header className="mb-12 sm:mb-20 border-b border-[#D4AF37]/20 dark:border-white/10 pb-12 sm:pb-16">
+            <p className="text-[#8DB580] dark:text-[#8DB580] font-bold tracking-[0.3em] sm:tracking-[0.4em] uppercase text-[9px] sm:text-[10px] mb-4 sm:mb-6 text-center md:text-left">La Colección · Primavera Vibrante</p>
             
-            <div className="w-full md:w-2/5 pt-2">
-              <div className="text-base md:text-lg font-light leading-relaxed text-justify text-slate-600 dark:text-slate-300 block">
-                <FloralCorner className="float-right w-32 h-32 ml-4 mb-2 opacity-90 drop-shadow-xl" />
-                <span className="float-left text-[90px] leading-[65px] pt-2 pr-4 font-editorial font-black text-[#F76C82] transition-colors">
-                  E
-                </span>
-                n nuestra boutique, cada historia de amor y celebración comienza con un lienzo en blanco. Creemos que los momentos más hermosos de tu vida merecen ser contados con el corazón, por eso nos alejamos de lo genérico. Cada trazo, paleta de color y tipografía nace exclusivamente para ti. Lo que ves aquí es pura alta costura digital: un arte interactivo diseñado no solo para informar, sino para enamorar, emocionar e inspirar a tus invitados desde el segundo en que abren tu invitación.
+            <div className="flex flex-col lg:flex-row gap-6 sm:gap-10 items-start">
+              <h1 className="text-5xl sm:text-7xl lg:text-[100px] font-editorial font-black tracking-tighter leading-[0.9] w-full lg:w-3/5 text-[#2A2A2A] dark:text-white text-center md:text-left">
+                Anatomía <br className="hidden md:block"/>
+                <span className="italic font-light text-[#D4AF37]">del diseño.</span>
+              </h1>
+              
+              <div className="w-full lg:w-2/5 pt-2">
+                <div className="text-sm sm:text-base font-light leading-relaxed text-justify text-slate-600 dark:text-slate-300 block">
+                  <FloralCorner className="float-right w-20 h-20 sm:w-28 sm:h-28 ml-4 mb-2 opacity-90 drop-shadow-xl" />
+                  <span className="float-left text-[60px] sm:text-[80px] leading-[45px] sm:leading-[60px] pt-1 sm:pt-2 pr-3 sm:pr-4 font-editorial font-black text-[#F76C82] transition-colors">
+                    E
+                  </span>
+                  n nuestra boutique, cada historia de amor y celebración comienza con un lienzo en blanco. Rechazamos categóricamente lo genérico. Cada trazo, paleta de color y tipografía nace exclusivamente para ti. Lo que ves aquí es pura alta costura digital: un arte interactivo diseñado no solo para informar, sino para enamorar, emocionar e inspirar a tus invitados desde el segundo en que abren tu invitación.
+                </div>
               </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        {/* CONTENIDO EDITORIAL COMPACTO SIN CAJAS */}
-        <div className="space-y-16">
+          {/* CONTENIDO EDITORIAL COMPACTO */}
+          <div className="space-y-12 sm:space-y-20">
 
-          {/* FILA 1: Identidad y Narrativa */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            
-            {/* Monograma y Nombres */}
-            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">01. El Emblema y La Jerarquía</span>
+            {/* FILA 1: Identidad y Narrativa */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
               
-              <div className="flex items-center gap-6 mb-8 pl-4 border-l-2 border-[#D4AF37]/30">
-                 <div className="w-24 h-24 shrink-0">
-                    <img src="/maricela-estudillo-gonzalez/monograma.svg" alt="Monograma" className="w-full h-full drop-shadow-md object-contain" />
-                 </div>
-                 <div className="flex flex-col text-left">
-                    <span style={{ fontFamily: invTheme.fontSans, color: invTheme.springGreen }} className="text-[9px] tracking-[0.4em] uppercase font-semibold mb-2">Celebrando la vida</span>
-                    <h1 style={{ fontFamily: invTheme.fontSerif, color: invTheme.springDark }} className="text-5xl leading-none drop-shadow-sm mb-1 dark:text-white">Miranda</h1>
-                    <h2 style={{ fontFamily: invTheme.fontSans, color: invTheme.goldDark }} className="text-[9px] tracking-[0.5em] uppercase font-medium">Gómez Villarreal</h2>
-                 </div>
-              </div>
+              {/* Monograma y Nombres */}
+              <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-6 sm:pt-8">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">01. El Emblema y La Jerarquía</span>
+                
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6 sm:mb-8 pl-0 sm:pl-4 border-l-0 sm:border-l-2 border-[#D4AF37]/30 text-center sm:text-left">
+                   <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 mb-4 sm:mb-0">
+                      <img src="/maricela-estudillo-gonzalez/monograma.svg" alt="Monograma" className="w-full h-full drop-shadow-md object-contain" />
+                   </div>
+                   <div className="flex flex-col">
+                      <span style={{ fontFamily: invTheme.fontSans, color: invTheme.springGreen }} className="text-[8px] sm:text-[9px] tracking-[0.3em] sm:tracking-[0.4em] uppercase font-semibold mb-2">Celebrando la vida</span>
+                      <h1 style={{ fontFamily: invTheme.fontSerif, color: invTheme.springDark }} className="text-4xl sm:text-5xl leading-none drop-shadow-sm mb-1 dark:text-white">Miranda</h1>
+                      <h2 style={{ fontFamily: invTheme.fontSans, color: invTheme.goldDark }} className="text-[8px] sm:text-[9px] tracking-[0.3em] sm:tracking-[0.5em] uppercase font-medium">Gómez Villarreal</h2>
+                   </div>
+                </div>
+                
+                <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white text-center sm:text-left">El Primer Impacto</h3>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-xs sm:text-sm text-justify">
+                  Como la portada de una revista de lujo, establecemos la identidad visual de inmediato. Creamos un monograma exclusivo entrelazando tus iniciales (como la M y la G en este ejemplo) que actúa como el sello real de tu celebración. Acompañado de una arquitectura tipográfica experta que fusiona fuentes clásicas con trazos modernos, dotamos a tu nombre de una majestuosidad absoluta. Todo es personalizable a tus gustos.
+                </p>
+              </section>
+
+              {/* Portada y Frase */}
+              <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-6 sm:pt-8">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">02. Arte Visual y Literario</span>
+                
+                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-6 sm:mb-8 pl-0 sm:pl-4 border-l-0 sm:border-l-2 border-[#D4AF37]/30 text-center sm:text-left">
+                   <div className="w-24 h-32 sm:w-28 sm:h-36 rounded-[100px] p-1.5 border border-[#D4AF37]/50 shadow-xl overflow-hidden shrink-0 mb-4 sm:mb-0">
+                      <div className="w-full h-full rounded-[100px] overflow-hidden bg-slate-200">
+                          <img src="/maricela-estudillo-gonzalez/portada.jpg" className="w-full h-full object-cover animate-slow-zoom" onError={(e) => e.target.style.display = 'none'} />
+                      </div>
+                   </div>
+                   <div className="flex flex-col justify-center">
+                      <span style={{ fontFamily: invTheme.fontScript, color: invTheme.springPink }} className="text-2xl sm:text-3xl font-semibold drop-shadow-sm mb-2 sm:mb-3">
+                          50 Primaveras
+                      </span>
+                      <p style={{ fontFamily: invTheme.fontSerif }} className="italic text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-tight">
+                          "Llegar a esta primavera es celebrar las flores de ayer y las semillas del mañana."
+                      </p>
+                   </div>
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white text-center sm:text-left">El Camafeo y el Alma</h3>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-xs sm:text-sm text-justify">
+                  Tu fotografía principal puede presentarse en este hermoso formato de camafeo clásico con sutiles animaciones, o si lo prefieres, como una portada panorámica inmersiva que se adapta perfectamente a la pantalla de cualquier dispositivo. Justo debajo, redactamos la frase que dictará el sentimiento de la noche, anclando la emoción antes de entregar los detalles operativos.
+                </p>
+              </section>
+
+            </div>
+
+            {/* FILA 2: Bienvenida, Cuenta Regresiva y Logística */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
               
-              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">El Primer Impacto</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Como la portada de una revista de lujo, establecemos la identidad visual de inmediato. Creamos un monograma exclusivo entrelazando tus iniciales (como la M y la G en este ejemplo) que actúa como el sello real de tu celebración. Acompañado de una arquitectura tipográfica experta que fusiona fuentes clásicas con trazos modernos, dotamos a tu nombre de una majestuosidad absoluta. Todo es personalizable a tus gustos.
-              </p>
-            </section>
+              {/* Pase VIP y Reloj */}
+              <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-6 sm:pt-8">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">03. La Experiencia del Invitado</span>
+                
+                <div className="flex flex-col items-center text-center mb-6 sm:mb-8">
+                   <span className="font-sans text-[7px] sm:text-[8px] tracking-[0.2em] sm:tracking-[0.3em] uppercase text-[#D4AF37] font-bold mb-2">Pase VIP Personal</span>
+                   <h3 className="font-serif text-xl sm:text-2xl text-[#2A2A2A] dark:text-white mb-4 sm:mb-6">
+                      ¡Qué alegría tenerte aquí, <br className="sm:hidden"/><span className="text-[#F76C82] italic">Familia Fuentes</span>!
+                   </h3>
+                   <div className="flex justify-center gap-3 sm:gap-4">
+                      {[ { label: 'Días', value: '45' }, { label: 'Hrs', value: '12' }, { label: 'Min', value: '30' }].map((item, idx) => (
+                          <div key={idx} className="flex flex-col items-center">
+                              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-[#D4AF37]/50 shadow-md flex items-center justify-center mb-2">
+                                  <span style={{ fontFamily: invTheme.fontSerif, color: invTheme.springDark }} className="text-lg sm:text-xl dark:text-white">{item.value}</span>
+                              </div>
+                              <span style={{ fontFamily: invTheme.fontSans }} className="text-[7px] sm:text-[8px] tracking-[0.2em] uppercase text-gray-500 font-medium">{item.label}</span>
+                          </div>
+                      ))}
+                   </div>
+                </div>
 
-            {/* Portada y Frase */}
-            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">02. Arte Visual y Literario</span>
+                <div>
+                  <FloralCorner className="float-left w-12 h-12 sm:w-16 sm:h-16 mr-3 sm:mr-4 opacity-50" />
+                  <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-2 sm:mb-3 text-slate-900 dark:text-white text-center sm:text-left">Hospitalidad y Expectativa</h3>
+                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-xs sm:text-sm text-justify">
+                    Nuestras obras son inteligentes. La invitación reconoce el nombre exacto de la persona o familia que la abre, haciéndolos sentir honrados y esperados. Justo debajo, un reloj estructurado en esferas de cristal marca el pulso del evento, generando anticipación física y emocional hacia el gran día.
+                  </p>
+                </div>
+              </section>
+
+              {/* Ubicación y Clima */}
+              <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-6 sm:pt-8">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">04. Logística de Precisión</span>
+                
+                <div className="flex flex-col items-center sm:items-start text-center sm:text-left mb-6 sm:mb-8 pl-0 sm:pl-4 border-l-0 sm:border-l-2 border-[#D4AF37]/30">
+                   <h3 className="font-serif text-2xl sm:text-3xl text-[#2A2A2A] dark:text-white mb-2 sm:mb-3">La Recepción</h3>
+                   <p className="font-sans text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4">
+                       Hacienda San Gabriel<br/>Carretera Central Km 14.5, Jardines del Valle.<br/>
+                       <span className="font-medium text-[#D4AF37] tracking-[0.1em] sm:tracking-widest uppercase mt-2 block text-[8px] sm:text-[9px]">Sábado, 23 de Mayo • 15:00 hrs</span>
+                   </p>
+                   <div className="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-3 w-full">
+                       <div className="px-3 sm:px-4 py-2 bg-[#2A2A2A] text-white rounded-full font-sans text-[8px] sm:text-[9px] tracking-[0.1em] sm:tracking-[0.2em] uppercase flex items-center shadow-md cursor-pointer text-center">Ver en GPS</div>
+                       <div className="px-3 sm:px-4 py-2 bg-transparent text-[#2A2A2A] dark:text-white border border-[#D4AF37] rounded-full font-sans text-[8px] sm:text-[9px] tracking-[0.1em] sm:tracking-[0.2em] uppercase flex items-center shadow-sm cursor-pointer text-center">Agendar</div>
+                   </div>
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white text-center sm:text-left">Ingeniería al Servicio del Asistente</h3>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-xs sm:text-sm text-justify">
+                  Evitamos indicaciones confusas. Integramos hipervínculos directos a Waze, Google Maps y Apple Maps para guiar a tus invitados de puerta a puerta. Sincronizamos la fecha con sus calendarios personales y mostramos pronósticos del clima en tiempo real para prever cualquier eventualidad y asegurar su comodidad.
+                </p>
+              </section>
+
+            </div>
+
+            {/* FILA 3: Itinerario y Código de Vestimenta */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
               
-              <div className="flex items-center gap-6 mb-8 pl-4 border-l-2 border-[#D4AF37]/30">
-                 <div className="w-28 h-36 rounded-[100px] p-1.5 border border-[#D4AF37]/50 shadow-xl overflow-hidden shrink-0">
-                    <div className="w-full h-full rounded-[100px] overflow-hidden bg-slate-200">
-                        <img src="/maricela-estudillo-gonzalez/portada.jpg" className="w-full h-full object-cover animate-slow-zoom" onError={(e) => e.target.style.display = 'none'} />
-                    </div>
-                 </div>
-                 <div className="flex flex-col justify-center">
-                    <span style={{ fontFamily: invTheme.fontScript, color: invTheme.springPink }} className="text-3xl font-semibold drop-shadow-sm mb-3">
-                        50 Primaveras
-                    </span>
-                    <p style={{ fontFamily: invTheme.fontSerif }} className="italic text-base text-gray-700 dark:text-gray-300 leading-tight">
-                        "Llegar a esta primavera es celebrar las flores de ayer y las semillas del mañana."
-                    </p>
-                 </div>
-              </div>
+              {/* Itinerario */}
+              <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-6 sm:pt-8">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">05. Ritmo y Sincronía</span>
+                
+                <div className="pl-4 sm:pl-6 border-l border-[#D4AF37]/30 mb-6 sm:mb-8 py-2">
+                   <div className="relative mb-4 sm:mb-6">
+                      <div className="absolute -left-[21px] sm:-left-[29px] top-1 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white dark:bg-[#080808] border-[2px] border-[#D4AF37]"></div>
+                      <span className="font-sans text-[8px] sm:text-[9px] text-[#D4AF37] tracking-[0.2em] font-bold block uppercase">15:00 hrs</span>
+                      <h4 className="font-serif text-lg sm:text-xl text-gray-800 dark:text-gray-200">Llegada de Invitados</h4>
+                      <p className="font-sans text-[9px] sm:text-[10px] text-gray-400 italic">Cóctel de bienvenida</p>
+                   </div>
+                   <div className="relative">
+                      <div className="absolute -left-[21px] sm:-left-[29px] top-1 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white dark:bg-[#080808] border-[2px] border-[#D4AF37]"></div>
+                      <span className="font-sans text-[8px] sm:text-[9px] text-[#D4AF37] tracking-[0.2em] font-bold block uppercase">16:00 hrs</span>
+                      <h4 className="font-serif text-lg sm:text-xl text-gray-800 dark:text-gray-200">Banquete Especial</h4>
+                      <p className="font-sans text-[9px] sm:text-[10px] text-gray-400 italic">Comida exquisita y música</p>
+                   </div>
+                </div>
 
-              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">El Camafeo y el Alma</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Tu fotografía principal puede presentarse en este hermoso formato de camafeo clásico con sutiles animaciones, o si lo prefieres, como una portada panorámica inmersiva que se adapta perfectamente a la pantalla de cualquier dispositivo. Justo debajo, redactamos la frase que dictará el sentimiento de la noche, anclando la emoción antes de entregar los detalles operativos.
-              </p>
-            </section>
+                <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white text-center sm:text-left">El Minuto a Minuto</h3>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-xs sm:text-sm text-justify">
+                  Un diseño fluido que comunica la agenda de tu celebración sin abrumar. Mediante una línea de tiempo elegante, los invitados conocen los momentos cumbre de la noche, asegurando puntualidad y manteniendo la fluidez de la velada que planeaste con tanto esmero.
+                </p>
+              </section>
 
-          </div>
-
-          {/* FILA 2: Bienvenida, Cuenta Regresiva y Logística */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            
-            {/* Pase VIP y Reloj */}
-            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">03. La Experiencia del Invitado</span>
-              
-              <div className="flex flex-col items-center text-center mb-8">
-                 <span className="font-sans text-[8px] tracking-[0.3em] uppercase text-[#D4AF37] font-bold mb-2">Pase VIP Personal</span>
-                 <h3 className="font-serif text-2xl text-[#2A2A2A] dark:text-white mb-6">
-                    ¡Qué alegría tenerte aquí, <span className="text-[#F76C82] italic">Familia Fuentes</span>!
-                 </h3>
-                 <div className="flex justify-center gap-4">
-                    {[ { label: 'Días', value: '45' }, { label: 'Hrs', value: '12' }, { label: 'Min', value: '30' }].map((item, idx) => (
-                        <div key={idx} className="flex flex-col items-center">
-                            <div className="w-12 h-12 rounded-full border border-[#D4AF37]/50 shadow-md flex items-center justify-center mb-2">
-                                <span style={{ fontFamily: invTheme.fontSerif, color: invTheme.springDark }} className="text-xl dark:text-white">{item.value}</span>
-                            </div>
-                            <span style={{ fontFamily: invTheme.fontSans }} className="text-[8px] tracking-[0.2em] uppercase text-gray-500 font-medium">{item.label}</span>
+              {/* Código de Vestimenta */}
+              <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-6 sm:pt-8">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">06. Estética Colectiva</span>
+                
+                <div className="flex justify-center gap-6 sm:gap-10 mb-6 sm:mb-8 pl-0 sm:pl-4 border-l-0 sm:border-l-2 border-[#D4AF37]/30 py-2">
+                    <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border border-[#D4AF37]/50 shadow-md flex items-center justify-center mb-2 sm:mb-3 text-[#F76C82]">
+                          <svg width="24" height="24" className="sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                            <path d="M9.5 3c1.5 2.5 3.5 2.5 5 0L16.5 8c.3.5.5 1.1.5 1.7v1.8a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 11.5V9.7c0-.6.2-1.2.5-1.7L9.5 3zM8.5 13L4.5 20.5a1 1 0 0 0 .9 1.5h13.2a1 1 0 0 0 .9-1.5L15.5 13M8 10h8" />
+                          </svg>
                         </div>
-                    ))}
-                 </div>
-              </div>
-
-              <FloralCorner className="float-left w-16 h-16 mr-4 opacity-50" />
-              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Hospitalidad y Expectativa</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Nuestras obras son inteligentes. La invitación reconoce el nombre exacto de la persona o familia que la abre, haciéndolos sentir honrados y esperados. Justo debajo, un reloj estructurado en esferas de cristal marca el pulso del evento, generando anticipación física y emocional hacia el gran día.
-              </p>
-            </section>
-
-            {/* Ubicación y Clima */}
-            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">04. Logística de Precisión</span>
-              
-              <div className="flex flex-col items-center text-center mb-8 pl-4 border-l-2 border-[#D4AF37]/30">
-                 <h3 className="font-serif text-3xl text-[#2A2A2A] dark:text-white mb-3">La Recepción</h3>
-                 <p className="font-sans text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4">
-                     Hacienda Los Arcángeles<br/>Av. de la Luz 777, Jardines del Pedregal, CDMX.<br/>
-                     <span className="font-medium text-[#D4AF37] tracking-widest uppercase mt-2 block text-[9px]">Sábado, 23 de Mayo • 15:00 hrs</span>
-                 </p>
-                 <div className="flex gap-3">
-                     <div className="px-4 py-2 bg-[#2A2A2A] text-white rounded-full font-sans text-[9px] tracking-[0.2em] uppercase flex items-center shadow-md hover:scale-105 transition-transform cursor-pointer">Ver en GPS</div>
-                     <div className="px-4 py-2 bg-transparent text-[#2A2A2A] dark:text-white border border-[#D4AF37] rounded-full font-sans text-[9px] tracking-[0.2em] uppercase flex items-center shadow-sm hover:scale-105 transition-transform cursor-pointer">Agendar</div>
-                 </div>
-              </div>
-
-              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Ingeniería al Servicio del Asistente</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Evitamos indicaciones confusas. Integramos hipervínculos directos a Waze, Google Maps y Apple Maps para guiar a tus invitados de puerta a puerta. Sincronizamos la fecha con sus calendarios personales y mostramos pronósticos del clima en tiempo real para prever cualquier eventualidad y asegurar su comodidad.
-              </p>
-            </section>
-
-          </div>
-
-          {/* FILA 3: Itinerario y Código de Vestimenta */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            
-            {/* Itinerario */}
-            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">05. Ritmo y Sincronía</span>
-              
-              <div className="pl-6 border-l border-[#D4AF37]/30 mb-8 py-2">
-                 <div className="relative mb-6">
-                    <div className="absolute -left-[29px] top-1 w-3 h-3 rounded-full bg-white dark:bg-[#080808] border-[2px] border-[#D4AF37]"></div>
-                    <span className="font-sans text-[9px] text-[#D4AF37] tracking-[0.2em] font-bold block uppercase">15:00 hrs</span>
-                    <h4 className="font-serif text-xl text-gray-800 dark:text-gray-200">Llegada de Invitados</h4>
-                    <p className="font-sans text-[10px] text-gray-400 italic">Cóctel de bienvenida</p>
-                 </div>
-                 <div className="relative">
-                    <div className="absolute -left-[29px] top-1 w-3 h-3 rounded-full bg-white dark:bg-[#080808] border-[2px] border-[#D4AF37]"></div>
-                    <span className="font-sans text-[9px] text-[#D4AF37] tracking-[0.2em] font-bold block uppercase">16:00 hrs</span>
-                    <h4 className="font-serif text-xl text-gray-800 dark:text-gray-200">Banquete Especial</h4>
-                    <p className="font-sans text-[10px] text-gray-400 italic">Comida exquisita y música</p>
-                 </div>
-              </div>
-
-              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">El Minuto a Minuto</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Un diseño fluido que comunica la agenda de tu celebración sin abrumar. Mediante una línea de tiempo elegante, los invitados conocen los momentos cumbre de la noche, asegurando puntualidad y manteniendo la fluidez de la velada que planeaste con tanto esmero.
-              </p>
-            </section>
-
-            {/* Código de Vestimenta */}
-            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">06. Estética Colectiva</span>
-              
-              <div className="flex justify-center gap-10 mb-8 pl-4 border-l-2 border-[#D4AF37]/30 py-2">
-                  <div className="flex flex-col items-center">
-                      <div className="w-16 h-16 rounded-full border border-[#D4AF37]/50 shadow-md flex items-center justify-center mb-3 text-[#F76C82]">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
-                          <path d="M9.5 3c1.5 2.5 3.5 2.5 5 0L16.5 8c.3.5.5 1.1.5 1.7v1.8a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 11.5V9.7c0-.6.2-1.2.5-1.7L9.5 3zM8.5 13L4.5 20.5a1 1 0 0 0 .9 1.5h13.2a1 1 0 0 0 .9-1.5L15.5 13M8 10h8" />
-                        </svg>
-                      </div>
-                      <span className="font-sans text-[9px] tracking-widest text-gray-600 dark:text-gray-400 uppercase font-bold text-center">Vestido<br/>Floral</span>
-                  </div>
-                  <div className="flex flex-col items-center">
-                      <div className="w-16 h-16 rounded-full border border-[#D4AF37]/50 shadow-md flex items-center justify-center mb-3 text-[#8DB580]">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                          <path d="M20.38 3.46L16 2 12 5 8 2 3.62 3.46a2 2 0 00-1.35 2.22l.87 5.23a2 2 0 002 1.67h.54V21a1 1 0 001 1h10.64a1 1 0 001-1V12.58h.54a2 2 0 002-1.67l.87-5.23a2 2 0 00-1.35-2.22zM8 2v5a4 4 0 108 0V2M12 12v10M8 13h2v2H8zM14 13h2v2h-2z" />
-                        </svg>
-                      </div>
-                      <span className="font-sans text-[9px] tracking-widest text-gray-600 dark:text-gray-400 uppercase font-bold text-center">Guayabera<br/>Fina</span>
-                  </div>
-              </div>
-
-              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Etiqueta Ilustrada</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                La perfección estética de un evento se logra cuando todos los asistentes armonizan visualmente. A través de iconografía exclusiva, paletas de color sugeridas o moodboards de inspiración, guiamos la indumentaria de tus invitados de forma sutil, elegante y muy clara.
-              </p>
-            </section>
-
-          </div>
-
-          {/* FILA 4: Galería, Lluvia de sobres y Redes */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            
-            {/* Galería */}
-            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">07. Un Viaje en el Tiempo</span>
-              
-              <div className="grid grid-cols-2 gap-3 auto-rows-[100px] mb-8 pl-4 border-l-2 border-[#D4AF37]/30">
-                  <div className="row-span-2 col-span-1 rounded-2xl overflow-hidden shadow-sm bg-slate-200"><img src="/maricela-estudillo-gonzalez/foto1.jpg" className="w-full h-full object-cover grayscale-[10%]" onError={(e) => e.target.style.display = 'none'} /></div>
-                  <div className="row-span-1 col-span-1 rounded-2xl overflow-hidden shadow-sm bg-slate-300"><img src="/maricela-estudillo-gonzalez/foto2.jpg" className="w-full h-full object-cover grayscale-[10%]" onError={(e) => e.target.style.display = 'none'} /></div>
-                  <div className="row-span-1 col-span-1 rounded-2xl overflow-hidden shadow-sm bg-slate-200"><img src="/maricela-estudillo-gonzalez/foto4.jpg" className="w-full h-full object-cover grayscale-[10%]" onError={(e) => e.target.style.display = 'none'} /></div>
-              </div>
-
-              <FloralCorner className="float-right w-16 h-16 ml-4 opacity-50" />
-              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">El Mosaico Fotográfico</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Toda celebración tiene un trayecto previo. Tienes la libertad de elegir entre distintos estilos arquitectónicos para tu galería: retículas dinámicas (Masonry), carruseles elegantes o composiciones con formas geométricas asimétricas que rompen la monotonía y sumergen a los visitantes en tus recuerdos.
-              </p>
-            </section>
-
-            {/* Lluvia de Sobres y Redes */}
-            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">08. Comodidad Financiera y Social</span>
-              
-              <div className="flex flex-col gap-4 mb-8 pl-4 border-l-2 border-[#D4AF37]/30 py-2">
-                 <div className="border border-[#D4AF37]/30 p-3 rounded-2xl flex items-center gap-4 bg-white dark:bg-[#111]">
-                    <div className="w-10 h-10 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]"><Gift size={18}/></div>
-                    <div>
-                       <h4 className="font-bold text-xs text-slate-800 dark:text-white">Mesa de Regalos / Efectivo</h4>
-                       <p className="text-[9px] text-slate-500 font-mono mt-0.5">CLABE: 0123 4567 8901 2345 67</p>
+                        <span className="font-sans text-[8px] sm:text-[9px] tracking-widest text-gray-600 dark:text-gray-400 uppercase font-bold text-center leading-tight">Vestido<br/>Floral</span>
                     </div>
-                 </div>
-                 <div className="border border-[#F76C82]/30 p-3 rounded-2xl flex items-center gap-4 bg-white dark:bg-[#111]">
-                    <div className="w-10 h-10 rounded-full bg-[#F76C82]/10 flex items-center justify-center text-[#F76C82]"><Hash size={18}/></div>
-                    <div>
-                       <h4 className="font-bold text-xs text-slate-800 dark:text-white">Filtro de Instagram</h4>
-                       <p className="text-[10px] font-bold text-[#F76C82] mt-0.5">#BodaMirandaYLuis</p>
+                    <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border border-[#D4AF37]/50 shadow-md flex items-center justify-center mb-2 sm:mb-3 text-[#8DB580]">
+                          <svg width="24" height="24" className="sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                            <path d="M20.38 3.46L16 2 12 5 8 2 3.62 3.46a2 2 0 00-1.35 2.22l.87 5.23a2 2 0 002 1.67h.54V21a1 1 0 001 1h10.64a1 1 0 001-1V12.58h.54a2 2 0 002-1.67l.87-5.23a2 2 0 00-1.35-2.22zM8 2v5a4 4 0 108 0V2M12 12v10M8 13h2v2H8zM14 13h2v2h-2z" />
+                          </svg>
+                        </div>
+                        <span className="font-sans text-[8px] sm:text-[9px] tracking-widest text-gray-600 dark:text-gray-400 uppercase font-bold text-center leading-tight">Guayabera<br/>Fina</span>
                     </div>
-                 </div>
-              </div>
+                </div>
 
-              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Gifting y Omnicanalidad</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Tus invitados pueden transferir regalos en efectivo directamente a tus cuentas bancarias. Y si lo prefieren, integramos el código y enlace a la mesa de regalos de tu tienda departamental favorita. Además, vinculamos tu hashtag oficial y filtros de Realidad Aumentada (AR) para que tu evento sea tendencia desde semanas antes de ocurrir.
-              </p>
+                <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white text-center sm:text-left">Etiqueta Ilustrada</h3>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-xs sm:text-sm text-justify">
+                  La perfección estética de un evento se logra cuando todos los asistentes armonizan visualmente. A través de iconografía exclusiva, paletas de color sugeridas o moodboards de inspiración, guiamos la indumentaria de tus invitados de forma sutil, elegante y muy clara.
+                </p>
+              </section>
+
+            </div>
+
+            {/* FILA 4: Galería, Lluvia de sobres y Redes */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+              
+              {/* Galería */}
+              <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-6 sm:pt-8">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">07. Un Viaje en el Tiempo</span>
+                
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 auto-rows-[80px] sm:auto-rows-[100px] mb-6 sm:mb-8 pl-0 sm:pl-4 border-l-0 sm:border-l-2 border-[#D4AF37]/30">
+                    <div className="row-span-2 col-span-1 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm bg-slate-200"><img src="/maricela-estudillo-gonzalez/foto1.jpg" className="w-full h-full object-cover grayscale-[10%]" onError={(e) => e.target.style.display = 'none'} /></div>
+                    <div className="row-span-1 col-span-1 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm bg-slate-300"><img src="/maricela-estudillo-gonzalez/foto2.jpg" className="w-full h-full object-cover grayscale-[10%]" onError={(e) => e.target.style.display = 'none'} /></div>
+                    <div className="row-span-1 col-span-1 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm bg-slate-200"><img src="/maricela-estudillo-gonzalez/foto4.jpg" className="w-full h-full object-cover grayscale-[10%]" onError={(e) => e.target.style.display = 'none'} /></div>
+                </div>
+
+                <div>
+                  <FloralCorner className="float-right w-12 h-12 sm:w-16 sm:h-16 ml-3 sm:ml-4 opacity-50" />
+                  <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-2 sm:mb-3 text-slate-900 dark:text-white text-center sm:text-left">El Mosaico Fotográfico</h3>
+                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-xs sm:text-sm text-justify">
+                    Toda celebración tiene un trayecto previo. Tienes la libertad de elegir entre distintos estilos arquitectónicos para tu galería: retículas dinámicas (Masonry), carruseles elegantes o composiciones con formas geométricas asimétricas que rompen la monotonía y sumergen a los visitantes en tus recuerdos.
+                  </p>
+                </div>
+              </section>
+
+              {/* Lluvia de Sobres y Redes */}
+              <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-6 sm:pt-8">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">08. Comodidad Financiera y Social</span>
+                
+                <div className="flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-8 pl-0 sm:pl-4 border-l-0 sm:border-l-2 border-[#D4AF37]/30 py-2">
+                   <div className="border border-[#D4AF37]/30 p-2 sm:p-3 rounded-2xl flex items-center gap-3 sm:gap-4 bg-white dark:bg-[#111]">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] shrink-0"><Gift size={16}/></div>
+                      <div className="min-w-0">
+                         <h4 className="font-bold text-[11px] sm:text-xs text-slate-800 dark:text-white truncate">Mesa de Regalos y Tiendas</h4>
+                         <p className="text-[8px] sm:text-[9px] text-slate-500 font-mono mt-0.5 truncate">CLABE / Liverpool / Palacio</p>
+                      </div>
+                   </div>
+                   <div className="border border-[#F76C82]/30 p-2 sm:p-3 rounded-2xl flex items-center gap-3 sm:gap-4 bg-white dark:bg-[#111]">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#F76C82]/10 flex items-center justify-center text-[#F76C82] shrink-0"><Hash size={16}/></div>
+                      <div className="min-w-0">
+                         <h4 className="font-bold text-[11px] sm:text-xs text-slate-800 dark:text-white truncate">Conexión con Instagram</h4>
+                         <p className="text-[9px] sm:text-[10px] font-bold text-[#F76C82] mt-0.5 truncate">#BodaMirandaYLuis</p>
+                      </div>
+                   </div>
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white text-center sm:text-left">Gifting y Omnicanalidad</h3>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-xs sm:text-sm text-justify">
+                  Tus invitados pueden transferir regalos en efectivo directamente a tus cuentas bancarias. Y si lo prefieren, integramos el código y enlace directo a la mesa de regalos de tus tiendas departamentales favoritas. Además, vinculamos tu hashtag oficial y filtros de Realidad Aumentada (AR) para que tu evento sea tendencia desde semanas antes de ocurrir.
+                </p>
+              </section>
+
+            </div>
+
+            {/* ÚLTIMA FILA: RSVP CENTRADO */}
+            <section className="flex flex-col items-center border-t border-slate-200 dark:border-white/10 pt-10 sm:pt-12 max-w-3xl mx-auto text-center">
+               <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">09. El Blindaje Final</span>
+               
+               <div className="w-full max-w-md bg-white dark:bg-[#111] p-5 sm:p-6 border border-slate-200 dark:border-white/10 shadow-lg rounded-2xl sm:rounded-3xl mb-6 sm:mb-8">
+                  <h4 className="font-serif text-xl sm:text-2xl text-slate-800 dark:text-white mb-4 sm:mb-6">Confirmación</h4>
+                  <div className="p-2 sm:p-3 border border-slate-200 dark:border-white/10 rounded-xl mb-3 sm:mb-4 text-left">
+                     <label className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-500 block mb-1.5 sm:mb-2">WhatsApp de Contacto</label>
+                     <div className="h-6 sm:h-8 bg-slate-100 dark:bg-white/5 rounded"></div>
+                  </div>
+                  <div className="p-2 sm:p-3 border border-slate-200 dark:border-white/10 rounded-xl mb-4 sm:mb-6 text-left flex justify-between items-center">
+                     <label className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-500 block">Pase #1</label>
+                     <div className="w-12 sm:w-16 h-5 sm:h-6 bg-[#8DB580]/20 rounded"></div>
+                  </div>
+                  <button className="w-full py-3 sm:py-4 bg-[#F76C82] text-white rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-widest shadow-md">Confirmar Asistencia</button>
+               </div>
+
+               <h3 className="text-2xl sm:text-3xl md:text-4xl font-editorial font-bold mb-3 sm:mb-4 text-slate-900 dark:text-white">RSVP Inteligente y Cero Colados</h3>
+               <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-xs sm:text-sm text-justify sm:text-center px-0 sm:px-4">
+                  La pieza maestra de nuestra ingeniería. Se acabaron los formularios genéricos donde los invitados anotan a 5 personas cuando solo invitaste a 2. El sistema reconoce la cuota asignada a cada familia y genera pases QR personales e intransferibles tras la confirmación, sincronizándose instantáneamente con tu panel de control y el escáner de la puerta.
+               </p>
             </section>
 
           </div>
 
-          {/* ÚLTIMA FILA: RSVP CENTRADO */}
-          <section className="flex flex-col items-center border-t border-slate-200 dark:border-white/10 pt-12 max-w-3xl mx-auto text-center">
-             <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">09. El Blindaje Final</span>
-             
-             <div className="w-full max-w-md bg-white dark:bg-[#111] p-6 border border-slate-200 dark:border-white/10 shadow-lg rounded-3xl mb-8">
-                <h4 className="font-serif text-2xl text-slate-800 dark:text-white mb-6">Confirmación</h4>
-                <div className="p-3 border border-slate-200 dark:border-white/10 rounded-xl mb-4 text-left">
-                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 block mb-2">WhatsApp de Contacto</label>
-                   <div className="h-8 bg-slate-100 dark:bg-white/5 rounded"></div>
-                </div>
-                <div className="p-3 border border-slate-200 dark:border-white/10 rounded-xl mb-6 text-left flex justify-between items-center">
-                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 block">Pase #1</label>
-                   <div className="w-16 h-6 bg-[#8DB580]/20 rounded"></div>
-                </div>
-                <button className="w-full py-4 bg-[#F76C82] text-white rounded-full font-bold text-xs uppercase tracking-widest shadow-md">Confirmar Asistencia</button>
-             </div>
+          {/* PIE DE PÁGINA EDITORIAL */}
+          <footer className="mt-20 sm:mt-32 border-t border-[#D4AF37]/30 dark:border-white/10 pt-8 sm:pt-12 flex flex-col md:flex-row justify-between items-center text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-colors gap-4 text-center md:text-left">
+            <span>Baulia Technologies Inc.</span>
+            <span className="text-[#8DB580]">Inspiración: Primavera Vibrante</span>
+          </footer>
 
-             <h3 className="text-3xl md:text-4xl font-editorial font-bold mb-4 text-slate-900 dark:text-white">RSVP Inteligente y Cero Colados</h3>
-             <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm">
-                La pieza maestra de nuestra ingeniería. Se acabaron los formularios genéricos donde los invitados anotan a 5 personas cuando solo invitaste a 2. El sistema reconoce la cuota asignada a cada familia y genera pases QR personales e intransferibles tras la confirmación, sincronizándose instantáneamente con tu panel de control y el escáner de la puerta.
-             </p>
-          </section>
-
-        </div>
-
-      </main>
+        </main>
+      </div>
     </div>
   );
 };
