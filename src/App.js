@@ -11889,7 +11889,7 @@ const ShowcaseSimulatorView = () => {
   const [checkoutStep, setCheckoutStep] = useState(0); 
   const [planSeleccionado, setPlanSeleccionado] = useState(null);
 
-  // 🔴 NUEVO BLINDAJE: Detecta si el cliente regresa de "Pantalla Completa" queriendo comprar
+  // Detecta si el cliente regresa de "Pantalla Completa" queriendo comprar
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('checkout') === '1') {
@@ -11897,7 +11897,7 @@ const ShowcaseSimulatorView = () => {
     }
   }, []);
 
-  // 🔴 LA MAGIA DE LA COMUNICACIÓN: Escuchamos al archivo HTML dentro del Iframe
+  // LA MAGIA DE LA COMUNICACIÓN: Escuchamos al archivo HTML dentro del Iframe
   useEffect(() => {
     const escucharMensajeDelIframe = (event) => {
       // Si el HTML nos manda la señal secreta, abrimos la pasarela VIP
@@ -11958,14 +11958,14 @@ const ShowcaseSimulatorView = () => {
   const currentDemo = demos[activeCategory];
 
   const handlePaymentSuccess = (datos, plan) => {
-    // 🔴 Simulamos éxito. En Fase 6 conectaremos Backend.
+    // Simulamos éxito. En Fase 6 conectaremos Backend.
     setCheckoutStep(3);
   };
 
   return (
     <div className="min-h-screen bg-[#050505] flex flex-col font-sans text-white overflow-x-hidden overflow-y-auto custom-scrollbar selection:bg-amber-500">
       
-      {/* 🔴 MODALES DE COMPRA DE CRISTAL DENTRO DEL SHOWROOM */}
+      {/* MODALES DE COMPRA DE CRISTAL DENTRO DEL SHOWROOM */}
       {checkoutStep > 0 && (
         <div className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-[#0a0a0a] rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-[0_0_50px_rgba(245,158,11,0.1)] border border-white/10 relative flex flex-col max-h-[90vh]">
@@ -12083,7 +12083,7 @@ const ShowcaseSimulatorView = () => {
 
         {/* Panel Derecho: El Simulador Escalar */}
         <div className="flex-1 flex items-center justify-center p-6 lg:p-10 z-10 relative">
-           
+            
            {/* iPhone Mockup Físico */}
            <div className="relative w-[320px] h-[650px] bg-black rounded-[3rem] border-[8px] border-slate-800 shadow-[0_0_80px_rgba(0,0,0,0.6)] flex-shrink-0">
              
@@ -12093,16 +12093,16 @@ const ShowcaseSimulatorView = () => {
                <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
              </div>
              
-             {/* LA MAGIA: El contenedor que recorta, y el iframe engañado */}
+             {/* 🔴 SOLUCIÓN MATEMÁTICA DE ESCALA PERFECTA SIN BORDES */}
              <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-[#111] relative">
                <iframe 
                  src={currentDemo.url} 
                  className="absolute top-0 left-0 border-0"
                  title={`Demo ${currentDemo.label}`}
                  style={{ 
-                    width: '390px', 
-                    height: '792px', 
-                    transform: 'scale(0.82)', 
+                    width: '430px', 
+                    height: '897px', 
+                    transform: 'scale(0.707)', 
                     transformOrigin: 'top left' 
                  }}
                ></iframe>
