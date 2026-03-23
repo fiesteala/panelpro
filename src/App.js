@@ -12576,18 +12576,8 @@ const ShowcaseSimulatorView = () => {
   const [checkoutStep, setCheckoutStep] = useState(0); 
   const [planSeleccionado, setPlanSeleccionado] = useState(null);
 
-  // Detecta si el cliente regresa de "Pantalla Completa" queriendo comprar
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('checkout') === '1') {
-      setCheckoutStep(1);
-    }
-  }, []);
-
-  // LA MAGIA DE LA COMUNICACIÓN: Escuchamos al archivo HTML dentro del Iframe
   useEffect(() => {
     const escucharMensajeDelIframe = (event) => {
-      // Si el HTML nos manda la señal secreta, abrimos la pasarela VIP
       if (event.data === 'open_checkout') {
         setCheckoutStep(1); 
       }
@@ -12645,19 +12635,16 @@ const ShowcaseSimulatorView = () => {
   const currentDemo = demos[activeCategory];
 
   const handlePaymentSuccess = (datos, plan) => {
-    // Simulamos éxito. En Fase 6 conectaremos Backend.
     setCheckoutStep(3);
   };
 
   return (
     <div className="min-h-screen bg-[#050505] flex flex-col font-sans text-white overflow-x-hidden overflow-y-auto custom-scrollbar selection:bg-amber-500">
       
-      {/* MODALES DE COMPRA DE CRISTAL DENTRO DEL SHOWROOM */}
       {checkoutStep > 0 && (
         <div className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-[#0a0a0a] rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-[0_0_50px_rgba(245,158,11,0.1)] border border-white/10 relative flex flex-col max-h-[90vh]">
             
-            {/* PASO 1: SELECCIÓN DE PLAN (UPSELL) */}
             {checkoutStep === 1 && (
               <div className="p-8 animate-in slide-in-from-right-8 duration-300">
                 <div className="flex justify-between items-center mb-6">
@@ -12688,7 +12675,6 @@ const ShowcaseSimulatorView = () => {
               </div>
             )}
 
-            {/* PASO 2: STRIPE CHECKOUT */}
             {checkoutStep === 2 && (
               <div className="p-8 animate-in slide-in-from-right-8 duration-300 flex-1 overflow-y-auto custom-scrollbar">
                 <div className="flex justify-between items-center mb-4">
@@ -12705,7 +12691,6 @@ const ShowcaseSimulatorView = () => {
               </div>
             )}
 
-            {/* PASO 3: ÉXITO */}
             {checkoutStep === 3 && (
               <div className="p-10 text-center animate-in zoom-in-95 duration-500">
                 <div className="w-24 h-24 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
@@ -12722,7 +12707,6 @@ const ShowcaseSimulatorView = () => {
         </div>
       )}
 
-      {/* Header Minimalista */}
       <header className="h-20 border-b border-white/5 flex items-center justify-between px-6 sm:px-10 shrink-0 bg-transparent z-20 relative">
         <div className="flex items-center gap-4">
           <button onClick={() => window.location.href = '/'} className="p-2 hover:bg-white/10 rounded-full transition-colors"><ArrowRight size={20} className="rotate-180"/></button>
@@ -12734,10 +12718,8 @@ const ShowcaseSimulatorView = () => {
       </header>
 
       <div className="flex flex-col lg:flex-row relative z-10 min-h-[calc(100vh-80px)]">
-        {/* Fondo con blur ambiental estilo iPhone */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-[#050505] to-[#050505] z-0 pointer-events-none"></div>
 
-        {/* Panel Izquierdo: El Pitch de Ventas */}
         <div className="w-full lg:w-5/12 xl:w-1/3 p-6 sm:p-10 flex flex-col justify-center z-10 shrink-0">
           <h2 className="text-3xl sm:text-5xl font-editorial font-medium mb-4 text-white leading-tight">
             {currentDemo.label}
@@ -12768,48 +12750,36 @@ const ShowcaseSimulatorView = () => {
           </div>
         </div>
 
-        {/* Panel Derecho: El Simulador Escalar */}
         <div className="flex-1 flex items-center justify-center p-6 lg:p-10 z-10 relative">
-            
-           {/* iPhone Mockup Físico */}
+           
            <div className="relative w-[320px] h-[650px] bg-black rounded-[3rem] border-[8px] border-slate-800 shadow-[0_0_80px_rgba(0,0,0,0.6)] flex-shrink-0">
              
-             {/* Isla Dinámica */}
              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-20 flex justify-end items-center pr-2">
                <div className="w-2 h-2 rounded-full bg-slate-800/80 mr-1"></div>
                <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
              </div>
              
-             {/* 🔴 SOLUCIÓN MATEMÁTICA DE ESCALA PERFECTA SIN BORDES */}
-             <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-[#111] relative">
+             {/* LA MAGIA: El contenedor que recorta, ahora con un iframe 100% nativo y responsivo */}
+             <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-[#111] relative flex items-center justify-center">
                <iframe 
                  src={currentDemo.url} 
-                 className="absolute top-0 left-0 border-0"
+                 className="w-full h-full border-0"
                  title={`Demo ${currentDemo.label}`}
-                 style={{ 
-                    width: '430px', 
-                    height: '897px', 
-                    transform: 'scale(0.707)', 
-                    transformOrigin: 'top left' 
-                 }}
                ></iframe>
              </div>
              
-             {/* Botones Físicos Simulados */}
              <div className="absolute top-24 -left-[11px] w-1.5 h-8 bg-slate-700 rounded-l-md"></div>
              <div className="absolute top-36 -left-[11px] w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
              <div className="absolute top-52 -left-[11px] w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
              <div className="absolute top-36 -right-[11px] w-1.5 h-16 bg-slate-700 rounded-r-md"></div>
            </div>
 
-           {/* Botón ver pantalla completa */}
            <button onClick={() => window.open(currentDemo.url, '_blank')} className="absolute bottom-10 right-10 px-5 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full font-bold text-[10px] uppercase tracking-widest flex items-center transition-colors shadow-2xl z-50">
              Pantalla completa <ExternalLink size={14} className="ml-2"/>
            </button>
         </div>
       </div>
       
-      {/* Botón flotante móvil para el Showroom */}
       <div className="fixed bottom-6 w-full px-4 sm:hidden z-50">
         <button onClick={() => setCheckoutStep(1)} className="w-full py-4 bg-amber-500 text-slate-900 font-black rounded-full text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.4)]">
           Comprar este Diseño <ArrowRight size={16} className="inline ml-1"/>
