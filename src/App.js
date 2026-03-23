@@ -9040,164 +9040,176 @@ const RevealSection = ({ children, className = '', delay = 0 }) => {
 // --- COMPONENTE: REVISTA EDITORIAL (ANATOMÍA DE LA INVITACIÓN) ---
 // ==========================================
 const AnatomyOverlay = ({ onClose }) => {
-  // 🌸 ARTE VECTORIAL EXTRAÍDO DE LA INVITACIÓN REAL
-  const FloralCorner = ({ className, style }) => (
-    <svg viewBox="0 0 200 200" className={className} style={style} xmlns="http://www.w3.org/2000/svg">
-      <g transform="scale(0.8) translate(20, 20)">
-        <path d="M 40 100 C 10 70, 20 20, 80 10 C 80 60, 60 90, 40 100 Z" fill="#8DB580" opacity="0.8"/>
-        <path d="M 100 40 C 70 10, 20 20, 10 80 C 60 80, 90 60, 100 40 Z" fill="#A3C697" opacity="0.9"/>
-        <path d="M 130 140 C 160 170, 180 130, 170 80 C 140 90, 120 120, 130 140 Z" fill="#8DB580" opacity="0.8"/>
-        <circle cx="120" cy="70" r="30" fill="#FFD166" />
-        <circle cx="120" cy="70" r="15" fill="#FFB347" />
-        <path d="M 120 40 C 130 20, 150 20, 145 45 C 165 40, 175 60, 150 70 C 175 80, 165 100, 145 95 C 150 120, 130 120, 120 100 C 110 120, 90 120, 95 95 C 75 100, 65 80, 90 70 C 65 60, 75 40, 95 45 C 90 20, 110 20, 120 40 Z" fill="#FFE28A" opacity="0.9"/>
-        <circle cx="70" cy="120" r="35" fill="#F76C82" />
-        <circle cx="70" cy="120" r="15" fill="#D84A63" />
-        <path d="M 70 85 C 85 60, 110 65, 100 90 C 125 80, 140 105, 110 120 C 140 135, 125 160, 100 150 C 110 175, 85 180, 70 155 C 55 180, 30 175, 40 150 C 15 160, 0 135, 30 120 C 0 105, 15 80, 40 90 C 30 65, 55 60, 70 85 Z" fill="#FF8FA3" opacity="0.9"/>
-        <circle cx="120" cy="70" r="5" fill="#D4AF37" />
-        <circle cx="70" cy="120" r="6" fill="#D4AF37" />
-        <path d="M 90 90 Q 100 100, 110 90" stroke="#D4AF37" strokeWidth="2" fill="none"/>
-      </g>
-    </svg>
-  );
-
-  // Los 24 elementos categorizados lógicamente en 4 Features Editoriales
-  const sections = [
-    {
-      title: "Identidad Visual",
-      subtitle: "01",
-      desc: "El primer impacto. Diseñamos la estética de tu evento para que la elegancia sea inmediata e inolvidable.",
-      items: [
-        { name: 'Monograma', icon: <Type size={28} strokeWidth={1}/>, desc: 'Tus iniciales entrelazadas con tipografía clásica en el centro de la pantalla.' },
-        { name: 'Monograma Personalizado', icon: <Sparkles size={28} strokeWidth={1}/>, desc: 'Un emblema único, forjado a medida para complementar el aura de tu evento.' },
-        { name: 'Fotos de Portada', icon: <ImageIcon size={28} strokeWidth={1}/>, desc: 'Imágenes inmersivas y full-screen que dan la bienvenida con dramatismo y clase.' },
-        { name: 'Fotos de Galería', icon: <LayoutGrid size={28} strokeWidth={1}/>, desc: 'Un mosaico visual fluido donde tus invitados exploran tu historia.' },
-        { name: 'Fotos de Novios', icon: <Camera size={28} strokeWidth={1}/>, desc: 'Una selección curada de la sesión principal de los grandes protagonistas.' }
-      ]
-    },
-    {
-      title: "La Narrativa",
-      subtitle: "02",
-      desc: "Tu celebración es una historia. Envolvemos a tus invitados en la esencia y emoción de las familias anfitrionas.",
-      items: [
-        { name: 'Nombres y Frases', icon: <Quote size={28} strokeWidth={1}/>, desc: 'Títulos majestuosos y citas que expresan la personalidad de la pareja.' },
-        { name: 'Nombre de los Padres', icon: <Heart size={28} strokeWidth={1}/>, desc: 'El espacio de máximo honor para reconocer a los pilares de la familia.' },
-        { name: 'Padrinos', icon: <Users size={28} strokeWidth={1}/>, desc: 'Reconocimiento con estilo editorial a quienes acompañan este gran paso.' },
-        { name: 'Frase General', icon: <BookOpenText size={28} strokeWidth={1}/>, desc: 'El lema emotivo o poesía que dictará el tono completo de la noche.' },
-        { name: 'Save the Date', icon: <CalendarDays size={28} strokeWidth={1}/>, desc: 'Una pre-invitación digital para asegurar la asistencia de los más queridos.' }
-      ]
-    },
-    {
-      title: "Logística y Precisión",
-      subtitle: "03",
-      desc: "Información blindada y elegante. Coordinamos cada detalle para que tus invitados tengan el control en sus manos.",
-      items: [
-        { name: 'Cuenta Regresiva', icon: <Clock size={28} strokeWidth={1}/>, desc: 'Un reloj vivo y minimalista marcando los segundos exactos hacia el gran día.' },
-        { name: 'Mapas GPS', icon: <MapPin size={28} strokeWidth={1}/>, desc: 'Rutas directas y geolocalizadas a la ceremonia y la recepción con un solo tap.' },
-        { name: 'Calendario', icon: <CheckSquare size={28} strokeWidth={1}/>, desc: 'Sincronización instantánea con Apple, Google u Outlook Calendar.' },
-        { name: 'Itinerario', icon: <ListTree size={28} strokeWidth={1}/>, desc: 'El cronograma visual (timeline) del evento, desplegado minuto a minuto.' },
-        { name: 'Código de Vestimenta', icon: <Shirt size={28} strokeWidth={1}/>, desc: 'Guía de estilo y etiqueta ilustrada para mantener la estética perfecta.' },
-        { name: 'Recomendación de Hospedaje', icon: <Hotel size={28} strokeWidth={1}/>, desc: 'Selección de hoteles con tarifas preferenciales para invitados foráneos.' },
-        { name: 'Clima', icon: <CloudSun size={28} strokeWidth={1}/>, desc: 'Pronóstico meteorológico en tiempo real para prever cualquier detalle.' },
-        { name: 'Traducción', icon: <Languages size={28} strokeWidth={1}/>, desc: 'Invitación adaptable en múltiples idiomas para tus invitados internacionales.' }
-      ]
-    },
-    {
-      title: "Interacción",
-      subtitle: "04",
-      desc: "Más que una simple invitación, una experiencia táctil que conecta a los invitados con la fiesta antes de llegar.",
-      items: [
-        { name: 'Confirmación (RSVP)', icon: <Ticket size={28} strokeWidth={1}/>, desc: 'Gestión de asistencia blindada por número de pases. Cero colados.' },
-        { name: 'Mesa de Regalos', icon: <Gift size={28} strokeWidth={1}/>, desc: 'Recepción de aportaciones en efectivo directo a tus cuentas, sin comisiones.' },
-        { name: 'Reproductor de Música', icon: <PlayCircle size={28} strokeWidth={1}/>, desc: 'Ambienta la experiencia visual con la canción principal de tu celebración.' },
-        { name: '# de Instagram', icon: <Hash size={28} strokeWidth={1}/>, desc: 'El hashtag oficial con enlace directo para indexar todos los recuerdos.' },
-        { name: 'Filtro de Instagram', icon: <Smartphone size={28} strokeWidth={1}/>, desc: 'Lente de Realidad Aumentada (AR) exclusivo para embellecer sus historias.' },
-        { name: 'Álbum Digital', icon: <SquareUser size={28} strokeWidth={1}/>, desc: 'Muro social integrado donde todos los invitados inmortalizan sus fotografías.' }
-      ]
+  // Inyectamos las fuentes de la invitación original solo para esta vista
+  useEffect(() => {
+    if (!document.getElementById('anatomy-fonts')) {
+      const link = document.createElement('link');
+      link.id = 'anatomy-fonts';
+      link.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&family=Pinyon+Script&display=swap';
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
     }
-  ];
+  }, []);
+
+  const invTheme = {
+    fontSerif: '"Cormorant Garamond", serif',
+    fontSans: '"Montserrat", sans-serif',
+    fontScript: '"Pinyon Script", cursive',
+    springDark: '#2A2A2A',
+    goldDark: '#AA8529',
+    goldWarm: '#B48E2F',
+    springPink: '#F76C82',
+    springGreen: '#8DB580',
+    bg: '#FDFBF7'
+  };
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-[#FDFBF7] dark:bg-[#080808] overflow-y-auto animate-in slide-in-from-bottom-10 fade-in duration-700 custom-scrollbar text-[#2A2A2A] dark:text-white transition-colors font-sans">
+    <div className="fixed inset-0 z-[9999] bg-white dark:bg-[#080808] overflow-y-auto animate-in slide-in-from-bottom-10 fade-in duration-700 custom-scrollbar text-slate-900 dark:text-white transition-colors">
       
       {/* NAVEGACIÓN FLOTANTE MINIMALISTA */}
-      <nav className="sticky top-0 w-full bg-[#FDFBF7]/80 dark:bg-[#080808]/80 backdrop-blur-2xl z-50 px-6 md:px-12 py-6 flex justify-between items-center border-b border-[#D4AF37]/20 dark:border-white/10 transition-colors">
-        <span className="font-editorial text-2xl font-bold tracking-widest uppercase text-[#D4AF37]">Baulia <span className="font-light italic text-[#2A2A2A] dark:text-white">Magazine</span></span>
-        <button onClick={onClose} className="group flex items-center text-xs font-black uppercase tracking-widest text-slate-500 hover:text-[#D4AF37] dark:text-slate-400 dark:hover:text-[#D4AF37] transition-colors">
-          Cerrar Edición <X size={20} className="ml-2 transform group-hover:rotate-90 transition-transform duration-300"/>
+      <nav className="sticky top-0 w-full bg-white/90 dark:bg-[#080808]/90 backdrop-blur-2xl z-50 px-6 md:px-12 py-6 flex justify-between items-center border-b border-slate-200 dark:border-white/10 transition-colors">
+        <span className="font-editorial text-2xl font-bold tracking-widest uppercase">Baulia <span className="font-light italic text-slate-500">Anatomy</span></span>
+        <button onClick={onClose} className="group flex items-center text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+          Cerrar Revista <X size={20} className="ml-2 transform group-hover:rotate-90 transition-transform duration-300"/>
         </button>
       </nav>
 
       <main className="max-w-[1200px] mx-auto px-6 md:px-12 pt-20 pb-32">
         
-        {/* PORTADA DE LA REVISTA (HERO EDITORIAL CON IMÁGENES FLOTANTES) */}
-        <header className="mb-32">
-          <p className="text-[#8DB580] dark:text-[#8DB580] font-bold tracking-[0.4em] uppercase text-[10px] mb-8 text-center md:text-left">La Colección · Primavera Vibrante</p>
-          
-          <div className="flex flex-col md:flex-row gap-12 items-start">
-            <h1 className="text-7xl md:text-8xl lg:text-[140px] font-editorial font-black tracking-tighter leading-[0.85] w-full md:w-3/5 text-[#2A2A2A] dark:text-white">
-              Anatomía <br/>
-              <span className="italic font-light text-[#D4AF37]">del diseño.</span>
-            </h1>
-            
-            {/* 🔴 SOLUCIÓN EDITORIAL: LETRA CAPITULAR Y VECTORES RODEADOS POR TEXTO */}
-            <div className="w-full md:w-2/5 pt-4">
-              <div className="text-lg md:text-xl font-light leading-relaxed text-justify text-slate-600 dark:text-slate-300 block">
-                {/* Objeto flotante para que el texto lo rodee */}
-                <FloralCorner className="float-right w-40 h-40 md:w-56 md:h-56 ml-6 mb-4 opacity-90 drop-shadow-xl" />
-                <span className="float-left text-[110px] leading-[80px] pt-2 pr-5 font-editorial font-black text-[#F76C82] transition-colors">
-                  C
-                </span>
-                ada elemento que compone nuestras invitaciones es programado minuciosamente desde cero. En Baulia rechazamos las plantillas genéricas. Creemos en la arquitectura de software aplicada al diseño de alta costura, forjando experiencias inmersivas, táctiles y logísticamente blindadas para el evento más importante de tu vida.
-              </div>
-            </div>
-          </div>
+        {/* HERO EDITORIAL */}
+        <header className="mb-24 md:mb-40 border-b border-slate-200 dark:border-white/10 pb-20">
+          <p className="text-amber-600 dark:text-amber-500 font-bold tracking-[0.4em] uppercase text-[10px] mb-8 text-center md:text-left">Caso de Estudio: Primavera Vibrante</p>
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-editorial font-black tracking-tighter leading-[1] w-full max-w-4xl text-slate-900 dark:text-white">
+            Diseccionando la <br/>
+            <span className="italic font-light text-slate-400 dark:text-slate-500">Alta Costura Digital.</span>
+          </h1>
+          <p className="mt-10 text-lg md:text-xl text-slate-500 font-light max-w-2xl leading-relaxed">
+            Una invitación de Baulia no es una plantilla. Es una composición de elementos de diseño interactivo calculados milimétricamente para crear una experiencia inmersiva. Conoce el "por qué" detrás de cada bloque.
+          </p>
         </header>
 
-        {/* FEATURES EDITORIALES (SECCIONES) */}
         <div className="space-y-32">
-          {sections.map((sec, i) => (
-            <section key={i} className="relative border-t-2 border-[#D4AF37]/30 dark:border-white/20 pt-12 flex flex-col lg:flex-row gap-16 transition-colors">
-              
-              {/* COLUMNA IZQUIERDA: TÍTULO Y DESCRIPCIÓN DE LA SECCIÓN */}
-              <div className="lg:w-1/3 relative">
-                 <h2 className="absolute -top-16 -left-6 text-[180px] font-editorial font-black text-[#D4AF37]/10 dark:text-white/5 pointer-events-none select-none transition-colors leading-none z-0">
-                    {sec.subtitle}
-                 </h2>
-                 <div className="relative z-10 pt-4">
-                    <h3 className="text-4xl md:text-5xl font-editorial font-bold mb-6 leading-tight text-[#2A2A2A] dark:text-white">{sec.title}</h3>
-                    <p className="text-slate-500 dark:text-slate-400 font-light text-lg italic leading-relaxed">{sec.desc}</p>
-                 </div>
+
+          {/* ELEMENTO 1: EL MONOGRAMA */}
+          <section className="flex flex-col md:flex-row gap-12 lg:gap-24 items-center">
+            <div className="w-full md:w-1/2 flex justify-center items-center p-12 bg-slate-50 dark:bg-[#111] rounded-[3rem] border border-slate-200 dark:border-white/5 shadow-inner min-h-[400px]">
+              {/* Pieza Real Extraída */}
+              <div className="animate-pulse-slow">
+                 <img src="/maricela-estudillo-gonzalez/monograma.svg" alt="Monograma" className="w-32 h-32 drop-shadow-md object-contain hover:scale-105 transition-transform duration-700" />
               </div>
-              
-              {/* COLUMNA DERECHA: ELEMENTOS CON TEXTO ENVOLVENTE (GRID DINÁMICO) */}
-              <div className="lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
-                {sec.items.map((item, j) => (
-                  <div key={j} className="relative group">
-                    {/* USO DE FLOAT PARA QUE EL TEXTO RODE EL ÍCONO (ESTILO REVISTA) */}
-                    <div className="float-left mr-5 mt-1 text-[#D4AF37] opacity-70 group-hover:opacity-100 group-hover:text-[#F76C82] transition-colors duration-500">
-                      {item.icon}
-                    </div>
-                    <div className="block">
-                      <h4 className="font-bold text-base md:text-lg tracking-wide mb-1.5 uppercase text-[#2A2A2A] dark:text-white group-hover:text-[#D4AF37] transition-colors duration-300">{item.name}</h4>
-                      <p className="text-sm font-light text-slate-500 dark:text-slate-400 leading-relaxed">
-                        {item.desc}
-                      </p>
-                    </div>
-                    {/* Línea divisoria minimalista */}
-                    <div className="w-full h-px bg-[#D4AF37]/0 group-hover:bg-[#D4AF37]/40 mt-6 transition-colors duration-500 clear-both"></div>
+            </div>
+            <div className="w-full md:w-1/2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">01. Identidad de Marca</span>
+              <h3 className="text-3xl md:text-4xl font-editorial font-bold mb-6 text-slate-900 dark:text-white">El Monograma Insignia</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light">
+                Es el primer punto de contacto visual. Funciona como el logotipo oficial del evento. Al colocarlo aislado con una animación de respiración <i>(pulse-slow)</i>, establecemos jerarquía y declaramos inmediatamente que el usuario está a punto de entrar a una experiencia premium, no a una simple página web.
+              </p>
+            </div>
+          </section>
+
+          {/* ELEMENTO 2: NOMBRES Y TIPOGRAFÍA */}
+          <section className="flex flex-col md:flex-row-reverse gap-12 lg:gap-24 items-center">
+            <div className="w-full md:w-1/2 flex justify-center items-center p-12 bg-[#FDFBF7] rounded-[3rem] border border-slate-200 dark:border-white/5 shadow-inner min-h-[400px]">
+              {/* Pieza Real Extraída */}
+              <div className="flex flex-col items-center text-center">
+                  <span style={{ fontFamily: invTheme.fontSans, color: invTheme.springGreen }} className="text-xs tracking-[0.4em] uppercase font-semibold mb-4">
+                      Celebrando la vida
+                  </span>
+                  <h1 style={{ fontFamily: invTheme.fontSerif, color: invTheme.springDark }} className="text-7xl mb-2 leading-none drop-shadow-sm">
+                      Maricela
+                  </h1>
+                  <h2 style={{ fontFamily: invTheme.fontSans, color: invTheme.goldDark }} className="text-xs tracking-[0.5em] uppercase font-medium opacity-80">
+                      Estudillo González
+                  </h2>
+              </div>
+            </div>
+            <div className="w-full md:w-1/2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">02. Arquitectura Tipográfica</span>
+              <h3 className="text-3xl md:text-4xl font-editorial font-bold mb-6 text-slate-900 dark:text-white">Jerarquía y Contraste</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light">
+                Combinamos tres familias tipográficas distintas. Una <i>Serif</i> clásica (Cormorant Garamond) para el nombre principal que aporta tamaño y elegancia; una <i>Sans-Serif</i> extendida (Montserrat) para los apellidos y subtítulos que da un toque moderno y legible; y colores orgánicos que anclan el tema de "Primavera". Es diseño editorial puro llevado a la pantalla.
+              </p>
+            </div>
+          </section>
+
+          {/* ELEMENTO 3: LA PORTADA (FOTOGRAFÍA) */}
+          <section className="flex flex-col md:flex-row gap-12 lg:gap-24 items-center">
+            <div className="w-full md:w-1/2 flex justify-center items-center p-12 bg-slate-50 dark:bg-[#111] rounded-[3rem] border border-slate-200 dark:border-white/5 shadow-inner min-h-[400px]">
+              {/* Pieza Real Extraída */}
+              <div className="relative w-48 h-64 rounded-full p-2 border border-[#D4AF37]/50 bg-white/40 shadow-xl overflow-hidden">
+                  <div className="w-full h-full rounded-full overflow-hidden relative bg-slate-200">
+                      <img src="/maricela-estudillo-gonzalez/portada.jpg" alt="Foto Portada" className="w-full h-full object-cover animate-slow-zoom" onError={(e) => e.target.style.display = 'none'} />
+                      <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-xs font-bold text-center px-4">
+                        (Foto de Portada)
+                      </div>
                   </div>
-                ))}
               </div>
+            </div>
+            <div className="w-full md:w-1/2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">03. Composición Visual</span>
+              <h3 className="text-3xl md:text-4xl font-editorial font-bold mb-6 text-slate-900 dark:text-white">El Recorte Fotográfico</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light">
+                Evitamos las aburridas fotos cuadradas de borde a borde. Al encapsular la fotografía principal dentro de un óvalo asimétrico con borde dorado, convertimos la imagen en un camafeo clásico. La sutil animación de zoom lento <i>(slow-zoom)</i> mantiene la pantalla viva sin distraer la lectura.
+              </p>
+            </div>
+          </section>
 
-            </section>
-          ))}
+          {/* ELEMENTO 4: FRASE LITERARIA */}
+          <section className="flex flex-col md:flex-row-reverse gap-12 lg:gap-24 items-center">
+            <div className="w-full md:w-1/2 flex justify-center items-center p-12 bg-[#FDFBF7] rounded-[3rem] border border-slate-200 dark:border-white/5 shadow-inner min-h-[400px] text-center">
+              {/* Pieza Real Extraída */}
+              <div className="max-w-xs">
+                  <div className="mb-6 w-full flex items-center justify-center gap-4 px-2">
+                      <div className="h-px w-10 bg-gradient-to-r from-transparent to-[#D4AF37]"></div>
+                      <span style={{ fontFamily: invTheme.fontScript, color: invTheme.springPink }} className="text-4xl font-semibold drop-shadow-sm">
+                          50 Primaveras
+                      </span>
+                      <div className="h-px w-10 bg-gradient-to-l from-transparent to-[#D4AF37]"></div>
+                  </div>
+                  <p style={{ fontFamily: invTheme.fontSerif }} className="italic text-2xl text-gray-700 leading-relaxed">
+                      "Llegar a esta primavera es celebrar las flores de ayer y las semillas del mañana."
+                  </p>
+              </div>
+            </div>
+            <div className="w-full md:w-1/2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">04. El Tono Emocional</span>
+              <h3 className="text-3xl md:text-4xl font-editorial font-bold mb-6 text-slate-900 dark:text-white">El Anclaje Literario</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light">
+                Separamos visualmente las secciones usando tipografía manuscrita <i>(Script)</i> soportada por líneas divisorias en degradado. Inmediatamente después, una frase inspiradora dictamina el "mood" del evento. Los espacios en blanco (margin y padding) alrededor de este texto obligan al invitado a pausar y leer antes de continuar.
+              </p>
+            </div>
+          </section>
+
+          {/* ELEMENTO 5: CUENTA REGRESIVA */}
+          <section className="flex flex-col md:flex-row gap-12 lg:gap-24 items-center">
+            <div className="w-full md:w-1/2 flex justify-center items-center p-8 bg-slate-50 dark:bg-[#111] rounded-[3rem] border border-slate-200 dark:border-white/5 shadow-inner min-h-[400px]">
+              {/* Pieza Real Extraída */}
+              <div className="flex flex-col items-center">
+                  <span style={{ fontFamily: invTheme.fontSans, color: invTheme.goldWarm }} className="text-xs tracking-[0.4em] uppercase font-medium mb-6">
+                      Faltan
+                  </span>
+                  <div className="flex justify-center gap-3">
+                      {[ { label: 'Días', value: '45' }, { label: 'Hrs', value: '12' }, { label: 'Min', value: '30' }].map((item, idx) => (
+                          <div key={idx} className="flex flex-col items-center w-20">
+                              <div className="w-16 h-16 rounded-full border border-[#D4AF37]/50 bg-white shadow-lg flex items-center justify-center mb-3">
+                                  <span style={{ fontFamily: invTheme.fontSerif, color: invTheme.springDark }} className="text-3xl">{item.value}</span>
+                              </div>
+                              <span style={{ fontFamily: invTheme.fontSans }} className="text-[0.65rem] tracking-[0.2em] uppercase text-gray-500 font-medium">{item.label}</span>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+            </div>
+            <div className="w-full md:w-1/2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">05. Tensión y Expectativa</span>
+              <h3 className="text-3xl md:text-4xl font-editorial font-bold mb-6 text-slate-900 dark:text-white">El Motor del Tiempo</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light">
+                A diferencia de los contadores cuadrados tradicionales, encapsulamos cada métrica en esferas de cristal con sombras pesadas (Drop Shadows) y bordes dorados. Esto crea la ilusión de objetos físicos, similares a relojes de bolsillo, generando anticipación constante hacia el gran día.
+              </p>
+            </div>
+          </section>
+
         </div>
-
-        {/* PIE DE PÁGINA EDITORIAL */}
-        <footer className="mt-40 border-t border-[#D4AF37]/30 dark:border-white/10 pt-12 flex flex-col md:flex-row justify-between items-center text-slate-400 text-xs font-bold uppercase tracking-widest transition-colors">
-          <span>Baulia Technologies Inc.</span>
-          <span className="mt-4 md:mt-0 text-[#8DB580]">Inspiración: Primavera Vibrante</span>
-        </footer>
 
       </main>
     </div>
