@@ -9493,482 +9493,294 @@ const AnatomyOverlay = ({ onClose }) => {
 // --- COMPONENTE: ARQUITECTURA DEL SISTEMA (ANATOMÍA DEL PANEL / BÓVEDA) ---
 // ==========================================
 const PanelAnatomyOverlay = ({ onClose }) => {
-  const GridPattern = () => (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
+  useEffect(() => {
+    if (!document.getElementById('anatomy-fonts')) {
+      const link = document.createElement('link');
+      link.id = 'anatomy-fonts';
+      link.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&family=Pinyon+Script&display=swap';
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
+  }, []);
+
+  const invTheme = {
+    fontSerif: '"Cormorant Garamond", serif',
+    fontSans: '"Montserrat", sans-serif',
+    fontScript: '"Pinyon Script", cursive',
+    dark: '#1C1917',
+    gold: '#D4AF37',
+    bg: '#FDFBF7'
+  };
+
+  const TechGrid = () => (
+    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.02]" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <pattern id="techGrid" width="30" height="30" patternUnits="userSpaceOnUse">
-          <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#0f172a" strokeWidth="1"/>
+        <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+          <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#D4AF37" strokeWidth="0.5"/>
         </pattern>
       </defs>
-      <rect width="100%" height="100%" fill="url(#techGrid)" />
+      <rect width="100%" height="100%" fill="url(#grid)" />
     </svg>
   );
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 lg:p-8 animate-in fade-in duration-500 font-sans text-slate-900">
+    <div className="fixed inset-0 z-[9999] bg-slate-900/40 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 lg:p-8 animate-in fade-in duration-500 font-sans text-[#1C1917]">
+      <style>{`
+        @keyframes tiktok-heart {
+          0% { opacity: 0; transform: translateY(0) scale(0.5) rotate(-5deg); }
+          15% { opacity: 1; transform: translateY(-30px) scale(1) rotate(5deg); }
+          80% { opacity: 1; transform: translateY(-100px) scale(1) rotate(-5deg); }
+          100% { opacity: 0; transform: translateY(-120px) scale(0.8) rotate(5deg); }
+        }
+        .animate-tiktok-heart {
+          animation: tiktok-heart 2s ease-out infinite;
+        }
+      `}</style>
       
-      <div className="w-[96vw] max-w-[1300px] h-[96vh] sm:h-[94vh] bg-slate-50 rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col relative overflow-hidden animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-700 border border-slate-200">
+      <div className="w-[96vw] max-w-[1300px] h-[96vh] sm:h-[94vh] bg-[#FDFBF7] rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col relative overflow-hidden animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-700 border border-slate-200">
+        <TechGrid />
         
-        {/* NAVEGACIÓN SUPERIOR (TECH STYLE) */}
-        <nav className="sticky top-0 w-full bg-white/90 backdrop-blur-xl z-50 px-6 sm:px-10 py-4 flex justify-between items-center border-b border-slate-200 shrink-0 shadow-sm">
-          <div className="flex items-center gap-3">
-             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-md">
-                <Settings2 size={18} />
-             </div>
-             <span className="font-bold text-lg tracking-tight text-slate-800">Baulia <span className="font-medium text-slate-500">System Architecture</span></span>
-          </div>
-          <button onClick={onClose} className="group flex items-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-600 transition-colors bg-slate-100 px-4 py-2 rounded-full">
-            <span className="hidden sm:block">Cerrar Arquitectura</span> <X size={16} className="sm:ml-2 transform group-hover:rotate-90 transition-transform duration-300"/>
+        <nav className="sticky top-0 w-full bg-[#FDFBF7]/90 backdrop-blur-xl z-50 px-6 sm:px-10 py-4 flex justify-between items-center border-b border-[#D4AF37]/20 shrink-0">
+          <span className="font-editorial text-xl font-bold tracking-widest uppercase text-[#D4AF37]">Baulia <span className="font-light italic text-[#1C1917]">Tech Magazine</span></span>
+          <button onClick={onClose} className="group flex items-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-[#D4AF37] transition-colors bg-slate-100 px-4 py-2 rounded-full">
+            <span className="hidden sm:block">Cerrar Edición</span> <X size={16} className="sm:ml-2 transform group-hover:rotate-90 transition-transform duration-300"/>
           </button>
         </nav>
 
-        <main className="flex-1 overflow-y-auto custom-scrollbar relative bg-slate-50">
-          <GridPattern />
+        <main className="flex-1 overflow-y-auto custom-scrollbar px-6 sm:px-10 lg:px-16 pt-16 pb-24 text-[#1C1917] z-10 relative">
           
-          {/* HERO TECH */}
-          <div className="px-6 sm:px-10 lg:px-16 pt-16 pb-16 relative z-10">
-             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-widest mb-6 shadow-sm">
-                <Settings2 size={12} /> Entorno Operativo Nivel 2
-             </div>
-             <h1 className="text-5xl sm:text-6xl lg:text-[80px] font-black tracking-tighter text-slate-900 leading-[0.95] mb-6">
-                La Ingeniería detrás <br className="hidden md:block"/> de tu evento.
-             </h1>
-             <p className="text-base sm:text-lg text-slate-600 font-medium max-w-4xl leading-relaxed">
-                La verdadera magia no solo radica en lo que los invitados ven, sino en el control absoluto que ocurre detrás del telón. Baulia te entrega una <b>Bóveda Digital</b> diseñada con los más altos estándares de ingeniería de software. Transformamos el caos logístico en una plataforma fluida, automatizada y elegante que te permite dominar cada variable de tu gran día.
-             </p>
-          </div>
+          <header className="mb-20 border-b border-[#D4AF37]/20 pb-16">
+            <p className="text-[#D4AF37] font-bold tracking-[0.4em] uppercase text-[10px] mb-6">Fase 2: Arquitectura y Operación</p>
+            <h1 className="text-6xl sm:text-7xl lg:text-[100px] font-editorial font-black tracking-tighter leading-[0.9] text-[#1C1917]">
+              El Mando <br className="hidden md:block"/>
+              <span className="italic font-light text-[#D4AF37]">Central.</span>
+            </h1>
+            <p className="text-slate-600 max-w-2xl mt-8 text-base sm:text-lg font-light leading-relaxed">Olvídate de los excels desordenados y las libretas perdidas. Baulia te entrega el Centro de Comando para administrar cada detalle desde tu iPad o computadora.</p>
+          </header>
 
-          <div className="px-6 sm:px-10 lg:px-16 pb-24 space-y-8 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
 
-            {/* FILA 1: DASHBOARD Y DIRECTORIO */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              {/* 01. Dashboard & Notificaciones */}
-              <section className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col hover:shadow-lg transition-shadow relative overflow-hidden">
-                <div className="flex items-center gap-3 mb-6 relative z-10">
-                   <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600"><LayoutDashboard size={20}/></div>
-                   <h3 className="text-2xl font-black tracking-tight text-slate-900">01. Centro de Mando</h3>
-                </div>
-                
-                <div className="relative mb-6 z-10">
-                   <div className="grid grid-cols-2 gap-3 mb-3">
-                      <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl">
-                         <p className="text-[9px] uppercase tracking-widest font-bold text-slate-500 mb-1">Pases Asignados</p>
-                         <p className="text-3xl font-black text-slate-800">185</p>
-                         <span className="text-[8px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold uppercase mt-2 inline-block">85% Confirmado</span>
-                      </div>
-                      <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl">
-                         <p className="text-[9px] uppercase tracking-widest font-bold text-slate-500 mb-1">Gasto Estimado</p>
-                         <p className="text-3xl font-black text-slate-800">$150k</p>
-                         <div className="w-full bg-slate-200 h-1 rounded-full mt-3"><div className="w-[45%] h-1 bg-amber-500 rounded-full"></div></div>
-                      </div>
-                   </div>
-                   
-                   <div className="absolute -bottom-4 -right-2 bg-white p-3 rounded-xl shadow-xl border border-slate-100 flex items-start gap-3 w-64 animate-pulse-slow">
-                      <div className="text-amber-500 mt-0.5"><Bell size={16}/></div>
-                      <div>
-                         <p className="text-xs font-black uppercase text-slate-800">Notificación Inteligente</p>
-                         <p className="text-[10px] text-slate-500">Familia Torres solicita +2 pases extra.</p>
-                      </div>
-                   </div>
-                </div>
-
-                <p className="text-sm text-slate-600 leading-relaxed font-medium mt-auto relative z-10 pt-6">
-                  Tu tablero principal te ofrece telemetría en tiempo real. Un <b>sistema de notificaciones inteligentes</b> te avisa de pagos vencidos, nuevas confirmaciones o asistentes que requieren pases extra. Todo exportable en elegantes reportes PDF (Ejecutivos o Directorio completo) con un solo clic.
-                </p>
-              </section>
-
-              {/* 02. Directorio Inteligente */}
-              <section className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col hover:shadow-lg transition-shadow">
-                <div className="flex items-center gap-3 mb-6">
-                   <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600"><Users size={20}/></div>
-                   <h3 className="text-2xl font-black tracking-tight text-slate-900">02. Directorio Inteligente</h3>
-                </div>
-                
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden mb-6 relative">
-                   <div className="p-3 border-b border-slate-200 bg-white flex justify-between items-center">
-                      <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
-                         <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest px-2">Boda</span>
-                         <div className="w-8 h-4 bg-indigo-500 rounded-full relative"><div className="absolute top-0.5 right-0.5 w-3 h-3 bg-white rounded-full"></div></div>
-                      </div>
-                      <div className="flex gap-2">
-                         <button className="bg-rose-500 text-white text-[8px] font-bold uppercase px-2 py-1 rounded shadow-sm">+ Novia</button>
-                         <button className="bg-indigo-600 text-white text-[8px] font-bold uppercase px-2 py-1 rounded shadow-sm">+ Novio</button>
-                      </div>
-                   </div>
-                   <div className="p-4 flex flex-col gap-3">
-                      <div className="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-                         <div>
-                            <span className="font-bold text-sm text-slate-800 block mb-1">Familia Torres <span className="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded text-[8px] uppercase tracking-widest ml-1">Novia</span></span>
-                            <span className="text-[10px] text-slate-500 flex items-center gap-2">
-                               <MapPin size={10} className="text-indigo-400"/> Mesa 5 <span className="text-slate-300">|</span> 
-                               Pin: <span className="font-mono bg-slate-100 px-1 rounded">7A9X</span>
-                            </span>
-                         </div>
-                         <div className="text-right">
-                            <span className="font-black text-indigo-600 text-sm block">4 Pases</span>
-                            <span className="bg-emerald-100 text-emerald-700 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">Confirmado</span>
-                         </div>
-                      </div>
-                   </div>
-                </div>
-
-                <p className="text-sm text-slate-600 leading-relaxed font-medium mt-auto">
-                  Tú creas la invitación y <b>los invitados se encargan de llenar la lista</b> con sus nombres cuando confirman. En bodas, activa el "Modo Boda" para separar invitados del Novio y la Novia. Visualiza la mesa asignada, el código PIN de acceso y el estatus en tiempo real. Además, el sistema separa pases infantiles para que sepas cuántos platillos <i>Kids</i> pedir.
-                </p>
-              </section>
-            </div>
-
-            {/* FILA 2: GESTIÓN DE MESAS Y CROQUIS (LA JOYA DE LA CORONA) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              {/* 03. Gestión y Auto-Acomodo */}
-              <section className="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-2xl flex flex-col hover:shadow-indigo-500/20 transition-all relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-                <div className="flex items-center gap-3 mb-6 relative z-10">
-                   <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400"><Wand2 size={20}/></div>
-                   <h3 className="text-2xl font-black tracking-tight text-white">03. Gestión de Mesas Automática</h3>
-                </div>
-                
-                <div className="bg-[#111] border border-white/10 rounded-2xl p-4 mb-6 relative z-10">
-                   <div className="flex justify-between items-center mb-4">
-                      <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Sin mesa (12)</span>
-                      <button className="bg-amber-500 text-slate-900 text-[9px] font-black uppercase px-3 py-1.5 rounded flex items-center shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:scale-105 transition-transform"><Wand2 size={10} className="mr-1"/> Auto-Acomodar</button>
-                   </div>
-                   
-                   <div className="flex gap-4">
-                      <div className="w-1/2 bg-[#1a1a1a] p-3 rounded-xl border border-white/5 cursor-grab shadow-lg">
-                         <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold text-white"><GripVertical size={10} className="inline text-slate-500 mr-1"/> Fam. López</span>
-                            <span className="text-xs font-black text-amber-500 bg-amber-500/10 px-2 rounded">4p</span>
-                         </div>
-                      </div>
-                      <div className="w-1/2 bg-indigo-500/10 p-3 rounded-xl border border-indigo-500/30 border-dashed flex flex-col justify-center items-center">
-                         <span className="text-xs font-bold text-white mb-1">Mesa 5</span>
-                         <span className="text-[10px] text-indigo-400">Libres: 6/10</span>
-                      </div>
-                   </div>
-                </div>
-
-                <p className="text-sm text-slate-300 leading-relaxed font-medium mt-auto relative z-10">
-                  Deja que el sistema piense por ti. El algoritmo <b>asigna a tus invitados automáticamente</b> priorizando <i>nunca separar a las familias</i> y optimizando cada espacio del salón. ¿Prefieres el control manual? Arrastra a los invitados entre mesas, visualiza en tiempo real cuántas sillas quedan libres, si la mesa se llenó, o crea mesas mixtas al gusto.
-                </p>
-              </section>
-
-              {/* 04. Croquis Espacial */}
-              <section className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col hover:shadow-lg transition-shadow">
-                <div className="flex items-center gap-3 mb-6">
-                   <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600"><MapIcon size={20}/></div>
-                   <h3 className="text-2xl font-black tracking-tight text-slate-900">04. Croquis Arquitectónico</h3>
-                </div>
-                
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl h-48 mb-6 relative overflow-hidden flex items-center justify-center p-4">
-                   <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-                   
-                   {/* Mesa Redonda (Estilo Real) */}
-                   <div className="relative w-[72px] h-[72px] flex items-center justify-center mx-4">
-                      {/* Sillas */}
-                      {[0, 36, 72, 108, 144, 180, 216, 252, 288, 324].map((deg, i) => (
-                         <div key={i} className={`absolute w-3 h-3 rounded-full border-[1.5px] ${i < 6 ? 'bg-emerald-400 border-emerald-600' : 'bg-slate-200 border-slate-400'} z-0`} style={{ transform: `rotate(${deg}deg) translate(36px)` }}>
-                           <div className={`absolute w-[45%] h-[115%] right-[-12%] rounded-full ${i < 6 ? 'bg-emerald-600' : 'bg-slate-400'}`}></div>
-                         </div>
-                      ))}
-                      {/* Centro de la mesa */}
-                      <div className="absolute inset-0 m-auto w-14 h-14 bg-white border-[3px] border-slate-400 rounded-full shadow-lg flex items-center justify-center z-10">
-                         <span className="text-[10px] font-black text-slate-500">1</span>
-                      </div>
-                   </div>
-
-                   {/* Mesa Cuadrada Realista */}
-                   <div className="relative w-[72px] h-[72px] flex items-center justify-center mx-4">
-                      {/* Centro de la mesa */}
-                      <div className="absolute inset-0 m-auto w-14 h-14 bg-white border-[3px] border-slate-400 rounded-sm shadow-lg flex items-center justify-center z-10">
-                         <span className="text-[10px] font-black text-slate-500">2</span>
-                      </div>
-                      {/* Sillas (3x4 = 12 total) */}
-                      {/* Top */}
-                      <div className="absolute -top-1 flex gap-1"><div className="w-3 h-3 bg-slate-200 border-[1.5px] border-slate-400 rounded-full"><div className="absolute w-[45%] h-[115%] right-[-12%] rounded-full bg-slate-400"></div></div><div className="w-3 h-3 bg-slate-200 border-[1.5px] border-slate-400 rounded-full"><div className="absolute w-[45%] h-[115%] right-[-12%] rounded-full bg-slate-400"></div></div><div className="w-3 h-3 bg-slate-200 border-[1.5px] border-slate-400 rounded-full"><div className="absolute w-[45%] h-[115%] right-[-12%] rounded-full bg-slate-400"></div></div></div>
-                      {/* Bottom */}
-                      <div className="absolute -bottom-1 flex gap-1"><div className="w-3 h-3 bg-slate-200 border-[1.5px] border-slate-400 rounded-full"><div className="absolute w-[45%] h-[115%] right-[-12%] rounded-full bg-slate-400"></div></div><div className="w-3 h-3 bg-slate-200 border-[1.5px] border-slate-400 rounded-full"><div className="absolute w-[45%] h-[115%] right-[-12%] rounded-full bg-slate-400"></div></div><div className="w-3 h-3 bg-slate-200 border-[1.5px] border-slate-400 rounded-full"><div className="absolute w-[45%] h-[115%] right-[-12%] rounded-full bg-slate-400"></div></div></div>
-                      {/* Left */}
-                      <div className="absolute -left-1.5 h-full flex flex-col justify-center gap-1.5"><div className="w-3 h-3 bg-slate-200 border-[1.5px] border-slate-400 rounded-full"><div className="absolute w-[45%] h-[115%] right-[-12%] rounded-full bg-slate-400"></div></div><div className="w-3 h-3 bg-slate-200 border-[1.5px] border-slate-400 rounded-full"><div className="absolute w-[45%] h-[115%] right-[-12%] rounded-full bg-slate-400"></div></div><div className="w-3 h-3 bg-slate-200 border-[1.5px] border-slate-400 rounded-full"><div className="absolute w-[45%] h-[115%] right-[-12%] rounded-full bg-slate-400"></div></div></div>
-                      {/* Right */}
-                      <div className="absolute -right-1.5 h-full flex flex-col justify-center gap-1.5"><div className="w-3 h-3 bg-slate-200 border-[1.5px] border-slate-400 rounded-full"><div className="absolute w-[45%] h-[115%] right-[-12%] rounded-full bg-slate-400"></div></div><div className="w-3 h-3 bg-slate-200 border-[1.5px] border-slate-400 rounded-full"><div className="absolute w-[45%] h-[115%] right-[-12%] rounded-full bg-slate-400"></div></div><div className="w-3 h-3 bg-slate-200 border-[1.5px] border-slate-400 rounded-full"><div className="absolute w-[45%] h-[115%] right-[-12%] rounded-full bg-slate-400"></div></div></div>
-                   </div>
-                </div>
-
-                <p className="text-sm text-slate-600 leading-relaxed font-medium mt-auto">
-                  Dibuja tu evento con medidas y proporciones exactas. Te permite asignar el número de sillas y acomodar mesas redondas, cuadradas, tablones o serpentinas en un croquis que tú mismo creas. Así tendrás un panorama realista de la capacidad de tu salón o jardín. Todo el acomodo que hagas se refleja visualmente aquí al instante.
-                </p>
-              </section>
-            </div>
-
-            {/* FILA 3: FINANZAS Y ESCÁNER */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              {/* 05. Bóveda Financiera */}
-              <section className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col hover:shadow-lg transition-shadow">
-                <div className="flex items-center gap-3 mb-6">
-                   <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600"><Wallet size={20}/></div>
-                   <h3 className="text-2xl font-black tracking-tight text-slate-900">05. Finanzas y Contratos</h3>
-                </div>
-                
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 mb-6">
-                   <div className="flex justify-between items-start mb-4">
-                      <div>
-                         <p className="font-bold text-slate-900 text-sm">Banquete Gourmet</p>
-                         <p className="text-[9px] text-slate-500 uppercase tracking-widest mt-0.5">Límite de pago: 15 Oct</p>
-                      </div>
-                      <span className="bg-indigo-50 text-indigo-600 border border-indigo-200 px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest flex items-center shadow-sm">
-                        <FileSignature size={10} className="mr-1"/> Contrato.pdf
-                      </span>
-                   </div>
-                   <div className="flex justify-between items-end bg-white p-3 rounded-xl border border-slate-100 shadow-sm mb-3">
-                      <div>
-                        <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-0.5 font-bold">Costo Estimado</p>
-                        <p className="font-medium text-slate-700 text-sm">$85,000.00</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-0.5 font-bold">Por Pagar</p>
-                        <p className="font-black text-amber-600 text-lg">$45,000.00</p>
-                      </div>
-                   </div>
-                   <div className="flex gap-2">
-                      <button className="flex-1 bg-emerald-500 text-white text-[9px] font-black uppercase tracking-widest py-2 rounded-lg shadow-sm hover:scale-105 transition-transform">Abonar</button>
-                      <button className="flex-1 bg-slate-100 text-slate-600 text-[9px] font-black uppercase tracking-widest py-2 rounded-lg border border-slate-200 flex justify-center items-center hover:bg-slate-200 transition-colors"><UploadCloud size={12} className="mr-1"/> Subir Recibo</button>
-                   </div>
-                </div>
-
-                <p className="text-sm text-slate-600 leading-relaxed font-medium mt-auto">
-                  Establece tu presupuesto y lleva el control milimétrico de tus gastos. Gestiona proveedores, sube comprobantes de abonos y <b>contratos en PDF</b>, todo centralizado al alcance de tu dedo. El sistema te genera reportes financieros corporativos al instante para compartir con tu equipo.
-                </p>
-              </section>
-
-              {/* 06. Control de Accesos */}
-              <section className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col hover:shadow-lg transition-shadow">
-                <div className="flex items-center gap-3 mb-6">
-                   <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600"><Scan size={20}/></div>
-                   <h3 className="text-2xl font-black tracking-tight text-slate-900">06. Escáner y Puerta QR</h3>
-                </div>
-                
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl h-48 mb-6 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-                   {/* Generador Pulseras Hint */}
-                   <div className="absolute top-3 left-3 bg-white border border-slate-200 shadow-md px-3 py-1.5 rounded-lg flex items-center gap-2 hover:scale-105 transition-transform cursor-pointer">
-                      <Printer size={12} className="text-indigo-500"/>
-                      <span className="text-[8px] font-black uppercase tracking-widest text-slate-600">Descargar Pulseras PDF</span>
-                   </div>
-
-                   <div className="w-20 h-20 bg-slate-900 rounded-2xl border-4 border-slate-800 shadow-lg relative flex items-center justify-center overflow-hidden mb-3 mt-4">
-                      <div className="absolute w-full h-1 bg-emerald-400 shadow-[0_0_15px_#34d399] animate-pulse"></div>
-                      <QrCode size={28} className="text-white opacity-40"/>
-                   </div>
-                   <div className="bg-emerald-100 border border-emerald-200 text-emerald-700 px-4 py-2 rounded-xl shadow-sm w-full max-w-[220px] text-center">
-                     <p className="text-[8px] font-black uppercase tracking-widest mb-0.5">Acceso Aprobado</p>
-                     <p className="text-sm font-bold truncate">Familia Fuentes (4)</p>
-                     <p className="text-[10px] font-bold opacity-80 mt-0.5">Mesa 5</p>
-                   </div>
-                </div>
-
-                <p className="text-sm text-slate-600 leading-relaxed font-medium mt-auto">
-                  El blindaje definitivo. Las *Hostess* o cadeneros usarán su propio celular como escáner láser. El sistema valida los pases QR al instante, evitando falsificaciones y mostrando la mesa asignada. Además, incluye un <b>generador de pulseras de ingreso</b> (PDF imprimible) para eventos de acceso súper restringido.
-                </p>
-              </section>
-            </div>
-
-            {/* FILA 4: TAREAS Y BOCETADOR */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              {/* 07. Checklist Kanban */}
-              <section className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col hover:shadow-lg transition-shadow">
-                <div className="flex items-center gap-3 mb-6">
-                   <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600"><CheckSquare size={20}/></div>
-                   <h3 className="text-2xl font-black tracking-tight text-slate-900">07. Tablero Táctil (Kanban)</h3>
-                </div>
-                
-                <div className="flex gap-3 mb-6 h-48 overflow-hidden">
-                   <div className="flex-1 bg-slate-50 rounded-xl border border-slate-100 p-2 flex flex-col">
-                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center"><Circle size={10} className="mr-1"/> Hacer</p>
-                     <div className="bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
-                       <p className="font-bold text-[11px] text-slate-800 leading-tight">Prueba de Menú</p>
-                     </div>
-                   </div>
-                   <div className="flex-1 bg-indigo-50/50 rounded-xl border border-indigo-100/50 p-2 flex flex-col">
-                     <p className="text-[9px] font-black text-indigo-500 uppercase tracking-widest mb-2 flex items-center"><Clock size={10} className="mr-1"/> Proceso</p>
-                     <div className="bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm cursor-grab">
-                       <span className="bg-slate-100 text-slate-500 text-[8px] px-1.5 py-0.5 rounded font-black uppercase mb-1 block w-max">Logística</span>
-                       <p className="font-bold text-[11px] text-slate-800 leading-tight">Permisos Alcaldía</p>
-                     </div>
-                   </div>
-                   <div className="flex-1 bg-emerald-50/50 rounded-xl border border-emerald-100/50 p-2 flex flex-col">
-                     <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-2 flex items-center"><CheckCircle2 size={10} className="mr-1"/> Listo</p>
-                   </div>
-                </div>
-
-                <p className="text-sm text-slate-600 leading-relaxed font-medium mt-auto">
-                  Gestiona la planeación paso a paso con una interfaz táctil profesional. Arrastra tus tareas entre columnas visuales. Asigna categorías y fechas límite; el sistema se encarga de priorizarlas y recordarte las tareas urgentes para que tengas control absoluto de los meses previos.
-                </p>
-              </section>
-
-              {/* 08. Bocetador Decorativo */}
-              <section className="bg-slate-900 p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col hover:shadow-pink-500/20 transition-all relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-                <div className="flex items-center gap-3 mb-6 relative z-10">
-                   <div className="w-10 h-10 rounded-xl bg-pink-500/20 flex items-center justify-center text-pink-400"><Palette size={20}/></div>
-                   <h3 className="text-2xl font-black tracking-tight text-white">08. Estudio Decorativo 2D</h3>
-                </div>
-                
-                <div className="bg-[#111] border border-white/10 rounded-2xl h-48 mb-6 relative flex items-end justify-center p-4 overflow-hidden z-10 shadow-inner">
-                   <div className="absolute inset-0 bg-slate-800 opacity-30"></div>
-                   
-                   {/* Vectores Decorativos */}
-                   <div className="relative z-10 flex flex-col items-center">
-                      <div className="absolute -top-6 -right-6 flex gap-1">
-                         <div className="w-6 h-6 rounded-full bg-yellow-400 shadow-md"></div>
-                         <div className="w-8 h-8 rounded-full bg-white shadow-md"></div>
-                         <div className="w-6 h-6 rounded-full bg-yellow-400 shadow-md"></div>
-                      </div>
-                      <div className="w-24 h-32 border-8 border-pink-300 rounded-t-full relative flex items-center justify-center shadow-lg">
-                         <span className="text-pink-300 font-editorial text-xl italic">Ana</span>
-                      </div>
-                   </div>
-
-                   {/* Regla de medición */}
-                   <div className="absolute bottom-4 left-4 right-4 border-b-2 border-dashed border-sky-400 flex justify-between items-end px-2">
-                      <div className="w-1 h-3 bg-sky-400"></div>
-                      <span className="bg-sky-500 text-white text-[8px] font-mono px-2 py-0.5 rounded -mb-2">Escala Exacta: 2.5 Metros</span>
-                      <div className="w-1 h-3 bg-sky-400"></div>
-                   </div>
-                </div>
-
-                <p className="text-sm text-slate-300 leading-relaxed font-medium mt-auto relative z-10">
-                  Crea bocetos espectaculares de tus sets de fotos o mesas de honor. <b>Importa una foto real de tu locación</b>, cálibrala a medidas reales y arrastra vectores arquitectónicos (mamparas, guirnaldas de globos, luces neón, mobiliario lounge). Envíale el diseño en PDF a tu decorador junto a un listado automático de materiales (BOM).
-                </p>
-              </section>
-            </div>
-
-            {/* FILA 5: MINUTO A MINUTO Y PANTALLA GIGANTE */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              {/* 09. Minuto a Minuto */}
-              <section className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col hover:shadow-lg transition-shadow">
-                <div className="flex items-center gap-3 mb-6">
-                   <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white"><Clock size={20}/></div>
-                   <h3 className="text-2xl font-black tracking-tight text-slate-900">09. El Minuto a Minuto</h3>
-                </div>
-                
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 mb-6 relative">
-                   <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-slate-200"></div>
-                   <div className="relative pl-6 mb-4">
-                      <div className="absolute left-[-21px] top-1 w-3 h-3 bg-white border-2 border-indigo-500 rounded-full"></div>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-black text-indigo-600 text-lg">15:00</span>
-                        <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">Hostess</span>
-                      </div>
-                      <p className="font-bold text-slate-800 text-sm">Apertura de Puertas</p>
-                   </div>
-                   <div className="relative pl-6">
-                      <div className="absolute left-[-21px] top-1 w-3 h-3 bg-white border-2 border-indigo-500 rounded-full"></div>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-black text-indigo-600 text-lg">16:30</span>
-                        <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">DJ</span>
-                      </div>
-                      <p className="font-bold text-slate-800 text-sm">Entrada Estelar</p>
-                      <p className="text-[10px] text-slate-500 mt-1 italic bg-white p-1.5 rounded border border-slate-100">Canción: Viva la Vida</p>
-                   </div>
-                </div>
-
-                <p className="text-sm text-slate-600 leading-relaxed font-medium mt-auto">
-                  Sincroniza al staff y a los proveedores con un guion operativo impecable. Crea el itinerario del evento especificando la hora, actividad, responsable, lugar y notas. El sistema te permite generar un <b>Rundown Operativo en PDF</b> al instante para imprimirlo o enviarlo por WhatsApp al equipo la mañana del evento.
-                </p>
-              </section>
-
-              {/* 10. Muro Social y Proyector */}
-              <section className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col hover:shadow-lg transition-shadow">
-                <div className="flex items-center gap-3 mb-6">
-                   <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center text-pink-600"><PlayCircle size={20}/></div>
-                   <h3 className="text-2xl font-black tracking-tight text-slate-900">10. Galería y Muro Social</h3>
-                </div>
-                
-                {/* Mockup Muro Social + Likes/Retos */}
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl h-48 mb-6 p-4 flex gap-4 overflow-x-auto hide-scrollbar relative">
-                   <div className="w-40 bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden flex flex-col shrink-0">
-                      <div className="h-24 bg-slate-200 relative">
-                         <img src="/maricela-estudillo-gonzalez/foto2.jpg" className="w-full h-full object-cover" onError={(e) => e.target.style.display = 'none'} />
-                      </div>
-                      <div className="p-3 flex-1 flex flex-col justify-between">
-                         <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-[10px] text-slate-800">Ana Ruiz</span>
-                            <div className="flex items-center gap-2">
-                               <span className="flex items-center text-[9px] font-bold text-rose-500"><Heart size={10} className="fill-rose-500 mr-0.5"/> 12</span>
-                               <span className="flex items-center text-[9px] font-bold text-slate-400"><MessageCircle size={10} className="mr-0.5"/> 3</span>
-                            </div>
-                         </div>
-                         <p className="text-[9px] text-slate-500 leading-tight">¡Qué gran noche! ✨</p>
-                      </div>
-                   </div>
-
-                   <div className="w-32 bg-amber-50 rounded-2xl shadow-md border border-amber-200 p-3 flex flex-col items-center justify-center text-center shrink-0 relative overflow-hidden">
-                      <div className="absolute inset-0 bg-amber-400/10 animate-pulse"></div>
-                      <span className="text-2xl mb-2 relative z-10">🎲</span>
-                      <p className="text-[10px] font-black text-amber-900 uppercase tracking-wide relative z-10">Misión Secreta</p>
-                      <p className="text-[9px] text-amber-800 mt-1 relative z-10 leading-tight">"Foto brindando con tu mesa 🥂"</p>
-                   </div>
-                </div>
-
-                <p className="text-sm text-slate-600 leading-relaxed font-medium mt-auto">
-                  La invitación web se transforma el día del evento en una red social. Tus invitados suben fotos, reciben <i>likes</i>, comentarios y juegan "Retos Fotográficos". Integramos un enlace especial para <b>proyectores o pantallas gigantes</b> que muestra este contenido en tiempo real (con opción de moderar el contenido previamente).
-                </p>
-              </section>
-            </div>
-
-            {/* FILA 6: PANTALLA GIGANTE (PROYECTOR) */}
-            <section className="bg-slate-900 rounded-3xl p-8 lg:p-12 border border-slate-800 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
-               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-               
-               <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-6 block relative z-10">Proyección en Tiempo Real</span>
-               <h3 className="text-3xl sm:text-4xl font-black text-white mb-8 relative z-10">El Muro Social Inmersivo (Proyector)</h3>
-
-               <div className="w-full max-w-2xl aspect-video bg-black rounded-2xl border-4 border-slate-800 shadow-2xl relative overflow-hidden mb-8 z-10 flex">
-                  {/* Foto gigante con dinámica de likes y comentarios */}
-                  <div className="w-2/3 h-full relative">
-                     <img src="/maricela-estudillo-gonzalez/foto1.jpg" className="w-full h-full object-cover opacity-80" onError={(e) => e.target.style.display = 'none'} />
-                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                     
-                     {/* 🎲 CORAZONES FLOTANTES ESTILO TIKTOK */}
-                     {[10, 20, 30, 40, 50, 60, 70, 80].map((left, i) => (
-                        <div key={i} className="absolute text-rose-500 animate-tiktok-heart opacity-0" style={{ left: `${left}%`, animationDelay: `${i * 0.4}s`, bottom: `${i*10}%` }}>
-                           <Heart size={20} className="fill-rose-500"/>
-                        </div>
-                     ))}
-
-                     {/* 💬 COMENTARIOS FLOTANTES */}
-                     <div className="absolute top-1/4 right-4 bg-white/20 backdrop-blur rounded-full px-3 py-1.5 flex items-center gap-2 shadow-lg animate-in slide-in-from-right fade-in transition-all">
-                        <MessageCircle size={10} className="text-white"/>
-                        <span className="text-white text-[9px] font-bold">¡Guapísimos! ✨</span>
-                     </div>
-                     <div className="absolute top-1/3 left-4 bg-white/10 backdrop-blur rounded-full px-3 py-1.5 flex items-center gap-2 shadow-lg animate-in slide-in-from-left fade-in transition-all Delay-500">
-                        <Heart size={10} className="text-white fill-rose-500"/>
-                        <span className="text-white text-[9px] font-bold">¡Qué noche! 🥂</span>
-                     </div>
-
-                     <div className="absolute bottom-4 left-4 text-left">
-                        <p className="text-white font-bold text-lg drop-shadow-md">Familia López</p>
-                        <p className="text-white/80 text-xs italic">"Disfrutando muchísimo la fiesta de Maricela"</p>
-                     </div>
+            {/* Tarjeta 1: Dashboard y Notificaciones (Reforzar texto) */}
+            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-lg transition-shadow">
+               <div className="flex items-center gap-3 mb-6 relative z-10">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 transition-colors group-hover:bg-indigo-50 group-hover:text-indigo-600"><LayoutDashboard size={20} strokeWidth={1.5}/></div>
+                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Centro de Mando</h3>
+               </div>
+               <div className="grid grid-cols-2 gap-3 mb-5 relative z-10">
+                  <div className="bg-[#FDFBF7] p-3 rounded-xl border border-slate-100 shadow-inner">
+                     <p className="text-[9px] uppercase tracking-wider font-bold text-slate-400 mb-0.5">Asistencia</p>
+                     <p className="text-2xl font-black text-slate-800">185p</p>
                   </div>
-                  {/* Barra lateral */}
-                  <div className="w-1/3 h-full bg-slate-900/90 backdrop-blur border-l border-white/10 p-4 flex flex-col justify-center items-center">
-                     <QrCode size={48} className="text-white/50 mb-3" />
-                     <p className="text-white font-black text-[6px] uppercase tracking-widest text-center leading-tight">¡Sube tu foto!<br/><span className="text-indigo-400">#NuestraBoda</span></p>
+                  <div className="bg-[#FDFBF7] p-3 rounded-xl border border-slate-100 shadow-inner flex flex-col justify-end">
+                     <p className="text-[9px] uppercase tracking-wider font-bold text-slate-400 mb-0.5">Presupuesto</p>
+                     <p className="text-lg font-black text-[#D4AF37]">$150k</p>
                   </div>
                </div>
+               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto relative z-10 pt-4 border-t border-slate-100">Un vistazo rápido te dice exactamente cómo va la confirmación, ocupación de mesas, tareas y salud financiera. Incluye <b>notificaciones inteligentes</b> en tiempo real.</p>
+            </section>
 
-               <p className="text-sm sm:text-base text-slate-400 leading-relaxed font-light max-w-3xl relative z-10">
-                 Integramos un modo especial diseñado para conectarse a las pantallas o proyectores del salón. Las fotografías que tus invitados suban desde sus celulares durante la fiesta, aparecerán en tiempo real en las pantallas del evento, creando una experiencia interactiva majestuosa. Los likes (corazones) y comentarios flotando sobre la pantalla harán que la interacción se sienta vibrante y en vivo, multiplicando los recuerdos de tu noche. Todo cuenta con un sistema de moderación opcional para tu total tranquilidad.
-               </p>
+            {/* Tarjeta 2: Directorio Inteligente (Texto y Mock corregido) */}
+            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
+               <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-rose-50 group-hover:text-rose-600"><Users size={20} strokeWidth={1.5}/></div>
+                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Directorio Inteligente</h3>
+               </div>
+               <div className="bg-[#FDFBF7] p-4 rounded-xl border border-slate-100 mb-5 text-sm flex-1 flex flex-col justify-between">
+                  <div>
+                     <span className="font-bold text-slate-800 block">Familia Torres <span className="bg-rose-100 text-rose-600 px-1 rounded text-[8px] uppercase tracking-widest ml-1">Novia</span></span>
+                     <span className="text-[10px] text-slate-500 mt-1 flex items-center gap-2">Mesa 5 <span className="text-slate-300">|</span> PIN: <span className="font-mono bg-slate-200 px-1 rounded">7A9X</span></span>
+                  </div>
+                  <span className="bg-emerald-100 text-emerald-700 text-[9px] px-2 py-0.5 rounded font-black uppercase mt-3 w-max">Confirmado</span>
+               </div>
+               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100"><b>Los invitados se encargan de llenar sus datos</b> cuando confirman. Activa el "Modo Boda" para separar por Novia/Novio. Visualiza mesa, PIN y estatus en tiempo real.</p>
+            </section>
+
+            {/* Tarjeta 3: Gestión de Mesas (Reforzar texto) */}
+            <section className="flex flex-col bg-slate-900 p-7 rounded-3xl shadow-2xl relative overflow-hidden text-slate-200 hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
+               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
+               <div className="flex items-center gap-3 mb-6 relative z-10">
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[#D4AF37]"><Wand2 size={20} strokeWidth={1.5}/></div>
+                  <h3 className="text-lg font-editorial font-bold text-white tracking-tight">Gestión y Auto-Acomodo</h3>
+               </div>
+               <div className="relative mb-5 z-10 h-28 flex items-center justify-center">
+                  <button className="bg-[#D4AF37] text-slate-900 text-[10px] font-black uppercase px-4 py-2 rounded flex items-center shadow-lg transform hover:scale-105 active:scale-95 transition-transform"><Wand2 size={12} className="mr-1.5"/> Auto-Acomodar (Libres: 6/10)</button>
+               </div>
+               <p className="text-slate-300 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-white/10 relative z-10">Nuestro algoritmo asigna invitados automáticamente priorizando <i>nunca separar a las familias</i> y optimizando espacios. centralizado. centralizado. centralizado. centralizado. centralizado. Arrastra y suelta familias o invitados individuales a sus mesas.</p>
+            </section>
+
+            {/* Tarjeta 4: Croquis Arquitectónico (REVISADO) */}
+            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
+               <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-sky-50 group-hover:text-sky-600"><MapIcon size={20} strokeWidth={1.5}/></div>
+                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Croquis Arquitectónico</h3>
+               </div>
+               <div className="relative mb-5 flex-1 flex items-center justify-center overflow-hidden">
+                  {/* Mesa Redonda Detallada 1 */}
+                  <div className="relative w-[72px] h-[72px] flex items-center justify-center mx-4">
+                     {[0, 36, 72, 108, 144, 180, 216, 252, 288, 324].map((deg, i) => (
+                        <div key={i} className={`absolute w-3 h-3 rounded-full border-[1.5px] ${i < 6 ? 'bg-emerald-400 border-emerald-600' : 'bg-slate-200 border-slate-400'} z-0`} style={{ transform: `rotate(${deg}deg) translate(36px)` }}>
+                          <div className={`absolute w-[45%] h-[115%] right-[-12%] rounded-full ${i < 6 ? 'bg-emerald-600' : 'bg-slate-400'}`}></div>
+                        </div>
+                     ))}
+                     <div className="absolute inset-0 m-auto w-14 h-14 bg-white border-[3px] border-slate-400 rounded-full shadow-lg flex items-center justify-center z-10">
+                        <span className="text-[10px] font-black text-slate-500">1</span>
+                     </div>
+                  </div>
+                  {/* Mesa Redonda Detallada 2 */}
+                  <div className="relative w-[72px] h-[72px] flex items-center justify-center mx-4">
+                     {[0, 36, 72, 108, 144, 180, 216, 252, 288, 324].map((deg, i) => (
+                        <div key={i} className={`absolute w-3 h-3 rounded-full border-[1.5px] ${i < 9 ? 'bg-emerald-400 border-emerald-600' : 'bg-slate-200 border-slate-400'} z-0`} style={{ transform: `rotate(${deg}deg) translate(36px)` }}>
+                          <div className={`absolute w-[45%] h-[115%] right-[-12%] rounded-full ${i < 9 ? 'bg-emerald-600' : 'bg-slate-400'}`}></div>
+                        </div>
+                     ))}
+                     <div className="absolute inset-0 m-auto w-14 h-14 bg-white border-[3px] border-slate-400 rounded-full shadow-lg flex items-center justify-center z-10">
+                        <span className="text-[10px] font-black text-slate-500">2</span>
+                     </div>
+                  </div>
+               </div>
+               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100">Te permite asignar número de sillas y acomodar mesas redondas detalladas con los patrones de ocupación correctos de nuestro motor. Todo con medidas estándar y croquis que tú mismo creas.</p>
+            </section>
+
+            {/* Tarjeta 5: Bóveda Financiera (Reforzar texto) */}
+            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
+               <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-amber-50 group-hover:text-amber-600"><Wallet size={20} strokeWidth={1.5}/></div>
+                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Finanzas y Contratos</h3>
+               </div>
+               <div className="flex justify-between items-start text-sm mb-5 flex-1 bg-[#FDFBF7] p-4 rounded-xl shadow-inner">
+                  <div>
+                     <span className="font-bold text-slate-800">Banquete</span>
+                     <span className="text-[10px] text-rose-500 block uppercase font-bold">Límite: 15 Oct</span>
+                  </div>
+                  <div className="text-right">
+                     <span className="text-[11px] text-slate-400 block">Total</span>
+                     <span className="font-bold text-slate-800">$85,000.00</span>
+                  </div>
+               </div>
+               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100">Establece tu presupuesto y lleva el control milimétrico. Gestiona proveedores, sube comprobantes de abonos y <b>contratos en PDF</b>, todo centralizado al alcance de tu dedo.</p>
+            </section>
+
+            {/* Tarjeta 6: Control de Accesos (QR Pulseras) */}
+            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
+               <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-emerald-50 group-hover:text-emerald-600"><Scan size={20} strokeWidth={1.5}/></div>
+                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Escáner y Puerta QR</h3>
+               </div>
+               <div className="bg-[#FDFBF7] p-4 rounded-xl border border-slate-100 mb-5 relative flex-1 flex flex-col items-center justify-center gap-2 text-center text-[10px] font-bold text-slate-600">
+                  <Printer size={16} className="text-indigo-500 mb-1"/>
+                  Descargar PDF Pulseras VIP
+                  <span className="absolute inset-0 bg-white/40 group-hover:opacity-0 opacity-100 transition-opacity"></span>
+               </div>
+               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100">Validación instantánea con celular para *Hostess*. Incluye un generador automático que crea un PDF listo para imprimir con QRs individuales para <b>pulseras VIP físicas</b>.</p>
+            </section>
+
+            {/* Tarjeta 7: Checklist Kanban */}
+            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
+               <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-rose-50 group-hover:text-rose-600"><CheckSquare size={20} strokeWidth={1.5}/></div>
+                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Tablero Kanban</h3>
+               </div>
+               <div className="flex gap-2 flex-1 mb-5">
+                  <div className="bg-[#FDFBF7] p-3 rounded-xl border border-slate-100 text-[9px] font-black uppercase text-slate-400 w-1/3">Hacer</div>
+                  <div className="bg-white p-3 rounded-xl border border-rose-200 text-[10px] font-black uppercase text-rose-500 w-2/3 shadow-md transform rotate-2">B Mobiliario</div>
+               </div>
+               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100">Gestiona la planeación paso a paso con una interfaz táctil profesional. centralizado. centralizado. centralizado. centralizado. centralizado. centralizado. Arrastra tus tareas entre "Por Hacer", "En Proceso" y "Listo".</p>
+            </section>
+
+            {/* Tarjeta 8: Estudio Decorativo (REVISADO) */}
+            <section className="flex flex-col bg-slate-900 p-7 rounded-3xl shadow-2xl relative overflow-hidden text-slate-200 hover:shadow-[0_0_20px_rgba(236,72,153,0.3)] transition-all">
+               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
+               <div className="flex items-center gap-3 mb-6 relative z-10">
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-pink-400"><Palette size={20} strokeWidth={1.5}/></div>
+                  <h3 className="text-lg font-editorial font-bold text-white tracking-tight">Estudio Decorativo 2D</h3>
+               </div>
+               <div className="relative mb-5 z-10 h-28 flex items-center justify-center text-amber-300 font-editorial italic text-2xl drop-shadow-lg">Bocetador VIP neón</div>
+               <p className="text-slate-300 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-white/10 relative z-10">Boceta tus sets de fotos o mesas de honor. <b>Importa una foto real de tu locación</b>, escálala a medidas reales, y arrastra vectores arquitectónicos. Genera un reporte de materiales (BOM).</p>
+            </section>
+
+            {/* Tarjeta 9: Minuto a Minuto */}
+            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
+               <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-slate-800 group-hover:text-white"><Clock size={20} strokeWidth={1.5}/></div>
+                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">El Minuto a Minuto</h3>
+               </div>
+               <div className="relative flex-1 mb-5 flex flex-col justify-center gap-2 text-slate-500 font-light text-xs pl-3 border-l-2 border-slate-200">
+                  <span className="font-black text-indigo-600 text-sm">15:00</span> apertura puertas Hostess
+                  <span className="font-black text-slate-800 text-base">16:30 <span className="text-slate-500 font-normal">entrada VIP DJ</span></span>
+               </div>
+               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100">Sincroniza al staff y a los proveedores con un guion operativo perfecto. centralizado. centralizado. centralizado. centralizado. centralizado. centralizado. centralizado. Genera un Rundown Operativo en PDF al instante.</p>
+            </section>
+
+            {/* Tarjeta 10: Galería Móvil y Retos (Dinamizar Likes y Misiones Secreta) */}
+            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
+               <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-pink-50 group-hover:text-pink-600"><Smartphone size={20} strokeWidth={1.5}/></div>
+                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Interactividad Móvil</h3>
+               </div>
+               <div className="bg-[#FDFBF7] p-4 rounded-xl mb-5 flex gap-3 overflow-x-auto hide-scrollbar relative">
+                   <div className="w-20 h-24 bg-slate-900 border-2 border-rose-500 rounded-lg flex flex-col justify-end p-2 relative shrink-0">
+                      <img src="/maricela-estudillo-gonzalez/foto1.jpg" className="w-full h-full object-cover absolute inset-0 opacity-50" onError={(e) => e.target.style.display = 'none'} />
+                      <div className="flex justify-between text-white text-[9px] relative z-10"><span className="flex items-center"><Heart size={8} className="text-rose-500 fill-rose-500 mr-0.5"/> 12</span> <span>Maricela estudi...</span></div>
+                   </div>
+                   <div className="absolute -bottom-6 -right-6 text-rose-500 animate-tiktok-heart opacity-60"><Heart size={24}/></div>
+               </div>
+               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100">La invitación web cobra vida. Los invitados suben fotos, reciben <i>likes</i>, comentarios y juegan divertidas <b>"Misiones Secretas"</b>. centralizado. centralizado. centralizado. centralizado. centralizado. centralizado.</p>
             </section>
 
           </div>
+
+          {/* 🔴 NUEVO BLOQUE FINAL: PROYECTOR DILATADO (TARJETA 09 RESTORED) */}
+          <section className="mt-20 border-t border-[#D4AF37]/30 pt-16 lg:pt-20 bg-slate-900 rounded-3xl p-8 lg:p-12 relative overflow-hidden shadow-2xl">
+             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
+             
+             <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-6 block relative z-10">Entretenimiento en Tiempo Real</span>
+             <h3 className="text-3xl sm:text-4xl lg:text-5xl font-editorial font-black tracking-tighter text-white mb-10 relative z-10">El Muro Social (Proyector Salón)</h3>
+
+             <div className="w-full max-w-2xl aspect-video bg-black rounded-2xl border-4 border-slate-800 shadow-2xl relative overflow-hidden mb-8 z-10 flex">
+                {/* Foto gigante con dinámica de likes y comentarios */}
+                <div className="w-2/3 h-full relative">
+                   <img src="/maricela-estudillo-gonzalez/foto1.jpg" className="w-full h-full object-cover opacity-80" onError={(e) => e.target.style.display = 'none'} />
+                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                   
+                   {/* 🎲 CORAZONES FLOTANTES ESTILO TIKTOK */}
+                   {[10, 20, 30, 40, 50, 60, 70, 80].map((left, i) => (
+                      <div key={i} className="absolute text-rose-500 animate-tiktok-heart opacity-0" style={{ left: `${left}%`, animationDelay: `${i * 0.4}s`, bottom: `${i*10}%` }}>
+                         <Heart size={20} className="fill-rose-500"/>
+                      </div>
+                   ))}
+
+                   {/* 💬 COMENTARIOS FLOTANTES */}
+                   <div className="absolute top-1/4 right-4 bg-white/20 backdrop-blur rounded-full px-3 py-1.5 flex items-center gap-2 shadow-lg animate-in slide-in-from-right fade-in transition-all">
+                      <MessageCircle size={10} className="text-white"/>
+                      <span className="text-white text-[9px] font-bold">¡Guapísimos! ✨</span>
+                   </div>
+                   <div className="absolute top-1/3 left-4 bg-white/10 backdrop-blur rounded-full px-3 py-1.5 flex items-center gap-2 shadow-lg animate-in slide-in-from-left fade-in transition-all Delay-500">
+                      <Heart size={10} className="text-white fill-rose-500"/>
+                      <span className="text-white text-[9px] font-bold">¡Qué noche! 🥂</span>
+                   </div>
+
+                   <div className="absolute bottom-4 left-4 text-left pr-20">
+                      <p className="text-white font-editorial font-bold text-2xl drop-shadow-md">Familia LópezFuentes</p>
+                      <p className="text-white/80 font-serif italic text-xs">"Disfrutando muchísimo la fiesta, felicidades Maricela"</p>
+                   </div>
+                </div>
+                {/* Barra lateral */}
+                <div className="w-1/3 h-full bg-slate-900/90 backdrop-blur border-l border-white/10 p-5 flex flex-col justify-center items-center">
+                   <QrCode size={56} className="text-white/50 mb-3" strokeWidth={1}/>
+                   <p className="text-white font-editorial italic text-base leading-tight text-center">Sube tu foto</p>
+                   <p className="text-[#D4AF37] font-black text-[9px] uppercase tracking-widest mt-1">#NuestraFiestaVIP</p>
+                </div>
+             </div>
+
+             <p className="text-sm sm:text-base text-slate-400 leading-relaxed font-light max-w-3xl relative z-10">
+               Integramos una vista especial diseñada para conectarse a las pantallas gigantes del salón. centralizado. centralizado. centralizado. centralizado. centralizado. centralizado. centralizado. Las fotografías, <b>likes</b> y comentarios que tus invitados suban desde sus celulares aparecerán en tiempo real, creando una experiencia interactiva majestuosa, vibrante y divertida. Todo con opción de moderación previa.
+             </p>
+          </section>
+
+          <footer className="mt-20 border-t border-[#D4AF37]/30 pt-12 flex flex-col md:flex-row justify-between items-center text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-colors gap-4 text-center md:text-left pb-10">
+            <span>Baulia Technologies Inc.</span>
+            <span className="text-[#D4AF37]">Software Premium B2B & B2C</span>
+          </footer>
 
         </main>
       </div>
