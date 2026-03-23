@@ -12752,22 +12752,31 @@ const ShowcaseSimulatorView = () => {
 
         <div className="flex-1 flex items-center justify-center p-6 lg:p-10 z-10 relative">
            
-           <div className="relative w-[320px] h-[650px] bg-black rounded-[3rem] border-[8px] border-slate-800 shadow-[0_0_80px_rgba(0,0,0,0.6)] flex-shrink-0">
+           {/* iPhone Mockup Físico Rediseñado */}
+           <div className="relative w-[328px] h-[691px] bg-black rounded-[3rem] border-[8px] border-slate-800 shadow-[0_0_80px_rgba(0,0,0,0.6)] flex-shrink-0">
              
+             {/* Isla Dinámica */}
              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-20 flex justify-end items-center pr-2">
                <div className="w-2 h-2 rounded-full bg-slate-800/80 mr-1"></div>
                <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
              </div>
              
-             {/* LA MAGIA: El contenedor que recorta, ahora con un iframe 100% nativo y responsivo */}
-             <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-[#111] relative flex items-center justify-center">
+             {/* LA MAGIA: Contenedor con escala matemática perfecta (0.8) */}
+             <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-[#111] relative">
                <iframe 
                  src={currentDemo.url} 
-                 className="w-full h-full border-0"
+                 className="absolute top-0 left-0 border-0"
                  title={`Demo ${currentDemo.label}`}
+                 style={{ 
+                    width: '390px', 
+                    height: '844px', 
+                    transform: 'scale(0.8)', 
+                    transformOrigin: 'top left' 
+                 }}
                ></iframe>
              </div>
              
+             {/* Botones Físicos Simulados */}
              <div className="absolute top-24 -left-[11px] w-1.5 h-8 bg-slate-700 rounded-l-md"></div>
              <div className="absolute top-36 -left-[11px] w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
              <div className="absolute top-52 -left-[11px] w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
