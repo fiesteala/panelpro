@@ -2281,55 +2281,56 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 flex-1 overflow-hidden z-10 relative">
+      {/* 🔴 CONTENEDOR PRINCIPAL: PANELES DE MESAS E INVITADOS */}
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 flex-1 overflow-hidden z-10 relative">
         
-        {/* PANEL IZQUIERDO: INVITADOS SIN MESA */}
+        {/* PANEL: INVITADOS SIN MESA (Carrusel horizontal en móvil / Columna en PC) */}
         <div 
-          className={`w-full lg:w-72 bg-white dark:bg-[#0a0a0a] rounded-3xl border flex flex-col transition-all duration-300 shadow-sm dark:shadow-2xl ${guestSeleccionado ? 'border-indigo-400 dark:border-amber-500 ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10'}`}
+          className={`w-full lg:w-72 bg-white dark:bg-[#0a0a0a] rounded-2xl lg:rounded-3xl border flex flex-col transition-all duration-300 shadow-sm dark:shadow-2xl ${guestSeleccionado ? 'border-indigo-400 dark:border-amber-500 ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10'} max-h-[30vh] lg:max-h-none shrink-0`}
           onDragOver={handleDragOver}
           onDrop={(e) => handleDrop(e, null)}
           onClick={() => { if(guestSeleccionado) moverInvitado(guestSeleccionado.id, null); }}
         >
-          <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] rounded-t-3xl transition-colors">
-            <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-sm uppercase tracking-widest"><Users size={16} className="mr-2 text-indigo-500 dark:text-amber-500"/> No Asignados <span className="ml-auto bg-slate-200 dark:bg-white/10 px-2 py-0.5 rounded-md">{invitadosSinMesa.length}</span></h3>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-2 font-medium">Arrastra un invitado o dale clic para moverlo.</p>
+          <div className="p-3 lg:p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] rounded-t-2xl lg:rounded-t-3xl transition-colors shrink-0">
+            <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-xs lg:text-sm uppercase tracking-widest"><Users size={16} className="mr-2 text-indigo-500 dark:text-amber-500"/> No Asignados <span className="ml-auto bg-slate-200 dark:bg-white/10 px-2 py-0.5 rounded-md">{invitadosSinMesa.length}</span></h3>
+            <p className="text-[9px] lg:text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 font-medium leading-tight">Toca un invitado para seleccionarlo, luego toca la mesa.</p>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-4 space-y-2.5 custom-scrollbar bg-white/50 dark:bg-transparent">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-4 flex flex-row lg:flex-col gap-2.5 custom-scrollbar bg-slate-50/50 dark:bg-transparent flex-wrap lg:flex-nowrap content-start">
             {invitadosSinMesa.map(g => (
               <div 
                 key={g.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, g.id)}
                 onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
-                className={`p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all shadow-sm ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 border-indigo-700 dark:border-amber-400 text-white dark:text-slate-900 transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'}`}
+                className={`px-3 py-2 lg:p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all shadow-sm w-auto lg:w-full flex-grow-0 ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 border-indigo-700 dark:border-amber-400 text-white dark:text-slate-900 transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'}`}
               >
-                <div className="flex items-center truncate">
-                  <GripVertical size={14} className={`mr-2.5 ${guestSeleccionado?.id === g.id ? 'text-white/50 dark:text-slate-900/50' : 'text-slate-400 cursor-grab'}`} />
-                  <span className="font-bold text-sm truncate">{g.name}</span>
+                <div className="flex items-center truncate max-w-[140px] lg:max-w-none">
+                  <GripVertical size={14} className={`mr-2 hidden lg:block ${guestSeleccionado?.id === g.id ? 'text-white/50 dark:text-slate-900/50' : 'text-slate-400 cursor-grab'}`} />
+                  <span className="font-bold text-xs lg:text-sm truncate">{g.name}</span>
                 </div>
-                <span className={`text-[10px] font-black px-2.5 py-1 rounded-md ${guestSeleccionado?.id === g.id ? 'bg-white/20 dark:bg-slate-900/20 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5'}`}>
+                <span className={`text-[9px] lg:text-[10px] font-black px-2 py-1 rounded-md ml-3 ${guestSeleccionado?.id === g.id ? 'bg-white/20 dark:bg-slate-900/20 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5'}`}>
                   {g.passes}p
                 </span>
               </div>
             ))}
             {invitadosSinMesa.length === 0 && (
-              <div className="text-center p-8 text-slate-400 dark:text-slate-500 text-sm border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl font-medium mt-4">Todos están asignados.</div>
+              <div className="text-center p-4 lg:p-8 text-slate-400 dark:text-slate-500 text-xs lg:text-sm border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl font-medium w-full mt-2">Todos están asignados.</div>
             )}
           </div>
         </div>
 
         {/* PANEL DERECHO: GRID DE MESAS */}
-        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto custom-scrollbar lg:pr-2 pb-6">
           {safeTables.length === 0 ? (
-            <div className="text-center py-20 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10 h-full flex flex-col items-center justify-center transition-colors">
-              <LayoutGrid size={48} className="mx-auto mb-4 text-slate-300 dark:text-slate-600"/>
-              <h3 className="text-2xl font-editorial font-bold text-slate-800 dark:text-white mb-2">Aún no hay mesas creadas</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 max-w-md">Puedes agregarlas manualmente o usar el asistente mágico para generarlas por ti.</p>
-              <button onClick={() => setIsAddModalOpen(true)} className="px-6 py-3 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-500 font-black uppercase tracking-widest text-[10px] rounded-xl border border-indigo-200 dark:border-amber-500/20 hover:bg-indigo-100 dark:hover:bg-amber-500/20 transition-colors">Crear Mesas Manual</button>
+            <div className="text-center py-16 lg:py-20 bg-white dark:bg-[#0a0a0a] rounded-2xl lg:rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10 h-full flex flex-col items-center justify-center transition-colors px-4">
+              <LayoutGrid size={40} className="mx-auto mb-4 text-slate-300 dark:text-slate-600"/>
+              <h3 className="text-xl lg:text-2xl font-editorial font-bold text-slate-800 dark:text-white mb-2">Aún no hay mesas</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-xs lg:text-sm mb-6 max-w-md">Puedes agregarlas manualmente o usar el asistente mágico.</p>
+              <button onClick={() => setIsAddModalOpen(true)} className="px-6 py-3 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-500 font-black uppercase tracking-widest text-[10px] rounded-xl border border-indigo-200 dark:border-amber-500/20 hover:bg-indigo-100 transition-colors">Crear Mesas</button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 pb-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5">
               {safeTables.map(table => {
                 const assignedGuests = safeGuests.filter(g => g.tableId === table.id);
                 const usedChairs = assignedGuests.reduce((sum, g) => sum + g.passes, 0);
@@ -2341,46 +2342,46 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, table.id)}
                     onClick={() => handleTableClick(table.id)}
-                    className={`bg-white dark:bg-[#111] p-5 rounded-3xl border shadow-sm dark:shadow-xl flex flex-col relative group transition-all duration-300 ${guestSeleccionado && !isFull ? 'border-indigo-400 dark:border-amber-500 bg-indigo-50/50 dark:bg-amber-500/10 cursor-pointer shadow-md dark:shadow-[0_0_20px_rgba(245,158,11,0.15)] ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10 hover:border-indigo-200 dark:hover:border-white/30'}`}
+                    className={`bg-white dark:bg-[#111] p-4 lg:p-5 rounded-2xl lg:rounded-3xl border shadow-sm flex flex-col relative group transition-all duration-300 ${guestSeleccionado && !isFull ? 'border-indigo-400 dark:border-amber-500 bg-indigo-50/50 dark:bg-amber-500/10 cursor-pointer shadow-md ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10 hover:border-indigo-200 dark:hover:border-white/30'}`}
                   >
-                    <div className="absolute top-4 right-4 flex opacity-0 group-hover:opacity-100 transition-opacity space-x-1.5 z-50">
-                       <button onClick={(e) => { e.stopPropagation(); setTableToEdit(table); setCurrentConfig(table.configDetalle || configActual); setCreationMode('edit'); setIsAddModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-indigo-600 dark:text-slate-500 dark:hover:text-white bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors" title="Editar Configuración"><Edit2 size={14}/></button>
-                       <button onClick={(e) => { e.stopPropagation(); emptyTable(table.id); }} className="p-1.5 text-slate-400 hover:text-amber-500 dark:text-slate-500 dark:hover:text-amber-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors" title="Vaciar Sillas"><Users size={14}/></button>
-                       <button onClick={(e) => { e.stopPropagation(); deleteTable(table.id); }} className="p-1.5 text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors" title="Eliminar Mesa"><Trash2 size={14}/></button>
+                    <div className="absolute top-3 lg:top-4 right-3 lg:right-4 flex opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity space-x-1.5 z-50">
+                       <button onClick={(e) => { e.stopPropagation(); setTableToEdit(table); setCurrentConfig(table.configDetalle || configActual); setCreationMode('edit'); setIsAddModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-indigo-600 dark:text-slate-500 dark:hover:text-white bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors"><Edit2 size={14}/></button>
+                       <button onClick={(e) => { e.stopPropagation(); emptyTable(table.id); }} className="p-1.5 text-slate-400 hover:text-amber-500 dark:text-slate-500 dark:hover:text-amber-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors"><Users size={14}/></button>
+                       <button onClick={(e) => { e.stopPropagation(); deleteTable(table.id); }} className="p-1.5 text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors"><Trash2 size={14}/></button>
                     </div>
                     
                     <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mr-3 border border-slate-100 dark:border-white/10 shrink-0">
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mr-3 border border-slate-100 dark:border-white/10 shrink-0">
                         {getTipoIcon(table.tipo, table.configDetalle?.formaPersonalizada)}
                       </div>
-                      <div className="flex-1 min-w-0 pr-20">
-                        <h4 className="font-bold text-slate-800 dark:text-white text-lg leading-tight truncate">{table.name}</h4>
-                        <p className="text-[9px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-widest mt-0.5">
+                      <div className="flex-1 min-w-0 pr-24 lg:pr-20">
+                        <h4 className="font-bold text-slate-800 dark:text-white text-base lg:text-lg leading-tight truncate">{table.name}</h4>
+                        <p className="text-[8px] lg:text-[9px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-widest mt-0.5">
                            {table.tipo === 'personalizada' ? table.configDetalle?.formaPersonalizada || 'Libre' : table.tipo}
                         </p>
                       </div>
                     </div>
 
-                    <div className="mb-4 bg-slate-50 dark:bg-[#050505] rounded-xl p-3 border border-slate-100 dark:border-white/5 flex items-center justify-between transition-colors">
+                    <div className="mb-4 bg-slate-50 dark:bg-[#050505] rounded-xl p-2.5 lg:p-3 border border-slate-100 dark:border-white/5 flex items-center justify-between transition-colors">
                       <div className="flex items-center text-xs font-bold text-slate-700 dark:text-slate-300">
                         <Users size={14} className="mr-2 text-indigo-500 dark:text-amber-500"/> {usedChairs} / {table.capacity}
                       </div>
-                      {isFull ? <span className="text-[9px] bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 px-2.5 py-1 rounded-md font-black uppercase tracking-widest border border-rose-200 dark:border-rose-500/20">Llena</span> : <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Suelta aquí</span>}
+                      {isFull ? <span className="text-[8px] lg:text-[9px] bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 px-2 py-1 rounded-md font-black uppercase tracking-widest border border-rose-200 dark:border-rose-500/20">Llena</span> : <span className={`text-[8px] lg:text-[9px] font-bold uppercase tracking-widest ${guestSeleccionado ? 'text-indigo-600 dark:text-amber-500 animate-pulse' : 'text-slate-400'}`}>{guestSeleccionado ? 'Toca para soltar' : 'Sillas libres'}</span>}
                     </div>
 
-                    <div className="mt-auto border-t border-slate-100 dark:border-white/5 pt-3 min-h-[70px] flex flex-wrap gap-1.5 content-start transition-colors">
+                    <div className="mt-auto border-t border-slate-100 dark:border-white/5 pt-3 min-h-[60px] flex flex-wrap gap-1.5 content-start transition-colors">
                       {assignedGuests.map(g => (
                         <div 
                           key={g.id} 
                           draggable
                           onDragStart={(e) => handleDragStart(e, g.id)}
                           onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
-                          className={`text-[10px] px-2.5 py-1.5 rounded-lg font-bold truncate flex items-center cursor-grab shadow-sm border transition-colors ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-700 dark:border-amber-400' : 'bg-white dark:bg-[#0a0a0a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50'}`}
+                          className={`text-[9px] lg:text-[10px] px-2.5 py-1.5 rounded-lg font-bold truncate flex items-center cursor-pointer lg:cursor-grab shadow-sm border transition-colors max-w-full ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-700 dark:border-amber-400' : 'bg-white dark:bg-[#0a0a0a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-indigo-300'}`}
                         >
-                          {g.name} <span className="ml-1.5 opacity-50 font-black">({g.passes})</span>
+                          <span className="truncate">{g.name}</span> <span className="ml-1.5 opacity-50 font-black shrink-0">({g.passes})</span>
                         </div>
                       ))}
-                      {assignedGuests.length === 0 && <span className="text-xs text-slate-300 dark:text-slate-600 font-medium italic w-full text-center mt-3">Mesa vacía</span>}
+                      {assignedGuests.length === 0 && <span className="text-[10px] lg:text-xs text-slate-300 dark:text-slate-600 font-medium italic w-full text-center mt-2">Mesa vacía</span>}
                     </div>
                   </div>
                 );
@@ -5382,7 +5383,7 @@ const ChecklistView = ({ tareas, addNotification }) => {
       <div key={tarea.id} className={`bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border shadow-sm mb-3 transition-all hover:shadow-md hover:scale-[1.01] group ${overdue ? 'border-rose-300 dark:border-rose-500/50' : 'border-slate-200 dark:border-white/10'}`}>
         <div className="flex justify-between items-start mb-2">
           <span className="px-2.5 py-1 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-transparent dark:border-white/5 rounded-md text-[9px] font-black uppercase tracking-widest">{tarea.categoria}</span>
-          <button onClick={() => eliminarTarea(tarea.id)} className="text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"><X size={14}/></button>
+          <button onClick={() => eliminarTarea(tarea.id)} className="text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-500 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity p-1"><X size={14}/></button>
         </div>
         
         <h4 className={`font-bold text-sm mb-3 leading-snug ${tarea.estado === 'listo' ? 'text-slate-400 dark:text-slate-600 line-through' : 'text-slate-800 dark:text-white'}`}>
@@ -5440,9 +5441,11 @@ const ChecklistView = ({ tareas, addNotification }) => {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col md:flex-row gap-6 overflow-hidden">
+      {/* 🔴 CONTENEDOR CON SWIPE HORIZONTAL PARA MÓVILES */}
+      <div className="flex-1 flex md:flex-row gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory custom-scrollbar pb-4 md:pb-0">
+        
         {/* COLUMNA 1: POR HACER */}
-        <div className="flex-1 flex flex-col bg-slate-50/80 dark:bg-white/[0.02] backdrop-blur-sm rounded-[2rem] border border-slate-200/50 dark:border-white/5 p-4 transition-colors shadow-inner">
+        <div className="w-[85vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-slate-50/80 dark:bg-white/[0.02] backdrop-blur-sm rounded-[2rem] border border-slate-200/50 dark:border-white/5 p-4 transition-colors shadow-inner">
           <div className="flex items-center justify-between mb-5 px-3 pt-2">
             <h3 className="font-black text-slate-700 dark:text-slate-300 flex items-center text-xs uppercase tracking-widest"><Circle size={14} className="mr-2 text-slate-400 dark:text-slate-500"/> Por Hacer</h3>
             <span className="bg-white dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400 text-[10px] font-black px-2.5 py-1 rounded-md border border-slate-200 dark:border-white/10 shadow-sm">{pendientes.length}</span>
@@ -5454,7 +5457,7 @@ const ChecklistView = ({ tareas, addNotification }) => {
         </div>
 
         {/* COLUMNA 2: EN PROCESO */}
-        <div className="flex-1 flex flex-col bg-indigo-50/50 dark:bg-indigo-500/5 backdrop-blur-sm rounded-[2rem] border border-indigo-100/50 dark:border-indigo-500/10 p-4 transition-colors shadow-inner">
+        <div className="w-[85vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-indigo-50/50 dark:bg-indigo-500/5 backdrop-blur-sm rounded-[2rem] border border-indigo-100/50 dark:border-indigo-500/10 p-4 transition-colors shadow-inner">
           <div className="flex items-center justify-between mb-5 px-3 pt-2">
             <h3 className="font-black text-indigo-800 dark:text-indigo-400 flex items-center text-xs uppercase tracking-widest"><Clock size={14} className="mr-2 text-indigo-500 dark:text-indigo-500"/> En Proceso</h3>
             <span className="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{enProceso.length}</span>
@@ -5466,7 +5469,7 @@ const ChecklistView = ({ tareas, addNotification }) => {
         </div>
 
         {/* COLUMNA 3: COMPLETADO */}
-        <div className="flex-1 flex flex-col bg-emerald-50/50 dark:bg-emerald-500/5 backdrop-blur-sm rounded-[2rem] border border-emerald-100/50 dark:border-emerald-500/10 p-4 transition-colors shadow-inner">
+        <div className="w-[85vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-emerald-50/50 dark:bg-emerald-500/5 backdrop-blur-sm rounded-[2rem] border border-emerald-100/50 dark:border-emerald-500/10 p-4 transition-colors shadow-inner">
           <div className="flex items-center justify-between mb-5 px-3 pt-2">
             <h3 className="font-black text-emerald-800 dark:text-emerald-400 flex items-center text-xs uppercase tracking-widest"><CheckCircle2 size={14} className="mr-2 text-emerald-500 dark:text-emerald-500"/> Completado</h3>
             <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{completadas.length}</span>
@@ -5478,6 +5481,7 @@ const ChecklistView = ({ tareas, addNotification }) => {
         </div>
       </div>
 
+      {/* MODAL FORMULARIO (Se mantiene igual) */}
       {isFormOpen && (
         <div className="fixed inset-0 z-[200] bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 duration-200 transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-white/10 transition-colors">
@@ -6077,7 +6081,9 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
 
       {viewMode === 'table' ? (
         <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl overflow-hidden flex flex-col print:hidden transition-colors">
-          <div className="overflow-y-auto custom-scrollbar">
+          
+          {/* 🔴 VISTA DE ESCRITORIO (TABLA ORIGINAL INTACTA) */}
+          <div className="hidden md:block overflow-y-auto custom-scrollbar">
             <table className="w-full text-left text-sm whitespace-nowrap">
               <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-400 uppercase tracking-widest text-[10px] transition-colors">
                 <tr>
@@ -6126,6 +6132,54 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
               </tbody>
             </table>
           </div>
+
+          {/* 🔴 VISTA MÓVIL (TARJETAS DINÁMICAS TÁCTILES) */}
+          <div className="md:hidden flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-50/50 dark:bg-transparent">
+            {safeGastos.map((gasto) => {
+              const deuda = gasto.estimado - gasto.pagado;
+              const overdue = isOverdue(gasto.fechaLimite, deuda);
+              return (
+                <div key={gasto.id} className={`bg-white dark:bg-[#111] p-4 rounded-2xl border shadow-sm transition-colors ${overdue ? 'border-rose-300 dark:border-rose-500/50' : 'border-slate-200 dark:border-white/10'}`}>
+                   
+                   <div className="flex justify-between items-start mb-3">
+                      <div className="pr-2">
+                         <p className="font-bold text-slate-900 dark:text-white text-base leading-tight">{gasto.concepto}</p>
+                         <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">{gasto.categoria}</p>
+                      </div>
+                      <span className={`px-2 py-1 rounded text-[9px] font-bold uppercase tracking-widest border shrink-0 ${overdue ? 'bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-500' : (deuda===0 ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-white/5 dark:text-slate-400')}`}>
+                        {gasto.fechaLimite || 'Sin plazo'}
+                      </span>
+                   </div>
+
+                   {gasto.proveedorId && <p className="text-[9px] text-indigo-600 dark:text-amber-500 font-bold uppercase tracking-widest flex items-center mb-4 bg-indigo-50 dark:bg-amber-500/10 w-max px-2 py-1 rounded"><Building size={10} className="mr-1"/> Prov. Vinculado</p>}
+
+                   <div className="flex justify-between items-end mb-4 bg-slate-50 dark:bg-black/20 p-3 rounded-xl border border-slate-100 dark:border-white/5">
+                      <div>
+                        <p className="text-[9px] text-slate-500 uppercase tracking-widest mb-0.5">Costo Total</p>
+                        <p className="font-medium text-slate-700 dark:text-slate-300 text-sm">{formatMoney(gasto.estimado)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] text-slate-500 uppercase tracking-widest mb-0.5">Resta por pagar</p>
+                        <p className={`font-black text-lg ${deuda > 0 ? 'text-amber-600 dark:text-amber-500' : 'text-emerald-600 dark:text-emerald-400'}`}>{deuda > 0 ? formatMoney(deuda) : 'Liquidado'}</p>
+                      </div>
+                   </div>
+
+                   <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex justify-between gap-2">
+                      <div className="flex gap-2">
+                        <button onClick={() => setEditGastoModal(gasto)} className="p-2.5 bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-indigo-600 rounded-xl transition-colors"><Edit2 size={16}/></button>
+                        <button onClick={() => initiateDelete(gasto)} className="p-2.5 bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-rose-600 rounded-xl transition-colors"><Trash2 size={16}/></button>
+                      </div>
+                      <div className="flex gap-2 flex-1 justify-end">
+                        {gasto.historial?.length > 0 && <button onClick={()=>setHistoryModal(gasto)} className="px-3 py-2 bg-slate-100 dark:bg-white/5 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center"><History size={14} className="mr-1 sm:mr-0"/></button>}
+                        {deuda > 0 && <button onClick={() => setPaymentProcess({ item: gasto, monto: '', fecha: new Date().toISOString().split('T')[0], metodo: 'Transferencia', cuenta: '', comprobante: null })} className="px-5 py-2 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-emerald-600 transition-colors flex items-center justify-center">Abonar</button>}
+                      </div>
+                   </div>
+                </div>
+              )
+            })}
+            {safeGastos.length === 0 && <div className="text-center py-10 text-slate-400 text-sm">No hay gastos registrados.</div>}
+          </div>
+
         </div>
       ) : (
         <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl overflow-hidden p-8 print:hidden transition-colors">
