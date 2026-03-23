@@ -9529,7 +9529,8 @@ const PanelAnatomyOverlay = ({ onClose }) => {
           {/* HERO TECH */}
           <div className="px-6 sm:px-10 lg:px-16 pt-16 pb-16 relative z-10">
              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-widest mb-6">
-                <Cpu size={12} /> Entorno Operativo Nivel 2
+                {/* 🔴 AQUÍ ESTABA EL ERROR. CAMBIADO A Settings2 */}
+                <Settings2 size={12} /> Entorno Operativo Nivel 2
              </div>
              <h1 className="text-5xl sm:text-6xl lg:text-[80px] font-black tracking-tighter text-slate-900 leading-[0.95] mb-6">
                 La Ingeniería detrás <br className="hidden md:block"/> de tu evento.
@@ -9789,7 +9790,7 @@ const PanelAnatomyOverlay = ({ onClose }) => {
                 <div className="bg-slate-50 border border-slate-100 rounded-2xl h-48 mb-6 p-4 flex gap-4 overflow-hidden relative">
                    <div className="w-32 bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden flex flex-col shrink-0">
                       <div className="h-24 bg-slate-200 relative">
-                         <img src="/maricela-estudillo-gonzalez/foto2.jpg" className="w-full h-full object-cover" />
+                         <img src="/maricela-estudillo-gonzalez/foto2.jpg" className="w-full h-full object-cover" onError={(e) => e.target.style.display = 'none'} />
                       </div>
                       <div className="p-2 flex-1 flex flex-col justify-between">
                          <div className="flex items-center justify-between">
@@ -9826,7 +9827,7 @@ const PanelAnatomyOverlay = ({ onClose }) => {
                <div className="w-full max-w-2xl aspect-video bg-black rounded-2xl border-4 border-slate-800 shadow-2xl relative overflow-hidden mb-8 z-10 flex">
                   {/* Foto gigante */}
                   <div className="w-2/3 h-full relative">
-                     <img src="/maricela-estudillo-gonzalez/foto1.jpg" className="w-full h-full object-cover" />
+                     <img src="/maricela-estudillo-gonzalez/foto1.jpg" className="w-full h-full object-cover" onError={(e) => e.target.style.display = 'none'} />
                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
                      <div className="absolute bottom-4 left-4 text-left">
                         <p className="text-white font-bold text-lg drop-shadow-md">Familia López</p>
