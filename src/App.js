@@ -9490,6 +9490,241 @@ const AnatomyOverlay = ({ onClose }) => {
 };
 
 // ==========================================
+// --- COMPONENTE: REVISTA EDITORIAL (ANATOMÍA DEL PANEL / BÓVEDA) ---
+// ==========================================
+const PanelAnatomyOverlay = ({ onClose }) => {
+  useEffect(() => {
+    if (!document.getElementById('anatomy-fonts')) {
+      const link = document.createElement('link');
+      link.id = 'anatomy-fonts';
+      link.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&family=Pinyon+Script&display=swap';
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
+  }, []);
+
+  const invTheme = {
+    fontSerif: '"Cormorant Garamond", serif',
+    fontSans: '"Montserrat", sans-serif',
+    fontScript: '"Pinyon Script", cursive',
+    dark: '#1C1917',
+    gold: '#D4AF37',
+    accent: '#4F46E5', // Indigo tech
+    bg: '#FDFBF7'
+  };
+
+  // Un elemento gráfico abstracto que representa tecnología y elegancia (Grid/Wireframe sutil)
+  const TechCorner = ({ className, style }) => (
+    <svg viewBox="0 0 200 200" className={className} style={style} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="smallGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#D4AF37" strokeWidth="0.5" opacity="0.3"/>
+        </pattern>
+      </defs>
+      <rect width="200" height="200" fill="url(#smallGrid)" />
+      <circle cx="100" cy="100" r="80" fill="none" stroke="#D4AF37" strokeWidth="1" opacity="0.5" strokeDasharray="4 4" />
+      <circle cx="100" cy="100" r="60" fill="none" stroke="#D4AF37" strokeWidth="2" opacity="0.2" />
+      <path d="M 100 0 L 100 200 M 0 100 L 200 100" stroke="#D4AF37" strokeWidth="1" opacity="0.4" />
+      <circle cx="100" cy="100" r="4" fill="#D4AF37" />
+    </svg>
+  );
+
+  return (
+    <div className="fixed inset-0 z-[9999] bg-slate-900/60 dark:bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 lg:p-8 animate-in fade-in duration-500 font-sans text-[#1C1917]">
+      
+      <div className="w-[96vw] max-w-[1300px] h-[96vh] sm:h-[94vh] bg-[#FDFBF7] rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col relative overflow-hidden animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-700 border border-slate-200">
+        
+        <nav className="sticky top-0 w-full bg-[#FDFBF7]/90 backdrop-blur-xl z-50 px-5 sm:px-10 py-4 flex justify-between items-center border-b border-[#D4AF37]/20 shrink-0">
+          <span className="font-editorial text-lg sm:text-xl font-bold tracking-widest uppercase text-[#D4AF37]">Baulia <span className="font-light italic text-[#1C1917]">Tech Magazine</span></span>
+          <button onClick={onClose} className="group flex items-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-[#D4AF37] transition-colors bg-slate-100 px-3 py-1.5 rounded-full sm:bg-transparent sm:px-0 sm:py-0">
+            <span className="hidden sm:block">Cerrar Edición</span> <X size={16} className="sm:ml-2 transform group-hover:rotate-90 transition-transform duration-300"/>
+          </button>
+        </nav>
+
+        <main className="flex-1 overflow-y-auto custom-scrollbar px-5 sm:px-10 lg:px-16 pt-10 sm:pt-16 pb-24 text-[#1C1917]">
+          
+          <header className="mb-12 sm:mb-20 border-b border-[#D4AF37]/20 pb-12 sm:pb-16">
+            <p className="text-[#D4AF37] font-bold tracking-[0.3em] sm:tracking-[0.4em] uppercase text-[9px] sm:text-[10px] mb-4 sm:mb-6 text-center md:text-left">Arquitectura de Software VIP</p>
+            
+            <div className="flex flex-col lg:flex-row gap-6 sm:gap-10 items-start">
+              <h1 className="text-5xl sm:text-7xl lg:text-[100px] font-editorial font-black tracking-tighter leading-[0.9] w-full lg:w-3/5 text-[#1C1917] text-center md:text-left">
+                El Centro de <br className="hidden md:block"/>
+                <span className="italic font-light text-[#D4AF37]">Comando.</span>
+              </h1>
+              
+              <div className="w-full lg:w-2/5 pt-2">
+                <div className="text-sm sm:text-base font-light leading-relaxed text-justify text-slate-600 block">
+                  <TechCorner className="float-right w-20 h-20 sm:w-28 sm:h-28 ml-4 mb-2 opacity-60 drop-shadow-lg" />
+                  <span className="float-left text-[60px] sm:text-[80px] leading-[45px] sm:leading-[60px] pt-1 sm:pt-2 pr-3 sm:pr-4 font-editorial font-black text-[#1C1917]">
+                    L
+                  </span>
+                  a verdadera magia de un evento no solo radica en lo que los invitados ven, sino en el control absoluto que ocurre detrás del telón. Baulia te entrega una Bóveda Digital diseñada con los más altos estándares de ingeniería de software. Transformamos el caos de libretas y hojas de cálculo en una plataforma fluida, elegante e inquebrantable, permitiéndote dominar cada variable desde la palma de tu mano.
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <div className="space-y-12 sm:space-y-24">
+
+            {/* FILA 1: Invitados y Mesas */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+              
+              <section className="flex flex-col border-t border-slate-200 pt-6 sm:pt-8">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">01. Inteligencia Logística</span>
+                
+                <div className="flex flex-col mb-6 sm:mb-8 pl-0 sm:pl-4 border-l-0 sm:border-l-2 border-[#D4AF37]/30">
+                   <div className="bg-[#111] rounded-2xl p-4 shadow-xl overflow-hidden relative w-full max-w-sm mx-auto md:mx-0">
+                      <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-3">
+                         <span className="text-white font-bold text-xs"><Users size={14} className="inline mr-2 text-[#D4AF37]"/>Directorio en Vivo</span>
+                         <span className="bg-emerald-500/20 text-emerald-400 text-[8px] uppercase tracking-widest px-2 py-1 rounded font-bold">Sincronizado</span>
+                      </div>
+                      <div className="space-y-2">
+                         <div className="bg-white/5 p-2 rounded flex justify-between items-center"><span className="text-white text-xs">Familia Villarreal</span><span className="text-[#D4AF37] text-[10px] font-bold">✔ Confirmado (4)</span></div>
+                         <div className="bg-white/5 p-2 rounded flex justify-between items-center"><span className="text-white text-xs">Lic. Roberto Mtz.</span><span className="text-rose-400 text-[10px] font-bold">Cancelado</span></div>
+                      </div>
+                   </div>
+                </div>
+                
+                <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-3 text-slate-900">El Fin del Excel</h3>
+                <p className="text-slate-600 leading-relaxed font-light text-xs sm:text-sm text-justify">
+                  El motor de Baulia conecta tu invitación web directamente con tu Panel. Cada vez que una familia hace clic en "Confirmar Asistencia", tu base de datos se actualiza en tiempo real, bloqueando lugares automáticamente. Tendrás métricas exactas al segundo, sin necesidad de actualizar listas a mano.
+                </p>
+              </section>
+
+              <section className="flex flex-col border-t border-slate-200 pt-6 sm:pt-8">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">02. Diseño Espacial</span>
+                
+                <div className="flex flex-col mb-6 sm:mb-8 pl-0 sm:pl-4 border-l-0 sm:border-l-2 border-[#D4AF37]/30">
+                   <div className="w-full max-w-sm mx-auto md:mx-0 h-40 bg-slate-100 rounded-2xl border border-slate-200 shadow-inner relative flex items-center justify-center overflow-hidden">
+                      <div className="absolute w-20 h-20 rounded-full border-[3px] border-[#D4AF37] bg-white flex items-center justify-center shadow-lg z-10">
+                         <span className="font-bold text-slate-400 text-xs">Mesa 1</span>
+                      </div>
+                      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => (
+                         <div key={i} className={`absolute w-4 h-4 rounded-full ${i < 5 ? 'bg-emerald-400' : 'bg-slate-300'} shadow-sm`} style={{ transform: `rotate(${deg}deg) translate(50px)` }}></div>
+                      ))}
+                   </div>
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-3 text-slate-900">Acomodo Táctil 2D</h3>
+                <p className="text-slate-600 leading-relaxed font-light text-xs sm:text-sm text-justify">
+                  Transformamos la asignación de lugares en una experiencia visual. Puedes generar decenas de mesas redondas, tablones o formas libres con un clic. Usando la tecnología <i>Drag & Drop</i>, simplemente arrastras a tus invitados hacia las sillas disponibles. El sistema te avisará si intentas sobrepoblar una mesa.
+                </p>
+              </section>
+            </div>
+
+            {/* FILA 2: Escáner y Finanzas */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+              
+              <section className="flex flex-col border-t border-slate-200 pt-6 sm:pt-8">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">03. Control de Accesos</span>
+                
+                <div className="flex flex-col items-center text-center mb-6 sm:mb-8">
+                   <div className="w-32 h-32 bg-slate-900 rounded-3xl border-4 border-[#D4AF37]/30 shadow-2xl relative flex items-center justify-center overflow-hidden">
+                      <div className="absolute w-full h-1 bg-emerald-400 shadow-[0_0_15px_#34d399] animate-pulse"></div>
+                      <QrCode size={48} className="text-white opacity-50"/>
+                   </div>
+                   <span className="mt-4 font-sans text-[8px] tracking-[0.2em] uppercase text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded border border-emerald-200">Acceso Aprobado</span>
+                </div>
+
+                <div>
+                  <TechCorner className="float-left w-12 h-12 sm:w-16 sm:h-16 mr-3 sm:mr-4 opacity-40" />
+                  <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-2 sm:mb-3 text-slate-900 text-center sm:text-left">El Escáner de la Puerta</h3>
+                  <p className="text-slate-600 leading-relaxed font-light text-xs sm:text-sm text-justify">
+                    El blindaje definitivo contra invitados no deseados. Proporcionamos un enlace único para las *Hostess* o cadeneros. Usando la cámara de cualquier teléfono, escanearán los pases digitales de tus invitados. El sistema detectará instantáneamente códigos falsos o pases ya utilizados, iluminando la pantalla en verde o rojo.
+                  </p>
+                </div>
+              </section>
+
+              <section className="flex flex-col border-t border-slate-200 pt-6 sm:pt-8">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">04. Inteligencia de Capital</span>
+                
+                <div className="flex flex-col items-center sm:items-start text-center sm:text-left mb-6 sm:mb-8 pl-0 sm:pl-4 border-l-0 sm:border-l-2 border-[#D4AF37]/30">
+                   <h3 className="font-serif text-3xl sm:text-4xl text-[#1C1917] mb-4">Bóveda Financiera</h3>
+                   <div className="w-full max-w-sm bg-white border border-slate-200 rounded-2xl p-4 shadow-md">
+                      <div className="flex justify-between items-center mb-2">
+                         <span className="text-xs font-bold text-slate-700">Presupuesto</span>
+                         <span className="text-xs font-black text-[#D4AF37]">$150,000</span>
+                      </div>
+                      <div className="w-full bg-slate-100 rounded-full h-1.5 mb-4">
+                         <div className="bg-[#D4AF37] h-1.5 rounded-full" style={{ width: '45%' }}></div>
+                      </div>
+                      <div className="flex justify-between text-[10px] uppercase tracking-widest">
+                         <span className="text-emerald-600 font-bold">Pagado: 45%</span>
+                         <span className="text-rose-500 font-bold">Deuda: 55%</span>
+                      </div>
+                   </div>
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-3 text-slate-900 text-center sm:text-left">Paz Mental Matemática</h3>
+                <p className="text-slate-600 leading-relaxed font-light text-xs sm:text-sm text-justify">
+                  Un evento impecable requiere finanzas impecables. Tu panel incluye un módulo contable de grado corporativo donde registrarás los costos de cada proveedor, fechas límite de pago y abonos realizados. Obtendrás un reporte ejecutivo en PDF al instante para conocer tu salud financiera y evitar recargos o sorpresas de último minuto.
+                </p>
+              </section>
+            </div>
+
+            {/* FILA 3: Experiencia Social y Marca Blanca */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+              
+              <section className="flex flex-col border-t border-slate-200 pt-6 sm:pt-8">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">05. Entretenimiento Inmersivo</span>
+                
+                <div className="pl-4 sm:pl-6 border-l border-[#D4AF37]/30 mb-6 sm:mb-8 py-2">
+                   <div className="w-full aspect-video bg-[#111] rounded-2xl shadow-xl flex flex-col items-center justify-center relative overflow-hidden border-2 border-slate-800">
+                      <PlayCircle size={40} className="text-white/50 mb-2"/>
+                      <span className="text-white font-bold tracking-widest uppercase text-[10px]">Pantalla Gigante</span>
+                      <div className="absolute bottom-4 left-4 bg-white/20 backdrop-blur rounded-lg p-2 flex items-center gap-2">
+                         <div className="w-6 h-6 bg-slate-300 rounded-full"></div>
+                         <div><div className="w-16 h-1.5 bg-white rounded mb-1"></div><div className="w-10 h-1 bg-white/50 rounded"></div></div>
+                      </div>
+                   </div>
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-3 text-slate-900 text-center sm:text-left">El Muro Social (Proyector)</h3>
+                <p className="text-slate-600 leading-relaxed font-light text-xs sm:text-sm text-justify">
+                  Integramos una vista especial diseñada para conectarse a las pantallas gigantes o proyectores del salón. Las fotografías que tus invitados suban a la invitación web durante la fiesta, aparecerán en tiempo real en las pantallas del evento, creando una experiencia interactiva y unificadora. Todo con opción a moderación previa.
+                </p>
+              </section>
+
+              <section className="flex flex-col border-t border-slate-200 pt-6 sm:pt-8 bg-slate-900 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-amber-500 mb-4 sm:mb-6 block relative z-10">06. Exclusivo para Planners</span>
+                
+                <div className="flex justify-center gap-4 sm:gap-6 mb-6 sm:mb-8 py-2 relative z-10">
+                    <div className="flex flex-col items-center">
+                        <div className="w-16 h-16 rounded-full border border-amber-500/50 shadow-md flex items-center justify-center mb-2 bg-white/5 text-white">
+                          <Layers size={24} strokeWidth={1.5} />
+                        </div>
+                        <span className="font-sans text-[8px] sm:text-[9px] tracking-widest text-slate-400 uppercase font-bold text-center leading-tight">Multi<br/>Evento</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                        <div className="w-16 h-16 rounded-full border border-amber-500/50 shadow-md flex items-center justify-center mb-2 bg-white/5 text-amber-500">
+                          <Settings2 size={24} strokeWidth={1.5} />
+                        </div>
+                        <span className="font-sans text-[8px] sm:text-[9px] tracking-widest text-slate-400 uppercase font-bold text-center leading-tight">Marca<br/>Blanca</span>
+                    </div>
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-editorial font-bold mb-3 text-white text-center sm:text-left relative z-10">Alianza B2B White-Label</h3>
+                <p className="text-slate-300 leading-relaxed font-light text-xs sm:text-sm text-justify relative z-10">
+                  Si eres Agencia o Wedding Planner, Baulia se convierte en tu herramienta corporativa. Te entregamos un "Mando Central" para gestionar ilimitadas bodas. Lo más importante: tus clientes verán <b>tu logotipo y tus colores</b> institucionales al iniciar sesión, elevando exponencialmente el valor percibido de tus servicios ante ellos.
+                </p>
+              </section>
+            </div>
+
+          </div>
+
+          <footer className="mt-20 sm:mt-32 border-t border-[#D4AF37]/30 pt-8 sm:pt-12 flex flex-col md:flex-row justify-between items-center text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-colors gap-4 text-center md:text-left">
+            <span>Baulia Technologies Inc.</span>
+            <span className="text-[#D4AF37]">Software Premium B2B & B2C</span>
+          </footer>
+
+        </main>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
 // --- COMPONENTE PRINCIPAL: PÁGINA DE VENTAS WEB (BAULIA 9.0 - FASE 3.0: SHOWROOM APPLE EDITORIAL) ---
 // ==========================================
 const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
@@ -9503,6 +9738,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   
   // ESTADO PARA ABRIR LA REVISTA
   const [showAnatomy, setShowAnatomy] = useState(false);
+  const [showPanelAnatomy, setShowPanelAnatomy] = useState(false);
 
   // ESTADOS PARA EL SHOWROOM INCRUSTADO
   const [activeCategory, setActiveCategory] = useState('boda');
@@ -9612,8 +9848,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white transition-colors duration-700 overflow-x-hidden relative">
       
-      {/* INCRUSTACIÓN DE LA REVISTA */}
+      {/* INCRUSTACIÓN DE LAS REVISTAS */}
       {showAnatomy && <AnatomyOverlay onClose={() => setShowAnatomy(false)} />}
+      {showPanelAnatomy && <PanelAnatomyOverlay onClose={() => setShowPanelAnatomy(false)} />}
 
       {/* OCULTAMOS EL BOTÓN DE WHATSAPP SI LA REVISTA ESTÁ ABIERTA */}
       {!showAnatomy && (
@@ -10048,8 +10285,17 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             <RevealSection className="lg:w-1/2">
               <span className="text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase text-xs mb-4 block flex items-center"><Lock size={14} className="mr-2"/> Fase 2: La Ejecución</span>
               <h2 className="text-4xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white mb-8 tracking-tight leading-tight transition-colors">Tu evento, bajo tu <span className="italic text-slate-500">dominio absoluto.</span></h2>
-              <p className="text-slate-600 dark:text-slate-400 text-lg mb-10 font-light leading-relaxed transition-colors">Olvídate de los excels desordenados y las libretas perdidas. Baulia te entrega el Centro de Comando para administrar cada detalle desde tu iPad o computadora.</p>
               
+              <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 font-light leading-relaxed transition-colors">Olvídate de los excels desordenados y las libretas perdidas. Baulia te entrega el Centro de Comando para administrar cada detalle desde tu iPad o computadora.</p>
+              
+              {/* 🔴 NUEVO BOTÓN PARA ABRIR LA REVISTA DEL PANEL */}
+              <button 
+                onClick={() => setShowPanelAnatomy(true)} 
+                className="mb-10 px-8 py-3.5 bg-transparent border-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm flex items-center justify-center w-full sm:w-max"
+              >
+                <BookOpenText size={16} className="mr-2" /> Explorar la Arquitectura del Panel
+              </button>
+
               <div className="space-y-8">
                 {[
                   { i: <LayoutGrid strokeWidth={1.5}/>, t: 'Acomodo de Mesas Visual', d: 'Dibuja el croquis del salón y arrastra a tus invitados a sus sillas.' },
