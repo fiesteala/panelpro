@@ -10530,7 +10530,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </section>
 
-      {/* 🔴 EL NUEVO PANEL ADAPTATIVO HIPERREALISTA DE BAULIA */}
+      {/* 🔴 EL NUEVO PANEL ADAPTATIVO HIPERREALISTA DE BAULIA (ESTÁTICO Y COMPLETO) */}
       <section id="boveda" className="py-32 relative z-10 border-y border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/50 transition-colors duration-700">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex flex-col lg:flex-row gap-16 items-center">
@@ -10558,14 +10558,24 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   </div>
                 ))}
               </div>
+
+              {/* Botón para la Revista de Anatomía del Panel */}
+              <button onClick={() => setShowPanelAnatomy(true)} className="mt-10 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
+                 Ver Anatomía del Sistema <ArrowRight size={18} className="ml-3"/>
+              </button>
             </div>
 
-            {/* 🔴 MOCKUP DEL DASHBOARD HIPERREALISTA */}
+            {/* 🔴 MOCKUP DEL DASHBOARD HIPERREALISTA (ESTÁTICO CON TODAS LAS PESTAÑAS) */}
             <div className="lg:w-1/2 w-full relative perspective-[1000px]">
               <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 dark:from-indigo-500/20 to-amber-500/10 dark:to-amber-500/20 blur-[120px] rounded-full pointer-events-none transition-colors"></div>
               
               <div className="bg-white/50 dark:bg-black/50 p-2 md:p-4 rounded-[2rem] border border-slate-200/50 dark:border-white/10 shadow-2xl dark:shadow-[0_30px_80px_rgba(0,0,0,0.8)] relative z-10 transform md:rotate-y-[-5deg] md:rotate-x-[2deg] hover:rotate-y-0 hover:rotate-x-0 transition-all duration-1000 backdrop-blur-xl">
                 
+                {/* Etiqueta de Demostración Estática */}
+                <div className="absolute -top-3 -right-3 bg-amber-500 text-slate-900 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg z-50">
+                  Entorno Demostrativo
+                </div>
+
                 {/* Ventana estilo macOS */}
                 <div className="bg-slate-50 dark:bg-slate-950 rounded-[1.5rem] border border-slate-200 dark:border-white/10 w-full overflow-hidden flex flex-col relative transition-colors shadow-inner h-[400px] sm:h-[500px]">
                   
@@ -10578,9 +10588,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   </div>
                   
                   {/* Cuerpo del Panel Hiperrealista */}
-                  <div className="flex-1 flex overflow-hidden">
-                     {/* Sidebar Realista */}
-                     <div className="w-16 sm:w-48 border-r border-slate-200 dark:border-white/5 bg-white/50 dark:bg-[#050505]/40 flex flex-col p-3 sm:p-4 gap-1 transition-colors">
+                  <div className="flex-1 flex overflow-hidden pointer-events-none select-none">
+                     {/* Sidebar Realista (Plan Diamante Completo) */}
+                     <div className="w-16 sm:w-48 border-r border-slate-200 dark:border-white/5 bg-white/50 dark:bg-[#050505]/40 flex flex-col p-3 sm:p-4 gap-1 transition-colors overflow-y-auto custom-scrollbar">
                         <div className="flex justify-center sm:justify-start items-center mb-4 sm:mb-6 mt-2">
                            <BauliaLogo className="h-6 w-auto" forceWhite={isDarkMode} />
                         </div>
@@ -10589,23 +10599,34 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         <div className="flex items-center justify-center sm:justify-start gap-3 p-2.5 sm:px-3 sm:py-2 bg-amber-500 rounded-xl text-slate-900 shadow-lg">
                           <LayoutDashboard size={16}/><span className="hidden sm:inline text-xs font-bold">Resumen</span>
                         </div>
-                        <div className="flex items-center justify-center sm:justify-start gap-3 p-2.5 sm:px-3 sm:py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl transition-colors">
+                        <div className="flex items-center justify-center sm:justify-start gap-3 p-2.5 sm:px-3 sm:py-2 text-slate-500 dark:text-slate-400 rounded-xl transition-colors">
                           <CheckSquare size={16}/><span className="hidden sm:inline text-xs font-medium">Checklist</span>
                         </div>
-                        <div className="flex items-center justify-center sm:justify-start gap-3 p-2.5 sm:px-3 sm:py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl transition-colors">
+                        <div className="flex items-center justify-center sm:justify-start gap-3 p-2.5 sm:px-3 sm:py-2 text-slate-500 dark:text-slate-400 rounded-xl transition-colors">
                           <Wallet size={16}/><span className="hidden sm:inline text-xs font-medium">Presupuesto</span>
+                        </div>
+                        <div className="flex items-center justify-center sm:justify-start gap-3 p-2.5 sm:px-3 sm:py-2 text-slate-500 dark:text-slate-400 rounded-xl transition-colors">
+                          <Store size={16}/><span className="hidden sm:inline text-xs font-medium">Proveedores</span>
                         </div>
                         
                         <p className="hidden sm:block text-[8px] text-slate-400 font-black uppercase tracking-widest mt-4 mb-2 ml-2">Gestión</p>
-                        <div className="flex items-center justify-center sm:justify-start gap-3 p-2.5 sm:px-3 sm:py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl transition-colors">
+                        <div className="flex items-center justify-center sm:justify-start gap-3 p-2.5 sm:px-3 sm:py-2 text-slate-500 dark:text-slate-400 rounded-xl transition-colors">
                           <Users size={16}/><span className="hidden sm:inline text-xs font-medium">Invitados</span>
                         </div>
-                        <div className="flex items-center justify-center sm:justify-start gap-3 p-2.5 sm:px-3 sm:py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl transition-colors">
+                        <div className="flex items-center justify-center sm:justify-start gap-3 p-2.5 sm:px-3 sm:py-2 text-slate-500 dark:text-slate-400 rounded-xl transition-colors">
                           <LayoutGrid size={16}/><span className="hidden sm:inline text-xs font-medium">Mesas</span>
+                        </div>
+
+                        <p className="hidden sm:block text-[8px] text-slate-400 font-black uppercase tracking-widest mt-4 mb-2 ml-2">El Día</p>
+                        <div className="flex items-center justify-center sm:justify-start gap-3 p-2.5 sm:px-3 sm:py-2 text-slate-500 dark:text-slate-400 rounded-xl transition-colors">
+                          <Scan size={16}/><span className="hidden sm:inline text-xs font-medium">Control QR</span>
+                        </div>
+                        <div className="flex items-center justify-center sm:justify-start gap-3 p-2.5 sm:px-3 sm:py-2 text-slate-500 dark:text-slate-400 rounded-xl transition-colors">
+                          <Camera size={16}/><span className="hidden sm:inline text-xs font-medium">Muro Social</span>
                         </div>
                      </div>
                      
-                     {/* Contenido Principal Realista */}
+                     {/* Contenido Principal Realista (Estático) */}
                      <div className="flex-1 p-4 sm:p-5 bg-slate-50/50 dark:bg-[#0a0a0a]/50 flex flex-col gap-4 overflow-hidden transition-colors">
                         
                         {/* Header del Dashboard */}
@@ -10615,7 +10636,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                              <p className="text-[9px] sm:text-[10px] text-slate-500 mt-0.5">Monitoreo en tiempo real.</p>
                            </div>
                            <div className="px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-900 dark:bg-white/10 text-white rounded-lg text-[9px] sm:text-xs font-bold flex items-center shadow-md">
-                             <Download size={14} className="mr-1.5"/> <span className="hidden sm:inline">Reporte</span>
+                             <Download size={14} className="mr-1.5"/> <span className="hidden sm:inline">Reporte Ejecutivo</span>
                            </div>
                         </div>
                         
@@ -10625,59 +10646,47 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                               <div className="flex justify-between items-start">
                                 <div>
                                   <p className="text-slate-500 text-[8px] sm:text-[9px] font-black uppercase tracking-widest">Pases Asignados</p>
-                                  <h3 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">180</h3>
+                                  <h3 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">240</h3>
                                 </div>
                                 <div className="p-1.5 sm:p-2 bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg"><Users size={16}/></div>
                               </div>
-                              <div className="mt-2 sm:mt-4 text-[8px] sm:text-[9px] text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded font-bold w-max uppercase tracking-wider">85% Confirmado</div>
+                              <div className="mt-2 sm:mt-4 text-[8px] sm:text-[9px] text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded font-bold w-max uppercase tracking-wider">95% Confirmado</div>
                            </div>
 
                            <div className="bg-white dark:bg-[#111] p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm flex flex-col transition-colors">
                               <div className="flex justify-between items-start">
                                 <div>
                                   <p className="text-slate-500 text-[8px] sm:text-[9px] font-black uppercase tracking-widest">Gasto Estimado</p>
-                                  <h3 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">$150k</h3>
+                                  <h3 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">$285k</h3>
                                 </div>
                                 <div className="p-1.5 sm:p-2 bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg"><Wallet size={16}/></div>
                               </div>
-                              <div className="mt-3 sm:mt-5 w-full bg-slate-100 dark:bg-white/5 h-1.5 rounded-full overflow-hidden"><div className="bg-amber-500 h-1.5 rounded-full w-[60%]"></div></div>
+                              <div className="mt-3 sm:mt-5 w-full bg-slate-100 dark:bg-white/5 h-1.5 rounded-full overflow-hidden"><div className="bg-amber-500 h-1.5 rounded-full w-[80%]"></div></div>
                            </div>
                         </div>
 
                         {/* Listado de tareas realista */}
                         <div className="flex-1 bg-white dark:bg-[#111] rounded-xl sm:rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm flex flex-col min-h-0 overflow-hidden transition-colors">
                            <div className="p-3 sm:p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 shrink-0">
-                             <h3 className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-white flex items-center"><ListTodo size={14} className="mr-1.5 text-indigo-500"/> Prioridades Logísticas</h3>
+                             <h3 className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-white flex items-center"><CheckSquare size={14} className="mr-1.5 text-indigo-500"/> Siguientes Pasos</h3>
                            </div>
                            <div className="p-3 space-y-2 overflow-y-auto custom-scrollbar">
-                             
                              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 transition-colors">
                                <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0 shadow-[0_0_8px_currentColor]"></div>
                                <div className="flex-1 min-w-0">
-                                 <p className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-white truncate">Cierre de proveedores</p>
+                                 <p className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-white truncate">Cierre con Banquetero</p>
                                  <p className="text-[8px] sm:text-[9px] text-slate-500 mt-0.5">Finanzas</p>
                                </div>
                                <div className="text-[8px] sm:text-[9px] text-rose-500 font-bold bg-rose-50 dark:bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-200 dark:border-rose-500/20">VENCE HOY</div>
                              </div>
-
                              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 transition-colors">
                                <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0 shadow-[0_0_8px_currentColor]"></div>
                                <div className="flex-1 min-w-0">
-                                 <p className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-white truncate">Acomodo de mesas familiares</p>
+                                 <p className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-white truncate">Asignación de Mesas</p>
                                  <p className="text-[8px] sm:text-[9px] text-slate-500 mt-0.5">Logística</p>
                                </div>
                                <div className="text-[8px] sm:text-[9px] text-slate-500 font-bold px-1.5 py-0.5">Mañana</div>
                              </div>
-
-                             <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 transition-colors">
-                               <div className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 shrink-0"></div>
-                               <div className="flex-1 min-w-0">
-                                 <p className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-white truncate">Prueba de banquete y coctelería</p>
-                                 <p className="text-[8px] sm:text-[9px] text-slate-500 mt-0.5">Comida/Bebida</p>
-                               </div>
-                               <div className="text-[8px] sm:text-[9px] text-slate-500 font-bold px-1.5 py-0.5">En 5 días</div>
-                             </div>
-
                            </div>
                         </div>
 
@@ -10686,6 +10695,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 </div>
               </div>
             </div>
+            {/* 🔴 FIN DEL MOCKUP DEL DASHBOARD */}
 
           </div>
         </div>
