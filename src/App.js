@@ -989,6 +989,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   // 🔴 LÓGICA DE BODA RESTAURADA (Con Botón Toggle)
   const isBodaType = tipoEvento === 'boda';
   const [isWeddingMode, setIsWeddingMode] = useState(isBodaType);
+  const [expandedMobileRow, setExpandedMobileRow] = useState(null);
+  const toggleMobileRow = (id) => setExpandedMobileRow(prev => prev === id ? null : id);
 
   // Asegurar que se sincronice si cambias de evento en el dropdown
   useEffect(() => {
@@ -1517,101 +1519,191 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       )}
 
       <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl overflow-hidden flex flex-col transition-colors duration-500 z-10 relative">
-        <div className="p-3 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex transition-colors">
+        <div className="p-3 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex transition-colors shrink-0">
           <div className="relative flex-1">
             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={16} />
             <input type="text" placeholder="Buscar por nombre, estatus o mesa..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-400 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors" />
           </div>
         </div>
 
-        <div className="overflow-y-auto custom-scrollbar flex-1">
-          <table className="w-full text-left text-xs whitespace-nowrap">
-            <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-400 sticky top-0 z-10 transition-colors">
-              <tr>
-                <th className="px-5 py-3 font-bold uppercase tracking-wider text-[10px]">Nombre</th>
-                <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Tipo</th>
-                <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Pases</th>
-                <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Mesa</th>
-                <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">QR Pase</th>
-                <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Estatus</th>
-                <th className="px-5 py-3 font-bold uppercase tracking-wider text-[10px] text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-              {flattenedList.map((row) => (
-                <tr key={row._rowId} className={`transition-colors hover:bg-slate-50 dark:hover:bg-white/5 ${row.parentGuest.status === 'cancelado' ? 'bg-rose-50/40 dark:bg-rose-500/5 opacity-70' : row.isMain ? 'bg-white dark:bg-transparent border-t-2 border-slate-100 dark:border-white/5' : 'bg-slate-50/30 dark:bg-white/[0.02]'}`}>
-                  <td className="px-5 py-3">
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-1.5">
-                        <span className={`${row.isMain ? 'font-bold text-slate-800 dark:text-white' : 'font-normal text-slate-600 dark:text-slate-300'} ${row.isMissing || row.isEmptyName ? 'text-amber-500 italic' : ''} ${row.parentGuest.status === 'cancelado' ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>
-                          {row.displayName}
-                        </span>
-                        {isWeddingMode && !row.isMissing && row.parentGuest.side && row.parentGuest.side !== 'general' && (
-                          <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${row.parentGuest.side === 'novia' ? 'bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : 'bg-indigo-100 text-indigo-600 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20'}`}>
-                            {row.parentGuest.side}
-                          </span>
-                        )}
-                        {row.isMain && row.parentGuest.extraRequested > 0 && (
-                          <span className="bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20 text-[8px] px-1.5 py-0.5 rounded uppercase font-black ml-1">
-                              +{row.parentGuest.extraRequested}
-                          </span>
-                        )}
-                      </div>
-                      {!row.isMain && !row.isMissing && (
-                        <span className="text-[9px] font-light text-slate-400 dark:text-slate-500 mt-1 leading-tight">Familia: {row.parentGuest.name}</span>
-                      )}
-                    </div>
-                  </td>
-                  
-                  <td className="px-3 py-3 text-center">
-                    {row.isMissing ? <span className="text-slate-300 dark:text-slate-600">-</span> : row.isChild ? <span className="text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 px-2 py-0.5 rounded text-[8px] uppercase font-black tracking-widest">Niño</span> : <span className="text-slate-300">-</span>}
-                  </td>
-                  
-                  <td className="px-3 py-3 text-center">
-                     {row.isMain || row.isMissing ? <span className="font-black text-indigo-600 dark:text-amber-500 text-sm">{row.passes}</span> : <span className="text-slate-300 dark:text-slate-600">-</span>}
-                  </td>
-
-                  <td className="px-4 py-3 text-center">
-                    {row.parentGuest.tableId ? (
-                      <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold border border-slate-200 dark:border-white/10 shadow-sm">
-                        {tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId}
-                      </span>
-                    ) : <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">No asignado</span>}
-                  </td>
-
-                  <td className="px-3 py-3 text-center">
-                    {row.pin && row.parentGuest.status !== 'cancelado' ? (
-                      <button onClick={() => setQrModal(row)} className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-white hover:bg-indigo-50 dark:hover:bg-white/10 p-2 rounded-lg transition-colors border border-transparent dark:hover:border-white/10" title="Ver Pase Individual">
-                        <QrCode size={16} />
-                      </button>
-                    ) : <span className="text-slate-300 dark:text-slate-600">-</span>}
-                  </td>
-                  
-                  <td className="px-4 py-3 text-center">
-                    {row.isMain ? (
-                      <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'ingreso' ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : row.parentGuest.status === 'confirmado' ? 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-white/10 dark:text-slate-300 dark:border-white/20' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
-                        {row.parentGuest.status === 'ingreso' ? `En el evento` : (row.parentGuest.status ? row.parentGuest.status.replace('_', ' ') : 'Pendiente')}
-                      </span>
-                    ) : !row.isMissing ? (
-                      <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.entered ? 'bg-emerald-500 text-white shadow-md border-emerald-600 dark:border-emerald-400' : (row.parentGuest.status === 'confirmado' || row.parentGuest.status === 'ingreso' ? 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' : (row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-white/10 dark:text-slate-300 dark:border-white/20' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'))}`}>
-                        {row.entered ? '✔ ADENTRO' : (row.parentGuest.status === 'cancelado' ? 'CANCELADO' : (row.parentGuest.status === 'confirmado' || row.parentGuest.status === 'ingreso' ? 'CONFIRMADO' : (row.parentGuest.status === 'por_invitar' ? 'POR INVITAR' : 'PENDIENTE')))}
-                      </span>
-                    ) : <span className="text-slate-300 dark:text-slate-600">-</span>}
-                  </td>
-                  
-                  <td className="px-5 py-3 text-right">
-                    {row.isMain ? (
-                      <div className="flex justify-end space-x-1.5">
-                        <button onClick={() => handleSendWhatsApp(row.parentGuest)} className={`p-2 rounded-lg transition-colors border ${row.parentGuest.sent ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'text-slate-400 bg-white border-slate-200 hover:bg-slate-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5'}`} title="Enviar por WhatsApp"><MessageCircle size={14}/></button>
-                        <button onClick={() => handleOpenEdit(row.parentGuest)} className="p-2 text-slate-400 bg-white border border-slate-200 hover:text-indigo-600 hover:bg-indigo-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5 rounded-lg transition-colors"><Edit2 size={14} /></button>
-                        <button onClick={() => setDeleteModal(row.parentGuest)} className="p-2 text-slate-400 bg-white border border-slate-200 hover:text-rose-600 hover:bg-rose-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:text-rose-500 dark:hover:bg-white/5 rounded-lg transition-colors"><Trash2 size={14} /></button>
-                      </div>
-                    ) : <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">Vinculado</span>}
-                  </td>
+        <div className="overflow-y-auto custom-scrollbar flex-1 relative">
+          
+          {/* 🔴 VISTA DE ESCRITORIO: TABLA ORIGINAL (Se oculta en celulares) */}
+          <div className="hidden md:block">
+            <table className="w-full text-left text-xs whitespace-nowrap">
+              <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-400 sticky top-0 z-10 transition-colors">
+                <tr>
+                  <th className="px-5 py-3 font-bold uppercase tracking-wider text-[10px]">Nombre</th>
+                  <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Tipo</th>
+                  <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Pases</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Mesa</th>
+                  <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">QR Pase</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Estatus</th>
+                  <th className="px-5 py-3 font-bold uppercase tracking-wider text-[10px] text-right">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                {flattenedList.map((row) => (
+                  <tr key={`desktop_${row._rowId}`} className={`transition-colors hover:bg-slate-50 dark:hover:bg-white/5 ${row.parentGuest.status === 'cancelado' ? 'bg-rose-50/40 dark:bg-rose-500/5 opacity-70' : row.isMain ? 'bg-white dark:bg-transparent border-t-2 border-slate-100 dark:border-white/5' : 'bg-slate-50/30 dark:bg-white/[0.02]'}`}>
+                    <td className="px-5 py-3">
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`${row.isMain ? 'font-bold text-slate-800 dark:text-white' : 'font-normal text-slate-600 dark:text-slate-300'} ${row.isMissing || row.isEmptyName ? 'text-amber-500 italic' : ''} ${row.parentGuest.status === 'cancelado' ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>
+                            {row.displayName}
+                          </span>
+                          {isWeddingMode && !row.isMissing && row.parentGuest.side && row.parentGuest.side !== 'general' && (
+                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${row.parentGuest.side === 'novia' ? 'bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : 'bg-indigo-100 text-indigo-600 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20'}`}>
+                              {row.parentGuest.side}
+                            </span>
+                          )}
+                          {row.isMain && row.parentGuest.extraRequested > 0 && (
+                            <span className="bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20 text-[8px] px-1.5 py-0.5 rounded uppercase font-black ml-1">
+                                +{row.parentGuest.extraRequested}
+                            </span>
+                          )}
+                        </div>
+                        {!row.isMain && !row.isMissing && (
+                          <span className="text-[9px] font-light text-slate-400 dark:text-slate-500 mt-1 leading-tight">Familia: {row.parentGuest.name}</span>
+                        )}
+                      </div>
+                    </td>
+                    
+                    <td className="px-3 py-3 text-center">
+                      {row.isMissing ? <span className="text-slate-300 dark:text-slate-600">-</span> : row.isChild ? <span className="text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 px-2 py-0.5 rounded text-[8px] uppercase font-black tracking-widest">Niño</span> : <span className="text-slate-300">-</span>}
+                    </td>
+                    
+                    <td className="px-3 py-3 text-center">
+                       {row.isMain || row.isMissing ? <span className="font-black text-indigo-600 dark:text-amber-500 text-sm">{row.passes}</span> : <span className="text-slate-300 dark:text-slate-600">-</span>}
+                    </td>
+
+                    <td className="px-4 py-3 text-center">
+                      {row.parentGuest.tableId ? (
+                        <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold border border-slate-200 dark:border-white/10 shadow-sm">
+                          {tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId}
+                        </span>
+                      ) : <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">No asignado</span>}
+                    </td>
+
+                    <td className="px-3 py-3 text-center">
+                      {row.pin && row.parentGuest.status !== 'cancelado' ? (
+                        <button onClick={() => setQrModal(row)} className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-white hover:bg-indigo-50 dark:hover:bg-white/10 p-2 rounded-lg transition-colors border border-transparent dark:hover:border-white/10" title="Ver Pase Individual">
+                          <QrCode size={16} />
+                        </button>
+                      ) : <span className="text-slate-300 dark:text-slate-600">-</span>}
+                    </td>
+                    
+                    <td className="px-4 py-3 text-center">
+                      {row.isMain ? (
+                        <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'ingreso' ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : row.parentGuest.status === 'confirmado' ? 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-white/10 dark:text-slate-300 dark:border-white/20' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
+                          {row.parentGuest.status === 'ingreso' ? `En el evento` : (row.parentGuest.status ? row.parentGuest.status.replace('_', ' ') : 'Pendiente')}
+                        </span>
+                      ) : !row.isMissing ? (
+                        <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.entered ? 'bg-emerald-500 text-white shadow-md border-emerald-600 dark:border-emerald-400' : (row.parentGuest.status === 'confirmado' || row.parentGuest.status === 'ingreso' ? 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' : (row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-white/10 dark:text-slate-300 dark:border-white/20' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'))}`}>
+                          {row.entered ? '✔ ADENTRO' : (row.parentGuest.status === 'cancelado' ? 'CANCELADO' : (row.parentGuest.status === 'confirmado' || row.parentGuest.status === 'ingreso' ? 'CONFIRMADO' : (row.parentGuest.status === 'por_invitar' ? 'POR INVITAR' : 'PENDIENTE')))}
+                        </span>
+                      ) : <span className="text-slate-300 dark:text-slate-600">-</span>}
+                    </td>
+                    
+                    <td className="px-5 py-3 text-right">
+                      {row.isMain ? (
+                        <div className="flex justify-end space-x-1.5">
+                          <button onClick={() => handleSendWhatsApp(row.parentGuest)} className={`p-2 rounded-lg transition-colors border ${row.parentGuest.sent ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'text-slate-400 bg-white border-slate-200 hover:bg-slate-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5'}`} title="Enviar por WhatsApp"><MessageCircle size={14}/></button>
+                          <button onClick={() => handleOpenEdit(row.parentGuest)} className="p-2 text-slate-400 bg-white border border-slate-200 hover:text-indigo-600 hover:bg-indigo-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5 rounded-lg transition-colors"><Edit2 size={14} /></button>
+                          <button onClick={() => setDeleteModal(row.parentGuest)} className="p-2 text-slate-400 bg-white border border-slate-200 hover:text-rose-600 hover:bg-rose-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:text-rose-500 dark:hover:bg-white/5 rounded-lg transition-colors"><Trash2 size={14} /></button>
+                        </div>
+                      ) : <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">Vinculado</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 🔴 VISTA MÓVIL: ACORDEÓN DE TARJETAS (Se oculta en PC) */}
+          <div className="block md:hidden p-3 space-y-2.5 pb-24">
+            {flattenedList.length === 0 ? (
+              <div className="text-center p-8 text-slate-400 dark:text-slate-500 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl mt-4">No se encontraron invitados.</div>
+            ) : (
+              flattenedList.map((row) => {
+                const isExpanded = expandedMobileRow === row._rowId;
+                const isCancelado = row.parentGuest.status === 'cancelado';
+                const tableName = row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : 'Sin mesa asignada';
+
+                return (
+                  <div key={`mobile_${row._rowId}`} className={`rounded-2xl transition-all duration-300 overflow-hidden border ${row.isMain ? 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 shadow-sm mt-4' : 'bg-slate-50/60 dark:bg-white/[0.03] border-l-[3px] border-l-indigo-200 dark:border-l-amber-500/40 border-y-transparent border-r-transparent ml-4 rounded-l-none'} ${isCancelado ? 'opacity-60' : ''}`}>
+                    
+                    {/* CABECERA TÁCTIL (Siempre Visible) */}
+                    <div onClick={() => toggleMobileRow(row._rowId)} className="p-4 flex justify-between items-center cursor-pointer select-none">
+                      <div className="flex-1 min-w-0 pr-3">
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <span className={`font-bold truncate text-base ${row.isMain ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'} ${row.isMissing ? 'text-amber-500 italic' : ''} ${isCancelado ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>
+                            {row.displayName}
+                          </span>
+                          {row.isMain && <span className="bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 text-[10px] px-2 py-0.5 rounded font-black shrink-0">{row.passes}p</span>}
+                          {row.isChild && <span className="bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-500/20 px-1.5 py-0.5 rounded text-[8px] uppercase font-black tracking-widest shrink-0">Niño</span>}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center truncate max-w-[150px]"><MapPin size={12} className="mr-1 shrink-0 text-indigo-400 dark:text-amber-500"/> <span className="truncate">{tableName}</span></span>
+                          {!row.isMain && !row.isMissing && <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate block">({row.parentGuest.name})</span>}
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col items-end gap-2.5 shrink-0">
+                        {row.isMain ? (
+                          <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'ingreso' ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : row.parentGuest.status === 'confirmado' ? 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
+                            {row.parentGuest.status === 'ingreso' ? 'Adentro' : row.parentGuest.status.replace('_', ' ')}
+                          </span>
+                        ) : !row.isMissing ? (
+                          <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.entered ? 'bg-emerald-500 text-white shadow-md border-emerald-600 dark:border-emerald-400' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
+                            {row.entered ? '✔ Adentro' : 'Pendiente'}
+                          </span>
+                        ) : null}
+                        
+                        {/* Flecha Chevron en formato SVG nativo para asegurar renderizado */}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-slate-400 dark:text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-indigo-500 dark:text-amber-500' : ''}`}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                      </div>
+                    </div>
+
+                    {/* ÁREA EXPANDIDA (Acciones) */}
+                    {isExpanded && (
+                      <div className="px-4 pb-4 pt-1 border-t border-slate-100 dark:border-white/5 animate-in slide-in-from-top-2 fade-in duration-300">
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {row.isMain ? (
+                            <>
+                              <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-1 py-3 ${row.parentGuest.sent ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' : 'bg-white dark:bg-transparent text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'} rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center border transition-colors shadow-sm`}>
+                                <MessageCircle size={16} className="mr-1.5"/> Enviar
+                              </button>
+                              <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-1 py-3 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-500 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center border border-indigo-200 dark:border-amber-500/20 transition-colors shadow-sm">
+                                <Edit2 size={16} className="mr-1.5"/> Editar
+                              </button>
+                              <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="w-14 flex items-center justify-center bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-200 dark:border-rose-500/20 shadow-sm hover:bg-rose-100 transition-colors">
+                                <Trash2 size={16}/>
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              {row.pin && row.parentGuest.status !== 'cancelado' && (
+                                <button onClick={(e) => { e.stopPropagation(); setQrModal(row); }} className="flex-1 py-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center shadow-lg transition-transform active:scale-95">
+                                  <QrCode size={16} className="mr-1.5"/> Ver Pase Individual
+                                </button>
+                              )}
+                              {!row.isMissing && (
+                                <span className="flex-1 py-3 bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-xl text-[11px] font-bold uppercase tracking-widest flex items-center justify-center border border-slate-200 dark:border-white/10 text-center">
+                                  Pin: {row.pin}
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
+                );
+              })
+            )}
+          </div>
+
         </div>
       </div>
 
