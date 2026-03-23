@@ -9507,279 +9507,403 @@ const PanelAnatomyOverlay = ({ onClose }) => {
     fontSerif: '"Cormorant Garamond", serif',
     fontSans: '"Montserrat", sans-serif',
     fontScript: '"Pinyon Script", cursive',
-    dark: '#1C1917',
+    dark: '#2A2A2A',
     gold: '#D4AF37',
     bg: '#FDFBF7'
   };
 
-  const TechGrid = () => (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.02]" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
-          <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#D4AF37" strokeWidth="0.5"/>
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#grid)" />
-    </svg>
-  );
-
   return (
-    <div className="fixed inset-0 z-[9999] bg-slate-900/40 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 lg:p-8 animate-in fade-in duration-500 font-sans text-[#1C1917]">
-      <style>{`
-        @keyframes tiktok-heart {
-          0% { opacity: 0; transform: translateY(0) scale(0.5) rotate(-5deg); }
-          15% { opacity: 1; transform: translateY(-30px) scale(1) rotate(5deg); }
-          80% { opacity: 1; transform: translateY(-100px) scale(1) rotate(-5deg); }
-          100% { opacity: 0; transform: translateY(-120px) scale(0.8) rotate(5deg); }
-        }
-        .animate-tiktok-heart {
-          animation: tiktok-heart 2s ease-out infinite;
-        }
-      `}</style>
+    <div className="fixed inset-0 z-[9999] bg-slate-900/60 dark:bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 lg:p-8 animate-in fade-in duration-500 font-sans text-[#2A2A2A]">
       
+      <style>{`
+        @keyframes floatHeart { 0% { bottom: -10%; transform: scale(0.5) translateX(0); opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { bottom: 110%; transform: scale(1.2) translateX(-20px); opacity: 0; } }
+        @keyframes floatComment { 0% { top: 110%; transform: scale(0.8); opacity: 0; } 10% { top: 75%; transform: scale(1); opacity: 1; } 90% { top: 15%; transform: scale(1); opacity: 1; } 100% { top: -10%; transform: scale(0.8); opacity: 0; } }
+        .anim-heart { animation: floatHeart 4s linear infinite; }
+        .anim-comment { animation: floatComment 8s linear infinite; }
+      `}</style>
+
+      {/* CAJA PRINCIPAL FLOTANTE */}
       <div className="w-[96vw] max-w-[1300px] h-[96vh] sm:h-[94vh] bg-[#FDFBF7] rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col relative overflow-hidden animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-700 border border-slate-200">
-        <TechGrid />
         
-        <nav className="sticky top-0 w-full bg-[#FDFBF7]/90 backdrop-blur-xl z-50 px-6 sm:px-10 py-4 flex justify-between items-center border-b border-[#D4AF37]/20 shrink-0">
-          <span className="font-editorial text-xl font-bold tracking-widest uppercase text-[#D4AF37]">Baulia <span className="font-light italic text-[#1C1917]">Tech Magazine</span></span>
-          <button onClick={onClose} className="group flex items-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-[#D4AF37] transition-colors bg-slate-100 px-4 py-2 rounded-full">
-            <span className="hidden sm:block">Cerrar Edición</span> <X size={16} className="sm:ml-2 transform group-hover:rotate-90 transition-transform duration-300"/>
+        {/* NAVEGACIÓN PEGADA ARRIBA */}
+        <nav className="sticky top-0 w-full bg-[#FDFBF7]/90 backdrop-blur-xl z-50 px-5 sm:px-10 py-4 flex justify-between items-center border-b border-[#D4AF37]/20 shrink-0">
+          <span className="font-editorial text-lg sm:text-xl font-bold tracking-widest uppercase text-[#D4AF37]">Baulia <span className="font-light italic text-[#2A2A2A]">System</span></span>
+          <button onClick={onClose} className="group flex items-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-[#D4AF37] transition-colors bg-slate-100 px-3 py-1.5 rounded-full sm:bg-transparent sm:px-0 sm:py-0">
+            <span className="hidden sm:block">Cerrar Arquitectura</span> <X size={16} className="sm:ml-2 transform group-hover:rotate-90 transition-transform duration-300"/>
           </button>
         </nav>
 
-        <main className="flex-1 overflow-y-auto custom-scrollbar px-6 sm:px-10 lg:px-16 pt-16 pb-24 text-[#1C1917] z-10 relative">
+        {/* ÁREA ESCROLEABLE */}
+        <main className="flex-1 overflow-y-auto custom-scrollbar px-5 sm:px-10 lg:px-20 pt-10 sm:pt-20 pb-32 text-[#2A2A2A]">
           
-          <header className="mb-20 border-b border-[#D4AF37]/20 pb-16">
-            <p className="text-[#D4AF37] font-bold tracking-[0.4em] uppercase text-[10px] mb-6">Fase 2: Arquitectura y Operación</p>
-            <h1 className="text-6xl sm:text-7xl lg:text-[100px] font-editorial font-black tracking-tighter leading-[0.9] text-[#1C1917]">
-              El Mando <br className="hidden md:block"/>
-              <span className="italic font-light text-[#D4AF37]">Central.</span>
-            </h1>
-            <p className="text-slate-600 max-w-2xl mt-8 text-base sm:text-lg font-light leading-relaxed">Olvídate de los excels desordenados y las libretas perdidas. Baulia te entrega el Centro de Comando para administrar cada detalle desde tu iPad o computadora.</p>
+          {/* HERO EDITORIAL */}
+          <header className="mb-20 sm:mb-32 border-b border-[#D4AF37]/20 pb-16">
+            <p className="text-[#D4AF37] font-bold tracking-[0.4em] uppercase text-[10px] mb-6 text-center md:text-left">Arquitectura de Software Nivel 2</p>
+            
+            <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-start">
+              <h1 className="text-6xl md:text-8xl lg:text-[110px] font-editorial font-black tracking-tighter leading-[0.85] w-full lg:w-1/2 text-[#2A2A2A] text-center md:text-left">
+                El Centro de <br/>
+                <span className="italic font-light text-[#D4AF37]">Comando.</span>
+              </h1>
+              
+              <div className="w-full lg:w-1/2 pt-2">
+                <p style={{ fontFamily: invTheme.fontSans }} className="text-base sm:text-lg font-light leading-relaxed text-justify text-slate-600 block">
+                  <span className="float-left text-[80px] sm:text-[100px] leading-[65px] sm:leading-[80px] pt-1 pr-4 font-editorial font-black text-[#D4AF37]">
+                    L
+                  </span>
+                  a verdadera magia de un evento no solo radica en lo que los invitados ven, sino en el control absoluto que ocurre detrás del telón. Baulia te entrega una Bóveda Digital diseñada con los más altos estándares de ingeniería de software. Transformamos el caos de las listas y hojas de cálculo en una plataforma fluida, automatizada y elegante que te permite dominar cada variable de tu gran día con la precisión de un director de orquesta.
+                </p>
+              </div>
+            </div>
           </header>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          <div className="space-y-24 sm:space-y-40">
 
-            {/* Tarjeta 1: Dashboard y Notificaciones (Reforzar texto) */}
-            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-lg transition-shadow">
-               <div className="flex items-center gap-3 mb-6 relative z-10">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 transition-colors group-hover:bg-indigo-50 group-hover:text-indigo-600"><LayoutDashboard size={20} strokeWidth={1.5}/></div>
-                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Centro de Mando</h3>
-               </div>
-               <div className="grid grid-cols-2 gap-3 mb-5 relative z-10">
-                  <div className="bg-[#FDFBF7] p-3 rounded-xl border border-slate-100 shadow-inner">
-                     <p className="text-[9px] uppercase tracking-wider font-bold text-slate-400 mb-0.5">Asistencia</p>
-                     <p className="text-2xl font-black text-slate-800">185p</p>
-                  </div>
-                  <div className="bg-[#FDFBF7] p-3 rounded-xl border border-slate-100 shadow-inner flex flex-col justify-end">
-                     <p className="text-[9px] uppercase tracking-wider font-bold text-slate-400 mb-0.5">Presupuesto</p>
-                     <p className="text-lg font-black text-[#D4AF37]">$150k</p>
-                  </div>
-               </div>
-               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto relative z-10 pt-4 border-t border-slate-100">Un vistazo rápido te dice exactamente cómo va la confirmación, ocupación de mesas, tareas y salud financiera. Incluye <b>notificaciones inteligentes</b> en tiempo real.</p>
-            </section>
-
-            {/* Tarjeta 2: Directorio Inteligente (Texto y Mock corregido) */}
-            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
-               <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-rose-50 group-hover:text-rose-600"><Users size={20} strokeWidth={1.5}/></div>
-                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Directorio Inteligente</h3>
-               </div>
-               <div className="bg-[#FDFBF7] p-4 rounded-xl border border-slate-100 mb-5 text-sm flex-1 flex flex-col justify-between">
-                  <div>
-                     <span className="font-bold text-slate-800 block">Familia Torres <span className="bg-rose-100 text-rose-600 px-1 rounded text-[8px] uppercase tracking-widest ml-1">Novia</span></span>
-                     <span className="text-[10px] text-slate-500 mt-1 flex items-center gap-2">Mesa 5 <span className="text-slate-300">|</span> PIN: <span className="font-mono bg-slate-200 px-1 rounded">7A9X</span></span>
-                  </div>
-                  <span className="bg-emerald-100 text-emerald-700 text-[9px] px-2 py-0.5 rounded font-black uppercase mt-3 w-max">Confirmado</span>
-               </div>
-               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100"><b>Los invitados se encargan de llenar sus datos</b> cuando confirman. Activa el "Modo Boda" para separar por Novia/Novio. Visualiza mesa, PIN y estatus en tiempo real.</p>
-            </section>
-
-            {/* Tarjeta 3: Gestión de Mesas (Reforzar texto) */}
-            <section className="flex flex-col bg-slate-900 p-7 rounded-3xl shadow-2xl relative overflow-hidden text-slate-200 hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
-               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-               <div className="flex items-center gap-3 mb-6 relative z-10">
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[#D4AF37]"><Wand2 size={20} strokeWidth={1.5}/></div>
-                  <h3 className="text-lg font-editorial font-bold text-white tracking-tight">Gestión y Auto-Acomodo</h3>
-               </div>
-               <div className="relative mb-5 z-10 h-28 flex items-center justify-center">
-                  <button className="bg-[#D4AF37] text-slate-900 text-[10px] font-black uppercase px-4 py-2 rounded flex items-center shadow-lg transform hover:scale-105 active:scale-95 transition-transform"><Wand2 size={12} className="mr-1.5"/> Auto-Acomodar (Libres: 6/10)</button>
-               </div>
-               <p className="text-slate-300 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-white/10 relative z-10">Nuestro algoritmo asigna invitados automáticamente priorizando <i>nunca separar a las familias</i> y optimizando espacios. centralizado. centralizado. centralizado. centralizado. centralizado. Arrastra y suelta familias o invitados individuales a sus mesas.</p>
-            </section>
-
-            {/* Tarjeta 4: Croquis Arquitectónico (REVISADO) */}
-            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
-               <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-sky-50 group-hover:text-sky-600"><MapIcon size={20} strokeWidth={1.5}/></div>
-                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Croquis Arquitectónico</h3>
-               </div>
-               <div className="relative mb-5 flex-1 flex items-center justify-center overflow-hidden">
-                  {/* Mesa Redonda Detallada 1 */}
-                  <div className="relative w-[72px] h-[72px] flex items-center justify-center mx-4">
-                     {[0, 36, 72, 108, 144, 180, 216, 252, 288, 324].map((deg, i) => (
-                        <div key={i} className={`absolute w-3 h-3 rounded-full border-[1.5px] ${i < 6 ? 'bg-emerald-400 border-emerald-600' : 'bg-slate-200 border-slate-400'} z-0`} style={{ transform: `rotate(${deg}deg) translate(36px)` }}>
-                          <div className={`absolute w-[45%] h-[115%] right-[-12%] rounded-full ${i < 6 ? 'bg-emerald-600' : 'bg-slate-400'}`}></div>
-                        </div>
-                     ))}
-                     <div className="absolute inset-0 m-auto w-14 h-14 bg-white border-[3px] border-slate-400 rounded-full shadow-lg flex items-center justify-center z-10">
-                        <span className="text-[10px] font-black text-slate-500">1</span>
-                     </div>
-                  </div>
-                  {/* Mesa Redonda Detallada 2 */}
-                  <div className="relative w-[72px] h-[72px] flex items-center justify-center mx-4">
-                     {[0, 36, 72, 108, 144, 180, 216, 252, 288, 324].map((deg, i) => (
-                        <div key={i} className={`absolute w-3 h-3 rounded-full border-[1.5px] ${i < 9 ? 'bg-emerald-400 border-emerald-600' : 'bg-slate-200 border-slate-400'} z-0`} style={{ transform: `rotate(${deg}deg) translate(36px)` }}>
-                          <div className={`absolute w-[45%] h-[115%] right-[-12%] rounded-full ${i < 9 ? 'bg-emerald-600' : 'bg-slate-400'}`}></div>
-                        </div>
-                     ))}
-                     <div className="absolute inset-0 m-auto w-14 h-14 bg-white border-[3px] border-slate-400 rounded-full shadow-lg flex items-center justify-center z-10">
-                        <span className="text-[10px] font-black text-slate-500">2</span>
-                     </div>
-                  </div>
-               </div>
-               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100">Te permite asignar número de sillas y acomodar mesas redondas detalladas con los patrones de ocupación correctos de nuestro motor. Todo con medidas estándar y croquis que tú mismo creas.</p>
-            </section>
-
-            {/* Tarjeta 5: Bóveda Financiera (Reforzar texto) */}
-            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
-               <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-amber-50 group-hover:text-amber-600"><Wallet size={20} strokeWidth={1.5}/></div>
-                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Finanzas y Contratos</h3>
-               </div>
-               <div className="flex justify-between items-start text-sm mb-5 flex-1 bg-[#FDFBF7] p-4 rounded-xl shadow-inner">
-                  <div>
-                     <span className="font-bold text-slate-800">Banquete</span>
-                     <span className="text-[10px] text-rose-500 block uppercase font-bold">Límite: 15 Oct</span>
-                  </div>
-                  <div className="text-right">
-                     <span className="text-[11px] text-slate-400 block">Total</span>
-                     <span className="font-bold text-slate-800">$85,000.00</span>
-                  </div>
-               </div>
-               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100">Establece tu presupuesto y lleva el control milimétrico. Gestiona proveedores, sube comprobantes de abonos y <b>contratos en PDF</b>, todo centralizado al alcance de tu dedo.</p>
-            </section>
-
-            {/* Tarjeta 6: Control de Accesos (QR Pulseras) */}
-            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
-               <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-emerald-50 group-hover:text-emerald-600"><Scan size={20} strokeWidth={1.5}/></div>
-                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Escáner y Puerta QR</h3>
-               </div>
-               <div className="bg-[#FDFBF7] p-4 rounded-xl border border-slate-100 mb-5 relative flex-1 flex flex-col items-center justify-center gap-2 text-center text-[10px] font-bold text-slate-600">
-                  <Printer size={16} className="text-indigo-500 mb-1"/>
-                  Descargar PDF Pulseras VIP
-                  <span className="absolute inset-0 bg-white/40 group-hover:opacity-0 opacity-100 transition-opacity"></span>
-               </div>
-               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100">Validación instantánea con celular para *Hostess*. Incluye un generador automático que crea un PDF listo para imprimir con QRs individuales para <b>pulseras VIP físicas</b>.</p>
-            </section>
-
-            {/* Tarjeta 7: Checklist Kanban */}
-            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
-               <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-rose-50 group-hover:text-rose-600"><CheckSquare size={20} strokeWidth={1.5}/></div>
-                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Tablero Kanban</h3>
-               </div>
-               <div className="flex gap-2 flex-1 mb-5">
-                  <div className="bg-[#FDFBF7] p-3 rounded-xl border border-slate-100 text-[9px] font-black uppercase text-slate-400 w-1/3">Hacer</div>
-                  <div className="bg-white p-3 rounded-xl border border-rose-200 text-[10px] font-black uppercase text-rose-500 w-2/3 shadow-md transform rotate-2">B Mobiliario</div>
-               </div>
-               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100">Gestiona la planeación paso a paso con una interfaz táctil profesional. centralizado. centralizado. centralizado. centralizado. centralizado. centralizado. Arrastra tus tareas entre "Por Hacer", "En Proceso" y "Listo".</p>
-            </section>
-
-            {/* Tarjeta 8: Estudio Decorativo (REVISADO) */}
-            <section className="flex flex-col bg-slate-900 p-7 rounded-3xl shadow-2xl relative overflow-hidden text-slate-200 hover:shadow-[0_0_20px_rgba(236,72,153,0.3)] transition-all">
-               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-               <div className="flex items-center gap-3 mb-6 relative z-10">
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-pink-400"><Palette size={20} strokeWidth={1.5}/></div>
-                  <h3 className="text-lg font-editorial font-bold text-white tracking-tight">Estudio Decorativo 2D</h3>
-               </div>
-               <div className="relative mb-5 z-10 h-28 flex items-center justify-center text-amber-300 font-editorial italic text-2xl drop-shadow-lg">Bocetador VIP neón</div>
-               <p className="text-slate-300 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-white/10 relative z-10">Boceta tus sets de fotos o mesas de honor. <b>Importa una foto real de tu locación</b>, escálala a medidas reales, y arrastra vectores arquitectónicos. Genera un reporte de materiales (BOM).</p>
-            </section>
-
-            {/* Tarjeta 9: Minuto a Minuto */}
-            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
-               <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-slate-800 group-hover:text-white"><Clock size={20} strokeWidth={1.5}/></div>
-                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">El Minuto a Minuto</h3>
-               </div>
-               <div className="relative flex-1 mb-5 flex flex-col justify-center gap-2 text-slate-500 font-light text-xs pl-3 border-l-2 border-slate-200">
-                  <span className="font-black text-indigo-600 text-sm">15:00</span> apertura puertas Hostess
-                  <span className="font-black text-slate-800 text-base">16:30 <span className="text-slate-500 font-normal">entrada VIP DJ</span></span>
-               </div>
-               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100">Sincroniza al staff y a los proveedores con un guion operativo perfecto. centralizado. centralizado. centralizado. centralizado. centralizado. centralizado. centralizado. Genera un Rundown Operativo en PDF al instante.</p>
-            </section>
-
-            {/* Tarjeta 10: Galería Móvil y Retos (Dinamizar Likes y Misiones Secreta) */}
-            <section className="flex flex-col bg-white p-7 rounded-3xl shadow-sm border border-slate-100 group hover:shadow-lg transition-shadow">
-               <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-pink-50 group-hover:text-pink-600"><Smartphone size={20} strokeWidth={1.5}/></div>
-                  <h3 className="text-lg font-editorial font-bold text-slate-900 tracking-tight">Interactividad Móvil</h3>
-               </div>
-               <div className="bg-[#FDFBF7] p-4 rounded-xl mb-5 flex gap-3 overflow-x-auto hide-scrollbar relative">
-                   <div className="w-20 h-24 bg-slate-900 border-2 border-rose-500 rounded-lg flex flex-col justify-end p-2 relative shrink-0">
-                      <img src="/maricela-estudillo-gonzalez/foto1.jpg" className="w-full h-full object-cover absolute inset-0 opacity-50" onError={(e) => e.target.style.display = 'none'} />
-                      <div className="flex justify-between text-white text-[9px] relative z-10"><span className="flex items-center"><Heart size={8} className="text-rose-500 fill-rose-500 mr-0.5"/> 12</span> <span>Maricela estudi...</span></div>
+            {/* 01. DASHBOARD */}
+            <section className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
+              <div className="w-full lg:w-1/2 relative">
+                {/* Objeto visual flotante sin cajas de fondo */}
+                <div className="relative pl-6 border-l border-[#D4AF37]/30 py-4">
+                   <div className="flex gap-6 mb-8">
+                      <div className="flex flex-col">
+                         <span className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-2">Pases Asignados</span>
+                         <span style={{ fontFamily: invTheme.fontSerif }} className="text-6xl font-black text-[#2A2A2A]">185</span>
+                         <span className="text-[9px] text-[#8DB580] font-bold uppercase tracking-widest mt-2">85% Confirmado</span>
+                      </div>
+                      <div className="flex flex-col">
+                         <span className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-2">Avance Evento</span>
+                         <span style={{ fontFamily: invTheme.fontSerif }} className="text-6xl font-black text-[#2A2A2A]">65%</span>
+                         <div className="w-24 h-1 bg-slate-200 mt-3 rounded-full"><div className="w-[65%] h-1 bg-[#D4AF37] rounded-full"></div></div>
+                      </div>
                    </div>
-                   <div className="absolute -bottom-6 -right-6 text-rose-500 animate-tiktok-heart opacity-60"><Heart size={24}/></div>
-               </div>
-               <p className="text-slate-600 text-xs sm:text-sm font-light leading-relaxed mt-auto pt-4 border-t border-slate-100">La invitación web cobra vida. Los invitados suben fotos, reciben <i>likes</i>, comentarios y juegan divertidas <b>"Misiones Secretas"</b>. centralizado. centralizado. centralizado. centralizado. centralizado. centralizado.</p>
+                   
+                   <div className="inline-flex items-start gap-3 bg-white/60 backdrop-blur-md p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] border border-[#D4AF37]/20">
+                      <Bell size={20} className="text-[#D4AF37] mt-0.5 animate-pulse"/>
+                      <div>
+                         <p style={{ fontFamily: invTheme.fontSans }} className="text-xs font-black uppercase text-slate-800 tracking-wider">Notificación Inteligente</p>
+                         <p style={{ fontFamily: invTheme.fontSans }} className="text-[11px] text-slate-500 mt-1">Familia Torres solicita +2 pases extra.</p>
+                      </div>
+                   </div>
+                </div>
+              </div>
+              <div className="w-full lg:w-1/2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 block">01. Telemetría en vivo</span>
+                <h3 style={{ fontFamily: invTheme.fontSerif }} className="text-4xl sm:text-5xl font-bold mb-6 text-[#2A2A2A]">El Tablero Principal</h3>
+                <p style={{ fontFamily: invTheme.fontSans }} className="text-slate-600 leading-relaxed font-light text-sm text-justify">
+                  Tu centro de mando te ofrece un vistazo instantáneo a la salud de tu evento. Un <b>sistema de notificaciones inteligentes</b> te avisa de pagos próximos, nuevas confirmaciones o asistentes que requieren pases extra. Todo es exportable en elegantes reportes PDF (Ejecutivos o Directorios completos) con un solo clic, dándote un poder de análisis que ninguna libreta puede igualar.
+                </p>
+              </div>
+            </section>
+
+            {/* 02. DIRECTORIO */}
+            <section className="flex flex-col lg:flex-row-reverse gap-12 lg:gap-20 items-center">
+              <div className="w-full lg:w-1/2 relative pl-6 border-l border-[#D4AF37]/30 py-4">
+                 <div className="flex items-center gap-3 mb-6">
+                    <span className="bg-[#F76C82]/10 text-[#F76C82] px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest border border-[#F76C82]/20">Lado Novia</span>
+                    <span className="bg-slate-100 text-slate-500 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest">Lado Novio</span>
+                 </div>
+                 
+                 <div className="space-y-6">
+                    <div>
+                       <span style={{ fontFamily: invTheme.fontSerif }} className="text-3xl font-bold text-[#2A2A2A] block mb-1">Familia Torres</span>
+                       <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
+                          <span>Juan, María, Luis</span>
+                          <span className="bg-[#8DB580]/10 text-[#8DB580] px-1.5 rounded uppercase font-bold text-[9px] border border-[#8DB580]/20">Confirmado</span>
+                       </div>
+                    </div>
+                    <div>
+                       <span style={{ fontFamily: invTheme.fontSerif }} className="text-3xl font-bold text-[#2A2A2A] block mb-1 line-through opacity-40">Roberto Martínez</span>
+                       <div className="flex items-center gap-3 text-xs text-slate-400 font-medium">
+                          <span>1 Pase</span>
+                          <span className="bg-slate-100 text-slate-500 px-1.5 rounded uppercase font-bold text-[9px]">Cancelado</span>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+              <div className="w-full lg:w-1/2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 block">02. RSVP Sincronizado</span>
+                <h3 style={{ fontFamily: invTheme.fontSerif }} className="text-4xl sm:text-5xl font-bold mb-6 text-[#2A2A2A]">Directorio Inteligente</h3>
+                <p style={{ fontFamily: invTheme.fontSans }} className="text-slate-600 leading-relaxed font-light text-sm text-justify">
+                  El fin del Excel. <b>Tú no haces la lista de nombres.</b> Solo creas la familia y asignas el número de pases permitidos. Los invitados se encargan de escribir sus nombres al confirmar en la invitación web. Tu base de datos se actualiza al milisegundo. Puedes separar invitados por lado (Novia/Novio) y el sistema detectará automáticamente los pases infantiles para que sepas exactamente cuántos platillos <i>Kids</i> ordenar.
+                </p>
+              </div>
+            </section>
+
+            {/* 03. AUTO-ACOMODO */}
+            <section className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
+              <div className="w-full lg:w-1/2 relative pl-6 border-l border-[#D4AF37]/30 py-4">
+                 <div className="flex justify-between items-end mb-6 max-w-sm">
+                    <div>
+                       <span className="text-[9px] text-slate-400 uppercase tracking-widest font-bold block mb-1">Sin mesa (12)</span>
+                       <span style={{ fontFamily: invTheme.fontSans }} className="text-lg font-bold text-[#2A2A2A] flex items-center"><GripVertical size={14} className="text-slate-300 mr-1"/> Fam. López (4p)</span>
+                    </div>
+                    <div className="w-8 h-8 rounded-full border border-[#D4AF37] flex items-center justify-center">
+                       <ArrowRight size={14} className="text-[#D4AF37]" />
+                    </div>
+                    <div className="text-right">
+                       <span className="text-[9px] text-slate-400 uppercase tracking-widest font-bold block mb-1">Mesa 5</span>
+                       <span style={{ fontFamily: invTheme.fontSans }} className="text-lg font-bold text-[#8DB580]">Libres: 6/10</span>
+                    </div>
+                 </div>
+                 
+                 <button className="bg-[#D4AF37] text-white text-[10px] font-black uppercase tracking-widest px-5 py-2.5 rounded-full flex items-center shadow-lg hover:scale-105 transition-transform">
+                   <Wand2 size={14} className="mr-2"/> Algoritmo Auto-Acomodar
+                 </button>
+              </div>
+              <div className="w-full lg:w-1/2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 block">03. Optimización de Espacios</span>
+                <h3 style={{ fontFamily: invTheme.fontSerif }} className="text-4xl sm:text-5xl font-bold mb-6 text-[#2A2A2A]">Gestión de Mesas</h3>
+                <p style={{ fontFamily: invTheme.fontSans }} className="text-slate-600 leading-relaxed font-light text-sm text-justify">
+                  La función por la que todo Planner suspira. Deja que el sistema piense por ti: nuestro algoritmo de <b>Auto-Acomodo</b> llena los asientos vacíos priorizando <i>nunca separar a una familia</i>. Si prefieres el control absoluto, su interfaz táctil te permite arrastrar invitados manualmente, indicándote en tiempo real cuántas sillas quedan libres para crear el balance perfecto.
+                </p>
+              </div>
+            </section>
+
+            {/* 04. CROQUIS */}
+            <section className="flex flex-col lg:flex-row-reverse gap-12 lg:gap-20 items-center">
+              <div className="w-full lg:w-1/2 relative pl-6 border-l border-[#D4AF37]/30 py-8 flex justify-center lg:justify-start">
+                 
+                 {/* Mesa 1: 10 sillas, 8 llenas */}
+                 <div className="relative w-28 h-28 flex items-center justify-center">
+                    <div className="absolute inset-3 bg-[#FDFBF7] border border-slate-300 rounded-full shadow-sm flex items-center justify-center z-10">
+                       <span style={{ fontFamily: invTheme.fontSerif }} className="text-2xl font-bold text-slate-600">1</span>
+                    </div>
+                    {[0,36,72,108,144,180,216,252,288,324].map((deg, i) => (
+                       <div key={i} className={`absolute w-3.5 h-3.5 rounded-full border-[1.5px] ${i < 8 ? 'bg-[#8DB580] border-[#6b8c60]' : 'bg-slate-200 border-slate-400'} z-0`} style={{ transform: `rotate(${deg}deg) translate(48px)` }}></div>
+                    ))}
+                 </div>
+                 
+                 {/* Mesa 2: 8 sillas, 4 llenas */}
+                 <div className="relative w-24 h-24 flex items-center justify-center mt-12 -ml-6">
+                    <div className="absolute inset-2.5 bg-[#FDFBF7] border border-slate-300 rounded-full shadow-sm flex items-center justify-center z-10">
+                       <span style={{ fontFamily: invTheme.fontSerif }} className="text-xl font-bold text-slate-600">2</span>
+                    </div>
+                    {[0,45,90,135,180,225,270,315].map((deg, i) => (
+                       <div key={i} className={`absolute w-3 h-3 rounded-full border-[1.5px] ${i < 4 ? 'bg-[#8DB580] border-[#6b8c60]' : 'bg-slate-200 border-slate-400'} z-0`} style={{ transform: `rotate(${deg}deg) translate(40px)` }}></div>
+                    ))}
+                 </div>
+
+              </div>
+              <div className="w-full lg:w-1/2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 block">04. Arquitectura 2D</span>
+                <h3 style={{ fontFamily: invTheme.fontSerif }} className="text-4xl sm:text-5xl font-bold mb-6 text-[#2A2A2A]">Croquis del Salón</h3>
+                <p style={{ fontFamily: invTheme.fontSans }} className="text-slate-600 leading-relaxed font-light text-sm text-justify">
+                  Dibuja un panorama realista de tu evento. Agrega mesas con capacidades precisas y dispónlas visualmente para replicar tu salón de fiestas o jardín. Todo el acomodo de invitados que realices se refleja gráficamente aquí en tiempo real, permitiéndote identificar huecos visuales. Al terminar, exporta el plano y entrégalo a tu equipo de banqueteros con total confianza.
+                </p>
+              </div>
+            </section>
+
+            {/* 05. BÓVEDA FINANCIERA */}
+            <section className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
+              <div className="w-full lg:w-1/2 relative pl-6 border-l border-[#D4AF37]/30 py-4">
+                 <div className="max-w-xs">
+                    <div className="flex justify-between items-start mb-4">
+                       <div>
+                          <span style={{ fontFamily: invTheme.fontSerif }} className="font-bold text-[#2A2A2A] text-2xl block mb-1">Banquete Gourmet</span>
+                          <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Comida/Bebida</span>
+                       </div>
+                       <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold border-b border-slate-300 pb-0.5">15 Oct</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-end mb-6">
+                       <div>
+                         <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-1 font-bold">Costo Total</p>
+                         <p style={{ fontFamily: invTheme.fontSans }} className="font-medium text-slate-600 text-sm">$85,000</p>
+                       </div>
+                       <div className="text-right">
+                         <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-1 font-bold">Resta por pagar</p>
+                         <p style={{ fontFamily: invTheme.fontSans }} className="font-black text-[#D4AF37] text-xl">$45,000</p>
+                       </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-widest text-slate-500">
+                       <span className="flex items-center"><FileSignature size={12} className="mr-1.5 text-[#D4AF37]"/> Contrato.pdf</span>
+                       <span className="flex items-center"><UploadCloud size={12} className="mr-1.5 text-[#D4AF37]"/> Recibos (2)</span>
+                    </div>
+                 </div>
+              </div>
+              <div className="w-full lg:w-1/2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 block">05. Contabilidad y Proveedores</span>
+                <h3 style={{ fontFamily: invTheme.fontSerif }} className="text-4xl sm:text-5xl font-bold mb-6 text-[#2A2A2A]">Bóveda Financiera</h3>
+                <p style={{ fontFamily: invTheme.fontSans }} className="text-slate-600 leading-relaxed font-light text-sm text-justify">
+                  Establece tu presupuesto y lleva el control milimétrico de tus gastos. Registra los costos de cada proveedor, adjunta sus contratos en PDF y sube los recibos de cada abono, todo centralizado al alcance de tu dedo. El sistema audita tus finanzas mostrándote exactamente cuánto has pagado y te genera reportes corporativos para tu contador.
+                </p>
+              </div>
+            </section>
+
+            {/* 06. ESCÁNER QR */}
+            <section className="flex flex-col lg:flex-row-reverse gap-12 lg:gap-20 items-center">
+              <div className="w-full lg:w-1/2 relative pl-6 border-l border-[#D4AF37]/30 py-4 flex flex-col items-center sm:items-start text-center sm:text-left">
+                 
+                 <div className="w-24 h-24 rounded-[2rem] border border-slate-200 shadow-xl relative flex items-center justify-center overflow-hidden mb-6 bg-white">
+                    <div className="absolute w-full h-0.5 bg-[#8DB580] shadow-[0_0_10px_#8DB580] animate-pulse"></div>
+                    <QrCode size={36} className="text-slate-300"/>
+                 </div>
+                 
+                 <h4 style={{ fontFamily: invTheme.fontSerif }} className="text-2xl font-bold text-[#2A2A2A] mb-1">Familia Fuentes (4)</h4>
+                 <p className="text-[10px] font-black uppercase tracking-widest text-[#8DB580] mb-3">Acceso Aprobado • Mesa 5</p>
+                 
+                 <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 flex items-center border border-slate-200 px-3 py-1.5 rounded-full">
+                    <Printer size={12} className="mr-1.5"/> Generar Pulseras PDF
+                 </span>
+
+              </div>
+              <div className="w-full lg:w-1/2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 block">06. Seguridad Perimetral</span>
+                <h3 style={{ fontFamily: invTheme.fontSerif }} className="text-4xl sm:text-5xl font-bold mb-6 text-[#2A2A2A]">Escáner y Puerta QR</h3>
+                <p style={{ fontFamily: invTheme.fontSans }} className="text-slate-600 leading-relaxed font-light text-sm text-justify">
+                  El blindaje definitivo. Las <i>Hostess</i> o cadeneros usarán su propio celular como escáner láser. El sistema valida los pases QR al instante, evitando falsificaciones e invitados sorpresa, mostrando en pantalla la mesa asignada. Además, incluye un motor que genera un PDF listo para imprimir con códigos QR individuales para crear <b>pulseras VIP físicas</b> en eventos de alta restricción.
+                </p>
+              </div>
+            </section>
+
+            {/* 07. TABLERO KANBAN */}
+            <section className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
+              <div className="w-full lg:w-1/2 relative pl-6 border-l border-[#D4AF37]/30 py-4">
+                 
+                 <div className="flex flex-col gap-6 max-w-sm">
+                    <div className="flex items-center gap-4">
+                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 w-16">Hacer</span>
+                       <div className="flex-1 bg-white p-3 rounded-xl border border-slate-200 shadow-sm"><p className="font-bold text-xs text-slate-800">Prueba de Menú</p></div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                       <span className="text-[9px] font-black uppercase tracking-widest text-[#D4AF37] w-16">Proceso</span>
+                       <div className="flex-1 bg-white p-3 rounded-xl border border-[#D4AF37]/50 shadow-md transform -rotate-1 cursor-grab"><p className="font-bold text-xs text-slate-800">Permisos Locación</p></div>
+                    </div>
+                    <div className="flex items-center gap-4 opacity-50">
+                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 w-16">Listo</span>
+                       <div className="flex-1 bg-transparent p-3 rounded-xl border border-slate-200 border-dashed"><p className="font-bold text-xs text-slate-400">Contratar DJ</p></div>
+                    </div>
+                 </div>
+
+              </div>
+              <div className="w-full lg:w-1/2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 block">07. Planeación Estructurada</span>
+                <h3 style={{ fontFamily: invTheme.fontSerif }} className="text-4xl sm:text-5xl font-bold mb-6 text-[#2A2A2A]">Tablero Kanban</h3>
+                <p style={{ fontFamily: invTheme.fontSans }} className="text-slate-600 leading-relaxed font-light text-sm text-justify">
+                  Gestiona la planeación paso a paso con una interfaz táctil profesional. Arrastra tus tareas entre "Por Hacer", "En Proceso" y "Listo". Asigna categorías y fechas límite; el sistema se encarga de priorizarlas y recordarte las tareas urgentes para que tengas control absoluto de los meses previos a la celebración.
+                </p>
+              </div>
+            </section>
+
+            {/* 08. BOCETADOR DECORATIVO (ARTE FLORAL Y NEÓN) */}
+            <section className="flex flex-col lg:flex-row-reverse gap-12 lg:gap-20 items-center">
+              <div className="w-full lg:w-1/2 relative pl-6 border-l border-[#D4AF37]/30 py-4 flex justify-center lg:justify-start">
+                 
+                 <div className="relative w-64 h-64 flex items-end justify-center border-b border-slate-300 pb-2">
+                    {/* Arco floral/mampara */}
+                    <div className="w-40 h-48 border-4 border-[#D4AF37] rounded-t-[50px] absolute bottom-2 flex items-center justify-center bg-[#FDFBF7] shadow-sm">
+                       <span style={{ fontFamily: invTheme.fontScript }} className="text-3xl text-[#F76C82] drop-shadow-md">Better Together</span>
+                    </div>
+                    {/* Pampas / Flores (representación abstracta elegante) */}
+                    <div className="absolute bottom-2 left-8 w-12 h-24 bg-[#8DB580]/20 rounded-full blur-[2px]"></div>
+                    <div className="absolute bottom-2 right-8 w-12 h-24 bg-[#F76C82]/20 rounded-full blur-[2px]"></div>
+                    <div className="absolute bottom-2 left-6 w-8 h-16 bg-[#D4AF37]/20 rounded-full blur-[2px] transform -rotate-12"></div>
+                    <div className="absolute bottom-2 right-6 w-8 h-16 bg-[#D4AF37]/20 rounded-full blur-[2px] transform rotate-12"></div>
+                    {/* Regla de medición */}
+                    <div className="absolute bottom-0 w-full flex justify-between px-4">
+                       <span className="text-[8px] font-mono text-slate-400">0m</span>
+                       <span className="text-[8px] font-mono text-slate-400">2.5m</span>
+                    </div>
+                 </div>
+
+              </div>
+              <div className="w-full lg:w-1/2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 block">08. Diseño Fotográfico</span>
+                <h3 style={{ fontFamily: invTheme.fontSerif }} className="text-4xl sm:text-5xl font-bold mb-6 text-[#2A2A2A]">Estudio Decorativo 2D</h3>
+                <p style={{ fontFamily: invTheme.fontSans }} className="text-slate-600 leading-relaxed font-light text-sm text-justify">
+                  Crea bocetos espectaculares de tus sets de fotos o mesas de honor. <b>Importa una foto real de tu locación</b>, cálibrala a medidas reales y arrastra vectores arquitectónicos (mamparas, arcos florales, luces neón, mobiliario lounge). Envíale el diseño en PDF a tu decorador junto a un listado automático de materiales (BOM) para garantizar que la visión se ejecute a la perfección.
+                </p>
+              </div>
+            </section>
+
+            {/* 09. MINUTO A MINUTO */}
+            <section className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
+              <div className="w-full lg:w-1/2 relative pl-6 border-l border-[#D4AF37]/30 py-4">
+                 
+                 <div className="relative">
+                    <div className="absolute left-[3px] top-2 bottom-2 w-[1px] bg-slate-200"></div>
+                    
+                    <div className="relative pl-6 mb-8">
+                       <div className="absolute left-0 top-1.5 w-2 h-2 bg-[#D4AF37] rounded-full shadow-[0_0_8px_#D4AF37]"></div>
+                       <span className="font-sans text-[10px] text-[#D4AF37] tracking-[0.2em] font-bold block uppercase mb-1">15:00 hrs</span>
+                       <h4 style={{ fontFamily: invTheme.fontSerif }} className="text-2xl text-slate-800 font-bold mb-1">Apertura de Puertas</h4>
+                       <span className="text-[8px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase font-bold tracking-widest inline-block">Hostess</span>
+                    </div>
+
+                    <div className="relative pl-6">
+                       <div className="absolute left-0 top-1.5 w-2 h-2 bg-white border border-slate-300 rounded-full"></div>
+                       <span className="font-sans text-[10px] text-slate-400 tracking-[0.2em] font-bold block uppercase mb-1">16:30 hrs</span>
+                       <h4 style={{ fontFamily: invTheme.fontSerif }} className="text-2xl text-slate-800 font-bold mb-1">Entrada Estelar</h4>
+                       <span className="text-[8px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase font-bold tracking-widest inline-block">DJ</span>
+                       <p className="text-[10px] text-slate-400 italic mt-2">Canción: Viva la Vida</p>
+                    </div>
+                 </div>
+
+              </div>
+              <div className="w-full lg:w-1/2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 block">09. Sincronización Operativa</span>
+                <h3 style={{ fontFamily: invTheme.fontSerif }} className="text-4xl sm:text-5xl font-bold mb-6 text-[#2A2A2A]">El Minuto a Minuto</h3>
+                <p style={{ fontFamily: invTheme.fontSans }} className="text-slate-600 leading-relaxed font-light text-sm text-justify">
+                  Sincroniza al staff y a los proveedores con un guion operativo impecable. Crea el itinerario interno del evento especificando la hora, actividad, responsable, lugar y notas (como canciones específicas o entradas de platillos). El sistema genera un <b>Rundown Operativo en PDF</b> al instante para imprimirlo o enviarlo por WhatsApp al equipo la mañana del evento.
+                </p>
+              </div>
+            </section>
+
+            {/* 10. MURO SOCIAL E INMERSIVO */}
+            <section className="flex flex-col lg:flex-row-reverse gap-12 lg:gap-20 items-center">
+              <div className="w-full lg:w-1/2 relative pl-6 border-l border-[#D4AF37]/30 py-4">
+                 
+                 <div className="w-full aspect-video bg-black rounded-3xl border-4 border-slate-800 shadow-2xl relative overflow-hidden flex">
+                    <div className="w-2/3 relative">
+                       <img src="/maricela-estudillo-gonzalez/foto1.jpg" className="w-full h-full object-cover opacity-90" onError={(e) => e.target.style.display = 'none'} />
+                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                       
+                       {/* Corazones flotantes TikTok style */}
+                       <div className="absolute bottom-8 right-12 text-[#F76C82] anim-heart opacity-0"><Heart size={20} className="fill-[#F76C82]"/></div>
+                       <div className="absolute bottom-2 right-24 text-[#F76C82] anim-heart opacity-0" style={{ animationDelay: '1s' }}><Heart size={16} className="fill-[#F76C82]"/></div>
+                       <div className="absolute bottom-12 right-6 text-[#F76C82] anim-heart opacity-0" style={{ animationDelay: '2.5s' }}><Heart size={24} className="fill-[#F76C82]"/></div>
+
+                       {/* Comentarios flotantes */}
+                       <div className="absolute top-1/4 right-4 bg-white/30 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2 shadow-lg anim-comment opacity-0">
+                          <span className="text-white text-[9px] font-bold">¡Hermosos! ✨</span>
+                       </div>
+                       <div className="absolute top-1/3 left-4 bg-white/20 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2 shadow-lg anim-comment opacity-0" style={{ animationDelay: '3s' }}>
+                          <span className="text-white text-[9px] font-bold">La mejor fiesta 🥂</span>
+                       </div>
+
+                       <div className="absolute bottom-3 left-4 text-left">
+                          <p className="text-white font-bold text-sm drop-shadow-md">Familia López</p>
+                          <p className="text-white/80 text-[10px] italic">"Disfrutando muchísimo"</p>
+                       </div>
+                    </div>
+                    
+                    <div className="w-1/3 border-l border-white/20 flex flex-col justify-center items-center bg-[#111]">
+                       <QrCode size={36} className="text-white/50 mb-3" />
+                       <p className="text-white font-black text-[7px] uppercase tracking-widest text-center leading-tight">¡Sube tu foto!<br/><span className="text-[#D4AF37]">#NuestraNoche</span></p>
+                       
+                       <div className="mt-4 bg-[#D4AF37]/20 border border-[#D4AF37]/50 rounded-lg p-2 text-center w-3/4 mx-auto">
+                          <p className="text-[14px]">🎲</p>
+                          <p className="text-[#D4AF37] text-[6px] font-black uppercase tracking-widest mt-1">Misión Secreta</p>
+                       </div>
+                    </div>
+                 </div>
+
+              </div>
+              <div className="w-full lg:w-1/2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 block">10. Entretenimiento Interactivo</span>
+                <h3 style={{ fontFamily: invTheme.fontSerif }} className="text-4xl sm:text-5xl font-bold mb-6 text-[#2A2A2A]">Muro Social en Vivo</h3>
+                <p style={{ fontFamily: invTheme.fontSans }} className="text-slate-600 leading-relaxed font-light text-sm text-justify">
+                  La invitación web se transforma el día del evento en una red social. Tus invitados suben fotos, dan <i>likes</i>, comentan y juegan "Misiones Fotográficas". Integramos un modo especial diseñado para conectarse a las pantallas o proyectores del salón. Las interacciones (corazones y comentarios) flotan sobre la pantalla en tiempo real, creando una experiencia majestuosa. Todo cuenta con moderación previa opcional.
+                </p>
+              </div>
             </section>
 
           </div>
 
-          {/* 🔴 NUEVO BLOQUE FINAL: PROYECTOR DILATADO (TARJETA 09 RESTORED) */}
-          <section className="mt-20 border-t border-[#D4AF37]/30 pt-16 lg:pt-20 bg-slate-900 rounded-3xl p-8 lg:p-12 relative overflow-hidden shadow-2xl">
-             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-             
-             <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-6 block relative z-10">Entretenimiento en Tiempo Real</span>
-             <h3 className="text-3xl sm:text-4xl lg:text-5xl font-editorial font-black tracking-tighter text-white mb-10 relative z-10">El Muro Social (Proyector Salón)</h3>
-
-             <div className="w-full max-w-2xl aspect-video bg-black rounded-2xl border-4 border-slate-800 shadow-2xl relative overflow-hidden mb-8 z-10 flex">
-                {/* Foto gigante con dinámica de likes y comentarios */}
-                <div className="w-2/3 h-full relative">
-                   <img src="/maricela-estudillo-gonzalez/foto1.jpg" className="w-full h-full object-cover opacity-80" onError={(e) => e.target.style.display = 'none'} />
-                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                   
-                   {/* 🎲 CORAZONES FLOTANTES ESTILO TIKTOK */}
-                   {[10, 20, 30, 40, 50, 60, 70, 80].map((left, i) => (
-                      <div key={i} className="absolute text-rose-500 animate-tiktok-heart opacity-0" style={{ left: `${left}%`, animationDelay: `${i * 0.4}s`, bottom: `${i*10}%` }}>
-                         <Heart size={20} className="fill-rose-500"/>
-                      </div>
-                   ))}
-
-                   {/* 💬 COMENTARIOS FLOTANTES */}
-                   <div className="absolute top-1/4 right-4 bg-white/20 backdrop-blur rounded-full px-3 py-1.5 flex items-center gap-2 shadow-lg animate-in slide-in-from-right fade-in transition-all">
-                      <MessageCircle size={10} className="text-white"/>
-                      <span className="text-white text-[9px] font-bold">¡Guapísimos! ✨</span>
-                   </div>
-                   <div className="absolute top-1/3 left-4 bg-white/10 backdrop-blur rounded-full px-3 py-1.5 flex items-center gap-2 shadow-lg animate-in slide-in-from-left fade-in transition-all Delay-500">
-                      <Heart size={10} className="text-white fill-rose-500"/>
-                      <span className="text-white text-[9px] font-bold">¡Qué noche! 🥂</span>
-                   </div>
-
-                   <div className="absolute bottom-4 left-4 text-left pr-20">
-                      <p className="text-white font-editorial font-bold text-2xl drop-shadow-md">Familia LópezFuentes</p>
-                      <p className="text-white/80 font-serif italic text-xs">"Disfrutando muchísimo la fiesta, felicidades Maricela"</p>
-                   </div>
-                </div>
-                {/* Barra lateral */}
-                <div className="w-1/3 h-full bg-slate-900/90 backdrop-blur border-l border-white/10 p-5 flex flex-col justify-center items-center">
-                   <QrCode size={56} className="text-white/50 mb-3" strokeWidth={1}/>
-                   <p className="text-white font-editorial italic text-base leading-tight text-center">Sube tu foto</p>
-                   <p className="text-[#D4AF37] font-black text-[9px] uppercase tracking-widest mt-1">#NuestraFiestaVIP</p>
-                </div>
-             </div>
-
-             <p className="text-sm sm:text-base text-slate-400 leading-relaxed font-light max-w-3xl relative z-10">
-               Integramos una vista especial diseñada para conectarse a las pantallas gigantes del salón. centralizado. centralizado. centralizado. centralizado. centralizado. centralizado. centralizado. Las fotografías, <b>likes</b> y comentarios que tus invitados suban desde sus celulares aparecerán en tiempo real, creando una experiencia interactiva majestuosa, vibrante y divertida. Todo con opción de moderación previa.
-             </p>
-          </section>
-
-          <footer className="mt-20 border-t border-[#D4AF37]/30 pt-12 flex flex-col md:flex-row justify-between items-center text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-colors gap-4 text-center md:text-left pb-10">
+          <footer className="mt-16 border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest gap-4 text-center md:text-left px-6 sm:px-10 pb-8">
             <span>Baulia Technologies Inc.</span>
-            <span className="text-[#D4AF37]">Software Premium B2B & B2C</span>
+            <span className="text-[#D4AF37]">Software Premium para la Gestión de Eventos</span>
           </footer>
 
         </main>
