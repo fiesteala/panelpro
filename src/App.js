@@ -9040,6 +9040,26 @@ const RevealSection = ({ children, className = '', delay = 0 }) => {
 // --- COMPONENTE: REVISTA EDITORIAL (ANATOMÍA DE LA INVITACIÓN) ---
 // ==========================================
 const AnatomyOverlay = ({ onClose }) => {
+  // 🌸 ARTE VECTORIAL EXTRAÍDO DE LA INVITACIÓN REAL
+  const FloralCorner = ({ className, style }) => (
+    <svg viewBox="0 0 200 200" className={className} style={style} xmlns="http://www.w3.org/2000/svg">
+      <g transform="scale(0.8) translate(20, 20)">
+        <path d="M 40 100 C 10 70, 20 20, 80 10 C 80 60, 60 90, 40 100 Z" fill="#8DB580" opacity="0.8"/>
+        <path d="M 100 40 C 70 10, 20 20, 10 80 C 60 80, 90 60, 100 40 Z" fill="#A3C697" opacity="0.9"/>
+        <path d="M 130 140 C 160 170, 180 130, 170 80 C 140 90, 120 120, 130 140 Z" fill="#8DB580" opacity="0.8"/>
+        <circle cx="120" cy="70" r="30" fill="#FFD166" />
+        <circle cx="120" cy="70" r="15" fill="#FFB347" />
+        <path d="M 120 40 C 130 20, 150 20, 145 45 C 165 40, 175 60, 150 70 C 175 80, 165 100, 145 95 C 150 120, 130 120, 120 100 C 110 120, 90 120, 95 95 C 75 100, 65 80, 90 70 C 65 60, 75 40, 95 45 C 90 20, 110 20, 120 40 Z" fill="#FFE28A" opacity="0.9"/>
+        <circle cx="70" cy="120" r="35" fill="#F76C82" />
+        <circle cx="70" cy="120" r="15" fill="#D84A63" />
+        <path d="M 70 85 C 85 60, 110 65, 100 90 C 125 80, 140 105, 110 120 C 140 135, 125 160, 100 150 C 110 175, 85 180, 70 155 C 55 180, 30 175, 40 150 C 15 160, 0 135, 30 120 C 0 105, 15 80, 40 90 C 30 65, 55 60, 70 85 Z" fill="#FF8FA3" opacity="0.9"/>
+        <circle cx="120" cy="70" r="5" fill="#D4AF37" />
+        <circle cx="70" cy="120" r="6" fill="#D4AF37" />
+        <path d="M 90 90 Q 100 100, 110 90" stroke="#D4AF37" strokeWidth="2" fill="none"/>
+      </g>
+    </svg>
+  );
+
   // Los 24 elementos categorizados lógicamente en 4 Features Editoriales
   const sections = [
     {
@@ -9088,7 +9108,6 @@ const AnatomyOverlay = ({ onClose }) => {
       items: [
         { name: 'Confirmación (RSVP)', icon: <Ticket size={28} strokeWidth={1}/>, desc: 'Gestión de asistencia blindada por número de pases. Cero colados.' },
         { name: 'Mesa de Regalos', icon: <Gift size={28} strokeWidth={1}/>, desc: 'Recepción de aportaciones en efectivo directo a tus cuentas, sin comisiones.' },
-        // 🔴 AQUÍ ESTABA EL ERROR DEL ÍCONO QUE CRASHEABA EL BOTÓN
         { name: 'Reproductor de Música', icon: <PlayCircle size={28} strokeWidth={1}/>, desc: 'Ambienta la experiencia visual con la canción principal de tu celebración.' },
         { name: '# de Instagram', icon: <Hash size={28} strokeWidth={1}/>, desc: 'El hashtag oficial con enlace directo para indexar todos los recuerdos.' },
         { name: 'Filtro de Instagram', icon: <Smartphone size={28} strokeWidth={1}/>, desc: 'Lente de Realidad Aumentada (AR) exclusivo para embellecer sus historias.' },
@@ -9098,32 +9117,34 @@ const AnatomyOverlay = ({ onClose }) => {
   ];
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-[#fafafa] dark:bg-[#080808] overflow-y-auto animate-in slide-in-from-bottom-10 fade-in duration-700 custom-scrollbar text-slate-900 dark:text-white transition-colors">
+    <div className="fixed inset-0 z-[9999] bg-[#FDFBF7] dark:bg-[#080808] overflow-y-auto animate-in slide-in-from-bottom-10 fade-in duration-700 custom-scrollbar text-[#2A2A2A] dark:text-white transition-colors font-sans">
       
       {/* NAVEGACIÓN FLOTANTE MINIMALISTA */}
-      <nav className="sticky top-0 w-full bg-[#fafafa]/80 dark:bg-[#080808]/80 backdrop-blur-2xl z-50 px-6 md:px-12 py-6 flex justify-between items-center border-b border-slate-200 dark:border-white/10 transition-colors">
-        <span className="font-editorial text-2xl font-bold tracking-widest uppercase">Baulia <span className="font-light italic">Magazine</span></span>
-        <button onClick={onClose} className="group flex items-center text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+      <nav className="sticky top-0 w-full bg-[#FDFBF7]/80 dark:bg-[#080808]/80 backdrop-blur-2xl z-50 px-6 md:px-12 py-6 flex justify-between items-center border-b border-[#D4AF37]/20 dark:border-white/10 transition-colors">
+        <span className="font-editorial text-2xl font-bold tracking-widest uppercase text-[#D4AF37]">Baulia <span className="font-light italic text-[#2A2A2A] dark:text-white">Magazine</span></span>
+        <button onClick={onClose} className="group flex items-center text-xs font-black uppercase tracking-widest text-slate-500 hover:text-[#D4AF37] dark:text-slate-400 dark:hover:text-[#D4AF37] transition-colors">
           Cerrar Edición <X size={20} className="ml-2 transform group-hover:rotate-90 transition-transform duration-300"/>
         </button>
       </nav>
 
       <main className="max-w-[1200px] mx-auto px-6 md:px-12 pt-20 pb-32">
         
-        {/* PORTADA DE LA REVISTA (HERO EDITORIAL) */}
+        {/* PORTADA DE LA REVISTA (HERO EDITORIAL CON IMÁGENES FLOTANTES) */}
         <header className="mb-32">
-          <p className="text-amber-600 dark:text-amber-500 font-bold tracking-[0.4em] uppercase text-[10px] mb-8 text-center md:text-left">La Colección · Ingeniería & Arte</p>
+          <p className="text-[#8DB580] dark:text-[#8DB580] font-bold tracking-[0.4em] uppercase text-[10px] mb-8 text-center md:text-left">La Colección · Primavera Vibrante</p>
           
           <div className="flex flex-col md:flex-row gap-12 items-start">
-            <h1 className="text-7xl md:text-8xl lg:text-[140px] font-editorial font-black tracking-tighter leading-[0.85] w-full md:w-3/5">
+            <h1 className="text-7xl md:text-8xl lg:text-[140px] font-editorial font-black tracking-tighter leading-[0.85] w-full md:w-3/5 text-[#2A2A2A] dark:text-white">
               Anatomía <br/>
-              <span className="italic font-light text-slate-400 dark:text-slate-500">del diseño.</span>
+              <span className="italic font-light text-[#D4AF37]">del diseño.</span>
             </h1>
             
-            {/* LETRA CAPITULAR Y TEXTO ENVOLVENTE (FLOAT CSS) */}
+            {/* 🔴 SOLUCIÓN EDITORIAL: LETRA CAPITULAR Y VECTORES RODEADOS POR TEXTO */}
             <div className="w-full md:w-2/5 pt-4">
-              <div className="text-lg md:text-xl font-light leading-relaxed text-justify text-slate-600 dark:text-slate-400 block">
-                <span className="float-left text-[110px] leading-[80px] pt-2 pr-5 font-editorial font-black text-slate-900 dark:text-white transition-colors">
+              <div className="text-lg md:text-xl font-light leading-relaxed text-justify text-slate-600 dark:text-slate-300 block">
+                {/* Objeto flotante para que el texto lo rodee */}
+                <FloralCorner className="float-right w-40 h-40 md:w-56 md:h-56 ml-6 mb-4 opacity-90 drop-shadow-xl" />
+                <span className="float-left text-[110px] leading-[80px] pt-2 pr-5 font-editorial font-black text-[#F76C82] transition-colors">
                   C
                 </span>
                 ada elemento que compone nuestras invitaciones es programado minuciosamente desde cero. En Baulia rechazamos las plantillas genéricas. Creemos en la arquitectura de software aplicada al diseño de alta costura, forjando experiencias inmersivas, táctiles y logísticamente blindadas para el evento más importante de tu vida.
@@ -9135,15 +9156,15 @@ const AnatomyOverlay = ({ onClose }) => {
         {/* FEATURES EDITORIALES (SECCIONES) */}
         <div className="space-y-32">
           {sections.map((sec, i) => (
-            <section key={i} className="relative border-t-2 border-slate-900 dark:border-white pt-12 flex flex-col lg:flex-row gap-16 transition-colors">
+            <section key={i} className="relative border-t-2 border-[#D4AF37]/30 dark:border-white/20 pt-12 flex flex-col lg:flex-row gap-16 transition-colors">
               
               {/* COLUMNA IZQUIERDA: TÍTULO Y DESCRIPCIÓN DE LA SECCIÓN */}
               <div className="lg:w-1/3 relative">
-                 <h2 className="absolute -top-16 -left-6 text-[180px] font-editorial font-black text-slate-100 dark:text-white/5 pointer-events-none select-none transition-colors leading-none z-0">
+                 <h2 className="absolute -top-16 -left-6 text-[180px] font-editorial font-black text-[#D4AF37]/10 dark:text-white/5 pointer-events-none select-none transition-colors leading-none z-0">
                     {sec.subtitle}
                  </h2>
                  <div className="relative z-10 pt-4">
-                    <h3 className="text-4xl md:text-5xl font-editorial font-bold mb-6 leading-tight">{sec.title}</h3>
+                    <h3 className="text-4xl md:text-5xl font-editorial font-bold mb-6 leading-tight text-[#2A2A2A] dark:text-white">{sec.title}</h3>
                     <p className="text-slate-500 dark:text-slate-400 font-light text-lg italic leading-relaxed">{sec.desc}</p>
                  </div>
               </div>
@@ -9153,17 +9174,17 @@ const AnatomyOverlay = ({ onClose }) => {
                 {sec.items.map((item, j) => (
                   <div key={j} className="relative group">
                     {/* USO DE FLOAT PARA QUE EL TEXTO RODE EL ÍCONO (ESTILO REVISTA) */}
-                    <div className="float-left mr-5 mt-1 text-slate-300 dark:text-slate-600 group-hover:text-amber-500 transition-colors duration-500">
+                    <div className="float-left mr-5 mt-1 text-[#D4AF37] opacity-70 group-hover:opacity-100 group-hover:text-[#F76C82] transition-colors duration-500">
                       {item.icon}
                     </div>
                     <div className="block">
-                      <h4 className="font-bold text-base md:text-lg tracking-wide mb-1.5 uppercase">{item.name}</h4>
+                      <h4 className="font-bold text-base md:text-lg tracking-wide mb-1.5 uppercase text-[#2A2A2A] dark:text-white group-hover:text-[#D4AF37] transition-colors duration-300">{item.name}</h4>
                       <p className="text-sm font-light text-slate-500 dark:text-slate-400 leading-relaxed">
                         {item.desc}
                       </p>
                     </div>
                     {/* Línea divisoria minimalista */}
-                    <div className="w-full h-px bg-amber-500/0 group-hover:bg-amber-500/50 mt-6 transition-colors duration-500 clear-both"></div>
+                    <div className="w-full h-px bg-[#D4AF37]/0 group-hover:bg-[#D4AF37]/40 mt-6 transition-colors duration-500 clear-both"></div>
                   </div>
                 ))}
               </div>
@@ -9173,9 +9194,9 @@ const AnatomyOverlay = ({ onClose }) => {
         </div>
 
         {/* PIE DE PÁGINA EDITORIAL */}
-        <footer className="mt-40 border-t border-slate-200 dark:border-white/10 pt-12 flex flex-col md:flex-row justify-between items-center text-slate-400 text-xs font-bold uppercase tracking-widest transition-colors">
+        <footer className="mt-40 border-t border-[#D4AF37]/30 dark:border-white/10 pt-12 flex flex-col md:flex-row justify-between items-center text-slate-400 text-xs font-bold uppercase tracking-widest transition-colors">
           <span>Baulia Technologies Inc.</span>
-          <span className="mt-4 md:mt-0">El nuevo estándar para celebrar</span>
+          <span className="mt-4 md:mt-0 text-[#8DB580]">Inspiración: Primavera Vibrante</span>
         </footer>
 
       </main>
