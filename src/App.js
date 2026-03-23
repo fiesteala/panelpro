@@ -9110,7 +9110,7 @@ const AnatomyOverlay = ({ onClose }) => {
                 <span className="float-left text-[90px] leading-[65px] pt-2 pr-4 font-editorial font-black text-[#F76C82] transition-colors">
                   E
                 </span>
-                n nuestra boutique de invitaciones, el lienzo siempre está en blanco. Rechazamos categóricamente lo genérico. Cada trazo, color y tipografía es forjado meticulosamente a la medida de tu evento. Lo que ves aquí es pura alta costura digital: arte interactivo diseñado no solo para informar, sino para enamorar e inspirar a tus invitados desde el primer instante en que reciben tu obra. Ninguna invitación Baulia es igual a la otra.
+                n nuestra boutique, cada historia de amor y celebración comienza con un lienzo en blanco. Creemos que los momentos más hermosos de tu vida merecen ser contados con el corazón, por eso nos alejamos de lo genérico. Cada trazo, paleta de color y tipografía nace exclusivamente para ti. Lo que ves aquí es pura alta costura digital: un arte interactivo diseñado no solo para informar, sino para enamorar, emocionar e inspirar a tus invitados desde el segundo en que abren tu invitación.
               </div>
             </div>
           </div>
@@ -9126,20 +9126,20 @@ const AnatomyOverlay = ({ onClose }) => {
             <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
               <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">01. El Emblema y La Jerarquía</span>
               
-              <div className="flex items-center gap-6 mb-8">
+              <div className="flex items-center gap-6 mb-8 pl-4 border-l-2 border-[#D4AF37]/30">
                  <div className="w-24 h-24 shrink-0">
                     <img src="/maricela-estudillo-gonzalez/monograma.svg" alt="Monograma" className="w-full h-full drop-shadow-md object-contain" />
                  </div>
                  <div className="flex flex-col text-left">
                     <span style={{ fontFamily: invTheme.fontSans, color: invTheme.springGreen }} className="text-[9px] tracking-[0.4em] uppercase font-semibold mb-2">Celebrando la vida</span>
-                    <h1 style={{ fontFamily: invTheme.fontSerif, color: invTheme.springDark }} className="text-5xl leading-none drop-shadow-sm mb-1 dark:text-white">Maricela</h1>
-                    <h2 style={{ fontFamily: invTheme.fontSans, color: invTheme.goldDark }} className="text-[9px] tracking-[0.5em] uppercase font-medium">Estudillo González</h2>
+                    <h1 style={{ fontFamily: invTheme.fontSerif, color: invTheme.springDark }} className="text-5xl leading-none drop-shadow-sm mb-1 dark:text-white">Miranda</h1>
+                    <h2 style={{ fontFamily: invTheme.fontSans, color: invTheme.goldDark }} className="text-[9px] tracking-[0.5em] uppercase font-medium">Gómez Villarreal</h2>
                  </div>
               </div>
               
               <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">El Primer Impacto</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Como la portada de una revista de lujo, establecemos la identidad visual de inmediato. Creamos un monograma exclusivo que actúa como el sello real de tu celebración. Acompañado de una arquitectura tipográfica experta —fusionando fuentes clásicas con trazos modernos— dotamos al nombre del festejado de una majestuosidad absoluta. Todo es personalizable a tu paleta de colores.
+                Como la portada de una revista de lujo, establecemos la identidad visual de inmediato. Creamos un monograma exclusivo entrelazando tus iniciales (como la M y la G en este ejemplo) que actúa como el sello real de tu celebración. Acompañado de una arquitectura tipográfica experta que fusiona fuentes clásicas con trazos modernos, dotamos a tu nombre de una majestuosidad absoluta. Todo es personalizable a tus gustos.
               </p>
             </section>
 
@@ -9147,17 +9147,17 @@ const AnatomyOverlay = ({ onClose }) => {
             <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
               <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">02. Arte Visual y Literario</span>
               
-              <div className="flex items-center gap-6 mb-8">
-                 <div className="w-32 h-40 rounded-[100px] p-1.5 border border-[#D4AF37]/50 shadow-xl overflow-hidden shrink-0">
+              <div className="flex items-center gap-6 mb-8 pl-4 border-l-2 border-[#D4AF37]/30">
+                 <div className="w-28 h-36 rounded-[100px] p-1.5 border border-[#D4AF37]/50 shadow-xl overflow-hidden shrink-0">
                     <div className="w-full h-full rounded-[100px] overflow-hidden bg-slate-200">
-                        <img src="/maricela-estudillo-gonzalez/portada.jpg" className="w-full h-full object-cover" onError={(e) => e.target.style.display = 'none'} />
+                        <img src="/maricela-estudillo-gonzalez/portada.jpg" className="w-full h-full object-cover animate-slow-zoom" onError={(e) => e.target.style.display = 'none'} />
                     </div>
                  </div>
                  <div className="flex flex-col justify-center">
                     <span style={{ fontFamily: invTheme.fontScript, color: invTheme.springPink }} className="text-3xl font-semibold drop-shadow-sm mb-3">
                         50 Primaveras
                     </span>
-                    <p style={{ fontFamily: invTheme.fontSerif }} className="italic text-lg text-gray-700 dark:text-gray-300 leading-tight">
+                    <p style={{ fontFamily: invTheme.fontSerif }} className="italic text-base text-gray-700 dark:text-gray-300 leading-tight">
                         "Llegar a esta primavera es celebrar las flores de ayer y las semillas del mañana."
                     </p>
                  </div>
@@ -9165,7 +9165,7 @@ const AnatomyOverlay = ({ onClose }) => {
 
               <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">El Camafeo y el Alma</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Nos alejamos de los encuadres tradicionales. Tu fotografía principal se encapsula en una silueta orgánica (camafeo), enmarcada en finos trazos que la convierten en una obra de museo. Inmediatamente debajo, redactamos o plasmamos la frase que dictará el sentimiento y el alma de la noche, anclando la emoción antes de entregar los detalles operativos.
+                Tu fotografía principal puede presentarse en este hermoso formato de camafeo clásico con sutiles animaciones, o si lo prefieres, como una portada panorámica inmersiva que se adapta perfectamente a la pantalla de cualquier dispositivo. Justo debajo, redactamos la frase que dictará el sentimiento de la noche, anclando la emoción antes de entregar los detalles operativos.
               </p>
             </section>
 
@@ -9195,10 +9195,10 @@ const AnatomyOverlay = ({ onClose }) => {
                  </div>
               </div>
 
-              <FloralCorner className="float-left w-20 h-20 mr-4 opacity-50" />
+              <FloralCorner className="float-left w-16 h-16 mr-4 opacity-50" />
               <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Hospitalidad y Expectativa</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Cada obra es inteligente. La invitación reconoce el nombre de quien la abre, haciéndolo sentir honrado y esperado de manera exclusiva. Justo debajo, el reloj de esferas de cristal marca el pulso del evento. Un diseño que genera anticipación física y emocional hacia el gran día.
+                Nuestras obras son inteligentes. La invitación reconoce el nombre exacto de la persona o familia que la abre, haciéndolos sentir honrados y esperados. Justo debajo, un reloj estructurado en esferas de cristal marca el pulso del evento, generando anticipación física y emocional hacia el gran día.
               </p>
             </section>
 
@@ -9206,21 +9206,21 @@ const AnatomyOverlay = ({ onClose }) => {
             <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
               <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">04. Logística de Precisión</span>
               
-              <div className="flex flex-col items-center text-center mb-8">
-                 <h3 className="font-serif text-3xl text-[#2A2A2A] dark:text-white mb-4">La Recepción</h3>
+              <div className="flex flex-col items-center text-center mb-8 pl-4 border-l-2 border-[#D4AF37]/30">
+                 <h3 className="font-serif text-3xl text-[#2A2A2A] dark:text-white mb-3">La Recepción</h3>
                  <p className="font-sans text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4">
-                     Av. Reyes Aztecas 102, Tacoteno,<br/>Minatitlán, Veracruz.<br/>
+                     Hacienda Los Arcángeles<br/>Av. de la Luz 777, Jardines del Pedregal, CDMX.<br/>
                      <span className="font-medium text-[#D4AF37] tracking-widest uppercase mt-2 block text-[9px]">Sábado, 23 de Mayo • 15:00 hrs</span>
                  </p>
                  <div className="flex gap-3">
-                     <div className="px-4 py-2 bg-[#2A2A2A] text-white rounded-full font-sans text-[9px] tracking-[0.2em] uppercase flex items-center">Ver en GPS</div>
-                     <div className="px-4 py-2 bg-transparent text-[#2A2A2A] dark:text-white border border-[#D4AF37] rounded-full font-sans text-[9px] tracking-[0.2em] uppercase flex items-center">Agendar</div>
+                     <div className="px-4 py-2 bg-[#2A2A2A] text-white rounded-full font-sans text-[9px] tracking-[0.2em] uppercase flex items-center shadow-md hover:scale-105 transition-transform cursor-pointer">Ver en GPS</div>
+                     <div className="px-4 py-2 bg-transparent text-[#2A2A2A] dark:text-white border border-[#D4AF37] rounded-full font-sans text-[9px] tracking-[0.2em] uppercase flex items-center shadow-sm hover:scale-105 transition-transform cursor-pointer">Agendar</div>
                  </div>
               </div>
 
               <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Ingeniería al Servicio del Asistente</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Olvídate de las indicaciones confusas. Integramos hipervínculos directos a Waze, Google Maps y Apple Maps para guiar a tus invitados puerta a puerta. Sincronizamos la fecha con sus calendarios personales (Outlook, Google, iOS) y mostramos pronósticos del clima en tiempo real para prever cualquier eventualidad.
+                Evitamos indicaciones confusas. Integramos hipervínculos directos a Waze, Google Maps y Apple Maps para guiar a tus invitados de puerta a puerta. Sincronizamos la fecha con sus calendarios personales y mostramos pronósticos del clima en tiempo real para prever cualquier eventualidad y asegurar su comodidad.
               </p>
             </section>
 
@@ -9250,7 +9250,7 @@ const AnatomyOverlay = ({ onClose }) => {
 
               <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">El Minuto a Minuto</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Un diseño fluido y estructurado que comunica la agenda de tu celebración sin abrumar. Mediante una línea de tiempo minimalista, los invitados conocen los momentos cumbre de la noche, asegurando puntualidad y manteniendo la fluidez de la velada que planeaste con tanto esmero.
+                Un diseño fluido que comunica la agenda de tu celebración sin abrumar. Mediante una línea de tiempo elegante, los invitados conocen los momentos cumbre de la noche, asegurando puntualidad y manteniendo la fluidez de la velada que planeaste con tanto esmero.
               </p>
             </section>
 
@@ -9258,16 +9258,20 @@ const AnatomyOverlay = ({ onClose }) => {
             <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
               <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">06. Estética Colectiva</span>
               
-              <div className="flex justify-center gap-10 mb-8">
+              <div className="flex justify-center gap-10 mb-8 pl-4 border-l-2 border-[#D4AF37]/30 py-2">
                   <div className="flex flex-col items-center">
                       <div className="w-16 h-16 rounded-full border border-[#D4AF37]/50 shadow-md flex items-center justify-center mb-3 text-[#F76C82]">
-                        <Shirt size={24} strokeWidth={1.5} />
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                          <path d="M9.5 3c1.5 2.5 3.5 2.5 5 0L16.5 8c.3.5.5 1.1.5 1.7v1.8a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 11.5V9.7c0-.6.2-1.2.5-1.7L9.5 3zM8.5 13L4.5 20.5a1 1 0 0 0 .9 1.5h13.2a1 1 0 0 0 .9-1.5L15.5 13M8 10h8" />
+                        </svg>
                       </div>
-                      <span className="font-sans text-[9px] tracking-widest text-gray-600 dark:text-gray-400 uppercase font-bold text-center">Vestido<br/>Cómodo</span>
+                      <span className="font-sans text-[9px] tracking-widest text-gray-600 dark:text-gray-400 uppercase font-bold text-center">Vestido<br/>Floral</span>
                   </div>
                   <div className="flex flex-col items-center">
                       <div className="w-16 h-16 rounded-full border border-[#D4AF37]/50 shadow-md flex items-center justify-center mb-3 text-[#8DB580]">
-                        <Shirt size={24} strokeWidth={1.5} />
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                          <path d="M20.38 3.46L16 2 12 5 8 2 3.62 3.46a2 2 0 00-1.35 2.22l.87 5.23a2 2 0 002 1.67h.54V21a1 1 0 001 1h10.64a1 1 0 001-1V12.58h.54a2 2 0 002-1.67l.87-5.23a2 2 0 00-1.35-2.22zM8 2v5a4 4 0 108 0V2M12 12v10M8 13h2v2H8zM14 13h2v2h-2z" />
+                        </svg>
                       </div>
                       <span className="font-sans text-[9px] tracking-widest text-gray-600 dark:text-gray-400 uppercase font-bold text-center">Guayabera<br/>Fina</span>
                   </div>
@@ -9275,7 +9279,7 @@ const AnatomyOverlay = ({ onClose }) => {
 
               <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Etiqueta Ilustrada</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                La perfección estética del evento se logra cuando todos los asistentes armonizan visualmente. A través de iconografía exclusiva, paletas de color sugeridas o moodboards de inspiración, guiamos la indumentaria de tus invitados de forma sutil, elegante y clara.
+                La perfección estética de un evento se logra cuando todos los asistentes armonizan visualmente. A través de iconografía exclusiva, paletas de color sugeridas o moodboards de inspiración, guiamos la indumentaria de tus invitados de forma sutil, elegante y muy clara.
               </p>
             </section>
 
@@ -9288,16 +9292,16 @@ const AnatomyOverlay = ({ onClose }) => {
             <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
               <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">07. Un Viaje en el Tiempo</span>
               
-              <div className="grid grid-cols-2 gap-3 auto-rows-[100px] mb-8">
+              <div className="grid grid-cols-2 gap-3 auto-rows-[100px] mb-8 pl-4 border-l-2 border-[#D4AF37]/30">
                   <div className="row-span-2 col-span-1 rounded-2xl overflow-hidden shadow-sm bg-slate-200"><img src="/maricela-estudillo-gonzalez/foto1.jpg" className="w-full h-full object-cover grayscale-[10%]" onError={(e) => e.target.style.display = 'none'} /></div>
                   <div className="row-span-1 col-span-1 rounded-2xl overflow-hidden shadow-sm bg-slate-300"><img src="/maricela-estudillo-gonzalez/foto2.jpg" className="w-full h-full object-cover grayscale-[10%]" onError={(e) => e.target.style.display = 'none'} /></div>
                   <div className="row-span-1 col-span-1 rounded-2xl overflow-hidden shadow-sm bg-slate-200"><img src="/maricela-estudillo-gonzalez/foto4.jpg" className="w-full h-full object-cover grayscale-[10%]" onError={(e) => e.target.style.display = 'none'} /></div>
               </div>
 
-              <FloralCorner className="float-right w-20 h-20 ml-4 opacity-50" />
-              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Mosaico Fotográfico</h3>
+              <FloralCorner className="float-right w-16 h-16 ml-4 opacity-50" />
+              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">El Mosaico Fotográfico</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Toda historia de amor o celebración de vida tiene un trayecto previo. Nuestro sistema de diseño ensambla galerías de imágenes asimétricas que rompen la monotonía y sumergen a los visitantes en tus recuerdos más preciados, preparando el terreno emocional para el evento.
+                Toda celebración tiene un trayecto previo. Tienes la libertad de elegir entre distintos estilos arquitectónicos para tu galería: retículas dinámicas (Masonry), carruseles elegantes o composiciones con formas geométricas asimétricas que rompen la monotonía y sumergen a los visitantes en tus recuerdos.
               </p>
             </section>
 
@@ -9305,26 +9309,26 @@ const AnatomyOverlay = ({ onClose }) => {
             <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
               <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">08. Comodidad Financiera y Social</span>
               
-              <div className="flex flex-col gap-6 mb-8">
-                 <div className="border border-[#D4AF37]/30 p-4 rounded-3xl flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]"><Gift size={20}/></div>
+              <div className="flex flex-col gap-4 mb-8 pl-4 border-l-2 border-[#D4AF37]/30 py-2">
+                 <div className="border border-[#D4AF37]/30 p-3 rounded-2xl flex items-center gap-4 bg-white dark:bg-[#111]">
+                    <div className="w-10 h-10 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]"><Gift size={18}/></div>
                     <div>
-                       <h4 className="font-bold text-sm text-slate-800 dark:text-white">Mesa de Regalos / Efectivo</h4>
-                       <p className="text-[10px] text-slate-500 font-mono mt-1">CLABE: 0123 4567 8901 2345 67</p>
+                       <h4 className="font-bold text-xs text-slate-800 dark:text-white">Mesa de Regalos / Efectivo</h4>
+                       <p className="text-[9px] text-slate-500 font-mono mt-0.5">CLABE: 0123 4567 8901 2345 67</p>
                     </div>
                  </div>
-                 <div className="border border-[#F76C82]/30 p-4 rounded-3xl flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#F76C82]/10 flex items-center justify-center text-[#F76C82]"><Hash size={20}/></div>
+                 <div className="border border-[#F76C82]/30 p-3 rounded-2xl flex items-center gap-4 bg-white dark:bg-[#111]">
+                    <div className="w-10 h-10 rounded-full bg-[#F76C82]/10 flex items-center justify-center text-[#F76C82]"><Hash size={18}/></div>
                     <div>
-                       <h4 className="font-bold text-sm text-slate-800 dark:text-white">Conexión con Instagram</h4>
-                       <p className="text-xs font-bold text-[#F76C82] mt-1">#PrimaveraMaricela</p>
+                       <h4 className="font-bold text-xs text-slate-800 dark:text-white">Filtro de Instagram</h4>
+                       <p className="text-[10px] font-bold text-[#F76C82] mt-0.5">#BodaMirandaYLuis</p>
                     </div>
                  </div>
               </div>
 
               <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Gifting y Omnicanalidad</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
-                Evitamos intermediarios y comisiones abusivas. Tus invitados pueden transferir regalos en efectivo directamente a tus cuentas bancarias mediante la copia rápida de datos. Además, vinculamos tu hashtag oficial y ofrecemos filtros de Realidad Aumentada (AR) para que tu evento sea tendencia en redes sociales desde semanas antes de ocurrir.
+                Tus invitados pueden transferir regalos en efectivo directamente a tus cuentas bancarias. Y si lo prefieren, integramos el código y enlace a la mesa de regalos de tu tienda departamental favorita. Además, vinculamos tu hashtag oficial y filtros de Realidad Aumentada (AR) para que tu evento sea tendencia desde semanas antes de ocurrir.
               </p>
             </section>
 
@@ -9342,14 +9346,14 @@ const AnatomyOverlay = ({ onClose }) => {
                 </div>
                 <div className="p-3 border border-slate-200 dark:border-white/10 rounded-xl mb-6 text-left flex justify-between items-center">
                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 block">Pase #1</label>
-                   <div className="w-16 h-6 bg-emerald-500/20 rounded"></div>
+                   <div className="w-16 h-6 bg-[#8DB580]/20 rounded"></div>
                 </div>
                 <button className="w-full py-4 bg-[#F76C82] text-white rounded-full font-bold text-xs uppercase tracking-widest shadow-md">Confirmar Asistencia</button>
              </div>
 
              <h3 className="text-3xl md:text-4xl font-editorial font-bold mb-4 text-slate-900 dark:text-white">RSVP Inteligente y Cero Colados</h3>
              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm">
-                La pieza maestra de nuestra ingeniería. Se acabaron los formularios genéricos donde los invitados anotan a 5 personas cuando solo invitaste a 2. El sistema reconoce la cuota asignada a cada familia y genera pases QR personales e intransferibles tras la confirmación, sincronizándose instantáneamente con tu panel de control de anfitrión y el escáner de la puerta.
+                La pieza maestra de nuestra ingeniería. Se acabaron los formularios genéricos donde los invitados anotan a 5 personas cuando solo invitaste a 2. El sistema reconoce la cuota asignada a cada familia y genera pases QR personales e intransferibles tras la confirmación, sincronizándose instantáneamente con tu panel de control y el escáner de la puerta.
              </p>
           </section>
 
