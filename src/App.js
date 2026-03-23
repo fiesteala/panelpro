@@ -9040,7 +9040,6 @@ const RevealSection = ({ children, className = '', delay = 0 }) => {
 // --- COMPONENTE: REVISTA EDITORIAL (ANATOMÍA DE LA INVITACIÓN) ---
 // ==========================================
 const AnatomyOverlay = ({ onClose }) => {
-  // Inyectamos las fuentes de la invitación original solo para esta vista
   useEffect(() => {
     if (!document.getElementById('anatomy-fonts')) {
       const link = document.createElement('link');
@@ -9063,150 +9062,295 @@ const AnatomyOverlay = ({ onClose }) => {
     bg: '#FDFBF7'
   };
 
+  const FloralCorner = ({ className, style }) => (
+    <svg viewBox="0 0 200 200" className={className} style={style} xmlns="http://www.w3.org/2000/svg">
+      <g transform="scale(0.8) translate(20, 20)">
+        <path d="M 40 100 C 10 70, 20 20, 80 10 C 80 60, 60 90, 40 100 Z" fill="#8DB580" opacity="0.8"/>
+        <path d="M 100 40 C 70 10, 20 20, 10 80 C 60 80, 90 60, 100 40 Z" fill="#A3C697" opacity="0.9"/>
+        <path d="M 130 140 C 160 170, 180 130, 170 80 C 140 90, 120 120, 130 140 Z" fill="#8DB580" opacity="0.8"/>
+        <circle cx="120" cy="70" r="30" fill="#FFD166" />
+        <circle cx="120" cy="70" r="15" fill="#FFB347" />
+        <path d="M 120 40 C 130 20, 150 20, 145 45 C 165 40, 175 60, 150 70 C 175 80, 165 100, 145 95 C 150 120, 130 120, 120 100 C 110 120, 90 120, 95 95 C 75 100, 65 80, 90 70 C 65 60, 75 40, 95 45 C 90 20, 110 20, 120 40 Z" fill="#FFE28A" opacity="0.9"/>
+        <circle cx="70" cy="120" r="35" fill="#F76C82" />
+        <circle cx="70" cy="120" r="15" fill="#D84A63" />
+        <path d="M 70 85 C 85 60, 110 65, 100 90 C 125 80, 140 105, 110 120 C 140 135, 125 160, 100 150 C 110 175, 85 180, 70 155 C 55 180, 30 175, 40 150 C 15 160, 0 135, 30 120 C 0 105, 15 80, 40 90 C 30 65, 55 60, 70 85 Z" fill="#FF8FA3" opacity="0.9"/>
+        <circle cx="120" cy="70" r="5" fill="#D4AF37" />
+        <circle cx="70" cy="120" r="6" fill="#D4AF37" />
+        <path d="M 90 90 Q 100 100, 110 90" stroke="#D4AF37" strokeWidth="2" fill="none"/>
+      </g>
+    </svg>
+  );
+
   return (
-    <div className="fixed inset-0 z-[9999] bg-white dark:bg-[#080808] overflow-y-auto animate-in slide-in-from-bottom-10 fade-in duration-700 custom-scrollbar text-slate-900 dark:text-white transition-colors">
+    <div className="fixed inset-0 z-[9999] bg-[#FDFBF7] dark:bg-[#080808] overflow-y-auto animate-in slide-in-from-bottom-10 fade-in duration-700 custom-scrollbar text-[#2A2A2A] dark:text-white transition-colors font-sans">
       
-      {/* NAVEGACIÓN FLOTANTE MINIMALISTA */}
-      <nav className="sticky top-0 w-full bg-white/90 dark:bg-[#080808]/90 backdrop-blur-2xl z-50 px-6 md:px-12 py-6 flex justify-between items-center border-b border-slate-200 dark:border-white/10 transition-colors">
-        <span className="font-editorial text-2xl font-bold tracking-widest uppercase">Baulia <span className="font-light italic text-slate-500">Anatomy</span></span>
-        <button onClick={onClose} className="group flex items-center text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
-          Cerrar Revista <X size={20} className="ml-2 transform group-hover:rotate-90 transition-transform duration-300"/>
+      {/* NAVEGACIÓN FLOTANTE */}
+      <nav className="sticky top-0 w-full bg-[#FDFBF7]/90 dark:bg-[#080808]/90 backdrop-blur-2xl z-50 px-6 md:px-12 py-4 flex justify-between items-center border-b border-[#D4AF37]/20 dark:border-white/10 transition-colors">
+        <span className="font-editorial text-xl font-bold tracking-widest uppercase text-[#D4AF37]">Baulia <span className="font-light italic text-[#2A2A2A] dark:text-white">Magazine</span></span>
+        <button onClick={onClose} className="group flex items-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-[#D4AF37] dark:text-slate-400 dark:hover:text-[#D4AF37] transition-colors">
+          Cerrar Edición <X size={16} className="ml-2 transform group-hover:rotate-90 transition-transform duration-300"/>
         </button>
       </nav>
 
-      <main className="max-w-[1200px] mx-auto px-6 md:px-12 pt-20 pb-32">
+      <main className="max-w-[1000px] mx-auto px-6 md:px-12 pt-16 pb-20">
         
-        {/* HERO EDITORIAL */}
-        <header className="mb-24 md:mb-40 border-b border-slate-200 dark:border-white/10 pb-20">
-          <p className="text-amber-600 dark:text-amber-500 font-bold tracking-[0.4em] uppercase text-[10px] mb-8 text-center md:text-left">Caso de Estudio: Primavera Vibrante</p>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-editorial font-black tracking-tighter leading-[1] w-full max-w-4xl text-slate-900 dark:text-white">
-            Diseccionando la <br/>
-            <span className="italic font-light text-slate-400 dark:text-slate-500">Alta Costura Digital.</span>
-          </h1>
-          <p className="mt-10 text-lg md:text-xl text-slate-500 font-light max-w-2xl leading-relaxed">
-            Una invitación de Baulia no es una plantilla. Es una composición de elementos de diseño interactivo calculados milimétricamente para crear una experiencia inmersiva. Conoce el "por qué" detrás de cada bloque.
-          </p>
+        {/* PORTADA DE LA REVISTA (HERO EDITORIAL) */}
+        <header className="mb-16 border-b border-[#D4AF37]/20 dark:border-white/10 pb-16">
+          <p className="text-[#8DB580] dark:text-[#8DB580] font-bold tracking-[0.4em] uppercase text-[10px] mb-6 text-center md:text-left">La Colección · Primavera Vibrante</p>
+          
+          <div className="flex flex-col md:flex-row gap-8 items-start">
+            <h1 className="text-6xl md:text-8xl lg:text-[120px] font-editorial font-black tracking-tighter leading-[0.85] w-full md:w-3/5 text-[#2A2A2A] dark:text-white">
+              Anatomía <br/>
+              <span className="italic font-light text-[#D4AF37]">del diseño.</span>
+            </h1>
+            
+            <div className="w-full md:w-2/5 pt-2">
+              <div className="text-base md:text-lg font-light leading-relaxed text-justify text-slate-600 dark:text-slate-300 block">
+                <FloralCorner className="float-right w-32 h-32 ml-4 mb-2 opacity-90 drop-shadow-xl" />
+                <span className="float-left text-[90px] leading-[65px] pt-2 pr-4 font-editorial font-black text-[#F76C82] transition-colors">
+                  E
+                </span>
+                n nuestra boutique de invitaciones, el lienzo siempre está en blanco. Rechazamos categóricamente lo genérico. Cada trazo, color y tipografía es forjado meticulosamente a la medida de tu evento. Lo que ves aquí es pura alta costura digital: arte interactivo diseñado no solo para informar, sino para enamorar e inspirar a tus invitados desde el primer instante en que reciben tu obra. Ninguna invitación Baulia es igual a la otra.
+              </div>
+            </div>
+          </div>
         </header>
 
-        <div className="space-y-32">
+        {/* CONTENIDO EDITORIAL COMPACTO SIN CAJAS */}
+        <div className="space-y-16">
 
-          {/* ELEMENTO 1: EL MONOGRAMA */}
-          <section className="flex flex-col md:flex-row gap-12 lg:gap-24 items-center">
-            <div className="w-full md:w-1/2 flex justify-center items-center p-12 bg-slate-50 dark:bg-[#111] rounded-[3rem] border border-slate-200 dark:border-white/5 shadow-inner min-h-[400px]">
-              {/* Pieza Real Extraída */}
-              <div className="animate-pulse-slow">
-                 <img src="/maricela-estudillo-gonzalez/monograma.svg" alt="Monograma" className="w-32 h-32 drop-shadow-md object-contain hover:scale-105 transition-transform duration-700" />
+          {/* FILA 1: Identidad y Narrativa */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            
+            {/* Monograma y Nombres */}
+            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">01. El Emblema y La Jerarquía</span>
+              
+              <div className="flex items-center gap-6 mb-8">
+                 <div className="w-24 h-24 shrink-0">
+                    <img src="/maricela-estudillo-gonzalez/monograma.svg" alt="Monograma" className="w-full h-full drop-shadow-md object-contain" />
+                 </div>
+                 <div className="flex flex-col text-left">
+                    <span style={{ fontFamily: invTheme.fontSans, color: invTheme.springGreen }} className="text-[9px] tracking-[0.4em] uppercase font-semibold mb-2">Celebrando la vida</span>
+                    <h1 style={{ fontFamily: invTheme.fontSerif, color: invTheme.springDark }} className="text-5xl leading-none drop-shadow-sm mb-1 dark:text-white">Maricela</h1>
+                    <h2 style={{ fontFamily: invTheme.fontSans, color: invTheme.goldDark }} className="text-[9px] tracking-[0.5em] uppercase font-medium">Estudillo González</h2>
+                 </div>
               </div>
-            </div>
-            <div className="w-full md:w-1/2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">01. Identidad de Marca</span>
-              <h3 className="text-3xl md:text-4xl font-editorial font-bold mb-6 text-slate-900 dark:text-white">El Monograma Insignia</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light">
-                Es el primer punto de contacto visual. Funciona como el logotipo oficial del evento. Al colocarlo aislado con una animación de respiración <i>(pulse-slow)</i>, establecemos jerarquía y declaramos inmediatamente que el usuario está a punto de entrar a una experiencia premium, no a una simple página web.
+              
+              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">El Primer Impacto</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
+                Como la portada de una revista de lujo, establecemos la identidad visual de inmediato. Creamos un monograma exclusivo que actúa como el sello real de tu celebración. Acompañado de una arquitectura tipográfica experta —fusionando fuentes clásicas con trazos modernos— dotamos al nombre del festejado de una majestuosidad absoluta. Todo es personalizable a tu paleta de colores.
               </p>
-            </div>
-          </section>
+            </section>
 
-          {/* ELEMENTO 2: NOMBRES Y TIPOGRAFÍA */}
-          <section className="flex flex-col md:flex-row-reverse gap-12 lg:gap-24 items-center">
-            <div className="w-full md:w-1/2 flex justify-center items-center p-12 bg-[#FDFBF7] rounded-[3rem] border border-slate-200 dark:border-white/5 shadow-inner min-h-[400px]">
-              {/* Pieza Real Extraída */}
-              <div className="flex flex-col items-center text-center">
-                  <span style={{ fontFamily: invTheme.fontSans, color: invTheme.springGreen }} className="text-xs tracking-[0.4em] uppercase font-semibold mb-4">
-                      Celebrando la vida
-                  </span>
-                  <h1 style={{ fontFamily: invTheme.fontSerif, color: invTheme.springDark }} className="text-7xl mb-2 leading-none drop-shadow-sm">
-                      Maricela
-                  </h1>
-                  <h2 style={{ fontFamily: invTheme.fontSans, color: invTheme.goldDark }} className="text-xs tracking-[0.5em] uppercase font-medium opacity-80">
-                      Estudillo González
-                  </h2>
+            {/* Portada y Frase */}
+            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">02. Arte Visual y Literario</span>
+              
+              <div className="flex items-center gap-6 mb-8">
+                 <div className="w-32 h-40 rounded-[100px] p-1.5 border border-[#D4AF37]/50 shadow-xl overflow-hidden shrink-0">
+                    <div className="w-full h-full rounded-[100px] overflow-hidden bg-slate-200">
+                        <img src="/maricela-estudillo-gonzalez/portada.jpg" className="w-full h-full object-cover" onError={(e) => e.target.style.display = 'none'} />
+                    </div>
+                 </div>
+                 <div className="flex flex-col justify-center">
+                    <span style={{ fontFamily: invTheme.fontScript, color: invTheme.springPink }} className="text-3xl font-semibold drop-shadow-sm mb-3">
+                        50 Primaveras
+                    </span>
+                    <p style={{ fontFamily: invTheme.fontSerif }} className="italic text-lg text-gray-700 dark:text-gray-300 leading-tight">
+                        "Llegar a esta primavera es celebrar las flores de ayer y las semillas del mañana."
+                    </p>
+                 </div>
               </div>
-            </div>
-            <div className="w-full md:w-1/2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">02. Arquitectura Tipográfica</span>
-              <h3 className="text-3xl md:text-4xl font-editorial font-bold mb-6 text-slate-900 dark:text-white">Jerarquía y Contraste</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light">
-                Combinamos tres familias tipográficas distintas. Una <i>Serif</i> clásica (Cormorant Garamond) para el nombre principal que aporta tamaño y elegancia; una <i>Sans-Serif</i> extendida (Montserrat) para los apellidos y subtítulos que da un toque moderno y legible; y colores orgánicos que anclan el tema de "Primavera". Es diseño editorial puro llevado a la pantalla.
-              </p>
-            </div>
-          </section>
 
-          {/* ELEMENTO 3: LA PORTADA (FOTOGRAFÍA) */}
-          <section className="flex flex-col md:flex-row gap-12 lg:gap-24 items-center">
-            <div className="w-full md:w-1/2 flex justify-center items-center p-12 bg-slate-50 dark:bg-[#111] rounded-[3rem] border border-slate-200 dark:border-white/5 shadow-inner min-h-[400px]">
-              {/* Pieza Real Extraída */}
-              <div className="relative w-48 h-64 rounded-full p-2 border border-[#D4AF37]/50 bg-white/40 shadow-xl overflow-hidden">
-                  <div className="w-full h-full rounded-full overflow-hidden relative bg-slate-200">
-                      <img src="/maricela-estudillo-gonzalez/portada.jpg" alt="Foto Portada" className="w-full h-full object-cover animate-slow-zoom" onError={(e) => e.target.style.display = 'none'} />
-                      <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-xs font-bold text-center px-4">
-                        (Foto de Portada)
+              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">El Camafeo y el Alma</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
+                Nos alejamos de los encuadres tradicionales. Tu fotografía principal se encapsula en una silueta orgánica (camafeo), enmarcada en finos trazos que la convierten en una obra de museo. Inmediatamente debajo, redactamos o plasmamos la frase que dictará el sentimiento y el alma de la noche, anclando la emoción antes de entregar los detalles operativos.
+              </p>
+            </section>
+
+          </div>
+
+          {/* FILA 2: Bienvenida, Cuenta Regresiva y Logística */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            
+            {/* Pase VIP y Reloj */}
+            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">03. La Experiencia del Invitado</span>
+              
+              <div className="flex flex-col items-center text-center mb-8">
+                 <span className="font-sans text-[8px] tracking-[0.3em] uppercase text-[#D4AF37] font-bold mb-2">Pase VIP Personal</span>
+                 <h3 className="font-serif text-2xl text-[#2A2A2A] dark:text-white mb-6">
+                    ¡Qué alegría tenerte aquí, <span className="text-[#F76C82] italic">Familia Fuentes</span>!
+                 </h3>
+                 <div className="flex justify-center gap-4">
+                    {[ { label: 'Días', value: '45' }, { label: 'Hrs', value: '12' }, { label: 'Min', value: '30' }].map((item, idx) => (
+                        <div key={idx} className="flex flex-col items-center">
+                            <div className="w-12 h-12 rounded-full border border-[#D4AF37]/50 shadow-md flex items-center justify-center mb-2">
+                                <span style={{ fontFamily: invTheme.fontSerif, color: invTheme.springDark }} className="text-xl dark:text-white">{item.value}</span>
+                            </div>
+                            <span style={{ fontFamily: invTheme.fontSans }} className="text-[8px] tracking-[0.2em] uppercase text-gray-500 font-medium">{item.label}</span>
+                        </div>
+                    ))}
+                 </div>
+              </div>
+
+              <FloralCorner className="float-left w-20 h-20 mr-4 opacity-50" />
+              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Hospitalidad y Expectativa</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
+                Cada obra es inteligente. La invitación reconoce el nombre de quien la abre, haciéndolo sentir honrado y esperado de manera exclusiva. Justo debajo, el reloj de esferas de cristal marca el pulso del evento. Un diseño que genera anticipación física y emocional hacia el gran día.
+              </p>
+            </section>
+
+            {/* Ubicación y Clima */}
+            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">04. Logística de Precisión</span>
+              
+              <div className="flex flex-col items-center text-center mb-8">
+                 <h3 className="font-serif text-3xl text-[#2A2A2A] dark:text-white mb-4">La Recepción</h3>
+                 <p className="font-sans text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4">
+                     Av. Reyes Aztecas 102, Tacoteno,<br/>Minatitlán, Veracruz.<br/>
+                     <span className="font-medium text-[#D4AF37] tracking-widest uppercase mt-2 block text-[9px]">Sábado, 23 de Mayo • 15:00 hrs</span>
+                 </p>
+                 <div className="flex gap-3">
+                     <div className="px-4 py-2 bg-[#2A2A2A] text-white rounded-full font-sans text-[9px] tracking-[0.2em] uppercase flex items-center">Ver en GPS</div>
+                     <div className="px-4 py-2 bg-transparent text-[#2A2A2A] dark:text-white border border-[#D4AF37] rounded-full font-sans text-[9px] tracking-[0.2em] uppercase flex items-center">Agendar</div>
+                 </div>
+              </div>
+
+              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Ingeniería al Servicio del Asistente</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
+                Olvídate de las indicaciones confusas. Integramos hipervínculos directos a Waze, Google Maps y Apple Maps para guiar a tus invitados puerta a puerta. Sincronizamos la fecha con sus calendarios personales (Outlook, Google, iOS) y mostramos pronósticos del clima en tiempo real para prever cualquier eventualidad.
+              </p>
+            </section>
+
+          </div>
+
+          {/* FILA 3: Itinerario y Código de Vestimenta */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            
+            {/* Itinerario */}
+            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">05. Ritmo y Sincronía</span>
+              
+              <div className="pl-6 border-l border-[#D4AF37]/30 mb-8 py-2">
+                 <div className="relative mb-6">
+                    <div className="absolute -left-[29px] top-1 w-3 h-3 rounded-full bg-white dark:bg-[#080808] border-[2px] border-[#D4AF37]"></div>
+                    <span className="font-sans text-[9px] text-[#D4AF37] tracking-[0.2em] font-bold block uppercase">15:00 hrs</span>
+                    <h4 className="font-serif text-xl text-gray-800 dark:text-gray-200">Llegada de Invitados</h4>
+                    <p className="font-sans text-[10px] text-gray-400 italic">Cóctel de bienvenida</p>
+                 </div>
+                 <div className="relative">
+                    <div className="absolute -left-[29px] top-1 w-3 h-3 rounded-full bg-white dark:bg-[#080808] border-[2px] border-[#D4AF37]"></div>
+                    <span className="font-sans text-[9px] text-[#D4AF37] tracking-[0.2em] font-bold block uppercase">16:00 hrs</span>
+                    <h4 className="font-serif text-xl text-gray-800 dark:text-gray-200">Banquete Especial</h4>
+                    <p className="font-sans text-[10px] text-gray-400 italic">Comida exquisita y música</p>
+                 </div>
+              </div>
+
+              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">El Minuto a Minuto</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
+                Un diseño fluido y estructurado que comunica la agenda de tu celebración sin abrumar. Mediante una línea de tiempo minimalista, los invitados conocen los momentos cumbre de la noche, asegurando puntualidad y manteniendo la fluidez de la velada que planeaste con tanto esmero.
+              </p>
+            </section>
+
+            {/* Código de Vestimenta */}
+            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">06. Estética Colectiva</span>
+              
+              <div className="flex justify-center gap-10 mb-8">
+                  <div className="flex flex-col items-center">
+                      <div className="w-16 h-16 rounded-full border border-[#D4AF37]/50 shadow-md flex items-center justify-center mb-3 text-[#F76C82]">
+                        <Shirt size={24} strokeWidth={1.5} />
                       </div>
+                      <span className="font-sans text-[9px] tracking-widest text-gray-600 dark:text-gray-400 uppercase font-bold text-center">Vestido<br/>Cómodo</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                      <div className="w-16 h-16 rounded-full border border-[#D4AF37]/50 shadow-md flex items-center justify-center mb-3 text-[#8DB580]">
+                        <Shirt size={24} strokeWidth={1.5} />
+                      </div>
+                      <span className="font-sans text-[9px] tracking-widest text-gray-600 dark:text-gray-400 uppercase font-bold text-center">Guayabera<br/>Fina</span>
                   </div>
               </div>
-            </div>
-            <div className="w-full md:w-1/2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">03. Composición Visual</span>
-              <h3 className="text-3xl md:text-4xl font-editorial font-bold mb-6 text-slate-900 dark:text-white">El Recorte Fotográfico</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light">
-                Evitamos las aburridas fotos cuadradas de borde a borde. Al encapsular la fotografía principal dentro de un óvalo asimétrico con borde dorado, convertimos la imagen en un camafeo clásico. La sutil animación de zoom lento <i>(slow-zoom)</i> mantiene la pantalla viva sin distraer la lectura.
-              </p>
-            </div>
-          </section>
 
-          {/* ELEMENTO 4: FRASE LITERARIA */}
-          <section className="flex flex-col md:flex-row-reverse gap-12 lg:gap-24 items-center">
-            <div className="w-full md:w-1/2 flex justify-center items-center p-12 bg-[#FDFBF7] rounded-[3rem] border border-slate-200 dark:border-white/5 shadow-inner min-h-[400px] text-center">
-              {/* Pieza Real Extraída */}
-              <div className="max-w-xs">
-                  <div className="mb-6 w-full flex items-center justify-center gap-4 px-2">
-                      <div className="h-px w-10 bg-gradient-to-r from-transparent to-[#D4AF37]"></div>
-                      <span style={{ fontFamily: invTheme.fontScript, color: invTheme.springPink }} className="text-4xl font-semibold drop-shadow-sm">
-                          50 Primaveras
-                      </span>
-                      <div className="h-px w-10 bg-gradient-to-l from-transparent to-[#D4AF37]"></div>
-                  </div>
-                  <p style={{ fontFamily: invTheme.fontSerif }} className="italic text-2xl text-gray-700 leading-relaxed">
-                      "Llegar a esta primavera es celebrar las flores de ayer y las semillas del mañana."
-                  </p>
-              </div>
-            </div>
-            <div className="w-full md:w-1/2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">04. El Tono Emocional</span>
-              <h3 className="text-3xl md:text-4xl font-editorial font-bold mb-6 text-slate-900 dark:text-white">El Anclaje Literario</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light">
-                Separamos visualmente las secciones usando tipografía manuscrita <i>(Script)</i> soportada por líneas divisorias en degradado. Inmediatamente después, una frase inspiradora dictamina el "mood" del evento. Los espacios en blanco (margin y padding) alrededor de este texto obligan al invitado a pausar y leer antes de continuar.
+              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Etiqueta Ilustrada</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
+                La perfección estética del evento se logra cuando todos los asistentes armonizan visualmente. A través de iconografía exclusiva, paletas de color sugeridas o moodboards de inspiración, guiamos la indumentaria de tus invitados de forma sutil, elegante y clara.
               </p>
-            </div>
-          </section>
+            </section>
 
-          {/* ELEMENTO 5: CUENTA REGRESIVA */}
-          <section className="flex flex-col md:flex-row gap-12 lg:gap-24 items-center">
-            <div className="w-full md:w-1/2 flex justify-center items-center p-8 bg-slate-50 dark:bg-[#111] rounded-[3rem] border border-slate-200 dark:border-white/5 shadow-inner min-h-[400px]">
-              {/* Pieza Real Extraída */}
-              <div className="flex flex-col items-center">
-                  <span style={{ fontFamily: invTheme.fontSans, color: invTheme.goldWarm }} className="text-xs tracking-[0.4em] uppercase font-medium mb-6">
-                      Faltan
-                  </span>
-                  <div className="flex justify-center gap-3">
-                      {[ { label: 'Días', value: '45' }, { label: 'Hrs', value: '12' }, { label: 'Min', value: '30' }].map((item, idx) => (
-                          <div key={idx} className="flex flex-col items-center w-20">
-                              <div className="w-16 h-16 rounded-full border border-[#D4AF37]/50 bg-white shadow-lg flex items-center justify-center mb-3">
-                                  <span style={{ fontFamily: invTheme.fontSerif, color: invTheme.springDark }} className="text-3xl">{item.value}</span>
-                              </div>
-                              <span style={{ fontFamily: invTheme.fontSans }} className="text-[0.65rem] tracking-[0.2em] uppercase text-gray-500 font-medium">{item.label}</span>
-                          </div>
-                      ))}
-                  </div>
+          </div>
+
+          {/* FILA 4: Galería, Lluvia de sobres y Redes */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            
+            {/* Galería */}
+            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">07. Un Viaje en el Tiempo</span>
+              
+              <div className="grid grid-cols-2 gap-3 auto-rows-[100px] mb-8">
+                  <div className="row-span-2 col-span-1 rounded-2xl overflow-hidden shadow-sm bg-slate-200"><img src="/maricela-estudillo-gonzalez/foto1.jpg" className="w-full h-full object-cover grayscale-[10%]" onError={(e) => e.target.style.display = 'none'} /></div>
+                  <div className="row-span-1 col-span-1 rounded-2xl overflow-hidden shadow-sm bg-slate-300"><img src="/maricela-estudillo-gonzalez/foto2.jpg" className="w-full h-full object-cover grayscale-[10%]" onError={(e) => e.target.style.display = 'none'} /></div>
+                  <div className="row-span-1 col-span-1 rounded-2xl overflow-hidden shadow-sm bg-slate-200"><img src="/maricela-estudillo-gonzalez/foto4.jpg" className="w-full h-full object-cover grayscale-[10%]" onError={(e) => e.target.style.display = 'none'} /></div>
               </div>
-            </div>
-            <div className="w-full md:w-1/2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">05. Tensión y Expectativa</span>
-              <h3 className="text-3xl md:text-4xl font-editorial font-bold mb-6 text-slate-900 dark:text-white">El Motor del Tiempo</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light">
-                A diferencia de los contadores cuadrados tradicionales, encapsulamos cada métrica en esferas de cristal con sombras pesadas (Drop Shadows) y bordes dorados. Esto crea la ilusión de objetos físicos, similares a relojes de bolsillo, generando anticipación constante hacia el gran día.
+
+              <FloralCorner className="float-right w-20 h-20 ml-4 opacity-50" />
+              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Mosaico Fotográfico</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
+                Toda historia de amor o celebración de vida tiene un trayecto previo. Nuestro sistema de diseño ensambla galerías de imágenes asimétricas que rompen la monotonía y sumergen a los visitantes en tus recuerdos más preciados, preparando el terreno emocional para el evento.
               </p>
-            </div>
+            </section>
+
+            {/* Lluvia de Sobres y Redes */}
+            <section className="flex flex-col border-t border-slate-200 dark:border-white/10 pt-8">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">08. Comodidad Financiera y Social</span>
+              
+              <div className="flex flex-col gap-6 mb-8">
+                 <div className="border border-[#D4AF37]/30 p-4 rounded-3xl flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]"><Gift size={20}/></div>
+                    <div>
+                       <h4 className="font-bold text-sm text-slate-800 dark:text-white">Mesa de Regalos / Efectivo</h4>
+                       <p className="text-[10px] text-slate-500 font-mono mt-1">CLABE: 0123 4567 8901 2345 67</p>
+                    </div>
+                 </div>
+                 <div className="border border-[#F76C82]/30 p-4 rounded-3xl flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-[#F76C82]/10 flex items-center justify-center text-[#F76C82]"><Hash size={20}/></div>
+                    <div>
+                       <h4 className="font-bold text-sm text-slate-800 dark:text-white">Conexión con Instagram</h4>
+                       <p className="text-xs font-bold text-[#F76C82] mt-1">#PrimaveraMaricela</p>
+                    </div>
+                 </div>
+              </div>
+
+              <h3 className="text-2xl font-editorial font-bold mb-3 text-slate-900 dark:text-white">Gifting y Omnicanalidad</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm text-justify">
+                Evitamos intermediarios y comisiones abusivas. Tus invitados pueden transferir regalos en efectivo directamente a tus cuentas bancarias mediante la copia rápida de datos. Además, vinculamos tu hashtag oficial y ofrecemos filtros de Realidad Aumentada (AR) para que tu evento sea tendencia en redes sociales desde semanas antes de ocurrir.
+              </p>
+            </section>
+
+          </div>
+
+          {/* ÚLTIMA FILA: RSVP CENTRADO */}
+          <section className="flex flex-col items-center border-t border-slate-200 dark:border-white/10 pt-12 max-w-3xl mx-auto text-center">
+             <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-6 block">09. El Blindaje Final</span>
+             
+             <div className="w-full max-w-md bg-white dark:bg-[#111] p-6 border border-slate-200 dark:border-white/10 shadow-lg rounded-3xl mb-8">
+                <h4 className="font-serif text-2xl text-slate-800 dark:text-white mb-6">Confirmación</h4>
+                <div className="p-3 border border-slate-200 dark:border-white/10 rounded-xl mb-4 text-left">
+                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 block mb-2">WhatsApp de Contacto</label>
+                   <div className="h-8 bg-slate-100 dark:bg-white/5 rounded"></div>
+                </div>
+                <div className="p-3 border border-slate-200 dark:border-white/10 rounded-xl mb-6 text-left flex justify-between items-center">
+                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 block">Pase #1</label>
+                   <div className="w-16 h-6 bg-emerald-500/20 rounded"></div>
+                </div>
+                <button className="w-full py-4 bg-[#F76C82] text-white rounded-full font-bold text-xs uppercase tracking-widest shadow-md">Confirmar Asistencia</button>
+             </div>
+
+             <h3 className="text-3xl md:text-4xl font-editorial font-bold mb-4 text-slate-900 dark:text-white">RSVP Inteligente y Cero Colados</h3>
+             <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm">
+                La pieza maestra de nuestra ingeniería. Se acabaron los formularios genéricos donde los invitados anotan a 5 personas cuando solo invitaste a 2. El sistema reconoce la cuota asignada a cada familia y genera pases QR personales e intransferibles tras la confirmación, sincronizándose instantáneamente con tu panel de control de anfitrión y el escáner de la puerta.
+             </p>
           </section>
 
         </div>
