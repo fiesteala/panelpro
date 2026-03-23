@@ -9537,8 +9537,19 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             <a href="#showroom" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">La Colección</a>
             <a href="#experiencia" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Características</a>
             <a href="#boveda" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">El Software</a>
-            <button onClick={() => setShowAnatomy(true)} className="text-indigo-600 dark:text-amber-500 font-black hover:text-indigo-700 dark:hover:text-amber-400 transition-colors flex items-center">
-              <BookOpenText size={14} className="mr-1.5"/> Baulia Magazine
+            
+            {/* 🔴 BOTÓN BAULIA MAGAZINE DESTACADO (ESTILO PRIMAVERA VIBRANTE) */}
+            <button 
+              onClick={() => setShowAnatomy(true)} 
+              className="bg-[#FDFBF7] border border-[#D4AF37]/50 px-5 py-2 rounded-full shadow-[0_4px_15px_rgba(247,108,130,0.2)] hover:shadow-[0_6px_25px_rgba(247,108,130,0.4)] hover:scale-105 transition-all flex items-center group ml-2"
+            >
+              <BookOpenText size={16} className="text-[#8DB580] mr-2.5 group-hover:-rotate-12 transition-transform duration-300"/>
+              <span style={{ fontFamily: '"Cormorant Garamond", serif', fontWeight: 600 }} className="text-[#2A2A2A] text-[13px] tracking-[0.2em] uppercase mr-2">
+                Baulia
+              </span>
+              <span style={{ fontFamily: '"Pinyon Script", cursive' }} className="text-[#F76C82] text-[24px] lowercase tracking-normal leading-none mt-1">
+                Magazine
+              </span>
             </button>
           </div>
           <div className="flex items-center gap-4">
