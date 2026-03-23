@@ -9564,14 +9564,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
                                       </div>
                                       
-                                      {/* ✅ RESTAURADO: Escala original segura (no desborda) pero más alta (1005px) para tapar lo negro */}
-                                      <div className="absolute inset-0 overflow-hidden rounded-[1.8rem] z-10 bg-[#111] flex items-center justify-center">
-    <div className="w-[390px] h-[845px] origin-center flex-shrink-0" style={{ transform: 'scale(0.46)' }}>
-        <iframe
-            src={currentDemo.url}
-            className="w-full h-full border-0"
-            title={`iPhone Demo ${currentDemo.label}`}
-        ></iframe>
+                                      {/* ✅ RESTAURADO: Estilo original seguro (no desborda) y alineado al tope (edge-to-edge top-to-bottom) */}
+<div className="absolute inset-0 overflow-hidden rounded-[1.8rem] z-10 bg-[#111] flex justify-center items-start"> {/* Align content to top of physical phone screen */}
+    <div className="w-[430px] h-[1005px] origin-top flex-shrink-0" style={{ transform: 'scale(0.475)' }}>
+        <iframe src={currentDemo.url} className="w-full h-full border-0" title={`iPhone Demo ${currentDemo.label}`}></iframe>
     </div>
 </div>
                                   </div>
