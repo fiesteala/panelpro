@@ -9552,7 +9552,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
                             {/* --- 🔴 IPHONE AL FRENTE (Centrado, Escala Móvil Exacta e Interactivo) --- */}
                             {/* Cambio clave: pointer-events-auto para que el cliente pueda hacer scroll */}
-                            <div className="absolute bottom-0 left-[-15%] xl:left-[-5%] z-40 transition-transform duration-700 hover:scale-[1.02] pointer-events-auto">
+                            <div className="absolute bottom-0 left-[-25%] xl:left-[-5%] z-40 transition-transform duration-700 hover:scale-[1.02] pointer-events-auto">
                                   <div 
                                     ref={showroomPhoneRef}
                                     style={{ width: '220px', height: '477px' }} 
@@ -9564,9 +9564,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
                                       </div>
                                       
-                                      {/* ✅ RESTAURADO: Estilo original seguro (no desborda) y alineado al tope (edge-to-edge top-to-bottom) */}
-<div className="absolute inset-0 overflow-hidden rounded-[1.8rem] z-10 bg-[#111] flex justify-center items-start"> {/* Align content to top of physical phone screen */}
-    <div className="w-[430px] h-[1005px] origin-top flex-shrink-0" style={{ transform: 'scale(0.475)' }}>
+                                      {/* SOLUCIÓN IPHONE: Proporción matemática exacta (220/0.475 = 463, 477/0.475 = 1004) */}
+<div className="absolute inset-0 overflow-hidden rounded-[1.8rem] z-10 bg-[#111]">
+    <div className="w-[463px] h-[1004px] origin-top-left" style={{ transform: 'scale(0.475)' }}>
         <iframe src={currentDemo.url} className="w-full h-full border-0" title={`iPhone Demo ${currentDemo.label}`}></iframe>
     </div>
 </div>
