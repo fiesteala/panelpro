@@ -9987,6 +9987,18 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 59 });
   const [accentColor, setAccentColor] = useState('amber');
   const [liveReviews, setLiveReviews] = useState([]);
+
+  // 🔴 ESCUCHA LOS BOTONES DE COMPRA DESDE ADENTRO DE LOS IFRAMES
+  useEffect(() => {
+    const escucharMensajesDeDemos = (event) => {
+      if (event.data === 'open_checkout') {
+        // Abre el modal de Stripe con el plan que quieras sugerir por defecto
+        setCheckoutModal({ plan: 'Oro VIP', precio: '1,990.00' });
+      }
+    };
+    window.addEventListener('message', escucharMensajesDeDemos);
+    return () => window.removeEventListener('message', escucharMensajesDeDemos);
+  }, []);
   
   // ESTADO PARA ABRIR LA REVISTA
   const [showAnatomy, setShowAnatomy] = useState(false);
