@@ -12698,9 +12698,39 @@ const ReviewHarvester = ({ authData }) => {
 // --- COMPONENTE: SHOWROOM SIMULADOR (VITRINA PERFECTA CON UPSELL) ---
 // ==========================================
 const ShowcaseSimulatorView = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const isCheckout = urlParams.get('checkout') === '1';
+
   const [activeCategory, setActiveCategory] = useState('boda');
-  const [checkoutStep, setCheckoutStep] = useState(0); 
+  const [checkoutStep, setCheckoutStep] = useState(isCheckout ? 1 : 0); 
   const [planSeleccionado, setPlanSeleccionado] = useState(null);
+
+  // 🔴 ESTADOS Y REFS PARA EL "ENFOQUE INTELIGENTE" (SMART FOCUS)
+  const macIframeRef = useRef(null);
+  const iphoneIframeRef = useRef(null);
+  const [activeDevice, setActiveDevice] = useState('iphone'); // Por defecto el iPhone tiene el control
+
+  // Si cambia de demo (ej. de Boda a XV), regresamos el foco al iPhone
+  useEffect(() => {
+    setActiveDevice('iphone');
+  }, [activeCategory]);
+
+  // La magia: Pausa el audio del dispositivo que pierde el foco
+  const switchFocus = (device) => {
+    setActiveDevice(device);
+    try {
+      // Identificamos cuál es el iframe que se queda inactivo
+      const inactiveRef = device === 'mac' ? iphoneIframeRef : macIframeRef;
+      
+      // Entramos al iframe inactivo y le damos "pause" a cualquier audio o video
+      if (inactiveRef.current && inactiveRef.current.contentWindow) {
+        const medias = inactiveRef.current.contentWindow.document.querySelectorAll('audio, video');
+        medias.forEach(media => media.pause());
+      }
+    } catch(err) {
+      console.log('CORS local bloqueó la pausa automática, pero el escudo visual protegerá la experiencia.');
+    }
+  };
 
   useEffect(() => {
     const escucharMensajeDelIframe = (event) => {
@@ -12878,35 +12908,70 @@ const ShowcaseSimulatorView = () => {
 
         <div className="flex-1 flex items-center justify-center p-6 lg:p-10 z-10 relative">
            
-           {/* iPhone Mockup Físico Rediseñado */}
-           <div className="relative w-[328px] h-[691px] bg-black rounded-[3rem] border-[8px] border-slate-800 shadow-[0_0_80px_rgba(0,0,0,0.6)] flex-shrink-0">
-             
-             {/* Isla Dinámica */}
-             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-20 flex justify-end items-center pr-2">
-               <div className="w-2 h-2 rounded-full bg-slate-800/80 mr-1"></div>
-               <div className="w-2 h-2 rounded-full bg-indigo-900/50"></div>
-             </div>
-             
-             {/* LA MAGIA: Contenedor con escala matemática perfecta (0.8) */}
-             <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-[#111] relative">
-               <iframe 
-                 src={currentDemo.url} 
-                 className="absolute top-0 left-0 border-0"
-                 title={`Demo ${currentDemo.label}`}
-                 style={{ 
-                    width: '390px', 
-                    height: '844px', 
-                    transform: 'scale(0.8)', 
-                    transformOrigin: 'top left' 
-                 }}
-               ></iframe>
-             </div>
-             
-             {/* Botones Físicos Simulados */}
-             <div className="absolute top-24 -left-[11px] w-1.5 h-8 bg-slate-700 rounded-l-md"></div>
-             <div className="absolute top-36 -left-[11px] w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
-             <div className="absolute top-52 -left-[11px] w-1.5 h-12 bg-slate-700 rounded-l-md"></div>
-             <div className="absolute top-36 -right-[11px] w-1.5 h-16 bg-slate-700 rounded-r-md"></div>
+           <div className="relative w-full max-w-[850px] translate-x-[5%] xl:translate-x-[15%]">
+               
+               {/* --- MACBOOK DE FONDO CON CRISTAL INTELIGENTE --- */}
+               <div className={`relative w-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-700 ${activeDevice === 'mac' ? 'scale-[1.02] z-30' : 'scale-100 z-10 opacity-70 blur-[1px]'}`}>
+                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-6 bg-black rounded-b-2xl z-30"></div>
+                   <div className="w-full aspect-[16/10] bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
+                       <iframe 
+                         ref={macIframeRef}
+                         src={currentDemo.url} 
+                         className="absolute top-0 left-0 border-0 origin-top-left" 
+                         style={{ width: '250%', height: '250%', transform: 'scale(0.4)' }} 
+                         title={`Mac Demo ${currentDemo.label}`}
+                       ></iframe>
+                       
+                       {/* CRISTAL INTELIGENTE MAC */}
+                       {activeDevice !== 'mac' && (
+                         <div onClick={() => switchFocus('mac')} className="absolute inset-0 z-20 bg-black/10 backdrop-blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
+                            <div className="bg-slate-900/90 text-white text-xs font-bold px-6 py-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl flex items-center transform scale-95 group-hover:scale-100">
+                               <PlayCircle size={18} className="mr-2 text-amber-500"/> Haz clic para explorar en Mac
+                            </div>
+                         </div>
+                       )}
+                   </div>
+                   <div className="relative w-[105%] -left-[2.5%] h-4 bg-slate-400 dark:bg-slate-700 rounded-b-3xl shadow-xl z-30 transition-colors">
+                      <div className="w-40 h-1.5 bg-slate-300 dark:bg-slate-600 mx-auto rounded-b-md"></div>
+                   </div>
+               </div>
+
+               {/* --- IPHONE AL FRENTE CON CRISTAL INTELIGENTE --- */}
+               <div className={`absolute bottom-[-15%] left-[-20%] xl:left-[-35%] transition-all duration-700 ease-out origin-bottom ${activeDevice === 'iphone' ? 'z-40 scale-[1.05]' : 'z-20 scale-95 opacity-80 blur-[1px]'}`}>
+                   <div style={{ width: '220px', height: '458px' }} className="relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto">
+                       
+                       {/* Isla Dinámica */}
+                       <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-[30%] h-[16px] bg-black rounded-full z-30 flex justify-end items-center pr-1.5">
+                         <div className="w-1.5 h-1.5 rounded-full bg-slate-800/80 mr-1"></div>
+                         <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
+                       </div>
+                       
+                       <div className="absolute inset-0 overflow-hidden rounded-[1.8rem] z-10 bg-[#111]">
+                         <iframe 
+                           ref={iphoneIframeRef}
+                           src={currentDemo.url} 
+                           className="border-0 absolute top-0 left-0" 
+                           title={`iPhone Demo ${currentDemo.label}`}
+                           style={{ 
+                               width: '390px', 
+                               height: '844px', 
+                               transform: 'scale(0.523)', 
+                               transformOrigin: 'top left' 
+                           }}
+                         ></iframe>
+
+                         {/* CRISTAL INTELIGENTE IPHONE */}
+                         {activeDevice !== 'iphone' && (
+                           <div onClick={() => switchFocus('iphone')} className="absolute inset-0 z-20 bg-black/10 backdrop-blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
+                              <div className="bg-slate-900/90 text-white text-[10px] font-bold px-4 py-3 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl text-center flex flex-col items-center transform scale-95 group-hover:scale-100">
+                                 <Smartphone size={24} className="mb-1 text-amber-500"/>
+                                 Tocar para usar<br/>en Móvil
+                              </div>
+                           </div>
+                         )}
+                       </div>
+                   </div>
+               </div>
            </div>
 
            <button onClick={() => window.open(currentDemo.url, '_blank')} className="absolute bottom-10 right-10 px-5 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full font-bold text-[10px] uppercase tracking-widest flex items-center transition-colors shadow-2xl z-50">
@@ -12944,7 +13009,8 @@ export default function App() {
   // ==========================================
   const [themeSetting, setThemeSetting] = useState(() => localStorage.getItem('baulia_theme') || 'auto');
   const [systemIsDark, setSystemIsDark] = useState(false);
-  const [authData, setAuthData] = useState({ isAuthenticated: false, role: null, plan: null, eventId: null });
+  // 🔴 SOLUCIÓN APLICADA: Se agregó "email: null" al estado inicial para que exista en memoria
+  const [authData, setAuthData] = useState({ isAuthenticated: false, email: null, role: null, plan: null, eventId: null });
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [accountSuspended, setAccountSuspended] = useState(false);
 
@@ -13015,30 +13081,31 @@ export default function App() {
               if (activeEvents.length === 0) {
                  signOut(auth);
                  setAccountSuspended(true);
-                 setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
+                 setAuthData({ isAuthenticated: false, email: null, role: null, plan: null, eventId: null, availableEvents: [] });
               } else {
                  const savedEventId = localStorage.getItem('eventmaster_currentEventId');
                  let selectedEvent = activeEvents.find(e => e.eventId === savedEventId) || activeEvents[0];
                  
                  setAuthData({ 
                    isAuthenticated: true, 
+                   email: user.email, // 🔴 ESTA ES LA CLAVE QUE FALTABA: Guardamos el correo en memoria
                    role: selectedEvent.role, 
                    plan: selectedEvent.plan, 
                    eventId: selectedEvent.eventId,
-                   availableEvents: activeEvents // 🔴 Esto activa el menú "Cambiar Proyecto"
+                   availableEvents: activeEvents 
                  });
                  localStorage.setItem('eventmaster_currentEventId', selectedEvent.eventId);
               }
             } else {
               signOut(auth);
-              setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
+              setAuthData({ isAuthenticated: false, email: null, role: null, plan: null, eventId: null, availableEvents: [] });
             }
           });
         } else {
-          setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
+          setAuthData({ isAuthenticated: false, email: null, role: null, plan: null, eventId: null, availableEvents: [] });
         }
       } catch (error) {
-        setAuthData({ isAuthenticated: false, role: null, plan: null, eventId: null, availableEvents: [] });
+        setAuthData({ isAuthenticated: false, email: null, role: null, plan: null, eventId: null, availableEvents: [] });
       } finally {
         setIsCheckingAuth(false);
       }
