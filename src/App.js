@@ -10318,13 +10318,18 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             {/* Social Proof */}
             <div className="flex flex-col sm:flex-row items-center gap-4 text-slate-500 dark:text-slate-400 text-xs font-medium border-t border-slate-200 dark:border-white/10 pt-6 w-full lg:w-max">
               <div className="flex -space-x-2">
-                {[1,2,3,4,5].map(i => <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-[#050505] bg-slate-200 dark:bg-slate-800"></div>)}
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Planner" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#050505] object-cover shadow-sm"/>
+                <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80" alt="Planner" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#050505] object-cover shadow-sm"/>
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Planner" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#050505] object-cover shadow-sm"/>
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Planner" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#050505] object-cover shadow-sm"/>
+                <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80" alt="Planner" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#050505] object-cover shadow-sm"/>
               </div>
               <div className="text-center sm:text-left">
                 <div className="flex items-center justify-center sm:justify-start gap-1 mb-1">
                     {[1,2,3,4,5].map(s => <Star key={s} size={12} className="fill-amber-500 text-amber-500"/>)}
+                    <span className="text-slate-800 dark:text-white font-bold ml-1">4.9/5</span>
                 </div>
-                <p>Confiado por más de <b className="text-slate-800 dark:text-white">500+ Planners</b> en México.</p>
+                <p>Confiado por <b className="text-slate-800 dark:text-white">120+ Planners</b> en México.</p>
               </div>
             </div>
           </RevealSection>
