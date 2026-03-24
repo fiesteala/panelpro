@@ -184,7 +184,7 @@
             return (
                 <div className="relative min-h-screen w-full overflow-hidden font-sans bg-[#FDFBF7]">
                     
-                    <audio ref={audioRef} id="bg-music" src="/primavera-vibrante/cancion.mp3" loop />
+                    <audio ref={audioRef} id="bg-music" src="/demos/cumple_formal/cancion.mp3" loop />
 
                     <div className="fixed inset-0 z-0 overflow-hidden bg-gradient-to-br from-[#FFF5F5] via-[#FDFBF7] to-[#FDF1F3]">
                         <div className="absolute top-0 left-[15%] w-3 h-3 md:w-4 md:h-4 bg-spring-pink/40 rounded-full blur-[1px] animate-falling-1 z-0"></div>
@@ -210,7 +210,7 @@
                         <div className="relative w-full max-w-lg flex flex-col items-center text-center mt-12 mb-20 animate-fade-in-up delay-300">
                             
                             <div className="mb-8 z-20 animate-pulse-slow">
-                                <img src="/primavera-vibrante/monograma.svg" alt="Monograma" className="w-20 h-20 md:w-24 md:h-24 mx-auto drop-shadow-md object-contain hover:scale-105 transition-transform duration-700" />
+                                <img src="/demos/cumple_formal/monograma.svg" alt="Monograma" className="w-20 h-20 md:w-24 md:h-24 mx-auto drop-shadow-md object-contain hover:scale-105 transition-transform duration-700" />
                             </div>
 
                             <div className="flex flex-col items-center z-10 px-4 mb-8">
@@ -227,7 +227,7 @@
 
                             <div className="relative w-64 h-80 md:w-72 md:h-[26rem] rounded-full p-2 border border-gold/30 bg-white/40 backdrop-blur-sm shadow-xl z-10 mb-10 overflow-hidden">
                                 <div className="w-full h-full rounded-full overflow-hidden relative">
-                                    <img src="/primavera-vibrante/portada.jpg" alt="Foto de Miranda" className="w-full h-full object-cover animate-slow-zoom"/>
+                                    <img src="/demos/cumple_formal/portada.jpg" alt="Foto de Miranda" className="w-full h-full object-cover animate-slow-zoom"/>
                                 </div>
                             </div>
 
@@ -366,7 +366,7 @@
                             </div>
                             
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px] md:auto-rows-[300px]">
-                                {[ { url: "/primavera-vibrante/foto1.jpg", span: "row-span-2 col-span-2 md:col-span-2" }, { url: "/primavera-vibrante/foto2.jpg", span: "row-span-1 col-span-1" }, { url: "/primavera-vibrante/foto3.jpg", span: "row-span-2 col-span-1" }, { url: "/primavera-vibrante/foto4.jpg", span: "row-span-1 col-span-1" }
+                                {[ { url: "/demos/cumple_formal/foto1.jpg", span: "row-span-2 col-span-2 md:col-span-2" }, { url: "/demos/cumple_formal/foto2.jpg", span: "row-span-1 col-span-1" }, { url: "/demos/cumple_formal/foto3.jpg", span: "row-span-2 col-span-1" }, { url: "/demos/cumple_formal/foto4.jpg", span: "row-span-1 col-span-1" }
                                 ].map((img, idx) => (
                                     <div key={idx} className={`${img.span} rounded-3xl overflow-hidden shadow-lg transition-all duration-700 hover:scale-[1.05] group bg-white/20 border-2 border-white/50 relative flex items-center justify-center`}><img src={img.url} alt={`Momento ${idx+1}`} className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:rotate-1 transition-all duration-700 relative z-10" /></div>
                                 ))}
@@ -375,10 +375,10 @@
                             {/* 🔴 NUEVAS 2 FOTOS 1:1 DEBAJO DE LA GALERÍA PRINCIPAL */}
                             <div className="grid grid-cols-2 gap-4 mt-4 w-full">
                                 <div className="rounded-3xl overflow-hidden shadow-lg transition-all duration-700 hover:scale-[1.05] group bg-white/20 border-2 border-white/50 relative flex items-center justify-center aspect-square">
-                                    <img src="/primavera-vibrante/foto5.jpg" alt="Momento 5" className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:rotate-1 transition-all duration-700 relative z-10" />
+                                    <img src="/demos/cumple_formal/foto5.jpg" alt="Momento 5" className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:rotate-1 transition-all duration-700 relative z-10" />
                                 </div>
                                 <div className="rounded-3xl overflow-hidden shadow-lg transition-all duration-700 hover:scale-[1.05] group bg-white/20 border-2 border-white/50 relative flex items-center justify-center aspect-square">
-                                    <img src="/primavera-vibrante/foto6.jpg" alt="Momento 6" className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:rotate-1 transition-all duration-700 relative z-10" />
+                                    <img src="/demos/cumple_formal/foto6.jpg" alt="Momento 6" className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:rotate-1 transition-all duration-700 relative z-10" />
                                 </div>
                             </div>
 
