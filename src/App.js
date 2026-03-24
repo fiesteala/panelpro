@@ -9034,7 +9034,7 @@ const GuestProyectorView = ({ eventId }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: FORMULARIO DE PAGO STRIPE (CONECTADO AL CEREBRO) ---
+// --- COMPONENTE: FORMULARIO DE PAGO STRIPE (DISEÑO ALTA COSTURA) ---
 // ==========================================
 const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   const stripe = useStripe();
@@ -9074,7 +9074,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           paymentMethodId: paymentMethod.id,
-          plan: planSeleccionado.plan, // 🔴 CORRECCIÓN: Ahora envía .plan correctamente
+          plan: planSeleccionado.plan, 
           precio: planSeleccionado.precio,
           nombre: nombre,
           email: email,
@@ -9085,10 +9085,8 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
       const resultado = await respuesta.json();
 
       if (resultado.success) {
-        // ¡Magia! Se cobró el dinero y se creó la Bóveda en Firebase.
         onSuccess(resultado, planSeleccionado);
       } else {
-        // Stripe rechazó la tarjeta
         setErrorTexto(resultado.error || "Transacción declinada por el banco.");
       }
     } catch (err) {
@@ -9099,59 +9097,76 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col h-full">
-      <div className="space-y-4 mb-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-        {/* Resumen de compra */}
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex justify-between items-center mb-6">
-           <div>
-             <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-1">Plan Seleccionado</p>
-             {/* 🔴 CORRECCIÓN: Renderiza .plan en vez de .nombre */}
-             <p className="text-white font-editorial text-xl">{planSeleccionado.plan}</p>
-           </div>
-           <div className="text-right">
-             <p className="text-white font-black text-2xl">${planSeleccionado.precio}</p>
-             <p className="text-slate-500 text-[9px] uppercase tracking-widest">MXN / Pago Único</p>
+    <form onSubmit={handleSubmit} className="flex flex-col h-full animate-in fade-in duration-500">
+      <div className="space-y-6 mb-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+        
+        {/* Resumen de compra VIP */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 to-white dark:from-amber-500/10 dark:to-[#111] border border-amber-200 dark:border-amber-500/30 rounded-2xl p-6 shadow-sm">
+           <div className="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/20 blur-2xl rounded-full pointer-events-none"></div>
+           <div className="flex justify-between items-center relative z-10">
+             <div>
+               <p className="text-amber-600 dark:text-amber-500 text-[10px] font-black uppercase tracking-widest mb-1.5">Suscripción Premium</p>
+               <p className="text-slate-900 dark:text-white font-editorial text-2xl md:text-3xl leading-none">{planSeleccionado.plan}</p>
+             </div>
+             <div className="text-right">
+               <p className="text-slate-900 dark:text-white font-black text-2xl md:text-3xl">${planSeleccionado.precio.split('.')[0]}</p>
+               <p className="text-slate-500 dark:text-slate-400 text-[9px] uppercase tracking-widest font-bold mt-1">MXN / Pago Único</p>
+             </div>
            </div>
         </div>
 
-        {/* Formulario de Datos */}
-        <div className="space-y-3">
+        {/* Formulario de Datos (Adaptativo Día/Noche) */}
+        <div className="space-y-4">
           <div>
-            <label className="block text-[10px] uppercase tracking-widest text-slate-400 mb-1 ml-1">Nombre de los Festejados</label>
-            <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Carlos & María" className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-amber-500 focus:outline-none transition-colors" />
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Nombre de los Festejados</label>
+            <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Carlos & María" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
           </div>
-          <div>
-            <label className="block text-[10px] uppercase tracking-widest text-slate-400 mb-1 ml-1">Correo Electrónico</label>
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-amber-500 focus:outline-none transition-colors" />
-          </div>
-          <div>
-            <label className="block text-[10px] uppercase tracking-widest text-slate-400 mb-1 ml-1">Fecha del Evento</label>
-            <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-amber-500 focus:outline-none transition-colors" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Correo Electrónico</label>
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Fecha del Evento</label>
+              <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium [color-scheme:light] dark:[color-scheme:dark]" />
+            </div>
           </div>
         </div>
 
-        {/* Tarjeta de Crédito (Stripe) */}
-        <div className="mt-6">
-           <label className="block text-[10px] uppercase tracking-widest text-slate-400 mb-2 ml-1">Datos de Pago</label>
-           <div className="p-4 bg-[#111] border border-white/10 rounded-xl">
-             <CardElement options={{
-               style: {
-                 base: { fontSize: '14px', color: '#ffffff', '::placeholder': { color: '#475569' }, iconColor: '#f59e0b' },
-                 invalid: { color: '#ef4444', iconColor: '#ef4444' }
-               }
-             }}/>
+        {/* Tarjeta de Crédito (Diseño Premium Black Card para garantizar contraste) */}
+        <div className="mt-8">
+           <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1 flex items-center"><Lock size={12} className="mr-1.5 text-emerald-500"/> Información Bancaria Segura</label>
+           
+           <div className="relative p-5 bg-slate-900 dark:bg-[#050505] border border-slate-800 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden group">
+             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
+             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
+             
+             <div className="relative z-10">
+               <CardElement options={{
+                 style: {
+                   base: { 
+                     fontSize: '15px', 
+                     color: '#ffffff', // Forzado a blanco porque el fondo es siempre oscuro premium
+                     fontFamily: '"Montserrat", sans-serif',
+                     '::placeholder': { color: '#94a3b8' }, 
+                     iconColor: '#fbbf24' 
+                   },
+                   invalid: { color: '#f87171', iconColor: '#f87171' }
+                 }
+               }}/>
+             </div>
            </div>
-           {errorTexto && <p className="text-red-400 text-xs mt-2 ml-1 flex items-center"><span className="w-1 h-1 bg-red-400 rounded-full mr-2"></span>{errorTexto}</p>}
+           {errorTexto && <p className="text-rose-500 text-xs mt-3 ml-1 flex items-center font-bold bg-rose-50 dark:bg-rose-500/10 p-2 rounded-lg border border-rose-200 dark:border-rose-500/20"><AlertCircle size={14} className="mr-1.5 flex-shrink-0"/> {errorTexto}</p>}
         </div>
       </div>
 
       {/* Botón de Pagar */}
-      <div className="pt-4 border-t border-white/5 mt-auto">
-        <button type="submit" disabled={!stripe || loading} className="w-full py-4 bg-amber-500 text-slate-900 font-black rounded-xl text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center">
+      <div className="pt-5 border-t border-slate-100 dark:border-white/5 mt-auto shrink-0">
+        <button type="submit" disabled={!stripe || loading} className="w-full py-4 sm:py-5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-black rounded-xl text-xs sm:text-sm uppercase tracking-widest shadow-[0_10px_25px_rgba(245,158,11,0.4)] hover:shadow-[0_15px_35px_rgba(245,158,11,0.6)] hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center">
           {loading ? (
-             <span className="flex items-center"><span className="animate-spin h-4 w-4 border-2 border-slate-900 border-t-transparent rounded-full mr-2"></span> Procesando Bóveda...</span>
+             <span className="flex items-center"><RefreshCw size={18} className="animate-spin mr-2"/> Cifrando Transacción...</span>
           ) : (
-             `Pagar $${planSeleccionado.precio} MXN`
+             <><ShieldCheck size={18} className="mr-2"/> Pagar ${planSeleccionado.precio} MXN</>
           )}
         </button>
       </div>

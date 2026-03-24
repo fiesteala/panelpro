@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Maricela - Mis 50 Años | Invitación Primavera Vibrante</title>
+    <title>Miranda - Mis 30 Años | Invitación Primavera Vibrante</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -218,23 +218,23 @@
                                     {language === 'ES' ? 'Celebrando la vida' : 'Celebrating Life'}
                                 </span>
                                 <h1 className="font-serif text-6xl md:text-8xl mb-2 text-spring-dark leading-none drop-shadow-sm">
-                                    Maricela
+                                    Miranda
                                 </h1>
                                 <h2 className="font-sans text-xs md:text-sm tracking-[0.3em] md:tracking-[0.5em] uppercase font-medium text-gold-dark/80">
-                                    Estudillo González
+                                    GÓMEZ VILLARREAL
                                 </h2>
                             </div>
 
                             <div className="relative w-64 h-80 md:w-72 md:h-[26rem] rounded-full p-2 border border-gold/30 bg-white/40 backdrop-blur-sm shadow-xl z-10 mb-10 overflow-hidden">
                                 <div className="w-full h-full rounded-full overflow-hidden relative">
-                                    <img src="/primavera-vibrante/portada.jpg" alt="Foto de Maricela" className="w-full h-full object-cover animate-slow-zoom"/>
+                                    <img src="/primavera-vibrante/portada.jpg" alt="Foto de Miranda" className="w-full h-full object-cover animate-slow-zoom"/>
                                 </div>
                             </div>
 
                             <div className="mb-6 z-10 w-full flex items-center justify-center gap-4 px-2">
                                 <div className="h-px w-12 bg-gradient-to-r from-transparent to-gold"></div>
                                 <span className="font-script text-5xl md:text-6xl text-spring-pink font-semibold drop-shadow-sm">
-                                    50 {language === 'ES' ? 'Primaveras' : 'Springs'}
+                                    30 {language === 'ES' ? 'Primaveras' : 'Springs'}
                                 </span>
                                 <div className="h-px w-12 bg-gradient-to-l from-transparent to-gold"></div>
                             </div>
@@ -320,7 +320,7 @@
 
                                 <div className="flex flex-col md:flex-row gap-4 w-full md:justify-center z-10">
                                     <a href="https://maps.app.goo.gl/jbq8caTyzZdFDBz5A" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-spring-dark text-white rounded-full font-sans text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-gold-dark hover:shadow-lg hover:-translate-y-1 flex justify-center items-center">{language === 'ES' ? 'Ver en GPS' : 'Open in GPS'}</a>
-                                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Mis+50+A%C3%B1os+-+Maricela&dates=20260523T210000Z/20260524T030000Z&details=Celebraci%C3%B3n+de+los+50+A%C3%B1os+de+Maricela+Estudillo+Gonz%C3%A1lez&location=Palapa+los+Otates,+Av.+Reyes+Aztecas+102,+Tacoteno,+96870+Minatitl%C3%A1n,+Ver." target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-transparent text-spring-dark border border-gold-dark rounded-full font-sans text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-gold/5 hover:-translate-y-1 flex justify-center items-center">{language === 'ES' ? 'Agendar' : 'Add to Calendar'}</a>
+                                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Mis+30+A%C3%B1os+-+Miranda&dates=20260523T210000Z/20260524T030000Z&details=Celebraci%C3%B3n+de+los+30+A%C3%B1os+de+Miranda+G%C3%B3mez+Villarreal&location=Palapa+los+Otates,+Av.+Reyes+Aztecas+102,+Tacoteno,+96870+Minatitl%C3%A1n,+Ver." target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-transparent text-spring-dark border border-gold-dark rounded-full font-sans text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-gold/5 hover:-translate-y-1 flex justify-center items-center">{language === 'ES' ? 'Agendar' : 'Add to Calendar'}</a>
                                 </div>
                             </div>
                         </RevealOnScroll>
@@ -364,12 +364,24 @@
                                 <span className="font-sans text-xs tracking-[0.3em] uppercase text-spring-green font-semibold">{language === 'ES' ? 'Un Viaje en el Tiempo' : 'A Journey Through Time'}</span>
                                 <h3 className="font-serif text-5xl md:text-6xl text-spring-dark mt-4">{language === 'ES' ? 'Momentos Inolvidables' : 'Unforgettable Moments'}</h3>
                             </div>
+                            
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px] md:auto-rows-[300px]">
                                 {[ { url: "/primavera-vibrante/foto1.jpg", span: "row-span-2 col-span-2 md:col-span-2" }, { url: "/primavera-vibrante/foto2.jpg", span: "row-span-1 col-span-1" }, { url: "/primavera-vibrante/foto3.jpg", span: "row-span-2 col-span-1" }, { url: "/primavera-vibrante/foto4.jpg", span: "row-span-1 col-span-1" }
                                 ].map((img, idx) => (
                                     <div key={idx} className={`${img.span} rounded-3xl overflow-hidden shadow-lg transition-all duration-700 hover:scale-[1.05] group bg-white/20 border-2 border-white/50 relative flex items-center justify-center`}><img src={img.url} alt={`Momento ${idx+1}`} className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:rotate-1 transition-all duration-700 relative z-10" /></div>
                                 ))}
                             </div>
+                            
+                            {/* 🔴 NUEVAS 2 FOTOS 1:1 DEBAJO DE LA GALERÍA PRINCIPAL */}
+                            <div className="grid grid-cols-2 gap-4 mt-4 w-full">
+                                <div className="rounded-3xl overflow-hidden shadow-lg transition-all duration-700 hover:scale-[1.05] group bg-white/20 border-2 border-white/50 relative flex items-center justify-center aspect-square">
+                                    <img src="/primavera-vibrante/foto5.jpg" alt="Momento 5" className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:rotate-1 transition-all duration-700 relative z-10" />
+                                </div>
+                                <div className="rounded-3xl overflow-hidden shadow-lg transition-all duration-700 hover:scale-[1.05] group bg-white/20 border-2 border-white/50 relative flex items-center justify-center aspect-square">
+                                    <img src="/primavera-vibrante/foto6.jpg" alt="Momento 6" className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:rotate-1 transition-all duration-700 relative z-10" />
+                                </div>
+                            </div>
+
                         </RevealOnScroll>
 
                         <RevealOnScroll className="w-full max-w-3xl">
@@ -385,7 +397,7 @@
                                         <p className="font-sans text-[0.7rem] tracking-widest text-gold-dark uppercase font-bold mb-3">Banco: Tu Banco</p>
                                         <p className="font-sans text-sm md:text-base text-gray-800 select-all font-medium mb-1 tracking-widest">CLABE: 0000 0000 0000 0000 00</p>
                                         <div className="h-px w-1/2 bg-gold/30 mx-auto my-3"></div>
-                                        <p className="font-sans text-[0.65rem] text-gray-500 uppercase italic tracking-widest">A nombre de: Maricela Estudillo</p>
+                                        <p className="font-sans text-[0.65rem] text-gray-500 uppercase italic tracking-widest">A nombre de: Miranda Gómez Villarreal</p>
                                     </div>
                                 </div>
                             </div>
@@ -398,7 +410,7 @@
                                 <h3 className="font-serif text-4xl md:text-6xl text-spring-dark mb-8 relative z-10">{language === 'ES' ? 'Captura el Momento' : 'Capture the Moment'}</h3>
                                 <p className="font-serif italic text-2xl md:text-3xl text-gray-700 mb-10 max-w-2xl mx-auto relative z-10">{language === 'ES' ? 'Sube tus fotos y videos usando nuestro hashtag especial:' : 'Upload your photos and videos using our special hashtag:'}</p>
                                 <div className="inline-block bg-white/60 backdrop-blur-md px-4 md:px-8 py-3 md:py-4 rounded-full border border-spring-pink/30 mb-12 shadow-md relative z-10 animate-float hover:scale-105 transition-transform duration-300 max-w-[90vw]">
-                                    <span className="font-sans text-[3.8vw] sm:text-lg md:text-2xl text-spring-pink font-bold tracking-tight block truncate">#Mis50PrimaverasMaricela</span>
+                                    <span className="font-sans text-[3.8vw] sm:text-lg md:text-2xl text-spring-pink font-bold tracking-tight block truncate">#Mis30PrimaverasMiranda</span>
                                 </div>
                                 <div className="flex flex-col items-center relative z-10">
                                     <p className="font-sans text-xs tracking-[0.2em] uppercase text-gray-500 mb-6 font-medium">O usa nuestro filtro de Instagram</p>
@@ -435,7 +447,7 @@
                                             : (language === 'ES' ? 'Confirmar Asistencia' : 'Confirm Attendance')}
                                     </span>
                                 </button>
-                                <p className="mt-6 font-script text-3xl text-gold-warm">Maricela espera tu confirmación</p>
+                                <p className="mt-6 font-script text-3xl text-gold-warm">Miranda espera tu confirmación</p>
                             </div>
                         </RevealOnScroll>
 
