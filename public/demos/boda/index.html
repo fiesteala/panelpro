@@ -8,7 +8,7 @@
     <!-- Google Fonts: High-End Typography Selection -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@200;300;400&family=Pinyon+Script&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@200;300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,10 +17,12 @@
             theme: {
                 extend: {
                     colors: {
-                        'luxury-black': '#050505',
-                        'champagne': '#D4AF37',
-                        'champagne-light': '#F3E5AB',
-                        'off-white': '#F9F9F9'
+                        'ivory': '#FDFBF7',
+                        'charcoal': '#2C3531',
+                        'gold': '#D4AF37',
+                        'sage': '#8DB580',
+                        'rose': '#F4AAB9',
+                        'rose-dark': '#D88A9B'
                     },
                     fontFamily: {
                         'serif': ['"Cormorant Garamond"', 'serif'],
@@ -29,37 +31,32 @@
                     },
                     animation: {
                         'fade-in': 'fadeIn 2s ease-out forwards',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'float': 'float 6s ease-in-out infinite',
-                        'drift': 'drift 40s ease-in-out infinite alternate',
-                        'drift-reverse': 'drift-reverse 50s ease-in-out infinite alternate',
-                        'drift-up': 'driftUp linear infinite',
+                        'float-slow': 'float 8s ease-in-out infinite',
                         'bounce-slow': 'bounce 3s infinite',
+                        'spin-slow': 'spin 25s linear infinite',
+                        'petal-fall': 'petalFall 15s linear infinite',
                     },
                     keyframes: {
                         fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
+                            '50%': { transform: 'translateY(-12px)' },
                         },
-                        drift: {
-                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                            '50%': { transform: 'translate(30px, -40px) scale(1.05)' },
-                            '100%': { transform: 'translate(-20px, 20px) scale(0.95)' },
-                        },
-                        'drift-reverse': {
-                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                            '50%': { transform: 'translate(-30px, 30px) scale(0.95)' },
-                            '100%': { transform: 'translate(20px, -20px) scale(1.05)' },
-                        },
-                        driftUp: {
-                            '0%': { transform: 'translateY(100vh) translateX(0)', opacity: '0' },
-                            '10%': { opacity: '0.8' },
-                            '90%': { opacity: '0.8' },
-                            '100%': { transform: 'translateY(-10vh) translateX(20px)', opacity: '0' },
+                        petalFall: {
+                            '0%': { transform: 'translateY(-10vh) rotate(0deg)', opacity: '0' },
+                            '10%': { opacity: '0.6' },
+                            '90%': { opacity: '0.6' },
+                            '100%': { transform: 'translateY(110vh) rotate(360deg)', opacity: '0' },
                         }
                     }
                 }
@@ -75,22 +72,23 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        /* Custom Utilities for absolute perfection */
-        body { background-color: #050505; color: #F9F9F9; overflow-x: hidden; }
+        body { background-color: #FDFBF7; color: #2C3531; overflow-x: hidden; }
         .bg-hero-image {
-            /* RUTA LOCAL ESTRICTA: PORTADA */
             background-image: url('/demos/boda/portada.jpg');
             background-size: cover;
             background-position: 50% 20%; 
         }
-        .vignette-overlay {
-            background: radial-gradient(circle, rgba(5,5,5,0.1) 0%, rgba(5,5,5,0.85) 70%, rgba(5,5,5,1) 100%);
+        .text-shadow-light {
+            text-shadow: 0 4px 12px rgba(255,255,255,0.8);
         }
-        .text-shadow-luxury {
-            text-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-        /* Hide scrollbar for cleaner look */
         ::-webkit-scrollbar { width: 0px; background: transparent; }
+        
+        .glass-panel {
+            background: rgba(253, 251, 247, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
 <body>
@@ -98,6 +96,25 @@
 
     <script type="text/babel">
         const { useState, useEffect, useRef, useMemo } = React;
+
+        // --- SVGs Temáticos (Floral y Jaulas) ---
+        const BirdcageIcon = ({ className = "w-24 h-24" }) => (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" className={className} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2v3m0 0a5 5 0 00-5 5v9h10v-9a5 5 0 00-5-5zm0 0h.01M7 19h10v2a1 1 0 01-1 1H8a1 1 0 01-1-1v-2zM9 10v9m6-9v9m-3-9v9"/>
+                <path d="M10 14c.5-1 2.5-1 3 0" strokeWidth="0.6"/>
+            </svg>
+        );
+
+        const FloralBranch = ({ className = "" }) => (
+            <svg viewBox="0 0 100 100" fill="none" className={className}>
+                <path d="M10 90 Q 40 50 90 10" stroke="#8DB580" strokeWidth="1.5" fill="none"/>
+                <path d="M30 70 Q 40 60 50 65 Q 45 75 30 70" fill="#8DB580" opacity="0.6"/>
+                <path d="M60 40 Q 70 30 80 35 Q 75 45 60 40" fill="#8DB580" opacity="0.6"/>
+                <circle cx="50" cy="50" r="4" fill="#F4AAB9"/>
+                <circle cx="75" cy="25" r="3" fill="#F4AAB9"/>
+                <circle cx="25" cy="75" r="5" fill="#D4AF37"/>
+            </svg>
+        );
 
         // --- Component: Scroll Reveal Wrapper ---
         const FadeInSection = ({ children }) => {
@@ -126,43 +143,17 @@
             );
         };
 
-        // --- Component: Floating Buy Button (MODO DEMO) ---
-        const FloatingBuyButton = () => {
-            return (
-        <div className="fixed bottom-6 inset-x-6 z-[9999] pointer-events-auto">
-          <button 
-            onClick={() => {
-              if (window.self !== window.top) {
-                window.parent.postMessage('open_checkout', '*');
-              } else {
-                window.location.href = '/?modo=showcase&checkout=1';
-              }
-            }} 
-            className="w-full py-4 bg-amber-500 text-slate-900 rounded-full font-black text-sm uppercase tracking-widest shadow-[0_10px_25px_rgba(245,158,11,0.5)] transform hover:scale-105 active:scale-95 transition-all border border-amber-400"
-          >
-            Adquirir esta Tecnología
-          </button>
-        </div>
-            );
-        };
-
         // --- Component: Language Translator ---
         const LanguageTranslator = () => {
             const [lang, setLang] = useState('ES');
-            
-            const toggleLang = () => {
-                setLang(lang === 'ES' ? 'EN' : 'ES');
-            };
-
             return (
                 <button 
-                    onClick={toggleLang}
-                    className="absolute top-8 right-8 z-50 text-xs font-sans tracking-[0.2em] text-white/70 hover:text-champagne transition-colors duration-500 uppercase flex items-center gap-2"
-                    style={{ letterSpacing: '0.25em' }}
+                    onClick={() => setLang(lang === 'ES' ? 'EN' : 'ES')}
+                    className="absolute top-8 right-8 z-50 text-xs font-sans tracking-[0.2em] text-charcoal hover:text-gold transition-colors duration-500 uppercase flex items-center gap-2 bg-white/50 backdrop-blur-md px-4 py-2 rounded-full border border-gold/20 shadow-sm"
                 >
-                    <span className={lang === 'ES' ? 'text-white' : ''}>ES</span>
-                    <span className="text-white/30 text-[10px]">|</span>
-                    <span className={lang === 'EN' ? 'text-white' : ''}>EN</span>
+                    <span className={lang === 'ES' ? 'text-gold font-bold' : ''}>ES</span>
+                    <span className="text-charcoal/30 text-[10px]">|</span>
+                    <span className={lang === 'EN' ? 'text-gold font-bold' : ''}>EN</span>
                 </button>
             );
         };
@@ -173,42 +164,24 @@
                 if (isPlaying) {
                     audioRef.current.pause();
                 } else {
-                    audioRef.current.play().catch(e => console.log("User interaction needed to play audio", e));
+                    audioRef.current.play().catch(e => console.log("Audio play prevented", e));
                 }
                 setIsPlaying(!isPlaying);
             };
 
             return (
-                <div className="fixed bottom-8 right-8 z-50 flex items-center justify-center">
-                    {/* RUTA LOCAL ESTRICTA: AUDIO */}
-                    <audio 
-                        id="wedding-audio" 
-                        ref={audioRef} 
-                        src="/demos/boda/cancion.mp3" 
-                        loop 
-                        onPlay={() => setIsPlaying(true)}
-                        onPause={() => setIsPlaying(false)}
-                    />
-                    
+                <div className="fixed bottom-8 right-6 z-[999] flex items-center justify-center">
+                    <audio id="wedding-audio" ref={audioRef} src="/demos/boda/cancion.mp3" loop onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />
                     <button 
                         onClick={togglePlay}
-                        className={`w-12 h-12 rounded-full border border-white/20 flex items-center justify-center backdrop-blur-md transition-all duration-700 hover:border-champagne hover:scale-105 ${isPlaying ? 'bg-white/10 animate-pulse-slow shadow-[0_0_15px_rgba(212,175,55,0.2)]' : 'bg-black/20'}`}
-                        aria-label="Play/Pause Music"
+                        className={`w-14 h-14 rounded-full border border-gold/30 flex items-center justify-center backdrop-blur-md transition-all duration-700 hover:border-gold hover:scale-105 shadow-xl ${isPlaying ? 'bg-white shadow-[0_0_20px_rgba(212,175,55,0.3)] animate-pulse-slow' : 'bg-white/80'}`}
                     >
                         {isPlaying ? (
-                            <svg className="w-4 h-4 text-champagne-light fill-current" viewBox="0 0 24 24">
-                                <rect x="6" y="4" width="4" height="16" />
-                                <rect x="14" y="4" width="4" height="16" />
-                            </svg>
+                            <svg className="w-4 h-4 text-gold fill-current" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" /><rect x="14" y="4" width="4" height="16" /></svg>
                         ) : (
-                            <svg className="w-5 h-5 text-white/80 fill-current ml-1" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z" />
-                            </svg>
+                            <svg className="w-5 h-5 text-charcoal fill-current ml-1" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                         )}
                     </button>
-                    <span className={`absolute -top-6 text-[9px] font-sans tracking-widest text-white/50 transition-opacity duration-500 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}>
-                        SOUNDTRACK
-                    </span>
                 </div>
             );
         };
@@ -217,10 +190,11 @@
         const Monogram = ({ className = "" }) => {
             return (
                 <div className={`relative flex items-center justify-center animate-float ${className}`}>
-                    <span className="absolute text-[2.5em] md:text-[3em] font-serif font-light text-white/90 transform -translate-x-6 -translate-y-3">I</span>
-                    <span className="absolute text-[2em] md:text-[2.5em] font-script text-champagne z-10 text-shadow-luxury">&</span>
-                    <span className="absolute text-[2.5em] md:text-[3em] font-serif font-light text-white/90 transform translate-x-8 translate-y-5">A</span>
-                    <div className="absolute inset-0 border-[0.5px] border-white/10 rounded-full scale-110"></div>
+                    <span className="absolute text-[2.5em] md:text-[3em] font-serif text-charcoal transform -translate-x-7 -translate-y-3">I</span>
+                    <span className="absolute text-[2em] md:text-[2.5em] font-script text-rose z-10">&</span>
+                    <span className="absolute text-[2.5em] md:text-[3em] font-serif text-charcoal transform translate-x-8 translate-y-5">A</span>
+                    <div className="absolute inset-0 border border-gold/40 rounded-full scale-[1.2]"></div>
+                    <div className="absolute inset-0 border border-sage/20 rounded-full scale-[1.35] rotate-45"></div>
                 </div>
             );
         };
@@ -230,33 +204,31 @@
             return (
                 <section className="pt-16 pb-8 px-6 w-full flex flex-col items-center justify-center text-center relative z-20">
                     <div className="mb-6 md:mb-8 animate-pulse-slow">
-                        <svg className="w-6 h-6 text-champagne/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M12 4v16m8-8H4" />
-                        </svg>
+                        <FloralBranch className="w-16 h-16 opacity-70" />
                     </div>
                     
-                    <p className="font-sans text-[9px] md:text-[10px] tracking-[0.4em] text-white/40 uppercase mb-8 md:mb-12">
+                    <p className="font-sans text-[9px] md:text-[10px] tracking-[0.4em] text-sage uppercase mb-8 md:mb-12 font-medium">
                         Con la bendición de nuestros padres
                     </p>
                     
                     <div className="flex flex-col md:flex-row gap-8 md:gap-16 w-full max-w-5xl justify-center items-center">
                         <div className="flex flex-col items-center gap-4 w-full md:w-1/3 text-center group">
-                            <span className="font-sans text-[8px] tracking-[0.3em] text-champagne uppercase border-b border-champagne/30 pb-2 mb-1">Familia de la Novia</span>
-                            <div className="flex flex-col gap-2 font-serif text-2xl md:text-3xl font-light text-white/90 group-hover:text-white transition-colors">
+                            <span className="font-sans text-[8px] tracking-[0.3em] text-gold uppercase border-b border-gold/30 pb-2 mb-1">Familia de la Novia</span>
+                            <div className="flex flex-col gap-2 font-serif text-2xl md:text-3xl text-charcoal/90 group-hover:text-charcoal transition-colors">
                                 <span>Roberto Garza Sada</span>
-                                <span className="text-white/40 text-sm font-sans italic">&</span>
+                                <span className="text-rose text-sm font-script italic">&</span>
                                 <span>María Villarreal</span>
                             </div>
                         </div>
                         
-                        <div className="hidden md:block w-[1px] h-24 bg-gradient-to-b from-transparent via-champagne/40 to-transparent"></div>
-                        <div className="block md:hidden w-16 h-[1px] bg-champagne/40 mx-auto"></div>
+                        <div className="hidden md:block w-[1px] h-24 bg-gradient-to-b from-transparent via-gold/40 to-transparent"></div>
+                        <div className="block md:hidden w-16 h-[1px] bg-gold/40 mx-auto"></div>
 
                         <div className="flex flex-col items-center gap-4 w-full md:w-1/3 text-center group">
-                            <span className="font-sans text-[8px] tracking-[0.3em] text-champagne uppercase border-b border-champagne/30 pb-2 mb-1">Familia del Novio</span>
-                            <div className="flex flex-col gap-2 font-serif text-2xl md:text-3xl font-light text-white/90 group-hover:text-white transition-colors">
+                            <span className="font-sans text-[8px] tracking-[0.3em] text-gold uppercase border-b border-gold/30 pb-2 mb-1">Familia del Novio</span>
+                            <div className="flex flex-col gap-2 font-serif text-2xl md:text-3xl text-charcoal/90 group-hover:text-charcoal transition-colors">
                                 <span>Carlos Treviño</span>
-                                <span className="text-white/40 text-sm font-sans italic">&</span>
+                                <span className="text-rose text-sm font-script italic">&</span>
                                 <span>Elena Elizondo</span>
                             </div>
                         </div>
@@ -265,40 +237,31 @@
             );
         };
 
-        // --- Component: Ambient Dynamic Background ---
+        // --- Component: Ambient Floral Background ---
         const AmbientBackground = () => {
-            const particles = useMemo(() => {
-                return Array.from({ length: 12 }).map((_, i) => ({
-                    id: i,
-                    left: `${Math.random() * 100}%`,
-                    animationDuration: `${Math.random() * 20 + 25}s`,
-                    animationDelay: `${Math.random() * 20}s`,
-                    size: `${Math.random() * 1.5 + 0.5}px`,
-                    opacity: Math.random() * 0.15 + 0.05
-                }));
-            }, []);
+            const particles = useMemo(() => Array.from({ length: 15 }).map((_, i) => ({
+                id: i, left: `${Math.random() * 100}%`,
+                animationDuration: `${Math.random() * 15 + 15}s`,
+                animationDelay: `${Math.random() * 10}s`,
+                size: `${Math.random() * 8 + 4}px`,
+                color: Math.random() > 0.5 ? '#F4AAB9' : '#D4AF37'
+            })), []);
 
             return (
-                <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-                    <div className="absolute inset-0 opacity-[0.03] mix-blend-screen" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
-                    <div className="absolute top-1/4 left-1/4 w-[40vw] h-[40vw] bg-champagne/5 blur-[120px] rounded-full animate-drift mix-blend-screen"></div>
-                    <div className="absolute bottom-1/4 right-1/4 w-[50vw] h-[50vw] bg-champagne-light/3 blur-[150px] rounded-full animate-drift-reverse mix-blend-screen"></div>
-                    <div className="absolute top-2/3 left-1/3 w-[30vw] h-[30vw] bg-white/3 blur-[100px] rounded-full animate-drift mix-blend-screen" style={{ animationDelay: '5s' }}></div>
-                    
+                <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-ivory">
                     {particles.map(p => (
                         <div
                             key={p.id}
-                            className="absolute rounded-full bg-champagne/60 animate-drift-up mix-blend-screen"
+                            className="absolute rounded-full opacity-30 animate-petal-fall"
                             style={{
-                                left: p.left,
-                                width: p.size,
-                                height: p.size,
-                                animationDuration: p.animationDuration,
-                                animationDelay: p.animationDelay,
-                                opacity: p.opacity
+                                left: p.left, width: p.size, height: p.size, backgroundColor: p.color,
+                                animationDuration: p.animationDuration, animationDelay: p.animationDelay,
+                                borderRadius: '50% 0 50% 50%' // Petal shape
                             }}
                         />
                     ))}
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-rose/5 blur-[100px] rounded-full"></div>
+                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-sage/5 blur-[100px] rounded-full"></div>
                 </div>
             );
         };
@@ -323,9 +286,7 @@
             const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
             useEffect(() => {
-                const timer = setTimeout(() => {
-                    setTimeLeft(calculateTimeLeft());
-                }, 1000);
+                const timer = setTimeout(() => setTimeLeft(calculateTimeLeft()), 1000);
                 return () => clearTimeout(timer);
             });
 
@@ -338,15 +299,15 @@
 
             return (
                 <section className="py-16 px-6 w-full flex flex-col items-center justify-center relative">
-                    <span className="font-script text-champagne text-3xl md:text-4xl mb-6 block text-center">La Cuenta Regresiva</span>
-                    <div className="flex gap-4 md:gap-12 justify-center w-full max-w-3xl">
+                    <span className="font-script text-rose text-4xl md:text-5xl mb-6 block text-center">Nuestra Fecha</span>
+                    <div className="flex gap-4 md:gap-12 justify-center w-full max-w-3xl glass-panel py-10 rounded-[40px]">
                         {timeUnits.map((unit, index) => (
-                            <div key={index} className="flex flex-col items-center">
-                                <span className="font-serif text-4xl md:text-6xl text-white font-light mb-3 tracking-wider">
+                            <div key={index} className="flex flex-col items-center w-16 md:w-24">
+                                <span className="font-serif text-4xl md:text-6xl text-charcoal mb-3 tracking-wider">
                                     {String(unit.value).padStart(2, '0')}
                                 </span>
-                                <div className="w-4 h-[1px] bg-champagne/50 mb-3"></div>
-                                <span className="font-sans text-[9px] md:text-xs tracking-[0.3em] text-white/50 uppercase">{unit.label}</span>
+                                <div className="w-6 h-[1px] bg-gold/40 mb-3"></div>
+                                <span className="font-sans text-[9px] md:text-[11px] tracking-[0.2em] text-sage uppercase font-bold">{unit.label}</span>
                             </div>
                         ))}
                     </div>
@@ -354,31 +315,26 @@
             );
         };
 
-        // --- Component: Visual Interlude (Frase del Evento & Padrinos) ---
+        // --- Component: Visual Interlude (Jaula y Padrinos) ---
         const VisualInterlude = () => {
             return (
                 <section className="relative py-24 w-full flex flex-col items-center justify-center overflow-hidden my-8">
-                    <div className="absolute inset-0 bg-black">
-                        {/* RUTA LOCAL ESTRICTA: SEPARADOR Y OPACIDAD MEJORADA */}
-                        <img 
-                            src="/demos/boda/separador.jpg" 
-                            alt="Pareja" 
-                            className="w-full h-full object-cover opacity-60 grayscale mix-blend-luminosity scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-b from-luxury-black via-transparent to-luxury-black"></div>
-                        <div className="absolute inset-0 vignette-overlay opacity-50"></div>
+                    <div className="absolute inset-0">
+                        <img src="/demos/boda/separador.jpg" alt="Pareja" className="w-full h-full object-cover opacity-20 sepia-[.2] scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-ivory via-ivory/80 to-ivory"></div>
                     </div>
 
                     <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
-                        <span className="font-script text-champagne text-4xl md:text-5xl mb-8 md:mb-12">"Dos almas, un solo corazón"</span>
-                        <p className="font-serif text-xl md:text-3xl font-light text-white leading-relaxed mb-12 max-w-2xl">
+                        <BirdcageIcon className="w-20 h-20 text-gold mb-6 animate-float-slow opacity-80" />
+                        <span className="font-script text-rose text-4xl md:text-5xl mb-6">"Dos almas, un solo corazón"</span>
+                        <p className="font-serif text-xl md:text-3xl text-charcoal leading-relaxed mb-12 max-w-2xl italic">
                             Acompáñanos a celebrar el inicio de nuestra historia eterna, rodeados de las personas que más amamos.
                         </p>
-                        <div className="w-12 h-[1px] bg-champagne/50 mb-12"></div>
-                        <div className="flex flex-col items-center">
-                            <span className="font-sans text-[9px] tracking-[0.4em] text-white/40 uppercase mb-4">Con el honor de nuestros</span>
-                            <h2 className="font-serif text-2xl md:text-3xl font-light text-white tracking-widest uppercase mb-4 md:mb-6">Padrinos de Velación</h2>
-                            <h3 className="font-serif text-2xl md:text-4xl text-champagne">Fernando Clariond <span className="font-script text-white text-3xl mx-2 lowercase">&</span> Patricia de Clariond</h3>
+                        <div className="w-12 h-[1px] bg-gold/50 mb-12"></div>
+                        <div className="flex flex-col items-center glass-panel px-10 py-8 rounded-[30px]">
+                            <span className="font-sans text-[9px] tracking-[0.3em] text-sage uppercase mb-4 font-bold">Con el honor de nuestros</span>
+                            <h2 className="font-serif text-2xl md:text-3xl text-charcoal tracking-widest uppercase mb-4 md:mb-6">Padrinos de Velación</h2>
+                            <h3 className="font-serif text-2xl md:text-4xl text-charcoal">Fernando Clariond <span className="font-script text-rose text-3xl mx-2 lowercase">&</span> Patricia de Clariond</h3>
                         </div>
                     </div>
                 </section>
@@ -390,63 +346,55 @@
             return (
                 <section className="py-16 px-6 w-full max-w-6xl mx-auto relative">
                     <div className="text-center mb-12">
-                        <span className="font-script text-champagne text-4xl mb-4 block">Dónde & Cuándo</span>
-                        <h2 className="font-serif text-3xl md:text-4xl font-light text-white tracking-widest uppercase">La Celebración</h2>
+                        <span className="font-script text-rose text-4xl md:text-5xl mb-4 block">Dónde & Cuándo</span>
+                        <h2 className="font-serif text-3xl md:text-4xl text-charcoal tracking-widest uppercase">La Celebración</h2>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-                        <div className="flex flex-col items-center text-center group">
-                            <div className="w-full aspect-[3/4] md:h-[500px] mb-8 md:mb-10 overflow-hidden relative rounded-t-full border border-white/10" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                                {/* FILTRO OSCURO APLICADO: group-hover:bg-black/30 oscurece un poco la foto en color */}
-                                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                                {/* RUTA LOCAL ESTRICTA: IGLESIA CON FILTRO A COLOR EN HOVER */}
-                                <img src="/demos/boda/iglesia.webp" alt="Catedral" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
-                                <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 font-sans text-[10px] tracking-widest text-white/90 uppercase bg-black/50 px-4 py-2 backdrop-blur-sm border border-white/20">01. Ceremonia</div>
+                        <div className="flex flex-col items-center text-center group glass-panel rounded-[40px] p-6 shadow-xl hover:shadow-2xl transition-all duration-500 border border-gold/20">
+                            <div className="w-full aspect-[3/4] md:h-[400px] mb-8 overflow-hidden relative rounded-t-[100px] rounded-b-[20px]">
+                                <div className="absolute inset-0 bg-white/20 group-hover:bg-transparent transition-all duration-700 z-10"></div>
+                                <img src="/demos/boda/iglesia.webp" alt="Catedral" className="w-full h-full object-cover group-hover:scale-105 transition-all duration-1000" />
+                                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 font-sans text-[9px] tracking-widest text-charcoal uppercase bg-white/90 px-6 py-2 rounded-full shadow-md border border-gold/30">01. Ceremonia</div>
                             </div>
-                            <h3 className="font-serif text-2xl md:text-3xl text-champagne mb-4">Catedral de Monterrey</h3>
-                            <p className="font-sans text-xs text-white/60 tracking-[0.15em] leading-loose mb-6">
+                            <h3 className="font-serif text-2xl md:text-3xl text-charcoal mb-2">Catedral de Monterrey</h3>
+                            <p className="font-sans text-[10px] md:text-xs text-charcoal/60 tracking-[0.1em] leading-loose mb-4">
                                 Zuazua y Padre Jardón S/N<br/>Centro, Monterrey, N.L.
                             </p>
-                            <p className="font-serif italic text-xl text-white mb-8">19:00 hrs</p>
-                            <a href="https://maps.google.com/?q=Catedral+Metropolitana+de+Monterrey" target="_blank" rel="noreferrer" className="font-sans text-[10px] tracking-[0.2em] uppercase text-white hover:text-champagne transition-colors border-b border-white/30 hover:border-champagne pb-2">Abrir Mapa</a>
+                            <p className="font-serif italic text-xl text-rose mb-6">19:00 hrs</p>
+                            <a href="https://maps.google.com/?q=Catedral+Metropolitana+de+Monterrey" target="_blank" rel="noreferrer" className="font-sans text-[9px] tracking-[0.2em] uppercase text-charcoal font-bold hover:text-rose transition-colors border-b border-charcoal/30 hover:border-rose pb-1">Abrir Mapa</a>
                         </div>
 
-                        <div className="flex flex-col items-center text-center group mt-8 md:mt-16">
-                            <div className="w-full aspect-[3/4] md:h-[500px] mb-8 md:mb-10 overflow-hidden relative rounded-t-full border border-white/10" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                                {/* FILTRO OSCURO APLICADO: group-hover:bg-black/30 oscurece un poco la foto en color */}
-                                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                                {/* RUTA LOCAL ESTRICTA: RECEPCIÓN CON FILTRO A COLOR EN HOVER */}
-                                <img src="/demos/boda/recepcion.jpg" alt="Salón San Pedro" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
-                                <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 font-sans text-[10px] tracking-widest text-white/90 uppercase bg-black/50 px-4 py-2 backdrop-blur-sm border border-white/20">02. Recepción</div>
+                        <div className="flex flex-col items-center text-center group glass-panel rounded-[40px] p-6 shadow-xl hover:shadow-2xl transition-all duration-500 border border-gold/20 md:mt-16">
+                            <div className="w-full aspect-[3/4] md:h-[400px] mb-8 overflow-hidden relative rounded-t-[100px] rounded-b-[20px]">
+                                <div className="absolute inset-0 bg-white/20 group-hover:bg-transparent transition-all duration-700 z-10"></div>
+                                <img src="/demos/boda/recepcion.jpg" alt="Salón San Pedro" className="w-full h-full object-cover group-hover:scale-105 transition-all duration-1000" />
+                                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 font-sans text-[9px] tracking-widest text-charcoal uppercase bg-white/90 px-6 py-2 rounded-full shadow-md border border-gold/30">02. Recepción</div>
                             </div>
-                            <h3 className="font-serif text-2xl md:text-3xl text-champagne mb-4">Gran Salón San Pedro</h3>
-                            <p className="font-sans text-xs text-white/60 tracking-[0.15em] leading-loose mb-6">
+                            <h3 className="font-serif text-2xl md:text-3xl text-charcoal mb-2">Gran Salón San Pedro</h3>
+                            <p className="font-sans text-[10px] md:text-xs text-charcoal/60 tracking-[0.1em] leading-loose mb-4">
                                 Av. Roble 660, Valle del Campestre<br/>San Pedro Garza García, N.L.
                             </p>
-                            <p className="font-serif italic text-xl text-white mb-8">21:00 hrs</p>
-                            <a href="https://maps.google.com/?q=San+Pedro+Garza+Garcia+Eventos" target="_blank" rel="noreferrer" className="font-sans text-[10px] tracking-[0.2em] uppercase text-white hover:text-champagne transition-colors border-b border-white/30 hover:border-champagne pb-2">Abrir Mapa</a>
+                            <p className="font-serif italic text-xl text-rose mb-6">21:00 hrs</p>
+                            <a href="https://maps.google.com/?q=San+Pedro+Garza+Garcia+Eventos" target="_blank" rel="noreferrer" className="font-sans text-[9px] tracking-[0.2em] uppercase text-charcoal font-bold hover:text-rose transition-colors border-b border-charcoal/30 hover:border-rose pb-1">Abrir Mapa</a>
                         </div>
                     </div>
 
                     <div className="mt-16 md:mt-24 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 py-8">
-                        <button className="flex items-center gap-4 group transition-all">
-                            <div className="w-12 h-12 rounded-full border-[0.5px] border-white/20 flex items-center justify-center group-hover:border-champagne group-hover:bg-white/5 transition-all">
-                                <svg className="w-4 h-4 text-white/70 group-hover:text-champagne transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <span className="font-sans text-[10px] tracking-[0.2em] uppercase text-white/60 group-hover:text-white transition-colors">Agendar Evento</span>
+                        <button className="flex items-center gap-4 group transition-all glass-panel px-6 py-3 rounded-full">
+                            <svg className="w-4 h-4 text-rose group-hover:text-gold transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span className="font-sans text-[10px] tracking-[0.2em] uppercase text-charcoal font-bold group-hover:text-gold transition-colors">Agendar Evento</span>
                         </button>
-                        <div className="w-12 h-[1px] md:w-[1px] md:h-12 bg-white/10"></div>
-                        <div className="flex items-center gap-4 group">
-                            <div className="w-12 h-12 rounded-full border-[0.5px] border-white/20 flex items-center justify-center group-hover:border-champagne transition-all">
-                                <svg className="w-5 h-5 text-champagne/80 group-hover:text-champagne transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                                </svg>
-                            </div>
+                        <div className="w-12 h-[1px] md:w-[1px] md:h-12 bg-gold/30"></div>
+                        <div className="flex items-center gap-4 glass-panel px-6 py-3 rounded-full">
+                            <svg className="w-5 h-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
                             <div className="flex flex-col text-left">
-                                <span className="font-sans text-[9px] tracking-[0.2em] uppercase text-white/40 mb-1">Julio en MTY</span>
-                                <span className="font-serif text-sm text-white/80 tracking-widest">28°C / Noche Clara</span>
+                                <span className="font-sans text-[8px] tracking-[0.2em] uppercase text-sage mb-1 font-bold">Julio en MTY</span>
+                                <span className="font-serif text-sm text-charcoal tracking-widest font-bold">28°C / Soleado</span>
                             </div>
                         </div>
                     </div>
@@ -457,35 +405,34 @@
         // --- Component: Itinerary (Timeline) ---
         const Itinerary = () => {
             const events = [
-                { time: "19:00", title: "Ceremonia Religiosa", desc: "La bendición nupcial en Catedral", icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.8} d="M12 2L12 10M12 10L8 14M12 10L16 14M12 22L12 14" /> },
-                { time: "20:30", title: "Cóctel de Bienvenida", desc: "Mixología de autor y canapés", icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.8} d="M8 6L16 6M12 6L12 18M9 18L15 18M7 3L17 3L12 8L7 3Z" /> },
-                { time: "21:30", title: "Entrada & Vals", desc: "Nuestro primer baile", icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.8} d="M9 19V6L20 3V16M9 10L20 7M6 19A3 3 0 109 19 3 3 0 006 19ZM17 16A3 3 0 1020 16 3 3 0 0017 16Z" /> },
-                { time: "22:00", title: "Cena de Gala", desc: "Experiencia culinaria a 4 tiempos", icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.8} d="M12 6C14 6 16 7 16 9C16 11 12 13 12 13C12 13 8 11 8 9C8 7 10 6 12 6ZM12 13V21M9 21H15" /> },
-                { time: "00:00", title: "Inicio de Fiesta", desc: "Música en vivo & DJ set", icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.8} d="M5 13L10 8L15 13M10 8V21M17 5L19 7L17 9" /> },
-                { time: "02:30", title: "Tornaboda", desc: "Antojitos regios nocturnos", icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.8} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /> }
+                { time: "19:00", title: "Ceremonia Religiosa", desc: "Bendición nupcial", icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 2L12 10M12 10L8 14M12 10L16 14M12 22L12 14" /> },
+                { time: "20:30", title: "Cóctel Romántico", desc: "Música de cuerdas y aperitivos", icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 6L16 6M12 6L12 18M9 18L15 18M7 3L17 3L12 8L7 3Z" /> },
+                { time: "21:30", title: "El Primer Baile", desc: "Magia en la pista", icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19V6L20 3V16M9 10L20 7M6 19A3 3 0 109 19 3 3 0 006 19ZM17 16A3 3 0 1020 16 3 3 0 0017 16Z" /> },
+                { time: "22:00", title: "Banquete Floral", desc: "Exquisita cena a 4 tiempos", icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6C14 6 16 7 16 9C16 11 12 13 12 13C12 13 8 11 8 9C8 7 10 6 12 6ZM12 13V21M9 21H15" /> },
+                { time: "00:00", title: "Fiesta y Celebración", desc: "Música en vivo & DJ", icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M5 13L10 8L15 13M10 8V21M17 5L19 7L17 9" /> },
             ];
 
             return (
-                <section className="py-16 px-2 md:px-6 w-full flex flex-col items-center bg-white/[0.02] relative">
+                <section className="py-16 px-2 md:px-6 w-full flex flex-col items-center relative">
                     <div className="text-center mb-12">
-                        <span className="font-script text-champagne text-4xl mb-4 block">El Itinerario</span>
-                        <h2 className="font-serif text-3xl md:text-4xl font-light text-white tracking-widest uppercase">Nuestra Velada</h2>
+                        <span className="font-script text-rose text-4xl md:text-5xl mb-4 block">El Itinerario</span>
+                        <h2 className="font-serif text-3xl md:text-4xl text-charcoal tracking-widest uppercase">Nuestra Velada</h2>
                     </div>
 
                     <div className="relative w-full max-w-4xl mx-auto">
-                        <div className="absolute left-1/2 top-0 bottom-0 w-[0.5px] bg-gradient-to-b from-transparent via-champagne/40 to-transparent transform -translate-x-1/2"></div>
+                        <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gold/40 transform -translate-x-1/2"></div>
                         <div className="flex flex-col gap-8 md:gap-12">
                             {events.map((event, index) => (
                                 <div key={index} className={`group relative flex items-center w-full ${index % 2 === 0 ? 'flex-row-reverse' : 'flex-row'}`}>
-                                    <div className="absolute left-1/2 w-[5px] h-[5px] md:w-[7px] md:h-[7px] rounded-full bg-champagne transform -translate-x-1/2 shadow-[0_0_12px_rgba(212,175,55,0.5)] group-hover:shadow-[0_0_20px_rgba(212,175,55,1)] group-hover:scale-150 transition-all duration-500 z-10"></div>
+                                    <div className="absolute left-1/2 w-3 h-3 md:w-4 md:h-4 rounded-full bg-rose border-2 border-ivory transform -translate-x-1/2 shadow-md group-hover:scale-125 transition-all duration-500 z-10"></div>
                                     <div className="w-1/2"></div>
-                                    <div className={`w-1/2 flex flex-col justify-center transition-transform duration-700 ${index % 2 === 0 ? 'pr-4 md:pr-16 items-end text-right group-hover:-translate-x-1 md:group-hover:-translate-x-4' : 'pl-4 md:pl-16 items-start text-left group-hover:translate-x-1 md:group-hover:translate-x-4'}`}>
-                                        <div className={`mb-2 md:mb-4 w-8 h-8 md:w-12 md:h-12 rounded-full border-[0.5px] border-white/10 flex items-center justify-center bg-black/40 backdrop-blur-sm group-hover:border-champagne/60 group-hover:bg-champagne/5 transition-all duration-500`}>
-                                            <svg className="w-4 h-4 md:w-5 md:h-5 text-white/50 group-hover:text-champagne transition-colors duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">{event.icon}</svg>
+                                    <div className={`w-1/2 flex flex-col justify-center transition-transform duration-700 ${index % 2 === 0 ? 'pr-6 md:pr-16 items-end text-right group-hover:-translate-x-2' : 'pl-6 md:pl-16 items-start text-left group-hover:translate-x-2'}`}>
+                                        <div className={`mb-3 w-10 h-10 md:w-12 md:h-12 rounded-full border border-gold/30 flex items-center justify-center bg-white shadow-sm group-hover:border-rose group-hover:bg-rose/5 transition-all duration-500`}>
+                                            <svg className="w-5 h-5 text-rose group-hover:text-rose-dark transition-colors duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">{event.icon}</svg>
                                         </div>
-                                        <span className="font-serif text-lg md:text-3xl text-champagne mb-1 md:mb-2 group-hover:text-white transition-colors duration-500">{event.time}</span>
-                                        <h3 className="font-sans text-[8px] md:text-[11px] tracking-[0.25em] uppercase text-white mb-1 md:mb-2">{event.title}</h3>
-                                        <p className="font-serif italic text-white/50 text-[10px] md:text-base">{event.desc}</p>
+                                        <span className="font-serif text-xl md:text-3xl text-charcoal mb-1 font-bold">{event.time}</span>
+                                        <h3 className="font-sans text-[9px] md:text-[11px] tracking-[0.2em] uppercase text-sage font-bold mb-1">{event.title}</h3>
+                                        <p className="font-serif italic text-charcoal/60 text-[11px] md:text-base">{event.desc}</p>
                                     </div>
                                 </div>
                             ))}
@@ -499,76 +446,42 @@
         const DressCode = () => {
             return (
                 <section className="py-16 px-6 w-full flex flex-col items-center justify-center text-center pb-24 relative">
-                    <span className="font-script text-champagne text-4xl mb-4 block">Dress Code</span>
-                    <h2 className="font-serif text-3xl md:text-4xl font-light text-white tracking-widest uppercase mb-8">Etiqueta Rigurosa</h2>
+                    <span className="font-script text-rose text-4xl md:text-5xl mb-4 block">Dress Code</span>
+                    <h2 className="font-serif text-3xl md:text-4xl text-charcoal tracking-widest uppercase mb-8">Etiqueta Formal</h2>
                     
-                    <div className="flex flex-col md:flex-row gap-8 md:gap-24 max-w-2xl mx-auto font-sans text-xs tracking-[0.15em] text-white/60 leading-relaxed uppercase">
-                        <div className="flex flex-col items-center gap-6 group">
-                            <div className="w-20 h-20 rounded-full border-[0.5px] border-white/20 flex items-center justify-center group-hover:border-champagne/50 transition-colors duration-700 bg-white/[0.01]">
-                                <svg className="w-10 h-10 text-white/50 group-hover:text-champagne transition-colors duration-700 transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.4} d="M10 5 Q12 7 14 5 Q15 8 14 12 Q12 13 10 12 Q9 8 10 5 M10 12 Q6 17 5 22 Q12 23 19 22 Q18 17 14 12 M12 12.5 Q13 17 14 22 M10 5 L9 3 M14 5 L15 3" />
+                    <div className="flex flex-col md:flex-row gap-8 md:gap-16 max-w-2xl mx-auto font-sans text-xs tracking-[0.1em] text-charcoal/70 leading-relaxed uppercase glass-panel p-8 md:p-12 rounded-[40px]">
+                        <div className="flex flex-col items-center gap-4 group">
+                            <div className="w-20 h-20 rounded-full border border-gold/30 flex items-center justify-center bg-white shadow-sm group-hover:border-rose group-hover:bg-rose/5 transition-colors duration-700">
+                                <svg className="w-10 h-10 text-rose" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M10 5 Q12 7 14 5 Q15 8 14 12 Q12 13 10 12 Q9 8 10 5 M10 12 Q6 17 5 22 Q12 23 19 22 Q18 17 14 12 M12 12.5 Q13 17 14 22 M10 5 L9 3 M14 5 L15 3" />
                                 </svg>
                             </div>
-                            <div className="flex flex-col items-center gap-2">
-                                <span className="text-[10px] text-white/80 font-medium tracking-[0.2em]">Damas</span>
-                                <span className="text-[9px] text-white/40">Vestido largo de gala</span>
+                            <div className="flex flex-col items-center gap-1">
+                                <span className="text-[11px] text-charcoal font-bold tracking-[0.2em]">Damas</span>
+                                <span className="text-[9px] text-charcoal/50">Vestido largo tonos pastel</span>
                             </div>
                         </div>
 
-                        <div className="flex flex-col items-center gap-6 group">
-                            <div className="w-20 h-20 rounded-full border-[0.5px] border-white/20 flex items-center justify-center group-hover:border-champagne/50 transition-colors duration-700 bg-white/[0.01]">
-                                <svg className="w-10 h-10 text-white/50 group-hover:text-champagne transition-colors duration-700 transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.4} d="M10 3 C 11 3.5 13 3.5 14 3 L 19 4.5 C 20 5 20 6 20 8 L 20 21 L 12.5 21 L 12 19.5 L 11.5 21 L 4 21 L 4 8 C 4 6 4 5 5 4.5 Z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.4} d="M10 3 L 12 15 L 14 3" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.4} d="M10 3 L 6.5 9 L 9 10 L 12 15 M 14 3 L 17.5 9 L 15 10 L 12 15" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.4} d="M7.5 9 L 7.5 21 M 16.5 9 L 16.5 21" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.4} d="M11 6.5 L 9 5 V 8 Z M 13 6.5 L 15 5 V 8 Z M 11 5.5 H 13 V 7.5 H 11 Z" fill="currentColor" fillOpacity="0.1" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.4} d="M 6.5 11 H 8.5 L 8 9.5 L 7.5 11 L 7 10 Z" />
-                                    <circle cx="12" cy="16.5" r="0.4" fill="currentColor" />
+                        <div className="hidden md:block w-[1px] h-24 bg-gold/20"></div>
+
+                        <div className="flex flex-col items-center gap-4 group">
+                            <div className="w-20 h-20 rounded-full border border-gold/30 flex items-center justify-center bg-white shadow-sm group-hover:border-sage group-hover:bg-sage/5 transition-colors duration-700">
+                                <svg className="w-10 h-10 text-sage" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M10 3 C 11 3.5 13 3.5 14 3 L 19 4.5 C 20 5 20 6 20 8 L 20 21 L 12.5 21 L 12 19.5 L 11.5 21 L 4 21 L 4 8 C 4 6 4 5 5 4.5 Z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M10 3 L 12 15 L 14 3" />
                                 </svg>
                             </div>
-                            <div className="flex flex-col items-center gap-2">
-                                <span className="text-[10px] text-white/80 font-medium tracking-[0.2em]">Caballeros</span>
-                                <span className="text-[9px] text-white/40">Smoking negro</span>
+                            <div className="flex flex-col items-center gap-1">
+                                <span className="text-[11px] text-charcoal font-bold tracking-[0.2em]">Caballeros</span>
+                                <span className="text-[9px] text-charcoal/50">Traje formal oscuro</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-12 md:mt-24 pt-6 md:pt-8 border-t border-white/5 w-48">
-                        <p className="font-serif italic text-[11px] text-white/40 tracking-widest">
+                    <div className="mt-10 pt-6 border-t border-gold/20 w-48 mx-auto">
+                        <p className="font-serif italic text-[12px] text-rose-dark tracking-widest font-bold">
                             Evento solo para adultos.
                         </p>
-                    </div>
-                </section>
-            );
-        };
-
-        // --- Component: Concierge (Hospedaje de Lujo) ---
-        const Concierge = () => {
-            return (
-                <section className="py-16 px-6 w-full flex flex-col items-center justify-center text-center relative">
-                    <span className="font-script text-champagne text-4xl mb-4 block">Hospedaje</span>
-                    <h2 className="font-serif text-3xl md:text-4xl font-light text-white tracking-widest uppercase mb-6">Concierge</h2>
-                    
-                    <p className="font-sans text-xs text-white/50 tracking-[0.15em] leading-relaxed max-w-lg mb-12">
-                        Para nuestros invitados foráneos, hemos asegurado tarifas preferenciales en los siguientes hoteles de gran lujo.
-                    </p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full max-w-4xl">
-                        <div className="p-8 md:p-10 border-[0.5px] border-white/10 flex flex-col items-center group hover:border-champagne/50 transition-all duration-700 bg-black/20 backdrop-blur-sm">
-                            <h3 className="font-serif text-2xl text-white mb-2">JW Marriott</h3>
-                            <p className="font-sans text-[10px] tracking-widest text-white/40 uppercase mb-8">San Pedro Valle</p>
-                            <a href="#" className="font-sans text-[9px] tracking-[0.2em] uppercase text-white group-hover:text-champagne border-b border-white/30 group-hover:border-champagne pb-1 transition-all">
-                                Reservar (Código: BODA26)
-                            </a>
-                        </div>
-                        <div className="p-8 md:p-10 border-[0.5px] border-white/10 flex flex-col items-center group hover:border-champagne/50 transition-all duration-700 bg-black/20 backdrop-blur-sm">
-                            <h3 className="font-serif text-2xl text-white mb-2">Live Aqua</h3>
-                            <p className="font-sans text-[10px] tracking-widest text-white/40 uppercase mb-8">Urban Resort Trébol</p>
-                            <a href="#" className="font-sans text-[9px] tracking-[0.2em] uppercase text-white group-hover:text-champagne border-b border-white/30 group-hover:border-champagne pb-1 transition-all">
-                                Reservar (Código: BODA26)
-                            </a>
-                        </div>
                     </div>
                 </section>
             );
@@ -577,82 +490,65 @@
         // --- Component: Editorial Gallery ---
         const EditorialGallery = () => {
             const images = [
-                "/demos/boda/foto1.jpg", 
-                "/demos/boda/foto2.jpg", 
-                "/demos/boda/foto3.jpg", 
-                "/demos/boda/foto4.jpg", 
-                "/demos/boda/foto5.jpg", 
-                "/demos/boda/foto6.jpg"  
+                "/demos/boda/foto1.jpg", "/demos/boda/foto2.jpg", "/demos/boda/foto3.jpg", 
+                "/demos/boda/foto4.jpg", "/demos/boda/foto5.jpg", "/demos/boda/foto6.jpg" 
             ];
 
             return (
                 <section className="py-16 px-6 w-full max-w-7xl mx-auto relative">
                     <div className="text-center mb-12">
-                        <span className="font-script text-champagne text-4xl mb-4 block">Memorias</span>
-                        <h2 className="font-serif text-3xl md:text-4xl font-light text-white tracking-widest uppercase">Galería Editorial</h2>
+                        <span className="font-script text-rose text-4xl md:text-5xl mb-4 block">Memorias</span>
+                        <h2 className="font-serif text-3xl md:text-4xl text-charcoal tracking-widest uppercase">Galería del Amor</h2>
                     </div>
 
-                    {/* VISTA MÓVIL (2 Columnas Exactas, 3 Fotos por columna) */}
+                    {/* VISTA MÓVIL */}
                     <div className="flex md:hidden gap-4 w-full justify-center">
-                        {/* Columna Izquierda */}
                         <div className="flex flex-col gap-4 w-1/2 pt-8">
-                            <div className="relative group overflow-hidden rounded-t-[50px] rounded-bl-[50px] aspect-[3/4]" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                                <img src={images[0]} alt="Gallery 1" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                            <div className="relative group overflow-hidden rounded-t-[50px] rounded-bl-[50px] aspect-[3/4] border border-white shadow-md">
+                                <div className="absolute inset-0 bg-white/20 group-hover:bg-transparent transition-all duration-700 z-10"></div>
+                                <img src={images[0]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                             </div>
-                            <div className="relative group overflow-hidden rounded-tr-[40px] rounded-bl-[40px] aspect-square" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                                <img src={images[2]} alt="Gallery 3" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                            <div className="relative group overflow-hidden rounded-tr-[40px] rounded-bl-[40px] aspect-square border border-white shadow-md">
+                                <img src={images[2]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                             </div>
-                            <div className="relative group overflow-hidden rounded-br-[50px] aspect-[4/5]" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                                <img src={images[4]} alt="Gallery 5" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                            <div className="relative group overflow-hidden rounded-br-[50px] aspect-[4/5] border border-white shadow-md">
+                                <img src={images[4]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                             </div>
                         </div>
-                        {/* Columna Derecha */}
                         <div className="flex flex-col gap-4 w-1/2">
-                            <div className="relative group overflow-hidden rounded-full aspect-square" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                                <img src={images[1]} alt="Gallery 2" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                            <div className="relative group overflow-hidden rounded-full aspect-square border border-white shadow-md">
+                                <img src={images[1]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                             </div>
-                            <div className="relative group overflow-hidden rounded-[30px] aspect-[4/5]" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                                <img src={images[3]} alt="Gallery 4" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                            <div className="relative group overflow-hidden rounded-[30px] aspect-[4/5] border border-white shadow-md">
+                                <img src={images[3]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                             </div>
-                            <div className="relative group overflow-hidden rounded-t-full aspect-[2/3]" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                                <img src={images[5]} alt="Gallery 6" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                            <div className="relative group overflow-hidden rounded-t-full aspect-[2/3] border border-white shadow-md">
+                                <img src={images[5]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                             </div>
                         </div>
                     </div>
 
-                    {/* VISTA ESCRITORIO (Grid Complejo Editorial) */}
-                    <div className="hidden md:grid md:grid-cols-12 gap-12 items-center">
-                        <div className="md:col-span-5 relative group overflow-hidden rounded-t-[100px] rounded-bl-[100px] aspect-[3/4]" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                            <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                            <img src={images[0]} alt="Gallery 1" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                    {/* VISTA ESCRITORIO */}
+                    <div className="hidden md:grid md:grid-cols-12 gap-8 items-center">
+                        <div className="md:col-span-5 relative group overflow-hidden rounded-t-[100px] rounded-bl-[100px] aspect-[3/4] border-[4px] border-white shadow-xl">
+                            <img src={images[0]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                         </div>
-                        <div className="md:col-span-3 flex flex-col gap-12">
-                            <div className="relative group overflow-hidden rounded-full aspect-square" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                                <img src={images[1]} alt="Gallery 2" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                        <div className="md:col-span-3 flex flex-col gap-8">
+                            <div className="relative group overflow-hidden rounded-full aspect-square border-[4px] border-white shadow-xl">
+                                <img src={images[1]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                             </div>
-                            <div className="relative group overflow-hidden rounded-tr-[50px] rounded-bl-[50px] aspect-[4/5]" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                                <img src={images[2]} alt="Gallery 3" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                            <div className="relative group overflow-hidden rounded-tr-[50px] rounded-bl-[50px] aspect-[4/5] border-[4px] border-white shadow-xl">
+                                <img src={images[2]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                             </div>
                         </div>
-                        <div className="md:col-span-4 relative group overflow-hidden rounded-t-full aspect-[2/3] md:-mt-32" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                            <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                            <img src={images[5]} alt="Gallery 6" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                        <div className="md:col-span-4 relative group overflow-hidden rounded-t-full aspect-[2/3] md:-mt-32 border-[4px] border-white shadow-xl">
+                            <img src={images[5]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                         </div>
-                        <div className="md:col-span-7 relative group overflow-hidden rounded-[40px] aspect-[16/9] md:mt-12" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                            <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                            <img src={images[3]} alt="Gallery 4" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                        <div className="md:col-span-7 relative group overflow-hidden rounded-[40px] aspect-[16/9] border-[4px] border-white shadow-xl">
+                            <img src={images[3]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                         </div>
-                        <div className="md:col-span-5 relative group overflow-hidden rounded-br-[100px] aspect-square md:mt-12 md:ml-12" style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                            <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-700 z-10"></div>
-                            <img src={images[4]} alt="Gallery 5" className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:sepia-[.3] group-hover:contrast-125 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                        <div className="md:col-span-5 relative group overflow-hidden rounded-br-[100px] aspect-square md:ml-8 border-[4px] border-white shadow-xl">
+                            <img src={images[4]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                         </div>
                     </div>
                 </section>
@@ -663,198 +559,118 @@
         const GiftRegistry = () => {
             return (
                 <section className="py-16 px-6 w-full flex flex-col items-center justify-center text-center relative">
-                    <div className="mb-8 md:mb-10 w-16 h-16 rounded-full border-[0.5px] border-champagne flex items-center justify-center animate-pulse-slow">
-                        <svg className="w-6 h-6 text-champagne" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                        </svg>
-                    </div>
-
-                    <span className="font-script text-champagne text-4xl mb-4 block">Mesa de Regalos</span>
-                    <h2 className="font-serif text-3xl md:text-4xl font-light text-white tracking-widest uppercase mb-6">Nuestra Nueva Vida</h2>
+                    <span className="font-script text-rose text-4xl md:text-5xl mb-4 block">Mesa de Regalos</span>
+                    <h2 className="font-serif text-3xl md:text-4xl text-charcoal tracking-widest uppercase mb-6">Nuestra Nueva Vida</h2>
                     
-                    <p className="font-sans text-xs text-white/50 tracking-[0.15em] leading-relaxed max-w-lg mb-12">
+                    <p className="font-sans text-[10px] md:text-xs text-charcoal/60 tracking-[0.1em] leading-relaxed max-w-lg mx-auto mb-12">
                         El mejor regalo es tu presencia. Sin embargo, si deseas tener un detalle con nosotros, te compartimos nuestras opciones.
                     </p>
 
-                    <div className="flex flex-col md:flex-row gap-6 md:gap-24 w-full max-w-4xl justify-center">
-                        <div className="flex flex-col items-center p-8 md:p-12 border-[0.5px] border-white/10 hover:border-champagne/50 transition-colors duration-700 bg-black/20 backdrop-blur-sm group w-full md:w-1/2">
-                            <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-white/40 mb-4 group-hover:text-champagne transition-colors">Tienda Exclusiva</span>
-                            <h3 className="font-serif text-2xl text-white mb-8">El Palacio de Hierro</h3>
-                            <p className="font-sans text-xs text-white/60 tracking-[0.1em] mb-8">
-                                Evento: <span className="text-white">#592038</span>
+                    <div className="flex flex-col md:flex-row gap-6 md:gap-12 w-full max-w-4xl justify-center">
+                        <div className="flex flex-col items-center glass-panel p-8 md:p-12 rounded-[30px] group w-full md:w-1/2 shadow-lg">
+                            <svg className="w-8 h-8 text-gold mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                            </svg>
+                            <span className="font-sans text-[9px] tracking-[0.2em] uppercase text-sage mb-2 font-bold">Tienda Exclusiva</span>
+                            <h3 className="font-serif text-2xl text-charcoal mb-4">El Palacio de Hierro</h3>
+                            <p className="font-sans text-[10px] text-charcoal/70 tracking-[0.1em] mb-6 border-b border-gold/30 pb-2">
+                                Evento: <span className="text-charcoal font-bold">#592038</span>
                             </p>
-                            <a href="#" target="_blank" rel="noreferrer" className="font-sans text-[10px] tracking-[0.2em] uppercase text-white hover:text-luxury-black bg-transparent hover:bg-champagne border border-white/30 hover:border-champagne px-8 py-3 transition-all duration-500">
+                            <a href="#" className="font-sans text-[9px] tracking-[0.2em] uppercase text-white bg-charcoal hover:bg-gold rounded-full px-8 py-3 transition-colors duration-500 shadow-md mt-auto">
                                 Ver Mesa Online
                             </a>
                         </div>
-                        <div className="flex flex-col items-center p-8 md:p-12 border-[0.5px] border-white/10 hover:border-champagne/50 transition-colors duration-700 bg-black/20 backdrop-blur-sm group w-full md:w-1/2">
-                            <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-white/40 mb-4 group-hover:text-champagne transition-colors">Lluvia de Sobres</span>
-                            <h3 className="font-serif text-2xl text-white mb-8">Transferencia</h3>
-                            <div className="font-sans text-xs text-white/60 tracking-[0.1em] mb-8 flex flex-col gap-2">
-                                <p>Banco: <span className="text-white">BBVA Lujo</span></p>
-                                <p>Cuenta: <span className="text-white">012 345 6789 0123 4567</span></p>
-                                <p>A nombre de: <span className="text-white">Alexander Novio</span></p>
+
+                        <div className="flex flex-col items-center glass-panel p-8 md:p-12 rounded-[30px] group w-full md:w-1/2 shadow-lg">
+                            <svg className="w-8 h-8 text-rose mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <span className="font-sans text-[9px] tracking-[0.2em] uppercase text-rose-dark mb-2 font-bold">Lluvia de Sobres</span>
+                            <h3 className="font-serif text-2xl text-charcoal mb-4">Transferencia</h3>
+                            <div className="font-sans text-[10px] text-charcoal/70 tracking-[0.1em] flex flex-col gap-2 mb-6 text-left border border-rose/20 p-4 rounded-xl bg-white/50 w-full">
+                                <p>Banco: <strong className="text-charcoal">BBVA Oro</strong></p>
+                                <p>Cuenta: <strong className="text-charcoal">012 345 6789</strong></p>
+                                <p>A nombre de: <strong className="text-charcoal">Alexander Treviño</strong></p>
                             </div>
                         </div>
                     </div>
                 </section>
             );
         };
+
+        // --- Component: Concierge (Hospedaje) ---
+        const Concierge = () => {
+            return (
+                <section className="py-16 px-6 w-full flex flex-col items-center justify-center text-center relative">
+                    <span className="font-script text-rose text-4xl mb-4 block">Hospedaje</span>
+                    <h2 className="font-serif text-3xl md:text-4xl text-charcoal tracking-widest uppercase mb-6">Concierge</h2>
+                    <p className="font-sans text-[10px] md:text-xs text-charcoal/60 tracking-[0.1em] leading-relaxed max-w-lg mb-12">
+                        Para nuestros invitados foráneos, hemos asegurado tarifas preferenciales en los siguientes hoteles.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+                        <div className="p-8 border border-gold/30 rounded-2xl flex flex-col items-center bg-white shadow-sm hover:shadow-lg transition-all duration-300">
+                            <h3 className="font-serif text-2xl text-charcoal mb-2 font-bold">JW Marriott</h3>
+                            <p className="font-sans text-[9px] tracking-widest text-sage uppercase mb-6">San Pedro Valle</p>
+                            <a href="#" className="font-sans text-[9px] tracking-[0.2em] uppercase text-rose font-bold border-b border-rose pb-1 hover:text-rose-dark transition-colors">
+                                Reservar (Cód: FLORAL26)
+                            </a>
+                        </div>
+                        <div className="p-8 border border-gold/30 rounded-2xl flex flex-col items-center bg-white shadow-sm hover:shadow-lg transition-all duration-300">
+                            <h3 className="font-serif text-2xl text-charcoal mb-2 font-bold">Live Aqua</h3>
+                            <p className="font-sans text-[9px] tracking-widest text-sage uppercase mb-6">Urban Resort</p>
+                            <a href="#" className="font-sans text-[9px] tracking-[0.2em] uppercase text-rose font-bold border-b border-rose pb-1 hover:text-rose-dark transition-colors">
+                                Reservar (Cód: FLORAL26)
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
 
         // --- Component: Social Wall & Filter ---
         const SocialWall = () => {
             return (
-                <section className="py-16 px-6 w-full flex flex-col items-center justify-center text-center relative">
-                    <span className="font-script text-champagne text-4xl mb-4 block">Captura la Magia</span>
-                    <h2 className="font-serif text-3xl md:text-4xl font-light text-white tracking-widest uppercase mb-6">Muro Social</h2>
-                    
-                    <p className="font-sans text-xs text-white/50 tracking-[0.15em] leading-relaxed max-w-lg mb-8">
+                <section className="py-16 px-6 w-full flex flex-col items-center justify-center text-center relative bg-rose/5 rounded-[50px] mx-4 max-w-6xl my-12 border border-rose/10">
+                    <span className="font-script text-rose text-4xl mb-4 block">Captura la Magia</span>
+                    <h2 className="font-serif text-3xl md:text-4xl text-charcoal tracking-widest uppercase mb-6">Muro Social</h2>
+                    <p className="font-sans text-[10px] md:text-xs text-charcoal/60 tracking-[0.1em] leading-relaxed max-w-lg mb-8">
                         Ayúdanos a documentar este día tan especial. Sube tus fotos y videos usando nuestro hashtag oficial.
                     </p>
-
-                    <div className="mb-12">
-                        <p className="font-serif text-4xl md:text-5xl italic text-champagne tracking-wider text-shadow-luxury">
-                            #Isabella<span className="font-sans text-3xl mx-1">&</span>Alexander
+                    <div className="mb-10 bg-white px-8 py-4 rounded-full shadow-md border border-gold/20">
+                        <p className="font-serif text-2xl md:text-3xl italic text-sage tracking-wider">
+                            #Isabella<span className="font-sans text-xl mx-1 text-rose">&</span>Alexander
                         </p>
                     </div>
-
-                    <div className="flex flex-col items-center group">
-                        <p className="font-sans text-[9px] tracking-[0.3em] uppercase text-white/40 mb-6">Usa nuestro filtro oficial en Instagram</p>
-                        <a href="https://www.instagram.com/ar/741492576406540/" target="_blank" rel="noreferrer" className="flex items-center gap-4 px-8 py-4 border-[0.5px] border-white/30 rounded-full hover:border-champagne hover:bg-white/5 transition-all duration-500">
-                            <svg className="w-5 h-5 text-white group-hover:text-champagne transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" strokeWidth={0.8}></rect>
-                                <path strokeWidth={0.8} d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"></path>
-                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" strokeWidth={1.5} strokeLinecap="round"></line>
+                    <div className="flex flex-col items-center">
+                        <p className="font-sans text-[9px] tracking-[0.2em] uppercase text-charcoal/50 mb-4 font-bold">Usa nuestro filtro oficial en Instagram</p>
+                        <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" className="flex items-center gap-3 px-8 py-4 bg-gradient-to-tr from-[#fdf497] via-[#fd5946] to-[#d6249f] text-white rounded-full hover:scale-105 transition-transform duration-300 shadow-lg">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" strokeWidth={1.5}></rect>
+                                <path strokeWidth={1.5} d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"></path>
+                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" strokeWidth={2} strokeLinecap="round"></line>
                             </svg>
-                            <span className="font-sans text-[11px] tracking-[0.2em] uppercase text-white group-hover:text-champagne transition-colors">Probar Filtro AR</span>
+                            <span className="font-sans text-[10px] tracking-[0.15em] uppercase font-bold">Probar Filtro AR</span>
                         </a>
                     </div>
                 </section>
             );
         };
 
-        // --- Component: RSVP / Modal Interactivo (MODO DEMO RESTAURADO) ---
-        const RSVP = () => {
-            const [isOpen, setIsOpen] = useState(false);
-            const [isSubmitted, setIsSubmitted] = useState(false);
-
-            const handleSubmit = (e) => {
-                e.preventDefault(); 
-                setIsSubmitted(true); 
-            };
-
-            return (
-                <section className="py-16 md:py-32 px-6 w-full flex flex-col items-center justify-center text-center relative pb-24 md:pb-48">
-                    <span className="font-script text-champagne text-4xl mb-4 block">Asistencia</span>
-                    <h2 className="font-serif text-3xl md:text-4xl font-light text-white tracking-widest uppercase mb-6">Confirma tu Presencia</h2>
-                    
-                    <p className="font-sans text-xs text-white/60 tracking-[0.15em] leading-relaxed max-w-lg mx-auto mb-8 md:mb-12">
-                        Nuestra mayor ilusión es celebrar este nuevo capítulo con las personas que han iluminado nuestra historia. Nos encantaría saber si contaremos con tu grata compañía.
-                    </p>
-                    
-                    <button 
-                        onClick={() => {setIsOpen(true); setIsSubmitted(false);}} 
-                        className="font-sans text-xs tracking-[0.3em] uppercase text-luxury-black bg-champagne hover:bg-white hover:scale-105 px-12 py-5 transition-all duration-500 font-bold shadow-[0_4px_25px_rgba(212,175,55,0.2)]"
-                    >
-                        Confirmar Asistencia
-                    </button>
-
-                    {isOpen && (
-                        <div className="fixed inset-0 z-[99999] bg-black/40 backdrop-blur-xl flex items-center justify-center p-4 md:p-8">
-                            <div className="bg-[#0A0A0A] border border-champagne/30 p-8 md:p-12 w-full max-w-lg relative animate-fade-in shadow-2xl rounded-2xl">
-                                <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 text-white/50 hover:text-white text-xl p-2 transition-colors z-10">
-                                    ✕
-                                </button>
-                                
-                                {!isSubmitted ? (
-                                    <form onSubmit={handleSubmit} className="flex flex-col gap-8 text-left">
-                                        <div className="text-center mb-2">
-                                            <span className="font-sans text-[9px] tracking-[0.3em] text-champagne/80 uppercase block mb-2">Modo de Prueba</span>
-                                            <h3 className="font-serif text-3xl text-white font-light">Generar Pase QR</h3>
-                                        </div>
-
-                                        <div className="flex flex-col gap-2">
-                                            <label className="font-sans text-[9px] tracking-[0.2em] text-white/60 uppercase">Nombre y Apellido</label>
-                                            <input 
-                                                type="text" 
-                                                required 
-                                                placeholder="Ej. Alejandro Garza" 
-                                                className="bg-transparent border-b border-white/20 text-white font-serif text-xl py-2 focus:outline-none focus:border-champagne transition-colors w-full placeholder-white/20" 
-                                            />
-                                        </div>
-
-                                        <div className="flex flex-col gap-2">
-                                            <label className="font-sans text-[9px] tracking-[0.2em] text-white/60 uppercase">Pases a confirmar</label>
-                                            <select className="bg-transparent border-b border-white/20 text-white font-serif text-xl py-2 focus:outline-none focus:border-champagne transition-colors w-full appearance-none cursor-pointer">
-                                                <option value="1" className="bg-[#0A0A0A]">1 Pase</option>
-                                                <option value="2" className="bg-[#0A0A0A]">2 Pases</option>
-                                                <option value="3" className="bg-[#0A0A0A]">3 Pases</option>
-                                            </select>
-                                        </div>
-
-                                        <button type="submit" className="mt-6 font-sans text-xs tracking-[0.3em] uppercase text-luxury-black bg-champagne hover:bg-white px-8 py-4 transition-all duration-500 text-center font-bold rounded-full shadow-[0_0_15px_rgba(212,175,55,0.3)]">
-                                            Generar Pase QR
-                                        </button>
-                                    </form>
-                                ) : (
-                                    <div className="flex flex-col items-center text-center py-10 animate-fade-in">
-                                        <div className="w-20 h-20 rounded-full border-[0.5px] border-champagne flex items-center justify-center mb-8 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
-                                            <span className="text-3xl">✨</span>
-                                        </div>
-                                        <h3 className="font-serif text-3xl text-champagne mb-6 font-light">¡Excelente!</h3>
-                                        <p className="font-sans text-xs text-white/80 leading-loose tracking-[0.1em] mb-8">
-                                            En una versión real, esto le generaría un código QR único a tu invitado.
-                                        </p>
-                                        <p className="font-sans text-[11px] text-champagne uppercase tracking-[0.2em] font-bold">
-                                            ¡Crea tu propio evento en Baulia para desbloquear esta función!
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </section>
-            );
-        };
-
-        // --- Component: Footer Oficial Baulia ---
+        // --- Component: Footer Oficial Baulia (FASE 4) ---
         const Footer = () => {
             return (
-                <footer className="py-12 md:py-24 flex flex-col items-center justify-center relative z-20 pb-24 md:pb-40 text-center">
-                    <span className="font-sans text-[9px] tracking-[0.4em] text-white/40 uppercase mb-8">Tecnología por</span>
+                <footer className="py-12 md:py-20 flex flex-col items-center justify-center relative z-20 pb-28 md:pb-32 text-center bg-white/50 border-t border-gold/20">
+                    <a href="https://panel.baulia.com" target="_blank" className="font-sans text-[9px] tracking-[0.3em] uppercase text-charcoal/40 hover:text-sage transition-colors pb-1 mb-8">
+                        ¿Eres el anfitrión? Iniciar Sesión
+                    </a>
+
+                    <span className="font-sans text-[9px] tracking-[0.4em] text-charcoal/50 uppercase mb-6 font-bold">Tecnología por</span>
                     
-                    <div className="flex items-center justify-center mb-8 md:mb-12">
-                        <svg viewBox="0 0 915 201" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ height: '40px', width: 'auto', overflow: 'visible', display: 'inline-block' }}>
-                            <style>{`
-                                .baulia-text { fill: #ffffff; transition: fill 0.5s ease; } 
-                                .baulia-diamond-animator { transform-origin: 100px 100px; transform: rotate(45deg) scale(0.8); transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); } 
-                                .baulia-diamond-shape { fill: transparent; stroke: #D4AF37; stroke-width: 1.72px; transition: fill 0.5s ease, stroke-width 0.3s ease; } 
-                                .baulia-b { fill: #D4AF37; transition: all 0.6s ease; transform-origin: 100px 100px; } 
-                                svg:hover .baulia-diamond-animator { transform: rotate(135deg) scale(0.85); } 
-                                svg:hover .baulia-diamond-shape { stroke-width: 3px; } 
-                                svg:hover .baulia-b { transform: scale(1.05); fill: #FDF1A9; }
-                            `}</style>
-                            <g className="baulia-text">
-                                <path d="M265.12,78.58h-.35c0-2.04-.75-3.8-2.24-5.25-1.5-1.46-3.27-2.18-5.31-2.18h-1.42l-.12-1.18h9.44v8.62ZM265.12,143.97v8.62h-9.44l.12-1.18h1.42c2.05,0,3.82-.73,5.31-2.18,1.49-1.46,2.24-3.21,2.24-5.25h.35ZM272.44,69.96v82.62h-7.67v-82.62h7.67ZM279.17,69.96c5.51,0,10.17.83,13.99,2.48,3.82,1.65,6.71,3.95,8.68,6.91,1.97,2.95,2.95,6.39,2.95,10.33,0,3.3-.63,6.2-1.89,8.68-1.26,2.48-2.87,4.49-4.84,6.02-1.97,1.53-4.05,2.62-6.26,3.25,4.17.63,7.77,2.01,10.8,4.13,3.03,2.12,5.35,4.78,6.96,7.97,1.61,3.19,2.42,6.75,2.42,10.68,0,4.41-1.06,8.28-3.19,11.63-2.12,3.35-5.25,5.94-9.38,7.79-4.13,1.85-9.11,2.77-14.93,2.77h-13.1c.08-1.42.12-2.83.12-4.25h12.51c4.09,0,7.55-.73,10.39-2.18,2.83-1.46,5-3.6,6.49-6.43,1.49-2.83,2.24-6.22,2.24-10.15,0-4.41-.85-7.99-2.54-10.74-1.69-2.75-3.88-4.84-6.55-6.26-2.68-1.42-5.57-2.38-8.68-2.89-3.11-.51-6.08-.77-8.91-.77v-1.06c1.81,0,3.82-.2,6.02-.59,2.2-.39,4.33-1.18,6.37-2.36,2.04-1.18,3.74-2.93,5.08-5.25,1.34-2.32,2.01-5.37,2.01-9.15,0-3.54-.65-6.57-1.95-9.09-1.3-2.52-3.23-4.43-5.78-5.72-2.56-1.3-5.72-1.95-9.5-1.95h-10.86c0-.08-.1-.41-.29-1-.2-.59-.49-1.51-.89-2.77h12.51Z"/><path d="M381.98,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM407.36,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.86-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM424,120.36v3.54h-36.95v-3.54h36.95ZM407.36,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM429.31,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95,1.18-1.3,1.34-3.13.47-5.49Z"/><path d="M506.51,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM513.83,69.96v51.94c0,5.67,1.04,10.66,3.13,14.99,2.08,4.33,5.02,7.69,8.79,10.09,3.78,2.4,8.14,3.6,13.1,3.6,5.27,0,9.87-1.14,13.81-3.42,3.93-2.28,7-5.45,9.21-9.5,2.2-4.05,3.31-8.79,3.31-14.22v-53.47h5.55v53.47c0,6.14-1.32,11.51-3.95,16.11-2.64,4.6-6.36,8.2-11.15,10.8-4.8,2.6-10.39,3.9-16.76,3.9s-12.26-1.28-17.17-3.84c-4.92-2.56-8.73-6.14-11.45-10.74-2.71-4.6-4.07-9.97-4.07-16.11v-53.59h7.67ZM521.97,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38ZM538.73,61.58c1.65-1.81,3.31-3.6,4.96-5.37,1.65-1.77,3.32-3.5,5.02-5.19s3.36-3.32,5.02-4.9c.87.94,1.73,1.93,2.6,2.95.87,1.02,1.61,2.12,2.24,3.31-2.12,1.18-4.25,2.36-6.37,3.54-2.12,1.18-4.23,2.3-6.31,3.36-2.09,1.06-4.19,2.11-6.31,3.13l-.83-.83ZM565.53,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM578.86,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38Z"/><path d="M646.97,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM646.97,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM654.29,69.96v82.62h-7.67v-82.62h7.67ZM653.94,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18s-2.22,3.21-2.3,5.25h-.35ZM686.16,148.93v3.66h-32.22v-3.66h32.22ZM693.36,133.46l-6.85,19.12h-19.59l4.25-3.66c4.17,0,7.57-.65,10.21-1.95,2.64-1.3,4.78-3.13,6.43-5.49,1.65-2.36,3.11-5.04,4.37-8.03h1.18Z"/><path d="M758.75,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM758.75,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM766.07,69.96v82.62h-7.67v-82.62h7.67ZM765.72,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18-1.46,1.46-2.22,3.21-2.3,5.25h-.35ZM765.72,143.97h.35c.08,2.05.84,3.8,2.3,5.25,1.46,1.46,3.21,2.18,5.25,2.18h1.53v1.18h-9.44v-8.62Z"/><path d="M846.33,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM871.71,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.87-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM888.35,120.36v3.54h-36.95v-3.54h36.95ZM871.71,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM893.67,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95s1.34-3.13.47-5.49Z"/></g>
-                                <g className="baulia-diamond-animator">
-                                    <rect className="baulia-diamond-shape" x=".86" y=".86" width="198.64" height="198.64" transform="translate(0 200.36) rotate(-90)" strokeMiterlimit="10" />
-                                </g>
-                                <path className="baulia-b" d="M116.87,94.54l6.01-.41c6.47,0,11.27,1.21,14.42,3.62,3.14,2.42,4.72,5.83,4.72,10.25s-2.01,9.59-6.01,15.51c-4.01,5.92-9.2,11.3-15.58,16.13h7.79c3.19,0,5.42-.14,6.7-.41,1.27-.27,2-.41,2.19-.41,1.27,0,1.91.68,1.91,2.05s-.91,2.1-2.73,2.19c-7.02,0-13.76-.09-20.23-.27-10.2,6.47-20.23,9.7-30.07,9.7-4.65,0-8.34-.87-11.07-2.6s-4.1-3.48-4.1-5.26.75-3.16,2.25-4.17c1.5-1,3.62-1.5,6.36-1.5,10.66,0,22.59.23,35.81.68,5.47-4.46,9.84-9.64,13.12-15.51,3.28-5.88,4.92-11.18,4.92-15.92,0-7.56-4.06-11.34-12.16-11.34-3.19,0-6.49.5-9.91,1.5-3.42,1-5.47,1.71-6.15,2.12s-1.12.61-1.3.61c-.55,0-.82-.39-.82-1.16s1.18-1.71,3.55-2.8c10.39-5.01,20.54-11.68,30.48-20.02,9.93-8.34,14.9-14.28,14.9-17.83,0-1.64-1.28-2.46-3.83-2.46-10.39.09-24.65,7.88-42.78,23.37-3.65,9.38-9.64,20.91-17.97,34.58-8.34,13.67-17.06,25.9-26.17,36.69-9.11,10.8-15.9,16.19-20.36,16.19-2.73,0-4.1-1.41-4.1-4.24,0-6.47,6.13-17.99,18.38-34.58,12.25-16.58,26.12-31.84,41.61-45.78,2.73-6.65,4.1-11.5,4.1-14.56s-.73-5.47-2.19-7.24c-1.46-1.78-3.6-3.08-6.42-3.9-4.46-1.18-9.18-1.78-14.14-1.78s-8.77.12-11.41.34c-2.64.23-5.86.68-9.64,1.37-3.78.68-6.86,1.87-9.22,3.55-2.37,1.69-3.55,3.83-3.55,6.42s1.27,4.6,3.83,6.01c2.55,1.41,5.67,2.39,9.36,2.94s7.36,1.14,11,1.78c3.64.64,6.74,1.89,9.29,3.76,2.55,1.87,3.83,4.49,3.83,7.86,0,.91-.2,1.37-.61,1.37s-.73-.14-.96-.41c-.23-.27-.62-.82-1.16-1.64-.82-1.18-2.03-2.1-3.62-2.73-1.59-.64-4.06-1.25-7.38-1.84-3.33-.59-6.47-1.23-9.43-1.91-2.96-.68-5.94-1.57-8.95-2.66-3.01-1.09-5.42-2.64-7.24-4.65-1.82-2-2.73-4.35-2.73-7.04s1.14-5.08,3.42-7.17c2.28-2.1,5.28-3.74,9.02-4.92,7.65-2.28,15.63-3.42,23.92-3.42,21.5,0,32.25,5.65,32.25,16.95,0,1-.23,2.51-.68,4.51,18.4-14.85,33.35-22.28,44.83-22.28,5.1,0,7.65,1.55,7.65,4.65,0,4.46-4.67,10.8-14.01,19-9.34,8.2-18.98,14.58-28.9,19.13ZM44.17,163.69c2.64,0,9.73-8.45,21.25-25.35,11.52-16.9,20.75-32.64,27.68-47.22-13.67,13.03-25.76,26.58-36.29,40.66-10.52,14.08-15.78,23.66-15.78,28.77,0,2.09,1.05,3.14,3.14,3.14ZM111,142.64l-24.74-.55c-7.02,0-10.52,1.05-10.52,3.14,0,1.18,1.18,2.3,3.55,3.35,2.37,1.05,5.1,1.57,8.2,1.57,8.11,0,15.94-2.5,23.51-7.52Z"/>
-                            </svg>
-                    </div>
-                    
-                    <div className="flex flex-col items-center gap-4">
-                        <a href="https://panel.baulia.com" target="_blank" rel="noreferrer" className="font-sans text-[9px] tracking-[0.3em] uppercase text-white/30 hover:text-champagne transition-colors pb-1 border-b border-transparent hover:border-champagne">
-                            ¿Eres el anfitrión? Iniciar Sesión
-                        </a>
-                        
-                        <a href="https://baulia.com" target="_blank" rel="noreferrer" className="font-sans text-[9px] tracking-[0.2em] uppercase text-white/40 hover:text-champagne transition-colors flex items-center gap-2">
-                            Crea tu invitación con nosotros
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                        </a>
-                    </div>
+                    <div 
+                        className="hover:scale-105 transition-transform duration-300 cursor-pointer w-auto h-10 mb-8"
+                        onClick={() => window.parent.location.href = 'https://baulia.com'}
+                        dangerouslySetInnerHTML={{ __html: `<svg viewBox="0 0 915 201" fill="none" xmlns="http://www.w3.org/2000/svg" style="height: 100%; width: auto; overflow: visible; display: inline-block;"><style>.baulia-text { fill: #1C1917; transition: fill 0.5s ease; } .baulia-diamond-animator { transform-origin: 100px 100px; transform: rotate(45deg) scale(0.8); transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); } .baulia-diamond-shape { fill: transparent; stroke: #D4AF37; stroke-width: 1.72px; transition: fill 0.5s ease, stroke-width 0.3s ease; } .baulia-b { fill: #D4AF37; transition: all 0.6s ease; transform-origin: 100px 100px; } svg:hover .baulia-diamond-animator { transform: rotate(135deg) scale(0.85); } svg:hover .baulia-diamond-shape { stroke-width: 3px; } svg:hover .baulia-b { transform: scale(1.05); fill: #FDF1A9; }</style><g class="baulia-text"><path d="M265.12,78.58h-.35c0-2.04-.75-3.8-2.24-5.25-1.5-1.46-3.27-2.18-5.31-2.18h-1.42l-.12-1.18h9.44v8.62ZM265.12,143.97v8.62h-9.44l.12-1.18h1.42c2.05,0,3.82-.73,5.31-2.18,1.49-1.46,2.24-3.21,2.24-5.25h.35ZM272.44,69.96v82.62h-7.67v-82.62h7.67ZM279.17,69.96c5.51,0,10.17.83,13.99,2.48,3.82,1.65,6.71,3.95,8.68,6.91,1.97,2.95,2.95,6.39,2.95,10.33,0,3.3-.63,6.2-1.89,8.68-1.26,2.48-2.87,4.49-4.84,6.02-1.97,1.53-4.05,2.62-6.26,3.25,4.17.63,7.77,2.01,10.8,4.13,3.03,2.12,5.35,4.78,6.96,7.97,1.61,3.19,2.42,6.75,2.42,10.68,0,4.41-1.06,8.28-3.19,11.63-2.12,3.35-5.25,5.94-9.38,7.79-4.13,1.85-9.11,2.77-14.93,2.77h-13.1c.08-1.42.12-2.83.12-4.25h12.51c4.09,0,7.55-.73,10.39-2.18,2.83-1.46,5-3.6,6.49-6.43,1.49-2.83,2.24-6.22,2.24-10.15,0-4.41-.85-7.99-2.54-10.74-1.69-2.75-3.88-4.84-6.55-6.26-2.68-1.42-5.57-2.38-8.68-2.89-3.11-.51-6.08-.77-8.91-.77v-1.06c1.81,0,3.82-.2,6.02-.59,2.2-.39,4.33-1.18,6.37-2.36,2.04-1.18,3.74-2.93,5.08-5.25,1.34-2.32,2.01-5.37,2.01-9.15,0-3.54-.65-6.57-1.95-9.09-1.3-2.52-3.23-4.43-5.78-5.72-2.56-1.3-5.72-1.95-9.5-1.95h-10.86c0-.08-.1-.41-.29-1-.2-.59-.49-1.51-.89-2.77h12.51Z"/><path d="M381.98,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM407.36,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.86-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM424,120.36v3.54h-36.95v-3.54h36.95ZM407.36,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM429.31,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95,1.18-1.3,1.34-3.13.47-5.49Z"/><path d="M506.51,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM513.83,69.96v51.94c0,5.67,1.04,10.66,3.13,14.99,2.08,4.33,5.02,7.69,8.79,10.09,3.78,2.4,8.14,3.6,13.1,3.6,5.27,0,9.87-1.14,13.81-3.42,3.93-2.28,7-5.45,9.21-9.5,2.2-4.05,3.31-8.79,3.31-14.22v-53.47h5.55v53.47c0,6.14-1.32,11.51-3.95,16.11-2.64,4.6-6.36,8.2-11.15,10.8-4.8,2.6-10.39,3.9-16.76,3.9s-12.26-1.28-17.17-3.84c-4.92-2.56-8.73-6.14-11.45-10.74-2.71-4.6-4.07-9.97-4.07-16.11v-53.59h7.67ZM521.97,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38ZM538.73,61.58c1.65-1.81,3.31-3.6,4.96-5.37,1.65-1.77,3.32-3.5,5.02-5.19s3.36-3.32,5.02-4.9c.87.94,1.73,1.93,2.6,2.95.87,1.02,1.61,2.12,2.24,3.31-2.12,1.18-4.25,2.36-6.37,3.54-2.12,1.18-4.23,2.3-6.31,3.36-2.09,1.06-4.19,2.11-6.31,3.13l-.83-.83ZM565.53,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM578.86,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38Z"/><path d="M646.97,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM646.97,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM654.29,69.96v82.62h-7.67v-82.62h7.67ZM653.94,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18s-2.22,3.21-2.3,5.25h-.35ZM686.16,148.93v3.66h-32.22v-3.66h32.22ZM693.36,133.46l-6.85,19.12h-19.59l4.25-3.66c4.17,0,7.57-.65,10.21-1.95,2.64-1.3,4.78-3.13,6.43-5.49,1.65-2.36,3.11-5.04,4.37-8.03h1.18Z"/><path d="M758.75,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM758.75,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM766.07,69.96v82.62h-7.67v-82.62h7.67ZM765.72,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18-1.46,1.46-2.22,3.21-2.3,5.25h-.35ZM765.72,143.97h.35c.08,2.05.84,3.8,2.3,5.25,1.46,1.46,3.21,2.18,5.25,2.18h1.53v1.18h-9.44v-8.62Z"/><path d="M846.33,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM871.71,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.87-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM888.35,120.36v3.54h-36.95v-3.54h36.95ZM871.71,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM893.67,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95s1.34-3.13.47-5.49Z"/></g><g className="baulia-diamond-animator"><rect className="baulia-diamond-shape" x=".86" y=".86" width="198.64" height="198.64" transform="translate(0 200.36) rotate(-90)" strokeMiterlimit="10" /></g><path className="baulia-b" d="M116.87,94.54l6.01-.41c6.47,0,11.27,1.21,14.42,3.62,3.14,2.42,4.72,5.83,4.72,10.25s-2.01,9.59-6.01,15.51c-4.01,5.92-9.2,11.3-15.58,16.13h7.79c3.19,0,5.42-.14,6.7-.41,1.27-.27,2-.41,2.19-.41,1.27,0,1.91.68,1.91,2.05s-.91,2.1-2.73,2.19c-7.02,0-13.76-.09-20.23-.27-10.2,6.47-20.23,9.7-30.07,9.7-4.65,0-8.34-.87-11.07-2.6s-4.1-3.48-4.1-5.26.75-3.16,2.25-4.17c1.5-1,3.62-1.5,6.36-1.5,10.66,0,22.59.23,35.81.68,5.47-4.46,9.84-9.64,13.12-15.51,3.28-5.88,4.92-11.18,4.92-15.92,0-7.56-4.06-11.34-12.16-11.34-3.19,0-6.49.5-9.91,1.5-3.42,1-5.47,1.71-6.15,2.12s-1.12.61-1.3.61c-.55,0-.82-.39-.82-1.16s1.18-1.71,3.55-2.8c10.39-5.01,20.54-11.68,30.48-20.02,9.93-8.34,14.9-14.28,14.9-17.83,0-1.64-1.28-2.46-3.83-2.46-10.39.09-24.65,7.88-42.78,23.37-3.65,9.38-9.64,20.91-17.97,34.58-8.34,13.67-17.06,25.9-26.17,36.69-9.11,10.8-15.9,16.19-20.36,16.19-2.73,0-4.1-1.41-4.1-4.24,0-6.47,6.13-17.99,18.38-34.58,12.25-16.58,26.12-31.84,41.61-45.78,2.73-6.65,4.1-11.5,4.1-14.56s-.73-5.47-2.19-7.24c-1.46-1.78-3.6-3.08-6.42-3.9-4.46-1.18-9.18-1.78-14.14-1.78s-8.77.12-11.41.34c-2.64.23-5.86.68-9.64,1.37-3.78.68-6.86,1.87-9.22,3.55-2.37,1.69-3.55,3.83-3.55,6.42s1.27,4.6,3.83,6.01c2.55,1.41,5.67,2.39,9.36,2.94s7.36,1.14,11,1.78c3.64.64,6.74,1.89,9.29,3.76,2.55,1.87,3.83,4.49,3.83,7.86,0,.91-.2,1.37-.61,1.37s-.73-.14-.96-.41c-.23-.27-.62-.82-1.16-1.64-.82-1.18-2.03-2.1-3.62-2.73-1.59-.64-4.06-1.25-7.38-1.84-3.33-.59-6.47-1.23-9.43-1.91-2.96-.68-5.94-1.57-8.95-2.66-3.01-1.09-5.42-2.64-7.24-4.65-1.82-2-2.73-4.35-2.73-7.04s1.14-5.08,3.42-7.17c2.28-2.1,5.28-3.74,9.02-4.92,7.65-2.28,15.63-3.42,23.92-3.42,21.5,0,32.25,5.65,32.25,16.95,0,1-.23,2.51-.68,4.51,18.4-14.85,33.35-22.28,44.83-22.28,5.1,0,7.65,1.55,7.65,4.65,0,4.46-4.67,10.8-14.01,19-9.34,8.2-18.98,14.58-28.9,19.13ZM44.17,163.69c2.64,0,9.73-8.45,21.25-25.35,11.52-16.9,20.75-32.64,27.68-47.22-13.67,13.03-25.76,26.58-36.29,40.66-10.52,14.08-15.78,23.66-15.78,28.77,0,2.09,1.05,3.14,3.14,3.14ZM111,142.64l-24.74-.55c-7.02,0-10.52,1.05-10.52,3.14,0,1.18,1.18,2.3,3.55,3.35,2.37,1.05,5.1,1.57,8.2,1.57,8.11,0,15.94-2.5,23.51-7.52Z"/></svg>` }}
+                    />
                 </footer>
             );
         };
@@ -863,15 +679,14 @@
         const App = () => {
             
             const [guestName, setGuestName] = useState(null);
-            
-            // Estado para el sobre/pantalla de inicio
             const [isEnvelopeOpened, setIsEnvelopeOpened] = useState(false);
-            
-            // Estados compartidos para la música
             const [isPlaying, setIsPlaying] = useState(false);
             const audioRef = useRef(null);
 
-            // Lógica para abrir el sobre e iniciar música
+            // 🔴 ESTADOS MOVIDOS A APP PARA EL MODAL GLOBAL
+            const [showRsvpModal, setShowRsvpModal] = useState(false);
+            const [demoFormStatus, setDemoFormStatus] = useState('form');
+
             const handleOpenInvitation = () => {
                 setIsEnvelopeOpened(true);
                 if (audioRef.current) {
@@ -881,133 +696,114 @@
                 }
             };
 
-            // Extracción del nombre del invitado desde la URL
             useEffect(() => {
                 try {
                     const params = new URLSearchParams(window.location.search);
                     let rawName = params.get('invitado') || params.get('para') || params.get('nombre');
-                    
                     if (rawName) {
                         let cleanName = decodeURIComponent(rawName).replace(/[_\-\+]/g, ' ');
                         cleanName = cleanName.replace(/\b\w/g, l => l.toUpperCase());
                         setGuestName(cleanName);
                     }
                 } catch (e) {
-                    console.error("Error al leer parámetros de URL", e);
+                    console.error("Error al leer parámetros", e);
                 }
             }, []);
 
-            // PROTECCIÓN ANTI-ROBO INTELIGENTE (Permite usar los inputs)
             useEffect(() => {
-                const preventDefault = (e) => {
+                const preventAction = (e) => {
                     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
                     e.preventDefault();
                 };
-                document.addEventListener('contextmenu', preventDefault);
-                document.addEventListener('selectstart', preventDefault);
-                document.addEventListener('dragstart', preventDefault);
+                document.addEventListener('contextmenu', preventAction);
+                document.addEventListener('selectstart', preventAction);
+                document.addEventListener('dragstart', preventAction);
                 return () => {
-                    document.removeEventListener('contextmenu', preventDefault);
-                    document.removeEventListener('selectstart', preventDefault);
-                    document.removeEventListener('dragstart', preventDefault);
+                    document.removeEventListener('contextmenu', preventAction);
+                    document.removeEventListener('selectstart', preventAction);
+                    document.removeEventListener('dragstart', preventAction);
                 };
             }, []);
 
             return (
-                <div className="relative min-h-screen w-full bg-luxury-black overflow-hidden">
+                <div className="relative min-h-screen w-full bg-ivory overflow-hidden">
                     
-                    {/* BOTÓN FLOTANTE GLOBAL - SIEMPRE VISIBLE EN EL TOP LEVEL */}
-                    <FloatingBuyButton />
+                    {/* 🔴 FASE 4: BOTÓN FLOTANTE COMPRA (INTELIGENTE Y SIEMPRE VISIBLE) */}
+                    <button
+                        onClick={() => {
+                            if (window !== window.parent) {
+                                window.parent.postMessage('open_checkout', '*');
+                            } else {
+                                window.location.href = 'https://baulia.com/#planes';
+                            }
+                        }}
+                        className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999999] bg-rose text-white px-6 md:px-8 py-3.5 md:py-4 rounded-full font-sans font-bold text-[10px] md:text-xs tracking-[0.2em] uppercase shadow-[0_10px_25px_rgba(244,170,185,0.6)] hover:scale-105 transition-all duration-300 border border-white/50 flex items-center gap-2 whitespace-nowrap"
+                    >
+                        ✨ Adquirir esta tecnología
+                    </button>
 
                     {/* --- PANTALLA DE INICIO / SOBRE --- */}
-                    <div className={`fixed inset-0 z-[999999] bg-luxury-black flex flex-col items-center justify-center w-full min-h-[100svh] px-6 text-center transition-transform duration-[1200ms] ease-in-out ${isEnvelopeOpened ? 'translate-y-[-100%] pointer-events-none' : 'translate-y-0'}`}>
-                        {/* Textura de fondo sutil del sobre */}
-                        <div className="absolute inset-0 bg-[url('/demos/boda/portada.jpg')] bg-cover bg-center opacity-10 grayscale mix-blend-overlay"></div>
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/60 to-black/90"></div>
+                    <div className={`fixed inset-0 z-[999999] bg-ivory flex flex-col items-center justify-center w-full min-h-[100svh] px-6 text-center transition-transform duration-[1200ms] ease-in-out ${isEnvelopeOpened ? 'translate-y-[-100%] pointer-events-none' : 'translate-y-0'}`}>
+                        <div className="absolute inset-0 bg-[url('/demos/boda/portada.jpg')] bg-cover bg-center opacity-[0.03] mix-blend-multiply"></div>
+                        <div className="absolute inset-0 bg-white/70"></div>
                         
                         <div className="relative z-10 flex flex-col items-center justify-center w-full">
-                            {/* Monograma */}
-                            <div className="transform scale-50 md:scale-75 origin-center mb-8 md:mb-12">
+                            <div className="transform scale-75 origin-center mb-8 md:mb-12 p-4 overflow-visible leading-normal">
                                 <Monogram />
                             </div>
-                            
-                            {/* Textos centrales */}
                             <div className="flex flex-col items-center gap-4 md:gap-6 mb-12 md:mb-16">
-                                <span className="font-sans text-[10px] md:text-[11px] tracking-[0.4em] text-champagne uppercase">
-                                    Invitación Especial
-                                </span>
-                                <span className="font-script text-white text-6xl md:text-8xl text-shadow-luxury leading-tight max-w-xl px-4">
+                                <span className="font-sans text-[10px] md:text-[11px] tracking-[0.4em] text-sage uppercase">Invitación Especial</span>
+                                <span className="font-script text-rose text-6xl md:text-8xl leading-tight max-w-xl px-4 drop-shadow-sm">
                                     {guestName ? `Para ${guestName}` : "Para Ti"}
                                 </span>
                             </div>
-                            
-                            {/* Botón */}
-                            <button 
-                                onClick={handleOpenInvitation}
-                                className="group relative px-10 py-5 bg-transparent border border-champagne/40 hover:border-champagne hover:bg-champagne/10 transition-all duration-700 overflow-hidden"
-                            >
-                                <span className="relative z-10 font-sans text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-champagne group-hover:text-white transition-colors duration-700">
+                            <button onClick={handleOpenInvitation} className="group relative px-10 py-5 bg-white border border-gold/40 hover:border-rose hover:bg-rose/5 transition-all duration-700 overflow-hidden shadow-lg rounded-full">
+                                <span className="relative z-10 font-sans text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-charcoal group-hover:text-rose-dark transition-colors duration-700 font-bold">
                                     Abrir Invitación
                                 </span>
                             </button>
                         </div>
                     </div>
 
-                    {/* --- CONTENIDO PRINCIPAL (Lo que está debajo del sobre) --- */}
+                    {/* --- CONTENIDO PRINCIPAL --- */}
                     <div className={`transition-opacity duration-1000 delay-500 ${isEnvelopeOpened ? 'opacity-100' : 'opacity-0'}`}>
                         <AmbientBackground />
                         <LanguageTranslator />
                         <MusicPlayer isPlaying={isPlaying} setIsPlaying={setIsPlaying} audioRef={audioRef} />
 
                         <section className="relative min-h-[100svh] w-full flex flex-col items-center bg-hero-image">
-                            {/* OVERLAY ORIGINAL PARA ESCRITORIO */}
-                            <div className="absolute inset-0 hidden md:block bg-black/40"></div>
-                            {/* NUEVO OVERLAY RADIAL EXCLUSIVO PARA MÓVIL (Aclara el centro) */}
-                            <div className="absolute inset-0 md:hidden bg-[radial-gradient(circle,rgba(0,0,0,0.1)_0%,rgba(0,0,0,0.6)_100%)]"></div>
-                            
-                            <div className="absolute inset-0 vignette-overlay"></div>
+                            <div className="absolute inset-0 bg-white/30 backdrop-blur-[2px]"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-ivory via-transparent to-ivory/50"></div>
                             
                             <div className="relative z-10 flex flex-col items-center justify-between w-full min-h-[100svh] px-6 text-center pt-8 pb-24 md:pt-12 md:pb-32">
-                                
-                                {/* TOP: Monogram - Reducido 20% y bajado para evitar el notch de la cámara móvil */}
-                                <div className="mt-24 md:mt-12 transform scale-[0.8] origin-top">
+                                <div className="mt-24 md:mt-12 transform scale-[0.8] origin-top p-4 overflow-visible leading-normal">
                                     <Monogram />
                                 </div>
-
-                                {/* CENTER SPACE: Espacio flexible para la foto */}
                                 <div className="flex-grow"></div>
-
-                                {/* BOTTOM: Text Block ultra-compacto */}
-                                <div className="flex flex-col items-center">
-                                    <p className="font-sans text-[10px] md:text-xs tracking-[0.4em] text-white/60 uppercase mb-2">
-                                        Con gran alegría celebramos
-                                    </p>
-                                    <h1 className="font-serif text-3xl md:text-5xl font-light tracking-wide text-white mb-3">
-                                        Isabella <span className="font-script text-champagne text-4xl md:text-6xl mx-2 lowercase">&</span> Alexander
+                                <div className="flex flex-col items-center glass-panel px-8 py-10 rounded-[40px] w-[90%] max-w-lg mb-12">
+                                    <p className="font-sans text-[10px] md:text-xs tracking-[0.4em] text-sage uppercase mb-4 font-bold">Con gran alegría celebramos</p>
+                                    <h1 className="font-serif text-4xl md:text-5xl font-light tracking-wide text-charcoal mb-4">
+                                        Isabella <span className="font-script text-rose text-5xl md:text-6xl mx-2 lowercase">&</span> Alexander
                                     </h1>
-                                    <div className="max-w-lg mx-auto">
-                                        <p className="font-serif italic text-lg md:text-xl font-light text-white/80 leading-relaxed px-4">
+                                    <div className="max-w-md mx-auto">
+                                        <p className="font-serif italic text-lg md:text-xl font-light text-charcoal/80 leading-relaxed px-4">
                                             "El amor no mira con los ojos, <br className="hidden md:block"/>sino con el alma."
                                         </p>
-                                        <div className="w-12 h-[1px] bg-champagne/50 mx-auto mt-4"></div>
+                                        <div className="w-12 h-[1px] bg-gold/50 mx-auto mt-6"></div>
                                     </div>
                                 </div>
-                                
-                                {/* SCROLL INDICATOR */}
                                 <div className="absolute bottom-6 md:bottom-8 flex flex-col items-center gap-3 opacity-60 animate-bounce-slow">
-                                    <span className="font-sans text-[8px] tracking-[0.4em] uppercase text-white/70">Deslizar</span>
-                                    <div className="w-[1px] h-6 md:h-8 bg-gradient-to-b from-white to-transparent"></div>
+                                    <span className="font-sans text-[8px] tracking-[0.4em] uppercase text-charcoal font-bold">Deslizar</span>
+                                    <div className="w-[1px] h-6 md:h-8 bg-gradient-to-b from-charcoal to-transparent"></div>
                                 </div>
                             </div>
                         </section>
 
                         <div className="relative z-20">
                             <FadeInSection><Parents /></FadeInSection>
-                            
                             <div className="w-full flex justify-center py-8">
-                                <div className="w-[1px] h-24 bg-gradient-to-b from-champagne/40 to-transparent"></div>
+                                <div className="w-[1px] h-24 bg-gradient-to-b from-gold/40 to-transparent"></div>
                             </div>
-
                             <FadeInSection><Countdown /></FadeInSection>
                             <FadeInSection><VisualInterlude /></FadeInSection>
                             <FadeInSection><EventDetails /></FadeInSection>
@@ -1018,11 +814,86 @@
                             <FadeInSection><GiftRegistry /></FadeInSection>
                             <FadeInSection><SocialWall /></FadeInSection>
                             
-                            {/* Secciones de Cierre / Demo */}
-                            <FadeInSection><RSVP /></FadeInSection>
+                            {/* SECCIÓN RSVP REDISEÑADA SIN MODAL ANIDADO */}
+                            <FadeInSection>
+                                <section className="py-16 md:py-24 px-6 w-full flex flex-col items-center justify-center text-center relative pb-24 md:pb-32">
+                                    <BirdcageIcon className="w-16 h-16 text-sage opacity-50 mb-6" />
+                                    <span className="font-script text-rose text-4xl mb-4 block">Asistencia</span>
+                                    <h2 className="font-serif text-3xl md:text-4xl text-charcoal tracking-widest uppercase mb-6">Confirma tu Presencia</h2>
+                                    <p className="font-sans text-[10px] md:text-xs text-charcoal/60 tracking-[0.15em] leading-relaxed max-w-lg mx-auto mb-8 md:mb-12">
+                                        Nuestra mayor ilusión es celebrar este nuevo capítulo con las personas que han iluminado nuestra historia. Nos encantaría saber si contaremos con tu grata compañía.
+                                    </p>
+                                    <button 
+                                        onClick={() => {setShowRsvpModal(true); setDemoFormStatus('form');}} 
+                                        className="font-sans text-xs tracking-[0.25em] uppercase text-white bg-sage hover:bg-sage/90 hover:scale-105 px-12 py-5 transition-all duration-300 font-bold rounded-full shadow-xl"
+                                    >
+                                        Confirmar Asistencia
+                                    </button>
+                                </section>
+                            </FadeInSection>
+
                             <FadeInSection><Footer /></FadeInSection>
                         </div>
                     </div>
+
+                    {/* 🔴 MODAL GLOBAL RENDERIZADO FUERA DEL FLUJO PARA EVITAR BUGS DE Z-INDEX */}
+                    {showRsvpModal && (
+                        <div className="fixed inset-0 z-[9999999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+                            <div className="bg-ivory border border-gold/30 p-8 md:p-12 w-full max-w-md relative animate-fade-in-up shadow-2xl rounded-3xl">
+                                <button onClick={() => setShowRsvpModal(false)} className="absolute top-5 right-5 text-charcoal/40 hover:text-rose transition-colors z-10">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
+                                
+                                {demoFormStatus === 'form' ? (
+                                    <form onSubmit={(e) => { e.preventDefault(); setDemoFormStatus('success'); }} className="flex flex-col gap-6 text-left">
+                                        <div className="text-center mb-2">
+                                            <span className="font-sans text-[9px] tracking-[0.3em] text-rose uppercase block mb-2 font-bold">Modo de Prueba</span>
+                                            <h3 className="font-serif text-3xl text-charcoal font-bold">Generar Pase QR</h3>
+                                            <p className="text-xs text-charcoal/50 italic mt-2">Completa los datos para ver la demostración</p>
+                                        </div>
+
+                                        <div className="flex flex-col gap-2">
+                                            <label className="font-sans text-[10px] tracking-[0.2em] text-sage uppercase font-bold">Nombre y Apellido</label>
+                                            <input 
+                                                type="text" 
+                                                required 
+                                                placeholder="Ej. Roberto Garza" 
+                                                className="bg-white border border-gold/30 rounded-xl text-charcoal font-serif text-lg py-3 px-4 focus:outline-none focus:border-rose focus:ring-1 focus:ring-rose transition-all w-full" 
+                                            />
+                                        </div>
+
+                                        <div className="flex flex-col gap-2">
+                                            <label className="font-sans text-[10px] tracking-[0.2em] text-sage uppercase font-bold">Pases a confirmar</label>
+                                            <select required className="bg-white border border-gold/30 rounded-xl text-charcoal font-serif text-lg py-3 px-4 focus:outline-none focus:border-rose focus:ring-1 focus:ring-rose transition-all w-full appearance-none cursor-pointer">
+                                                <option value="1">1 Pase</option>
+                                                <option value="2">2 Pases</option>
+                                                <option value="3">3 Pases</option>
+                                            </select>
+                                        </div>
+
+                                        <button type="submit" className="mt-4 font-sans text-xs tracking-[0.2em] uppercase text-white bg-charcoal hover:bg-gold px-8 py-4 transition-all duration-300 text-center font-bold rounded-xl shadow-lg">
+                                            Confirmar e Imprimir QR
+                                        </button>
+                                    </form>
+                                ) : (
+                                    <div className="flex flex-col items-center text-center py-8 animate-fade-in">
+                                        <div className="w-20 h-20 rounded-full border-2 border-sage flex items-center justify-center mb-6 shadow-md bg-sage/10 text-sage">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-10 h-10"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                        </div>
+                                        <h3 className="font-serif text-3xl text-charcoal mb-4 font-bold">¡Excelente!</h3>
+                                        <p className="font-sans text-[11px] text-charcoal/70 leading-relaxed mb-6">
+                                            En una versión real, esto le generaría un código QR único a tu invitado y lo registraría en tu lista.
+                                        </p>
+                                        <div className="bg-rose/10 p-4 rounded-xl border border-rose/30">
+                                            <p className="font-sans text-[10px] text-rose-dark uppercase tracking-[0.1em] font-bold">
+                                                ¡Crea tu propio evento en Baulia para desbloquear esta función!
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };

@@ -544,7 +544,13 @@
 
                     {/* 🔴 FASE 4: BOTÓN FLOTANTE COMPRA (CRÍTICO) */}
                     <button
-                        onClick={() => window.parent.postMessage('open_checkout', '*')}
+                        onClick={() => {
+                            if (window !== window.parent) {
+                                window.parent.postMessage('open_checkout', '*');
+                            } else {
+                                window.location.href = 'https://baulia.com/#planes';
+                            }
+                        }}
                         className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] bg-gradient-to-r from-spring-dark to-gray-800 text-white px-6 md:px-8 py-3.5 md:py-4 rounded-full font-sans font-bold text-[10px] md:text-xs tracking-[0.2em] uppercase shadow-[0_10px_25px_rgba(42,42,42,0.5)] hover:scale-105 transition-all duration-300 border border-white/20 flex items-center gap-2 whitespace-nowrap"
                     >
                         ✨ Adquirir esta tecnología
