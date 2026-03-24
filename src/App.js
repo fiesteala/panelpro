@@ -10142,6 +10142,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       )}
 
       {/* 🔴 MODAL CHECKOUT MEJORADO (DOS PASOS EN LA MISMA PANTALLA) */}
+      {/* 🔴 MODAL CHECKOUT MEJORADO (DOS PASOS EN LA MISMA PANTALLA) */}
       {checkoutModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className={`bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full ${checkoutModal === 'selector' ? 'max-w-2xl' : 'max-w-md'} overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 flex flex-col max-h-[90vh] transition-all duration-300`}>
@@ -10160,8 +10161,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   {[
                     { id: 'basico', plan: 'Básico', precio: '990.00', desc: 'Invitación, RSVP simple y GPS.', icon: <Smartphone size={24}/> },
                     { id: 'plata', plan: 'Plata', precio: '1,490.00', desc: 'Suma Mesa de Regalos e Itinerario.', icon: <Wallet size={24}/> },
-                    { id: 'oro', plan: 'Oro VIP', precio: '1,990.00', desc: 'Panel Maestro, Control QR y Mesas.', icon: <ShieldCheck size={24}/>, popular: true },
-                    { id: 'diamante', plan: 'Diamante Planner', precio: '2,990.00', desc: 'Bocetador 3D y Muro Social.', icon: <LayoutDashboard size={24}/> }
+                    { id: 'oro', plan: 'Oro', precio: '1,990.00', desc: 'Panel Maestro, Control QR y Mesas.', icon: <ShieldCheck size={24}/>, popular: true },
+                    { id: 'diamante', plan: 'Diamante', precio: '2,990.00', desc: 'Croquis de Mesas y Muro Social.', icon: <LayoutDashboard size={24}/> }
                   ].map(plan => (
                     <button 
                       key={plan.id}
@@ -10207,17 +10208,32 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       )}
 
-      {/* MODAL ÉXITO PAGO */}
+      {/* 🔴 MODAL ÉXITO PAGO (DISEÑO EDITORIAL Y GLAMUROSO) */}
       {checkoutSuccess && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 text-center border border-transparent dark:border-white/10 animate-in zoom-in-95">
-            <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-emerald-200 dark:border-emerald-500/30">
-              <CheckCircle size={48} className="animate-pulse"/>
+          <div className="bg-[#FDFBF7] dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-10 text-center border border-[#D4AF37]/30 dark:border-white/10 animate-in zoom-in-95 relative">
+            
+            {/* Detalle dorado superior */}
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-600"></div>
+            
+            <div className="mx-auto mb-6 relative w-24 h-24 flex items-center justify-center">
+               <div className="absolute inset-0 border border-amber-300 dark:border-amber-500/30 rounded-full animate-ping opacity-50"></div>
+               <div className="absolute inset-3 border border-amber-400 dark:border-amber-500/50 rounded-full"></div>
+               <CheckCircle size={40} className="text-amber-500 dark:text-amber-400 relative z-10"/>
             </div>
-            <h3 className="font-editorial font-black text-3xl text-slate-900 dark:text-white mb-2">¡Bienvenido a Baulia!</h3>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 leading-relaxed">Tu pago se ha procesado con éxito. Hemos enviado un correo con tus credenciales de acceso a tu Bóveda Privada.</p>
-            <button onClick={() => {setCheckoutSuccess(false); window.location.href = 'https://panel.baulia.com';}} className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 font-black rounded-xl shadow-lg hover:bg-indigo-700 dark:hover:bg-amber-400 transition-all uppercase tracking-widest text-[10px]">
-              Ir a mi Panel de Control
+            
+            <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-2">Transacción Exitosa</p>
+            <h3 className="font-editorial font-bold text-4xl text-slate-900 dark:text-white mb-4 leading-tight">
+              Bienvenido <br/>
+              <span className="italic font-light text-slate-600 dark:text-slate-400">a Baulia.</span>
+            </h3>
+            
+            <p className="text-slate-600 dark:text-slate-400 text-sm mb-10 font-light leading-relaxed">
+              Tu bóveda privada ha sido creada con éxito. Hemos enviado las credenciales de acceso a tu correo electrónico para que comiences a diseñar tu evento.
+            </p>
+            
+            <button onClick={() => {setCheckoutSuccess(false); window.location.href = 'https://panel.baulia.com';}} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold rounded-full shadow-xl hover:bg-slate-800 dark:hover:bg-slate-200 hover:scale-[1.02] transition-all uppercase tracking-widest text-[10px]">
+              Entrar a mi Panel de Control
             </button>
           </div>
         </div>
