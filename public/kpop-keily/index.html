@@ -2,74 +2,41 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invitación Digital | Alta Costura</title>
     
-    <!-- Meta Tags para WhatsApp (Open Graph) -->
-    <meta property="og:title" content="¡Estás invitado al Nivel 3 de Keylli! 🎤⚔️">
-    <meta property="og:description" content="Únete al escuadrón. Misión: Celebrar los 3 años de Keylli (K-Pop Demon Hunters).">
-    <meta property="og:image" content="[LINK_DE_FOTO_PORTADA.jpg]">
-    <meta property="og:url" content="https://tu-dominio.com/invitacion-keylli">
-    <meta property="og:type" content="website">
-
-    <title>Invitación Keylli - Kpop Demon Hunters</title>
-
-    <!-- React & ReactDOM -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Fuentes de Google: Cinzel (Elegancia Clásica) y Montserrat (Modernidad Limpia) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@200;300;400&display=swap" rel="stylesheet">
     
-    <!-- Babel para JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Righteous&display=swap" rel="stylesheet">
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
+    <!-- Configuración de Tailwind -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Outfit', 'sans-serif'],
-                        display: ['Righteous', 'cursive'],
+                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Cinzel', 'serif'],
                     },
                     colors: {
-                        kpop: {
-                            pink: '#ff2a85',
-                            purple: '#8a2be2',
-                            cyan: '#00f0ff',
-                            dark: '#0a0a16',
-                            glass: 'rgba(255, 255, 255, 0.05)'
-                        }
+                        luxuryDark: '#0a0510',
+                        neonAccent: '#ff2a85',
                     },
                     animation: {
-                        'float': 'float 4s ease-in-out infinite',
-                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'slide-up': 'slideUp 0.8s ease-out forwards',
-                        'fade-in': 'fadeIn 1s ease-out forwards',
+                        'fade-in': 'fadeIn 1.5s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-15px)' },
-                        },
-                        pulseGlow: {
-                            '0%, 100%': { opacity: 1, boxShadow: '0 0 15px #ff2a85, 0 0 30px #8a2be2' },
-                            '50%': { opacity: .7, boxShadow: '0 0 5px #ff2a85, 0 0 10px #8a2be2' },
-                        },
-                        slideUp: {
-                            '0%': { opacity: 0, transform: 'translateY(40px)' },
-                            '100%': { opacity: 1, transform: 'translateY(0)' },
-                        },
-                        fadeIn: {
-                            '0%': { opacity: 0 },
-                            '100%': { opacity: 1 },
+                            '50%': { transform: 'translateY(-10px)' },
                         }
                     }
                 }
@@ -77,50 +44,38 @@
         }
     </script>
 
+    <!-- React y ReactDOM (CDN) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel para compilar JSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Estilos Personalizados Esenciales -->
     <style>
         body {
-            background-color: #0a0a16;
-            color: #ffffff;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden; /* Evita scroll en la pantalla de inicio */
         }
-        
+
+        /* Efecto de cristal esmerilado de lujo */
         .glass-panel {
-            background: rgba(20, 20, 35, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 42, 133, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            background: rgba(10, 5, 16, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 
+                        inset 0 0 20px rgba(255, 42, 133, 0.05); /* Toque sutil del neón */
         }
 
-        .neon-text-pink {
-            text-shadow: 0 0 10px rgba(255, 42, 133, 0.8), 0 0 20px rgba(255, 42, 133, 0.4);
-        }
-        
-        .neon-text-cyan {
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.8), 0 0 20px rgba(0, 240, 255, 0.4);
-        }
-
-        .img-fallback {
-            background: linear-gradient(45deg, #2a0845, #6441A5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.5);
-        }
-
-        /* Custom Scrollbar */
+        /* Ocultar barra de scroll si se habilita más adelante */
         ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0a0a16;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #ff2a85;
-            border-radius: 10px;
+            width: 0px;
+            background: transparent;
         }
     </style>
 </head>
@@ -128,246 +83,76 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const App = () => {
+            // Estado para la interacción inicial
+            const [isOpened, setIsOpened] = React.useState(false);
 
-        // --- COMPONENTE: CONTADOR REVERSIVO ---
-        const Countdown = ({ targetDate }) => {
-            const calculateTimeLeft = () => {
-                const difference = +new Date(targetDate) - +new Date();
-                let timeLeft = {};
-
-                if (difference > 0) {
-                    timeLeft = {
-                        Días: Math.floor(difference / (1000 * 60 * 60 * 24)),
-                        Hrs: Math.floor((difference / (1000 * 60 * 60)) % 24),
-                        Min: Math.floor((difference / 1000 / 60) % 60),
-                        Seg: Math.floor((difference / 1000) % 60),
-                    };
-                } else {
-                    timeLeft = { Días: 0, Hrs: 0, Min: 0, Seg: 0 };
-                }
-                return timeLeft;
+            const handleOpen = () => {
+                setIsOpened(true);
+                // Aquí en el futuro podemos agregar lógica para mostrar más contenido
+                console.log("Invitación desbloqueada.");
             };
-
-            const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-
-            useEffect(() => {
-                const timer = setTimeout(() => {
-                    setTimeLeft(calculateTimeLeft());
-                }, 1000);
-                return () => clearTimeout(timer);
-            });
 
             return (
-                <div className="flex justify-center gap-3 my-6 animate-slide-up" style={{animationDelay: '0.4s'}}>
-                    {Object.keys(timeLeft).map((interval, index) => (
-                        <div key={index} className="flex flex-col items-center">
-                            <div className="glass-panel w-16 h-16 flex items-center justify-center rounded-xl border-kpop-cyan/30 text-2xl font-display text-kpop-cyan neon-text-cyan shadow-[0_0_15px_rgba(0,240,255,0.2)]">
-                                {timeLeft[interval].toString().padStart(2, '0')}
-                            </div>
-                            <span className="text-xs uppercase tracking-widest mt-2 text-gray-400 font-semibold">{interval}</span>
-                        </div>
-                    ))}
-                </div>
-            );
-        };
+                <div 
+                    className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat transition-all duration-1000"
+                    style={{ backgroundImage: `url('kpopsfondo.svg')` }}
+                >
+                    {/* Capa de superposición para mejorar el contraste (Vignette) */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/80 z-0"></div>
+                    <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] z-0"></div>
 
-        // --- COMPONENTE PRINCIPAL ---
-        const App = () => {
-            const [isOpened, setIsOpened] = useState(false);
-            const [isPlaying, setIsPlaying] = useState(false);
-            
-            // Fecha ficticia para el contador (puedes cambiarla)
-            const eventDate = "2026-10-31T16:00:00"; 
-            const eventID = "prueba-htsj";
-
-            // Simulación de música (Requiere interacción del usuario)
-            const toggleMusic = () => {
-                setIsPlaying(!isPlaying);
-                // Aquí iría la lógica del <audio> real si tienes un MP3
-            };
-
-            useEffect(() => {
-                // Renderizar iconos de Lucide
-                lucide.createIcons();
-            });
-
-            // --- PANTALLA 1: SOBRE / PORTADA ---
-            if (!isOpened) {
-                return (
-                    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-kpop-dark">
-                        {/* Efecto de fondo sutil */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-kpop-purple/20 via-kpop-dark to-kpop-pink/10 z-0"></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-kpop-pink/20 rounded-full blur-[100px] z-0 pointer-events-none"></div>
-
-                        <div className="z-10 flex flex-col items-center justify-center w-full px-6 animate-fade-in">
+                    {/* Contenedor Principal (Tarjeta Glassmorfismo) */}
+                    <main 
+                        className={`relative z-10 w-full max-w-lg mx-4 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]
+                            ${isOpened ? 'scale-105 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}
+                        `}
+                    >
+                        <div className="glass-panel rounded-3xl p-10 md:p-14 text-center animate-fade-in relative overflow-hidden group">
                             
-                            {/* LOGO / MONOGRAMA (Ruta solicitada) */}
-                            <div className="w-64 h-64 mb-12 relative animate-float">
-                                <img 
-                                    src="/kpop-keily/kpoplogo.svg" 
-                                    alt="Keylli Kpop Logo" 
-                                    className="w-full h-full object-contain drop-shadow-[0_0_20px_rgba(255,42,133,0.5)] img-fallback rounded-full"
-                                    onError={(e) => {
-                                        e.target.style.display = 'none';
-                                        e.target.nextSibling.style.display = 'flex';
-                                    }}
-                                />
-                                {/* Fallback visual por si el SVG no carga localmente */}
-                                <div className="absolute inset-0 img-fallback rounded-full hidden flex-col border-2 border-kpop-pink/50">
-                                    <span className="font-display text-2xl text-kpop-pink">KEYLLI</span>
-                                    <span className="text-xs">Logo Missing</span>
-                                </div>
+                            {/* Reflejo animado sutil en el borde superior */}
+                            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+
+                            {/* Encabezado Pequeño */}
+                            <h3 className="font-sans text-white/60 tracking-[0.4em] text-[10px] md:text-xs uppercase mb-6 flex items-center justify-center gap-4">
+                                <span className="w-8 h-[1px] bg-white/30"></span>
+                                Colección Exclusiva
+                                <span className="w-8 h-[1px] bg-white/30"></span>
+                            </h3>
+
+                            {/* Título Principal */}
+                            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-normal text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 mb-2 drop-shadow-sm animate-float">
+                                Estás<br/>Invitado
+                            </h1>
+                            
+                            {/* Separador Elegante */}
+                            <div className="my-8 flex justify-center items-center">
+                                <div className="h-2 w-2 rounded-full bg-neonAccent/80 animate-pulse-slow"></div>
                             </div>
 
-                            <h1 className="text-2xl font-display tracking-widest text-center mb-10 text-white uppercase">
-                                <span className="text-kpop-pink neon-text-pink">Misión:</span> Nivel 3
-                            </h1>
+                            {/* Subtítulo */}
+                            <p className="font-sans text-sm md:text-base font-light text-white/80 tracking-widest uppercase mb-12">
+                                Una noche inolvidable
+                            </p>
 
+                            {/* Botón de Acción de Alta Costura */}
                             <button 
-                                onClick={() => { setIsOpened(true); setIsPlaying(true); }}
-                                className="relative group px-8 py-4 bg-transparent outline-none"
+                                onClick={handleOpen}
+                                className="relative inline-flex items-center justify-center px-10 py-4 font-sans text-xs tracking-[0.2em] uppercase text-white overflow-hidden rounded-full border border-white/30 hover:border-white transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 group/btn"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-r from-kpop-pink to-kpop-purple rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300 animate-pulse-glow"></div>
-                                <div className="relative flex items-center gap-3 bg-kpop-dark border border-kpop-pink/50 rounded-full px-8 py-3 text-white font-bold tracking-widest uppercase text-sm">
-                                    <i data-lucide="scan-face" className="w-5 h-5 text-kpop-cyan"></i>
-                                    Ingresar al Sistema
-                                </div>
+                                <span className="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-white/10"></span>
+                                <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-black">
+                                    Descubrir
+                                </span>
+                                {/* Fondo que se desliza al hacer hover */}
+                                <div className="absolute inset-0 bg-white transform scale-x-0 origin-right transition-transform duration-500 ease-out group-hover/btn:scale-x-100 group-hover/btn:origin-left"></div>
                             </button>
                         </div>
-                    </div>
-                );
-            }
+                    </main>
 
-            // --- PANTALLA 2: INVITACIÓN PRINCIPAL ---
-            return (
-                <div className="relative min-h-screen bg-kpop-dark overflow-x-hidden">
-                    
-                    {/* FONDO DINÁMICO (Ruta solicitada) */}
-                    <div className="fixed inset-0 z-0">
-                        <img 
-                            src="/kpop-keily/kpopfondo.svg" 
-                            alt="Fondo Kpop" 
-                            className="w-full h-full object-cover opacity-40 img-fallback"
-                            onError={(e) => {
-                                e.target.style.display = 'none';
-                                e.target.nextSibling.style.display = 'block';
-                            }}
-                        />
-                        {/* Fallback de fondo */}
-                        <div className="absolute inset-0 hidden bg-gradient-to-b from-[#1a0b2e] via-kpop-dark to-[#2a0845]"></div>
-                        <div className="absolute inset-0 bg-kpop-dark/60 backdrop-blur-[2px]"></div> {/* Overlay oscuro para legibilidad */}
-                    </div>
-
-                    {/* CONTROL DE MÚSICA (Flotante) */}
-                    <button 
-                        onClick={toggleMusic}
-                        className="fixed top-6 right-6 z-50 glass-panel w-12 h-12 rounded-full flex items-center justify-center border-kpop-cyan/50 text-kpop-cyan"
-                    >
-                        {isPlaying ? <i data-lucide="music" className="w-5 h-5 animate-pulse"></i> : <i data-lucide="volume-x" className="w-5 h-5"></i>}
-                    </button>
-
-                    {/* CONTENIDO PRINCIPAL */}
-                    <div className="relative z-10 w-full max-w-md mx-auto min-h-screen flex flex-col items-center pt-16 pb-24 px-6">
-                        
-                        {/* Encabezado */}
-                        <div className="text-center animate-slide-up" style={{animationDelay: '0.1s'}}>
-                            <p className="text-kpop-cyan font-semibold tracking-[0.2em] text-sm mb-2 neon-text-cyan uppercase">Agente Principal</p>
-                            <h2 className="font-display text-6xl text-transparent bg-clip-text bg-gradient-to-r from-white via-kpop-pink to-kpop-purple neon-text-pink mb-1">
-                                KEYLLI
-                            </h2>
-                            <p className="text-gray-300 font-light tracking-wide text-sm">Escuadrón Demon Hunters • Nivel 3</p>
-                        </div>
-
-                        {/* GUERRERA PRINCIPAL (Ruta solicitada) */}
-                        <div className="w-full h-80 my-8 relative flex justify-center items-center animate-slide-up animate-float" style={{animationDelay: '0.2s'}}>
-                            {/* Círculo brillante detrás del personaje */}
-                            <div className="absolute w-48 h-48 bg-kpop-purple/40 rounded-full blur-3xl"></div>
-                            <img 
-                                src="/kpop-keily/kpop.svg" 
-                                alt="Guerrera Principal" 
-                                className="w-full h-full object-contain relative z-10 drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] img-fallback rounded-3xl"
-                                onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'flex';
-                                }}
-                            />
-                             {/* Fallback visual */}
-                             <div className="absolute inset-0 hidden img-fallback rounded-3xl border border-kpop-purple/50 flex-col">
-                                <i data-lucide="swords" className="w-12 h-12 text-kpop-purple mb-2"></i>
-                                <span>Guerrera Principal (SVG missing)</span>
-                            </div>
-                        </div>
-
-                        <div className="w-full space-y-4">
-                            {/* Tarjeta de Detalles */}
-                            <div className="glass-panel rounded-3xl p-6 w-full animate-slide-up relative overflow-hidden group" style={{animationDelay: '0.3s'}}>
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-kpop-pink/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                                
-                                <h3 className="font-display text-xl text-white mb-4 flex items-center gap-2">
-                                    <i data-lucide="map-pin" className="text-kpop-pink w-5 h-5"></i>
-                                    Punto de Extracción
-                                </h3>
-                                
-                                <div className="space-y-3 font-light text-gray-200 text-sm">
-                                    <p className="flex justify-between items-center border-b border-white/10 pb-2">
-                                        <span className="text-gray-400 uppercase tracking-wider text-xs font-semibold">Fecha</span>
-                                        <strong className="text-white text-base">Sáb, 31 de Octubre</strong>
-                                    </p>
-                                    <p className="flex justify-between items-center border-b border-white/10 pb-2">
-                                        <span className="text-gray-400 uppercase tracking-wider text-xs font-semibold">Hora</span>
-                                        <strong className="text-white text-base">16:00 HRS</strong>
-                                    </p>
-                                    <p className="flex flex-col pt-1">
-                                        <span className="text-gray-400 uppercase tracking-wider text-xs font-semibold mb-1">Ubicación Segura</span>
-                                        <span className="leading-relaxed">Salón de Eventos "Neon Star"<br/>Calle Principal #123, Ciudad</span>
-                                    </p>
-                                </div>
-                                
-                                <a href="https://maps.google.com" target="_blank" className="mt-5 w-full bg-white/5 hover:bg-white/10 border border-white/20 rounded-xl py-3 flex justify-center items-center gap-2 text-sm font-semibold transition-all">
-                                    <i data-lucide="navigation" className="w-4 h-4 text-kpop-cyan"></i>
-                                    Ver Mapa del Radar
-                                </a>
-                            </div>
-
-                            {/* Dress Code Card */}
-                            <div className="glass-panel rounded-3xl p-5 w-full flex items-center justify-between animate-slide-up border-kpop-purple/30" style={{animationDelay: '0.4s'}}>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-kpop-purple/20 border border-kpop-purple/50 flex items-center justify-center">
-                                        <i data-lucide="shirt" className="text-kpop-purple w-5 h-5"></i>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-display text-sm text-white">Dress Code</h4>
-                                        <p className="text-xs text-gray-400">K-Pop Style / Dark & Neon</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Contador */}
-                        <div className="w-full mt-8 text-center animate-slide-up" style={{animationDelay: '0.5s'}}>
-                            <h3 className="font-display tracking-widest text-kpop-pink uppercase text-sm mb-2">Tiempo para el despliegue</h3>
-                            <Countdown targetDate={eventDate} />
-                        </div>
-
-                        {/* Footer / RSVP */}
-                        <div className="mt-12 w-full text-center animate-slide-up" style={{animationDelay: '0.6s'}}>
-                            <p className="text-xs text-gray-500 mb-6 uppercase tracking-widest">ID de Misión: {eventID}</p>
-                            
-                            <a 
-                                href={`https://wa.me/?text=¡Hola! Confirmo mi asistencia a la misión del Nivel 3 de Keylli. ID: ${eventID}`} 
-                                target="_blank"
-                                className="relative inline-flex group w-full"
-                            >
-                                <div className="absolute transition-all duration-1000 opacity-70 -inset-px bg-gradient-to-r from-[#44BC85] to-[#0ea5e9] rounded-xl blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 animate-pulse-glow"></div>
-                                <button className="relative inline-flex items-center justify-center w-full px-8 py-4 text-base font-bold text-white transition-all duration-200 bg-kpop-dark border-2 border-[#44BC85] font-display uppercase tracking-widest rounded-xl gap-3">
-                                    <i data-lucide="check-circle-2" className="w-5 h-5 text-[#44BC85]"></i>
-                                    Confirmar Asistencia
-                                </button>
-                            </a>
-                        </div>
-
-                    </div>
+                    {/* Elementos decorativos (Partículas/Luz) */}
+                    <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-neonAccent/20 rounded-full blur-[100px] mix-blend-screen pointer-events-none animate-pulse-slow z-0"></div>
+                    <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-cyan-500/10 rounded-full blur-[120px] mix-blend-screen pointer-events-none animate-pulse-slow z-0" style={{ animationDelay: '2s' }}></div>
                 </div>
             );
         };
