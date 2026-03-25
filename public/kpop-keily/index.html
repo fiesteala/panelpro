@@ -13,10 +13,16 @@
 
     <title>Pase VIP - Keyli</title>
 
-    <!-- Google Fonts: Orbitron y Rajdhani -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700;900&family=Birthstone&display=swap" rel="stylesheet">
+
+    <!-- PRELOAD: Fuerza la carga inmediata de los SVG pesados para evitar retrasos visuales -->
+    <link rel="preload" href="./kpopsfondo.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="./kpoplogo.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="./kpopsilueta.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="./kpop.svg" as="image" type="image/svg+xml">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -33,12 +39,15 @@
                     fontFamily: {
                         cyber: ['Orbitron', 'sans-serif'],
                         body: ['Rajdhani', 'sans-serif'],
+                        cursive: ['Birthstone', 'cursive'],
                     },
                     animation: {
                         'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'fade-in': 'fadeIn 0.8s ease-out forwards',
                         'breathe': 'breathe 15s ease-in-out infinite alternate',
                         'spin-slow': 'spin 3s linear infinite',
+                        'float': 'float 4s ease-in-out infinite',
+                        'energy-pulse': 'energy 2.5s ease-in-out infinite',
                     },
                     keyframes: {
                         fadeIn: {
@@ -48,6 +57,14 @@
                         breathe: {
                             '0%': { transform: 'scale(1)' },
                             '100%': { transform: 'scale(1.08)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0) scale(1)' },
+                            '50%': { transform: 'translateY(-25px) scale(1.03)' }
+                        },
+                        energy: {
+                            '0%, 100%': { opacity: '0.2', transform: 'scale(0.8) rotate(0deg)' },
+                            '50%': { opacity: '0.4', transform: 'scale(1.3) rotate(5deg)' }
                         }
                     }
                 }
@@ -61,10 +78,10 @@
     <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Estilos Personalizados - Versión Noche Mágica -->
+    <!-- Estilos Personalizados -->
     <style type="text/tailwindcss">
         @layer utilities {
-            .text-glow-pink { text-shadow: 0 0 10px #ff2e93, 0 0 20px #ff2e93; }
+            .text-glow-pink { text-shadow: 0 0 10px #ff2e93, 0 0 20px #ff2e93, 0 0 40px rgba(255, 46, 147, 0.6); }
             .text-glow-blue { text-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff; }
             .text-glow-purple { text-shadow: 0 0 10px #b724ff, 0 0 30px #b724ff; }
             
@@ -72,31 +89,15 @@
             .box-glow-purple { box-shadow: 0 0 20px rgba(183, 36, 255, 0.4), inset 0 0 15px rgba(183, 36, 255, 0.2); }
             .box-glow-blue { box-shadow: 0 0 15px rgba(0, 229, 255, 0.4), inset 0 0 10px rgba(0, 229, 255, 0.1); }
             
-            /* Nuevas Tarjetas Traslúcidas K-Pop (Efecto Holograma Mágico) */
             .glass-panel {
-                background: linear-gradient(135deg, rgba(30, 10, 50, 0.25) 0%, rgba(10, 5, 25, 0.4) 100%);
-                backdrop-filter: blur(6px);
-                -webkit-backdrop-filter: blur(6px);
+                background: linear-gradient(135deg, rgba(30, 10, 50, 0.2) 0%, rgba(10, 5, 25, 0.5) 100%);
+                backdrop-filter: blur(12px);
                 border: 1px solid rgba(183, 36, 255, 0.2);
                 border-top: 1px solid rgba(255, 46, 147, 0.5);
-                border-left: 1px solid rgba(0, 229, 255, 0.4);
-                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-                position: relative;
-                overflow: hidden;
-            }
-            .glass-panel-highlight {
-                background: linear-gradient(135deg, rgba(40, 10, 60, 0.35) 0%, rgba(15, 5, 30, 0.5) 100%);
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
-                border: 1px solid rgba(183, 36, 255, 0.4);
-                border-top: 1px solid rgba(183, 36, 255, 0.7);
                 box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-                position: relative;
-                overflow: hidden;
             }
             
-            /* Animación de Escaneo Holográfico */
-            .glass-panel::after, .glass-panel-highlight::after, .hologram-overlay {
+            .hologram-overlay {
                 content: '';
                 position: absolute;
                 top: -150%;
@@ -115,7 +116,6 @@
                 100% { transform: rotate(30deg) translateY(100%); }
             }
 
-            /* Efecto Glitch y Neón */
             .glitch { position: relative; }
             .glitch::before, .glitch::after {
                 content: attr(data-text);
@@ -127,23 +127,12 @@
             }
             .glitch::after {
                 left: -2px; text-shadow: -2px 0 #00e5ff; clip: rect(85px, 550px, 140px, 0);
-                animation: glitch-anim 2.5s infinite linear alternate-reverse;
+                animation: glitch-anim-2 2.5s infinite linear alternate-reverse;
             }
             
-            @keyframes glitch-anim {
-                0% { clip: rect(10px, 9999px, 86px, 0); }
-                20% { clip: rect(72px, 9999px, 14px, 0); }
-                40% { clip: rect(32px, 9999px, 98px, 0); }
-                60% { clip: rect(87px, 9999px, 12px, 0); }
-                80% { clip: rect(4px, 9999px, 64px, 0); }
-                100% { clip: rect(62px, 9999px, 32px, 0); }
-            }
             @keyframes glitch-anim-2 {
                 0% { clip: rect(65px, 9999px, 100px, 0); }
                 20% { clip: rect(12px, 9999px, 45px, 0); }
-                40% { clip: rect(89px, 9999px, 23px, 0); }
-                60% { clip: rect(45px, 9999px, 76px, 0); }
-                80% { clip: rect(21px, 9999px, 98px, 0); }
                 100% { clip: rect(9px, 9999px, 54px, 0); }
             }
             @keyframes neon-flicker {
@@ -153,12 +142,9 @@
                 20%, 24%, 55% { filter: drop-shadow(0 0 2px #ff2e93); opacity: 0.6; }
             }
             .animate-neon-flicker { animation: neon-flicker 4s infinite alternate; }
-
-            /* Logo Baulia Text Color */
             .baulia-text { fill: #ffffff; transition: fill 0.5s ease; }
         }
 
-        /* Ocultar scrollbar visualmente */
         ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
@@ -168,14 +154,11 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // ==========================================
-        // COMPONENTE: CUENTA REGRESIVA MAGICAL
-        // ==========================================
+        // --- COMPONENTE: CUENTA REGRESIVA ---
         const Countdown = () => {
             const calculateTimeLeft = () => {
                 const difference = +new Date("2026-04-12T12:00:00") - +new Date();
                 let timeLeft = {};
-
                 if (difference > 0) {
                     timeLeft = {
                         DÍAS: Math.floor(difference / (1000 * 60 * 60 * 24)),
@@ -192,26 +175,20 @@
             const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
             useEffect(() => {
-                const timer = setTimeout(() => {
-                    setTimeLeft(calculateTimeLeft());
-                }, 1000);
+                const timer = setTimeout(() => setTimeLeft(calculateTimeLeft()), 1000);
                 return () => clearTimeout(timer);
             });
 
             return (
-                <div className="glass-panel-highlight p-6 md:p-8 rounded-3xl box-glow-purple flex flex-col items-center w-full max-w-lg mx-auto relative overflow-hidden group">
-                    <div className="absolute -right-6 -top-6 opacity-10 font-cyber text-9xl text-neonPurple transform rotate-12 group-hover:scale-110 transition-transform duration-700 z-0">
-                        ✦
-                    </div>
-
+                <div className="glass-panel p-6 md:p-8 rounded-3xl box-glow-purple flex flex-col items-center w-full max-w-lg mx-auto relative overflow-hidden group">
+                    <div className="absolute -right-6 -top-6 opacity-10 font-cyber text-9xl text-neonPurple transform rotate-12 group-hover:scale-110 transition-transform duration-700 z-0">✦</div>
                     <h2 className="font-cyber text-neonPink text-sm md:text-base tracking-[0.3em] uppercase mb-6 text-center z-10 relative">
                         <span className="text-skyBlue text-glow-blue">Tiempo para el Despliegue</span>
                     </h2>
-                    
                     <div className="flex gap-4 md:gap-8 justify-center w-full z-10 relative">
                         {Object.keys(timeLeft).map((interval, i) => (
                             <div key={i} className="flex flex-col items-center w-16 md:w-20">
-                                <span className="font-cyber text-4xl md:text-5xl text-white text-glow-purple">
+                                <span className="font-cyber text-4xl md:text-5xl text-white text-glow-purple font-black">
                                     {timeLeft[interval].toString().padStart(2, '0')}
                                 </span>
                                 <span className="font-cyber text-skyBlue text-[10px] md:text-xs tracking-widest mt-2 border-t border-neonPurple/50 pt-2 w-full text-center">
@@ -224,41 +201,25 @@
             );
         };
 
-        // ==========================================
-        // COMPONENTE: TARJETA DE UBICACIÓN TÁCTICA
-        // ==========================================
+        // --- COMPONENTE: TARJETA DE UBICACIÓN ---
         const LocationCard = ({ type, title, time, address, mainMapUrl, isReception }) => {
             const calLink = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Misión+K-Pop:+Keyli+(${type})&dates=20260412T180000Z/20260413T020000Z&details=Únete+al+escuadrón+en+esta+batalla+sónica.&location=${encodeURIComponent(address)}`;
-
             return (
                 <div className={`glass-panel p-6 md:p-8 rounded-3xl relative overflow-hidden group transition-all duration-500 hover:-translate-y-2 ${isReception ? 'hover:box-glow-purple' : 'hover:box-glow-blue'}`}>
                     <div className={`absolute top-0 left-0 w-1.5 h-full ${isReception ? 'bg-neonPurple shadow-[0_0_10px_#b724ff]' : 'bg-skyBlue shadow-[0_0_10px_#00e5ff]'} z-10`}></div>
-                    
                     <div className="pl-4 relative z-10">
                         <div className="flex justify-between items-start mb-2">
                             <h3 className="text-2xl md:text-3xl font-cyber text-white uppercase tracking-wide">{title}</h3>
-                            <span className={`font-cyber text-sm px-3 py-1 rounded-full border ${isReception ? 'border-neonPurple text-neonPurple bg-neonPurple/10' : 'border-skyBlue text-skyBlue bg-skyBlue/10'}`}>
-                                {time}
-                            </span>
+                            <span className={`font-cyber text-sm px-3 py-1 rounded-full border ${isReception ? 'border-neonPurple text-neonPurple bg-neonPurple/10' : 'border-skyBlue text-skyBlue bg-skyBlue/10'}`}>{time}</span>
                         </div>
-                        
-                        <p className={`font-cyber text-xs tracking-[0.2em] mb-3 uppercase font-bold ${isReception ? 'text-neonPink' : 'text-neonPurple'}`}>
-                            {type}
-                        </p>
-                        <p className="font-body text-gray-200 text-lg md:text-xl leading-relaxed mb-8 border-l-2 border-white/10 pl-3">
-                            {address}
-                        </p>
-
+                        <p className={`font-cyber text-xs tracking-[0.2em] mb-3 uppercase font-bold ${isReception ? 'text-neonPink' : 'text-neonPurple'}`}>{type}</p>
+                        <p className="font-body text-gray-200 text-lg md:text-xl leading-relaxed mb-8 border-l-2 border-white/10 pl-3">{address}</p>
                         <div className="flex flex-col gap-3">
-                            <a href={mainMapUrl} target="_blank" rel="noopener noreferrer" 
-                               className={`flex items-center justify-center gap-3 w-full py-3.5 rounded-xl uppercase font-cyber text-sm tracking-widest transition-all duration-300 
-                               ${isReception ? 'bg-neonPurple text-white hover:bg-white hover:text-neonPurple hover:shadow-[0_0_20px_#b724ff]' : 'bg-skyBlue text-cyberDark hover:bg-white hover:text-skyBlue hover:shadow-[0_0_20px_#00e5ff]'}`}>
+                            <a href={mainMapUrl} target="_blank" rel="noopener noreferrer" className={`flex items-center justify-center gap-3 w-full py-3.5 rounded-xl uppercase font-cyber text-sm tracking-widest transition-all duration-300 ${isReception ? 'bg-neonPurple text-white hover:bg-white hover:text-neonPurple hover:shadow-[0_0_20px_#b724ff]' : 'bg-skyBlue text-cyberDark hover:bg-white hover:text-skyBlue hover:shadow-[0_0_20px_#00e5ff]'}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
                                 Fijar Coordenadas
                             </a>
-
-                            <a href={calLink} target="_blank" rel="noopener noreferrer"
-                               className="flex items-center justify-center gap-2 w-full py-3 rounded-xl uppercase font-cyber text-xs tracking-widest bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-neonPink transition-colors">
+                            <a href={calLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full py-3 rounded-xl uppercase font-cyber text-xs tracking-widest bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-neonPink transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                                 Sincronizar Calendario
                             </a>
@@ -268,12 +229,9 @@
             );
         };
 
-        // ==========================================
-        // COMPONENTE: QR VIP PASS
-        // ==========================================
+        // --- COMPONENTE: QR VIP PASS ---
         const VIPPassCard = ({ guest }) => {
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=https://panel.baulia.com/checkin/${guest.id}&margin=10`;
-
             const downloadQR = async () => {
                 try {
                     const response = await fetch(qrUrl);
@@ -286,29 +244,17 @@
                     link.click();
                     document.body.removeChild(link);
                     window.URL.revokeObjectURL(url);
-                } catch (error) {
-                    console.error("Error al descargar el QR", error);
-                    window.open(qrUrl, '_blank');
-                }
+                } catch (error) { window.open(qrUrl, '_blank'); }
             };
-
             return (
                 <div className="glass-panel p-6 rounded-3xl flex flex-col items-center justify-center gap-4 relative overflow-hidden group box-glow-purple border-neonPurple/40 w-full max-w-sm">
                     <div className="absolute inset-0 bg-gradient-to-t from-neonPink/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
-                    
-                    <h3 className="font-cyber text-lg md:text-xl text-white uppercase tracking-widest text-center z-10">
-                        {guest.name}
-                    </h3>
+                    <h3 className="font-cyber text-lg md:text-xl text-white uppercase tracking-widest text-center z-10">{guest.name}</h3>
                     <p className="font-cyber text-[10px] text-skyBlue tracking-widest uppercase mb-2 z-10">Acceso VIP Confirmado</p>
-                    
                     <div className="bg-white p-2 rounded-xl shadow-[0_0_20px_rgba(0,229,255,0.4)] z-10 transition-transform duration-300 group-hover:scale-105">
                         <img src={qrUrl} alt={`QR Code for ${guest.name}`} className="w-48 h-48 object-contain" crossOrigin="anonymous" />
                     </div>
-
-                    <button 
-                        onClick={downloadQR}
-                        className="mt-4 flex items-center justify-center gap-2 px-6 py-2 rounded-full uppercase font-cyber text-xs tracking-widest transition-all duration-300 bg-white/10 border border-white/20 text-white hover:bg-neonPink hover:border-neonPink hover:shadow-[0_0_15px_rgba(255,46,147,0.5)] z-10"
-                    >
+                    <button onClick={downloadQR} className="mt-4 flex items-center justify-center gap-2 px-6 py-2 rounded-full uppercase font-cyber text-xs tracking-widest transition-all duration-300 bg-white/10 border border-white/20 text-white hover:bg-neonPink hover:border-neonPink hover:shadow-[0_0_15px_rgba(255,46,147,0.5)] z-10">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         Guardar en Galería
                     </button>
@@ -316,34 +262,27 @@
             );
         };
 
-        // ==========================================
-        // APLICACIÓN PRINCIPAL (Gestión de Fases SPA)
-        // ==========================================
+        // --- APLICACIÓN PRINCIPAL ---
         const App = () => {
             const [guestUid, setGuestUid] = useState(null);
             const [guestName, setGuestName] = useState(null);
             const [lang, setLang] = useState('ES');
             const [isPlaying, setIsPlaying] = useState(false);
-            // Vistas: 'hero' -> 'briefing' -> 'arena'
             const [currentView, setCurrentView] = useState('hero'); 
             const [briefingProgress, setBriefingProgress] = useState(0);
-            
-            // ESTADOS RSVP CRÍTICOS
             const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
             const [isConfirmed, setIsConfirmed] = useState(false);
             const [subGuests, setSubGuests] = useState([]);
             const [isSimulatingLoad, setIsSimulatingLoad] = useState(false);
-
             const audioRef = useRef(null);
             const EVENT_ID = 'prueba-htsj';
 
-            // PROTECCIÓN ANTI-ROBO (CRÍTICA)
+            // Protección Anti-Robo
             useEffect(() => {
                 const preventDefault = (e) => e.preventDefault();
                 document.addEventListener('contextmenu', preventDefault);
                 document.addEventListener('selectstart', preventDefault);
                 document.addEventListener('dragstart', preventDefault);
-
                 return () => {
                     document.removeEventListener('contextmenu', preventDefault);
                     document.removeEventListener('selectstart', preventDefault);
@@ -351,173 +290,90 @@
                 };
             }, []);
 
-            // OBTENER INVITADO
+            // Fetch inteligente
             useEffect(() => {
                 const urlParams = new URLSearchParams(window.location.search);
                 const u = urlParams.get('u');
                 if (u) {
                     setGuestUid(u);
-                    const firestoreUrl = `https://firestore.googleapis.com/v1/projects/panel-de-control-intelig-db278/databases/(default)/documents/eventos/${EVENT_ID}/invitados/${u}`;
-                    fetch(firestoreUrl)
-                        .then(response => response.ok ? response.json() : null)
-                        .then(data => {
-                            if (data?.fields?.name?.stringValue) setGuestName(data.fields.name.stringValue);
-                            
-                            if (data?.fields?.confirmed?.booleanValue === true) {
-                                setIsConfirmed(true);
-                            }
-                        }).catch(e => console.error("Error Firebase:", e));
+                    fetch(`https://firestore.googleapis.com/v1/projects/panel-de-control-intelig-db278/databases/(default)/documents/eventos/${EVENT_ID}/invitados/${u}`)
+                        .then(r => r.ok ? r.json() : null)
+                        .then(d => {
+                            if (d?.fields?.name?.stringValue) setGuestName(d.fields.name.stringValue);
+                            if (d?.fields?.confirmed?.booleanValue === true) setIsConfirmed(true);
+                        }).catch(e => console.error(e));
                 }
             }, []);
 
-            // ==========================================
-            // LÓGICA DE CIERRE AUTOMÁTICO RSVP (CRÍTICA)
-            // ==========================================
+            // Escucha PostMessage
             useEffect(() => {
-                const handleMessage = (event) => {
-                    let messageStr = '';
-                    if (typeof event.data === 'string') {
-                        messageStr = event.data;
-                    } else if (typeof event.data === 'object') {
-                        try { messageStr = JSON.stringify(event.data); } catch(e) {}
-                    }
-
-                    if (messageStr.includes('rsvp_success')) {
-                        console.log("¡RSVP Exitoso Detectado!");
+                const handleMessage = (e) => {
+                    let m = typeof e.data === 'string' ? e.data : (typeof e.data === 'object' ? JSON.stringify(e.data) : '');
+                    if (m.includes('rsvp_success')) {
                         setIsSimulatingLoad(true);
-
                         setTimeout(() => {
-                            setIsRsvpModalOpen(false);
-                            setIsConfirmed(true);
-                            setIsSimulatingLoad(false);
-
-                            // DATOS FICTICIOS PARA EL CARRUSEL DE QR
-                            const fakeConfirmedSubGuests = [
-                                { id: `${guestUid || 'guest'}-1`, name: guestName || 'Agente Principal' },
-                                { id: `${guestUid || 'guest'}-2`, name: 'Acompañante VIP' }
-                            ];
-                            setSubGuests(fakeConfirmedSubGuests);
-
-                            // Scroll suave hacia los QRs
-                            setTimeout(() => {
-                                document.getElementById('qr-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            }, 300);
-
+                            setIsRsvpModalOpen(false); setIsConfirmed(true); setIsSimulatingLoad(false);
+                            setSubGuests([{ id: `${guestUid}-1`, name: guestName || 'Agente VIP' }, { id: `${guestUid}-2`, name: 'Acompañante VIP' }]);
+                            setTimeout(() => document.getElementById('qr-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
                         }, 2000);
                     }
                 };
-
                 window.addEventListener('message', handleMessage);
                 return () => window.removeEventListener('message', handleMessage);
             }, [guestName, guestUid]);
 
             const toggleAudio = () => {
-                if (isPlaying) {
-                    audioRef.current.pause();
-                } else {
-                    audioRef.current.play().catch(e => console.log("Interacción requerida", e));
-                }
+                if (isPlaying) audioRef.current.pause(); else audioRef.current.play().catch(e => {});
                 setIsPlaying(!isPlaying);
             };
 
-            const toggleLang = () => setLang(prev => prev === 'ES' ? 'EN' : 'ES');
-
-            // INICIAR SECUENCIA DE BRIEFING Y ANIMACIÓN DE CARGA
             const startBriefingSequence = () => {
                 setCurrentView('briefing');
-                
-                // Reproducir audio si no está sonando
-                if (!isPlaying && audioRef.current) {
-                    audioRef.current.play()
-                        .then(() => setIsPlaying(true))
-                        .catch(e => console.log("Auto-play prevenido", e));
-                }
-
-                // Simular carga de barra de progreso
+                if (!isPlaying && audioRef.current) audioRef.current.play().then(() => setIsPlaying(true)).catch(e => {});
                 let progressValue = 0;
                 const interval = setInterval(() => {
-                    progressValue += Math.floor(Math.random() * 15) + 5; // Salto aleatorio entre 5 y 20
+                    progressValue += Math.floor(Math.random() * 8) + 2; 
                     if (progressValue >= 100) {
                         progressValue = 100;
                         clearInterval(interval);
-                        // Transición a la arena después de llegar al 100%
-                        setTimeout(() => {
-                            setCurrentView('arena');
-                        }, 1500);
+                        setTimeout(() => setCurrentView('arena'), 1800);
                     }
                     setBriefingProgress(progressValue);
-                }, 400); // Velocidad de la carga
+                }, 350); 
             };
 
-            const openRsvpModal = () => setIsRsvpModalOpen(true);
-            const closeRsvpModal = () => setIsRsvpModalOpen(false);
+            const isFamily = guestName?.toLowerCase().includes('familia') || guestName?.includes(' y ') || guestName?.includes(' & ');
 
             return (
                 <div className="relative w-full h-full overflow-hidden">
-                    
                     <audio ref={audioRef} src="cancion.mp3" loop preload="auto"></audio>
-
-                    {/* FONDO DINÁMICO */}
+                    
+                    {/* FONDO DINÁMICO (Usando rutas estrictamente relativas) */}
                     <div className="fixed inset-0 z-0 overflow-hidden bg-cyberDark pointer-events-none">
-                        <div 
-                            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80 animate-breathe"
-                            style={{ backgroundImage: `url('kpopsfondo.svg'), url('/kpop-keily/kpopfondo.svg')` }}
-                        ></div>
-                        <div 
-                            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 animate-breathe mix-blend-screen saturate-200 blur-[6px]"
-                            style={{ backgroundImage: `url('kpopsfondo.svg'), url('/kpop-keily/kpopfondo.svg')` }}
-                        ></div>
+                        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80 animate-breathe" style={{ backgroundImage: `url('./kpopsfondo.svg')` }}></div>
+                        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 animate-breathe mix-blend-screen saturate-200 blur-[6px]" style={{ backgroundImage: `url('./kpopsfondo.svg')` }}></div>
                         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0514]/40 via-[#0a0514]/70 to-[#0a0514] z-0"></div>
                     </div>
 
-                    {/* Navbar Superior Fija */}
                     <div className="absolute top-0 left-0 w-full p-6 flex justify-end z-50 pointer-events-none">
-                        <button 
-                            onClick={toggleLang}
-                            className="pointer-events-auto text-xs font-cyber tracking-[0.3em] text-white/50 hover:text-skyBlue transition-all duration-300 backdrop-blur-sm px-3 py-1 border border-white/10 rounded-full hover:border-skyBlue"
-                        >
-                            {lang === 'ES' ? 'EN / ES' : 'ES / EN'}
-                        </button>
+                        <button onClick={() => setLang(l => l === 'ES' ? 'EN' : 'ES')} className="pointer-events-auto text-xs font-cyber tracking-[0.3em] text-white/50 hover:text-skyBlue backdrop-blur-sm px-3 py-1 border border-white/10 rounded-full">{lang === 'ES' ? 'EN / ES' : 'ES / EN'}</button>
                     </div>
 
-                    {/* RENDERIZADO CONDICIONAL DE VISTAS (SPA) */}
                     <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden">
-                        
-                        {/* ============================== */}
-                        {/* VISTA 1: HERO / PORTADA        */}
-                        {/* ============================== */}
                         {currentView === 'hero' && (
                             <main className="relative flex flex-col items-center justify-center min-h-full px-6 text-center animate-fade-in py-12">
                                 
-                                {/* Logo SVG (Z-20 para estar encima de todo) */}
                                 <div className="mb-8 w-40 h-40 md:w-56 md:h-56 relative flex items-center justify-center z-20">
-                                    <img 
-                                        src="kpoplogo.svg" 
-                                        alt="Logo Keyli" 
-                                        className="w-full h-full object-contain relative z-10 animate-neon-flicker pointer-events-none"
-                                        onError={(e) => {
-                                            if (!e.target.dataset.retried) {
-                                                e.target.dataset.retried = true;
-                                                e.target.src = '/kpop-keily/kpoplogo.svg';
-                                            }
-                                        }}
-                                    />
+                                    <img src="./kpoplogo.svg" alt="Logo" className="w-full h-full object-contain relative z-10 animate-neon-flicker pointer-events-none" />
                                 </div>
-
-                                {/* SILUETA K-POP GUERRERAS (Fondo Inferior, detrás de los textos) */}
+                                
+                                {/* SILUETA INYECTADA CON RUTA RELATIVA ESTRICTA */}
                                 <img 
-                                    src="kpopsilueta.svg" 
+                                    src="./kpopsilueta.svg" 
                                     alt="Silueta Guerreras K-Pop" 
                                     className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-5xl h-auto max-h-[calc(100vh-320px)] object-contain object-bottom z-0 pointer-events-none opacity-90 drop-shadow-[0_0_25px_rgba(183,36,255,0.4)]"
-                                    onError={(e) => {
-                                        if (!e.target.dataset.retried) {
-                                            e.target.dataset.retried = true;
-                                            e.target.src = '/kpop-keily/kpopsilueta.svg';
-                                        }
-                                    }}
                                 />
 
-                                {/* Saludo VIP Operativo */}
                                 <div className="h-16 flex items-center justify-center w-full mb-2 relative z-10">
                                     {guestName && (
                                         <div className="glass-panel px-6 py-2 rounded-full border-neonPink/30">
@@ -528,249 +384,103 @@
                                         </div>
                                     )}
                                 </div>
-
-                                {/* Título Principal */}
-                                <h1 className="text-6xl md:text-8xl font-cyber font-black text-white text-glow-pink glitch mb-4 uppercase tracking-wider select-none relative z-10" data-text="KEYLI">
-                                    KEYLI
-                                </h1>
-
-                                <p className="font-cyber text-neonPurple tracking-[0.5em] font-bold text-sm md:text-lg uppercase mt-2 mb-12 text-glow-purple select-none relative z-10">
-                                    Demon Hunters Tour
-                                </p>
-
-                                {/* Botón de Acción Principal */}
-                                <button 
-                                    onClick={startBriefingSequence}
-                                    className="group relative px-10 py-4 font-cyber text-sm md:text-base tracking-[0.2em] uppercase text-white overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.03] shadow-[0_0_20px_rgba(255,46,147,0.4)] z-10"
-                                >
+                                <h1 className="text-6xl md:text-8xl font-cyber font-black text-white text-glow-pink glitch mb-4 uppercase tracking-wider relative z-10" data-text="KEYLI">KEYLI</h1>
+                                <p className="font-cyber text-neonPurple tracking-[0.5em] font-bold text-sm md:text-lg uppercase mt-2 mb-12 text-glow-purple relative z-10">Demon Hunters Tour</p>
+                                <button onClick={startBriefingSequence} className="group relative px-10 py-4 font-cyber text-sm md:text-base tracking-[0.2em] uppercase text-white overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.03] shadow-[0_0_20px_rgba(255,46,147,0.4)] z-10">
                                     <span className="absolute inset-0 w-full h-full bg-neonPink group-hover:bg-neonPurple transition-colors duration-500"></span>
-                                    <span className="absolute inset-0 w-full h-full border-2 border-white/30 group-hover:border-white z-10 rounded-xl"></span>
-                                    <span className="relative z-20 font-bold flex items-center gap-3">
-                                        Acceder a la Misión
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                    </span>
+                                    <span className="absolute inset-0 w-full h-full border-2 border-white/30 z-10 rounded-xl"></span>
+                                    <span className="relative z-20 font-bold flex items-center gap-3">Acceder a la Misión <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></span>
                                 </button>
                             </main>
                         )}
 
-                        {/* ============================== */}
-                        {/* VISTA 1.5: ANIMACIÓN DE CARGA  */}
-                        {/* ============================== */}
                         {currentView === 'briefing' && (
-                            <section className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-cyberDark/95 backdrop-blur-xl p-6 animate-fade-in">
-                                
-                                {/* Imagen de las Guerreras K-Pop Flotando */}
-                                <div className="relative w-64 h-64 md:w-80 md:h-80 mb-8 animate-breathe flex justify-center items-center">
-                                    <div className="absolute inset-0 bg-neonPurple opacity-30 blur-[60px] rounded-full"></div>
-                                    <img 
-                                        src="/kpop-keily/kpop.svg" 
-                                        alt="Escuadrón Demon Hunters" 
-                                        className="relative z-10 w-full h-full object-contain drop-shadow-[0_0_25px_rgba(255,46,147,0.6)]"
-                                        onError={(e) => {
-                                            // Fallback opcional por si la ruta estricta falla
-                                            if (!e.target.dataset.retried) {
-                                                e.target.dataset.retried = true;
-                                                e.target.src = 'kpop.svg';
-                                            } else {
-                                                e.target.style.display = 'none';
-                                            }
-                                        }}
-                                    />
-                                </div>
-
-                                {/* Mensaje de Bienvenida Temático */}
-                                <div className="text-center max-w-2xl mb-12">
-                                    <h2 className="font-cyber text-skyBlue text-xl md:text-3xl mb-4 tracking-widest uppercase text-glow-blue">
-                                        Enlace Neuronal Establecido
-                                    </h2>
-                                    <p className="font-body text-gray-200 text-lg md:text-xl leading-relaxed">
-                                        Saludos, {guestName ? <span className="text-neonPink font-bold">Agente {guestName}</span> : <span className="text-neonPink font-bold">Demon Hunter</span>}. 
-                                        Has sido elegid{lang === 'ES' ? 'o/a' : 'o'} por el alto mando por tu resonancia excepcional. 
-                                        La oscuridad se acerca, pero nuestra luz brillará más fuerte. Preparando coordenadas...
+                            <section className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-cyberDark/95 backdrop-blur-2xl p-6 animate-fade-in overflow-hidden">
+                                <div className="text-center max-w-2xl mb-6 relative z-20">
+                                    <h2 className="font-cyber text-skyBlue text-xl md:text-3xl mb-2 tracking-widest uppercase text-glow-blue">Enlace Neuronal</h2>
+                                    <p className="font-body text-gray-200 text-lg md:text-xl leading-tight">
+                                        {isFamily ? 'Bienvenidos' : 'Bienvenid' + (lang === 'ES' ? (guestName?.endsWith('a') ? 'a' : 'o') : 'o')},
                                     </p>
+                                    <p className="font-cursive text-4xl md:text-6xl text-neonPink text-glow-pink mt-2 blur-[0.3px]">{guestName || 'Demon Hunter'}</p>
                                 </div>
-
-                                {/* Barra de Progreso Cyberpunk */}
-                                <div className="w-full max-w-md bg-white/5 h-4 rounded-full overflow-hidden border border-white/10 relative p-[2px] shadow-[0_0_15px_rgba(0,229,255,0.2)]">
-                                    <div 
-                                        className="h-full bg-gradient-to-r from-neonPurple via-neonPink to-skyBlue rounded-full transition-all duration-300 ease-out relative"
-                                        style={{ width: `${briefingProgress}%` }}
-                                    >
-                                        <div className="absolute top-0 right-0 bottom-0 w-12 bg-white/60 blur-[4px] animate-pulse"></div>
-                                    </div>
+                                <div className="relative w-72 h-72 md:w-[500px] md:h-[500px] flex justify-center items-center group">
+                                    <div className="absolute inset-0 bg-neonPurple opacity-20 blur-[100px] rounded-full animate-energy-pulse"></div>
+                                    {/* SVG DE GUERRERAS CON RUTA RELATIVA */}
+                                    <img src="./kpop.svg" alt="Hunters" className="relative z-10 w-full h-full object-contain drop-shadow-[0_0_40px_rgba(255,46,147,0.7)] animate-float" />
                                 </div>
-                                
-                                {/* Estado del Sistema */}
-                                <div className="mt-6 font-cyber text-sm tracking-[0.3em] text-white/80 uppercase flex items-center gap-3">
-                                    {briefingProgress < 100 ? (
-                                        <>
-                                            <svg className="animate-spin h-5 w-5 text-skyBlue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                            Desencriptando Archivos: {briefingProgress}%
-                                        </>
-                                    ) : (
-                                        <span className="text-skyBlue text-glow-blue font-bold flex items-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                            ¡Acceso Concedido!
-                                        </span>
-                                    )}
+                                <div className="w-full max-w-md bg-white/5 h-4 rounded-full overflow-hidden border border-white/10 relative p-[2px] mt-8">
+                                    <div className="h-full bg-gradient-to-r from-neonPurple via-neonPink to-skyBlue rounded-full transition-all duration-300" style={{ width: `${briefingProgress}%` }}></div>
+                                </div>
+                                <div className="mt-4 font-cyber text-[10px] tracking-[0.4em] text-white/60 uppercase">
+                                    {briefingProgress < 100 ? `Iniciando despliegue de arena: ${briefingProgress}%` : '¡Acceso Concedido!'}
                                 </div>
                             </section>
                         )}
 
-                        {/* ============================== */}
-                        {/* VISTA 2: ARENA / DETALLES      */}
-                        {/* ============================== */}
                         {currentView === 'arena' && (
                             <section className="w-full max-w-4xl mx-auto px-4 pt-20 pb-8 min-h-full flex flex-col gap-10 animate-fade-in relative">
-                                
                                 <div className="flex items-center justify-between mb-2">
-                                    <button onClick={() => setCurrentView('hero')} className="text-white/50 hover:text-neonPink font-cyber text-xs flex items-center gap-2 uppercase tracking-widest transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                                        Abortar
-                                    </button>
+                                    <button onClick={() => setCurrentView('hero')} className="text-white/50 hover:text-neonPink font-cyber text-xs flex items-center gap-2 uppercase tracking-widest transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> Abortar</button>
                                 </div>
-
                                 <div className="text-center mb-2 relative z-10">
-                                    <h2 className="font-cyber text-3xl md:text-5xl text-white text-glow-blue uppercase tracking-widest mb-6 select-none">
-                                        Expediente Confidencial
-                                    </h2>
-                                    
+                                    <h2 className="font-cyber text-3xl md:text-5xl text-white text-glow-blue uppercase tracking-widest mb-6">Expediente Confidencial</h2>
                                     <div className="inline-flex items-center justify-center glass-panel px-6 py-3 rounded-full mb-8 border-neonPink/50 box-glow-pink">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neonPink mr-3 animate-pulse"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                        <span className="font-cyber text-white tracking-[0.1em] uppercase text-sm md:text-base font-bold select-none">
-                                            Sábado 12 de Abril, 12:00 Hrs
-                                        </span>
+                                        <span className="font-cyber text-white tracking-[0.1em] uppercase text-sm md:text-base font-bold">Sábado 12 de Abril, 12:00 Hrs</span>
                                     </div>
-
                                     <div className="glass-panel p-6 md:p-8 rounded-2xl border-l-4 border-l-skyBlue text-left relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 w-40 h-40 bg-neonPurple opacity-20 rounded-full blur-3xl z-0 pointer-events-none"></div>
-                                        <p className="font-cyber text-neonPink text-xs tracking-widest uppercase mb-3 relative z-10 select-none">Transmisión VIP Entrante:</p>
-                                        <p className="font-body text-gray-200 text-lg md:text-xl leading-relaxed relative z-10 select-none">
-                                            ¡Hola, Demon Hunter! ✨ Nuestra misión más importante está por comenzar y necesito a mi mejor escuadrón a mi lado. Prepara tu <span className="text-skyBlue font-bold text-glow-blue">lightstick</span>, ponte tu mejor outfit y acompáñame a llenar la arena de magia y mucho K-Pop. ¡La purificación no será igual sin ti! 💖
-                                        </p>
+                                        <div className="absolute top-0 right-0 w-40 h-40 bg-neonPurple opacity-20 rounded-full blur-3xl z-0"></div>
+                                        <p className="font-cyber text-neonPink text-xs tracking-widest uppercase mb-3 relative z-10">Mensaje del Alto Mando:</p>
+                                        <p className="font-body text-gray-200 text-lg md:text-xl leading-relaxed relative z-10">¡Hola, Demon Hunter! ✨ Nuestra misión más importante está por comenzar y necesito a mi mejor escuadrón a mi lado. Prepara tu <span className="text-skyBlue font-bold text-glow-blue">lightstick</span>, ponte tu mejor outfit y acompáñame a llenar la arena de magia y mucho K-Pop. ¡La purificación no será igual sin ti! 💖</p>
                                     </div>
-
                                     <div className="w-24 h-1 bg-neonPurple mx-auto mt-10 shadow-[0_0_15px_#b724ff]"></div>
                                 </div>
-
                                 <Countdown />
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-4">
-                                    <LocationCard 
-                                        type="Fase 1: Santuario de Purificación"
-                                        title="Iglesia Cristo Rey"
-                                        time="12:00 HRS"
-                                        address="Azcapotzalco S/N, Nueva Tacoteno, 96730 Minatitlán, Ver."
-                                        mainMapUrl="https://share.google/ULjxXyME7C7AmZ6Cy"
-                                        isReception={false}
-                                    />
-                                    <LocationCard 
-                                        type="Fase 2: Arena de Batalla (Concierto)"
-                                        title="Jardín Velin"
-                                        time="14:00 HRS"
-                                        address="Porfirio Díaz 16, 96770 Minatitlán, Ver."
-                                        mainMapUrl="https://share.google/wQTCLZ1dlSY7BYSYq"
-                                        isReception={true}
-                                    />
+                                    <LocationCard type="Fase 1: Santuario de Purificación" title="Iglesia Cristo Rey" time="12:00 HRS" address="Azcapotzalco S/N, Nueva Tacoteno, 96730 Minatitlán, Ver." mainMapUrl="https://share.google/ULjxXyME7C7AmZ6Cy" isReception={false} />
+                                    <LocationCard type="Fase 2: Arena de Batalla" title="Jardín Velin" time="14:00 HRS" address="Porfirio Díaz 16, 96770 Minatitlán, Ver." mainMapUrl="https://share.google/wQTCLZ1dlSY7BYSYq" isReception={true} />
                                 </div>
-
-                                {/* MURO SOCIAL Y FILTRO DE INSTAGRAM */}
                                 <div className="w-full max-w-lg mx-auto mt-4">
-                                    <div className="glass-panel p-6 md:p-8 rounded-3xl relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 w-40 h-40 bg-neonPink opacity-10 rounded-full blur-3xl z-0 pointer-events-none"></div>
-                                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-skyBlue opacity-10 rounded-full blur-3xl z-0 pointer-events-none"></div>
-                                        
-                                        <div className="relative z-10 text-center flex flex-col items-center">
-                                            <div className="w-16 h-16 rounded-full bg-neonPurple/10 border border-neonPurple mb-4 flex items-center justify-center box-glow-purple">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neonPink animate-pulse"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                                            </div>
-                                            
-                                            <h3 className="font-cyber text-xl md:text-2xl text-white uppercase tracking-widest mb-3 select-none">
-                                                Red de Inteligencia
-                                            </h3>
-                                            
-                                            <p className="font-body text-gray-300 text-lg mb-6 leading-relaxed select-none">
-                                                Captura el poder de la arena y sube tus fotos de la misión a Instagram usando el hashtag:
-                                                <br/>
-                                                <span className="font-cyber text-skyBlue text-xl md:text-2xl tracking-widest block mt-3 font-bold text-glow-blue">#MiEvento</span>
-                                            </p>
-
-                                            <a href="https://www.instagram.com/ar/288339596001004/" target="_blank" rel="noopener noreferrer" 
-                                               className="group relative flex items-center justify-center gap-3 w-full py-4 rounded-xl uppercase font-cyber text-sm tracking-widest transition-all duration-300 bg-gradient-to-r from-neonPurple to-neonPink text-white hover:shadow-[0_0_20px_rgba(255,46,147,0.6)] overflow-hidden">
-                                                <span className="absolute inset-0 w-full h-full bg-white/10 group-hover:bg-transparent transition-colors duration-300"></span>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="relative z-10"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                                                <span className="relative z-10 font-bold">Probar Filtro de Instagram</span>
-                                            </a>
+                                    <div className="glass-panel p-6 md:p-8 rounded-3xl relative overflow-hidden group text-center">
+                                        <div className="w-16 h-16 rounded-full bg-neonPurple/10 border border-neonPurple mb-4 flex items-center justify-center box-glow-purple mx-auto">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neonPink animate-pulse"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                                         </div>
+                                        <h3 className="font-cyber text-xl md:text-2xl text-white uppercase tracking-widest mb-3">Red de Inteligencia</h3>
+                                        <p className="font-body text-gray-300 text-lg mb-6 leading-relaxed">Captura el poder de la arena y sube tus fotos de la misión usando el hashtag:<br/><span className="font-cyber text-skyBlue text-xl md:text-2xl tracking-widest block mt-3 font-bold text-glow-blue">#MiEvento</span></p>
+                                        <a href="https://www.instagram.com/ar/288339596001004/" target="_blank" rel="noopener noreferrer" className="group relative flex items-center justify-center gap-3 w-full py-4 rounded-xl uppercase font-cyber text-sm tracking-widest transition-all duration-300 bg-gradient-to-r from-neonPurple to-neonPink text-white hover:shadow-[0_0_20px_rgba(255,46,147,0.6)] overflow-hidden">
+                                            <span className="absolute inset-0 w-full h-full bg-white/10 group-hover:bg-transparent transition-colors duration-300"></span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="relative z-10"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                                            <span className="relative z-10 font-bold">Probar Filtro de Instagram</span>
+                                        </a>
                                     </div>
                                 </div>
-
-                                {/* ========================================== */}
-                                {/* SECCIÓN RSVP / CÓDIGOS QR VIP (CRÍTICO)    */}
-                                {/* ========================================== */}
                                 <div className="mt-12 mb-8 w-full" id="qr-section">
                                     {!isConfirmed ? (
                                         <div className="flex flex-col items-center justify-center text-center">
-                                            
-                                            {/* Frase temática de Invitación a RSVP */}
                                             <div className="max-w-2xl mx-auto mb-8 px-4">
-                                                <p className="font-body text-gray-300 text-lg md:text-xl leading-relaxed">
-                                                    Tu energía es vital para el éxito de esta misión. Agradecemos infinitamente tu lealtad al escuadrón. 
-                                                    <span className="text-skyBlue font-bold block mt-3 text-glow-blue">¡Por favor, confirma tu despliegue para asegurar tu lugar en la arena!</span>
-                                                </p>
+                                                <p className="font-body text-gray-300 text-lg md:text-xl leading-relaxed">Tu energía es vital para el éxito de esta misión. Agradecemos infinitamente tu lealtad al escuadrón.<br/><span className="text-skyBlue font-bold block mt-3 text-glow-blue italic">¡Por favor, confirma tu despliegue para asegurar tu lugar en la arena!</span></p>
                                             </div>
-
-                                            {/* BOTÓN GIGANTE RSVP */}
-                                            <button 
-                                                onClick={openRsvpModal}
-                                                className="group relative px-12 py-6 md:py-8 font-cyber text-lg md:text-2xl tracking-[0.2em] uppercase text-white overflow-hidden rounded-2xl transition-all duration-500 hover:scale-[1.02] shadow-[0_0_30px_rgba(0,229,255,0.5)] w-full max-w-md border-2 border-skyBlue box-glow-blue"
-                                            >
+                                            <button onClick={() => setIsRsvpModalOpen(true)} className="group relative px-12 py-6 md:py-8 font-cyber text-lg md:text-2xl tracking-[0.2em] uppercase text-white overflow-hidden rounded-2xl transition-all duration-500 hover:scale-[1.02] shadow-[0_0_30px_rgba(0,229,255,0.5)] w-full max-w-md border-2 border-skyBlue box-glow-blue">
                                                 <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-skyBlue via-neonPurple to-neonPink opacity-20 group-hover:opacity-100 transition-opacity duration-500"></span>
-                                                <span className="absolute inset-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+')] opacity-30 group-hover:opacity-50"></span>
-                                                <span className="relative z-20 font-black flex items-center justify-center gap-4 text-glow-blue group-hover:text-white transition-colors">
-                                                    CONFIRMAR ASISTENCIA
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
-                                                </span>
+                                                <span className="relative z-20 font-black flex items-center justify-center gap-4 text-glow-blue group-hover:text-white transition-colors">CONFIRMAR ASISTENCIA <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></span>
                                             </button>
                                         </div>
                                     ) : (
-                                        // CARRUSEL DE PASES QR VIP
                                         <div className="flex flex-col items-center animate-fade-in w-full">
                                             <div className="text-center mb-8">
-                                                <h2 className="font-cyber text-3xl md:text-4xl text-neonPink uppercase tracking-widest text-glow-pink">
-                                                    Pases de Abordaje
-                                                </h2>
-                                                <p className="font-body text-gray-300 mt-2 select-none">Presenta este código en la entrada de la Arena.</p>
+                                                <h2 className="font-cyber text-3xl md:text-4xl text-neonPink uppercase tracking-widest text-glow-pink">Pases de Abordaje</h2>
+                                                <p className="font-body text-gray-300 mt-2">Presenta este código en la entrada de la Arena.</p>
                                             </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-3xl place-items-center">
-                                                {subGuests.map((guest, index) => (
-                                                    <VIPPassCard key={index} guest={guest} />
-                                                ))}
-                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-3xl place-items-center">{subGuests.map((g, i) => <VIPPassCard key={i} guest={g} />)}</div>
                                         </div>
                                     )}
                                 </div>
-
-                                {/* ========================================== */}
-                                {/* FOOTER Y FIRMA BAULIA                      */}
-                                {/* ========================================== */}
                                 <footer className="w-full text-center mt-12 border-t border-white/10 pt-8 relative z-20">
-                                    {!guestUid && (
-                                        <a href="https://panel.baulia.com" target="_blank" rel="noopener noreferrer" 
-                                           className="font-body text-gray-500 hover:text-skyBlue text-sm mb-6 inline-block transition-colors">
-                                            ¿Eres el anfitrión? Iniciar Sesión
-                                        </a>
-                                    )}
-                                    
+                                    {!guestUid && <a href="https://panel.baulia.com" target="_blank" rel="noopener noreferrer" className="font-body text-gray-500 hover:text-skyBlue text-sm mb-6 inline-block transition-colors">¿Eres el anfitrión? Iniciar Sesión</a>}
                                     <div className="flex flex-col items-center justify-center mt-2 opacity-80 hover:opacity-100 transition-opacity">
-                                        <span className="font-body text-xs text-gray-400 tracking-widest uppercase mb-2 block select-none">Tecnología por</span>
+                                        <span className="font-body text-xs text-gray-400 tracking-widest uppercase mb-2 block">Tecnología por</span>
                                         <a href="https://baulia.com" target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform duration-300 block w-auto h-10 mb-8">
-                                            {/* Logotipo Oficial SVG Baulia */}
                                             <svg viewBox="0 0 915 201" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ height: '40px', width: 'auto', overflow: 'visible', display: 'inline-block' }}>
-                                                <style>
-                                                    {`.baulia-text { fill: #ffffff; transition: fill 0.5s ease; } .baulia-diamond-animator { transform-origin: 100px 100px; transform: rotate(45deg) scale(0.8); transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); } .baulia-diamond-shape { fill: transparent; stroke: #D4AF37; stroke-width: 1.72px; transition: fill 0.5s ease, stroke-width 0.3s ease; } .baulia-b { fill: #D4AF37; transition: all 0.6s ease; transform-origin: 100px 100px; } svg:hover .baulia-diamond-animator { transform: rotate(135deg) scale(0.85); } svg:hover .baulia-diamond-shape { stroke-width: 3px; } svg:hover .baulia-b { transform: scale(1.05); fill: #FDF1A9; }`}
-                                                </style>
                                                 <g className="baulia-text">
                                                     <path d="M265.12,78.58h-.35c0-2.04-.75-3.8-2.24-5.25-1.5-1.46-3.27-2.18-5.31-2.18h-1.42l-.12-1.18h9.44v8.62ZM265.12,143.97v8.62h-9.44l.12-1.18h1.42c2.05,0,3.82-.73,5.31-2.18,1.49-1.46,2.24-3.21,2.24-5.25h.35ZM272.44,69.96v82.62h-7.67v-82.62h7.67ZM279.17,69.96c5.51,0,10.17.83,13.99,2.48,3.82,1.65,6.71,3.95,8.68,6.91,1.97,2.95,2.95,6.39,2.95,10.33,0,3.3-.63,6.2-1.89,8.68-1.26,2.48-2.87,4.49-4.84,6.02-1.97,1.53-4.05,2.62-6.26,3.25,4.17.63,7.77,2.01,10.8,4.13,3.03,2.12,5.35,4.78,6.96,7.97,1.61,3.19,2.42,6.75,2.42,10.68,0,4.41-1.06,8.28-3.19,11.63-2.12,3.35-5.25,5.94-9.38,7.79-4.13,1.85-9.11,2.77-14.93,2.77h-13.1c.08-1.42.12-2.83.12-4.25h12.51c4.09,0,7.55-.73,10.39-2.18,2.83-1.46,5-3.6,6.49-6.43,1.49-2.83,2.24-6.22,2.24-10.15,0-4.41-.85-7.99-2.54-10.74-1.69-2.75-3.88-4.84-6.55-6.26-2.68-1.42-5.57-2.38-8.68-2.89-3.11-.51-6.08-.77-8.91-.77v-1.06c1.81,0,3.82-.2,6.02-.59,2.2-.39,4.33-1.18,6.37-2.36,2.04-1.18,3.74-2.93,5.08-5.25,1.34-2.32,2.01-5.37,2.01-9.15,0-3.54-.65-6.57-1.95-9.09-1.3-2.52-3.23-4.43-5.78-5.72-2.56-1.3-5.72-1.95-9.5-1.95h-10.86c0-.08-.1-.41-.29-1-.2-.59-.49-1.51-.89-2.77h12.51Z"/>
                                                     <path d="M381.98,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM407.36,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.86-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM424,120.36v3.54h-36.95v-3.54h36.95ZM407.36,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM429.31,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95,1.18-1.3,1.34-3.13.47-5.49Z"/>
@@ -780,79 +490,39 @@
                                                     <path d="M846.33,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM871.71,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.87-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM888.35,120.36v3.54h-36.95v-3.54h36.95ZM871.71,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM893.67,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95s1.34-3.13.47-5.49Z"/>
                                                 </g>
                                                 <g className="baulia-diamond-animator">
-                                                    <rect className="baulia-diamond-shape" x=".86" y=".86" width="198.64" height="198.64" transform="translate(0 200.36) rotate(-90)" strokeMiterlimit="10" />
+                                                    <rect className="baulia-diamond-shape" x=".86" y=".86" width="198.64" height="198.64" transform="translate(0 200.36) rotate(-90)" strokeMiterlimit="10"/>
                                                 </g>
                                                 <path className="baulia-b" d="M116.87,94.54l6.01-.41c6.47,0,11.27,1.21,14.42,3.62,3.14,2.42,4.72,5.83,4.72,10.25s-2.01,9.59-6.01,15.51c-4.01,5.92-9.2,11.3-15.58,16.13h7.79c3.19,0,5.42-.14,6.7-.41,1.27-.27,2-.41,2.19-.41,1.27,0,1.91.68,1.91,2.05s-.91,2.1-2.73,2.19c-7.02,0-13.76-.09-20.23-.27-10.2,6.47-20.23,9.7-30.07,9.7-4.65,0-8.34-.87-11.07-2.6s-4.1-3.48-4.1-5.26.75-3.16,2.25-4.17c1.5-1,3.62-1.5,6.36-1.5,10.66,0,22.59.23,35.81.68,5.47-4.46,9.84-9.64,13.12-15.51,3.28-5.88,4.92-11.18,4.92-15.92,0-7.56-4.06-11.34-12.16-11.34-3.19,0-6.49.5-9.91,1.5-3.42,1-5.47,1.71-6.15,2.12s-1.12.61-1.3.61c-.55,0-.82-.39-.82-1.16s1.18-1.71,3.55-2.8c10.39-5.01,20.54-11.68,30.48-20.02,9.93-8.34,14.9-14.28,14.9-17.83,0-1.64-1.28-2.46-3.83-2.46-10.39.09-24.65,7.88-42.78,23.37-3.65,9.38-9.64,20.91-17.97,34.58-8.34,13.67-17.06,25.9-26.17,36.69-9.11,10.8-15.9,16.19-20.36,16.19-2.73,0-4.1-1.41-4.1-4.24,0-6.47,6.13-17.99,18.38-34.58,12.25-16.58,26.12-31.84,41.61-45.78,2.73-6.65,4.1-11.5,4.1-14.56s-.73-5.47-2.19-7.24c-1.46-1.78-3.6-3.08-6.42-3.9-4.46-1.18-9.18-1.78-14.14-1.78s-8.77.12-11.41.34c-2.64.23-5.86.68-9.64,1.37-3.78.68-6.86,1.87-9.22,3.55-2.37,1.69-3.55,3.83-3.55,6.42s1.27,4.6,3.83,6.01c2.55,1.41,5.67,2.39,9.36,2.94s7.36,1.14,11,1.78c3.64.64,6.74,1.89,9.29,3.76,2.55,1.87,3.83,4.49,3.83,7.86,0,.91-.2,1.37-.61,1.37s-.73-.14-.96-.41c-.23-.27-.62-.82-1.16-1.64-.82-1.18-2.03-2.1-3.62-2.73-1.59-.64-4.06-1.25-7.38-1.84-3.33-.59-6.47-1.23-9.43-1.91-2.96-.68-5.94-1.57-8.95-2.66-3.01-1.09-5.42-2.64-7.24-4.65-1.82-2-2.73-4.35-2.73-7.04s1.14-5.08,3.42-7.17c2.28-2.1,5.28-3.74,9.02-4.92,7.65-2.28,15.63-3.42,23.92-3.42,21.5,0,32.25,5.65,32.25,16.95,0,1-.23,2.51-.68,4.51,18.4-14.85,33.35-22.28,44.83-22.28,5.1,0,7.65,1.55,7.65,4.65,0,4.46-4.67,10.8-14.01,19-9.34,8.2-18.98,14.58-28.9,19.13ZM44.17,163.69c2.64,0,9.73-8.45,21.25-25.35,11.52-16.9,20.75-32.64,27.68-47.22-13.67,13.03-25.76,26.58-36.29,40.66-10.52,14.08-15.78,23.66-15.78,28.77,0,2.09,1.05,3.14,3.14,3.14ZM111,142.64l-24.74-.55c-7.02,0-10.52,1.05-10.52,3.14,0,1.18,1.18,2.3,3.55,3.35,2.37,1.05,5.1,1.57,8.2,1.57,8.11,0,15.94-2.5,23.51-7.52Z"/>
                                             </svg>
                                         </a>
                                     </div>
                                 </footer>
-
                             </section>
                         )}
                     </div>
 
-                    {/* REPRODUCTOR FLOTANTE */}
                     <div className="fixed bottom-6 left-6 z-40">
-                        <button 
-                            onClick={toggleAudio}
-                            className={`w-12 h-12 flex items-center justify-center rounded-full glass-panel transition-all duration-500 shadow-2xl ${isPlaying ? 'border-neonPurple box-glow-purple' : 'border-white/20 hover:border-neonPink hover:box-glow-pink'}`}
-                            aria-label="Reproducir música"
-                        >
-                            {isPlaying ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neonPurple animate-pulse-fast">
-                                    <rect x="6" y="4" width="4" height="16"></rect>
-                                    <rect x="14" y="4" width="4" height="16"></rect>
-                                </svg>
-                            ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white hover:text-skyBlue ml-1">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                            )}
+                        <button onClick={toggleAudio} className={`w-12 h-12 flex items-center justify-center rounded-full glass-panel transition-all duration-500 shadow-2xl ${isPlaying ? 'border-neonPurple box-glow-purple' : 'border-white/20 hover:border-neonPink hover:box-glow-pink'}`}>
+                            {isPlaying ? <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neonPurple animate-pulse-fast"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white hover:text-skyBlue ml-1"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>}
                         </button>
                     </div>
 
-                    {/* ========================================== */}
-                    {/* MODAL OVERLAY PARA RSVP (IFRAME ESTRICTO)  */}
-                    {/* ========================================== */}
                     {isRsvpModalOpen && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center">
-                            <div 
-                                className="absolute inset-0 bg-black/40 backdrop-blur-xl transition-opacity duration-300"
-                                onClick={closeRsvpModal}
-                            ></div>
-                            
-                            <div className="relative w-full max-w-lg mx-auto h-[90vh] flex flex-col items-center justify-center z-10 animate-fade-in p-4">
-                                
-                                <button 
-                                    onClick={closeRsvpModal}
-                                    className="absolute -top-4 md:-top-10 right-4 md:-right-4 w-10 h-10 bg-cyberDark/80 border border-neonPink/50 rounded-full flex items-center justify-center text-white hover:bg-neonPink hover:text-white transition-colors z-20 box-glow-pink"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                                </button>
-
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                            <div className="absolute inset-0 bg-black/40 backdrop-blur-xl" onClick={() => setIsRsvpModalOpen(false)}></div>
+                            <div className="relative w-full max-w-lg mx-auto h-[90vh] flex flex-col items-center justify-center z-10 animate-fade-in">
+                                <button onClick={() => setIsRsvpModalOpen(false)} className="absolute -top-10 right-0 w-10 h-10 bg-cyberDark/80 border border-neonPink/50 rounded-full flex items-center justify-center text-white hover:bg-neonPink transition-colors z-20 box-glow-pink"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
                                 {isSimulatingLoad ? (
-                                    <div className="flex flex-col items-center justify-center h-full gap-4">
-                                        <svg className="animate-spin-slow h-16 w-16 text-skyBlue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <p className="font-cyber text-neonPink tracking-widest uppercase animate-pulse text-glow-pink">Generando Pases VIP...</p>
-                                    </div>
+                                    <div className="flex flex-col items-center justify-center h-full gap-4"><svg className="animate-spin-slow h-16 w-16 text-skyBlue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p className="font-cyber text-neonPink tracking-widest uppercase animate-pulse text-glow-pink">Generando Pases VIP...</p></div>
                                 ) : (
-                                    <div className="w-full h-full glass-panel rounded-3xl overflow-hidden relative shadow-[0_0_30px_rgba(183,36,255,0.3)] border-t border-neonPurple/50">
+                                    <div className="w-full h-full glass-panel rounded-3xl overflow-hidden relative shadow-[0_0_30px_rgba(183,36,255,0.3)]">
                                         <div className="hologram-overlay"></div>
-                                        <iframe 
-                                            src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani`}
-                                            style={{ backgroundColor: 'transparent', touchAction: 'pan-y' }} 
-                                            className="w-full h-full max-h-[85vh] border-none relative z-10"
-                                        ></iframe>
+                                        <iframe src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani`} style={{ backgroundColor: 'transparent', touchAction: 'pan-y' }} className="w-full h-full max-h-[85vh] border-none relative z-10"></iframe>
                                     </div>
                                 )}
                             </div>
                         </div>
                     )}
-                    
                 </div>
             );
         };
