@@ -3,40 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invitación Digital | Alta Costura</title>
     
-    <!-- Fuentes de Google: Cinzel (Elegancia Clásica) y Montserrat (Modernidad Limpia) -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@200;300;400&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS (CDN) -->
+    <!-- Open Graph (WhatsApp Preview) -->
+    <meta property="og:title" content="Misión VIP - Keyli K-Pop Hunters" />
+    <meta property="og:description" content="Abre tu archivo de misión y confirma tu asistencia a la arena." />
+    <meta property="og:image" content="[LINK_DE_FOTO_PORTADA.jpg]" />
+    <meta property="og:url" content="https://baulia.com" />
+    <meta property="og:type" content="website" />
+
+    <title>Pase VIP - Keyli</title>
+
+    <!-- Google Fonts: Orbitron y Rajdhani -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Configuración de Tailwind -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Montserrat', 'sans-serif'],
-                        serif: ['Cinzel', 'serif'],
-                    },
                     colors: {
-                        luxuryDark: '#0a0510',
-                        neonAccent: '#ff2a85',
+                        neonPink: '#ff007f',
+                        neonCyan: '#00f3ff',
+                        demonRed: '#ff0a2f',
+                        cyberDark: '#05050A',
+                    },
+                    fontFamily: {
+                        cyber: ['Orbitron', 'sans-serif'],
+                        body: ['Rajdhani', 'sans-serif'],
                     },
                     animation: {
-                        'fade-in': 'fadeIn 1.5s ease-out forwards',
-                        'float': 'float 6s ease-in-out infinite',
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in': 'fadeIn 0.8s ease-out forwards',
+                        'breathe': 'breathe 15s ease-in-out infinite alternate',
                     },
                     keyframes: {
                         fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                            '0%': { opacity: '0', transform: 'scale(0.95) translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'scale(1) translateY(0)' }
                         },
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
+                        breathe: {
+                            '0%': { transform: 'scale(1)' },
+                            '100%': { transform: 'scale(1.08)' }
                         }
                     }
                 }
@@ -44,115 +54,408 @@
         }
     </script>
 
-    <!-- React y ReactDOM (CDN) -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel para compilar JSX en el navegador -->
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Estilos Personalizados Esenciales -->
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #000;
-            color: #fff;
-            overflow: hidden; /* Evita scroll en la pantalla de inicio */
+    <!-- Estilos Personalizados -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-glow-pink { text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f; }
+            .text-glow-cyan { text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff; }
+            .text-glow-red { text-shadow: 0 0 10px #ff0a2f, 0 0 30px #ff0a2f; }
+            
+            .box-glow-pink { box-shadow: 0 0 15px rgba(255, 0, 127, 0.5), inset 0 0 10px rgba(255, 0, 127, 0.2); }
+            .box-glow-red { box-shadow: 0 0 20px rgba(255, 10, 47, 0.4), inset 0 0 15px rgba(255, 10, 47, 0.1); }
+            
+            .glass-panel {
+                background: rgba(5, 5, 10, 0.7);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border: 1px solid rgba(0, 243, 255, 0.15);
+            }
+            .glass-panel-demon {
+                background: rgba(15, 0, 5, 0.7);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border: 1px solid rgba(255, 10, 47, 0.3);
+            }
+
+            /* Efecto Glitch y Neón */
+            .glitch { position: relative; }
+            .glitch::before, .glitch::after {
+                content: attr(data-text);
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.8;
+            }
+            .glitch::before {
+                left: 2px; text-shadow: -2px 0 #ff007f; clip: rect(24px, 550px, 90px, 0);
+                animation: glitch-anim-2 3s infinite linear alternate-reverse;
+            }
+            .glitch::after {
+                left: -2px; text-shadow: -2px 0 #00f3ff; clip: rect(85px, 550px, 140px, 0);
+                animation: glitch-anim 2.5s infinite linear alternate-reverse;
+            }
+            
+            @keyframes glitch-anim {
+                0% { clip: rect(10px, 9999px, 86px, 0); }
+                20% { clip: rect(72px, 9999px, 14px, 0); }
+                40% { clip: rect(32px, 9999px, 98px, 0); }
+                60% { clip: rect(87px, 9999px, 12px, 0); }
+                80% { clip: rect(4px, 9999px, 64px, 0); }
+                100% { clip: rect(62px, 9999px, 32px, 0); }
+            }
+            @keyframes glitch-anim-2 {
+                0% { clip: rect(65px, 9999px, 100px, 0); }
+                20% { clip: rect(12px, 9999px, 45px, 0); }
+                40% { clip: rect(89px, 9999px, 23px, 0); }
+                60% { clip: rect(45px, 9999px, 76px, 0); }
+                80% { clip: rect(21px, 9999px, 98px, 0); }
+                100% { clip: rect(9px, 9999px, 54px, 0); }
+            }
+            @keyframes neon-flicker {
+                0%, 18%, 22%, 25%, 53%, 57%, 100% {
+                    filter: drop-shadow(0 0 5px #ff007f) drop-shadow(0 0 15px #ff007f) drop-shadow(0 0 30px #00f3ff); opacity: 1;
+                }
+                20%, 24%, 55% { filter: drop-shadow(0 0 2px #ff007f); opacity: 0.6; }
+            }
+            .animate-neon-flicker { animation: neon-flicker 4s infinite alternate; }
         }
 
-        /* Efecto de cristal esmerilado de lujo */
-        .glass-panel {
-            background: rgba(10, 5, 16, 0.4);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 
-                        inset 0 0 20px rgba(255, 42, 133, 0.05); /* Toque sutil del neón */
-        }
-
-        /* Ocultar barra de scroll si se habilita más adelante */
-        ::-webkit-scrollbar {
-            width: 0px;
-            background: transparent;
-        }
+        /* Ocultar scrollbar visualmente */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="bg-cyberDark text-white font-body selection:bg-demonRed selection:text-white overflow-hidden h-screen w-screen">
+    <div id="root" class="h-full w-full"></div>
 
     <script type="text/babel">
-        const App = () => {
-            // Estado para la interacción inicial
-            const [isOpened, setIsOpened] = React.useState(false);
+        const { useState, useEffect, useRef } = React;
 
-            const handleOpen = () => {
-                setIsOpened(true);
-                // Aquí en el futuro podemos agregar lógica para mostrar más contenido
-                console.log("Invitación desbloqueada.");
+        // ==========================================
+        // COMPONENTE: CUENTA REGRESIVA REPARADA
+        // ==========================================
+        const Countdown = () => {
+            const calculateTimeLeft = () => {
+                // FECHA CORREGIDA: 12 de Abril del 2026 (Asegurando que sea a futuro)
+                const difference = +new Date("2026-04-12T12:00:00") - +new Date();
+                let timeLeft = {};
+
+                if (difference > 0) {
+                    timeLeft = {
+                        DÍAS: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                        HRS: Math.floor((difference / (1000 * 60 * 60)) % 24),
+                        MIN: Math.floor((difference / 1000 / 60) % 60),
+                        SEG: Math.floor((difference / 1000) % 60)
+                    };
+                } else {
+                    timeLeft = { DÍAS: 0, HRS: 0, MIN: 0, SEG: 0 };
+                }
+                return timeLeft;
+            };
+
+            const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
+            useEffect(() => {
+                const timer = setTimeout(() => {
+                    setTimeLeft(calculateTimeLeft());
+                }, 1000);
+                return () => clearTimeout(timer);
+            });
+
+            return (
+                <div className="glass-panel-demon p-6 md:p-8 rounded-2xl box-glow-red flex flex-col items-center w-full max-w-lg mx-auto relative overflow-hidden group">
+                    {/* Elemento de advertencia en el fondo */}
+                    <div className="absolute -right-10 -top-10 opacity-5 font-cyber text-9xl text-demonRed transform rotate-12 group-hover:scale-110 transition-transform duration-700">
+                        ⚠
+                    </div>
+
+                    <h2 className="font-cyber text-demonRed text-sm md:text-base tracking-[0.3em] uppercase mb-6 text-center z-10">
+                        <span className="text-white">Despliegue Táctico En:</span><br/>Sábado 12 de Abril, 12:00 Hrs
+                    </h2>
+                    
+                    <div className="flex gap-4 md:gap-8 justify-center w-full z-10">
+                        {Object.keys(timeLeft).map((interval, i) => (
+                            <div key={i} className="flex flex-col items-center w-16 md:w-20">
+                                <span className="font-cyber text-4xl md:text-5xl text-white text-glow-red">
+                                    {timeLeft[interval].toString().padStart(2, '0')}
+                                </span>
+                                <span className="font-cyber text-neonCyan text-[10px] md:text-xs tracking-widest mt-2 border-t border-demonRed/50 pt-2 w-full text-center">
+                                    {interval}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // COMPONENTE: TARJETA DE UBICACIÓN TÁCTICA
+        // ==========================================
+        const LocationCard = ({ type, title, time, address, mainMapUrl, isReception }) => {
+            const calLink = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Misión+K-Pop:+Keyli+(${type})&dates=20260412T180000Z/20260413T020000Z&details=Únete+al+escuadrón+en+esta+batalla+sónica.&location=${encodeURIComponent(address)}`;
+
+            return (
+                <div className={`glass-panel p-6 md:p-8 rounded-2xl relative overflow-hidden group transition-all duration-500 hover:-translate-y-2 ${isReception ? 'hover:box-glow-red border-demonRed/30' : 'hover:box-glow-cyan border-neonCyan/30'}`}>
+                    {/* Acento lateral Cyberpunk */}
+                    <div className={`absolute top-0 left-0 w-1.5 h-full ${isReception ? 'bg-demonRed shadow-[0_0_10px_#ff0a2f]' : 'bg-neonCyan shadow-[0_0_10px_#00f3ff]'}`}></div>
+                    
+                    <div className="pl-4">
+                        <div className="flex justify-between items-start mb-2">
+                            <h3 className="text-2xl md:text-3xl font-cyber text-white uppercase tracking-wide">{title}</h3>
+                            <span className={`font-cyber text-sm px-3 py-1 rounded border ${isReception ? 'border-demonRed text-demonRed' : 'border-neonCyan text-neonCyan'}`}>
+                                {time}
+                            </span>
+                        </div>
+                        
+                        <p className={`font-cyber text-xs tracking-[0.2em] mb-3 uppercase font-bold ${isReception ? 'text-neonPink' : 'text-neonCyan'}`}>
+                            {type}
+                        </p>
+                        <p className="font-body text-gray-300 text-lg md:text-xl leading-relaxed mb-8 border-l-2 border-white/10 pl-3">
+                            {address}
+                        </p>
+
+                        <div className="flex flex-col gap-3">
+                            {/* BOTÓN ÚNICO DE MAPA (Abre app predeterminada en móviles) */}
+                            <a href={mainMapUrl} target="_blank" rel="noopener noreferrer" 
+                               className={`flex items-center justify-center gap-3 w-full py-3.5 rounded uppercase font-cyber text-sm tracking-widest transition-all duration-300 
+                               ${isReception ? 'bg-demonRed text-white hover:bg-white hover:text-demonRed hover:shadow-[0_0_15px_#ff0a2f]' : 'bg-neonCyan text-cyberDark hover:bg-white hover:text-neonCyan hover:shadow-[0_0_15px_#00f3ff]'}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+                                Fijar Coordenadas
+                            </a>
+
+                            {/* Botón Calendario */}
+                            <a href={calLink} target="_blank" rel="noopener noreferrer"
+                               className="flex items-center justify-center gap-2 w-full py-3 rounded uppercase font-cyber text-xs tracking-widest bg-transparent border border-white/20 text-white hover:bg-white/10 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                Sincronizar Calendario
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // APLICACIÓN PRINCIPAL (Gestión de Fases SPA)
+        // ==========================================
+        const App = () => {
+            const [guestName, setGuestName] = useState(null);
+            const [lang, setLang] = useState('ES');
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [currentView, setCurrentView] = useState('hero'); // 'hero' | 'arena'
+            const audioRef = useRef(null);
+
+            useEffect(() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const u = urlParams.get('u');
+                if (u) {
+                    const firestoreUrl = `https://firestore.googleapis.com/v1/projects/panel-de-control-intelig-db278/databases/(default)/documents/eventos/prueba-htsj/invitados/${u}`;
+                    fetch(firestoreUrl)
+                        .then(response => response.ok ? response.json() : null)
+                        .then(data => {
+                            if (data?.fields?.name?.stringValue) setGuestName(data.fields.name.stringValue);
+                        }).catch(e => console.error("Error Firebase:", e));
+                }
+            }, []);
+
+            const toggleAudio = () => {
+                if (isPlaying) {
+                    audioRef.current.pause();
+                } else {
+                    audioRef.current.play().catch(e => console.log("Interacción requerida", e));
+                }
+                setIsPlaying(!isPlaying);
+            };
+
+            const toggleLang = () => setLang(prev => prev === 'ES' ? 'EN' : 'ES');
+
+            // Cambio de fase (SPA sin scroll)
+            const enterArena = () => {
+                setCurrentView('arena');
+                if (!isPlaying && audioRef.current) {
+                    audioRef.current.play()
+                        .then(() => setIsPlaying(true))
+                        .catch(e => console.log("Auto-play prevenido", e));
+                }
             };
 
             return (
-                <div 
-                    className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat transition-all duration-1000"
-                    style={{ backgroundImage: `url('kpopsfondo.svg')` }}
-                >
-                    {/* Capa de superposición para mejorar el contraste (Vignette) */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/80 z-0"></div>
-                    <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] z-0"></div>
+                <div className="relative w-full h-full overflow-hidden">
+                    
+                    <audio ref={audioRef} src="cancion.mp3" loop preload="auto"></audio>
 
-                    {/* Contenedor Principal (Tarjeta Glassmorfismo) */}
-                    <main 
-                        className={`relative z-10 w-full max-w-lg mx-4 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]
-                            ${isOpened ? 'scale-105 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}
-                        `}
-                    >
-                        <div className="glass-panel rounded-3xl p-10 md:p-14 text-center animate-fade-in relative overflow-hidden group">
-                            
-                            {/* Reflejo animado sutil en el borde superior */}
-                            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                    {/* FONDO DINÁMICO (Con animación de respiración recuperada) */}
+                    <div className="fixed inset-0 z-0 overflow-hidden bg-cyberDark">
+                        <div 
+                            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 animate-breathe"
+                            style={{ 
+                                backgroundImage: `url('kpopsfondo.svg'), url('/kpop-keily/kpopfondo.svg')` 
+                            }}
+                        ></div>
+                        {/* Capa de gradiente para legibilidad y tono dark/demon */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-cyberDark/40 via-cyberDark/80 to-cyberDark z-0"></div>
+                    </div>
 
-                            {/* Encabezado Pequeño */}
-                            <h3 className="font-sans text-white/60 tracking-[0.4em] text-[10px] md:text-xs uppercase mb-6 flex items-center justify-center gap-4">
-                                <span className="w-8 h-[1px] bg-white/30"></span>
-                                Colección Exclusiva
-                                <span className="w-8 h-[1px] bg-white/30"></span>
-                            </h3>
+                    {/* Navbar Superior Fija */}
+                    <div className="absolute top-0 left-0 w-full p-6 flex justify-end z-50">
+                        <button 
+                            onClick={toggleLang}
+                            className="text-xs font-cyber tracking-[0.3em] text-white/50 hover:text-neonCyan transition-all duration-300 backdrop-blur-sm px-3 py-1 border border-white/10 rounded-full hover:border-neonCyan"
+                        >
+                            {lang === 'ES' ? 'EN / ES' : 'ES / EN'}
+                        </button>
+                    </div>
 
-                            {/* Título Principal */}
-                            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-normal text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 mb-2 drop-shadow-sm animate-float">
-                                Estás<br/>Invitado
-                            </h1>
-                            
-                            {/* Separador Elegante */}
-                            <div className="my-8 flex justify-center items-center">
-                                <div className="h-2 w-2 rounded-full bg-neonAccent/80 animate-pulse-slow"></div>
-                            </div>
+                    {/* RENDERIZADO CONDICIONAL DE VISTAS (SPA) */}
+                    <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden">
+                        
+                        {/* VISTA 1: HERO / PORTADA */}
+                        {currentView === 'hero' && (
+                            <main className="flex flex-col items-center justify-center min-h-full px-6 text-center animate-fade-in py-12">
+                                
+                                {/* Logo SVG */}
+                                <div className="mb-8 w-40 h-40 md:w-56 md:h-56 relative flex items-center justify-center">
+                                    <img 
+                                        src="kpoplogo.svg" 
+                                        alt="Logo Keyli" 
+                                        className="w-full h-full object-contain relative z-10 animate-neon-flicker"
+                                        onError={(e) => {
+                                            if (!e.target.dataset.retried) {
+                                                e.target.dataset.retried = true;
+                                                e.target.src = '/kpop-keily/kpoplogo.svg';
+                                            }
+                                        }}
+                                    />
+                                </div>
 
-                            {/* Subtítulo */}
-                            <p className="font-sans text-sm md:text-base font-light text-white/80 tracking-widest uppercase mb-12">
-                                Una noche inolvidable
-                            </p>
+                                {/* Saludo VIP Operativo */}
+                                <div className="h-16 flex items-center justify-center w-full mb-2">
+                                    {guestName && (
+                                        <div className="glass-panel px-6 py-2 rounded-full border-neonPink/30">
+                                            <p className="text-sm md:text-base tracking-[0.1em] text-gray-300">
+                                                <span className="text-neonPink font-cyber uppercase text-[10px] tracking-widest">Agente Asignado:</span><br/>
+                                                <span className="italic font-bold text-xl text-white">{guestName}</span>
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
 
-                            {/* Botón de Acción de Alta Costura */}
-                            <button 
-                                onClick={handleOpen}
-                                className="relative inline-flex items-center justify-center px-10 py-4 font-sans text-xs tracking-[0.2em] uppercase text-white overflow-hidden rounded-full border border-white/30 hover:border-white transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 group/btn"
-                            >
-                                <span className="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-white/10"></span>
-                                <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-black">
-                                    Descubrir
-                                </span>
-                                {/* Fondo que se desliza al hacer hover */}
-                                <div className="absolute inset-0 bg-white transform scale-x-0 origin-right transition-transform duration-500 ease-out group-hover/btn:scale-x-100 group-hover/btn:origin-left"></div>
-                            </button>
-                        </div>
-                    </main>
+                                {/* Título Principal */}
+                                <h1 className="text-6xl md:text-8xl font-cyber font-black text-white text-glow-pink glitch mb-4 uppercase tracking-wider" data-text="KEYLI">
+                                    KEYLI
+                                </h1>
 
-                    {/* Elementos decorativos (Partículas/Luz) */}
-                    <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-neonAccent/20 rounded-full blur-[100px] mix-blend-screen pointer-events-none animate-pulse-slow z-0"></div>
-                    <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-cyan-500/10 rounded-full blur-[120px] mix-blend-screen pointer-events-none animate-pulse-slow z-0" style={{ animationDelay: '2s' }}></div>
+                                <p className="font-cyber text-demonRed tracking-[0.5em] font-bold text-sm md:text-lg uppercase mt-2 mb-12 text-glow-red">
+                                    Demon Hunters Tour
+                                </p>
+
+                                {/* Botón de Acción Principal */}
+                                <button 
+                                    onClick={enterArena}
+                                    className="group relative px-10 py-4 font-cyber text-sm md:text-base tracking-[0.2em] uppercase text-white overflow-hidden rounded-sm transition-all duration-300 hover:scale-[1.03] shadow-[0_0_20px_rgba(255,0,127,0.3)]"
+                                >
+                                    <span className="absolute inset-0 w-full h-full bg-neonPink group-hover:bg-demonRed transition-colors duration-500"></span>
+                                    <span className="absolute inset-0 w-full h-full border-2 border-white/30 group-hover:border-white z-10"></span>
+                                    <span className="relative z-20 font-bold flex items-center gap-3">
+                                        Acceder a la Misión
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                    </span>
+                                </button>
+                            </main>
+                        )}
+
+                        {/* VISTA 2: ARENA / DETALLES DE LA MISIÓN */}
+                        {currentView === 'arena' && (
+                            <section className="w-full max-w-4xl mx-auto px-4 py-20 min-h-full flex flex-col gap-12 animate-fade-in">
+                                
+                                {/* Header / Botón Volver */}
+                                <div className="flex items-center justify-between mb-2">
+                                    <button onClick={() => setCurrentView('hero')} className="text-white/50 hover:text-neonPink font-cyber text-xs flex items-center gap-2 uppercase tracking-widest transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                                        Abortar
+                                    </button>
+                                </div>
+
+                                {/* Título de Sección Temático */}
+                                <div className="text-center mb-6">
+                                    <h2 className="font-cyber text-3xl md:text-5xl text-white text-glow-cyan uppercase tracking-widest">
+                                        Expediente Confidencial
+                                    </h2>
+                                    <p className="font-body text-gray-400 mt-3 text-lg">Objetivo: Purificar la zona mediante arsenal sónico.</p>
+                                    <div className="w-24 h-1 bg-demonRed mx-auto mt-6 shadow-[0_0_10px_#ff0a2f]"></div>
+                                </div>
+
+                                {/* 1. CUENTA REGRESIVA */}
+                                <Countdown />
+
+                                {/* WIDGET DEL CLIMA (Condiciones de la zona) */}
+                                <div className="w-full max-w-lg mx-auto">
+                                    <div className="glass-panel p-4 md:p-6 rounded-xl flex items-center justify-between border-t border-neonCyan/50 relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-neonCyan opacity-5 rounded-full blur-2xl"></div>
+                                        <div className="flex flex-col relative z-10">
+                                            <span className="font-cyber text-neonCyan text-[10px] md:text-xs tracking-widest uppercase mb-1 flex items-center gap-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"></path><path d="M7 3.34V5a3 3 0 0 0 3 3v0a2 2 0 0 1 2 2v0c0 1.1.9 2 2 2v0a2 2 0 0 0 2-2v0c0-1.1.9-2 2-2h1.66"></path><path d="M11 21.95V18a2 2 0 0 0-2-2v0a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                                                Condiciones Zona Cero
+                                            </span>
+                                            <span className="font-body text-white text-lg md:text-xl font-bold">Minatitlán, Sector V.</span>
+                                        </div>
+                                        <div className="text-right flex items-center gap-3 relative z-10">
+                                            <span className="text-3xl md:text-4xl drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]">☀️</span>
+                                            <div className="flex flex-col items-end">
+                                                <span className="font-cyber text-white text-lg md:text-xl">32°C</span>
+                                                <span className="font-cyber text-demonRed text-[10px] uppercase tracking-wider">Actividad Alta</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 2. y 3. UBICACIONES TÁCTICAS */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-4">
+                                    <LocationCard 
+                                        type="Fase 1: Santuario de Purificación"
+                                        title="Iglesia Cristo Rey"
+                                        time="12:00 HRS"
+                                        address="Azcapotzalco S/N, Nueva Tacoteno, 96730 Minatitlán, Ver."
+                                        mainMapUrl="https://share.google/ULjxXyME7C7AmZ6Cy"
+                                        isReception={false}
+                                    />
+                                    <LocationCard 
+                                        type="Fase 2: Arena de Batalla (Concierto)"
+                                        title="Jardín Velin"
+                                        time="14:00 HRS"
+                                        address="Porfirio Díaz 16, 96770 Minatitlán, Ver."
+                                        mainMapUrl="https://share.google/wQTCLZ1dlSY7BYSYq"
+                                        isReception={true}
+                                    />
+                                </div>
+
+                                <div className="h-24"></div>
+                            </section>
+                        )}
+                    </div>
+
+                    {/* REPRODUCTOR FLOTANTE */}
+                    <div className="fixed bottom-6 left-6 z-50">
+                        <button 
+                            onClick={toggleAudio}
+                            className={`w-12 h-12 flex items-center justify-center rounded-full glass-panel transition-all duration-500 shadow-2xl ${isPlaying ? 'border-demonRed box-glow-red' : 'border-white/20 hover:border-neonPink hover:box-glow-pink'}`}
+                            aria-label="Reproducir música"
+                        >
+                            {isPlaying ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-demonRed animate-pulse-fast">
+                                    <rect x="6" y="4" width="4" height="16"></rect>
+                                    <rect x="14" y="4" width="4" height="16"></rect>
+                                </svg>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white hover:text-neonCyan ml-1">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            )}
+                        </button>
+                    </div>
                 </div>
             );
         };

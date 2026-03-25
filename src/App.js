@@ -12695,7 +12695,7 @@ const ReviewHarvester = ({ authData }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: SHOWROOM SIMULADOR (VITRINA PERFECTA CON UPSELL) ---
+// --- COMPONENTE: SHOWROOM SIMULADOR (VITRINA PERFECTA CON UPSELL Y SMART FOCUS) ---
 // ==========================================
 const ShowcaseSimulatorView = () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -12723,6 +12723,8 @@ const ShowcaseSimulatorView = () => {
       const inactiveRef = device === 'mac' ? iphoneIframeRef : macIframeRef;
       
       // Entramos al iframe inactivo y le damos "pause" a cualquier audio o video
+      // Nota: Si los iframes están en un subdominio diferente (CORS), esto podría fallar,
+      // pero el escudo visual seguirá indicando cuál está activo.
       if (inactiveRef.current && inactiveRef.current.contentWindow) {
         const medias = inactiveRef.current.contentWindow.document.querySelectorAll('audio, video');
         medias.forEach(media => media.pause());
