@@ -345,13 +345,13 @@
                 }, 350); 
             };
 
-            const isFamily = guestName?.toLowerCase().includes('familia') || guestName?.includes(' y ') || guestName?.includes(' & ');
+            const isFamily = guestName ? /fam\b|familia/i.test(guestName) || guestName.includes(' y ') || guestName.includes(' & ') : false;
 
             return (
                 <div className="relative w-full h-full overflow-hidden">
                     <audio ref={audioRef} src="cancion.mp3" loop preload="auto"></audio>
                     
-                    {/* FONDO DINÁMICO (Global) */}
+                    {/* FONDO DINÁMICO */}
                     <div className="fixed inset-0 z-0 overflow-hidden bg-cyberDark pointer-events-none">
                         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80 animate-breathe" style={{ backgroundImage: `url('/kpop-keily/kpopsfondo.svg')` }}></div>
                         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 animate-breathe mix-blend-screen saturate-200 blur-[6px]" style={{ backgroundImage: `url('/kpop-keily/kpopsfondo.svg')` }}></div>
@@ -398,71 +398,44 @@
                         )}
 
                         {currentView === 'briefing' && (
-                            <section className="fixed inset-0 z-[60] flex flex-col items-center justify-between overflow-hidden h-screen animate-fade-in">
-                                {/* Degradado Rosa y Azul con Blur sobre el fondo base */}
-                                <div className="absolute inset-0 bg-gradient-to-b from-neonPink/20 via-transparent to-skyBlue/20 backdrop-blur-sm z-0 pointer-events-none"></div>
-                                
-                                {/* Luces parpadeantes con mucho blur */}
-                                <div 
-                                    className="absolute inset-0 bg-cover bg-center bg-no-repeat mix-blend-screen blur-[25px] animate-pulse pointer-events-none opacity-60 z-0" 
-                                    style={{ backgroundImage: `url('/kpop-keily/kpopsfondo.svg')` }}
-                                ></div>
-
-                                {/* Saludo VIP Temático en la parte superior */}
-                                <div className="text-center w-full mt-12 md:mt-20 px-4 relative z-20 shrink-0">
-                                    <p className="font-cyber text-white/80 text-xs md:text-sm tracking-[0.4em] uppercase mb-4 animate-pulse drop-shadow-md">
-                                        Conexión Neural Establecida
-                                    </p>
+                            <section className="fixed inset-0 z-[60] flex flex-col items-center justify-between bg-cyberDark/95 backdrop-blur-3xl p-6 animate-fade-in overflow-hidden h-screen">
+                                <div className="text-center max-w-2xl mt-4 md:mt-8 relative z-20 shrink-0">
                                     {guestName ? (
                                         <>
-                                            <p className="font-body text-gray-100 text-xl md:text-3xl leading-tight mb-2 drop-shadow-lg">
-                                                {isFamily ? 'Escuadrón Táctico Confirmado:' : 'Cazador de Élite Confirmado:'}
+                                            <h2 className="font-cyber text-white/80 text-xs md:text-sm tracking-[0.4em] uppercase mb-2 md:mb-4 animate-pulse drop-shadow-md">
+                                                Conexión Neural Establecida
+                                            </h2>
+                                            <p className="font-body text-gray-200 text-lg md:text-2xl leading-tight">
+                                                {isFamily ? 'Pase Especial Para El Escuadrón:' : 'Pase Especial Para El Cazador:'}
                                             </p>
-                                            <h2 
-                                                className="font-cyber font-black text-5xl md:text-7xl uppercase tracking-widest mt-2"
+                                            <p 
+                                                className="font-cyber font-black text-4xl md:text-6xl mt-2 md:mt-4 px-4 leading-none uppercase tracking-wider"
                                                 style={{ 
                                                     color: neonColor, 
-                                                    textShadow: `0 0 15px ${neonColor}, 0 0 30px ${neonColor}, 0 0 50px ${neonColor}` 
+                                                    textShadow: `0 0 10px ${neonColor}, 0 0 20px ${neonColor}, 0 0 40px ${neonColor}` 
                                                 }}
                                             >
                                                 {guestName}
-                                            </h2>
+                                            </p>
                                         </>
                                     ) : (
-                                        <h2 
-                                            className="font-cyber font-black text-3xl md:text-5xl uppercase tracking-widest mt-4 leading-tight"
-                                            style={{ 
-                                                color: neonColor, 
-                                                textShadow: `0 0 15px ${neonColor}, 0 0 30px ${neonColor}, 0 0 50px ${neonColor}` 
-                                            }}
-                                        >
-                                            Bienvenido a la banda<br/>
-                                            <span className="text-5xl md:text-7xl mt-2 block">HUNTR/X</span>
+                                        <h2 className="font-cyber font-black text-3xl md:text-5xl text-neonPink text-glow-pink uppercase tracking-widest mt-4 leading-tight">
+                                            Bienvenido<br/>Demon Hunter
                                         </h2>
                                     )}
                                 </div>
                                 
-                                {/* Guerreras K-Pop en el Pavimento */}
-                                <div className="absolute bottom-0 left-0 w-full h-[65vh] md:h-[75vh] flex justify-center items-end z-10 pointer-events-none">
-                                    {/* Aura detrás de ellas */}
-                                    <div className="absolute bottom-10 bg-neonPurple opacity-30 blur-[80px] w-3/4 h-1/2 rounded-full animate-energy-pulse"></div>
-                                    <img 
-                                        src="/kpop-keily/kpop.svg" 
-                                        alt="Hunters" 
-                                        className="relative z-10 w-auto h-full max-w-none object-contain object-bottom drop-shadow-[0_-10px_40px_rgba(255,46,147,0.5)] animate-breathe"
-                                        style={{ transformOrigin: 'bottom center' }}
-                                    />
+                                <div className="relative w-full max-w-md md:max-w-xl flex-1 min-h-0 flex justify-center items-center group my-4">
+                                    <div className="absolute inset-0 bg-neonPurple opacity-20 blur-[100px] rounded-full animate-energy-pulse"></div>
+                                    <img src="/kpop-keily/kpop.svg" alt="Hunters" className="relative z-10 w-full h-full object-contain drop-shadow-[0_0_50px_rgba(255,46,147,0.6)] animate-float transform translate-x-3" />
                                 </div>
                                 
-                                {/* Barra de Progreso */}
-                                <div className="w-full max-w-md shrink-0 mb-10 px-6 relative z-20">
-                                    <div className="bg-cyberDark/60 backdrop-blur-md p-5 rounded-2xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.6)]">
-                                        <div className="w-full bg-white/5 h-3 md:h-4 rounded-full overflow-hidden border border-white/10 relative p-[2px]">
-                                            <div className="h-full bg-gradient-to-r from-neonPurple via-neonPink to-skyBlue rounded-full transition-all duration-300" style={{ width: `${briefingProgress}%` }}></div>
-                                        </div>
-                                        <div className="mt-4 font-cyber text-[10px] md:text-xs tracking-[0.3em] text-white/80 uppercase text-center">
-                                            {briefingProgress < 100 ? `Sincronizando arsenal sónico: ${briefingProgress}%` : '¡Acceso Concedido! Preparando Arena...'}
-                                        </div>
+                                <div className="w-full max-w-md shrink-0 mb-4 md:mb-8">
+                                    <div className="bg-white/5 h-4 rounded-full overflow-hidden border border-white/10 relative p-[2px]">
+                                        <div className="h-full bg-gradient-to-r from-neonPurple via-neonPink to-skyBlue rounded-full transition-all duration-300" style={{ width: `${briefingProgress}%` }}></div>
+                                    </div>
+                                    <div className="mt-4 md:mt-6 font-cyber text-[10px] md:text-xs tracking-[0.4em] text-white/60 uppercase text-center">
+                                        {briefingProgress < 100 ? `Sincronizando arsenal sónico: ${briefingProgress}%` : '¡Acceso Concedido! Iniciando Arena...'}
                                     </div>
                                 </div>
                             </section>
