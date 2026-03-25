@@ -1,45 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <script>
-        // 1. RADAR: Atrapa todos los audios generados en memoria por React
-        window.audiosEnMemoria = [];
-        var AudioOriginal = window.Audio;
-        window.Audio = function() {
-            var nuevoAudio = new AudioOriginal(arguments[0]);
-            window.audiosEnMemoria.push(nuevoAudio);
-            return nuevoAudio;
-        };
-
-        // 2. OÍDO: Escucha la orden de la Landing Page y silencia todo
-        window.addEventListener('message', function(event) {
-            if (event.data === 'pause_baulia_audio') {
-            
-            // Apaga etiquetas normales (si existen)
-            var elementosHTML = document.querySelectorAll('audio, video');
-            for (var i = 0; i < elementosHTML.length; i++) {
-                elementosHTML[i].pause();
-            }
-      
-            // Apaga los audios "fantasma" de React en memoria
-            for (var j = 0; j < window.audiosEnMemoria.length; j++) {
-                if (window.audiosEnMemoria[j] && typeof window.audiosEnMemoria[j].pause === 'function') {
-                window.audiosEnMemoria[j].pause();                    }
-                }
-
-            }
-        });
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Isabella & Alexander - Wedding Invitation</title>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@200;300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -88,7 +57,6 @@
         }
     </script>
 
-    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -505,42 +473,30 @@
             );
         };
 
-       const App = () => {
-  const [guestName, setGuestName] = useState(null);
-  const [isEnvelopeOpened, setIsEnvelopeOpened] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  
-  // Subimos el audioRef aquí arriba para que el Oído lo reconozca
-  const audioRef = useRef(null); 
-  
-  // FASE 4: Modal Global
-  const [showRsvpModal, setShowRsvpModal] = useState(false);
-  const [demoFormStatus, setDemoFormStatus] = useState('form');
-
-  // 🔴 OÍDO MAESTRO: Escucha a la Landing Page para silenciar la música al perder el foco
-  useEffect(() => {
-    const oidoBoveda = (event) => {
-      // Cuando la Landing Page mande la señal de pausa...
-      if (event.data === 'pause_baulia_audio') {
-        
-        setIsPlaying(false); // Actualiza el botón visual a "Pausa"
-        
-        // Respaldo balístico usando tu propia referencia de React (Mucho más seguro)
-        if (audioRef.current) {
-          audioRef.current.pause();
-        }
-      }
-    };
-
-    window.addEventListener('message', oidoBoveda);
-    return () => window.removeEventListener('message', oidoBoveda);
-  }, []);
-            
-            // FASE 4: Modal Global
+        const App = () => {
+            // 🔴 ORDEN CORREGIDO: Todos los estados y referencias van PRIMERO
+            const [guestName, setGuestName] = useState(null);
+            const [isEnvelopeOpened, setIsEnvelopeOpened] = useState(false);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const audioRef = useRef(null); // <- Referencia del audio subida a su lugar correcto
             const [showRsvpModal, setShowRsvpModal] = useState(false);
             const [demoFormStatus, setDemoFormStatus] = useState('form');
-            const audioRef = useRef(null);
 
+            // 🔴 OÍDO MAESTRO: Ahora sí puede encontrar "audioRef" y apagarlo
+            useEffect(() => {
+                const oidoBoveda = (event) => {
+                    if (event.data === 'pause_baulia_audio') {
+                        setIsPlaying(false);
+                        if (audioRef.current) {
+                            audioRef.current.pause();
+                        }
+                    }
+                };
+
+                window.addEventListener('message', oidoBoveda);
+                return () => window.removeEventListener('message', oidoBoveda);
+            }, []);
+            
             useEffect(() => {
                 const params = new URLSearchParams(window.location.search);
                 let rawName = params.get('invitado') || params.get('para') || params.get('nombre');
@@ -570,7 +526,7 @@
             return (
                 <div className="relative min-h-screen w-full bg-ivory overflow-hidden">
                     
-                    {/* 🔴 FASE 4: BOTÓN FLOTANTE COMPRA (SIEMPRE VISIBLE) */}
+                    {/* 🔴 FASE 4: BOTÓN FLOTANTE COMPRA */}
                     <button
                         onClick={() => {
                             if (window !== window.parent) window.parent.postMessage('open_checkout', '*');
@@ -602,7 +558,7 @@
                         <audio ref={audioRef} src="/demos/boda/cancion.mp3" loop />
                         {isEnvelopeOpened && <MusicPlayer isPlaying={isPlaying} setIsPlaying={setIsPlaying} audioRef={audioRef} />}
 
-                        {/* PORTADA REDISEÑADA (Sin caja obstructiva) */}
+                        {/* PORTADA REDISEÑADA */}
                         <section className="relative h-[100svh] w-full flex flex-col items-center bg-hero-image">
                             <div className="absolute inset-0 bg-white/10"></div>
                             <div className="absolute bottom-0 left-0 right-0 h-[60vh] bg-gradient-to-t from-ivory via-ivory/80 to-transparent"></div>
@@ -658,7 +614,7 @@
                                 </section>
                             </FadeInSection>
 
-                            {/* FOOTER BAULIA CON COMPONENTE NATIVO OSCURO */}
+                            {/* FOOTER BAULIA */}
                             <footer className="py-20 text-center bg-white/40 border-t border-gold/10 flex flex-col items-center">
                                 <a href="https://panel.baulia.com" target="_blank" className="font-sans text-[9px] tracking-[0.3em] uppercase text-charcoal/40 hover:text-sage transition-colors block mb-8">
                                     ¿Eres el anfitrión? Iniciar Sesión
@@ -673,7 +629,7 @@
                         </div>
                     </div>
 
-                    {/* 🔴 FASE 4: MODAL GLOBAL (CRISTAL ESMERILADO Y Z-INDEX MÁXIMO) */}
+                    {/* 🔴 FASE 4: MODAL GLOBAL */}
                     {showRsvpModal && (
                         <div className="fixed inset-0 z-[99999999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
                             <div className="bg-ivory border border-gold/30 p-8 md:p-12 w-full max-w-md relative animate-fade-in shadow-2xl rounded-[40px]">

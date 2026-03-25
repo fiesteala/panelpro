@@ -9475,10 +9475,6 @@ const AnatomyOverlay = ({ onClose }) => {
                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-4 sm:mb-6 block">09. El Blindaje Final</span>
                <div className="w-full max-w-md bg-white p-5 sm:p-6 border border-slate-200 shadow-lg rounded-2xl sm:rounded-3xl mb-6 sm:mb-8">
                   <h4 className="font-serif text-xl sm:text-2xl text-slate-800 mb-4 sm:mb-6">Confirmación</h4>
-                  <div className="p-2 sm:p-3 border border-slate-200 rounded-xl mb-3 sm:mb-4 text-left">
-                     <label className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-500 block mb-1.5 sm:mb-2">WhatsApp de Contacto</label>
-                     <div className="h-6 sm:h-8 bg-slate-100 rounded"></div>
-                  </div>
                   <div className="p-2 sm:p-3 border border-slate-200 rounded-xl mb-4 sm:mb-6 text-left flex justify-between items-center">
                      <label className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-500 block">Pase #1</label>
                      <div className="w-12 sm:w-16 h-5 sm:h-6 bg-[#8DB580]/20 rounded"></div>
@@ -12029,7 +12025,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [rsvpStatus, setRsvpStatus] = useState('idle'); 
   const [formError, setFormError] = useState(''); 
   
-  const [guestPhone, setGuestPhone] = useState('');
   const [tempSubGuests, setTempSubGuests] = useState([]);
   const [extraRequested, setExtraRequested] = useState(0);
   const [openPasses, setOpenPasses] = useState(1);
@@ -12074,7 +12069,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
           if (guestSnap.exists()) {
             const gData = guestSnap.data();
             setGuestInfo(gData);
-            setGuestPhone(gData.phone || '');
             setExtraRequested(gData.extraRequested || 0);
             
             const isFirstTime = gData.status === 'pendiente' || gData.status === 'por_invitar';
@@ -12108,7 +12102,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     e.preventDefault();
     setFormError('');
 
-    // 🔴 BLINDAJE DE SEGURIDAD: Si está en el Panel, bloqueamos el Firebase
+    // 🔴 BLINDAJE DE SEGURIDAD
     if (isPreviewMode) {
       alert("🔒 MODO VISTA PREVIA\nEsta es una simulación segura para el Panel. En la invitación real, al darle clic a este botón los datos se guardarían en la base de datos y cambiaría el estatus a Confirmado.");
       return;
@@ -12130,15 +12124,17 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
           }
         }
 
+        // 🔴 Guardado limpio en BD sin teléfono
         const updatedGuest = {
-          ...guestInfo, phone: guestPhone, passes: isCancelled ? 0 : attendingGuests.length, 
+          ...guestInfo, passes: isCancelled ? 0 : attendingGuests.length, 
           status: isCancelled ? 'cancelado' : 'confirmado', extraRequested: extraRequested, fechaConfirmacion: serverTimestamp(),
           subGuests: attendingGuests.map((sg, i) => ({ id: sg.id?.startsWith('s_new') ? `usr_${guestInfo.id}_${i}` : sg.id, name: sg.name, isChild: sg.isChild, entered: false }))
         };
         await setDoc(doc(db, "eventos", eventId, "invitados", guestUid), updatedGuest);
       } else {
+        // 🔴 Guardado de nuevo invitado sin teléfono
         await addDoc(collection(db, "eventos", eventId, "invitados"), {
-          name: openName, phone: guestPhone, passes: parseInt(openPasses), originalPasses: parseInt(openPasses),
+          name: openName, passes: parseInt(openPasses), originalPasses: parseInt(openPasses),
           status: 'confirmado', fechaConfirmacion: serverTimestamp(), side: 'general', entered: 0, tableId: null,
           subGuests: Array(parseInt(openPasses)).fill(null).map((_, i) => ({ id: `usr_gen_${Date.now()}_${i}`, name: i === 0 ? openName : `Acompañante de ${openName}`, isChild: false, entered: false }))
         });
@@ -12189,7 +12185,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
       {showRSVP && (
         <div className="w-full max-w-sm mx-auto z-50 animate-in slide-in-from-bottom-8 duration-500">
           
-          {/* 🔴 AVISO DE MODO SIMULACRO */}
           {isPreviewMode && (
             <div className="bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest py-1.5 text-center shadow-lg rounded-t-xl animate-pulse flex justify-center items-center">
                <Lock size={12} className="mr-1"/> Vista Previa Protegida
@@ -12211,11 +12206,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
             )}
             
             <form onSubmit={handleRSVPSubmit} className="space-y-4">
-              
-              <div className="p-3 rounded-xl border" style={{ borderColor: `${t_txt}20` }}>
-                <label className="block text-xs font-bold uppercase tracking-widest mb-1.5 flex items-center opacity-90"><Phone size={14} className="mr-1.5"/> WhatsApp de Contacto</label>
-                <input type="tel" required value={guestPhone} onChange={e => setGuestPhone(e.target.value)} style={themeInput} className="w-full p-2.5 border rounded-lg outline-none font-medium text-base" placeholder="10 dígitos" />
-              </div>
 
               {guestInfo ? (
                 <>
