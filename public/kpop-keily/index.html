@@ -324,7 +324,9 @@
             const [guestName, setGuestName] = useState(null);
             const [lang, setLang] = useState('ES');
             const [isPlaying, setIsPlaying] = useState(false);
-            const [currentView, setCurrentView] = useState('hero');
+            // Vistas: 'hero' -> 'briefing' -> 'arena'
+            const [currentView, setCurrentView] = useState('hero'); 
+            const [briefingProgress, setBriefingProgress] = useState(0);
             
             // ESTADOS RSVP CRÍTICOS
             const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
@@ -420,13 +422,31 @@
 
             const toggleLang = () => setLang(prev => prev === 'ES' ? 'EN' : 'ES');
 
-            const enterArena = () => {
-                setCurrentView('arena');
+            // INICIAR SECUENCIA DE BRIEFING Y ANIMACIÓN DE CARGA
+            const startBriefingSequence = () => {
+                setCurrentView('briefing');
+                
+                // Reproducir audio si no está sonando
                 if (!isPlaying && audioRef.current) {
                     audioRef.current.play()
                         .then(() => setIsPlaying(true))
                         .catch(e => console.log("Auto-play prevenido", e));
                 }
+
+                // Simular carga de barra de progreso
+                let progressValue = 0;
+                const interval = setInterval(() => {
+                    progressValue += Math.floor(Math.random() * 15) + 5; // Salto aleatorio entre 5 y 20
+                    if (progressValue >= 100) {
+                        progressValue = 100;
+                        clearInterval(interval);
+                        // Transición a la arena después de llegar al 100%
+                        setTimeout(() => {
+                            setCurrentView('arena');
+                        }, 1500);
+                    }
+                    setBriefingProgress(progressValue);
+                }, 400); // Velocidad de la carga
             };
 
             const openRsvpModal = () => setIsRsvpModalOpen(true);
@@ -463,11 +483,14 @@
                     {/* RENDERIZADO CONDICIONAL DE VISTAS (SPA) */}
                     <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden">
                         
-                        {/* VISTA 1: HERO / PORTADA */}
+                        {/* ============================== */}
+                        {/* VISTA 1: HERO / PORTADA        */}
+                        {/* ============================== */}
                         {currentView === 'hero' && (
-                            <main className="flex flex-col items-center justify-center min-h-full px-6 text-center animate-fade-in py-12">
+                            <main className="relative flex flex-col items-center justify-center min-h-full px-6 text-center animate-fade-in py-12">
                                 
-                                <div className="mb-8 w-40 h-40 md:w-56 md:h-56 relative flex items-center justify-center">
+                                {/* Logo SVG (Z-20 para estar encima de todo) */}
+                                <div className="mb-8 w-40 h-40 md:w-56 md:h-56 relative flex items-center justify-center z-20">
                                     <img 
                                         src="kpoplogo.svg" 
                                         alt="Logo Keyli" 
@@ -481,28 +504,44 @@
                                     />
                                 </div>
 
-                                <div className="h-16 flex items-center justify-center w-full mb-2">
+                                {/* SILUETA K-POP GUERRERAS (Fondo Inferior, detrás de los textos) */}
+                                <img 
+                                    src="kpopsilueta.svg" 
+                                    alt="Silueta Guerreras K-Pop" 
+                                    className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-5xl h-auto max-h-[calc(100vh-320px)] object-contain object-bottom z-0 pointer-events-none opacity-90 drop-shadow-[0_0_25px_rgba(183,36,255,0.4)]"
+                                    onError={(e) => {
+                                        if (!e.target.dataset.retried) {
+                                            e.target.dataset.retried = true;
+                                            e.target.src = '/kpop-keily/kpopsilueta.svg';
+                                        }
+                                    }}
+                                />
+
+                                {/* Saludo VIP Operativo */}
+                                <div className="h-16 flex items-center justify-center w-full mb-2 relative z-10">
                                     {guestName && (
                                         <div className="glass-panel px-6 py-2 rounded-full border-neonPink/30">
                                             <p className="text-sm md:text-base tracking-[0.1em] text-gray-200">
-                                                <span className="text-neonPink font-cyber uppercase text-[10px] tracking-widest">Agente Asignado:</span><br/>
+                                                <span className="text-neonPink font-cyber uppercase text-[10px] tracking-widest">{isFamily ? 'Agentes Asignados:' : 'Agente Asignado:'}</span><br/>
                                                 <span className="italic font-bold text-xl text-white">{guestName}</span>
                                             </p>
                                         </div>
                                     )}
                                 </div>
 
-                                <h1 className="text-6xl md:text-8xl font-cyber font-black text-white text-glow-pink glitch mb-4 uppercase tracking-wider select-none" data-text="KEYLI">
+                                {/* Título Principal */}
+                                <h1 className="text-6xl md:text-8xl font-cyber font-black text-white text-glow-pink glitch mb-4 uppercase tracking-wider select-none relative z-10" data-text="KEYLI">
                                     KEYLI
                                 </h1>
 
-                                <p className="font-cyber text-neonPurple tracking-[0.5em] font-bold text-sm md:text-lg uppercase mt-2 mb-12 text-glow-purple select-none">
+                                <p className="font-cyber text-neonPurple tracking-[0.5em] font-bold text-sm md:text-lg uppercase mt-2 mb-12 text-glow-purple select-none relative z-10">
                                     Demon Hunters Tour
                                 </p>
 
+                                {/* Botón de Acción Principal */}
                                 <button 
-                                    onClick={enterArena}
-                                    className="group relative px-10 py-4 font-cyber text-sm md:text-base tracking-[0.2em] uppercase text-white overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.03] shadow-[0_0_20px_rgba(255,46,147,0.4)]"
+                                    onClick={startBriefingSequence}
+                                    className="group relative px-10 py-4 font-cyber text-sm md:text-base tracking-[0.2em] uppercase text-white overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.03] shadow-[0_0_20px_rgba(255,46,147,0.4)] z-10"
                                 >
                                     <span className="absolute inset-0 w-full h-full bg-neonPink group-hover:bg-neonPurple transition-colors duration-500"></span>
                                     <span className="absolute inset-0 w-full h-full border-2 border-white/30 group-hover:border-white z-10 rounded-xl"></span>
@@ -514,7 +553,73 @@
                             </main>
                         )}
 
-                        {/* VISTA 2: ARENA / DETALLES DE LA MISIÓN */}
+                        {/* ============================== */}
+                        {/* VISTA 1.5: ANIMACIÓN DE CARGA  */}
+                        {/* ============================== */}
+                        {currentView === 'briefing' && (
+                            <section className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-cyberDark/95 backdrop-blur-xl p-6 animate-fade-in">
+                                
+                                {/* Imagen de las Guerreras K-Pop Flotando */}
+                                <div className="relative w-64 h-64 md:w-80 md:h-80 mb-8 animate-breathe flex justify-center items-center">
+                                    <div className="absolute inset-0 bg-neonPurple opacity-30 blur-[60px] rounded-full"></div>
+                                    <img 
+                                        src="/kpop-keily/kpop.svg" 
+                                        alt="Escuadrón Demon Hunters" 
+                                        className="relative z-10 w-full h-full object-contain drop-shadow-[0_0_25px_rgba(255,46,147,0.6)]"
+                                        onError={(e) => {
+                                            // Fallback opcional por si la ruta estricta falla
+                                            if (!e.target.dataset.retried) {
+                                                e.target.dataset.retried = true;
+                                                e.target.src = 'kpop.svg';
+                                            } else {
+                                                e.target.style.display = 'none';
+                                            }
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Mensaje de Bienvenida Temático */}
+                                <div className="text-center max-w-2xl mb-12">
+                                    <h2 className="font-cyber text-skyBlue text-xl md:text-3xl mb-4 tracking-widest uppercase text-glow-blue">
+                                        Enlace Neuronal Establecido
+                                    </h2>
+                                    <p className="font-body text-gray-200 text-lg md:text-xl leading-relaxed">
+                                        Saludos, {guestName ? <span className="text-neonPink font-bold">Agente {guestName}</span> : <span className="text-neonPink font-bold">Demon Hunter</span>}. 
+                                        Has sido elegid{lang === 'ES' ? 'o/a' : 'o'} por el alto mando por tu resonancia excepcional. 
+                                        La oscuridad se acerca, pero nuestra luz brillará más fuerte. Preparando coordenadas...
+                                    </p>
+                                </div>
+
+                                {/* Barra de Progreso Cyberpunk */}
+                                <div className="w-full max-w-md bg-white/5 h-4 rounded-full overflow-hidden border border-white/10 relative p-[2px] shadow-[0_0_15px_rgba(0,229,255,0.2)]">
+                                    <div 
+                                        className="h-full bg-gradient-to-r from-neonPurple via-neonPink to-skyBlue rounded-full transition-all duration-300 ease-out relative"
+                                        style={{ width: `${briefingProgress}%` }}
+                                    >
+                                        <div className="absolute top-0 right-0 bottom-0 w-12 bg-white/60 blur-[4px] animate-pulse"></div>
+                                    </div>
+                                </div>
+                                
+                                {/* Estado del Sistema */}
+                                <div className="mt-6 font-cyber text-sm tracking-[0.3em] text-white/80 uppercase flex items-center gap-3">
+                                    {briefingProgress < 100 ? (
+                                        <>
+                                            <svg className="animate-spin h-5 w-5 text-skyBlue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            Desencriptando Archivos: {briefingProgress}%
+                                        </>
+                                    ) : (
+                                        <span className="text-skyBlue text-glow-blue font-bold flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            ¡Acceso Concedido!
+                                        </span>
+                                    )}
+                                </div>
+                            </section>
+                        )}
+
+                        {/* ============================== */}
+                        {/* VISTA 2: ARENA / DETALLES      */}
+                        {/* ============================== */}
                         {currentView === 'arena' && (
                             <section className="w-full max-w-4xl mx-auto px-4 pt-20 pb-8 min-h-full flex flex-col gap-10 animate-fade-in relative">
                                 
@@ -605,8 +710,17 @@
                                 {/* ========================================== */}
                                 <div className="mt-12 mb-8 w-full" id="qr-section">
                                     {!isConfirmed ? (
-                                        // BOTÓN GIGANTE RSVP
-                                        <div className="flex justify-center">
+                                        <div className="flex flex-col items-center justify-center text-center">
+                                            
+                                            {/* Frase temática de Invitación a RSVP */}
+                                            <div className="max-w-2xl mx-auto mb-8 px-4">
+                                                <p className="font-body text-gray-300 text-lg md:text-xl leading-relaxed">
+                                                    Tu energía es vital para el éxito de esta misión. Agradecemos infinitamente tu lealtad al escuadrón. 
+                                                    <span className="text-skyBlue font-bold block mt-3 text-glow-blue">¡Por favor, confirma tu despliegue para asegurar tu lugar en la arena!</span>
+                                                </p>
+                                            </div>
+
+                                            {/* BOTÓN GIGANTE RSVP */}
                                             <button 
                                                 onClick={openRsvpModal}
                                                 className="group relative px-12 py-6 md:py-8 font-cyber text-lg md:text-2xl tracking-[0.2em] uppercase text-white overflow-hidden rounded-2xl transition-all duration-500 hover:scale-[1.02] shadow-[0_0_30px_rgba(0,229,255,0.5)] w-full max-w-md border-2 border-skyBlue box-glow-blue"
@@ -729,8 +843,7 @@
                                     <div className="w-full h-full glass-panel rounded-3xl overflow-hidden relative shadow-[0_0_30px_rgba(183,36,255,0.3)] border-t border-neonPurple/50">
                                         <div className="hologram-overlay"></div>
                                         <iframe 
-                                            src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&card=0a0514&btn=ff2e93&txt=ffffff&font=Rajdhani`}
-                                            allowtransparency="true" 
+                                            src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani`}
                                             style={{ backgroundColor: 'transparent', touchAction: 'pan-y' }} 
                                             className="w-full h-full max-h-[85vh] border-none relative z-10"
                                         ></iframe>
