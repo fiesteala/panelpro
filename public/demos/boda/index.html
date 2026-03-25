@@ -505,10 +505,36 @@
             );
         };
 
-        const App = () => {
-            const [guestName, setGuestName] = useState(null);
-            const [isEnvelopeOpened, setIsEnvelopeOpened] = useState(false);
-            const [isPlaying, setIsPlaying] = useState(false);
+       const App = () => {
+  const [guestName, setGuestName] = useState(null);
+  const [isEnvelopeOpened, setIsEnvelopeOpened] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  
+  // Subimos el audioRef aquí arriba para que el Oído lo reconozca
+  const audioRef = useRef(null); 
+  
+  // FASE 4: Modal Global
+  const [showRsvpModal, setShowRsvpModal] = useState(false);
+  const [demoFormStatus, setDemoFormStatus] = useState('form');
+
+  // 🔴 OÍDO MAESTRO: Escucha a la Landing Page para silenciar la música al perder el foco
+  useEffect(() => {
+    const oidoBoveda = (event) => {
+      // Cuando la Landing Page mande la señal de pausa...
+      if (event.data === 'pause_baulia_audio') {
+        
+        setIsPlaying(false); // Actualiza el botón visual a "Pausa"
+        
+        // Respaldo balístico usando tu propia referencia de React (Mucho más seguro)
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
+      }
+    };
+
+    window.addEventListener('message', oidoBoveda);
+    return () => window.removeEventListener('message', oidoBoveda);
+  }, []);
             
             // FASE 4: Modal Global
             const [showRsvpModal, setShowRsvpModal] = useState(false);
