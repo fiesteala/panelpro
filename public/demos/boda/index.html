@@ -1,6 +1,35 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <script>
+        // 1. RADAR: Atrapa todos los audios generados en memoria por React
+        window.audiosEnMemoria = [];
+        var AudioOriginal = window.Audio;
+        window.Audio = function() {
+            var nuevoAudio = new AudioOriginal(arguments[0]);
+            window.audiosEnMemoria.push(nuevoAudio);
+            return nuevoAudio;
+        };
+
+        // 2. OÍDO: Escucha la orden de la Landing Page y silencia todo
+        window.addEventListener('message', function(event) {
+            if (event.data === 'pause_baulia_audio') {
+            
+            // Apaga etiquetas normales (si existen)
+            var elementosHTML = document.querySelectorAll('audio, video');
+            for (var i = 0; i < elementosHTML.length; i++) {
+                elementosHTML[i].pause();
+            }
+      
+            // Apaga los audios "fantasma" de React en memoria
+            for (var j = 0; j < window.audiosEnMemoria.length; j++) {
+                if (window.audiosEnMemoria[j] && typeof window.audiosEnMemoria[j].pause === 'function') {
+                window.audiosEnMemoria[j].pause();                    }
+                }
+
+            }
+        });
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Isabella & Alexander - Wedding Invitation</title>
@@ -676,22 +705,5 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
-    <script>
-  // El "oído" que escucha a la Landing Page
-  window.addEventListener('message', function(event) {
-    if (event.data === 'pause_baulia_audio') {
-      
-      // 1. Apaga cualquier audio o video clásico que esté sonando
-      var medias = document.querySelectorAll('audio, video');
-      medias.forEach(function(media) { 
-        media.pause(); 
-      });
-
-      // 2. Opcional: Si tienes un botón visual de Play/Pausa, descomenta la línea de abajo 
-      // y ponle el ID de tu botón. Así, cuando se pause, el icono cambiará automáticamente a "Play".
-      // document.getElementById('id-de-tu-boton-de-musica').click();
-    }
-  });
-</script>
 </body>
 </html>
