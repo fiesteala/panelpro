@@ -12715,22 +12715,14 @@ const ShowcaseSimulatorView = () => {
     setActiveDevice('iphone');
   }, [activeCategory]);
 
-  // La magia: Pausa el audio del dispositivo que pierde el foco
+  // La magia: Envía la orden por radio al dispositivo que pierde el foco
   const switchFocus = (device) => {
     setActiveDevice(device);
-    try {
-      // Identificamos cuál es el iframe que se queda inactivo
-      const inactiveRef = device === 'mac' ? iphoneIframeRef : macIframeRef;
-      
-      // Entramos al iframe inactivo y le damos "pause" a cualquier audio o video
-      // Nota: Si los iframes están en un subdominio diferente (CORS), esto podría fallar,
-      // pero el escudo visual seguirá indicando cuál está activo.
-      if (inactiveRef.current && inactiveRef.current.contentWindow) {
-        const medias = inactiveRef.current.contentWindow.document.querySelectorAll('audio, video');
-        medias.forEach(media => media.pause());
-      }
-    } catch(err) {
-      console.log('CORS local bloqueó la pausa automática, pero el escudo visual protegerá la experiencia.');
+    const inactiveRef = device === 'mac' ? iphoneIframeRef : macIframeRef;
+    
+    if (inactiveRef.current && inactiveRef.current.contentWindow) {
+      // Usamos el "Walkie-Talkie" oficial para decirle al iframe inactivo que se silencie
+      inactiveRef.current.contentWindow.postMessage('pause_baulia_audio', '*');
     }
   };
 

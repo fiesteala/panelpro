@@ -25,10 +25,10 @@
             theme: {
                 extend: {
                     colors: {
-                        neonPink: '#ff007f',
-                        neonCyan: '#00f3ff',
-                        demonRed: '#ff0a2f',
-                        cyberDark: '#05050A',
+                        neonPink: '#ff2e93',
+                        skyBlue: '#00e5ff',
+                        neonPurple: '#b724ff',
+                        cyberDark: '#0a0514',
                     },
                     fontFamily: {
                         cyber: ['Orbitron', 'sans-serif'],
@@ -63,24 +63,31 @@
     <!-- Estilos Personalizados -->
     <style type="text/tailwindcss">
         @layer utilities {
-            .text-glow-pink { text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f; }
-            .text-glow-cyan { text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff; }
-            .text-glow-red { text-shadow: 0 0 10px #ff0a2f, 0 0 30px #ff0a2f; }
+            .text-glow-pink { text-shadow: 0 0 10px #ff2e93, 0 0 20px #ff2e93; }
+            .text-glow-blue { text-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff; }
+            .text-glow-purple { text-shadow: 0 0 10px #b724ff, 0 0 30px #b724ff; }
             
-            .box-glow-pink { box-shadow: 0 0 15px rgba(255, 0, 127, 0.5), inset 0 0 10px rgba(255, 0, 127, 0.2); }
-            .box-glow-red { box-shadow: 0 0 20px rgba(255, 10, 47, 0.4), inset 0 0 15px rgba(255, 10, 47, 0.1); }
+            .box-glow-pink { box-shadow: 0 0 15px rgba(255, 46, 147, 0.5), inset 0 0 10px rgba(255, 46, 147, 0.2); }
+            .box-glow-purple { box-shadow: 0 0 20px rgba(183, 36, 255, 0.4), inset 0 0 15px rgba(183, 36, 255, 0.2); }
+            .box-glow-blue { box-shadow: 0 0 15px rgba(0, 229, 255, 0.4), inset 0 0 10px rgba(0, 229, 255, 0.1); }
             
+            /* Nuevas Tarjetas Traslúcidas K-Pop (Mejor integración con el fondo) */
             .glass-panel {
-                background: rgba(5, 5, 10, 0.7);
-                backdrop-filter: blur(16px);
-                -webkit-backdrop-filter: blur(16px);
-                border: 1px solid rgba(0, 243, 255, 0.15);
+                background: linear-gradient(135deg, rgba(30, 10, 50, 0.5) 0%, rgba(10, 5, 25, 0.7) 100%);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(183, 36, 255, 0.15);
+                border-top: 1px solid rgba(255, 46, 147, 0.4);
+                border-left: 1px solid rgba(0, 229, 255, 0.3);
+                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
             }
-            .glass-panel-demon {
-                background: rgba(15, 0, 5, 0.7);
+            .glass-panel-highlight {
+                background: linear-gradient(135deg, rgba(40, 10, 60, 0.6) 0%, rgba(15, 5, 30, 0.8) 100%);
                 backdrop-filter: blur(16px);
                 -webkit-backdrop-filter: blur(16px);
-                border: 1px solid rgba(255, 10, 47, 0.3);
+                border: 1px solid rgba(183, 36, 255, 0.4);
+                border-top: 1px solid rgba(183, 36, 255, 0.6);
+                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
             }
 
             /* Efecto Glitch y Neón */
@@ -90,11 +97,11 @@
                 position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.8;
             }
             .glitch::before {
-                left: 2px; text-shadow: -2px 0 #ff007f; clip: rect(24px, 550px, 90px, 0);
+                left: 2px; text-shadow: -2px 0 #ff2e93; clip: rect(24px, 550px, 90px, 0);
                 animation: glitch-anim-2 3s infinite linear alternate-reverse;
             }
             .glitch::after {
-                left: -2px; text-shadow: -2px 0 #00f3ff; clip: rect(85px, 550px, 140px, 0);
+                left: -2px; text-shadow: -2px 0 #00e5ff; clip: rect(85px, 550px, 140px, 0);
                 animation: glitch-anim 2.5s infinite linear alternate-reverse;
             }
             
@@ -116,9 +123,9 @@
             }
             @keyframes neon-flicker {
                 0%, 18%, 22%, 25%, 53%, 57%, 100% {
-                    filter: drop-shadow(0 0 5px #ff007f) drop-shadow(0 0 15px #ff007f) drop-shadow(0 0 30px #00f3ff); opacity: 1;
+                    filter: drop-shadow(0 0 5px #ff2e93) drop-shadow(0 0 15px #b724ff) drop-shadow(0 0 30px #00e5ff); opacity: 1;
                 }
-                20%, 24%, 55% { filter: drop-shadow(0 0 2px #ff007f); opacity: 0.6; }
+                20%, 24%, 55% { filter: drop-shadow(0 0 2px #ff2e93); opacity: 0.6; }
             }
             .animate-neon-flicker { animation: neon-flicker 4s infinite alternate; }
         }
@@ -127,18 +134,17 @@
         ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
-<body class="bg-cyberDark text-white font-body selection:bg-demonRed selection:text-white overflow-hidden h-screen w-screen">
+<body class="bg-cyberDark text-white font-body selection:bg-neonPurple selection:text-white overflow-hidden h-screen w-screen">
     <div id="root" class="h-full w-full"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
         // ==========================================
-        // COMPONENTE: CUENTA REGRESIVA REPARADA
+        // COMPONENTE: CUENTA REGRESIVA MAGICAL
         // ==========================================
         const Countdown = () => {
             const calculateTimeLeft = () => {
-                // FECHA CORREGIDA: 12 de Abril del 2026 (Asegurando que sea a futuro)
                 const difference = +new Date("2026-04-12T12:00:00") - +new Date();
                 let timeLeft = {};
 
@@ -165,23 +171,23 @@
             });
 
             return (
-                <div className="glass-panel-demon p-6 md:p-8 rounded-2xl box-glow-red flex flex-col items-center w-full max-w-lg mx-auto relative overflow-hidden group">
-                    {/* Elemento de advertencia en el fondo */}
-                    <div className="absolute -right-10 -top-10 opacity-5 font-cyber text-9xl text-demonRed transform rotate-12 group-hover:scale-110 transition-transform duration-700">
-                        ⚠
+                <div className="glass-panel-highlight p-6 md:p-8 rounded-3xl box-glow-purple flex flex-col items-center w-full max-w-lg mx-auto relative overflow-hidden group">
+                    {/* Elemento mágico en el fondo */}
+                    <div className="absolute -right-6 -top-6 opacity-10 font-cyber text-9xl text-neonPurple transform rotate-12 group-hover:scale-110 transition-transform duration-700">
+                        ✦
                     </div>
 
-                    <h2 className="font-cyber text-demonRed text-sm md:text-base tracking-[0.3em] uppercase mb-6 text-center z-10">
-                        <span className="text-white">Despliegue Táctico En:</span><br/>Sábado 12 de Abril, 12:00 Hrs
+                    <h2 className="font-cyber text-neonPink text-sm md:text-base tracking-[0.3em] uppercase mb-6 text-center z-10">
+                        <span className="text-skyBlue">Despliegue Táctico En:</span><br/>Sábado 12 de Abril, 12:00 Hrs
                     </h2>
                     
                     <div className="flex gap-4 md:gap-8 justify-center w-full z-10">
                         {Object.keys(timeLeft).map((interval, i) => (
                             <div key={i} className="flex flex-col items-center w-16 md:w-20">
-                                <span className="font-cyber text-4xl md:text-5xl text-white text-glow-red">
+                                <span className="font-cyber text-4xl md:text-5xl text-white text-glow-purple">
                                     {timeLeft[interval].toString().padStart(2, '0')}
                                 </span>
-                                <span className="font-cyber text-neonCyan text-[10px] md:text-xs tracking-widest mt-2 border-t border-demonRed/50 pt-2 w-full text-center">
+                                <span className="font-cyber text-skyBlue text-[10px] md:text-xs tracking-widest mt-2 border-t border-neonPurple/50 pt-2 w-full text-center">
                                     {interval}
                                 </span>
                             </div>
@@ -198,37 +204,37 @@
             const calLink = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Misión+K-Pop:+Keyli+(${type})&dates=20260412T180000Z/20260413T020000Z&details=Únete+al+escuadrón+en+esta+batalla+sónica.&location=${encodeURIComponent(address)}`;
 
             return (
-                <div className={`glass-panel p-6 md:p-8 rounded-2xl relative overflow-hidden group transition-all duration-500 hover:-translate-y-2 ${isReception ? 'hover:box-glow-red border-demonRed/30' : 'hover:box-glow-cyan border-neonCyan/30'}`}>
-                    {/* Acento lateral Cyberpunk */}
-                    <div className={`absolute top-0 left-0 w-1.5 h-full ${isReception ? 'bg-demonRed shadow-[0_0_10px_#ff0a2f]' : 'bg-neonCyan shadow-[0_0_10px_#00f3ff]'}`}></div>
+                <div className={`glass-panel p-6 md:p-8 rounded-3xl relative overflow-hidden group transition-all duration-500 hover:-translate-y-2 ${isReception ? 'hover:box-glow-purple' : 'hover:box-glow-blue'}`}>
+                    {/* Acento lateral K-Pop */}
+                    <div className={`absolute top-0 left-0 w-1.5 h-full ${isReception ? 'bg-neonPurple shadow-[0_0_10px_#b724ff]' : 'bg-skyBlue shadow-[0_0_10px_#00e5ff]'}`}></div>
                     
                     <div className="pl-4">
                         <div className="flex justify-between items-start mb-2">
                             <h3 className="text-2xl md:text-3xl font-cyber text-white uppercase tracking-wide">{title}</h3>
-                            <span className={`font-cyber text-sm px-3 py-1 rounded border ${isReception ? 'border-demonRed text-demonRed' : 'border-neonCyan text-neonCyan'}`}>
+                            <span className={`font-cyber text-sm px-3 py-1 rounded-full border ${isReception ? 'border-neonPurple text-neonPurple bg-neonPurple/10' : 'border-skyBlue text-skyBlue bg-skyBlue/10'}`}>
                                 {time}
                             </span>
                         </div>
                         
-                        <p className={`font-cyber text-xs tracking-[0.2em] mb-3 uppercase font-bold ${isReception ? 'text-neonPink' : 'text-neonCyan'}`}>
+                        <p className={`font-cyber text-xs tracking-[0.2em] mb-3 uppercase font-bold ${isReception ? 'text-neonPink' : 'text-neonPurple'}`}>
                             {type}
                         </p>
-                        <p className="font-body text-gray-300 text-lg md:text-xl leading-relaxed mb-8 border-l-2 border-white/10 pl-3">
+                        <p className="font-body text-gray-200 text-lg md:text-xl leading-relaxed mb-8 border-l-2 border-white/10 pl-3">
                             {address}
                         </p>
 
                         <div className="flex flex-col gap-3">
-                            {/* BOTÓN ÚNICO DE MAPA (Abre app predeterminada en móviles) */}
+                            {/* BOTÓN ÚNICO DE MAPA */}
                             <a href={mainMapUrl} target="_blank" rel="noopener noreferrer" 
-                               className={`flex items-center justify-center gap-3 w-full py-3.5 rounded uppercase font-cyber text-sm tracking-widest transition-all duration-300 
-                               ${isReception ? 'bg-demonRed text-white hover:bg-white hover:text-demonRed hover:shadow-[0_0_15px_#ff0a2f]' : 'bg-neonCyan text-cyberDark hover:bg-white hover:text-neonCyan hover:shadow-[0_0_15px_#00f3ff]'}`}>
+                               className={`flex items-center justify-center gap-3 w-full py-3.5 rounded-xl uppercase font-cyber text-sm tracking-widest transition-all duration-300 
+                               ${isReception ? 'bg-neonPurple text-white hover:bg-white hover:text-neonPurple hover:shadow-[0_0_20px_#b724ff]' : 'bg-skyBlue text-cyberDark hover:bg-white hover:text-skyBlue hover:shadow-[0_0_20px_#00e5ff]'}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
                                 Fijar Coordenadas
                             </a>
 
                             {/* Botón Calendario */}
                             <a href={calLink} target="_blank" rel="noopener noreferrer"
-                               className="flex items-center justify-center gap-2 w-full py-3 rounded uppercase font-cyber text-xs tracking-widest bg-transparent border border-white/20 text-white hover:bg-white/10 transition-colors">
+                               className="flex items-center justify-center gap-2 w-full py-3 rounded-xl uppercase font-cyber text-xs tracking-widest bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-neonPink transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                                 Sincronizar Calendario
                             </a>
@@ -290,20 +296,20 @@
                     {/* FONDO DINÁMICO (Con animación de respiración recuperada) */}
                     <div className="fixed inset-0 z-0 overflow-hidden bg-cyberDark">
                         <div 
-                            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 animate-breathe"
+                            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80 animate-breathe"
                             style={{ 
                                 backgroundImage: `url('kpopsfondo.svg'), url('/kpop-keily/kpopfondo.svg')` 
                             }}
                         ></div>
-                        {/* Capa de gradiente para legibilidad y tono dark/demon */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-cyberDark/40 via-cyberDark/80 to-cyberDark z-0"></div>
+                        {/* Capa de gradiente profundo para legibilidad */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0514]/30 via-[#0a0514]/60 to-[#0a0514] z-0"></div>
                     </div>
 
                     {/* Navbar Superior Fija */}
                     <div className="absolute top-0 left-0 w-full p-6 flex justify-end z-50">
                         <button 
                             onClick={toggleLang}
-                            className="text-xs font-cyber tracking-[0.3em] text-white/50 hover:text-neonCyan transition-all duration-300 backdrop-blur-sm px-3 py-1 border border-white/10 rounded-full hover:border-neonCyan"
+                            className="text-xs font-cyber tracking-[0.3em] text-white/50 hover:text-skyBlue transition-all duration-300 backdrop-blur-sm px-3 py-1 border border-white/10 rounded-full hover:border-skyBlue"
                         >
                             {lang === 'ES' ? 'EN / ES' : 'ES / EN'}
                         </button>
@@ -335,7 +341,7 @@
                                 <div className="h-16 flex items-center justify-center w-full mb-2">
                                     {guestName && (
                                         <div className="glass-panel px-6 py-2 rounded-full border-neonPink/30">
-                                            <p className="text-sm md:text-base tracking-[0.1em] text-gray-300">
+                                            <p className="text-sm md:text-base tracking-[0.1em] text-gray-200">
                                                 <span className="text-neonPink font-cyber uppercase text-[10px] tracking-widest">Agente Asignado:</span><br/>
                                                 <span className="italic font-bold text-xl text-white">{guestName}</span>
                                             </p>
@@ -348,17 +354,17 @@
                                     KEYLI
                                 </h1>
 
-                                <p className="font-cyber text-demonRed tracking-[0.5em] font-bold text-sm md:text-lg uppercase mt-2 mb-12 text-glow-red">
+                                <p className="font-cyber text-neonPurple tracking-[0.5em] font-bold text-sm md:text-lg uppercase mt-2 mb-12 text-glow-purple">
                                     Demon Hunters Tour
                                 </p>
 
                                 {/* Botón de Acción Principal */}
                                 <button 
                                     onClick={enterArena}
-                                    className="group relative px-10 py-4 font-cyber text-sm md:text-base tracking-[0.2em] uppercase text-white overflow-hidden rounded-sm transition-all duration-300 hover:scale-[1.03] shadow-[0_0_20px_rgba(255,0,127,0.3)]"
+                                    className="group relative px-10 py-4 font-cyber text-sm md:text-base tracking-[0.2em] uppercase text-white overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.03] shadow-[0_0_20px_rgba(255,46,147,0.4)]"
                                 >
-                                    <span className="absolute inset-0 w-full h-full bg-neonPink group-hover:bg-demonRed transition-colors duration-500"></span>
-                                    <span className="absolute inset-0 w-full h-full border-2 border-white/30 group-hover:border-white z-10"></span>
+                                    <span className="absolute inset-0 w-full h-full bg-neonPink group-hover:bg-neonPurple transition-colors duration-500"></span>
+                                    <span className="absolute inset-0 w-full h-full border-2 border-white/30 group-hover:border-white z-10 rounded-xl"></span>
                                     <span className="relative z-20 font-bold flex items-center gap-3">
                                         Acceder a la Misión
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -381,11 +387,11 @@
 
                                 {/* Título de Sección Temático */}
                                 <div className="text-center mb-6">
-                                    <h2 className="font-cyber text-3xl md:text-5xl text-white text-glow-cyan uppercase tracking-widest">
+                                    <h2 className="font-cyber text-3xl md:text-5xl text-white text-glow-blue uppercase tracking-widest">
                                         Expediente Confidencial
                                     </h2>
-                                    <p className="font-body text-gray-400 mt-3 text-lg">Objetivo: Purificar la zona mediante arsenal sónico.</p>
-                                    <div className="w-24 h-1 bg-demonRed mx-auto mt-6 shadow-[0_0_10px_#ff0a2f]"></div>
+                                    <p className="font-body text-gray-300 mt-3 text-lg">Objetivo: Purificar la zona mediante arsenal sónico.</p>
+                                    <div className="w-24 h-1 bg-neonPurple mx-auto mt-6 shadow-[0_0_15px_#b724ff]"></div>
                                 </div>
 
                                 {/* 1. CUENTA REGRESIVA */}
@@ -393,10 +399,10 @@
 
                                 {/* WIDGET DEL CLIMA (Condiciones de la zona) */}
                                 <div className="w-full max-w-lg mx-auto">
-                                    <div className="glass-panel p-4 md:p-6 rounded-xl flex items-center justify-between border-t border-neonCyan/50 relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-neonCyan opacity-5 rounded-full blur-2xl"></div>
+                                    <div className="glass-panel p-4 md:p-6 rounded-3xl flex items-center justify-between relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-skyBlue opacity-10 rounded-full blur-2xl"></div>
                                         <div className="flex flex-col relative z-10">
-                                            <span className="font-cyber text-neonCyan text-[10px] md:text-xs tracking-widest uppercase mb-1 flex items-center gap-2">
+                                            <span className="font-cyber text-skyBlue text-[10px] md:text-xs tracking-widest uppercase mb-1 flex items-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"></path><path d="M7 3.34V5a3 3 0 0 0 3 3v0a2 2 0 0 1 2 2v0c0 1.1.9 2 2 2v0a2 2 0 0 0 2-2v0c0-1.1.9-2 2-2h1.66"></path><path d="M11 21.95V18a2 2 0 0 0-2-2v0a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"></path><circle cx="12" cy="12" r="10"></circle></svg>
                                                 Condiciones Zona Cero
                                             </span>
@@ -406,7 +412,7 @@
                                             <span className="text-3xl md:text-4xl drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]">☀️</span>
                                             <div className="flex flex-col items-end">
                                                 <span className="font-cyber text-white text-lg md:text-xl">32°C</span>
-                                                <span className="font-cyber text-demonRed text-[10px] uppercase tracking-wider">Actividad Alta</span>
+                                                <span className="font-cyber text-neonPink text-[10px] uppercase tracking-wider">Actividad Mágica Alta</span>
                                             </div>
                                         </div>
                                     </div>
@@ -441,16 +447,16 @@
                     <div className="fixed bottom-6 left-6 z-50">
                         <button 
                             onClick={toggleAudio}
-                            className={`w-12 h-12 flex items-center justify-center rounded-full glass-panel transition-all duration-500 shadow-2xl ${isPlaying ? 'border-demonRed box-glow-red' : 'border-white/20 hover:border-neonPink hover:box-glow-pink'}`}
+                            className={`w-12 h-12 flex items-center justify-center rounded-full glass-panel transition-all duration-500 shadow-2xl ${isPlaying ? 'border-neonPurple box-glow-purple' : 'border-white/20 hover:border-neonPink hover:box-glow-pink'}`}
                             aria-label="Reproducir música"
                         >
                             {isPlaying ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-demonRed animate-pulse-fast">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neonPurple animate-pulse-fast">
                                     <rect x="6" y="4" width="4" height="16"></rect>
                                     <rect x="14" y="4" width="4" height="16"></rect>
                                 </svg>
                             ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white hover:text-neonCyan ml-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white hover:text-skyBlue ml-1">
                                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                                 </svg>
                             )}

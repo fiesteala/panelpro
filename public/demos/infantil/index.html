@@ -433,5 +433,22 @@
             }
         });
     </script>
+    <script>
+  // El "oído" que escucha a la Landing Page
+  window.addEventListener('message', function(event) {
+    if (event.data === 'pause_baulia_audio') {
+      
+      // 1. Apaga cualquier audio o video clásico que esté sonando
+      var medias = document.querySelectorAll('audio, video');
+      medias.forEach(function(media) { 
+        media.pause(); 
+      });
+
+      // 2. Opcional: Si tienes un botón visual de Play/Pausa, descomenta la línea de abajo 
+      // y ponle el ID de tu botón. Así, cuando se pause, el icono cambiará automáticamente a "Play".
+      // document.getElementById('id-de-tu-boton-de-musica').click();
+    }
+  });
+</script>
 </body>
 </html>
