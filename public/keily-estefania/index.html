@@ -414,10 +414,10 @@
                                     )}
                                 </div>
 
-                                {/* CONTENEDOR DE INTERFAZ */}
-                                <div className={`relative z-10 flex flex-col items-center justify-start w-full h-full transition-all duration-1000 ${isTransforming ? 'pointer-events-none' : 'opacity-100'}`}>
+                                {/* CONTENEDOR DE INTERFAZ (Ahora perfectamente centrado con justify-center) */}
+                                <div className={`relative z-10 flex flex-col items-center justify-center w-full h-full min-h-[80vh] pb-10 md:pb-0 transition-all duration-1000 ${isTransforming ? 'pointer-events-none' : 'opacity-100'}`}>
                                     
-                                    <div className="mb-2 w-32 h-32 md:w-48 md:h-48 relative flex items-center justify-center">
+                                    <div className="mb-6 md:mb-10 w-36 h-36 md:w-52 md:h-52 relative flex items-center justify-center shrink-0 mt-4 md:mt-0">
                                         {/* Logo Original */}
                                         <img 
                                             src="/keily-estefania/kpoplogo.svg" 
@@ -437,11 +437,8 @@
                                         </div>
                                     </div>
                                     
-                                    {/* Empuja el contenido hacia abajo dando aire a la silueta */}
-                                    <div className="flex-1 min-h-[5vh] md:min-h-[10vh]"></div>
-
                                     {/* Etiqueta de Agente Asignado se oculta elegantemente durante la transformación */}
-                                    <div className={`h-16 flex items-center justify-center w-full mb-2 transition-all duration-500 ${isTransforming ? 'opacity-0 blur-sm scale-95' : 'opacity-100 scale-100'}`}>
+                                    <div className={`h-16 flex items-center justify-center w-full mb-4 md:mb-6 transition-all duration-500 ${isTransforming ? 'opacity-0 blur-sm scale-95' : 'opacity-100 scale-100'}`}>
                                         {guestName && (
                                             <div className="glass-panel px-6 py-2 rounded-full border-neonPink/30 shadow-[0_0_15px_rgba(255,46,147,0.3)]">
                                                 <p className="text-sm md:text-base tracking-[0.1em] text-gray-200">
@@ -453,7 +450,7 @@
                                     </div>
                                     
                                     {/* TÍTULOS JUSTIFICADOS Y COMPACTOS - Descienden hacia el botón */}
-                                    <div className={`inline-block text-center mb-8 mt-2 transition-transform duration-1000 ease-in-out ${isTransforming ? 'translate-y-20 md:translate-y-24 scale-105' : 'translate-y-0 scale-100'}`}>
+                                    <div className={`inline-block text-center mb-8 md:mb-10 transition-transform duration-1000 ease-in-out ${isTransforming ? 'translate-y-16 md:translate-y-20 scale-105' : 'translate-y-0 scale-100'}`}>
                                         <h1 className="text-6xl md:text-[6.5rem] lg:text-8xl font-cyber font-black text-white text-glow-pink glitch mb-0 uppercase tracking-wider leading-none" data-text="KEYLI">KEYLI</h1>
                                         <div className="flex justify-between w-full px-[0.1em] mt-1 md:mt-2 mb-6">
                                             {'ESTEFANIA'.split('').map((letter, index) => (
