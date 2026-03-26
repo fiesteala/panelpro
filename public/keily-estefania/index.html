@@ -57,7 +57,7 @@
                         },
                         breathe: {
                             '0%': { transform: 'scale(1)' },
-                            '100%': { transform: 'scale(1.08)' }
+                            '100%': { transform: 'scale(1.12)' } /* Se incrementó para que sea más notorio */
                         },
                         float: {
                             '0%, 100%': { transform: 'translateY(0) scale(1)' },
@@ -300,6 +300,9 @@
             const [isTransforming, setIsTransforming] = useState(false);
             
             const audioRef = useRef(null);
+            // REF PARA CONTROLAR EL FONDO CON SCROLL (PARALLAX ZOOM)
+            const bgParallaxRef = useRef(null);
+            
             const EVENT_ID = 'prueba-htsj';
 
             // Protección Anti-Robo
@@ -364,16 +367,34 @@
                 }, 10000); 
             };
 
+            // CONTROLADOR DE EFECTO PARALLAX PARA EL FONDO DURANTE EL SCROLL
+            const handleScroll = (e) => {
+                if (currentView === 'arena' && bgParallaxRef.current) {
+                    const scrollTop = e.target.scrollTop;
+                    const scrollHeight = e.target.scrollHeight - e.target.clientHeight;
+                    
+                    if (scrollHeight > 0) {
+                        const scrollRatio = scrollTop / scrollHeight;
+                        // Aumenta el scale del fondo basado en el progreso del scroll (hasta un 50% extra para un zoom notorio)
+                        const newScale = 1 + (scrollRatio * 0.5); 
+                        bgParallaxRef.current.style.transform = `scale(${newScale})`;
+                    }
+                }
+            };
+
             const isFamily = guestName ? /fam\b|familia/i.test(guestName) || guestName.includes(' y ') || guestName.includes(' & ') : false;
 
             return (
                 <div className="relative w-full h-full overflow-hidden">
                     <audio ref={audioRef} src="cancion.mp3" loop preload="auto"></audio>
                     
-                    {/* FONDO DINÁMICO */}
+                    {/* FONDO DINÁMICO CON REF PARA PARALLAX SCROLL */}
                     <div className="fixed inset-0 z-0 overflow-hidden bg-cyberDark pointer-events-none">
-                        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80 animate-breathe" style={{ backgroundImage: `url('/keily-estefania/kpopsfondo.svg')` }}></div>
-                        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 animate-breathe mix-blend-screen saturate-200 blur-[6px]" style={{ backgroundImage: `url('/keily-estefania/kpopsfondo.svg')` }}></div>
+                        {/* Wrapper para el Parallax gestionado por handleScroll */}
+                        <div ref={bgParallaxRef} className="absolute inset-0 w-full h-full origin-center transition-transform duration-100 ease-out will-change-transform">
+                            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80 animate-breathe" style={{ backgroundImage: `url('/keily-estefania/kpopsfondo.svg')` }}></div>
+                            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 animate-breathe mix-blend-screen saturate-200 blur-[6px]" style={{ backgroundImage: `url('/keily-estefania/kpopsfondo.svg')` }}></div>
+                        </div>
                         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0514]/40 via-[#0a0514]/70 to-[#0a0514] z-0"></div>
                     </div>
 
@@ -381,7 +402,7 @@
                         <button onClick={() => setLang(l => l === 'ES' ? 'EN' : 'ES')} className="pointer-events-auto text-xs font-cyber tracking-[0.3em] text-white/50 hover:text-skyBlue backdrop-blur-sm px-3 py-1 border border-white/10 rounded-full">{lang === 'ES' ? 'EN / ES' : 'ES / EN'}</button>
                     </div>
 
-                    <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden">
+                    <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden" onScroll={handleScroll}>
                         {currentView === 'hero' && (
                             <main className="relative flex flex-col items-center min-h-[100dvh] px-6 text-center animate-fade-in overflow-hidden">
                                 
