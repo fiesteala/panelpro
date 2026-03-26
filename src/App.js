@@ -12024,8 +12024,15 @@ const ConfiguracionMaestraView = ({ agencyConfig, addNotification }) => {
   );
 };
 
+// Función auxiliar para el efecto Cristal (Glassmorphism)
+const hexToRgb = (hex) => {
+  if (!hex || hex.length !== 7) return {r:255,g:255,b:255};
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : {r:255,g:255,b:255};
+};
+
 // ==========================================
-// --- COMPONENTE: VISOR PÚBLICO WIDGET (COMPACTO, ANTI-ZOOM Y CRISTAL) ---
+// --- COMPONENTE: VISOR PÚBLICO WIDGET (ALTA COSTURA - GLASSMORPHISM) ---
 // ==========================================
 const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [eventoInfo, setEventoInfo] = useState(null);
@@ -12035,6 +12042,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [rsvpStatus, setRsvpStatus] = useState('idle'); 
   const [formError, setFormError] = useState(''); 
   const [downloadingId, setDownloadingId] = useState(null);
+  const [logoFailed, setLogoFailed] = useState(false);
   
   const [tempSubGuests, setTempSubGuests] = useState([]);
   const [extraRequested, setExtraRequested] = useState(0);
@@ -12046,15 +12054,25 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const isPreviewMode = urlParams.get('preview') === '1';
   
   const t_bg = urlParams.get('bg') ? `#${urlParams.get('bg')}` : '#f8fafc'; 
-  const t_card = urlParams.get('card') ? `#${urlParams.get('card')}` : '#ffffff'; 
   const t_btn = urlParams.get('btn') ? `#${urlParams.get('btn')}` : '#d97706'; 
   const t_txt = urlParams.get('txt') ? `#${urlParams.get('txt')}` : '#1c1917'; 
   const t_font = urlParams.get('font') || '';
 
+  const textRgb = hexToRgb(t_txt);
+
   const themeContainer = { backgroundColor: isIframe ? 'transparent' : t_bg, fontFamily: t_font ? `"${t_font}", sans-serif` : 'inherit', minHeight: '100vh', color: t_txt };
-  const themeCard = { backgroundColor: t_card, borderColor: `${t_txt}20`, color: t_txt };
+  
+  // 🔴 ESTILO DE CRISTAL ESMERILADO (Sutil y elegante)
+  const themeGlass = {
+    backgroundColor: isIframe ? `rgba(255, 255, 255, 0.03)` : `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.05)`,
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: `1px solid rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)`,
+    color: t_txt
+  };
+
   const themeBtn = { backgroundColor: t_btn, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.1em' };
-  const themeInput = { backgroundColor: isIframe ? 'rgba(255,255,255,0.3)' : `${t_bg}50`, color: t_txt, borderColor: `${t_txt}30` };
+  const themeInput = { backgroundColor: 'rgba(255,255,255,0.2)', color: t_txt, borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)` };
 
   useEffect(() => {
     let meta = document.querySelector('meta[name="viewport"]');
@@ -12182,7 +12200,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     }
   };
 
-  // 🔴 MAGIA DE ALTA COSTURA: Tomar foto al pase y mandarlo a la galería nativa
   const handleDownloadTicket = async (subGuest) => {
     setDownloadingId(subGuest.id);
     try {
@@ -12190,15 +12207,14 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
       const element = document.getElementById(`ticket_${subGuest.id}`);
       
       const canvas = await html2canvas(element, { 
-        scale: 3, // Alta resolución
+        scale: 3,
         useCORS: true, 
-        backgroundColor: t_card 
+        backgroundColor: null // Para que el png mantenga la elegancia si se puede
       });
       
       canvas.toBlob(async (blob) => {
         const file = new File([blob], `Pase_${subGuest.name.replace(/\s+/g, '_')}.png`, { type: 'image/png' });
         
-        // 1. Intentar usar la API de Compartir Nativa (La que abre el menú del carrete de fotos)
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
@@ -12206,7 +12222,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
             text: `Pase de acceso para ${subGuest.name}`
           });
         } else {
-          // 2. Plan B: Descarga clásica si el navegador es antiguo o es de PC
           const url = URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
@@ -12234,7 +12249,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const baseLink = `${getCleanBaseUrl()}/${eventId}`;
 
   // ==========================================
-  // PANTALLA 1: BILLETERA DE PASES (SI YA CONFIRMÓ O RECIÉN TERMINÓ DE CONFIRMAR)
+  // PANTALLA 1: BILLETERA DE PASES 
   // ==========================================
   if (isConfirmado || rsvpStatus === 'success') {
     const pasesActivos = guestInfo?.subGuests || [];
@@ -12242,12 +12257,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     return (
       <div style={themeContainer} className="relative pb-16 flex flex-col items-center p-4 overflow-hidden">
         {t_font && <style>{`@import url('https://fonts.googleapis.com/css2?family=${t_font.replace(/ /g, '+')}&display=swap');`}</style>}
-        
-        {isIframe && (
-          <style>{`
-            html, body, #root { background: transparent !important; background-color: transparent !important; overflow-x: hidden !important; touch-action: pan-y !important; }
-          `}</style>
-        )}
+        {isIframe && (<style>{`html, body, #root { background: transparent !important; background-color: transparent !important; overflow-x: hidden !important; touch-action: pan-y !important; }`}</style>)}
 
         <div className="w-full max-w-sm mx-auto z-50 animate-in slide-in-from-bottom-4 duration-500">
           
@@ -12270,21 +12280,33 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
               const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(baseLink + '?u=' + sg.id)}&margin=10`;
               return (
                 <div key={sg.id} className="flex flex-col items-center">
-                  {/* Tarjeta del Pase para la captura */}
-                  <div id={`ticket_${sg.id}`} style={themeCard} className={`w-full rounded-3xl p-6 border shadow-2xl relative overflow-hidden`}>
+                  {/* Tarjeta del Pase con Glassmorphism */}
+                  <div id={`ticket_${sg.id}`} style={themeGlass} className="w-full rounded-3xl p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] relative overflow-hidden">
                     
-                    {/* Elementos decorativos del boleto */}
                     <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: t_btn }}></div>
-                    <div className="absolute -left-3 top-1/2 w-6 h-6 rounded-full border border-r-0" style={{ borderColor: `${t_txt}20`, backgroundColor: t_bg }}></div>
-                    <div className="absolute -right-3 top-1/2 w-6 h-6 rounded-full border border-l-0" style={{ borderColor: `${t_txt}20`, backgroundColor: t_bg }}></div>
+                    <div className="absolute -left-3 top-1/2 w-6 h-6 rounded-full border border-r-0" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)` }}></div>
+                    <div className="absolute -right-3 top-1/2 w-6 h-6 rounded-full border border-l-0" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)` }}></div>
 
-                    <div className="text-center border-b pb-4 mb-4 border-dashed" style={{ borderColor: `${t_txt}30` }}>
+                    <div className="text-center border-b pb-4 mb-4 border-dashed" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.3)` }}>
+                      
+                      {/* Logo automático o nombre del evento */}
+                      {!logoFailed ? (
+                        <img 
+                          src={`/${eventId}/logodeevento.svg`} 
+                          alt="Logotipo" 
+                          className="h-14 mx-auto mb-3 object-contain drop-shadow-md" 
+                          onError={() => setLogoFailed(true)} 
+                        />
+                      ) : (
+                        <h3 className="font-editorial text-lg sm:text-xl font-bold mb-3 opacity-90">{eventoInfo?.nombres}</h3>
+                      )}
+
                       <p className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-1">Entrada Personal</p>
                       <h4 className="text-xl font-bold leading-tight">{sg.name || 'Acompañante VIP'}</h4>
                       {sg.isChild && <span style={{ backgroundColor: `${t_btn}20`, color: t_btn }} className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest mt-2 inline-block">Pase Infantil</span>}
                     </div>
 
-                    <div className="bg-white p-3 rounded-2xl border mx-auto w-max mb-4 shadow-sm" style={{ borderColor: `${t_txt}10` }}>
+                    <div className="bg-white p-3 rounded-2xl border mx-auto w-max mb-4 shadow-sm" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)` }}>
                       <img src={qrUrl} alt="QR Code" className="w-40 h-40 mix-blend-multiply" crossOrigin="anonymous" />
                     </div>
 
@@ -12296,7 +12318,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                     </div>
                   </div>
 
-                  {/* Botón de Guardar debajo de la tarjeta */}
                   <button 
                     onClick={() => handleDownloadTicket(sg)} 
                     disabled={downloadingId === sg.id}
@@ -12313,10 +12334,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
               );
             })}
           </div>
-
-          {/* Sugerencia nativa para móviles */}
           <p className="text-center text-[10px] mt-8 opacity-50 font-medium">Tip: Puedes tomarle captura de pantalla a tus pases o mantener presionado el código QR para guardarlo en tus fotos.</p>
-
         </div>
       </div>
     );
@@ -12328,15 +12346,17 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   if (isCancelado) {
     return (
       <div style={themeContainer} className="flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
-        <div style={{...themeCard, borderColor: t_txt, borderWidth: '2px'}} className="w-16 h-16 rounded-full flex items-center justify-center mb-5 shadow-lg opacity-50"><X size={32} /></div>
-        <h2 className="text-xl font-bold mb-2">Asistencia Declinada</h2>
-        <p className="text-sm opacity-70 font-medium">Lamentamos que no puedas acompañarnos. Hemos liberado tus lugares.</p>
+        <div style={themeGlass} className="p-8 rounded-3xl flex flex-col items-center shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
+          <div style={{borderColor: t_txt, borderWidth: '2px'}} className="w-16 h-16 rounded-full flex items-center justify-center mb-5 shadow-lg opacity-50"><X size={32} /></div>
+          <h2 className="text-xl font-bold mb-2">Asistencia Declinada</h2>
+          <p className="text-sm opacity-70 font-medium">Lamentamos que no puedas acompañarnos. Hemos liberado tus lugares.</p>
+        </div>
       </div>
     );
   }
 
   // ==========================================
-  // PANTALLA 3: EL FORMULARIO ORIGINAL (SI ES LA PRIMERA VEZ)
+  // PANTALLA 3: FORMULARIO RSVP (CRISTAL)
   // ==========================================
   return (
     <div style={themeContainer} className="relative pb-16 flex items-center justify-center p-3 sm:p-4 overflow-hidden">
@@ -12352,13 +12372,29 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
             </div>
           )}
 
-          <div style={themeCard} className={`w-full ${isPreviewMode ? 'rounded-b-2xl' : 'rounded-2xl'} p-4 sm:p-5 border max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar ${isIframe ? 'shadow-[0_8px_30px_rgba(0,0,0,0.12)]' : 'shadow-xl'}`}>
+          <div style={themeGlass} className={`w-full ${isPreviewMode ? 'rounded-b-2xl' : 'rounded-2xl'} p-5 sm:p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar`}>
             
-            <div className="text-center mb-5 border-b pb-3" style={{ borderColor: `${t_txt}15` }}>
-               <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-widest leading-tight">Confirmación</h3>
+            <div className="text-center mb-6 border-b pb-4" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
+               {!logoFailed ? (
+                 <img 
+                   src={`/${eventId}/logodeevento.svg`} 
+                   alt="Logotipo" 
+                   className="h-16 mx-auto mb-3 object-contain drop-shadow-md" 
+                   onError={() => setLogoFailed(true)} 
+                 />
+               ) : (
+                 <h3 className="text-xl sm:text-2xl font-editorial font-bold leading-tight mb-2">{eventoInfo?.nombres || 'Confirmación'}</h3>
+               )}
                {guestInfo && <p className="mt-1 text-sm font-medium opacity-80">{guestInfo.name} ({guestInfo.originalPasses || guestInfo.passes} lugares)</p>}
             </div>
 
+            {extrasAprobados > 0 && guestInfo?.status === 'confirmado' && (
+               <div style={{ backgroundColor: `${t_btn}15`, borderColor: t_btn, color: t_txt }} className="mb-4 border p-2.5 rounded-lg shadow-sm animate-in fade-in">
+                  <p className="text-xs font-black uppercase tracking-widest mb-0.5 flex items-center justify-center"><CheckCircle size={14} className="mr-1.5"/> Solicitud Aprobada</p>
+                  <p className="text-xs text-center font-medium">Te han otorgado {extrasAprobados} pase(s) extra. Tienes {guestInfo.passes} en total.</p>
+               </div>
+            )}
+            
             <form onSubmit={handleRSVPSubmit} className="space-y-4">
 
               {guestInfo ? (
@@ -12369,26 +12405,26 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                   
                   <div className="space-y-2.5">
                     {tempSubGuests.map((sg, idx) => (
-                      <div key={idx} style={{ borderColor: sg.willAttend ? `${t_txt}40` : `${t_txt}15`, opacity: sg.willAttend ? 1 : 0.6 }} className="p-2.5 rounded-xl border transition-all">
+                      <div key={idx} style={{ borderColor: sg.willAttend ? `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.3)` : `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)`, opacity: sg.willAttend ? 1 : 0.6 }} className="p-3 rounded-xl border transition-all bg-white/5">
                         <div className="flex justify-between items-center mb-1.5">
                           <label className="text-xs font-bold uppercase tracking-wider">Pase #{idx + 1}</label>
-                          <label style={{ backgroundColor: isIframe ? 'rgba(0,0,0,0.05)' : `${t_bg}60` }} className="flex items-center space-x-1.5 cursor-pointer px-2 py-1 rounded-md border" >
+                          <label style={{ backgroundColor: 'rgba(255,255,255,0.1)' }} className="flex items-center space-x-1.5 cursor-pointer px-2 py-1 rounded-md border border-white/5" >
                             <input type="checkbox" checked={sg.willAttend} onChange={(e) => handleSubGuestChange(idx, 'willAttend', e.target.checked)} className="w-3.5 h-3.5 accent-emerald-600" />
                             <span className="text-[10px] font-bold uppercase tracking-wider">{sg.willAttend ? 'SÍ VOY' : 'NO VOY'}</span>
                           </label>
                         </div>
                         
                         {sg.willAttend && (
-                          <div className="space-y-2 mt-2 pt-2 border-t animate-in fade-in" style={{ borderColor: `${t_txt}10` }}>
+                          <div className="space-y-2 mt-3 pt-3 border-t animate-in fade-in" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)` }}>
                             <input 
                               type="text" required 
                               placeholder={sg.isChild ? "Nombre del niño / menor..." : (idx === 0 ? "Tu nombre..." : "Nombre del adulto acompañante...")} 
                               value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)} 
-                              style={themeInput} className="w-full p-2 border rounded-md text-base font-medium outline-none" 
+                              style={themeInput} className="w-full p-2.5 border rounded-lg text-sm font-medium outline-none shadow-inner" 
                             />
-                            <label className="flex items-center space-x-2 cursor-pointer pt-0.5">
+                            <label className="flex items-center space-x-2 cursor-pointer pt-1">
                                <input type="checkbox" checked={sg.isChild || false} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-3.5 h-3.5 accent-indigo-600" />
-                               <span className="text-xs font-medium uppercase tracking-wider opacity-80">Pase de Menor / Niño</span>
+                               <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">Pase de Menor / Niño</span>
                             </label>
                           </div>
                         )}
@@ -12396,27 +12432,27 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                     ))}
                   </div>
 
-                  <div className="border-t pt-3 mt-4 flex items-center justify-between p-2 rounded-lg" style={{ borderColor: `${t_txt}15`, backgroundColor: isIframe ? 'transparent' : `${t_bg}40` }}>
+                  <div className="border-t pt-4 mt-5 flex items-center justify-between p-2" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-widest">¿Pases extra?</p>
-                      <p className="text-[8px] text-slate-400 leading-tight">Sujeto a disponibilidad.</p>
+                      <p className="text-[8px] opacity-60 leading-tight">Sujeto a disponibilidad.</p>
                     </div>
-                    <div style={{ backgroundColor: t_card, borderColor: `${t_txt}30` }} className="flex items-center border rounded-md p-0.5 shadow-sm">
-                      <button type="button" onClick={() => setExtraRequested(Math.max(0, extraRequested - 1))} className="px-2 py-0.5 text-lg font-bold hover:opacity-50">-</button>
+                    <div style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)` }} className="flex items-center border rounded-lg p-0.5 shadow-sm bg-white/10">
+                      <button type="button" onClick={() => setExtraRequested(Math.max(0, extraRequested - 1))} className="px-2 py-1 text-lg font-bold hover:opacity-50">-</button>
                       <span className="text-sm font-black w-6 text-center">{extraRequested}</span>
-                      <button type="button" onClick={() => setExtraRequested(extraRequested + 1)} className="px-2 py-0.5 text-lg font-bold hover:opacity-50">+</button>
+                      <button type="button" onClick={() => setExtraRequested(extraRequested + 1)} className="px-2 py-1 text-lg font-bold hover:opacity-50">+</button>
                     </div>
                   </div>
                 </>
               ) : (
                 <div className="space-y-3">
-                  <div className="p-3 rounded-xl border" style={{ borderColor: `${t_txt}20` }}>
-                    <label className="block text-xs font-bold uppercase tracking-widest mb-1.5 opacity-90">Tu Nombre Completo</label>
-                    <input type="text" required value={openName} onChange={e => setOpenName(e.target.value)} style={themeInput} className="w-full p-2.5 border rounded-lg outline-none font-medium text-base" placeholder="Ej. Familia López" />
+                  <div className="p-3 rounded-xl border bg-white/5" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5 opacity-90">Tu Nombre Completo</label>
+                    <input type="text" required value={openName} onChange={e => setOpenName(e.target.value)} style={themeInput} className="w-full p-2.5 border rounded-lg outline-none font-medium text-sm shadow-inner" placeholder="Ej. Familia López" />
                   </div>
-                  <div className="p-3 rounded-xl border" style={{ borderColor: `${t_txt}20` }}>
-                    <label className="block text-xs font-bold uppercase tracking-widest mb-1.5 opacity-90">¿Cuántos asisten?</label>
-                    <select value={openPasses} onChange={e => setOpenPasses(e.target.value)} style={themeInput} className="w-full p-2.5 border rounded-lg outline-none font-medium text-base">
+                  <div className="p-3 rounded-xl border bg-white/5" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5 opacity-90">¿Cuántos asisten?</label>
+                    <select value={openPasses} onChange={e => setOpenPasses(e.target.value)} style={themeInput} className="w-full p-2.5 border rounded-lg outline-none font-medium text-sm shadow-inner">
                       {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n} persona(s)</option>)}
                     </select>
                   </div>
@@ -12424,12 +12460,12 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
               )}
               
               {formError && (
-                 <div className="bg-rose-500/10 border border-rose-500/30 text-rose-600 p-2.5 rounded-lg font-bold text-xs flex items-center shadow-sm animate-in shake">
-                    <AlertCircle size={16} className="mr-1.5 flex-shrink-0"/> {formError}
+                 <div className="bg-rose-500/20 border border-rose-500/40 text-rose-500 p-3 rounded-xl font-bold text-xs flex items-center shadow-sm animate-in shake">
+                    <AlertCircle size={16} className="mr-2 flex-shrink-0"/> {formError}
                  </div>
               )}
 
-              <button type="submit" disabled={rsvpStatus === 'submitting'} style={{...themeBtn, opacity: (!guestInfo || tempSubGuests.filter(s => s.willAttend).length > 0) ? 1 : 0.8 }} className="w-full py-3.5 rounded-xl font-bold text-sm sm:text-base shadow-lg hover:scale-[1.02] transition-transform mt-5 border-b-4 border-black/20">
+              <button type="submit" disabled={rsvpStatus === 'submitting'} style={{...themeBtn, opacity: (!guestInfo || tempSubGuests.filter(s => s.willAttend).length > 0) ? 1 : 0.8 }} className="w-full py-4 rounded-xl font-bold text-sm shadow-xl hover:scale-[1.02] transition-transform mt-6 border-b-4 border-black/20">
                 {rsvpStatus === 'submitting' ? 'Enviando...' : (!guestInfo || tempSubGuests.filter(s => s.willAttend).length > 0 ? 'Confirmar Asistencia' : 'Declinar Invitación')}
               </button>
             </form>
