@@ -390,7 +390,7 @@
 
                     <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden">
                         {currentView === 'hero' && (
-                            <main className="relative flex flex-col items-center min-h-full px-6 text-center animate-fade-in py-12 overflow-hidden">
+                            <main className="relative flex flex-col items-center min-h-[100dvh] px-6 text-center animate-fade-in overflow-hidden">
                                 
                                 {/* SISTEMA DE SILUETA -> HOLOGRAMA */}
                                 <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-5xl h-[55vh] md:h-[45vh] lg:h-[40vh] max-h-[500px] flex justify-center items-end z-0 pointer-events-none">
@@ -414,57 +414,64 @@
                                     )}
                                 </div>
 
-                                {/* CONTENEDOR DE INTERFAZ (Ahora perfectamente centrado con justify-center) */}
-                                <div className={`relative z-10 flex flex-col items-center justify-center w-full h-full min-h-[80vh] pb-10 md:pb-0 transition-all duration-1000 ${isTransforming ? 'pointer-events-none' : 'opacity-100'}`}>
+                                {/* CONTENEDOR DE INTERFAZ: Utilizando justify-between para anclar arriba y abajo */}
+                                <div className={`relative z-10 flex flex-col items-center justify-between w-full h-full min-h-[100dvh] pt-20 pb-28 md:pt-24 md:pb-24 transition-all duration-1000 ${isTransforming ? 'pointer-events-none' : 'opacity-100'}`}>
                                     
-                                    <div className="mb-6 md:mb-10 w-36 h-36 md:w-52 md:h-52 relative flex items-center justify-center shrink-0 mt-4 md:mt-0">
-                                        {/* Logo Original */}
-                                        <img 
-                                            src="/keily-estefania/kpoplogo.svg" 
-                                            alt="Logo" 
-                                            className={`absolute inset-0 w-full h-full object-contain z-10 animate-neon-flicker pointer-events-none transition-all duration-700 ${isTransforming ? 'opacity-0 scale-50 blur-md' : 'opacity-100 scale-100'}`} 
-                                        />
-                                        
-                                        {/* SALUDO VIP AL ACTIVAR */}
-                                        <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] md:w-[600px] flex flex-col items-center justify-center transition-all duration-700 delay-300 z-50 ${isTransforming ? 'opacity-100 scale-100' : 'opacity-0 scale-125 blur-md pointer-events-none'}`}>
-                                            <span className="font-cyber text-white text-lg md:text-2xl uppercase tracking-widest mb-1 md:mb-2 drop-shadow-md">Hola</span>
-                                            <span className="font-cyber font-black text-3xl md:text-5xl lg:text-6xl text-neonPink text-glow-pink uppercase tracking-widest mb-1 md:mb-3 text-center leading-tight">
-                                                {guestName || 'Demon Hunter'}
-                                            </span>
-                                            <span className="font-body text-skyBlue text-lg md:text-2xl lg:text-3xl uppercase tracking-widest text-glow-blue font-bold text-center">
-                                                bienvenido a la banda HUNTR/X
-                                            </span>
-                                        </div>
-                                    </div>
-                                    
-                                    {/* Etiqueta de Agente Asignado se oculta elegantemente durante la transformación */}
-                                    <div className={`h-16 flex items-center justify-center w-full mb-4 md:mb-6 transition-all duration-500 ${isTransforming ? 'opacity-0 blur-sm scale-95' : 'opacity-100 scale-100'}`}>
-                                        {guestName && (
-                                            <div className="glass-panel px-6 py-2 rounded-full border-neonPink/30 shadow-[0_0_15px_rgba(255,46,147,0.3)]">
-                                                <p className="text-sm md:text-base tracking-[0.1em] text-gray-200">
-                                                    <span className="text-neonPink font-cyber uppercase text-[10px] tracking-widest">{isFamily ? 'Agentes Asignados:' : 'Agente Asignado:'}</span><br/>
-                                                    <span className="italic font-bold text-xl text-white">{guestName}</span>
-                                                </p>
+                                    {/* BLOQUE SUPERIOR (Logo + Etiqueta Agente) */}
+                                    <div className="flex flex-col items-center w-full">
+                                        <div className="mb-4 md:mb-6 w-48 h-48 md:w-64 md:h-64 relative flex items-center justify-center shrink-0">
+                                            {/* Logo Original (Más grande) */}
+                                            <img 
+                                                src="/keily-estefania/kpoplogo.svg" 
+                                                alt="Logo" 
+                                                className={`absolute inset-0 w-full h-full object-contain z-10 animate-neon-flicker pointer-events-none transition-all duration-700 ${isTransforming ? 'opacity-0 scale-50 blur-md' : 'opacity-100 scale-100'}`} 
+                                            />
+                                            
+                                            {/* SALUDO VIP AL ACTIVAR */}
+                                            <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] md:w-[600px] flex flex-col items-center justify-center transition-all duration-700 delay-300 z-50 ${isTransforming ? 'opacity-100 scale-100' : 'opacity-0 scale-125 blur-md pointer-events-none'}`}>
+                                                <span className="font-cyber text-white text-lg md:text-2xl uppercase tracking-widest mb-1 md:mb-2 drop-shadow-md">Hola</span>
+                                                <span className="font-cyber font-black text-3xl md:text-5xl lg:text-6xl text-neonPink text-glow-pink uppercase tracking-widest mb-1 md:mb-3 text-center leading-tight">
+                                                    {guestName || 'Demon Hunter'}
+                                                </span>
+                                                <span className="font-body text-skyBlue text-lg md:text-2xl lg:text-3xl uppercase tracking-widest text-glow-blue font-bold text-center">
+                                                    bienvenido a la banda HUNTR/X
+                                                </span>
                                             </div>
-                                        )}
-                                    </div>
-                                    
-                                    {/* TÍTULOS JUSTIFICADOS Y COMPACTOS - Descienden hacia el botón */}
-                                    <div className={`inline-block text-center mb-8 md:mb-10 transition-transform duration-1000 ease-in-out ${isTransforming ? 'translate-y-16 md:translate-y-20 scale-105' : 'translate-y-0 scale-100'}`}>
-                                        <h1 className="text-6xl md:text-[6.5rem] lg:text-8xl font-cyber font-black text-white text-glow-pink glitch mb-0 uppercase tracking-wider leading-none" data-text="KEYLI">KEYLI</h1>
-                                        <div className="flex justify-between w-full px-[0.1em] mt-1 md:mt-2 mb-6">
-                                            {'ESTEFANIA'.split('').map((letter, index) => (
-                                                <span key={index} className="font-cyber font-bold text-lg md:text-3xl lg:text-4xl text-neonPurple text-glow-purple uppercase">{letter}</span>
-                                            ))}
+                                        </div>
+                                        
+                                        {/* Etiqueta de Agente Asignado se oculta elegantemente durante la transformación */}
+                                        <div className={`h-16 flex items-center justify-center w-full transition-all duration-500 ${isTransforming ? 'opacity-0 blur-sm scale-95' : 'opacity-100 scale-100'}`}>
+                                            {guestName && (
+                                                <div className="glass-panel px-6 py-2 rounded-full border-neonPink/30 shadow-[0_0_15px_rgba(255,46,147,0.3)]">
+                                                    <p className="text-sm md:text-base tracking-[0.1em] text-gray-200">
+                                                        <span className="text-neonPink font-cyber uppercase text-[10px] tracking-widest">{isFamily ? 'Agentes Asignados:' : 'Agente Asignado:'}</span><br/>
+                                                        <span className="italic font-bold text-xl text-white">{guestName}</span>
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                     
-                                    {/* BOTÓN - Desaparece de la vista */}
-                                    <button onClick={startBriefingSequence} className={`group relative px-10 py-4 font-cyber text-sm md:text-base tracking-[0.2em] uppercase text-white overflow-hidden rounded-xl transition-all duration-700 shadow-[0_0_20px_rgba(255,46,147,0.4)] ${isTransforming ? 'opacity-0 translate-y-10 scale-90 blur-sm pointer-events-none' : 'opacity-100 translate-y-0 scale-100 hover:scale-[1.03]'}`}>
-                                        <span className="absolute inset-0 w-full h-full bg-neonPink group-hover:bg-neonPurple transition-colors duration-500"></span>
-                                        <span className="absolute inset-0 w-full h-full border-2 border-white/30 z-10 rounded-xl"></span>
-                                        <span className="relative z-20 font-bold flex items-center gap-3">Desplegar Barrera Musical <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></span>
-                                    </button>
+                                    {/* BLOQUE INFERIOR (Títulos y Botón anclados al fondo mediante mt-auto) */}
+                                    <div className="flex flex-col items-center w-full mt-auto">
+                                        {/* TÍTULOS JUSTIFICADOS Y COMPACTOS - Descienden un poco al hacer click */}
+                                        <div className={`inline-block text-center mb-6 md:mb-8 transition-transform duration-1000 ease-in-out ${isTransforming ? 'translate-y-16 md:translate-y-20 scale-105' : 'translate-y-0 scale-100'}`}>
+                                            <h1 className="text-6xl md:text-[6.5rem] lg:text-8xl font-cyber font-black text-white text-glow-pink glitch mb-0 uppercase tracking-wider leading-none" data-text="KEYLI">KEYLI</h1>
+                                            <div className="flex justify-between w-full px-[0.1em] mt-1 md:mt-2">
+                                                {'ESTEFANIA'.split('').map((letter, index) => (
+                                                    <span key={index} className="font-cyber font-bold text-lg md:text-3xl lg:text-4xl text-neonPurple text-glow-purple uppercase">{letter}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        
+                                        {/* BOTÓN - Desaparece de la vista con blur y fade down */}
+                                        <button onClick={startBriefingSequence} className={`group relative px-10 py-4 font-cyber text-sm md:text-base tracking-[0.2em] uppercase text-white overflow-hidden rounded-xl transition-all duration-700 shadow-[0_0_20px_rgba(255,46,147,0.4)] ${isTransforming ? 'opacity-0 translate-y-10 scale-90 blur-sm pointer-events-none' : 'opacity-100 translate-y-0 scale-100 hover:scale-[1.03]'}`}>
+                                            <span className="absolute inset-0 w-full h-full bg-neonPink group-hover:bg-neonPurple transition-colors duration-500"></span>
+                                            <span className="absolute inset-0 w-full h-full border-2 border-white/30 z-10 rounded-xl"></span>
+                                            <span className="relative z-20 font-bold flex items-center gap-3">Desplegar Barrera Musical <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></span>
+                                        </button>
+                                    </div>
+
                                 </div>
                             </main>
                         )}
