@@ -622,12 +622,15 @@ END:VCALENDAR`;
                     </div>
 
                     {isRsvpModalOpen && (
-                        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex justify-center items-center p-4">
-                            <div className="relative w-full max-w-md mx-auto flex flex-col items-center justify-center z-10 animate-fade-in">
-                                <button onClick={() => setIsRsvpModalOpen(false)} className="absolute -top-12 right-0 w-10 h-10 bg-cyberDark/80 border border-neonPink/50 rounded-full flex items-center justify-center text-white hover:bg-neonPink transition-colors z-20 box-glow-pink">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                                </button>
-                                <iframe src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani&v=${sessionCacheBuster}`} allowTransparency="true" style={{ backgroundColor: 'transparent', border: 'none' }} className="w-full max-w-md h-[90vh] mx-auto relative z-10"></iframe>
+                        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex flex-col justify-center items-center p-4">
+                            {/* 🔴 Botón de Cerrar pegado a la pantalla (top-6 right-6), nunca se saldrá */}
+                            <button onClick={() => setIsRsvpModalOpen(false)} className="absolute top-6 right-6 md:top-8 md:right-8 w-10 h-10 bg-cyberDark/80 border border-neonPink/50 rounded-full flex items-center justify-center text-white hover:bg-neonPink transition-colors z-[150] box-glow-pink">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                            
+                            {/* Contenedor del Iframe ajustado para no chocar con el botón */}
+                            <div className="relative w-full max-w-md mx-auto flex flex-col items-center justify-center z-10 animate-fade-in h-[85vh] mt-10">
+                                <iframe src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani&v=${sessionCacheBuster}`} allowTransparency="true" style={{ backgroundColor: 'transparent', border: 'none' }} className="w-full h-full relative z-10"></iframe>
                             </div>
                         </div>
                     )}
