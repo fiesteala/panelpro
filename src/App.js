@@ -985,7 +985,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 // ==========================================
 // --- COMPONENTE: INVITADOS (DARK PREMIUM) ---
 // ==========================================
-const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento, userPlan, eventName }) => {
+const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento, userPlan, eventName, urlInvitacion }) => {
   // 🔴 LÓGICA DE BODA RESTAURADA (Con Botón Toggle)
   const isBodaType = tipoEvento === 'boda';
   const [isWeddingMode, setIsWeddingMode] = useState(isBodaType);
@@ -1088,8 +1088,18 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
   const handleSendWhatsApp = async (parentGuest) => {
     const phone = parentGuest.phone ? parentGuest.phone.replace(/\D/g,'') : '';
-    const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
-    const linkPersonalizado = `${baseDomain}/${ID_DEL_EVENTO}?u=${parentGuest.id}`;
+    
+    // 🔴 EL ARREGLO: Usamos el link exacto que pusiste en el SuperAdmin
+    let linkPersonalizado = '';
+    if (urlInvitacion) {
+      // Revisa si el link ya tiene un signo de interrogación para no romper la URL
+      const separator = urlInvitacion.includes('?') ? '&' : '?';
+      linkPersonalizado = `${urlInvitacion}${separator}u=${parentGuest.id}`;
+    } else {
+      // Si por alguna razón se te olvida poner el link en el SuperAdmin, usa este de respaldo
+      const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
+      linkPersonalizado = `${baseDomain}/${ID_DEL_EVENTO}?u=${parentGuest.id}`;
+    }
     
     const msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
 
@@ -12468,10 +12478,8 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const renderContent = () => {
     switch(activeTab) {
       case 'licencias': return isSuperAdminMode && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} authData={authData} /> : null;
-      case 'dashboard': return typeof DashboardView !== 'undefined' ? <DashboardView authData={authData} guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null; 
-      
-      case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={currentEventType} userPlan={currentEventPlan} eventName={currentEventName} /> : null; 
-      
+      case 'dashboard': return typeof DashboardView !== 'undefined' ? <DashboardView authData={authData} guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null;      
+      case 'invitados': return typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={currentEventType} userPlan={currentEventPlan} eventName={currentEventName} urlInvitacion={activeEventData?.urlInvitacion} /> : null;      
       case 'escaner': return userPlan === 'diamante' && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
       case 'mesas': return userPlan === 'diamante' && typeof MesasView !== 'undefined' ? <MesasView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
       case 'mapa': return userPlan === 'diamante' && typeof MapaView !== 'undefined' ? <MapaView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} globalSearch={globalSearch} elements={mapElements} setElements={setMapElements} /> : null;
