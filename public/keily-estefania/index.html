@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Open Graph (WhatsApp Preview) -->
     <meta property="og:title" content="Misión VIP - Keyli K-Pop Hunters" />
     <meta property="og:description" content="Abre tu archivo de misión y confirma tu asistencia a la arena." />
     <meta property="og:image" content="[LINK_DE_FOTO_PORTADA.jpg]" />
@@ -13,22 +12,16 @@
 
     <title>Pase VIP - Keyli Estefania</title>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700;900&family=Birthstone&display=swap" rel="stylesheet">
 
-    <!-- html2canvas para descargar pases nativamente en React -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-    <!-- PRELOAD: Fuerza la carga inmediata de los SVG pesados para evitar retrasos visuales -->
     <link rel="preload" href="/keily-estefania/kpopsfondo.svg" as="image" type="image/svg+xml">
     <link rel="preload" href="/keily-estefania/kpoplogo.svg" as="image" type="image/svg+xml">
     <link rel="preload" href="/keily-estefania/kpopsilueta.svg" as="image" type="image/svg+xml">
     <link rel="preload" href="/keily-estefania/kpopguerreras.svg" as="image" type="image/svg+xml">
     <link rel="preload" href="/keily-estefania/kpop.svg" as="image" type="image/svg+xml">
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -76,13 +69,12 @@
         }
     </script>
 
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <!-- Babel -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- Estilos Personalizados -->
     <style type="text/tailwindcss">
         @layer utilities {
             .text-glow-pink { text-shadow: 0 0 10px #ff2e93, 0 0 20px #ff2e93, 0 0 40px rgba(255, 46, 147, 0.6); }
@@ -120,7 +112,6 @@
                 100% { transform: rotate(30deg) translateY(100%); }
             }
 
-            /* Efecto Holográfico Épico para la revelación a color */
             .holo-reveal {
                 filter: drop-shadow(0 0 20px #00e5ff) drop-shadow(0 0 40px #ff2e93) brightness(1.2) contrast(1.1);
                 animation: holo-glitch 3s ease-in-out forwards;
@@ -161,7 +152,6 @@
             }
             .animate-neon-flicker { animation: neon-flicker 4s infinite alternate; }
 
-            /* Estilos del Logo de Baulia */
             .baulia-text { fill: #ffffff; transition: fill 0.5s ease; }
             .baulia-diamond-animator { transform-origin: 100px 100px; transform: rotate(45deg) scale(0.8); transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
             .baulia-diamond-shape { fill: transparent; stroke: #D4AF37; stroke-width: 1.72px; transition: fill 0.5s ease, stroke-width 0.3s ease; }
@@ -170,12 +160,9 @@
             .baulia-logo-svg:hover .baulia-diamond-shape { stroke-width: 3px; }
             .baulia-logo-svg:hover .baulia-b { transform: scale(1.05); fill: #FDF1A9; }
             
-            /* Ocultar barra de scroll nativa para el carrusel de pases */
             .hide-scrollbar::-webkit-scrollbar { display: none; }
             .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         }
-
-        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-cyberDark text-white font-body selection:bg-neonPurple selection:text-white overflow-hidden h-screen w-screen">
@@ -267,19 +254,15 @@
             const [currentView, setCurrentView] = useState('hero'); 
             const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
             
-            // NUEVO: ESTADO DE MEMORIA PARA DATOS DE REACT (Baulia)
+            // NUEVO ESTADO: Guarda los datos de confirmación recibidos del Panel
             const [confirmedData, setConfirmedData] = useState(null);
-            
-            // ESTADO PARA TRANSFORMACIÓN HOLOGRÁFICA
+
             const [isTransforming, setIsTransforming] = useState(false);
-            
             const audioRef = useRef(null);
-            // REF PARA CONTROLAR EL FONDO CON SCROLL (PARALLAX ZOOM)
             const bgParallaxRef = useRef(null);
             
             const EVENT_ID = 'prueba-htsj';
 
-            // Protección Anti-Robo
             useEffect(() => {
                 const preventDefault = (e) => e.preventDefault();
                 document.addEventListener('contextmenu', preventDefault);
@@ -292,25 +275,12 @@
                 };
             }, []);
 
-            // OÍDO DE REACT: Escuchar evento RSVP de Baulia
-            useEffect(() => {
-                const handleMessage = (event) => {
-                    if (!event.origin.includes('baulia.com')) return;
-                    if (event.data && event.data.action === 'RSVP_SUCCESS_DATA') {
-                        setConfirmedData(event.data);
-                        setIsRsvpModalOpen(false);
-                    }
-                };
-                window.addEventListener('message', handleMessage);
-                return () => window.removeEventListener('message', handleMessage);
-            }, []);
-
-            // Extracción Inteligente (Solo para nombre en la Hero si se necesita visualmente antes de confirmar)
             useEffect(() => {
                 const urlParams = new URLSearchParams(window.location.search);
                 const u = urlParams.get('u');
                 if (u) {
                     setGuestUid(u);
+                    // Chequeo Inicial (Opcional, pero bueno por si acaso)
                     fetch(`https://firestore.googleapis.com/v1/projects/panel-de-control-intelig-db278/databases/(default)/documents/eventos/${EVENT_ID}/invitados/${u}`)
                         .then(r => r.ok ? r.json() : null)
                         .then(d => {
@@ -319,34 +289,54 @@
                 }
             }, []);
 
+            // 🔴 EL OÍDO MÁGICO: Escucha cuando el Panel de Baulia grita que ya confirmó
+            useEffect(() => {
+                const handleMessage = (event) => {
+                    if (!event.origin.includes('baulia.com')) return;
+                    if (event.data && event.data.action === 'RSVP_SUCCESS_DATA') {
+                        setConfirmedData(event.data);
+                        setIsRsvpModalOpen(false); 
+                    }
+                };
+                window.addEventListener('message', handleMessage);
+                return () => window.removeEventListener('message', handleMessage);
+            }, []);
+
             const toggleAudio = () => {
                 if (isPlaying) audioRef.current.pause(); else audioRef.current.play().catch(e => {});
                 setIsPlaying(!isPlaying);
             };
 
             const startBriefingSequence = () => {
-                // Iniciar la transformación holográfica en la portada
                 setIsTransforming(true);
-                
-                // Forzar reproducción de música al instante
                 if (audioRef.current) {
                     audioRef.current.play().then(() => setIsPlaying(true)).catch(e => console.log("Auto-play blocked:", e));
                 }
-                
-                // Aumento de tiempo: 10 segundos enteros antes de cambiar directo a la arena
                 setTimeout(() => {
                     setCurrentView('arena');
                 }, 10000); 
             };
 
-            // Función nativa para descargar el pase como imagen
+            const handleScroll = (e) => {
+                if (currentView === 'arena' && bgParallaxRef.current) {
+                    const scrollTop = e.target.scrollTop;
+                    const scrollHeight = e.target.scrollHeight - e.target.clientHeight;
+                    
+                    if (scrollHeight > 0) {
+                        const scrollRatio = scrollTop / scrollHeight;
+                        const newScale = 1 + (scrollRatio * 0.5); 
+                        bgParallaxRef.current.style.transform = `scale(${newScale})`;
+                    }
+                }
+            };
+
+            // 🔴 FUNCIÓN DE DESCARGA: Usa el html2canvas global
             const descargarPase = async (id, name) => {
                 try {
                     const html2canvas = window.html2canvas;
                     const element = document.getElementById(`ticket_${id}`);
-                    // Ocultamos temporalmente bordes o estilos que puedan romper el canvas si es necesario, 
-                    // pero con configuraciones estables suele funcionar directo.
                     const canvas = await html2canvas(element, { scale: 3, useCORS: true, backgroundColor: null });
+                    
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], `Pase_${name.replace(/ /g, '_')}.png`, { type: 'image/png' });
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -358,39 +348,16 @@
                             link.click();
                         }
                     }, 'image/png');
-                } catch (e) { 
-                    console.error("Error al descargar:", e); 
+                } catch (e) {
+                    console.error("Error al descargar:", e);
                 }
-            };
-
-            // CONTROLADOR DE EFECTO PARALLAX PARA EL FONDO DURANTE EL SCROLL
-            const handleScroll = (e) => {
-                if (currentView === 'arena' && bgParallaxRef.current) {
-                    const scrollTop = e.target.scrollTop;
-                    const scrollHeight = e.target.scrollHeight - e.target.clientHeight;
-                    
-                    if (scrollHeight > 0) {
-                        const scrollRatio = scrollTop / scrollHeight;
-                        // Aumenta el scale del fondo basado en el progreso del scroll
-                        const newScale = 1 + (scrollRatio * 0.5); 
-                        bgParallaxRef.current.style.transform = `scale(${newScale})`;
-                    }
-                }
-            };
-
-            // Helper para garantizar el HEX correcto
-            const getHex = (val, fallback) => {
-                if (!val) return fallback;
-                return val.startsWith('#') ? val : `#${val}`;
             };
 
             return (
                 <div className="relative w-full h-full overflow-hidden">
                     <audio ref={audioRef} src="cancion.mp3" loop preload="auto"></audio>
                     
-                    {/* FONDO DINÁMICO CON REF PARA PARALLAX SCROLL */}
                     <div className="fixed inset-0 z-0 overflow-hidden bg-cyberDark pointer-events-none">
-                        {/* Wrapper para el Parallax gestionado por handleScroll */}
                         <div ref={bgParallaxRef} className="absolute inset-0 w-full h-full origin-center transition-transform duration-100 ease-out will-change-transform">
                             <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80 animate-breathe" style={{ backgroundImage: `url('/keily-estefania/kpopsfondo.svg')` }}></div>
                             <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 animate-breathe mix-blend-screen saturate-200 blur-[6px]" style={{ backgroundImage: `url('/keily-estefania/kpopsfondo.svg')` }}></div>
@@ -402,35 +369,28 @@
                         {currentView === 'hero' && (
                             <main className="relative flex flex-col items-center min-h-[100dvh] px-6 text-center animate-fade-in overflow-hidden">
                                 
-                                {/* SISTEMA DE SILUETA -> HOLOGRAMA */}
                                 <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-5xl h-[55vh] md:h-[45vh] lg:h-[40vh] max-h-[500px] flex justify-center items-end z-0 pointer-events-none">
-                                    {/* Silueta Original (Se desvanece y desenfoca al transformar) */}
                                     <img 
                                         src="/keily-estefania/kpopsilueta.svg" 
-                                        alt="Silueta Guerreras K-Pop" 
+                                        alt="Silueta" 
                                         className={`absolute bottom-0 w-auto h-full max-w-none object-contain object-bottom transition-all duration-[1500ms] ease-in-out ${isTransforming ? 'opacity-0 scale-105 blur-xl' : 'opacity-90 drop-shadow-[0_0_25px_rgba(183,36,255,0.4)]'}`}
                                     />
-                                    
-                                    {/* Revelación Holográfica a Color */}
                                     {isTransforming && (
                                         <div className="absolute bottom-0 w-auto h-full flex justify-center items-end">
                                             <div className="absolute inset-0 hologram-overlay rounded-full mix-blend-screen"></div>
                                             <img 
                                                 src="/keily-estefania/kpopguerreras.svg" 
-                                                alt="Holograma Guerreras" 
+                                                alt="Holograma" 
                                                 className="absolute bottom-0 w-auto h-full max-w-none object-contain object-bottom holo-reveal"
                                             />
                                         </div>
                                     )}
                                 </div>
 
-                                {/* CONTENEDOR DE INTERFAZ: Utilizando justify-between para anclar arriba y abajo */}
                                 <div className={`relative z-10 flex flex-col items-center justify-between w-full h-full min-h-[100dvh] pt-20 pb-28 md:pt-24 md:pb-24 transition-all duration-1000 ${isTransforming ? 'pointer-events-none' : 'opacity-100'}`}>
                                     
-                                    {/* BLOQUE SUPERIOR (Logo) */}
                                     <div className="flex flex-col items-center w-full relative">
                                         <div className="mb-4 md:mb-6 w-48 h-48 md:w-64 md:h-64 relative flex items-center justify-center shrink-0">
-                                            {/* Logo Original (Más grande, desaparece quitando la animación flicker) */}
                                             <img 
                                                 src="/keily-estefania/kpoplogo.svg" 
                                                 alt="Logo" 
@@ -438,13 +398,10 @@
                                             />
                                         </div>
 
-                                        {/* SALUDO VIP AL ACTIVAR */}
                                         <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[85%] md:-translate-y-[75%] w-[90vw] md:w-[500px] flex flex-col items-center justify-center transition-all duration-700 z-50 ${isTransforming ? 'opacity-100 scale-100' : 'opacity-0 scale-125 blur-xl pointer-events-none'}`}>
                                             <div className="glass-panel w-full p-8 md:p-10 rounded-3xl box-glow-purple border border-neonPurple/50 flex flex-col items-center justify-center relative overflow-hidden">
-                                                {/* Destellos de luz internos */}
                                                 <div className="absolute top-0 right-0 w-32 h-32 bg-skyBlue opacity-20 blur-3xl rounded-full pointer-events-none"></div>
                                                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-neonPink opacity-20 blur-3xl rounded-full pointer-events-none"></div>
-                                                
                                                 <span className="relative z-10 font-cyber text-white text-lg md:text-xl uppercase tracking-widest mb-2 drop-shadow-md">Hola</span>
                                                 <span className="relative z-10 font-cyber font-black text-3xl md:text-5xl lg:text-6xl text-neonPink text-glow-pink uppercase tracking-widest mb-3 text-center leading-tight">
                                                     {guestName || 'Demon Hunter'}
@@ -456,9 +413,7 @@
                                         </div>
                                     </div>
                                     
-                                    {/* BLOQUE INFERIOR (Títulos y Botón anclados al fondo mediante mt-auto) */}
                                     <div className="flex flex-col items-center w-full mt-auto">
-                                        {/* TÍTULOS JUSTIFICADOS Y COMPACTOS */}
                                         <div className={`inline-block text-center mb-6 md:mb-8 transition-transform duration-[3000ms] ease-in-out ${isTransforming ? 'translate-y-16 md:translate-y-20 scale-105' : 'translate-y-0 scale-100'}`}>
                                             <h1 className="text-6xl md:text-[6.5rem] lg:text-8xl font-cyber font-black text-white text-glow-pink glitch mb-0 uppercase tracking-wider leading-none" data-text="KEYLI">KEYLI</h1>
                                             <div className="flex justify-between w-full px-[0.1em] mt-1 md:mt-2">
@@ -468,7 +423,6 @@
                                             </div>
                                         </div>
                                         
-                                        {/* BOTÓN - Desaparece de la vista con blur y fade down */}
                                         <button onClick={startBriefingSequence} className={`group relative px-10 py-4 font-cyber text-sm md:text-base tracking-[0.2em] uppercase text-white overflow-hidden rounded-xl transition-all duration-700 shadow-[0_0_20px_rgba(255,46,147,0.4)] ${isTransforming ? 'opacity-0 translate-y-10 scale-90 blur-sm pointer-events-none' : 'opacity-100 translate-y-0 scale-100 hover:scale-[1.03]'}`}>
                                             <span className="absolute inset-0 w-full h-full bg-neonPink group-hover:bg-neonPurple transition-colors duration-500"></span>
                                             <span className="absolute inset-0 w-full h-full border-2 border-white/30 z-10 rounded-xl"></span>
@@ -480,7 +434,6 @@
                             </main>
                         )}
 
-                        {/* SECCIÓN DE ARENA DIRECTA */}
                         {currentView === 'arena' && (
                             <section className="w-full max-w-4xl mx-auto px-4 pt-8 md:pt-12 pb-8 min-h-full flex flex-col gap-10 animate-fade-in relative">
                                 <div className="text-center mb-2 relative z-10">
@@ -512,13 +465,14 @@
                                         <a href="https://www.instagram.com/ar/288339596001004/" target="_blank" rel="noopener noreferrer" className="group relative flex items-center justify-center gap-3 w-full py-4 rounded-xl uppercase font-cyber text-sm tracking-widest transition-all duration-300 bg-gradient-to-r from-neonPurple to-neonPink text-white hover:shadow-[0_0_20px_rgba(255,46,147,0.6)] overflow-hidden">
                                             <span className="absolute inset-0 w-full h-full bg-white/10 group-hover:bg-transparent transition-colors duration-300"></span>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="relative z-10"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                                            <span className="relative z-10 font-bold">Activar Visión Demon Hunter (Filtro)</span>
+                                            <span className="relative z-10 font-bold">Activar Visión Demon Hunter</span>
                                         </a>
                                     </div>
                                 </div>
 
-                                {/* SECCIÓN DE CONFIRMACIÓN O PASES VIP */}
                                 <div className="mt-12 mb-8 w-full" id="qr-section">
+                                    
+                                    {/* 🔴 LÓGICA DE CONFIRMACIÓN Y CARUSEL */}
                                     {!confirmedData ? (
                                         <div className="flex flex-col items-center justify-center text-center">
                                             <div className="max-w-2xl mx-auto mb-8 px-4">
@@ -531,38 +485,33 @@
                                         </div>
                                     ) : (
                                         <div className="w-full max-w-sm mx-auto mt-12 animate-fade-in">
-                                            <h3 className="text-center font-bold text-2xl mb-2 text-white font-cyber tracking-widest uppercase text-glow-pink">Mis Pases VIP</h3>
+                                            <h3 className="text-center font-bold text-2xl mb-2 text-white font-cyber tracking-widest text-glow-pink">Mis Pases VIP</h3>
                                             <p className="text-center text-xs opacity-70 mb-6 text-white font-body">Desliza y presenta en la entrada.</p>
                                             
-                                            {/* CARRUSEL NATIVO TAILWIND */}
                                             <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 hide-scrollbar">
                                                 {confirmedData.subGuests.map(sg => (
-                                                    <div key={sg.id} className="min-w-full flex-shrink-0 snap-center flex flex-col items-center px-2">
-                                                        <div id={`ticket_${sg.id}`} style={{ backgroundColor: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(15px)', borderColor: `${getHex(confirmedData.theme?.txtRgb, 'rgba(255,255,255)')}20`, color: confirmedData.theme?.txt || '#ffffff' }} className="w-full p-6 rounded-3xl border relative overflow-hidden shadow-[0_0_30px_rgba(183,36,255,0.3)]">
-                                                            <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: getHex(confirmedData.theme?.btn, '#ff2e93') }}></div>
+                                                    <div key={sg.id} className="min-w-full flex-shrink-0 snap-center flex flex-col items-center">
+                                                        <div id={`ticket_${sg.id}`} style={{ backgroundColor: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(15px)', borderColor: `${confirmedData.theme.txtRgb}20`, color: confirmedData.theme.txt }} className="w-full p-6 rounded-3xl border relative overflow-hidden shadow-[0_0_20px_rgba(183,36,255,0.3)]">
+                                                            <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: confirmedData.theme.btn }}></div>
                                                             
-                                                            {/* LOGO SUPERIOR DENTRO DE LA TARJETA */}
-                                                            <div className="text-center pb-4 mb-4 border-b border-white/20 border-dashed flex flex-col items-center">
-                                                                <img src="/keily-estefania/kpoplogo.svg" alt="Logo" className="w-12 h-12 object-contain animate-neon-flicker mb-1" />
-                                                                <h4 className="font-cyber text-neonPink text-glow-pink uppercase tracking-widest text-[10px] z-10 font-bold text-center mb-4">Cumple de Keyli</h4>
-                                                                
-                                                                <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1 font-cyber">Entrada Personal</p>
+                                                            <div className="text-center pb-4 mb-4 border-b border-white/20 border-dashed">
+                                                                <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">Entrada Personal</p>
                                                                 <h4 className="text-2xl font-bold leading-tight font-cyber">{sg.name || 'Acompañante VIP'}</h4>
-                                                                {sg.isChild && <span style={{ backgroundColor: `${getHex(confirmedData.theme?.btn, '#ff2e93')}30`, color: getHex(confirmedData.theme?.btn, '#ff2e93') }} className="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mt-3 inline-block font-cyber">Pase Infantil</span>}
+                                                                {sg.isChild && <span style={{ backgroundColor: `${confirmedData.theme.btn}30`, color: confirmedData.theme.btn }} className="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mt-3 inline-block">Pase Infantil</span>}
                                                             </div>
 
-                                                            <div className="bg-white p-2 rounded-xl shadow-[0_0_20px_rgba(0,229,255,0.4)] z-10 mx-auto w-max mb-5">
-                                                                <img src={sg.qrUrl} alt="QR" className="w-40 h-40 object-contain" crossOrigin="anonymous" />
+                                                            <div className="bg-white p-3 rounded-3xl mx-auto w-max mb-5 shadow-inner">
+                                                                <img src={sg.qrUrl} alt="QR" className="w-40 h-40 mix-blend-multiply" crossOrigin="anonymous" />
                                                             </div>
 
                                                             <div className="text-center">
-                                                                <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1 font-cyber">Asiento Asignado</p>
-                                                                <p className="text-sm font-black uppercase tracking-widest font-cyber text-glow-blue" style={{ color: getHex(confirmedData.theme?.btn, '#00e5ff') }}>
+                                                                <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">Asiento Asignado</p>
+                                                                <p className="text-sm font-black uppercase tracking-widest" style={{ color: confirmedData.theme.btn }}>
                                                                     {sg.tableId ? `Mesa Asignada` : 'Pendiente Recepción'}
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                        <button onClick={() => descargarPase(sg.id, sg.name)} style={{ backgroundColor: getHex(confirmedData.theme?.btn, '#ff2e93') }} className="w-[85%] py-3.5 rounded-b-2xl font-bold text-[10px] text-white shadow-xl -mt-2 relative z-0 uppercase tracking-widest hover:scale-105 transition-transform font-cyber">
+                                                        <button onClick={() => descargarPase(sg.id, sg.name)} style={{ backgroundColor: confirmedData.theme.btn }} className="w-[85%] py-3.5 rounded-b-2xl font-bold text-[10px] text-white shadow-[0_0_20px_rgba(255,46,147,0.5)] -mt-2 relative z-0 uppercase tracking-widest hover:scale-105 transition-transform">
                                                             Guardar Imagen VIP
                                                         </button>
                                                     </div>
@@ -570,8 +519,9 @@
                                             </div>
                                         </div>
                                     )}
+
                                 </div>
-                                
+
                                 <footer className="w-full text-center mt-12 border-t border-white/10 pt-8 relative z-20">
                                     {!guestUid && <a href="https://panel.baulia.com" target="_blank" rel="noopener noreferrer" className="font-body text-gray-500 hover:text-skyBlue text-sm mb-6 inline-block transition-colors">¿Eres el anfitrión? Iniciar Sesión</a>}
                                     <div className="flex flex-col items-center justify-center mt-2 opacity-80 hover:opacity-100 transition-opacity">
@@ -586,10 +536,6 @@
                                                     <path d="M758.75,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM758.75,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM766.07,69.96v82.62h-7.67v-82.62h7.67ZM765.72,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18-1.46,1.46-2.22,3.21-2.3,5.25h-.35ZM765.72,143.97h.35c.08,2.05.84,3.8,2.3,5.25,1.46,1.46,3.21,2.18,5.25,2.18h1.53v1.18h-9.44v-8.62Z"/>
                                                     <path d="M846.33,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM871.71,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.87-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM888.35,120.36v3.54h-36.95v-3.54h36.95ZM871.71,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM893.67,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95s1.34-3.13.47-5.49Z"/>
                                                 </g>
-                                                <g className="baulia-diamond-animator">
-                                                    <rect className="baulia-diamond-shape" x=".86" y=".86" width="198.64" height="198.64" transform="translate(0 200.36) rotate(-90)" strokeMiterlimit="10" />
-                                                </g>
-                                                <path className="baulia-b" d="M116.87,94.54l6.01-.41c6.47,0,11.27,1.21,14.42,3.62,3.14,2.42,4.72,5.83,4.72,10.25s-2.01,9.59-6.01,15.51c-4.01,5.92-9.2,11.3-15.58,16.13h7.79c3.19,0,5.42-.14,6.7-.41,1.27-.27,2-.41,2.19-.41,1.27,0,1.91.68,1.91,2.05s-.91,2.1-2.73,2.19c-7.02,0-13.76-.09-20.23-.27-10.2,6.47-20.23,9.7-30.07,9.7-4.65,0-8.34-.87-11.07-2.6s-4.1-3.48-4.1-5.26.75-3.16,2.25-4.17c1.5-1,3.62-1.5,6.36-1.5,10.66,0,22.59.23,35.81.68,5.47-4.46,9.84-9.64,13.12-15.51,3.28-5.88,4.92-11.18,4.92-15.92,0-7.56-4.06-11.34-12.16-11.34-3.19,0-6.49.5-9.91,1.5-3.42,1-5.47,1.71-6.15,2.12s-1.12.61-1.3.61c-.55,0-.82-.39-.82-1.16s1.18-1.71,3.55-2.8c10.39-5.01,20.54-11.68,30.48-20.02,9.93-8.34,14.9-14.28,14.9-17.83,0-1.64-1.28-2.46-3.83-2.46-10.39.09-24.65,7.88-42.78,23.37-3.65,9.38-9.64,20.91-17.97,34.58-8.34,13.67-17.06,25.9-26.17,36.69-9.11,10.8-15.9,16.19-20.36,16.19-2.73,0-4.1-1.41-4.1-4.24,0-6.47,6.13-17.99,18.38-34.58,12.25-16.58,26.12-31.84,41.61-45.78,2.73-6.65,4.1-11.5,4.1-14.56s-.73-5.47-2.19-7.24c-1.46-1.78-3.6-3.08-6.42-3.9-4.46-1.18-9.18-1.78-14.14-1.78s-8.77.12-11.41.34c-2.64.23-5.86.68-9.64,1.37-3.78.68-6.86,1.87-9.22,3.55-2.37,1.69-3.55,3.83-3.55,6.42s1.27,4.6,3.83,6.01c2.55,1.41,5.67,2.39,9.36,2.94s7.36,1.14,11,1.78c3.64.64,6.74,1.89,9.29,3.76,2.55,1.87,3.83,4.49,3.83,7.86,0,.91-.2,1.37-.61,1.37s-.73-.14-.96-.41c-.23-.27-.62-.82-1.16-1.64-.82-1.18-2.03-2.1-3.62-2.73-1.59-.64-4.06-1.25-7.38-1.84-3.33-.59-6.47-1.23-9.43-1.91-2.96-.68-5.94-1.57-8.95-2.66-3.01-1.09-5.42-2.64-7.24-4.65-1.82-2-2.73-4.35-2.73-7.04s1.14-5.08,3.42-7.17c2.28-2.1,5.28-3.74,9.02-4.92,7.65-2.28,15.63-3.42,23.92-3.42,21.5,0,32.25,5.65,32.25,16.95,0,1-.23,2.51-.68,4.51,18.4-14.85,33.35-22.28,44.83-22.28,5.1,0,7.65,1.55,7.65,4.65,0,4.46-4.67,10.8-14.01,19-9.34,8.2-18.98,14.58-28.9,19.13ZM44.17,163.69c2.64,0,9.73-8.45,21.25-25.35,11.52-16.9,20.75-32.64,27.68-47.22-13.67,13.03-25.76,26.58-36.29,40.66-10.52,14.08-15.78,23.66-15.78,28.77,0,2.09,1.05,3.14,3.14,3.14ZM111,142.64l-24.74-.55c-7.02,0-10.52,1.05-10.52,3.14,0,1.18,1.18,2.3,3.55,3.35,2.37,1.05,5.1,1.57,8.2,1.57,8.11,0,15.94-2.5,23.51-7.52Z" />
                                             </svg>
                                         </a>
                                     </div>
@@ -604,14 +550,16 @@
                         </button>
                     </div>
 
+                    {/* 🔴 MODAL RSVP LIMPIO (Cero cajas anidadas) */}
                     {isRsvpModalOpen && (
                         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex justify-center items-center p-4">
-                            <div className="relative w-full max-w-md mx-auto flex flex-col items-center justify-center z-10 animate-fade-in">
-                                <button onClick={() => setIsRsvpModalOpen(false)} className="absolute -top-12 right-0 w-10 h-10 bg-cyberDark/80 border border-neonPink/50 rounded-full flex items-center justify-center text-white hover:bg-neonPink transition-colors z-20 box-glow-pink">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                                </button>
-                                <iframe src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&preview=1&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani`} allowtransparency="true" style={{ backgroundColor: 'transparent', border: 'none' }} className="w-full max-w-md h-[90vh] mx-auto relative z-10"></iframe>
-                            </div>
+                            <button onClick={() => setIsRsvpModalOpen(false)} className="absolute top-6 right-6 w-10 h-10 bg-cyberDark/80 border border-neonPink/50 rounded-full flex items-center justify-center text-white hover:bg-neonPink transition-colors z-20 box-glow-pink"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                            <iframe 
+                                src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&preview=1&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani`} 
+                                allowTransparency="true" 
+                                style={{ backgroundColor: 'transparent', border: 'none' }} 
+                                className="w-full max-w-md h-[90vh] mx-auto relative z-10"
+                            ></iframe>
                         </div>
                     )}
                 </div>
