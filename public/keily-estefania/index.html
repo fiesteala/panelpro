@@ -10,7 +10,7 @@
     <meta property="og:url" content="https://baulia.com" />
     <meta property="og:type" content="website" />
 
-    <title>Pase VIP - Keyli Estefania</title>
+    <title>Keyli Estefania</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -160,37 +160,15 @@
             .baulia-logo-svg:hover .baulia-diamond-shape { stroke-width: 3px; }
             .baulia-logo-svg:hover .baulia-b { transform: scale(1.05); fill: #FDF1A9; }
             
+            /* Ocultar barra de scroll nativa para el carrusel de pases */
             .hide-scrollbar::-webkit-scrollbar { display: none; }
             .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-            /* 🔴 SPLASH SCREEN DE CARGA RÁPIDA */
-            #baulia-splash {
-                position: fixed; inset: 0; z-index: 9999;
-                background-color: #0a0514;
-                display: flex; flex-direction: column; justify-content: center; align-items: center;
-                transition: opacity 0.8s ease-out, visibility 0.8s;
-            }
-            .splash-loader {
-                width: 50px; height: 50px; border: 3px solid rgba(0, 229, 255, 0.2);
-                border-top-color: #ff2e93; border-radius: 50%;
-                animation: spin-slow 1s linear infinite; margin-bottom: 24px;
-            }
-            .splash-text {
-                font-family: 'Orbitron', sans-serif; color: #00e5ff;
-                text-transform: uppercase; letter-spacing: 0.3em; font-size: 12px;
-                animation: pulse-fast 2s infinite; text-shadow: 0 0 10px #00e5ff;
-            }
-            body.react-loaded #baulia-splash { opacity: 0; visibility: hidden; }
         }
+
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-cyberDark text-white font-body selection:bg-neonPurple selection:text-white overflow-hidden h-screen w-screen">
-    
-    <div id="baulia-splash">
-        <div class="splash-loader"></div>
-        <div class="splash-text">Desencriptando Misión...</div>
-    </div>
-
     <div id="root" class="h-full w-full"></div>
 
     <script type="text/babel">
@@ -271,23 +249,21 @@
         const App = () => {
             const [guestUid, setGuestUid] = useState(null);
             const [guestName, setGuestName] = useState(null);
-            const [lang, setLang] = useState('ES');
             const [isPlaying, setIsPlaying] = useState(false);
             const [currentView, setCurrentView] = useState('hero'); 
             const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
+            
             const [confirmedData, setConfirmedData] = useState(null);
             const [logoFailed, setLogoFailed] = useState(false);
-
             const [isTransforming, setIsTransforming] = useState(false);
+            
+            // 🔴 ESCUDO ANTI-CACHÉ (Evita que el Iframe parpadee infinitamente)
+            const [sessionCacheBuster] = useState(Date.now());
+
             const audioRef = useRef(null);
             const bgParallaxRef = useRef(null);
             
             const EVENT_ID = 'prueba-htsj';
-
-            // Apagar Splash Screen en cuanto React arranca
-            useEffect(() => {
-                document.body.classList.add('react-loaded');
-            }, []);
 
             useEffect(() => {
                 const preventDefault = (e) => e.preventDefault();
@@ -376,9 +352,9 @@
                 }
             };
 
-            // Helper para garantizar el HEX correcto
+            // Helper Seguro para Colores
             const getHex = (val, fallback) => {
-                if (!val) return fallback;
+                if (!val || typeof val !== 'string') return fallback;
                 return val.startsWith('#') ? val : `#${val}`;
             };
 
@@ -505,10 +481,10 @@
                                     </div>
                                 </div>
 
-                                {/* 🔴 ZONA DE RSVP Y CARRUSEL PEEK VIP */}
+                                {/* ZONA DE RSVP Y CARRUSEL PEEK VIP */}
                                 <div className="mt-12 mb-8 w-full relative" id="qr-section">
                                     <iframe 
-                                        src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani&v=${Date.now()}`} 
+                                        src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani&v=${sessionCacheBuster}`} 
                                         style={{ display: 'none' }} 
                                     ></iframe>
 
@@ -517,63 +493,64 @@
                                             <div className="max-w-2xl mx-auto mb-8 px-4">
                                                 <p className="font-body text-gray-300 text-lg md:text-xl leading-relaxed">Tu lightstick es nuestra mejor energía. Únete a Rumi, Mira y Zoey en este concierto único. <span className="text-white font-bold italic">¡Prepárate para cantar y bailar!</span><br/><span className="text-skyBlue font-bold block mt-3 text-glow-blue italic">¡Confirma tu despliegue para asegurar tu lugar en la formación!</span></p>
                                             </div>
-                                            <button onClick={() => setIsRsvpModalOpen(true)} className="group relative px-12 py-6 md:py-8 font-cyber text-lg md:text-2xl tracking-[0.2em] uppercase text-white overflow-hidden rounded-2xl transition-all duration-500 hover:scale-[1.02] shadow-[0_0_30px_rgba(0,229,255,0.5)] w-full max-w-md border-2 border-skyBlue box-glow-blue">
+                                            <button id="boton-abrir-rsvp" onClick={() => setIsRsvpModalOpen(true)} className="group relative px-12 py-6 md:py-8 font-cyber text-lg md:text-2xl tracking-[0.2em] uppercase text-white overflow-hidden rounded-2xl transition-all duration-500 hover:scale-[1.02] shadow-[0_0_30px_rgba(0,229,255,0.5)] w-full max-w-md border-2 border-skyBlue box-glow-blue">
                                                 <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-skyBlue via-neonPurple to-neonPink opacity-20 group-hover:opacity-100 transition-opacity duration-500"></span>
                                                 <span className="relative z-20 font-black flex items-center justify-center gap-4 text-glow-blue group-hover:text-white transition-colors uppercase">CONFIRMAR DESPLIEGUE</span>
                                             </button>
                                         </div>
                                     ) : (
-                                        <div className="w-full max-w-2xl mx-auto mt-12 animate-fade-in pb-10">
-                                            <h3 className="text-center font-bold text-3xl mb-2 text-white font-cyber tracking-widest text-glow-pink">Mis Pases VIP</h3>
-                                            <p className="text-center text-xs opacity-70 mb-4 text-white font-body">Presenta estos códigos en la entrada.</p>
+                                        <div className="w-full max-w-sm mx-auto mt-12 animate-fade-in">
+                                            <h3 className="text-center font-bold text-2xl mb-2 text-white font-cyber tracking-widest uppercase text-glow-pink">Mis Pases VIP</h3>
+                                            <p className="text-center text-xs opacity-70 mb-6 text-white font-body">Desliza y presenta en la entrada.</p>
                                             
                                             {/* INSTRUCCIÓN DE DESLIZAR */}
                                             {confirmedData.subGuests.length > 1 && (
                                                 <p className="text-center text-[10px] uppercase tracking-widest text-skyBlue mb-6 animate-pulse font-cyber">← Desliza para ver más →</p>
                                             )}
                                             
-                                            {/* CARRUSEL CON EFECTO PEEK (85% ancho) */}
-                                            <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 px-4 hide-scrollbar">
+                                            {/* CARRUSEL NATIVO TAILWIND */}
+                                            <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 hide-scrollbar">
                                                 {confirmedData.subGuests.map(sg => (
-                                                    <div key={sg.id} className="w-[85%] sm:w-[320px] flex-shrink-0 snap-center flex flex-col items-center">
-                                                        <div id={`ticket_${sg.id}`} style={{ backgroundColor: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(15px)', borderColor: `${getHex(confirmedData.theme?.txtRgb, 'rgba(255,255,255)')}20`, color: confirmedData.theme?.txt || '#ffffff' }} className="w-full p-6 rounded-3xl border relative overflow-hidden shadow-[0_0_20px_rgba(183,36,255,0.3)]">
+                                                    <div key={sg.id} className="w-[85%] sm:w-[320px] flex-shrink-0 snap-center flex flex-col items-center px-2">
+                                                        <div id={`ticket_${sg.id}`} style={{ backgroundColor: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(15px)', borderColor: 'rgba(255,255,255,0.2)', color: confirmedData.theme?.txt || '#ffffff' }} className="w-full p-6 rounded-3xl border relative overflow-hidden shadow-[0_0_30px_rgba(183,36,255,0.3)]">
                                                             <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: getHex(confirmedData.theme?.btn, '#ff2e93') }}></div>
                                                             
-                                                            <div className="text-center pb-4 mb-4 border-b border-white/20 border-dashed">
+                                                            <div className="text-center pb-4 mb-4 border-b border-white/20 border-dashed flex flex-col items-center">
                                                                 {!logoFailed ? (
-                                                                    <img src="/keily-estefania/logoevento.svg" alt="Logo Evento" className="h-16 mx-auto mb-4 object-contain animate-neon-flicker" onError={() => setLogoFailed(true)} />
+                                                                    <img src="/keily-estefania/logoevento.svg" alt="Logo Evento" className="h-12 mx-auto mb-4 object-contain animate-neon-flicker" onError={() => setLogoFailed(true)} />
                                                                 ) : (
-                                                                    <h3 className="font-cyber text-xl font-bold mb-4 uppercase text-glow-pink" style={{ color: confirmedData.theme.btn }}>{confirmedData.theme.eventNames || 'Keily Estefania'}</h3>
+                                                                    <h3 className="font-cyber text-xl font-bold mb-4 uppercase text-glow-pink" style={{ color: getHex(confirmedData.theme?.btn, '#ff2e93') }}>{confirmedData.theme?.eventNames || 'Keily Estefania'}</h3>
                                                                 )}
                                                                 
-                                                                <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">Entrada Personal</p>
+                                                                <h4 className="font-cyber text-neonPink text-glow-pink uppercase tracking-widest text-[10px] z-10 font-bold text-center mb-4">Cumple de Keyli</h4>
+                                                                
+                                                                <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1 font-cyber">Entrada Personal</p>
                                                                 <h4 className="text-2xl font-bold leading-tight font-cyber">{sg.name || 'Acompañante VIP'}</h4>
-                                                                {sg.isChild && <span style={{ backgroundColor: `${getHex(confirmedData.theme?.btn, '#ff2e93')}30`, color: getHex(confirmedData.theme?.btn, '#ff2e93') }} className="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mt-3 inline-block">Pase Infantil</span>}
+                                                                {sg.isChild && <span style={{ backgroundColor: `${getHex(confirmedData.theme?.btn, '#ff2e93')}30`, color: getHex(confirmedData.theme?.btn, '#ff2e93') }} className="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mt-3 inline-block font-cyber">Pase Infantil</span>}
                                                             </div>
 
-                                                            <div className="bg-white p-3 rounded-3xl mx-auto w-max mb-5 shadow-[0_0_15px_rgba(0,229,255,0.4)]">
-                                                                <img src={sg.qrUrl} alt="QR" className="w-40 h-40 mix-blend-multiply" crossOrigin="anonymous" />
+                                                            <div className="bg-white p-2 rounded-xl shadow-[0_0_20px_rgba(0,229,255,0.4)] z-10 mx-auto w-max mb-5">
+                                                                <img src={sg.qrUrl} alt="QR" className="w-40 h-40 object-contain" crossOrigin="anonymous" />
                                                             </div>
 
                                                             <div className="text-center space-y-2">
                                                                 <p className="text-[10px] font-cyber tracking-widest text-skyBlue">12 ABR 2026 | 14:00 HRS</p>
-                                                                <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">Asiento Asignado</p>
-                                                                <p className="text-sm font-black uppercase tracking-widest" style={{ color: getHex(confirmedData.theme?.btn, '#ff2e93') }}>
+                                                                <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1 font-cyber">Asiento Asignado</p>
+                                                                <p className="text-sm font-black uppercase tracking-widest font-cyber text-glow-blue" style={{ color: getHex(confirmedData.theme?.btn, '#00e5ff') }}>
                                                                     {sg.tableId ? `Mesa Asignada` : 'Pendiente Recepción'}
                                                                 </p>
                                                             </div>
                                                         </div>
                                                         <button onClick={() => descargarPase(sg.id, sg.name)} style={{ backgroundColor: getHex(confirmedData.theme?.btn, '#ff2e93') }} className="w-[85%] py-3.5 rounded-b-2xl font-bold text-[10px] text-white shadow-[0_0_20px_rgba(255,46,147,0.5)] -mt-2 relative z-0 uppercase tracking-widest hover:scale-105 transition-transform font-cyber">
-                                                            Guardar Pase VIP
+                                                            Guardar Imagen VIP
                                                         </button>
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
                                     )}
-
                                 </div>
-
+                                
                                 <footer className="w-full text-center mt-12 border-t border-white/10 pt-8 relative z-20">
                                     {!guestUid && <a href="https://panel.baulia.com" target="_blank" rel="noopener noreferrer" className="font-body text-gray-500 hover:text-skyBlue text-sm mb-6 inline-block transition-colors">¿Eres el anfitrión? Iniciar Sesión</a>}
                                     <div className="flex flex-col items-center justify-center mt-2 opacity-80 hover:opacity-100 transition-opacity">
@@ -612,7 +589,7 @@
                                 <button onClick={() => setIsRsvpModalOpen(false)} className="absolute -top-12 right-0 w-10 h-10 bg-cyberDark/80 border border-neonPink/50 rounded-full flex items-center justify-center text-white hover:bg-neonPink transition-colors z-20 box-glow-pink">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                 </button>
-                                <iframe src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani&v=${Date.now()}`} allowTransparency="true" style={{ backgroundColor: 'transparent', border: 'none' }} className="w-full max-w-md h-[90vh] mx-auto relative z-10"></iframe>
+                                <iframe src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani&v=${sessionCacheBuster}`} allowTransparency="true" style={{ backgroundColor: 'transparent', border: 'none' }} className="w-full max-w-md h-[90vh] mx-auto relative z-10"></iframe>
                             </div>
                         </div>
                     )}
