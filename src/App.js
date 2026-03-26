@@ -12032,9 +12032,8 @@ const hexToRgb = (hex) => {
 };
 
 // ==========================================
-// --- COMPONENTE: VISOR PÚBLICO WIDGET (ALTA COSTURA UNIFICADA) ---
+// --- COMPONENTE: VISOR PÚBLICO WIDGET (ALTA COSTURA - GLASSMORPHISM) ---
 // ==========================================
-// 🔴 NOTA: Este componente ya no muestra pases. Envía datos al HTML madre y gestiona RSVP.
 const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [eventoInfo, setEventoInfo] = useState(null);
   const [guestInfo, setGuestInfo] = useState(null);
@@ -12043,7 +12042,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [rsvpStatus, setRsvpStatus] = useState('idle'); 
   const [formError, setFormError] = useState(''); 
   const [logoFailed, setLogoFailed] = useState(false);
-  const [dataSent, setDataSent] = useState(false); // Estado para evitar loops de postMessage
+  const [dataSent, setDataSent] = useState(false); 
   
   const [tempSubGuests, setTempSubGuests] = useState([]);
   const [extraRequested, setExtraRequested] = useState(0);
@@ -12060,10 +12059,8 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const t_font = urlParams.get('font') || '';
 
   const textRgb = hexToRgb(t_txt);
-
   const themeContainer = { backgroundColor: 'transparent', fontFamily: t_font ? `"${t_font}", sans-serif` : 'inherit', minHeight: '100vh', color: t_txt };
   
-  // 🔴 GLASSMORPHISM EXTREMO PARA EL FORMULARIO (Sutil y elegante)
   const themeGlassForm = {
     backgroundColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.05)`,
     backdropFilter: 'blur(25px)',
@@ -12085,23 +12082,18 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     meta.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
   }, []);
 
-  // Función Mágica: Comunicar datos al HTML Madre
   const comunicarDatosALaInvitacionHTML = useCallback((guestData) => {
     if (!isIframe || !window.parent || dataSent) return;
 
-    // Preparamos los links de los QR y nombres limpios
     const getCleanBaseUrl = () => window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
     const baseLink = `${getCleanBaseUrl()}/${eventId}`;
 
     const subGuestsWithQr = guestData.subGuests?.map(sg => ({
         ...sg,
-        // Generamos la URL del QR lista para usar
         qrUrl: `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(baseLink + '?u=' + sg.id)}&margin=10`,
-        // Agregamos texto fallback por si acaso
         eventNames: eventoInfo?.nombres || ''
     })) || [];
 
-    // ¡GRITAMOS LOS DATOS!
     window.parent.postMessage({ 
         action: 'RSVP_SUCCESS_DATA', 
         passesLimit: guestData.originalPasses || guestData.passes,
@@ -12113,7 +12105,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     
     setDataSent(true);
   }, [eventId, isIframe, eventoInfo, t_btn, t_txt, textRgb, dataSent]);
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -12146,13 +12137,11 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     fetchData();
   }, [eventId, guestUid]);
 
-  // 🔴 NUEVA LÓGICA: Si ya confirmó, gritar datos y no mostrar nada visual
   useEffect(() => {
     if (!loading && guestInfo && eventoInfo && (guestInfo.status === 'confirmado' || guestInfo.status === 'ingreso')) {
         comunicarDatosALaInvitacionHTML(guestInfo);
     }
   }, [loading, guestInfo, eventoInfo, comunicarDatosALaInvitacionHTML]);
-
 
   const handleSubGuestChange = (index, field, value) => {
     setFormError('');
@@ -12207,12 +12196,24 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
         setGuestInfo(finalGuestData);
         
       } else {
-        // ... (Lógica para link general se mantiene igual)
+        const subGuestsArray = Array(parseInt(openPasses)).fill(null).map((_, i) => ({ 
+          id: `usr_gen_${Date.now()}_${i}`, 
+          name: i === 0 ? openName : `Acompañante de ${openName}`, 
+          isChild: false, 
+          entered: false 
+        }));
+
+        const newDocRef = await addDoc(collection(db, "eventos", eventId, "invitados"), {
+          name: openName, passes: parseInt(openPasses), originalPasses: parseInt(openPasses),
+          status: 'confirmado', fechaConfirmacion: serverTimestamp(), side: 'general', entered: 0, tableId: null,
+          subGuests: subGuestsArray
+        });
+        const newGuestSnap = await getDoc(newDocRef);
+        finalGuestData = { id: newDocRef.id, ...newGuestSnap.data() };
+        setGuestInfo(finalGuestData);
       }
       
       setRsvpStatus('success');
-
-      // Comunicar datos recién guardados
       if (finalGuestData) comunicarDatosALaInvitacionHTML(finalGuestData);
 
     } catch (error) { 
@@ -12221,17 +12222,37 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     }
   };
 
-  if (loading) return null; // No mostrar nada mientras carga, para no romper el flujo
-  if (!eventoInfo) return null; // Evitar errores si el evento no existe
+  // 🔴 CORRECCIÓN DE LA PANTALLA NEGRA: Se vuelve a agregar el indicador de carga
+  if (loading) return (
+    <div style={themeContainer} className="flex flex-col items-center justify-center p-6 min-h-[50vh]">
+      <svg className="animate-spin h-10 w-10 mb-4" style={{ color: t_btn }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+      <p className="text-xs font-bold uppercase tracking-widest opacity-70" style={{ color: t_txt }}>Conectando Bóveda...</p>
+    </div>
+  );
+
+  if (!eventoInfo) return (
+    <div style={themeContainer} className="flex flex-col items-center justify-center p-6 min-h-[50vh]">
+      <div className="w-16 h-16 rounded-full bg-rose-500/20 flex items-center justify-center mb-4"><svg className="text-rose-500 w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
+      <p className="text-sm font-bold uppercase tracking-widest text-rose-500">Error 404</p>
+      <p className="text-xs opacity-70 mt-2" style={{ color: t_txt }}>El enlace de evento es inválido.</p>
+    </div>
+  );
 
   const isConfirmadoOrSuccess = guestInfo && (guestInfo.status === 'confirmado' || guestInfo.status === 'ingreso') || rsvpStatus === 'success';
 
-  // 🔴 NUEVA LÓGICA: Si ya está confirmado, React desaparece visualmente (null)
   if (isConfirmadoOrSuccess) {
-    return null;
+    return (
+      <div style={themeContainer} className="flex flex-col items-center justify-center p-6 min-h-[50vh] animate-in fade-in">
+        <div style={{ borderColor: t_btn, color: t_btn }} className="w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-lg border-2 bg-white/5 backdrop-blur-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <h2 className="text-lg font-bold uppercase tracking-widest" style={{ color: t_txt }}>¡Confirmado!</h2>
+        <p className="text-[10px] opacity-60 mt-2" style={{ color: t_txt }}>Tus pases están listos en la invitación.</p>
+      </div>
+    );
   }
 
-  // PANTALLA 3: EL FORMULARIO ORIGINAL (SÓLO SI NO ESTÁ CONFIRMADO)
+  // PANTALLA 3: EL FORMULARIO ORIGINAL
   return (
     <div style={themeContainer} className="relative flex items-center justify-center p-3 sm:p-4 overflow-hidden">
       {isIframe && (<style>{`html, body, #root { background: transparent !important; overflow-x: hidden !important; touch-action: pan-y !important; }`}</style>)}
@@ -12242,16 +12263,14 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
           
           {isPreviewMode && (
             <div className="bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest py-1.5 text-center shadow-lg rounded-t-xl animate-pulse flex justify-center items-center">
-               <Lock size={12} className="mr-1"/> Vista Previa Protegida
+               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Vista Previa Protegida
             </div>
           )}
 
-          {/* 🔴 CAMBIO CLAVE: Usamos 'themeGlassForm' directamente */}
+          {/* 🔴 APLICANDO GLASSMORPHISM */}
           <div style={themeGlassForm} className={`w-full ${isPreviewMode ? 'rounded-b-2xl' : 'rounded-2xl'} p-5 sm:p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar`}>
             
             <div className="text-center mb-6 border-b pb-4" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
-               
-               {/* Logotipo automático */}
                {!logoFailed ? (
                  <img 
                    src={`/${eventId}/logodeevento.svg`} 
@@ -12262,12 +12281,10 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                ) : (
                  <h3 className="text-xl sm:text-2xl font-editorial font-bold leading-tight mb-2">{eventoInfo?.nombres || 'Confirmación'}</h3>
                )}
-
                {guestInfo && <p className="mt-1 text-sm font-medium opacity-80">{guestInfo.name} ({guestInfo.originalPasses || guestInfo.passes} lugares)</p>}
             </div>
             
             <form onSubmit={handleRSVPSubmit} className="space-y-4">
-
               {guestInfo ? (
                 <>
                   <div className="text-center mt-5 mb-2">
@@ -12289,7 +12306,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                           <div className="space-y-2 mt-3 pt-3 border-t animate-in fade-in" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)` }}>
                             <input 
                               type="text" required 
-                              placeholder={sg.isChild ? "Nombre del niño / menor..." : (idx === 0 ? "Tu nombre..." : "Nombre del adulto acompañante...")} 
+                              placeholder={sg.isChild ? "Nombre del niño..." : (idx === 0 ? "Tu nombre..." : "Nombre del adulto...")} 
                               value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)} 
                               style={themeInput} className="w-full p-2.5 border rounded-lg text-sm font-medium outline-none shadow-inner" 
                             />
@@ -12332,7 +12349,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
               
               {formError && (
                  <div className="bg-rose-500/20 border border-rose-500/40 text-rose-500 p-3 rounded-xl font-bold text-xs flex items-center shadow-sm animate-in shake">
-                    <AlertCircle size={16} className="mr-2 flex-shrink-0"/> {formError}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> {formError}
                  </div>
               )}
 
