@@ -171,7 +171,6 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- COMPONENTE: CUENTA REGRESIVA ---
         const Countdown = () => {
             const calculateTimeLeft = () => {
                 const difference = +new Date("2026-04-12T12:00:00") - +new Date();
@@ -218,7 +217,6 @@
             );
         };
 
-        // --- COMPONENTE: TARJETA DE UBICACIÓN ---
         const LocationCard = ({ type, title, time, address, mainMapUrl, isReception }) => {
             const calLink = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Misión+K-Pop:+Keyli+(${type})&dates=20260412T180000Z/20260413T020000Z&details=Únete+al+escuadrón+en+esta+batalla+sónica.&location=${encodeURIComponent(address)}`;
             return (
@@ -245,7 +243,6 @@
             );
         };
 
-        // --- APLICACIÓN PRINCIPAL ---
         const App = () => {
             const [guestUid, setGuestUid] = useState(null);
             const [guestName, setGuestName] = useState(null);
@@ -253,9 +250,8 @@
             const [isPlaying, setIsPlaying] = useState(false);
             const [currentView, setCurrentView] = useState('hero'); 
             const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
-            
-            // NUEVO ESTADO: Guarda los datos de confirmación recibidos del Panel
             const [confirmedData, setConfirmedData] = useState(null);
+            const [logoFailed, setLogoFailed] = useState(false);
 
             const [isTransforming, setIsTransforming] = useState(false);
             const audioRef = useRef(null);
@@ -280,7 +276,6 @@
                 const u = urlParams.get('u');
                 if (u) {
                     setGuestUid(u);
-                    // Chequeo Inicial (Opcional, pero bueno por si acaso)
                     fetch(`https://firestore.googleapis.com/v1/projects/panel-de-control-intelig-db278/databases/(default)/documents/eventos/${EVENT_ID}/invitados/${u}`)
                         .then(r => r.ok ? r.json() : null)
                         .then(d => {
@@ -289,7 +284,6 @@
                 }
             }, []);
 
-            // 🔴 EL OÍDO MÁGICO: Escucha cuando el Panel de Baulia grita que ya confirmó
             useEffect(() => {
                 const handleMessage = (event) => {
                     if (!event.origin.includes('baulia.com')) return;
@@ -330,7 +324,6 @@
                 }
             };
 
-            // 🔴 FUNCIÓN DE DESCARGA: Usa el html2canvas global
             const descargarPase = async (id, name) => {
                 try {
                     const html2canvas = window.html2canvas;
@@ -471,7 +464,6 @@
                                 </div>
 
                                 <div className="mt-12 mb-8 w-full relative" id="qr-section">
-                                    {/* 🔴 EL VIGILANTE INVISIBLE SIN MODO PREVIEW */}
                                     <iframe 
                                         src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani&v=${Date.now()}`} 
                                         style={{ display: 'none' }} 
@@ -488,35 +480,46 @@
                                             </button>
                                         </div>
                                     ) : (
-                                        <div className="w-full max-w-sm mx-auto mt-12 animate-fade-in">
-                                            <h3 className="text-center font-bold text-2xl mb-2 text-white font-cyber tracking-widest text-glow-pink">Mis Pases VIP</h3>
-                                            <p className="text-center text-xs opacity-70 mb-6 text-white font-body">Desliza y presenta en la entrada.</p>
+                                        <div className="w-full max-w-2xl mx-auto mt-12 animate-fade-in pb-10">
+                                            <h3 className="text-center font-bold text-3xl mb-2 text-white font-cyber tracking-widest text-glow-pink">Mis Pases VIP</h3>
+                                            <p className="text-center text-xs opacity-70 mb-4 text-white font-body">Presenta estos códigos en la entrada.</p>
                                             
-                                            <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 hide-scrollbar">
+                                            {confirmedData.subGuests.length > 1 && (
+                                                <p className="text-center text-[10px] uppercase tracking-widest text-skyBlue mb-6 animate-pulse font-cyber">← Desliza para ver más →</p>
+                                            )}
+                                            
+                                            <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 px-4 hide-scrollbar">
                                                 {confirmedData.subGuests.map(sg => (
-                                                    <div key={sg.id} className="min-w-full flex-shrink-0 snap-center flex flex-col items-center">
+                                                    <div key={sg.id} className="w-[85%] sm:w-[320px] flex-shrink-0 snap-center flex flex-col items-center">
                                                         <div id={`ticket_${sg.id}`} style={{ backgroundColor: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(15px)', borderColor: `${confirmedData.theme.txtRgb}20`, color: confirmedData.theme.txt }} className="w-full p-6 rounded-3xl border relative overflow-hidden shadow-[0_0_20px_rgba(183,36,255,0.3)]">
                                                             <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: confirmedData.theme.btn }}></div>
                                                             
                                                             <div className="text-center pb-4 mb-4 border-b border-white/20 border-dashed">
+                                                                {!logoFailed ? (
+                                                                    <img src="/keily-estefania/logoevento.svg" alt="Logo Evento" className="h-16 mx-auto mb-4 object-contain animate-neon-flicker" onError={() => setLogoFailed(true)} />
+                                                                ) : (
+                                                                    <h3 className="font-cyber text-xl font-bold mb-4 uppercase text-glow-pink" style={{ color: confirmedData.theme.btn }}>{confirmedData.theme.eventNames || 'Keily Estefania'}</h3>
+                                                                )}
+                                                                
                                                                 <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">Entrada Personal</p>
                                                                 <h4 className="text-2xl font-bold leading-tight font-cyber">{sg.name || 'Acompañante VIP'}</h4>
                                                                 {sg.isChild && <span style={{ backgroundColor: `${confirmedData.theme.btn}30`, color: confirmedData.theme.btn }} className="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mt-3 inline-block">Pase Infantil</span>}
                                                             </div>
 
-                                                            <div className="bg-white p-3 rounded-3xl mx-auto w-max mb-5 shadow-inner">
+                                                            <div className="bg-white p-3 rounded-3xl mx-auto w-max mb-5 shadow-[0_0_15px_rgba(0,229,255,0.4)]">
                                                                 <img src={sg.qrUrl} alt="QR" className="w-40 h-40 mix-blend-multiply" crossOrigin="anonymous" />
                                                             </div>
 
-                                                            <div className="text-center">
+                                                            <div className="text-center space-y-2">
+                                                                <p className="text-[10px] font-cyber tracking-widest text-skyBlue">12 ABR 2026 | 14:00 HRS</p>
                                                                 <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">Asiento Asignado</p>
                                                                 <p className="text-sm font-black uppercase tracking-widest" style={{ color: confirmedData.theme.btn }}>
                                                                     {sg.tableId ? `Mesa Asignada` : 'Pendiente Recepción'}
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                        <button onClick={() => descargarPase(sg.id, sg.name)} style={{ backgroundColor: confirmedData.theme.btn }} className="w-[85%] py-3.5 rounded-b-2xl font-bold text-[10px] text-white shadow-[0_0_20px_rgba(255,46,147,0.5)] -mt-2 relative z-0 uppercase tracking-widest hover:scale-105 transition-transform">
-                                                            Guardar Imagen VIP
+                                                        <button onClick={() => descargarPase(sg.id, sg.name)} style={{ backgroundColor: confirmedData.theme.btn }} className="w-[85%] py-3.5 rounded-b-2xl font-bold text-[10px] text-white shadow-[0_0_20px_rgba(255,46,147,0.5)] -mt-2 relative z-0 uppercase tracking-widest hover:scale-105 transition-transform font-cyber">
+                                                            Guardar Pase VIP
                                                         </button>
                                                     </div>
                                                 ))}
@@ -540,6 +543,10 @@
                                                     <path d="M758.75,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM758.75,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM766.07,69.96v82.62h-7.67v-82.62h7.67ZM765.72,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18-1.46,1.46-2.22,3.21-2.3,5.25h-.35ZM765.72,143.97h.35c.08,2.05.84,3.8,2.3,5.25,1.46,1.46,3.21,2.18,5.25,2.18h1.53v1.18h-9.44v-8.62Z"/>
                                                     <path d="M846.33,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM871.71,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.87-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM888.35,120.36v3.54h-36.95v-3.54h36.95ZM871.71,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM893.67,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95s1.34-3.13.47-5.49Z"/>
                                                 </g>
+                                                <g className="baulia-diamond-animator">
+                                                    <rect className="baulia-diamond-shape" x=".86" y=".86" width="198.64" height="198.64" transform="translate(0 200.36) rotate(-90)" strokeMiterlimit="10" />
+                                                </g>
+                                                <path className="baulia-b" d="M116.87,94.54l6.01-.41c6.47,0,11.27,1.21,14.42,3.62,3.14,2.42,4.72,5.83,4.72,10.25s-2.01,9.59-6.01,15.51c-4.01,5.92-9.2,11.3-15.58,16.13h7.79c3.19,0,5.42-.14,6.7-.41,1.27-.27,2-.41,2.19-.41,1.27,0,1.91.68,1.91,2.05s-.91,2.1-2.73,2.19c-7.02,0-13.76-.09-20.23-.27-10.2,6.47-20.23,9.7-30.07,9.7-4.65,0-8.34-.87-11.07-2.6s-4.1-3.48-4.1-5.26.75-3.16,2.25-4.17c1.5-1,3.62-1.5,6.36-1.5,10.66,0,22.59.23,35.81.68,5.47-4.46,9.84-9.64,13.12-15.51,3.28-5.88,4.92-11.18,4.92-15.92,0-7.56-4.06-11.34-12.16-11.34-3.19,0-6.49.5-9.91,1.5-3.42,1-5.47,1.71-6.15,2.12s-1.12.61-1.3.61c-.55,0-.82-.39-.82-1.16s1.18-1.71,3.55-2.8c10.39-5.01,20.54-11.68,30.48-20.02,9.93-8.34,14.9-14.28,14.9-17.83,0-1.64-1.28-2.46-3.83-2.46-10.39.09-24.65,7.88-42.78,23.37-3.65,9.38-9.64,20.91-17.97,34.58-8.34,13.67-17.06,25.9-26.17,36.69-9.11,10.8-15.9,16.19-20.36,16.19-2.73,0-4.1-1.41-4.1-4.24,0-6.47,6.13-17.99,18.38-34.58,12.25-16.58,26.12-31.84,41.61-45.78,2.73-6.65,4.1-11.5,4.1-14.56s-.73-5.47-2.19-7.24c-1.46-1.78-3.6-3.08-6.42-3.9-4.46-1.18-9.18-1.78-14.14-1.78s-8.77.12-11.41.34c-2.64.23-5.86.68-9.64,1.37-3.78.68-6.86,1.87-9.22,3.55-2.37,1.69-3.55,3.83-3.55,6.42s1.27,4.6,3.83,6.01c2.55,1.41,5.67,2.39,9.36,2.94s7.36,1.14,11,1.78c3.64.64,6.74,1.89,9.29,3.76,2.55,1.87,3.83,4.49,3.83,7.86,0,.91-.2,1.37-.61,1.37s-.73-.14-.96-.41c-.23-.27-.62-.82-1.16-1.64-.82-1.18-2.03-2.1-3.62-2.73-1.59-.64-4.06-1.25-7.38-1.84-3.33-.59-6.47-1.23-9.43-1.91-2.96-.68-5.94-1.57-8.95-2.66-3.01-1.09-5.42-2.64-7.24-4.65-1.82-2-2.73-4.35-2.73-7.04s1.14-5.08,3.42-7.17c2.28-2.1,5.28-3.74,9.02-4.92,7.65-2.28,15.63-3.42,23.92-3.42,21.5,0,32.25,5.65,32.25,16.95,0,1-.23,2.51-.68,4.51,18.4-14.85,33.35-22.28,44.83-22.28,5.1,0,7.65,1.55,7.65,4.65,0,4.46-4.67,10.8-14.01,19-9.34,8.2-18.98,14.58-28.9,19.13ZM44.17,163.69c2.64,0,9.73-8.45,21.25-25.35,11.52-16.9,20.75-32.64,27.68-47.22-13.67,13.03-25.76,26.58-36.29,40.66-10.52,14.08-15.78,23.66-15.78,28.77,0,2.09,1.05,3.14,3.14,3.14ZM111,142.64l-24.74-.55c-7.02,0-10.52,1.05-10.52,3.14,0,1.18,1.18,2.3,3.55,3.35,2.37,1.05,5.1,1.57,8.2,1.57,8.11,0,15.94-2.5,23.51-7.52Z" />
                                             </svg>
                                         </a>
                                     </div>
@@ -554,14 +561,12 @@
                         </button>
                     </div>
 
-                    {/* 🔴 EL MODAL TRANSPARENTE LIMPIO CON DESTRUCTOR DE CACHÉ */}
                     {isRsvpModalOpen && (
                         <div className="fixed inset-0 z-[100] flex justify-center items-center p-4 bg-black/60 backdrop-blur-md">
                             <button onClick={() => setIsRsvpModalOpen(false)} className="absolute top-6 right-6 w-10 h-10 bg-cyberDark/80 border border-neonPink/50 rounded-full flex items-center justify-center text-white hover:bg-neonPink transition-colors z-50 box-glow-pink">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
                             
-                            {/* 🔴 EL MODAL SIN MODO PREVIEW */}
                             <iframe 
                                 src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani&v=${Date.now()}`} 
                                 allowTransparency="true" 
