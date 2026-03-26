@@ -352,7 +352,7 @@
                 
                 if (!isPlaying && audioRef.current) audioRef.current.play().then(() => setIsPlaying(true)).catch(e => {});
                 
-                // Esperar a que la animación de 3s termine antes de cambiar la pantalla al briefing
+                // Aumento de tiempo: 6 segundos para dar tiempo suficiente a leer la tarjeta VIP
                 setTimeout(() => {
                     const colors = ['#ff2e93', '#00e5ff', '#b724ff', '#39ff14', '#ffea00'];
                     setNeonColor(colors[Math.floor(Math.random() * colors.length)]);
@@ -368,7 +368,7 @@
                         }
                         setBriefingProgress(progressValue);
                     }, 350); 
-                }, 3000); 
+                }, 6000); 
             };
 
             const isFamily = guestName ? /fam\b|familia/i.test(guestName) || guestName.includes(' y ') || guestName.includes(' & ') : false;
@@ -418,22 +418,28 @@
                                 <div className={`relative z-10 flex flex-col items-center justify-between w-full h-full min-h-[100dvh] pt-20 pb-28 md:pt-24 md:pb-24 transition-all duration-1000 ${isTransforming ? 'pointer-events-none' : 'opacity-100'}`}>
                                     
                                     {/* BLOQUE SUPERIOR (Logo + Etiqueta Agente) */}
-                                    <div className="flex flex-col items-center w-full">
+                                    <div className="flex flex-col items-center w-full relative">
                                         <div className="mb-4 md:mb-6 w-48 h-48 md:w-64 md:h-64 relative flex items-center justify-center shrink-0">
-                                            {/* Logo Original (Más grande) */}
+                                            {/* Logo Original (Más grande, desaparece quitando la animación flicker) */}
                                             <img 
                                                 src="/keily-estefania/kpoplogo.svg" 
                                                 alt="Logo" 
-                                                className={`absolute inset-0 w-full h-full object-contain z-10 animate-neon-flicker pointer-events-none transition-all duration-700 ${isTransforming ? 'opacity-0 scale-50 blur-md' : 'opacity-100 scale-100'}`} 
+                                                className={`absolute inset-0 w-full h-full object-contain z-10 pointer-events-none transition-all duration-[1000ms] ease-in-out ${isTransforming ? 'opacity-0 scale-0 blur-xl' : 'opacity-100 scale-100 animate-neon-flicker'}`} 
                                             />
-                                            
-                                            {/* SALUDO VIP AL ACTIVAR */}
-                                            <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] md:w-[600px] flex flex-col items-center justify-center transition-all duration-700 delay-300 z-50 ${isTransforming ? 'opacity-100 scale-100' : 'opacity-0 scale-125 blur-md pointer-events-none'}`}>
-                                                <span className="font-cyber text-white text-lg md:text-2xl uppercase tracking-widest mb-1 md:mb-2 drop-shadow-md">Hola</span>
-                                                <span className="font-cyber font-black text-3xl md:text-5xl lg:text-6xl text-neonPink text-glow-pink uppercase tracking-widest mb-1 md:mb-3 text-center leading-tight">
+                                        </div>
+
+                                        {/* SALUDO VIP AL ACTIVAR - Posicionado mucho más arriba (-translate-y-[85%]) y dentro de tarjeta temática */}
+                                        <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[85%] md:-translate-y-[75%] w-[90vw] md:w-[500px] flex flex-col items-center justify-center transition-all duration-[1200ms] delay-500 z-50 ${isTransforming ? 'opacity-100 scale-100' : 'opacity-0 scale-125 blur-xl pointer-events-none'}`}>
+                                            <div className="glass-panel w-full p-8 md:p-10 rounded-3xl box-glow-purple border border-neonPurple/50 flex flex-col items-center justify-center relative overflow-hidden">
+                                                {/* Destellos de luz internos */}
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-skyBlue opacity-20 blur-3xl rounded-full pointer-events-none"></div>
+                                                <div className="absolute bottom-0 left-0 w-32 h-32 bg-neonPink opacity-20 blur-3xl rounded-full pointer-events-none"></div>
+                                                
+                                                <span className="relative z-10 font-cyber text-white text-lg md:text-xl uppercase tracking-widest mb-2 drop-shadow-md">Hola</span>
+                                                <span className="relative z-10 font-cyber font-black text-3xl md:text-5xl lg:text-6xl text-neonPink text-glow-pink uppercase tracking-widest mb-3 text-center leading-tight">
                                                     {guestName || 'Demon Hunter'}
                                                 </span>
-                                                <span className="font-body text-skyBlue text-lg md:text-2xl lg:text-3xl uppercase tracking-widest text-glow-blue font-bold text-center">
+                                                <span className="relative z-10 font-body text-skyBlue text-xl md:text-2xl lg:text-3xl uppercase tracking-widest text-glow-blue font-bold text-center">
                                                     bienvenido a la banda HUNTR/X
                                                 </span>
                                             </div>
