@@ -1,3 +1,3 @@
 git add .
-git commit -m "Correcion de QR y memoria de confirmacion"
+git commit -m "Correcion sin cajas para confirmacion y tarjetas QR"
 git push origin main
