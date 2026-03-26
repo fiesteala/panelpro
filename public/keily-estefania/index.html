@@ -162,10 +162,35 @@
             
             .hide-scrollbar::-webkit-scrollbar { display: none; }
             .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+            /* 🔴 SPLASH SCREEN DE CARGA RÁPIDA (ALTA COSTURA) */
+            #baulia-splash {
+                position: fixed; inset: 0; z-index: 9999;
+                background-color: #0a0514;
+                display: flex; flex-direction: column; justify-content: center; align-items: center;
+                transition: opacity 0.8s ease-out, visibility 0.8s;
+            }
+            .splash-loader {
+                width: 50px; height: 50px; border: 3px solid rgba(0, 229, 255, 0.2);
+                border-top-color: #ff2e93; border-radius: 50%;
+                animation: spin-slow 1s linear infinite; margin-bottom: 24px;
+            }
+            .splash-text {
+                font-family: 'Orbitron', sans-serif; color: #00e5ff;
+                text-transform: uppercase; letter-spacing: 0.3em; font-size: 12px;
+                animation: pulse-fast 2s infinite; text-shadow: 0 0 10px #00e5ff;
+            }
+            body.react-loaded #baulia-splash { opacity: 0; visibility: hidden; }
         }
     </style>
 </head>
 <body class="bg-cyberDark text-white font-body selection:bg-neonPurple selection:text-white overflow-hidden h-screen w-screen">
+    
+    <div id="baulia-splash">
+        <div class="splash-loader"></div>
+        <div class="splash-text">Desencriptando Misión...</div>
+    </div>
+
     <div id="root" class="h-full w-full"></div>
 
     <script type="text/babel">
@@ -251,13 +276,18 @@
             const [currentView, setCurrentView] = useState('hero'); 
             const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
             const [confirmedData, setConfirmedData] = useState(null);
-            const [logoFailed, setLogoFailed] = useState(false);
+            const [logoFailed, setLogoFailed] = useState(false); // 🔴 Estado del Logo Auto
 
             const [isTransforming, setIsTransforming] = useState(false);
             const audioRef = useRef(null);
             const bgParallaxRef = useRef(null);
             
             const EVENT_ID = 'prueba-htsj';
+
+            // 🔴 Apagar Splash Screen en cuanto React arranca
+            useEffect(() => {
+                document.body.classList.add('react-loaded');
+            }, []);
 
             useEffect(() => {
                 const preventDefault = (e) => e.preventDefault();
@@ -463,6 +493,7 @@
                                     </div>
                                 </div>
 
+                                {/* 🔴 ZONA DE RSVP Y CARRUSEL PEEK VIP */}
                                 <div className="mt-12 mb-8 w-full relative" id="qr-section">
                                     <iframe 
                                         src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani&v=${Date.now()}`} 
@@ -484,10 +515,12 @@
                                             <h3 className="text-center font-bold text-3xl mb-2 text-white font-cyber tracking-widest text-glow-pink">Mis Pases VIP</h3>
                                             <p className="text-center text-xs opacity-70 mb-4 text-white font-body">Presenta estos códigos en la entrada.</p>
                                             
+                                            {/* 🔴 INSTRUCCIÓN DE DESLIZAR */}
                                             {confirmedData.subGuests.length > 1 && (
                                                 <p className="text-center text-[10px] uppercase tracking-widest text-skyBlue mb-6 animate-pulse font-cyber">← Desliza para ver más →</p>
                                             )}
                                             
+                                            {/* 🔴 CARRUSEL CON EFECTO PEEK (85% ancho) */}
                                             <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 px-4 hide-scrollbar">
                                                 {confirmedData.subGuests.map(sg => (
                                                     <div key={sg.id} className="w-[85%] sm:w-[320px] flex-shrink-0 snap-center flex flex-col items-center">
@@ -495,6 +528,7 @@
                                                             <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: confirmedData.theme.btn }}></div>
                                                             
                                                             <div className="text-center pb-4 mb-4 border-b border-white/20 border-dashed">
+                                                                {/* 🔴 LOGO AUTO-INYECTADO CON FALLBACK AL NOMBRE DEL EVENTO */}
                                                                 {!logoFailed ? (
                                                                     <img src="/keily-estefania/logoevento.svg" alt="Logo Evento" className="h-16 mx-auto mb-4 object-contain animate-neon-flicker" onError={() => setLogoFailed(true)} />
                                                                 ) : (
@@ -511,7 +545,9 @@
                                                             </div>
 
                                                             <div className="text-center space-y-2">
+                                                                {/* 🔴 FECHA Y HORA (AJUSTADA AL DISEÑO K-POP) */}
                                                                 <p className="text-[10px] font-cyber tracking-widest text-skyBlue">12 ABR 2026 | 14:00 HRS</p>
+                                                                
                                                                 <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">Asiento Asignado</p>
                                                                 <p className="text-sm font-black uppercase tracking-widest" style={{ color: confirmedData.theme.btn }}>
                                                                     {sg.tableId ? `Mesa Asignada` : 'Pendiente Recepción'}
