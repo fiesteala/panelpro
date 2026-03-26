@@ -1,4 +1,4 @@
-import React, { useState, useRef, useLayoutEffect, useEffect } from 'react';
+import React, { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react';
 import { collection, doc, setDoc, onSnapshot, getDocs, query, where, serverTimestamp, deleteDoc, getDoc, addDoc, updateDoc } from 'firebase/firestore';
 import { db, auth, secondaryAuth } from './firebase';
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail, updatePassword } from 'firebase/auth';
@@ -12138,7 +12138,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     fetchData();
   }, [eventId, guestUid]);
 
-  const isConfirmadoOrSuccess = guestInfo && (guestInfo.status === 'confirmado' || guestInfo.status === 'ingreso') || rsvpStatus === 'success';
+  const isConfirmadoOrSuccess = (guestInfo && (guestInfo.status === 'confirmado' || guestInfo.status === 'ingreso')) || rsvpStatus === 'success';
 
   useEffect(() => {
     if (!loading && guestInfo && eventoInfo && isConfirmadoOrSuccess) {
