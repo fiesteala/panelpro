@@ -471,9 +471,9 @@
                                 </div>
 
                                 <div className="mt-12 mb-8 w-full relative" id="qr-section">
-                                    {/* 🔴 EL VIGILANTE INVISIBLE: Verifica silenciosamente si el usuario ya confirmó */}
+                                    {/* 🔴 EL VIGILANTE INVISIBLE CON DESTRUCTOR DE CACHÉ */}
                                     <iframe 
-                                        src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&preview=1&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani`} 
+                                        src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&preview=1&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani&v=${Date.now()}`} 
                                         style={{ display: 'none' }} 
                                     ></iframe>
 
@@ -554,7 +554,7 @@
                         </button>
                     </div>
 
-                    {/* 🔴 EL MODAL TRANSPARENTE LIMPIO */}
+                    {/* 🔴 EL MODAL TRANSPARENTE LIMPIO CON DESTRUCTOR DE CACHÉ */}
                     {isRsvpModalOpen && (
                         <div className="fixed inset-0 z-[100] flex justify-center items-center p-4 bg-black/60 backdrop-blur-md">
                             <button onClick={() => setIsRsvpModalOpen(false)} className="absolute top-6 right-6 w-10 h-10 bg-cyberDark/80 border border-neonPink/50 rounded-full flex items-center justify-center text-white hover:bg-neonPink transition-colors z-50 box-glow-pink">
@@ -562,7 +562,7 @@
                             </button>
                             
                             <iframe 
-                                src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&preview=1&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani`} 
+                                src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&preview=1&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani&v=${Date.now()}`} 
                                 allowTransparency="true" 
                                 style={{ backgroundColor: 'transparent', border: 'none' }} 
                                 className="w-full max-w-md h-[90vh] mx-auto relative z-10"

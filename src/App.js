@@ -12059,6 +12059,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const t_font = urlParams.get('font') || '';
 
   const textRgb = hexToRgb(t_txt);
+
   const themeContainer = { backgroundColor: 'transparent', fontFamily: t_font ? `"${t_font}", sans-serif` : 'inherit', minHeight: '100vh', color: t_txt };
   
   const themeGlassForm = {
@@ -12137,11 +12138,13 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     fetchData();
   }, [eventId, guestUid]);
 
+  const isConfirmadoOrSuccess = guestInfo && (guestInfo.status === 'confirmado' || guestInfo.status === 'ingreso') || rsvpStatus === 'success';
+
   useEffect(() => {
-    if (!loading && guestInfo && eventoInfo && (guestInfo.status === 'confirmado' || guestInfo.status === 'ingreso')) {
+    if (!loading && guestInfo && eventoInfo && isConfirmadoOrSuccess) {
         comunicarDatosALaInvitacionHTML(guestInfo);
     }
-  }, [loading, guestInfo, eventoInfo, comunicarDatosALaInvitacionHTML]);
+  }, [loading, guestInfo, eventoInfo, isConfirmadoOrSuccess, comunicarDatosALaInvitacionHTML]);
 
   const handleSubGuestChange = (index, field, value) => {
     setFormError('');
@@ -12222,7 +12225,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     }
   };
 
-  // 🔴 CORRECCIÓN DE LA PANTALLA NEGRA: Se vuelve a agregar el indicador de carga
   if (loading) return (
     <div style={themeContainer} className="flex flex-col items-center justify-center p-6 min-h-[50vh]">
       <svg className="animate-spin h-10 w-10 mb-4" style={{ color: t_btn }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -12238,16 +12240,14 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     </div>
   );
 
-  const isConfirmadoOrSuccess = guestInfo && (guestInfo.status === 'confirmado' || guestInfo.status === 'ingreso') || rsvpStatus === 'success';
-
   if (isConfirmadoOrSuccess) {
     return (
       <div style={themeContainer} className="flex flex-col items-center justify-center p-6 min-h-[50vh] animate-in fade-in">
         <div style={{ borderColor: t_btn, color: t_btn }} className="w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-lg border-2 bg-white/5 backdrop-blur-sm">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
-        <h2 className="text-lg font-bold uppercase tracking-widest" style={{ color: t_txt }}>¡Confirmado!</h2>
-        <p className="text-[10px] opacity-60 mt-2" style={{ color: t_txt }}>Tus pases están listos en la invitación.</p>
+        <h2 className="text-xl font-bold uppercase tracking-widest text-center" style={{ color: t_txt }}>¡Asistencia Confirmada!</h2>
+        <p className="text-xs opacity-80 mt-3 text-center leading-relaxed" style={{ color: t_txt }}>Tus pases VIP han sido generados en tu invitación.<br/><br/>Ya puedes cerrar esta ventana.</p>
       </div>
     );
   }
@@ -12267,7 +12267,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
             </div>
           )}
 
-          {/* 🔴 APLICANDO GLASSMORPHISM */}
           <div style={themeGlassForm} className={`w-full ${isPreviewMode ? 'rounded-b-2xl' : 'rounded-2xl'} p-5 sm:p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar`}>
             
             <div className="text-center mb-6 border-b pb-4" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
