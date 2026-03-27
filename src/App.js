@@ -11212,7 +11212,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  // 🔴 CIRUGÍA MULTI-MODAL: Agregamos isQrEnabled y isPassCountEnabled
   const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', isQrEnabled: true, isPassCountEnabled: true });
   const [editingLic, setEditingLic] = useState(null);
 
@@ -11299,10 +11298,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         }
       }
 
+      // 🔴 REPARACIÓN DE MEMORIA: Guardamos los interruptores en el USUARIO también
       await setDoc(doc(db, "usuarios", newEventId), { 
         email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, 
         nombres: formData.nombres, status: 'activo', urlInvitacion: formData.urlInvitacion, creadoPor: authData.email, 
-        referenciaPago: formData.referenciaPago, createdAt: serverTimestamp() 
+        referenciaPago: formData.referenciaPago, createdAt: serverTimestamp(),
+        isQrEnabled: formData.isQrEnabled, 
+        isPassCountEnabled: formData.isPassCountEnabled
       });
 
       await setDoc(doc(db, "eventos", newEventId), { 
@@ -11351,11 +11353,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       const isQrChecked = editingLic.isQrEnabled !== false; 
       const isPassChecked = editingLic.isPassCountEnabled !== false;
 
+      // 🔴 REPARACIÓN DE MEMORIA: Actualizamos los interruptores en el USUARIO también
       await updateDoc(doc(db, "usuarios", editingLic.id), { 
         urlInvitacion: safeUrl, 
         plan: editingLic.plan, 
         nombres: safeNombre, 
-        tipoEvento: safeTipo 
+        tipoEvento: safeTipo,
+        isQrEnabled: isQrChecked,
+        isPassCountEnabled: isPassChecked
       });
 
       try {
@@ -11646,7 +11651,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         </div>
       )}
 
-      {/* MODAL CREAR LICENCIA CON EL NUEVO SWITCH */}
+      {/* MODAL CREAR LICENCIA */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar border border-transparent dark:border-white/10 transition-colors">
@@ -11659,7 +11664,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                 </div>
                 
                 <div className="space-y-4 mb-6">
-                  {/* ... (campos anteriores: referencia, tipo, rol, nombres, email) ... */}
                   <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-xl transition-colors">
                     <label className="block text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Wallet size={12} className="mr-1"/> Referencia de Pago (Obligatorio)</label>
                     <input type="text" required value={formData.referenciaPago} onChange={e => setFormData({...formData, referenciaPago: e.target.value})} placeholder="Ej: Pago en Efectivo, Transf BBVA..." className="w-full p-3 bg-white dark:bg-[#111] border border-emerald-200 dark:border-emerald-500/30 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
@@ -11699,7 +11703,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       <option value="diamante">Plan Diamante ($2,990)</option>
                     </select>
 
-                    {/* Los dos interruptores */}
                     <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
                       <div>
                         <p className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
@@ -11736,7 +11739,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
               </form>
             ) : (
               <div className="p-8 text-center bg-slate-50 dark:bg-transparent transition-colors">
-                {/* ... (pantalla de éxito igual) ... */}
                 <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-transparent dark:border-emerald-500/30"><CheckCircle size={40} /></div>
                 <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2 transition-colors">¡Accesos Creados!</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 transition-colors">La venta se registró en el Libro Mayor por <b>{authData.email.split('@')[0]}</b>.</p>
@@ -11761,7 +11763,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         </div>
       )}
 
-      {/* 🔴 MODAL PARA EDITAR LICENCIA CON LOS DOS SWITCHES */}
+      {/* 🔴 MODAL PARA EDITAR LICENCIA */}
       {isEditModalOpen && editingLic && (
         <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto border border-transparent dark:border-white/10 transition-colors">
