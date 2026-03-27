@@ -272,6 +272,9 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
 const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tareas, setActiveTab, addNotification }) => {
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
 
+  // 🔴 ESTADOS PARA CAMBIO DE CONTRASEÑA INYECTADOS AQUÍ
+  const [passModal, setPassModal] = useState({ open: false, newPass: '', loading: false, msg: '', type: '' });
+
   const totalPasses = guests.reduce((sum, guest) => sum + guest.passes, 0);
   const confirmedPasses = guests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').reduce((sum, guest) => sum + guest.passes, 0);
   const confirmationPercentage = totalPasses > 0 ? Math.round((confirmedPasses / totalPasses) * 100) : 0;
@@ -313,6 +316,31 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
       accentColor = '#475569'; // Slate
   }
 
+  // 🔴 FUNCIÓN DE CAMBIO DE CONTRASEÑA
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if(passModal.newPass.length < 6) {
+      setPassModal(prev => ({...prev, msg: 'La contraseña debe tener al menos 6 caracteres.', type: 'error'}));
+      return;
+    }
+    
+    setPassModal(prev => ({...prev, loading: true, msg: ''}));
+    
+    try {
+      if (!auth.currentUser) throw new Error("No hay usuario autenticado.");
+      await updatePassword(auth.currentUser, passModal.newPass);
+      setPassModal({ open: false, newPass: '', loading: false, msg: '¡Contraseña actualizada exitosamente!', type: 'success' });
+      if(addNotification) addNotification('Seguridad Actualizada', 'Tu contraseña ha sido cambiada.', 'success');
+      setTimeout(() => setPassModal({ open: false, newPass: '', loading: false, msg: '', type: '' }), 3000);
+    } catch (error) {
+      if(error.code === 'auth/requires-recent-login') {
+        setPassModal(prev => ({...prev, loading: false, msg: 'Por seguridad, cierra sesión y vuelve a entrar para cambiarla.', type: 'error'}));
+      } else {
+        setPassModal(prev => ({...prev, loading: false, msg: 'Error al cambiar la contraseña. Intenta de nuevo.', type: 'error'}));
+      }
+    }
+  };
+
   // 🔴 DESCARGA DIRECTA E INVISIBLE DEL REPORTE EJECUTIVO
   const triggerDashboardPdf = async () => {
     setIsPreparingPrint(true);
@@ -347,10 +375,18 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
           <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Centro de Mando</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Monitoreo en tiempo real de la Bóveda.</p>
         </div>
-        <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="px-5 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center disabled:opacity-50">
-          {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
-          {isPreparingPrint ? 'Generando PDF...' : 'Descargar Reporte'}
-        </button>
+        
+        {/* 🔴 NUEVO GRUPO DE BOTONES EN LA CABECERA */}
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => setPassModal({ ...passModal, open: true })} className="px-4 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-xs font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center">
+            <Key size={14} className="mr-2 text-amber-500" />
+            Cambiar Contraseña
+          </button>
+          <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="px-5 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center disabled:opacity-50">
+            {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
+            {isPreparingPrint ? 'Generando PDF...' : 'Descargar Reporte'}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
@@ -573,6 +609,42 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
            </div>
         </div>
       </div>
+
+      {/* 🔴 MODAL DE CAMBIO DE CONTRASEÑA */}
+      {passModal.open && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95">
+            <div className="p-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-[#111]">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center"><Key size={18} className="mr-2 text-amber-500"/> Seguridad</h3>
+              <button onClick={() => setPassModal({ open: false, newPass: '', loading: false, msg: '', type: '' })} className="text-slate-400 hover:text-rose-500 transition-colors"><X size={20}/></button>
+            </div>
+            <form onSubmit={handleChangePassword} className="p-6 space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Nueva Contraseña</label>
+                <input 
+                  type="password" 
+                  required 
+                  value={passModal.newPass} 
+                  onChange={e => setPassModal({...passModal, newPass: e.target.value})} 
+                  className="w-full p-4 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors"
+                  placeholder="Mínimo 6 caracteres..."
+                />
+              </div>
+              
+              {passModal.msg && (
+                <div className={`p-3 rounded-xl text-xs font-bold ${passModal.type === 'error' ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'}`}>
+                  {passModal.msg}
+                </div>
+              )}
+
+              <button type="submit" disabled={passModal.loading} className="w-full py-4 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-2 shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 transition-colors disabled:opacity-50">
+                {passModal.loading ? 'Actualizando...' : 'Guardar Contraseña'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
