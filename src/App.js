@@ -11063,8 +11063,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   <th className="py-6 px-8 font-bold text-xs uppercase tracking-widest text-slate-500 w-1/3">Característica</th>
                   <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-slate-700 dark:text-slate-300 w-1/6">Básico</th>
                   <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-slate-700 dark:text-slate-300 w-1/6">Plata</th>
-                  <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-amber-600 dark:text-amber-500 bg-amber-50/50 dark:bg-amber-500/5 w-1/6">Oro</th>
-                  <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-slate-900 dark:text-white w-1/6">Diamante</th>
+                  <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-amber-600 dark:text-amber-500 bg-amber-50/50 dark:bg-amber-500/10 w-1/6">Oro</th>
+                  {/* 🔴 EFECTO DIAMANTE (INDIGO VIP) EN LA CABECERA */}
+                  <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-50/60 dark:bg-indigo-500/10 w-1/6">Diamante</th>
                 </tr>
               </thead>
               <tbody className="text-sm">
@@ -11077,16 +11078,17 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 </tr>
                 {[
                   { n: 'Estilo de Diseño Alta Costura', b: true, p: false, o: false, d: false },
-                  { n: 'Monograma (Estandar / Personalizado)', b: false, p: false, o: 'X', d: 'PREMIUM' },
+                  { n: 'Monograma (Estándar / Personalizado)', b: false, p: false, o: 'X', d: 'PREMIUM' },
                   { n: 'Nombres, Frases Novios, Padres y General', b: true, p: true, o: true, d: true },
                   { n: 'Save The Date', b: false, p: false, o: false, d: true },
                 ].map((row, i) => (
                   <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <td className="py-4 px-8 text-slate-700 dark:text-slate-300 font-medium">{row.n}</td>
-                    <td className="py-4 px-4 text-center">{row.b === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.b === false || row.b === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.b}</td>
-                    <td className="py-4 px-4 text-center">{row.p === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.p === false || row.p === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.p}</td>
-                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.o === false || row.o === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.o}</td>
-                    <td className="py-4 px-4 text-center">{row.d === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.d === false || row.d === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.d}</td>
+                    <td className="py-4 px-4 text-center">{row.b === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.b === false || row.b === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-bold text-slate-600 dark:text-slate-400">{row.b}</span>}</td>
+                    <td className="py-4 px-4 text-center">{row.p === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.p === false || row.p === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-bold text-slate-600 dark:text-slate-400">{row.p}</span>}</td>
+                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.o === false || row.o === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-black text-amber-600 dark:text-amber-500">{row.o}</span>}</td>
+                    {/* 🔴 EFECTO DIAMANTE EN CELDA */}
+                    <td className="py-4 px-4 text-center bg-indigo-50/30 dark:bg-indigo-500/5">{row.d === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.d === false || row.d === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-black text-indigo-600 dark:text-indigo-400">{row.d}</span>}</td>
                   </tr>
                 ))}
 
@@ -11107,10 +11109,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 ].map((row, i) => (
                   <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <td className="py-4 px-8 text-slate-700 dark:text-slate-300 font-medium">{row.n}</td>
-                    <td className="py-4 px-4 text-center">{row.b === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.b === false || row.b === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.b}</td>
-                    <td className="py-4 px-4 text-center">{row.p === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.p === false || row.p === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.p}</td>
-                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.o === false || row.o === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.o}</td>
-                    <td className="py-4 px-4 text-center">{row.d === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.d === false || row.d === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.d}</td>
+                    <td className="py-4 px-4 text-center">{row.b === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.b === false || row.b === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-bold text-slate-600 dark:text-slate-400">{row.b}</span>}</td>
+                    <td className="py-4 px-4 text-center">{row.p === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.p === false || row.p === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-bold text-slate-600 dark:text-slate-400">{row.p}</span>}</td>
+                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.o === false || row.o === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-black text-amber-600 dark:text-amber-500">{row.o}</span>}</td>
+                    {/* 🔴 EFECTO DIAMANTE EN CELDA */}
+                    <td className="py-4 px-4 text-center bg-indigo-50/30 dark:bg-indigo-500/5">{row.d === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.d === false || row.d === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-black text-indigo-600 dark:text-indigo-400">{row.d}</span>}</td>
                   </tr>
                 ))}
 
@@ -11131,10 +11134,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 ].map((row, i) => (
                   <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <td className="py-4 px-8 text-slate-700 dark:text-slate-300 font-medium">{row.n}</td>
-                    <td className="py-4 px-4 text-center">{row.b === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.b === false || row.b === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.b}</td>
-                    <td className="py-4 px-4 text-center">{row.p === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.p === false || row.p === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.p}</td>
-                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.o === false || row.o === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.o}</td>
-                    <td className="py-4 px-4 text-center">{row.d === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.d === false || row.d === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.d}</td>
+                    <td className="py-4 px-4 text-center">{row.b === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.b === false || row.b === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-bold text-slate-600 dark:text-slate-400">{row.b}</span>}</td>
+                    <td className="py-4 px-4 text-center">{row.p === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.p === false || row.p === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-bold text-slate-600 dark:text-slate-400">{row.p}</span>}</td>
+                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.o === false || row.o === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-black text-amber-600 dark:text-amber-500">{row.o}</span>}</td>
+                    {/* 🔴 EFECTO DIAMANTE EN CELDA */}
+                    <td className="py-4 px-4 text-center bg-indigo-50/30 dark:bg-indigo-500/5">{row.d === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.d === false || row.d === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-black text-indigo-600 dark:text-indigo-400">{row.d}</span>}</td>
                   </tr>
                 ))}
 
@@ -11156,10 +11160,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 ].map((row, i) => (
                   <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <td className="py-4 px-8 text-slate-700 dark:text-slate-300 font-medium">{row.n}</td>
-                    <td className="py-4 px-4 text-center">{row.b === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.b === false || row.b === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.b}</td>
-                    <td className="py-4 px-4 text-center">{row.p === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.p === false || row.p === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.p}</td>
-                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.o === false || row.o === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.o}</td>
-                    <td className="py-4 px-4 text-center">{row.d === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.d === false || row.d === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.d}</td>
+                    <td className="py-4 px-4 text-center">{row.b === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.b === false || row.b === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-bold text-slate-600 dark:text-slate-400">{row.b}</span>}</td>
+                    <td className="py-4 px-4 text-center">{row.p === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.p === false || row.p === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-bold text-slate-600 dark:text-slate-400">{row.p}</span>}</td>
+                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.o === false || row.o === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-black text-amber-600 dark:text-amber-500">{row.o}</span>}</td>
+                    {/* 🔴 EFECTO DIAMANTE EN CELDA */}
+                    <td className="py-4 px-4 text-center bg-indigo-50/30 dark:bg-indigo-500/5">{row.d === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.d === false || row.d === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-black text-indigo-600 dark:text-indigo-400">{row.d}</span>}</td>
                   </tr>
                 ))}
               </tbody>
