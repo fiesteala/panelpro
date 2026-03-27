@@ -10033,7 +10033,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [fakeRsvp, setFakeRsvp] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 59 });
-  const [accentColor, setAccentColor] = useState('amber');
+  const [accentColor, setAccentColor] = useState('monochrome');
   const [liveReviews, setLiveReviews] = useState([]);
   
   // ESTADO PARA ABRIR LA REVISTA
@@ -10534,21 +10534,36 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[280px]">
           {/* TARJETA 1 */}
           <RevealSection delay={100} className="md:col-span-2 md:row-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-10 md:p-12 border border-slate-200 dark:border-white/10 flex flex-col justify-end relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
-            <div className={`absolute inset-0 opacity-5 dark:opacity-10 transition-colors duration-700 ${accentThemes[accentColor].bg}`}></div>
+            <div className={`absolute inset-0 opacity-5 dark:opacity-10 transition-colors duration-700 ${accentColor === 'monochrome' ? 'bg-slate-500' : (accentThemes[accentColor]?.bg || '')}`}></div>
+            
             <div className="absolute top-10 right-0 md:right-10 w-full md:w-56 h-64 pointer-events-none perspective-[1000px] flex items-center justify-center">
-               <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 1" className="absolute w-40 h-52 object-cover rounded-xl border-[4px] border-white dark:border-[#111] transform rotate-[10deg] translate-x-12 translate-y-4 group-hover:rotate-[20deg] group-hover:translate-x-20 shadow-xl transition-all duration-700 ease-out" />
-               <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 2" className="absolute w-40 h-52 object-cover rounded-xl border-[4px] border-white dark:border-[#111] transform -rotate-[5deg] group-hover:-rotate-[12deg] group-hover:-translate-x-8 shadow-xl transition-all duration-700 ease-out z-10" />
-               <div className={`absolute z-20 font-monogram text-5xl md:text-6xl drop-shadow-xl transition-colors duration-700 ${accentThemes[accentColor].text} transform group-hover:scale-110`}>Ana & Rodrigo</div>
+               
+               {/* 🔴 NUEVO MONOGRAMA SVG EN EL ESPACIO VACÍO */}
+               <div className={`absolute -left-2 sm:-left-8 top-8 z-20 transition-colors duration-700 transform group-hover:scale-110 group-hover:-rotate-6 drop-shadow-2xl ${accentColor === 'monochrome' ? 'text-slate-900 dark:text-white' : accentThemes[accentColor]?.text}`}>
+                  <svg width="110" height="110" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle" fill="currentColor" fontFamily="'Playfair Display', serif" fontSize="72" fontStyle="italic" fontWeight="bold">A<tspan fontSize="48">&</tspan>R</text>
+                  </svg>
+               </div>
+
+               <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 1" className="absolute w-40 h-52 object-cover rounded-xl border-[4px] border-white dark:border-[#111] transform rotate-[10deg] translate-x-16 translate-y-6 group-hover:rotate-[15deg] group-hover:translate-x-24 shadow-xl transition-all duration-700 ease-out" />
+               <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 2" className="absolute w-40 h-52 object-cover rounded-xl border-[4px] border-white dark:border-[#111] transform -rotate-[5deg] group-hover:-rotate-[10deg] group-hover:-translate-x-4 shadow-xl transition-all duration-700 ease-out z-10" />
             </div>
+            
             <div className="absolute top-10 left-10 flex gap-2 p-2 bg-white/80 dark:bg-black/40 backdrop-blur-md rounded-full border border-slate-200 dark:border-white/10 z-30 shadow-sm">
+               {/* 🔴 NUEVO BOTÓN MONOCROMÁTICO */}
+               <button onMouseEnter={()=>setAccentColor('monochrome')} className={`w-5 h-5 rounded-full bg-[linear-gradient(135deg,_#0f172a_50%,_#ffffff_50%)] dark:bg-[linear-gradient(135deg,_#ffffff_50%,_#0f172a_50%)] border border-slate-300 dark:border-slate-600 transition-all ${accentColor === 'monochrome' ? 'scale-125 ring-2 ring-offset-2 ring-slate-400 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Clásico"></button>
+               
                <button onMouseEnter={()=>setAccentColor('amber')} className={`w-5 h-5 rounded-full bg-amber-500 transition-all ${accentColor === 'amber' ? 'scale-125 ring-2 ring-offset-2 ring-amber-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
                <button onMouseEnter={()=>setAccentColor('rose')} className={`w-5 h-5 rounded-full bg-rose-500 transition-all ${accentColor === 'rose' ? 'scale-125 ring-2 ring-offset-2 ring-rose-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
                <button onMouseEnter={()=>setAccentColor('emerald')} className={`w-5 h-5 rounded-full bg-emerald-500 transition-all ${accentColor === 'emerald' ? 'scale-125 ring-2 ring-offset-2 ring-emerald-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
                <button onMouseEnter={()=>setAccentColor('indigo')} className={`w-5 h-5 rounded-full bg-indigo-500 transition-all ${accentColor === 'indigo' ? 'scale-125 ring-2 ring-offset-2 ring-indigo-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
             </div>
+            
             <div className="relative z-30 w-full md:w-3/4">
                <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-3 leading-tight transition-colors duration-500">Diseño Inmersivo</h3>
-               <p className="text-slate-600 dark:text-slate-400 text-base leading-relaxed transition-colors duration-500">Galerías fotográficas, logotipos manuscritos y paletas de color <b>adaptativas</b> que reflejan la elegancia de tu evento.</p>
+               <p className="text-slate-600 dark:text-slate-400 text-base leading-relaxed transition-colors duration-500">
+                 Galerías fotográficas, logotipos manuscritos y paletas de color <b className={`transition-colors duration-500 ${accentColor === 'monochrome' ? 'text-slate-900 dark:text-white' : accentThemes[accentColor]?.text}`}>adaptativas</b> que reflejan la elegancia de tu evento.
+               </p>
             </div>
           </RevealSection>
 
