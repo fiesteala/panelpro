@@ -162,12 +162,36 @@
             
             .hide-scrollbar::-webkit-scrollbar { display: none; }
             .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+            #baulia-splash {
+                position: fixed; inset: 0; z-index: 9999;
+                background-color: #0a0514;
+                display: flex; flex-direction: column; justify-content: center; align-items: center;
+                transition: opacity 0.8s ease-out, visibility 0.8s;
+            }
+            .splash-loader {
+                width: 50px; height: 50px; border: 3px solid rgba(0, 229, 255, 0.2);
+                border-top-color: #ff2e93; border-radius: 50%;
+                animation: spin-slow 1s linear infinite; margin-bottom: 24px;
+            }
+            .splash-text {
+                font-family: 'Orbitron', sans-serif; color: #00e5ff;
+                text-transform: uppercase; letter-spacing: 0.3em; font-size: 12px;
+                animation: pulse-fast 2s infinite; text-shadow: 0 0 10px #00e5ff;
+            }
+            body.react-loaded #baulia-splash { opacity: 0; visibility: hidden; }
         }
 
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-cyberDark text-white font-body selection:bg-neonPurple selection:text-white overflow-hidden h-screen w-screen">
+    
+    <div id="baulia-splash">
+        <div class="splash-loader"></div>
+        <div class="splash-text">Desencriptando Misión...</div>
+    </div>
+
     <div id="root" class="h-full w-full"></div>
 
     <script type="text/babel">
@@ -220,7 +244,6 @@
         };
 
         const LocationCard = ({ type, title, time, address, mainMapUrl, isReception }) => {
-            // 🔴 FUNCIÓN DE RADAR GPS: Abre Waze/AppleMaps/GoogleMaps nativamente
             const getDynamicMapLink = () => {
                 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
                 const isAndroid = /Android/.test(navigator.userAgent);
@@ -228,7 +251,7 @@
                 
                 if (isIOS) return `maps://?q=${encodedAddress}`;
                 if (isAndroid) return `geo:0,0?q=${encodedAddress}`;
-                return `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`; // Fallback para PC
+                return `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
             };
 
             return (
@@ -273,6 +296,10 @@
             const EVENT_ID = 'prueba-htsj';
 
             useEffect(() => {
+                document.body.classList.add('react-loaded');
+            }, []);
+
+            useEffect(() => {
                 const preventDefault = (e) => e.preventDefault();
                 document.addEventListener('contextmenu', preventDefault);
                 document.addEventListener('selectstart', preventDefault);
@@ -315,7 +342,6 @@
             };
 
             const startBriefingSequence = () => {
-                
                 if (audioRef.current) {
                     audioRef.current.play().then(() => setIsPlaying(true)).catch(e => console.log("Auto-play blocked:", e));
                 }
@@ -537,8 +563,8 @@ END:VCALENDAR`;
                                                 <span className="relative z-20 font-black flex items-center justify-center gap-4 text-glow-blue group-hover:text-white transition-colors uppercase">CONFIRMAR DESPLIEGUE</span>
                                             </button>
                                         </div>
-                                    ) : (
-                                        <div className="w-full mx-auto mt-12 animate-fade-in">
+                                    ) : confirmedData.subGuests && confirmedData.subGuests.length > 0 ? (
+                                        <div className="w-full mx-auto mt-12 animate-fade-in pb-10">
                                             <h3 className="text-center font-bold text-2xl mb-2 text-white font-cyber tracking-widest uppercase text-glow-pink">Mis Pases VIP</h3>
                                             <p className="text-center text-xs opacity-70 mb-6 text-white font-body">Desliza y presenta en la entrada.</p>
                                             
@@ -586,6 +612,20 @@ END:VCALENDAR`;
                                                 ))}
                                             </div>
                                         </div>
+                                    ) : (
+                                        <div className="w-full max-w-2xl mx-auto mt-12 animate-fade-in pb-10">
+                                            <div className="glass-panel p-10 md:p-14 rounded-3xl border border-skyBlue/50 box-glow-blue flex flex-col items-center justify-center max-w-lg mx-auto relative overflow-hidden">
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-skyBlue opacity-20 blur-3xl rounded-full pointer-events-none"></div>
+                                                <div className="w-20 h-20 rounded-full bg-skyBlue/10 border-2 border-skyBlue mb-6 flex items-center justify-center animate-pulse">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-glow-blue"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                </div>
+                                                <h3 className="text-center font-bold text-3xl md:text-4xl mb-4 text-white font-cyber tracking-widest uppercase text-glow-blue">¡Asistencia Confirmada!</h3>
+                                                <p className="text-center text-lg opacity-80 text-white font-body leading-relaxed">
+                                                    Tu presencia en la formación está asegurada. Gracias por confirmar tu asistencia a esta gran misión.
+                                                </p>
+                                                <p className="mt-8 font-cyber text-neonPink tracking-widest text-sm uppercase font-bold text-glow-pink">¡Te esperamos!</p>
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
                                 
@@ -623,12 +663,10 @@ END:VCALENDAR`;
 
                     {isRsvpModalOpen && (
                         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex flex-col justify-center items-center p-4">
-                            {/* 🔴 Botón de Cerrar pegado a la pantalla (top-6 right-6), nunca se saldrá */}
                             <button onClick={() => setIsRsvpModalOpen(false)} className="absolute top-6 right-6 md:top-8 md:right-8 w-10 h-10 bg-cyberDark/80 border border-neonPink/50 rounded-full flex items-center justify-center text-white hover:bg-neonPink transition-colors z-[150] box-glow-pink">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
                             
-                            {/* Contenedor del Iframe ajustado para no chocar con el botón */}
                             <div className="relative w-full max-w-md mx-auto flex flex-col items-center justify-center z-10 animate-fade-in h-[85vh] mt-10">
                                 <iframe src={`https://panel.baulia.com/?modo=invitacion&e=${EVENT_ID}&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=ff2e93&txt=ffffff&font=Rajdhani&v=${sessionCacheBuster}`} allowTransparency="true" style={{ backgroundColor: 'transparent', border: 'none' }} className="w-full h-full relative z-10"></iframe>
                             </div>
