@@ -11047,6 +11047,77 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           </RevealSection>
 
         </div>
+        {/* ========================================== */}
+        {/* 🔴 NUEVA TABLA COMPARATIVA PREMIUM */}
+        {/* ========================================== */}
+        <RevealSection delay={500} className="mt-32 max-w-5xl mx-auto hidden md:block relative z-10">
+          <div className="text-center mb-10">
+            <h3 className="text-3xl font-editorial font-medium text-slate-900 dark:text-white transition-colors">Anatomía de los Planes</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 font-light">Compara a detalle el nivel de tecnología de cada bóveda.</p>
+          </div>
+
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-xl overflow-hidden transition-colors duration-700">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 transition-colors">
+                  <th className="py-6 px-8 font-bold text-xs uppercase tracking-widest text-slate-500 w-1/3">Característica</th>
+                  <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-slate-700 dark:text-slate-300 w-1/6">Básico</th>
+                  <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-slate-700 dark:text-slate-300 w-1/6">Plata</th>
+                  <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-amber-600 dark:text-amber-500 bg-amber-50/50 dark:bg-amber-500/5 w-1/6">Oro</th>
+                  <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-slate-900 dark:text-white w-1/6">Diamante</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {/* GRUPO 1: EXPERIENCIA DEL INVITADO */}
+                <tr>
+                  <td colSpan="5" className="bg-slate-100 dark:bg-white/5 py-3 px-8 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 transition-colors">
+                    La Experiencia (Frontend para Invitados)
+                  </td>
+                </tr>
+                {[
+                  { n: 'Diseño Inmersivo Alta Costura', b: true, p: true, o: true, d: true },
+                  { n: 'Cuenta Regresiva & Mapas GPS', b: true, p: true, o: true, d: true },
+                  { n: 'Confirmación Simple (RSVP)', b: true, p: true, o: true, d: true },
+                  { n: 'Itinerario y Dress Code', b: false, p: true, o: true, d: true },
+                  { n: 'Mesa de Regalos (Sin Comisión)', b: false, p: true, o: true, d: true },
+                  { n: 'Pases QR Únicos e Infértiles', b: false, p: false, o: true, d: true },
+                ].map((row, i) => (
+                  <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                    <td className="py-4 px-8 text-slate-700 dark:text-slate-300 font-medium">{row.n}</td>
+                    <td className="py-4 px-4 text-center">{row.b ? <Check size={18} className="mx-auto text-amber-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
+                    <td className="py-4 px-4 text-center">{row.p ? <Check size={18} className="mx-auto text-amber-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
+                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o ? <Check size={18} className="mx-auto text-amber-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
+                    <td className="py-4 px-4 text-center">{row.d ? <Check size={18} className="mx-auto text-amber-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
+                  </tr>
+                ))}
+
+                {/* GRUPO 2: PODER DEL ANFITRIÓN */}
+                <tr>
+                  <td colSpan="5" className="bg-slate-100 dark:bg-white/5 py-3 px-8 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 transition-colors">
+                    El Poder (Backend y Panel de Control)
+                  </td>
+                </tr>
+                {[
+                  { n: 'Panel de Control Web / Base de datos', b: true, p: true, o: true, d: true },
+                  { n: 'Gestor de Tareas y Checklist', b: true, p: true, o: true, d: true },
+                  { n: 'RSVP Estricto (Bloqueo de Colados)', b: false, p: false, o: true, d: true },
+                  { n: 'Gestor Financiero / Presupuesto', b: false, p: false, o: true, d: true },
+                  { n: 'App Escáner para Hostess (Puerta)', b: false, p: false, o: true, d: true },
+                  { n: 'Diseñador de Mesas (Croquis 2D)', b: false, p: false, o: false, d: true },
+                  { n: 'Muro Social (Proyección en Vivo)', b: false, p: false, o: false, d: true },
+                ].map((row, i) => (
+                  <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                    <td className="py-4 px-8 text-slate-700 dark:text-slate-300 font-medium">{row.n}</td>
+                    <td className="py-4 px-4 text-center">{row.b ? <Check size={18} className="mx-auto text-emerald-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
+                    <td className="py-4 px-4 text-center">{row.p ? <Check size={18} className="mx-auto text-emerald-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
+                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o ? <Check size={18} className="mx-auto text-emerald-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
+                    <td className="py-4 px-4 text-center">{row.d ? <Check size={18} className="mx-auto text-emerald-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </RevealSection>
       </div>
 
       {/* PREGUNTAS FRECUENTES (FAQ) */}
