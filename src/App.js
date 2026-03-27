@@ -11048,12 +11048,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
         </div>
         {/* ========================================== */}
-        {/* 🔴 NUEVA TABLA COMPARATIVA PREMIUM */}
+        {/* 🔴 NUEVA TABLA COMPARATIVA HIPER-DETALLADA (AJUSTES DE MARKETING APLICADOS) */}
         {/* ========================================== */}
         <RevealSection delay={500} className="mt-32 max-w-5xl mx-auto hidden md:block relative z-10">
           <div className="text-center mb-10">
             <h3 className="text-3xl font-editorial font-medium text-slate-900 dark:text-white transition-colors">Anatomía de los Planes</h3>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 font-light">Compara a detalle el nivel de tecnología de cada bóveda.</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 font-light">Comparativa detallada del nivel tecnológico y control absoluto de cada bóveda.</p>
           </div>
 
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-xl overflow-hidden transition-colors duration-700">
@@ -11068,50 +11068,98 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 </tr>
               </thead>
               <tbody className="text-sm">
-                {/* GRUPO 1: EXPERIENCIA DEL INVITADO */}
+                
+                {/* GRUPO 1: IDENTIDAD VISUAL Y DISEÑO */}
                 <tr>
                   <td colSpan="5" className="bg-slate-100 dark:bg-white/5 py-3 px-8 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 transition-colors">
-                    La Experiencia (Frontend para Invitados)
+                    La Experiencia (Frontend para Invitados) - Diseño e Identidad
                   </td>
                 </tr>
                 {[
-                  { n: 'Diseño Inmersivo Alta Costura', b: true, p: true, o: true, d: true },
-                  { n: 'Cuenta Regresiva & Mapas GPS', b: true, p: true, o: true, d: true },
-                  { n: 'Confirmación Simple (RSVP)', b: true, p: true, o: true, d: true },
-                  { n: 'Itinerario y Dress Code', b: false, p: true, o: true, d: true },
-                  { n: 'Mesa de Regalos (Sin Comisión)', b: false, p: true, o: true, d: true },
-                  { n: 'Pases QR Únicos e Infértiles', b: false, p: false, o: true, d: true },
+                  { n: 'Estilo de Diseño Alta Costura', b: true, p: false, o: false, d: false },
+                  { n: 'Monograma (Estandar / Personalizado)', b: false, p: false, o: 'X', d: 'PREMIUM' },
+                  { n: 'Nombres, Frases Novios, Padres y General', b: true, p: true, o: true, d: true },
+                  { n: 'Save The Date', b: false, p: false, o: false, d: true },
                 ].map((row, i) => (
                   <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <td className="py-4 px-8 text-slate-700 dark:text-slate-300 font-medium">{row.n}</td>
-                    <td className="py-4 px-4 text-center">{row.b ? <Check size={18} className="mx-auto text-amber-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
-                    <td className="py-4 px-4 text-center">{row.p ? <Check size={18} className="mx-auto text-amber-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
-                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o ? <Check size={18} className="mx-auto text-amber-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
-                    <td className="py-4 px-4 text-center">{row.d ? <Check size={18} className="mx-auto text-amber-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
+                    <td className="py-4 px-4 text-center">{row.b === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.b === false || row.b === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.b}</td>
+                    <td className="py-4 px-4 text-center">{row.p === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.p === false || row.p === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.p}</td>
+                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.o === false || row.o === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.o}</td>
+                    <td className="py-4 px-4 text-center">{row.d === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.d === false || row.d === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.d}</td>
                   </tr>
                 ))}
 
-                {/* GRUPO 2: PODER DEL ANFITRIÓN */}
+                {/* GRUPO 2: LOGÍSTICA E INFORMACIÓN */}
                 <tr>
                   <td colSpan="5" className="bg-slate-100 dark:bg-white/5 py-3 px-8 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 transition-colors">
-                    El Poder (Backend y Panel de Control)
+                    Logística del Evento
                   </td>
                 </tr>
                 {[
-                  { n: 'Panel de Control Web / Base de datos', b: true, p: true, o: true, d: true },
-                  { n: 'Gestor de Tareas y Checklist', b: true, p: true, o: true, d: true },
+                  { n: 'Ubicación GPS (# Enlaces)', b: false, p: '1', o: '2', d: '2' },
+                  { n: 'Cuenta Regresiva & Mapas GPS', b: true, p: true, o: true, d: true },
+                  { n: 'Itinerario y Dress Code', b: false, p: true, o: true, d: true },
+                  { n: 'Recomendación de hospedaje', b: false, p: false, o: true, d: true },
+                  { n: 'Agregar a Calendario', b: true, p: true, o: true, d: true },
+                  { n: 'Clima', b: false, p: false, o: false, d: true },
+                  { n: 'Notificaciones', b: false, p: false, o: true, d: true },
+                ].map((row, i) => (
+                  <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                    <td className="py-4 px-8 text-slate-700 dark:text-slate-300 font-medium">{row.n}</td>
+                    <td className="py-4 px-4 text-center">{row.b === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.b === false || row.b === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.b}</td>
+                    <td className="py-4 px-4 text-center">{row.p === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.p === false || row.p === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.p}</td>
+                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.o === false || row.o === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.o}</td>
+                    <td className="py-4 px-4 text-center">{row.d === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.d === false || row.d === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.d}</td>
+                  </tr>
+                ))}
+
+                {/* GRUPO 3: INTERACTIVIDAD Y MULTIMEDIA */}
+                <tr>
+                  <td colSpan="5" className="bg-slate-100 dark:bg-white/5 py-3 px-8 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 transition-colors">
+                    Interactividad y Multimedia
+                  </td>
+                </tr>
+                {[
+                  { n: 'Mesa de Regalos (Sin Comisión)', b: false, p: true, o: true, d: true },
+                  { n: 'Confirmación Simple (RSVP) e Invitados', b: true, p: true, o: true, d: true },
+                  { n: 'Pases QR Únicos e Infértiles', b: false, p: false, o: true, d: true },
+                  { n: 'Reproductor de música', b: false, p: true, o: true, d: true },
+                  { n: 'Dominio personalizado', b: false, p: false, o: false, d: true },
+                  { n: 'Album Digital y Multimedia Avanzada', b: false, p: false, o: false, d: true },
+                  { n: 'Traducción', b: false, p: false, o: false, d: true },
+                ].map((row, i) => (
+                  <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                    <td className="py-4 px-8 text-slate-700 dark:text-slate-300 font-medium">{row.n}</td>
+                    <td className="py-4 px-4 text-center">{row.b === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.b === false || row.b === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.b}</td>
+                    <td className="py-4 px-4 text-center">{row.p === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.p === false || row.p === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.p}</td>
+                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.o === false || row.o === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.o}</td>
+                    <td className="py-4 px-4 text-center">{row.d === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.d === false || row.d === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.d}</td>
+                  </tr>
+                ))}
+
+                {/* GRUPO 4: EL PODER (CONTROL MASTER) */}
+                <tr>
+                  <td colSpan="5" className="bg-slate-100 dark:bg-white/5 py-3 px-8 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 transition-colors">
+                    El Poder (Backend y Panel de Control - Control Master)
+                  </td>
+                </tr>
+                {[
+                  { n: 'Panel de Control Web y Base de datos', b: false, p: false, o: true, d: true },
+                  { n: 'Gestor de Invitados Completo', b: false, p: false, o: true, d: true },
                   { n: 'RSVP Estricto (Bloqueo de Colados)', b: false, p: false, o: true, d: true },
-                  { n: 'Gestor Financiero / Presupuesto', b: false, p: false, o: true, d: true },
                   { n: 'App Escáner para Hostess (Puerta)', b: false, p: false, o: true, d: true },
-                  { n: 'Diseñador de Mesas (Croquis 2D)', b: false, p: false, o: false, d: true },
+                  { n: 'Gestor Financiero / Presupuesto', b: false, p: false, o: true, d: true },
+                  { n: 'Gestor de Tareas, Checklist y Proveedores', b: false, p: false, o: true, d: true },
+                  { n: 'Acomodo de mesas visual', b: false, p: false, o: false, d: true },
                   { n: 'Muro Social (Proyección en Vivo)', b: false, p: false, o: false, d: true },
                 ].map((row, i) => (
                   <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <td className="py-4 px-8 text-slate-700 dark:text-slate-300 font-medium">{row.n}</td>
-                    <td className="py-4 px-4 text-center">{row.b ? <Check size={18} className="mx-auto text-emerald-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
-                    <td className="py-4 px-4 text-center">{row.p ? <Check size={18} className="mx-auto text-emerald-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
-                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o ? <Check size={18} className="mx-auto text-emerald-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
-                    <td className="py-4 px-4 text-center">{row.d ? <Check size={18} className="mx-auto text-emerald-500"/> : <span className="text-slate-300 dark:text-slate-700">-</span>}</td>
+                    <td className="py-4 px-4 text-center">{row.b === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.b === false || row.b === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.b}</td>
+                    <td className="py-4 px-4 text-center">{row.p === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.p === false || row.p === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.p}</td>
+                    <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.o === false || row.o === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.o}</td>
+                    <td className="py-4 px-4 text-center">{row.d === true ? <Check size={18} className="mx-auto text-emerald-500"/> : row.d === false || row.d === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : row.d}</td>
                   </tr>
                 ))}
               </tbody>
