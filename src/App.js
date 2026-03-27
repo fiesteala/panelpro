@@ -11998,7 +11998,7 @@ const hexToRgb = (hex) => {
 };
 
 // ==========================================
-// --- COMPONENTE: VISOR PÚBLICO WIDGET (ALTA COSTURA - MULTIMODAL) ---
+// --- COMPONENTE: VISOR PÚBLICO WIDGET (ALTA COSTURA - MULTIMODAL - VIRAL) ---
 // ==========================================
 const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [eventoInfo, setEventoInfo] = useState(null);
@@ -12179,7 +12179,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
           };
         } else {
           const isCancelled = !willAttendSimple;
-          // 🔴 CIRUGÍA: Si no se cuentan los pases, forzamos la cantidad a la original o 1
           const finalCount = isCancelled ? 0 : (passCountEnabled ? attendingCount : (guestInfo.originalPasses || 1));
           
           const subGuestsArray = isCancelled ? [] : Array(finalCount).fill(null).map((_, i) => ({
@@ -12193,7 +12192,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
             ...guestInfo,
             passes: finalCount,
             status: isCancelled ? 'cancelado' : 'confirmado',
-            extraRequested: passCountEnabled ? extraRequested : 0, // Si está apagado, 0 pases extra
+            extraRequested: passCountEnabled ? extraRequested : 0,
             fechaConfirmacion: serverTimestamp(),
             subGuests: subGuestsArray
           };
@@ -12244,6 +12243,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     </div>
   );
 
+  // 🔴 VISTA DE ÉXITO CON MOTOR VIRAL INCLUIDO
   if (isConfirmadoOrSuccess) {
     return (
       <div style={themeContainer} className="flex flex-col items-center justify-center p-6 min-h-[50vh] animate-in fade-in">
@@ -12252,12 +12252,24 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
         </div>
         <h2 className="text-xl font-bold uppercase tracking-widest text-center" style={{ color: t_txt }}>¡Asistencia Confirmada!</h2>
         <p className="text-xs opacity-80 mt-3 text-center leading-relaxed" style={{ color: t_txt }}>Tu asistencia ha sido registrada exitosamente en nuestra base de datos.<br/><br/>Ya puedes cerrar esta ventana.</p>
+
+        {/* 🔴 INYECCIÓN MOTOR VIRAL (SÓLO EN VISTA REAL) */}
+        {!isPreviewMode && (
+            <div className="w-full text-center py-6 mt-16 border-t animate-in slide-in-from-bottom-5 duration-1000 delay-500" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)` }}>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 mb-3" style={{ color: t_txt }}>¿Te gustó esta invitación?</p>
+                <a href="https://baulia.com?utm_source=invitation&utm_medium=rsvp_success&utm_campaign=viral_engine" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 group p-1.5 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors">
+                <span className="font-editorial text-2xl font-bold transition-transform group-hover:scale-105" style={{ color: t_txt }}>Baulia</span>
+                <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full text-white hover:brightness-110 transition-all shadow-md" style={{ backgroundColor: t_btn }}>Crea la tuya</span>
+                </a>
+                <p className="text-[9px] opacity-40 mt-3" style={{ color: t_txt }}>Tecnología de Alta Costura Digital. © 2024</p>
+            </div>
+        )}
       </div>
     );
   }
 
   return (
-    <div style={themeContainer} className="relative flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+    <div style={themeContainer} className="relative flex items-center justify-center p-3 sm:p-4 overflow-hidden flex-col">
       {isIframe && (<style>{`html, body, #root { background: transparent !important; overflow-x: hidden !important; touch-action: pan-y !important; }`}</style>)}
       {t_font && <style>{`@import url('https://fonts.googleapis.com/css2?family=${t_font.replace(/ /g, '+')}&display=swap');`}</style>}
 
@@ -12283,7 +12295,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                ) : (
                  <h3 className="text-xl sm:text-2xl font-editorial font-bold leading-tight mb-2">{eventoInfo?.nombres || 'Confirmación'}</h3>
                )}
-               {/* 🔴 Si no hay recuento de pases, ni mostramos "X lugares" */}
                {guestInfo && (
                   <p className="mt-1 text-sm font-medium opacity-80">
                      {guestInfo.name} {passCountEnabled && `(${guestInfo.originalPasses || guestInfo.passes} lugares)`}
@@ -12337,7 +12348,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                           <button type="button" onClick={() => setWillAttendSimple(false)} style={{ backgroundColor: !willAttendSimple ? '#ef4444' : 'transparent', color: !willAttendSimple ? '#ffffff' : t_txt, borderColor: !willAttendSimple ? 'transparent' : `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)` }} className="flex-1 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border opacity-90">No Asistiré</button>
                        </div>
                        
-                       {/* 🔴 SOLO PEDIMOS NÚMEROS SI isPassCountEnabled ESTÁ ENCENDIDO */}
                        {passCountEnabled && willAttendSimple && (
                           <div className="p-4 rounded-xl border bg-white/5 mt-4 text-left animate-in fade-in slide-in-from-top-2" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
                              <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 opacity-90">¿Cuántos asisten de tu grupo?</label>
@@ -12351,7 +12361,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                     </div>
                   )}
 
-                  {/* 🔴 SOLO PEDIMOS PASES EXTRA SI isPassCountEnabled ESTÁ ENCENDIDO */}
                   {passCountEnabled && (
                     <div className="border-t pt-4 mt-5 flex items-center justify-between p-2" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
                       <div>
@@ -12395,6 +12404,18 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* 🔴 INYECCIÓN MOTOR VIRAL EN EL FOOTER GENERAL (SÓLO EN VISTA REAL) */}
+      {!loading && !isPreviewMode && (
+          <div className="w-full text-center py-6 mt-16 border-t animate-in fade-in duration-1000 delay-500" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)` }}>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 mb-3" style={{ color: t_txt }}>¿Te gustó esta invitación?</p>
+              <a href="https://baulia.com?utm_source=invitation&utm_medium=rsvp_footer&utm_campaign=viral_engine" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 group p-1.5 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors">
+                <span className="font-editorial text-2xl font-bold transition-transform group-hover:scale-105" style={{ color: t_txt }}>Baulia</span>
+                <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full text-white hover:brightness-110 transition-all shadow-md" style={{ backgroundColor: t_btn }}>Crea la tuya</span>
+              </a>
+              <p className="text-[9px] opacity-40 mt-3" style={{ color: t_txt }}>Tecnología de Alta Costura Digital. © 2024</p>
+          </div>
       )}
     </div>
   );
