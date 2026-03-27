@@ -1,0 +1,331 @@
+// ==========================================
+// --- COMPONENTE: VISOR PÚBLICO WIDGET (ALTA COSTURA - GLASSMORPHISM) ---
+// ==========================================
+const InvitacionPublicaView = ({ eventId, guestUid }) => {
+  const [eventoInfo, setEventoInfo] = useState(null);
+  const [guestInfo, setGuestInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showRSVP, setShowRSVP] = useState(false);
+  const [rsvpStatus, setRsvpStatus] = useState('idle'); 
+  const [formError, setFormError] = useState(''); 
+  const [logoFailed, setLogoFailed] = useState(false);
+  const [dataSent, setDataSent] = useState(false); 
+  
+  const [tempSubGuests, setTempSubGuests] = useState([]);
+  const [extraRequested, setExtraRequested] = useState(0);
+  const [openPasses, setOpenPasses] = useState(1);
+  const [openName, setOpenName] = useState('');
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isIframe = urlParams.get('iframe') === 'true';
+  const isPreviewMode = urlParams.get('preview') === '1';
+  
+  const t_bg = urlParams.get('bg') ? `#${urlParams.get('bg')}` : '#f8fafc'; 
+  const t_btn = urlParams.get('btn') ? `#${urlParams.get('btn')}` : '#d97706'; 
+  const t_txt = urlParams.get('txt') ? `#${urlParams.get('txt')}` : '#1c1917'; 
+  const t_font = urlParams.get('font') || '';
+
+  const textRgb = hexToRgb(t_txt);
+
+  const themeContainer = { backgroundColor: 'transparent', fontFamily: t_font ? `"${t_font}", sans-serif` : 'inherit', minHeight: '100vh', color: t_txt };
+  
+  const themeGlassForm = {
+    backgroundColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.05)`,
+    backdropFilter: 'blur(25px)',
+    WebkitBackdropFilter: 'blur(25px)',
+    border: `1px solid rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)`,
+    color: t_txt
+  };
+
+  const themeBtn = { backgroundColor: t_btn, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.1em' };
+  const themeInput = { backgroundColor: 'rgba(255,255,255,0.2)', color: t_txt, borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)` };
+
+  useEffect(() => {
+    let meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = "viewport";
+      document.head.appendChild(meta);
+    }
+    meta.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
+  }, []);
+
+  const comunicarDatosALaInvitacionHTML = useCallback((guestData) => {
+    if (!isIframe || !window.parent || dataSent) return;
+
+    const getCleanBaseUrl = () => window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
+    const baseLink = `${getCleanBaseUrl()}/${eventId}`;
+
+    const subGuestsWithQr = guestData.subGuests?.map(sg => ({
+        ...sg,
+        qrUrl: `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(baseLink + '?u=' + sg.id)}&margin=10`,
+        eventNames: eventoInfo?.nombres || ''
+    })) || [];
+
+    window.parent.postMessage({ 
+        action: 'RSVP_SUCCESS_DATA', 
+        passesLimit: guestData.originalPasses || guestData.passes,
+        confirmedCount: guestData.passes,
+        subGuests: subGuestsWithQr,
+        status: guestData.status,
+        theme: { btn: t_btn, txt: t_txt, txtRgb: textRgb }
+    }, '*');
+    
+    setDataSent(true);
+  }, [eventId, isIframe, eventoInfo, t_btn, t_txt, textRgb, dataSent]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const docSnap = await getDoc(doc(db, "eventos", eventId));
+        if (docSnap.exists()) setEventoInfo(docSnap.data());
+
+        if (guestUid) {
+          const guestSnap = await getDoc(doc(db, "eventos", eventId, "invitados", guestUid));
+          if (guestSnap.exists()) {
+            const gData = guestSnap.data();
+            setGuestInfo(gData);
+            setExtraRequested(gData.extraRequested || 0);
+            
+            const totalLimit = gData.originalPasses || gData.passes; 
+            const currentSubs = gData.subGuests || [];
+            
+            const newTemp = Array(totalLimit).fill(null).map((_, i) => {
+              if (currentSubs[i]) return { ...currentSubs[i], willAttend: true };
+              const esMenor = gData.childrenPasses > 0 && i >= (totalLimit - gData.childrenPasses);
+              return { name: i === 0 ? gData.name : '', isChild: esMenor, willAttend: false, id: `s_new_${Date.now()}_${i}` };
+            });
+            setTempSubGuests(newTemp);
+          }
+        }
+      } catch (error) {}
+      setLoading(false);
+    };
+    setShowRSVP(true);
+    fetchData();
+  }, [eventId, guestUid]);
+
+  const isConfirmadoOrSuccess = (guestInfo && (guestInfo.status === 'confirmado' || guestInfo.status === 'ingreso')) || rsvpStatus === 'success';
+
+  useEffect(() => {
+    if (!loading && guestInfo && eventoInfo && isConfirmadoOrSuccess) {
+        comunicarDatosALaInvitacionHTML(guestInfo);
+    }
+  }, [loading, guestInfo, eventoInfo, isConfirmadoOrSuccess, comunicarDatosALaInvitacionHTML]);
+
+  const handleSubGuestChange = (index, field, value) => {
+    setFormError('');
+    const newSubGuests = [...tempSubGuests];
+    newSubGuests[index] = { ...newSubGuests[index], [field]: value };
+    setTempSubGuests(newSubGuests);
+  };
+
+  const handleRSVPSubmit = async (e) => {
+    e.preventDefault();
+    setFormError('');
+
+    if (isPreviewMode) {
+      alert("🔒 MODO VISTA PREVIA\nAquí se guardarían los datos y se comunicarían los QRs al HTML.");
+      return;
+    }
+
+    setRsvpStatus('submitting');
+    
+    try {
+      let finalGuestData = null;
+
+      if (guestUid && guestInfo) {
+        const attendingGuests = tempSubGuests.filter(sg => sg.willAttend);
+        const isCancelled = attendingGuests.length === 0;
+
+        if (!isCancelled) {
+          const emptyNames = attendingGuests.filter(sg => !sg.name.trim());
+          if(emptyNames.length > 0) { 
+             setFormError("Por favor, ingresa el nombre de todos los que SÍ asistirán."); 
+             setRsvpStatus('idle'); 
+             return; 
+          }
+        }
+
+        const subGuestsArray = attendingGuests.map((sg, i) => ({ 
+          id: sg.id?.startsWith('s_new') ? `usr_${guestInfo.id}_${i}` : sg.id, 
+          name: sg.name, 
+          isChild: sg.isChild, 
+          entered: false 
+        }));
+
+        finalGuestData = {
+          ...guestInfo, 
+          passes: isCancelled ? 0 : attendingGuests.length, 
+          status: isCancelled ? 'cancelado' : 'confirmado', 
+          extraRequested: extraRequested, 
+          fechaConfirmacion: serverTimestamp(),
+          subGuests: subGuestsArray
+        };
+        await setDoc(doc(db, "eventos", eventId, "invitados", guestUid), finalGuestData);
+        setGuestInfo(finalGuestData);
+        
+      } else {
+        const subGuestsArray = Array(parseInt(openPasses)).fill(null).map((_, i) => ({ 
+          id: `usr_gen_${Date.now()}_${i}`, 
+          name: i === 0 ? openName : `Acompañante de ${openName}`, 
+          isChild: false, 
+          entered: false 
+        }));
+
+        const newDocRef = await addDoc(collection(db, "eventos", eventId, "invitados"), {
+          name: openName, passes: parseInt(openPasses), originalPasses: parseInt(openPasses),
+          status: 'confirmado', fechaConfirmacion: serverTimestamp(), side: 'general', entered: 0, tableId: null,
+          subGuests: subGuestsArray
+        });
+        const newGuestSnap = await getDoc(newDocRef);
+        finalGuestData = { id: newDocRef.id, ...newGuestSnap.data() };
+        setGuestInfo(finalGuestData);
+      }
+      
+      setRsvpStatus('success');
+      if (finalGuestData) comunicarDatosALaInvitacionHTML(finalGuestData);
+
+    } catch (error) { 
+      setFormError("Error al guardar. Revisa tu conexión."); 
+      setRsvpStatus('idle'); 
+    }
+  };
+
+  if (loading) return (
+    <div style={themeContainer} className="flex flex-col items-center justify-center p-6 min-h-[50vh]">
+      <svg className="animate-spin h-10 w-10 mb-4" style={{ color: t_btn }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+      <p className="text-xs font-bold uppercase tracking-widest opacity-70" style={{ color: t_txt }}>Conectando Bóveda...</p>
+    </div>
+  );
+
+  if (!eventoInfo) return (
+    <div style={themeContainer} className="flex flex-col items-center justify-center p-6 min-h-[50vh]">
+      <div className="w-16 h-16 rounded-full bg-rose-500/20 flex items-center justify-center mb-4"><svg className="text-rose-500 w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
+      <p className="text-sm font-bold uppercase tracking-widest text-rose-500">Error 404</p>
+      <p className="text-xs opacity-70 mt-2" style={{ color: t_txt }}>El enlace de evento es inválido.</p>
+    </div>
+  );
+
+  if (isConfirmadoOrSuccess) {
+    return (
+      <div style={themeContainer} className="flex flex-col items-center justify-center p-6 min-h-[50vh] animate-in fade-in">
+        <div style={{ borderColor: t_btn, color: t_btn }} className="w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-lg border-2 bg-white/5 backdrop-blur-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <h2 className="text-xl font-bold uppercase tracking-widest text-center" style={{ color: t_txt }}>¡Asistencia Confirmada!</h2>
+        <p className="text-xs opacity-80 mt-3 text-center leading-relaxed" style={{ color: t_txt }}>Tus pases VIP han sido generados en tu invitación.<br/><br/>Ya puedes cerrar esta ventana.</p>
+      </div>
+    );
+  }
+
+  // PANTALLA 3: EL FORMULARIO ORIGINAL
+  return (
+    <div style={themeContainer} className="relative flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+      {isIframe && (<style>{`html, body, #root { background: transparent !important; overflow-x: hidden !important; touch-action: pan-y !important; }`}</style>)}
+      {t_font && <style>{`@import url('https://fonts.googleapis.com/css2?family=${t_font.replace(/ /g, '+')}&display=swap');`}</style>}
+
+      {showRSVP && (
+        <div className="w-full max-w-sm mx-auto z-50 animate-in slide-in-from-bottom-8 duration-500">
+          
+          {isPreviewMode && (
+            <div className="bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest py-1.5 text-center shadow-lg rounded-t-xl animate-pulse flex justify-center items-center">
+               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Vista Previa Protegida
+            </div>
+          )}
+
+          <div style={themeGlassForm} className={`w-full ${isPreviewMode ? 'rounded-b-2xl' : 'rounded-2xl'} p-5 sm:p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar`}>
+            
+            <div className="text-center mb-6 border-b pb-4" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
+               {!logoFailed ? (
+                 <img 
+                   src={`/${eventId}/logodeevento.svg`} 
+                   alt="Logotipo" 
+                   className="h-16 mx-auto mb-3 object-contain drop-shadow-md" 
+                   onError={() => setLogoFailed(true)} 
+                 />
+               ) : (
+                 <h3 className="text-xl sm:text-2xl font-editorial font-bold leading-tight mb-2">{eventoInfo?.nombres || 'Confirmación'}</h3>
+               )}
+               {guestInfo && <p className="mt-1 text-sm font-medium opacity-80">{guestInfo.name} ({guestInfo.originalPasses || guestInfo.passes} lugares)</p>}
+            </div>
+            
+            <form onSubmit={handleRSVPSubmit} className="space-y-4">
+              {guestInfo ? (
+                <>
+                  <div className="text-center mt-5 mb-2">
+                    <h4 className="font-bold text-sm uppercase tracking-widest opacity-90">Asistentes</h4>
+                  </div>
+                  
+                  <div className="space-y-2.5">
+                    {tempSubGuests.map((sg, idx) => (
+                      <div key={idx} style={{ borderColor: sg.willAttend ? `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.3)` : `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)`, opacity: sg.willAttend ? 1 : 0.6 }} className="p-3 rounded-xl border transition-all bg-white/5">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <label className="text-xs font-bold uppercase tracking-wider">Pase #{idx + 1}</label>
+                          <label style={{ backgroundColor: 'rgba(255,255,255,0.1)' }} className="flex items-center space-x-1.5 cursor-pointer px-2 py-1 rounded-md border border-white/5" >
+                            <input type="checkbox" checked={sg.willAttend} onChange={(e) => handleSubGuestChange(idx, 'willAttend', e.target.checked)} className="w-3.5 h-3.5 accent-emerald-600" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">{sg.willAttend ? 'SÍ VOY' : 'NO VOY'}</span>
+                          </label>
+                        </div>
+                        
+                        {sg.willAttend && (
+                          <div className="space-y-2 mt-3 pt-3 border-t animate-in fade-in" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)` }}>
+                            <input 
+                              type="text" required 
+                              placeholder={sg.isChild ? "Nombre del niño..." : (idx === 0 ? "Tu nombre..." : "Nombre del adulto...")} 
+                              value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)} 
+                              style={themeInput} className="w-full p-2.5 border rounded-lg text-sm font-medium outline-none shadow-inner" 
+                            />
+                            <label className="flex items-center space-x-2 cursor-pointer pt-1">
+                               <input type="checkbox" checked={sg.isChild || false} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-3.5 h-3.5 accent-indigo-600" />
+                               <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">Pase de Menor / Niño</span>
+                            </label>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="border-t pt-4 mt-5 flex items-center justify-between p-2" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-widest">¿Pases extra?</p>
+                      <p className="text-[8px] opacity-60 leading-tight">Sujeto a disponibilidad.</p>
+                    </div>
+                    <div style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)` }} className="flex items-center border rounded-lg p-0.5 shadow-sm bg-white/10">
+                      <button type="button" onClick={() => setExtraRequested(Math.max(0, extraRequested - 1))} className="px-2 py-1 text-lg font-bold hover:opacity-50">-</button>
+                      <span className="text-sm font-black w-6 text-center">{extraRequested}</span>
+                      <button type="button" onClick={() => setExtraRequested(extraRequested + 1)} className="px-2 py-1 text-lg font-bold hover:opacity-50">+</button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-3">
+                  <div className="p-3 rounded-xl border bg-white/5" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5 opacity-90">Tu Nombre Completo</label>
+                    <input type="text" required value={openName} onChange={e => setOpenName(e.target.value)} style={themeInput} className="w-full p-2.5 border rounded-lg outline-none font-medium text-sm shadow-inner" placeholder="Ej. Familia López" />
+                  </div>
+                  <div className="p-3 rounded-xl border bg-white/5" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5 opacity-90">¿Cuántos asisten?</label>
+                    <select value={openPasses} onChange={e => setOpenPasses(e.target.value)} style={themeInput} className="w-full p-2.5 border rounded-lg outline-none font-medium text-sm shadow-inner">
+                      {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n} persona(s)</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
+              
+              {formError && (
+                 <div className="bg-rose-500/20 border border-rose-500/40 text-rose-500 p-3 rounded-xl font-bold text-xs flex items-center shadow-sm animate-in shake">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> {formError}
+                 </div>
+              )}
+
+              <button type="submit" disabled={rsvpStatus === 'submitting'} style={{...themeBtn, opacity: (!guestInfo || tempSubGuests.filter(s => s.willAttend).length > 0) ? 1 : 0.8 }} className="w-full py-4 rounded-xl font-bold text-sm shadow-xl hover:scale-[1.02] transition-transform mt-6 border-b-4 border-black/20">
+                {rsvpStatus === 'submitting' ? 'Enviando...' : (!guestInfo || tempSubGuests.filter(s => s.willAttend).length > 0 ? 'Confirmar Asistencia' : 'Declinar Invitación')}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
