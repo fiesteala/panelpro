@@ -10536,27 +10536,26 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           <RevealSection delay={100} className="md:col-span-2 md:row-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-10 md:p-12 border border-slate-200 dark:border-white/10 flex flex-col justify-end relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
             <div className={`absolute inset-0 opacity-5 dark:opacity-10 transition-colors duration-700 ${accentColor === 'monochrome' ? 'bg-slate-500' : (accentThemes[accentColor]?.bg || '')}`}></div>
             
+            {/* 🔴 NUEVO TEXTO MANUSCRITO ALINEADO A LA IZQUIERDA Y A LA ALTURA DE LAS FOTOS */}
+            <div className={`absolute top-16 sm:top-20 left-10 sm:left-12 z-20 transition-all duration-700 transform group-hover:scale-105 group-hover:-rotate-2 drop-shadow-xl ${accentColor === 'monochrome' ? 'text-slate-800 dark:text-white' : accentThemes[accentColor]?.text}`}>
+                <h3 style={{ fontFamily: '"Birthstone", cursive', fontSize: '4.5rem', lineHeight: '1' }} className="font-medium -rotate-6">
+                    Ana y Rodrigo
+                </h3>
+            </div>
+
             <div className="absolute top-10 right-0 md:right-10 w-full md:w-56 h-64 pointer-events-none perspective-[1000px] flex items-center justify-center">
                <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 1" className="absolute w-40 h-52 object-cover rounded-xl border-[4px] border-white dark:border-[#111] transform rotate-[10deg] translate-x-16 translate-y-6 group-hover:rotate-[15deg] group-hover:translate-x-24 shadow-xl transition-all duration-700 ease-out" />
                <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 2" className="absolute w-40 h-52 object-cover rounded-xl border-[4px] border-white dark:border-[#111] transform -rotate-[5deg] group-hover:-rotate-[10deg] group-hover:-translate-x-4 shadow-xl transition-all duration-700 ease-out z-10" />
             </div>
             
-            <div className="absolute top-10 left-10 flex gap-2 p-2 bg-white/80 dark:bg-black/40 backdrop-blur-md rounded-full border border-slate-200 dark:border-white/10 z-30 shadow-sm">
-               {/* BOTÓN MONOCROMÁTICO SELECCIONADO */}
-               <button onMouseEnter={()=>setAccentColor('monochrome')} className={`w-5 h-5 rounded-full bg-[linear-gradient(135deg,_#0f172a_50%,_#ffffff_50%)] dark:bg-[linear-gradient(135deg,_#ffffff_50%,_#0f172a_50%)] border border-slate-300 dark:border-slate-600 transition-all ${accentColor === 'monochrome' ? 'scale-125 ring-2 ring-offset-2 ring-slate-400 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Clásico"></button>
-               
-               <button onMouseEnter={()=>setAccentColor('amber')} className={`w-5 h-5 rounded-full bg-amber-500 transition-all ${accentColor === 'amber' ? 'scale-125 ring-2 ring-offset-2 ring-amber-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
-               <button onMouseEnter={()=>setAccentColor('rose')} className={`w-5 h-5 rounded-full bg-rose-500 transition-all ${accentColor === 'rose' ? 'scale-125 ring-2 ring-offset-2 ring-rose-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
-               <button onMouseEnter={()=>setAccentColor('emerald')} className={`w-5 h-5 rounded-full bg-emerald-500 transition-all ${accentColor === 'emerald' ? 'scale-125 ring-2 ring-offset-2 ring-emerald-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
-               <button onMouseEnter={()=>setAccentColor('indigo')} className={`w-5 h-5 rounded-full bg-indigo-500 transition-all ${accentColor === 'indigo' ? 'scale-125 ring-2 ring-offset-2 ring-indigo-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
-            </div>
-            
-            <div className="relative z-30 w-full md:w-3/4">
-               {/* 🔴 NUEVO MONOGRAMA SVG CORREGIDO: Bajado y centrado en el texto block void */}
-               <div className={`transition-colors duration-700 mb-6 flex justify-center w-full ${accentColor === 'monochrome' ? 'text-slate-900 dark:text-white' : accentThemes[accentColor]?.text}`}>
-                  <svg width="140" height="110" viewBox="0 0 140 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <text x="50%" y="60%" dominantBaseline="middle" textAnchor="middle" fill="currentColor" fontFamily="'Playfair Display', serif" fontSize="72" fontStyle="italic" fontWeight="bold">A<tspan fontSize="48" dx="3">&</tspan><tspan dx="3">R</tspan></text>
-                  </svg>
+            <div className="relative z-30 w-full md:w-3/4 mt-48 sm:mt-32">
+               {/* 🔴 BOTONERA DE COLORES REUBICADA ARRIBA DEL TEXTO */}
+               <div className="flex gap-2 p-2 bg-white/80 dark:bg-black/40 backdrop-blur-md rounded-full border border-slate-200 dark:border-white/10 w-max mb-6 shadow-sm">
+                 <button onMouseEnter={()=>setAccentColor('monochrome')} className={`w-5 h-5 rounded-full bg-[linear-gradient(135deg,_#0f172a_50%,_#ffffff_50%)] dark:bg-[linear-gradient(135deg,_#ffffff_50%,_#0f172a_50%)] border border-slate-300 dark:border-slate-600 transition-all ${accentColor === 'monochrome' ? 'scale-125 ring-2 ring-offset-2 ring-slate-400 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Clásico"></button>
+                 <button onMouseEnter={()=>setAccentColor('amber')} className={`w-5 h-5 rounded-full bg-amber-500 transition-all ${accentColor === 'amber' ? 'scale-125 ring-2 ring-offset-2 ring-amber-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
+                 <button onMouseEnter={()=>setAccentColor('rose')} className={`w-5 h-5 rounded-full bg-rose-500 transition-all ${accentColor === 'rose' ? 'scale-125 ring-2 ring-offset-2 ring-rose-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
+                 <button onMouseEnter={()=>setAccentColor('emerald')} className={`w-5 h-5 rounded-full bg-emerald-500 transition-all ${accentColor === 'emerald' ? 'scale-125 ring-2 ring-offset-2 ring-emerald-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
+                 <button onMouseEnter={()=>setAccentColor('indigo')} className={`w-5 h-5 rounded-full bg-indigo-500 transition-all ${accentColor === 'indigo' ? 'scale-125 ring-2 ring-offset-2 ring-indigo-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
                </div>
 
                <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-3 leading-tight transition-colors duration-500">Diseño Inmersivo</h3>
