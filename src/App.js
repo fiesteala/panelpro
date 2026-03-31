@@ -196,7 +196,8 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
       title: 'Gestión de Asistentes', 
       items: [ 
         { id: 'invitacion', icon: Smartphone, label: 'Ver Invitación App', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
-        { id: 'invitados', icon: Users, label: 'Lista de Invitados', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
+        // 🔴 PERMISO AÑADIDO: Kit de seguridad ahora puede ver y gestionar invitados
+        { id: 'invitados', icon: Users, label: 'Lista de Invitados', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante', 'security_kit'] }, 
         { id: 'mesas', icon: LayoutGrid, label: 'Gestión de Mesas', minLevel: 2, allowedPlans: ['oro', 'diamante'] } 
       ] 
     },
@@ -211,7 +212,7 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
       title: 'El Día del Evento', 
       items: [ 
         { id: 'timing', icon: Clock, label: 'El Minuto a Minuto', minLevel: 1, allowedPlans: ['plata', 'oro', 'diamante'] }, 
-        // 🔴 AQUÍ DESBLOQUEAMOS EL ESCÁNER PARA EL KIT DE SEGURIDAD
+        // 🔴 PERMISO AÑADIDO: Escáner
         { id: 'escaner', icon: Scan, label: 'Control Puerta (QR)', minLevel: 2, allowedPlans: ['oro', 'diamante', 'security_kit'] }, 
         { id: 'galeria', icon: Camera, label: 'Muro Social (Vivo)', minLevel: 1, allowedPlans: ['diamante', 'social_wall'] } 
       ] 
@@ -1387,7 +1388,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     }
   };
 
-  // 🔴 RESTAURADO: GENERADOR DE PULSERAS VIP EXACTAS
+  // 🔴 MOTOR DE PULSERAS VIRALES (Con Autopublicidad y Letra Manuscrita)
   const triggerQRPdfDownload = async () => {
     const allIndividualsForQR = safeGuests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').flatMap(g => (g.subGuests || []).map(sg => ({ ...sg, familyName: g.name, familyId: g.id })));
     if (allIndividualsForQR.length === 0) {
@@ -1396,12 +1397,24 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     }
     
     setIsPreparingQRPrint(true);
-    if(addNotification) addNotification('Preparando Archivo', 'Generando pulseras QR a medida exacta...', 'info');
+    if(addNotification) addNotification('Preparando Archivo', 'Generando pulseras VIP con tu diseño...', 'info');
+
+    // 1. Inyectamos la fuente manuscrita "Great Vibes" en la cabecera
+    if (!document.getElementById('font-great-vibes')) {
+       const link = document.createElement('link');
+       link.id = 'font-great-vibes';
+       link.href = 'https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap';
+       link.rel = 'stylesheet';
+       document.head.appendChild(link);
+    }
 
     setTimeout(async () => {
       try {
+        await document.fonts.ready; // Esperamos a que la fuente cargue
+
         const { jsPDF } = await import('jspdf');
         const html2canvas = (await import('html2canvas')).default;
+        const ReactDOMClient = await import('react-dom/client'); 
         
         const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
         const wristbandPages = chunkArray(allIndividualsForQR, 10);
@@ -1412,30 +1425,62 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         tempContainer.style.top = '-9999px';
         document.body.appendChild(tempContainer);
         
-        const root = ReactDOM.createRoot(tempContainer);
+        const root = ReactDOMClient.createRoot(tempContainer);
         
+        // 10 pulseras de 1.9cm de alto = 19cm (190mm). Ancho: 25cm (250mm).
         const QRPagesToRender = wristbandPages.map((page, pageIdx) => (
            <div key={pageIdx} className="hidden-qr-pdf-page bg-white relative shrink-0" style={{ width: '250mm', height: '190mm', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflow: 'hidden', padding: 0, margin: 0 }}>
              {page.map((ind) => {
                const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
                const link = `${baseDomain}/?modo=camara&e=${ID_DEL_EVENTO}&u=${ind.id}`;
                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`;
+               
+               const nombreMesa = ind.tableId ? (tables?.find(t => String(t.id) === String(ind.tableId))?.name || 'Mesa Asignada') : 'Sin Mesa';
+
                return (
                  <div key={ind.id} style={{ width: '250mm', height: '19mm', borderBottom: '1px dashed #cbd5e1', display: 'flex', boxSizing: 'border-box', backgroundColor: 'white', margin: 0 }}>
-                    <div style={{ width: '25mm', height: '100%', backgroundColor: '#f8fafc', borderRight: '1px dashed #94a3b8', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center' }}>
+                    
+                    {/* Zona 1: Pegamento */}
+                    <div style={{ width: '25mm', height: '100%', backgroundColor: '#f8fafc', borderRight: '1px dashed #94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <span style={{ fontSize: '8px', color: '#94a3b8', transform: 'rotate(-90deg)', letterSpacing: '1px', fontWeight: 'bold' }}>PEGAMENTO</span>
                     </div>
-                    <div style={{ flex: 1, padding: '0 10mm', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                      <div style={{ fontSize: '14px', fontWeight: '900', color: '#0f172a', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{ind.name || 'Invitado (Sin Nombre)'}</div>
-                      <div style={{ fontSize: '10px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>({ind.familyName})</div>
+
+                    {/* Zona 2: Autopublicidad Baulia (El Ciclo Viral) */}
+                    <div style={{ width: '30mm', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid #f1f5f9' }}>
+                      <span style={{ fontSize: '7px', color: '#64748b', transform: 'rotate(-90deg)', letterSpacing: '1px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                         Control de Acceso by BAULIA.COM
+                      </span>
                     </div>
-                    <div style={{ width: '60mm', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '5mm', gap: '10px' }}>
+
+                    {/* Zona 3: Logo del Evento (Fuente Manuscrita Elegante) */}
+                    <div style={{ width: '80mm', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 5mm', borderRight: '1px solid #f1f5f9' }}>
+                      <div style={{ fontFamily: '"Great Vibes", cursive', fontSize: '18px', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '2px' }}>
+                        {eventName}
+                      </div>
+                      <div style={{ fontSize: '8px', fontWeight: 'bold', color: '#64748b', letterSpacing: '2px', textTransform: 'uppercase' }}>
+                        ACCESO VIP
+                      </div>
+                    </div>
+
+                    {/* Zona 4: Datos del Invitado y Mesa */}
+                    <div style={{ flex: 1, padding: '0 5mm', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                      <div style={{ fontSize: '13px', fontWeight: '900', color: '#0f172a', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {ind.name || 'Invitado (Sin Nombre)'}
+                      </div>
+                      <div style={{ fontSize: '9px', color: '#64748b', whiteSpace: 'nowrap', marginTop: '2px', fontWeight: 'bold' }}>
+                        FAM. {ind.familyName} • <span style={{color: '#4f46e5'}}>{nombreMesa}</span>
+                      </div>
+                    </div>
+
+                    {/* Zona 5: Código QR (El Escáner) */}
+                    <div style={{ width: '40mm', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '5mm', gap: '8px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <span style={{ fontSize: '8px', fontWeight: 'bold', color: '#64748b' }}>CÓDIGO MANUAL</span>
-                        <span style={{ fontSize: '14px', fontWeight: '900', fontFamily: 'monospace', color: '#0f172a', backgroundColor: '#f1f5f9', padding: '2px 4px', borderRadius: '4px' }}>{ind.id}</span>
+                        <span style={{ fontSize: '7px', fontWeight: 'bold', color: '#64748b' }}>CÓDIGO MANUAL</span>
+                        <span style={{ fontSize: '11px', fontWeight: '900', fontFamily: 'monospace', color: '#0f172a', backgroundColor: '#f1f5f9', padding: '2px 4px', borderRadius: '4px', marginTop: '2px' }}>{ind.id}</span>
                       </div>
                       <img src={qrUrl} alt="QR" style={{ width: '15mm', height: '15mm', mixBlendMode: 'multiply' }} />
                     </div>
+
                  </div>
                )
              })}
@@ -1462,7 +1507,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         pdf.save(`Pulseras-VIP-${eventName.replace(/\s+/g, '-')}.pdf`);
         root.unmount();
         document.body.removeChild(tempContainer);
-        if(addNotification) addNotification('¡Pulseras Listas!', 'El documento se guardó correctamente.', 'success');
+        if(addNotification) addNotification('¡Pulseras Listas!', 'El documento se guardó correctamente con la tipografía Premium.', 'success');
       } catch (error) {
         console.error(error);
         if(addNotification) addNotification('Error', 'Fallo al generar el PDF.', 'error');
@@ -12876,31 +12921,31 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const userRole = impersonating ? impersonating.role : originalUserRole;
   const userPlan = impersonating ? impersonating.plan : originalUserPlan;
 
-  // 🔴 MODO APP ÚNICA: Detecta si es un producto independiente
-  const isSingleAppMode = userPlan === 'social_wall' || userPlan === 'security_kit';
+  // 🔴 AHORA SOLO EL SOCIAL WALL ES "APP ÚNICA SIN MENÚ". 
+  // El Security Kit sí necesita menú lateral para ver la Lista de Invitados y el Escáner.
+  const isSingleAppMode = userPlan === 'social_wall';
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
-  // 🔴 MAGIA DE RUTAS REPARADA: Si es Kit de Seguridad, arranca directo en el Escáner
+  // 🔴 RUTAS INICIALES CORRECTAS
   const [activeTab, setActiveTab] = useState(() => {
     if (userRole === 'superadmin') return 'licencias';
     if (userPlan === 'social_wall') return 'galeria';
-    if (userPlan === 'security_kit') return 'escaner';
+    if (userPlan === 'security_kit') return 'invitados'; // Aterriza en su lista para cargar la info
     return 'dashboard';
   });
 
-  // 🔴 VIGILANTE DE CAMBIOS DE EVENTO (SOPORTE B2B)
   useEffect(() => {
-    if (userPlan === 'social_wall') {
+    if (userPlan === 'social_wall' && activeTab !== 'galeria') {
       setActiveTab('galeria');
-    } else if (userPlan === 'security_kit') {
-      setActiveTab('escaner');
-    } else if (activeTab === 'galeria' && !['diamante', 'social_wall'].includes(userPlan)) {
+    } else if (userPlan === 'security_kit' && !['invitados', 'escaner'].includes(activeTab)) {
+      setActiveTab('invitados');
+    } else if (!isSingleAppMode && userPlan !== 'security_kit' && (activeTab === 'galeria' && userPlan !== 'diamante' && userPlan !== 'social_wall')) {
       setActiveTab('dashboard');
-    } else if (activeTab === 'escaner' && !['oro', 'diamante', 'security_kit'].includes(userPlan)) {
+    } else if (!isSingleAppMode && userPlan !== 'security_kit' && (activeTab === 'escaner' && userPlan !== 'oro' && userPlan !== 'diamante')) {
       setActiveTab('dashboard');
     }
-  }, [userPlan, activeTab]);
+  }, [userPlan, activeTab, isSingleAppMode]);
   
   const [tareas, setTareas] = useState([]); 
   const [timing, setTiming] = useState([]); 
@@ -12926,7 +12971,9 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
     const id = Date.now() + Math.random(); 
     const notifObj = { id, title, message, type, tab, date: new Date(), isRead: false };
     setNotifications(prev => [...prev, notifObj]);
-    setTimeout(() => { setNotifications(prev => prev.filter(n => n.id !== id)); }, 6000);
+    setTimeout(() => { 
+        setNotifications(prev => prev.filter(n => n.id !== id)); 
+    }, 6000);
     setBellAlerts(prev => [notifObj, ...prev].slice(0, 30));
   }, []);
 
@@ -12938,7 +12985,10 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
 
   useEffect(() => {
     if (userRole === 'superadmin' && !impersonating) return;
-    setGlobalEventId(eventId);
+    
+    if (typeof setGlobalEventId !== 'undefined') {
+        setGlobalEventId(eventId);
+    }
 
     const unsubConfigMain = onSnapshot(doc(db, "eventos", eventId), (docSnap) => {
       if (docSnap.exists() && docSnap.data().presupuestoTotal !== undefined) {
@@ -12949,7 +12999,9 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
     });
 
     const unsubWhiteLabel = onSnapshot(doc(db, "eventos", eventId, "configuracion", "marcaBlanca"), (docSnap) => {
-      if (docSnap.exists()) setAgencyConfig(docSnap.data());
+      if (docSnap.exists()) {
+          setAgencyConfig(docSnap.data());
+      }
     });
 
     const unsubGuests = onSnapshot(collection(db, "eventos", eventId, "invitados"), (snap) => {
@@ -12975,16 +13027,51 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       setGuests(newGuests);
     });
 
-    const unsubGastos = onSnapshot(collection(db, "eventos", eventId, "gastos"), (snap) => setGastos(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-    const unsubProv = onSnapshot(collection(db, "eventos", eventId, "proveedores"), (snap) => setProveedores(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-    const unsubMesas = onSnapshot(collection(db, "eventos", eventId, "mesas"), (snap) => setTables(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-    const unsubTareas = onSnapshot(collection(db, "eventos", eventId, "tareas"), (snap) => setTareas(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-    const unsubTiming = onSnapshot(collection(db, "eventos", eventId, "timing"), (snap) => setTiming(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-    const unsubMapa = onSnapshot(collection(db, "eventos", eventId, "mapa"), (snap) => setMapElements(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-    const unsubDeco = onSnapshot(collection(db, "eventos", eventId, "decoracion"), (snap) => setDecoElements(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-    const unsubFotos = onSnapshot(collection(db, "eventos", eventId, "fotos"), (snap) => setPhotos(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+    const unsubGastos = onSnapshot(collection(db, "eventos", eventId, "gastos"), (snap) => {
+        setGastos(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
 
-    return () => { unsubConfigMain(); unsubWhiteLabel(); unsubGuests(); unsubGastos(); unsubProv(); unsubMesas(); unsubTareas(); unsubTiming(); unsubMapa(); unsubDeco(); unsubFotos(); };
+    const unsubProv = onSnapshot(collection(db, "eventos", eventId, "proveedores"), (snap) => {
+        setProveedores(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const unsubMesas = onSnapshot(collection(db, "eventos", eventId, "mesas"), (snap) => {
+        setTables(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const unsubTareas = onSnapshot(collection(db, "eventos", eventId, "tareas"), (snap) => {
+        setTareas(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const unsubTiming = onSnapshot(collection(db, "eventos", eventId, "timing"), (snap) => {
+        setTiming(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const unsubMapa = onSnapshot(collection(db, "eventos", eventId, "mapa"), (snap) => {
+        setMapElements(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const unsubDeco = onSnapshot(collection(db, "eventos", eventId, "decoracion"), (snap) => {
+        setDecoElements(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const unsubFotos = onSnapshot(collection(db, "eventos", eventId, "fotos"), (snap) => {
+        setPhotos(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    return () => { 
+        unsubConfigMain(); 
+        unsubWhiteLabel(); 
+        unsubGuests(); 
+        unsubGastos(); 
+        unsubProv(); 
+        unsubMesas(); 
+        unsubTareas(); 
+        unsubTiming(); 
+        unsubMapa(); 
+        unsubDeco(); 
+        unsubFotos(); 
+    };
   }, [eventId, userRole, impersonating, addNotification]);
 
   const isSuperAdminMode = originalUserRole === 'superadmin' && !impersonating;
@@ -12995,10 +13082,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const currentEventName = activeEventData.nombres || activeEventData.nombre || 'Evento Baulia';
 
   const renderContent = () => {
-    // 🔴 BLINDAJE MAESTRO: Forza la aplicación exclusiva pase lo que pase
-    if (userPlan === 'security_kit') {
-      return typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null;
-    }
+    // 🔴 BLOQUEOS PARA PRODUCTOS INDEPENDIENTES
     if (userPlan === 'social_wall') {
       return typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} /> : null;
     }
@@ -13006,8 +13090,11 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
     switch(activeTab) {
       case 'licencias': return isSuperAdminMode && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} authData={authData} /> : null;
       case 'dashboard': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof DashboardView !== 'undefined' ? <DashboardView authData={authData} guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null;      
-      case 'invitados': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={currentEventType} userPlan={currentEventPlan} eventName={currentEventName} urlInvitacion={activeEventData?.urlInvitacion} /> : null;      
-      case 'escaner': return ['oro', 'diamante'].includes(userPlan) && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
+      
+      // Permitimos que Security Kit entre a Invitados y a Escáner
+      case 'invitados': return ['esencial', 'plata', 'oro', 'diamante', 'security_kit'].includes(userPlan) && typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={currentEventType} userPlan={currentEventPlan} eventName={currentEventName} urlInvitacion={activeEventData?.urlInvitacion} /> : null;      
+      case 'escaner': return ['oro', 'diamante', 'security_kit'].includes(userPlan) && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
+      
       case 'mesas': return ['oro', 'diamante'].includes(userPlan) && typeof MesasView !== 'undefined' ? <MesasView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
       case 'mapa': return userPlan === 'diamante' && typeof MapaView !== 'undefined' ? <MapaView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} globalSearch={globalSearch} elements={mapElements} setElements={setMapElements} /> : null;
       case 'decoracion': return userPlan === 'diamante' && typeof DecoracionView !== 'undefined' ? <DecoracionView elements={decoElements} setElements={setDecoElements} addNotification={addNotification} /> : null; 
@@ -13057,7 +13144,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
         ))}
       </div>
 
-      {/* 🔴 MODO APP ÚNICA: Destruimos el Sidebar si es un plan independiente */}
+      {/* 🔴 MODO APP ÚNICA: Destruimos el Sidebar si es un Social Wall. El Security Kit SÍ lo conserva */}
       {typeof Sidebar !== 'undefined' && !isSuperAdminMode && !isSingleAppMode && (
         <Sidebar 
           isOpen={sidebarOpen} 
@@ -13073,7 +13160,23 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         <div className={`${impersonating ? 'pt-7' : ''} transition-all`}>
-          <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} authData={authData} switchEvent={switchEvent} isSuperAdminMode={isSuperAdminMode} eventName={currentEventName} eventPlan={currentEventPlan} />
+          <Header 
+              setIsOpen={setSidebarOpen} 
+              setActiveTab={setActiveTab} 
+              data={{ guests, proveedores, gastos }} 
+              globalSearch={globalSearch} 
+              setGlobalSearch={setGlobalSearch} 
+              bellAlerts={bellAlerts} 
+              setBellAlerts={setBellAlerts} 
+              markAsRead={markAsRead} 
+              cycleTheme={cycleTheme} 
+              themeSetting={themeSetting} 
+              authData={authData} 
+              switchEvent={switchEvent} 
+              isSuperAdminMode={isSuperAdminMode} 
+              eventName={currentEventName} 
+              eventPlan={currentEventPlan} 
+          />
         </div>
         
         <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-5 lg:p-6 print:p-0 print:overflow-visible custom-scrollbar relative z-10">
