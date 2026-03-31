@@ -1365,7 +1365,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     }
   };
 
-  // 🔴 GENERADOR DE PULSERAS VIP EXACTAS (25x19cm, 10 por hoja con adhesivo)
+  // 🔴 RESTAURADO: GENERADOR DE PULSERAS VIP EXACTAS (100% Funcional sin importar librerías raras)
   const triggerQRPdfDownload = async () => {
     const allIndividualsForQR = safeGuests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').flatMap(g => (g.subGuests || []).map(sg => ({ ...sg, familyName: g.name, familyId: g.id })));
     if (allIndividualsForQR.length === 0) {
@@ -1380,7 +1380,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       try {
         const { jsPDF } = await import('jspdf');
         const html2canvas = (await import('html2canvas')).default;
-        const ReactDOMClient = await import('react-dom/client'); 
         
         const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
         const wristbandPages = chunkArray(allIndividualsForQR, 10);
@@ -1391,9 +1390,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         tempContainer.style.top = '-9999px';
         document.body.appendChild(tempContainer);
         
-        const root = ReactDOMClient.createRoot(tempContainer);
+        const root = ReactDOM.createRoot(tempContainer);
         
-        // 10 pulseras de 1.9cm de alto = 19cm (190mm). Ancho: 25cm (250mm).
         const QRPagesToRender = wristbandPages.map((page, pageIdx) => (
            <div key={pageIdx} className="hidden-qr-pdf-page bg-white relative shrink-0" style={{ width: '250mm', height: '190mm', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflow: 'hidden', padding: 0, margin: 0 }}>
              {page.map((ind) => {
@@ -1453,7 +1451,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
   const toggleCol = (col) => setExportCols(prev => ({ ...prev, [col]: !prev[col] }));
 
-  // 🔴 ESTUDIO DE IMPRESIÓN ELEGANTE Y ESTILO WORD
+  // 🔴 CORRECCIÓN 2: ESTUDIO DE IMPRESIÓN (ESTILO WORD PURO Y ELEGANTE)
   const triggerListPdfDownload = async () => {
     setIsPreparingListPrint(true);
     setTimeout(async () => {
@@ -1468,7 +1466,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
            if (i > 0) pdf.addPage();
            pdf.addImage(imgData, 'JPEG', 0, 0, 215.9, 279.4);
         }
-        pdf.save(`Reporte-Lista-${eventName?.replace(/\s+/g, '-') || 'Invitados'}.pdf`);
+        pdf.save(`Reporte-Asistencia-${eventName?.replace(/\s+/g, '-') || 'Invitados'}.pdf`);
         if(addNotification) addNotification('¡PDF Guardado!', 'Revisa tu carpeta de descargas.', 'success');
       } catch (error) {}
       setIsPreparingListPrint(false);
@@ -1533,7 +1531,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   return (
     <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500">
       
-      {/* 🔴 VISTA PREVIA PROFESIONAL (ESTILO WORD) */}
+      {/* 🔴 MODAL VISTA PREVIA PROFESIONAL (ESTILO WORD PURO) */}
       {exportViewOpen && (() => {
           const allList = getFlattenedGuests(invitadosFiltrados);
           let listToRender = [];
@@ -1549,46 +1547,40 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
              listToRender = allList;
           }
 
-          const PAGE_1_LIMIT = 20; 
-          const PAGE_N_LIMIT = 32;
+          const PAGE_1_LIMIT = 28; // Caben más porque quitamos los fondos anchos
+          const PAGE_N_LIMIT = 35;
           const firstPageItems = listToRender.slice(0, PAGE_1_LIMIT);
           const extraItems = listToRender.slice(PAGE_1_LIMIT);
           const extraPages = [];
           for(let i=0; i<extraItems.length; i+=PAGE_N_LIMIT) extraPages.push(extraItems.slice(i, i+PAGE_N_LIMIT));
 
-          let gradientStyle = 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)';
-          let accentColor = '#64748b'; 
-          if (userPlan === 'diamante') { gradientStyle = 'linear-gradient(180deg, #eef2ff 0%, #ffffff 100%)'; accentColor = '#4f46e5'; }
-          else if (userPlan === 'oro') { gradientStyle = 'linear-gradient(180deg, #fffbeb 0%, #ffffff 100%)'; accentColor = '#d97706'; }
-          else if (userPlan === 'plata') { gradientStyle = 'linear-gradient(180deg, #f1f5f9 0%, #ffffff 100%)'; accentColor = '#475569'; }
-
           const renderTableRows = (rows) => (
-            <table className="w-full text-left text-xs whitespace-nowrap border-collapse">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="border-b-2 border-slate-400">
-                  {exportCols.nombre && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px] w-1/3">Nombre del Asistente</th>}
-                  {exportCols.pases && passCountEnabled && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px] text-center">Pase</th>}
-                  {exportCols.estatus && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px] text-center">Estatus</th>}
-                  {exportCols.telefono && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px]">Teléfono (Titular)</th>}
-                  {exportCols.mesa && <th className="py-3 px-2 font-black text-slate-800 uppercase tracking-widest text-[10px]">Mesa</th>}
+                <tr className="border-b-2 border-slate-800 text-slate-900">
+                  {exportCols.nombre && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest">Asistente</th>}
+                  {exportCols.pases && passCountEnabled && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest text-center">Pase</th>}
+                  {exportCols.estatus && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest text-center">Estatus</th>}
+                  {exportCols.telefono && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest">Teléfono</th>}
+                  {exportCols.mesa && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest">Mesa</th>}
                 </tr>
               </thead>
               <tbody>
                 {rows.map(row => {
-                  if (row.isHeader) return <tr key={`hdr_${row.title}`}><td colSpan="5" className="py-4 text-sm font-black uppercase tracking-widest" style={{ color: accentColor }}>{row.title}</td></tr>;
+                  if (row.isHeader) return <tr key={`hdr_${row.title}`}><td colSpan="5" className="py-6 text-base font-editorial font-bold uppercase tracking-widest text-slate-800 border-b border-slate-300">{row.title}</td></tr>;
                   return (
-                    <tr key={`print_${row._rowId}`} className={`border-b border-slate-200/60 ${row.parentGuest.status === 'cancelado' ? 'opacity-40 line-through' : ''}`}>
+                    <tr key={`print_${row._rowId}`} className={`border-b border-slate-200 ${row.parentGuest.status === 'cancelado' ? 'opacity-50 line-through' : ''}`}>
                       {exportCols.nombre && (
-                        <td className="py-3 px-2">
-                          <span className={`${row.isMain ? 'font-bold text-slate-900' : 'text-slate-600'} text-sm`}>{row.displayName}</span> 
-                          {row.isChild && <span className="ml-1 text-[9px] uppercase tracking-widest text-slate-400 font-bold">(Niño)</span>}
-                          {row.isMissing && <span className="ml-1 text-[9px] uppercase tracking-widest text-amber-500 font-bold">Por registrar</span>}
+                        <td className="py-3 px-2 text-slate-800">
+                          <span className={`${row.isMain ? 'font-bold' : ''}`}>{row.displayName}</span> 
+                          {row.isChild && <span className="ml-2 text-[10px] text-slate-500">(Niño)</span>}
+                          {row.isMissing && <span className="ml-2 text-[10px] text-slate-500 italic">(Por registrar)</span>}
                         </td>
                       )}
-                      {exportCols.pases && passCountEnabled && <td className="py-3 px-2 text-center font-bold text-indigo-600 text-sm">{row.isMain ? row.passes : ''}</td>}
-                      {exportCols.estatus && <td className="py-3 px-2 text-center"><span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">{row.parentGuest.status.replace('_', ' ')}</span></td>}
-                      {exportCols.telefono && <td className="py-3 px-2 text-slate-500 font-mono">{row.isMain ? (row.parentGuest.phone || '-') : ''}</td>}
-                      {exportCols.mesa && <td className="py-3 px-2 text-slate-700 font-bold">{row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : <span className="text-slate-300 font-normal italic">Sin mesa</span>}</td>}
+                      {exportCols.pases && passCountEnabled && <td className="py-3 px-2 text-center text-slate-800 font-bold">{row.isMain ? row.passes : '-'}</td>}
+                      {exportCols.estatus && <td className="py-3 px-2 text-center text-slate-600 text-[10px] uppercase tracking-widest font-bold">{row.parentGuest.status.replace('_', ' ')}</td>}
+                      {exportCols.telefono && <td className="py-3 px-2 text-slate-600 font-mono text-[11px]">{row.isMain ? (row.parentGuest.phone || '-') : ''}</td>}
+                      {exportCols.mesa && <td className="py-3 px-2 text-slate-800 font-bold">{row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : <span className="text-slate-400 font-normal italic">Sin mesa</span>}</td>}
                     </tr>
                   )
                 })}
@@ -1597,9 +1589,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           );
 
           return (
-            <div className="fixed inset-0 z-[9999] bg-slate-900 flex flex-col overflow-hidden animate-in fade-in">
+            <div className="fixed inset-0 z-[9999] bg-slate-900/90 backdrop-blur-sm flex flex-col overflow-hidden animate-in fade-in transition-colors">
               
-              {/* HEADER DE HERRAMIENTAS - FLOTANTE Y PROFESIONAL */}
+              {/* HEADER DE HERRAMIENTAS (FLOTANTE Y OSCURO) */}
               <div className="h-auto md:h-20 bg-[#0a0a0a] text-white px-6 py-4 flex flex-col md:flex-row items-center justify-between shrink-0 border-b border-white/10 shadow-2xl print:hidden gap-4 relative z-50">
                 <div className="flex items-center space-x-4 w-full md:w-auto">
                   <button onClick={() => setExportViewOpen(false)} className="p-2 bg-rose-500 hover:bg-rose-600 text-white rounded-full transition-colors shadow-lg shadow-rose-500/30"><X size={20}/></button>
@@ -1643,7 +1635,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 </div>
               </div>
 
-              {/* LIENZO DE HOJAS */}
+              {/* LIENZO DE HOJAS (ESTILO WORD) */}
               <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8 bg-[#111] print:bg-white print:p-0 print:overflow-visible">
                 
                 <style>{`
@@ -1656,44 +1648,47 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 `}</style>
 
                 {/* PÁGINA 1 */}
-                <div className="list-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
-                  <div className="absolute top-0 left-0 w-full h-3" style={{ backgroundColor: accentColor }}></div>
+                <div className="list-pdf-page bg-white shrink-0 mx-auto mb-8 shadow-2xl relative" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '25mm 20mm', boxSizing: 'border-box', overflow: 'hidden' }}>
                   
-                  <header className="flex justify-between items-center pb-8 pt-4">
+                  {/* Membrete Estilo Word */}
+                  <header className="flex justify-between items-start border-b-[3px] border-slate-900 pb-6 mb-6">
                     <div>
-                      <h1 className="text-4xl font-editorial font-bold text-slate-900 leading-none">Reporte de Asistencia</h1>
-                      <p className="text-sm font-black tracking-[0.2em] uppercase mt-2 text-slate-500">{eventName || 'Evento Baulia'}</p>
+                      <h1 className="text-3xl font-editorial font-black text-slate-900 uppercase tracking-widest">Reporte de Asistencia</h1>
+                      <p className="text-sm font-medium text-slate-600 mt-2">Evento: <span className="font-bold text-slate-900 uppercase">{eventName || 'Evento Baulia'}</span></p>
+                      <p className="text-sm font-medium text-slate-600">Fecha de emisión: {new Date().toLocaleDateString('es-MX')}</p>
                     </div>
                     <div className="text-right flex flex-col items-end">
-                      <BauliaLogo className="h-10" forceWhite={false} />
+                      <BauliaLogo className="h-8" forceWhite={false} />
+                      <p className="text-[8px] text-slate-400 mt-2 tracking-widest uppercase font-bold">Documento Oficial</p>
                     </div>
                   </header>
                   
-                  <div className="grid grid-cols-4 gap-4 mb-8">
-                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">{passCountEnabled ? 'Total Pases' : 'Invitados Tot.'}</p><p className="text-2xl font-editorial text-slate-900">{passCountEnabled ? totalPases : safeGuests.length}</p></div>
-                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Confirmados</p><p className="text-2xl font-editorial" style={{ color: accentColor }}>{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</p></div>
-                     {qrEnabled && <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Ya Ingresaron</p><p className="text-2xl font-editorial text-emerald-600">{totalIngresos}</p></div>}
-                     <div className="p-4 border border-slate-200/60 rounded-xl bg-white/60 text-center"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Mesas</p><p className="text-2xl font-editorial text-sky-600">{totalMesas}</p></div>
+                  {/* Estadísticas en texto plano, elegante */}
+                  <div className="flex gap-10 mb-8 border-b border-slate-200 pb-6 text-slate-800">
+                     <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">{passCountEnabled ? 'Total Pases' : 'Invitados Totales'}</span><span className="text-xl font-bold">{passCountEnabled ? totalPases : safeGuests.length}</span></div>
+                     <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Confirmados</span><span className="text-xl font-bold">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</span></div>
+                     {qrEnabled && <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Ya Ingresaron</span><span className="text-xl font-bold">{totalIngresos}</span></div>}
+                     <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Mesas Asignadas</span><span className="text-xl font-bold">{totalMesas}</span></div>
                   </div>
 
                   <main>{renderTableRows(firstPageItems)}</main>
-                  <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
-                    <span>Fecha de Emisión: {new Date().toLocaleDateString('es-MX')}</span>
+                  
+                  <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[9px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
+                    <span>Baulia Technologies • Control de Accesos</span>
                     <span>Página 1 de {1 + extraPages.length}</span>
                   </div>
                 </div>
 
                 {/* PÁGINAS EXTRA */}
                 {extraPages.map((pageRows, pIdx) => (
-                  <div key={`extrapage_${pIdx}`} className="list-pdf-page bg-white shadow-2xl relative shrink-0" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
-                     <div className="absolute top-0 left-0 w-full h-3" style={{ backgroundColor: accentColor }}></div>
-                     <header className="flex justify-between items-center pb-6 pt-4 mb-6 border-b-2 border-slate-400">
-                       <h1 className="text-2xl font-editorial font-bold text-slate-900 leading-none">Reporte de Asistencia (Cont.)</h1>
-                       <p className="text-xs font-black tracking-[0.2em] uppercase" style={{ color: accentColor }}>{eventName}</p>
+                  <div key={`extrapage_${pIdx}`} className="list-pdf-page bg-white shrink-0 mx-auto mb-8 shadow-2xl relative" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '25mm 20mm', boxSizing: 'border-box', overflow: 'hidden' }}>
+                     <header className="flex justify-between items-center pb-4 mb-6 border-b border-slate-900">
+                       <h2 className="text-lg font-editorial font-bold text-slate-900 uppercase tracking-widest">Reporte de Asistencia (Cont.)</h2>
+                       <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{eventName}</span>
                      </header>
                      <main>{renderTableRows(pageRows)}</main>
-                     <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
-                       <span>Fecha de Emisión: {new Date().toLocaleDateString('es-MX')}</span>
+                     <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[9px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
+                       <span>Baulia Technologies • Control de Accesos</span>
                        <span>Página {pIdx + 2} de {1 + extraPages.length}</span>
                      </div>
                   </div>
@@ -1854,7 +1849,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
             </table>
           </div>
 
-          {/* VISTA MÓVIL */}
           <div className="block md:hidden p-3 space-y-2.5 pb-24">
             {flattenedList.length === 0 ? (
               <div className="text-center p-8 text-slate-400 dark:text-slate-500 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl mt-4">No se encontraron invitados.</div>
@@ -1913,13 +1907,11 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       </div>
 
-      {/* MODAL AGREGAR INVITADO */}
       {addModal.open && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors">
             <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 transition-colors"><h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-wide">Nuevo Invitado</h3><button onClick={() => setAddModal({ open: false, side: 'general' })} className="text-slate-400 hover:text-slate-800 dark:hover:text-white"><X size={20}/></button></div>
             <form onSubmit={handleSaveGuest} className="p-6">
-              
               <div className="space-y-5">
                 <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre del Titular o Familia</label><input type="text" required value={newGuest.name} onChange={e=>setNewGuest({...newGuest, name: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
                 <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" value={newGuest.phone} onChange={e=>setNewGuest({...newGuest, phone: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" placeholder="10 dígitos" /></div>
@@ -1937,7 +1929,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       )}
 
-      {/* MODAL EDITAR INVITADO */}
       {editModal.open && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors">
