@@ -9256,6 +9256,15 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
       const resultado = await respuesta.json();
 
       if (resultado.success) {
+        if (window.fbq) {
+          // Limpiamos las comas del precio (ej. "1,990" -> "1990") para que Facebook lo entienda
+          const precioLimpio = planSeleccionado.precio.toString().replace(/,/g, '');
+          window.fbq('track', 'Purchase', {
+            value: Number(precioLimpio),
+            currency: 'MXN',
+            content_name: `Plan ${planSeleccionado.plan}`
+          });
+        }
         onSuccess(resultado, planSeleccionado);
       } else {
         setErrorTexto(resultado.error || "Transacción declinada por el banco.");
