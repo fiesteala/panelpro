@@ -271,9 +271,24 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
 // ==========================================
 const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tareas, setActiveTab, addNotification }) => {
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
-
-  // 🔴 ESTADOS PARA CAMBIO DE CONTRASEÑA INYECTADOS AQUÍ
   const [passModal, setPassModal] = useState({ open: false, newPass: '', loading: false, msg: '', type: '' });
+
+  // 🔴 DETECTOR DE DATOS FANTASMA (ONBOARDING)
+  const isDemoMode = (guests || []).some(g => String(g.id).includes('_demo_')) || 
+                     (tables || []).some(t => String(t.id).includes('_demo_')) || 
+                     (gastos || []).some(g => String(g.id).includes('_demo_')) ||
+                     (tareas || []).some(t => String(t.id).includes('_demo_'));
+
+  const handleClearDemoData = async () => {
+    if(addNotification) addNotification('Limpiando Bóveda...', 'Eliminando datos de ejemplo.', 'info');
+    const promesas = [];
+    (guests || []).filter(g => String(g.id).includes('_demo_')).forEach(g => promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", g.id))));
+    (tables || []).filter(t => String(t.id).includes('_demo_')).forEach(t => promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", t.id))));
+    (gastos || []).filter(g => String(g.id).includes('_demo_')).forEach(g => promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "gastos", g.id))));
+    (tareas || []).filter(t => String(t.id).includes('_demo_')).forEach(t => promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "tareas", t.id))));
+    await Promise.all(promesas);
+    if(addNotification) addNotification('¡Bóveda Limpia!', 'El panel está listo para tu evento real.', 'success');
+  };
 
   const totalPasses = guests.reduce((sum, guest) => sum + guest.passes, 0);
   const confirmedPasses = guests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').reduce((sum, guest) => sum + guest.passes, 0);
@@ -298,34 +313,20 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
   const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
   const isOverdue = (dateStr) => { if(!dateStr) return false; return new Date(dateStr) < new Date(); };
 
-  // 🔴 LÓGICA DE COLORES DINÁMICOS PARA EL PDF
   const currentEvent = authData?.availableEvents?.find(e => e.eventId === authData?.eventId);
   const plan = currentEvent?.plan || 'oro';
   const eventName = currentEvent?.nombres || 'Proyecto Baulia';
 
   let gradientStyle = 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)';
   let accentColor = '#64748b'; 
-  if (plan === 'diamante') {
-      gradientStyle = 'linear-gradient(180deg, #eef2ff 0%, #ffffff 100%)';
-      accentColor = '#4f46e5'; // Indigo
-  } else if (plan === 'oro') {
-      gradientStyle = 'linear-gradient(180deg, #fffbeb 0%, #ffffff 100%)';
-      accentColor = '#d97706'; // Amber
-  } else if (plan === 'plata') {
-      gradientStyle = 'linear-gradient(180deg, #f1f5f9 0%, #ffffff 100%)';
-      accentColor = '#475569'; // Slate
-  }
+  if (plan === 'diamante') { gradientStyle = 'linear-gradient(180deg, #eef2ff 0%, #ffffff 100%)'; accentColor = '#4f46e5'; } 
+  else if (plan === 'oro') { gradientStyle = 'linear-gradient(180deg, #fffbeb 0%, #ffffff 100%)'; accentColor = '#d97706'; } 
+  else if (plan === 'plata') { gradientStyle = 'linear-gradient(180deg, #f1f5f9 0%, #ffffff 100%)'; accentColor = '#475569'; }
 
-  // 🔴 FUNCIÓN DE CAMBIO DE CONTRASEÑA
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    if(passModal.newPass.length < 6) {
-      setPassModal(prev => ({...prev, msg: 'La contraseña debe tener al menos 6 caracteres.', type: 'error'}));
-      return;
-    }
-    
+    if(passModal.newPass.length < 6) { setPassModal(prev => ({...prev, msg: 'La contraseña debe tener al menos 6 caracteres.', type: 'error'})); return; }
     setPassModal(prev => ({...prev, loading: true, msg: ''}));
-    
     try {
       if (!auth.currentUser) throw new Error("No hay usuario autenticado.");
       await updatePassword(auth.currentUser, passModal.newPass);
@@ -333,54 +334,58 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
       if(addNotification) addNotification('Seguridad Actualizada', 'Tu contraseña ha sido cambiada.', 'success');
       setTimeout(() => setPassModal({ open: false, newPass: '', loading: false, msg: '', type: '' }), 3000);
     } catch (error) {
-      if(error.code === 'auth/requires-recent-login') {
-        setPassModal(prev => ({...prev, loading: false, msg: 'Por seguridad, cierra sesión y vuelve a entrar para cambiarla.', type: 'error'}));
-      } else {
-        setPassModal(prev => ({...prev, loading: false, msg: 'Error al cambiar la contraseña. Intenta de nuevo.', type: 'error'}));
-      }
+      if(error.code === 'auth/requires-recent-login') setPassModal(prev => ({...prev, loading: false, msg: 'Cierra sesión y vuelve a entrar para cambiarla.', type: 'error'}));
+      else setPassModal(prev => ({...prev, loading: false, msg: 'Error al cambiar la contraseña.', type: 'error'}));
     }
   };
 
-  // 🔴 DESCARGA DIRECTA E INVISIBLE DEL REPORTE EJECUTIVO
   const triggerDashboardPdf = async () => {
     setIsPreparingPrint(true);
     if(addNotification) addNotification('Preparando Documento', 'Generando formato ejecutivo...', 'info');
-    
     setTimeout(async () => {
       try {
         const { jsPDF } = await import('jspdf');
         const html2canvas = (await import('html2canvas')).default;
-        
         const element = document.getElementById('hidden-executive-report');
         const canvas = await html2canvas(element, { scale: 2, useCORS: true, logging: false });
         const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        
         const pdf = new jsPDF('p', 'mm', 'letter');
         pdf.addImage(imgData, 'JPEG', 0, 0, 215.9, 279.4);
         pdf.save(`Reporte-Ejecutivo-${eventName.replace(/\s+/g, '-')}.pdf`);
-        
         if(addNotification) addNotification('¡Descarga Lista!', 'El reporte se guardó en tu dispositivo.', 'success');
-      } catch (error) {
-        console.error(error);
-        if(addNotification) addNotification('Error', 'Fallo al generar el PDF.', 'error');
-      }
+      } catch (error) { if(addNotification) addNotification('Error', 'Fallo al generar el PDF.', 'error'); }
       setIsPreparingPrint(false);
     }, 800);
   };
 
   return (
     <div className="space-y-6 relative">
+      
+      {/* 🔴 BANNER DE ONBOARDING (DATOS FANTASMA) */}
+      {isDemoMode && (
+        <div className="bg-indigo-600 dark:bg-amber-500 rounded-2xl p-5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-in slide-in-from-top-4">
+          <div className="flex items-center text-white dark:text-slate-900">
+            <Sparkles size={24} className="mr-3 shrink-0 animate-pulse"/>
+            <div>
+              <h3 className="font-black text-lg">Modo de Demostración</h3>
+              <p className="text-sm font-medium opacity-90">Hemos cargado datos de ejemplo para que veas cómo funciona la Bóveda. Explora a tu gusto.</p>
+            </div>
+          </div>
+          <button onClick={handleClearDemoData} className="w-full sm:w-auto px-6 py-3 bg-white text-indigo-700 dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-md hover:scale-105 transition-transform shrink-0">
+             Iniciar mi Evento Real
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Centro de Mando</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Monitoreo en tiempo real de la Bóveda.</p>
         </div>
         
-        {/* 🔴 NUEVO GRUPO DE BOTONES EN LA CABECERA */}
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setPassModal({ ...passModal, open: true })} className="px-4 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-xs font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center">
-            <Key size={14} className="mr-2 text-amber-500" />
-            Cambiar Contraseña
+            <Key size={14} className="mr-2 text-amber-500" /> Cambiar Contraseña
           </button>
           <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="px-5 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center disabled:opacity-50">
             {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
@@ -457,7 +462,7 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
         <div className="bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col transition-colors">
           <div className="p-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 rounded-t-2xl transition-colors">
             <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-sm transition-colors"><ListTodo size={16} className="mr-2 text-indigo-500 dark:text-indigo-400"/> Prioridades Logísticas</h3>
-            {setActiveTab && <button onClick={() => setActiveTab('checklist')} className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 uppercase tracking-widest print:hidden transition-colors">Ver Tablero</button>}
+            {setActiveTab && <button onClick={() => setActiveTab('tareas')} className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 uppercase tracking-widest print:hidden transition-colors">Ver Tablero</button>}
           </div>
           <div className="p-5 flex-1">
             {tareasPendientes.length === 0 ? (
@@ -524,7 +529,7 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
         </div>
       </div>
 
-      {/* 🔴 ÁREA INVISIBLE PARA EL RENDER DEL REPORTE EJECUTIVO (ESTILO SUTIL) */}
+      {/* ÁREA INVISIBLE PARA EL RENDER DEL REPORTE EJECUTIVO */}
       <div style={{ position: 'absolute', top: '-10000px', left: '-10000px', zIndex: -9999 }}>
         <div id="hidden-executive-report" className="bg-white relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
            
@@ -536,7 +541,6 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
                 <p className="text-base font-black tracking-[0.2em] uppercase mt-3" style={{ color: accentColor }}>{eventName}</p>
               </div>
               <div className="text-right flex flex-col items-end">
-                {/* 🔴 LOGO FORZADO A OSCURO PARA QUE DESTAQUE EN FONDO BLANCO */}
                 <BauliaLogo className="h-10" forceWhite={false} />
                 <p className="text-[8px] text-slate-400 mt-2 uppercase tracking-[0.3em] font-bold">Tecnología Inteligente</p>
               </div>
@@ -610,7 +614,7 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
         </div>
       </div>
 
-      {/* 🔴 MODAL DE CAMBIO DE CONTRASEÑA */}
+      {/* MODAL DE CAMBIO DE CONTRASEÑA */}
       {passModal.open && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95">
@@ -663,7 +667,22 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   const [showShareModal, setShowShareModal] = useState(false);
   const [staffPhone, setStaffPhone] = useState('');
   const [camError, setCamError] = useState(null);
+  // 🔴 ESTADO DEL SEMÁFORO DE CONEXIÓN
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+  const [showProtocol, setShowProtocol] = useState(isSharedMode);
 
   const [cardData, setCardData] = useState({ 
     status: 'idle', 
@@ -894,12 +913,25 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   return (
     <div className={`h-full flex flex-col space-y-4 pb-6 ${isSharedMode ? 'max-w-lg mx-auto' : 'max-w-4xl'}`}>
       
-      {isOffline && (
-        <div className="bg-amber-500 text-white p-3 rounded-2xl shadow-lg flex items-center justify-center font-bold text-sm animate-in slide-in-from-top-4">
-          <WifiOff size={18} className="mr-2 animate-pulse" /> 
-          Modo Offline. Guardando accesos localmente.
+      {/* 🔴 SEMÁFORO DE CONEXIÓN INTELIGENTE */}
+      <div className={`p-3 rounded-2xl shadow-lg flex items-center justify-between transition-colors duration-500 animate-in slide-in-from-top-4 mb-2 border ${isOffline ? 'bg-amber-500 border-amber-600' : 'bg-slate-900 border-slate-700'}`}>
+        <div className="flex items-center">
+          {isOffline ? (
+            <WifiOff size={18} className="mr-2.5 text-white animate-pulse" />
+          ) : (
+            <div className="relative mr-2.5 flex items-center justify-center w-5 h-5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-30 animate-ping"></span>
+              <div className="relative w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_8px_#10b981]"></div>
+            </div>
+          )}
+          <span className="font-bold text-white text-xs uppercase tracking-widest">
+            {isOffline ? 'Modo Supervivencia' : 'En Línea'}
+          </span>
         </div>
-      )}
+        <span className="text-[9px] text-white/80 font-medium">
+          {isOffline ? 'Guardando en celular' : 'Sincronizado'}
+        </span>
+      </div>
 
       <div className="flex justify-between items-center gap-4 px-2">
         <div>
@@ -1049,7 +1081,37 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           </div>
         </div>
       )}
-
+{/* 🔴 MODAL DE PROTOCOLO OFFLINE PARA EL STAFF */}
+      {showProtocol && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-white/10 flex flex-col relative">
+            <div className="bg-amber-500 p-8 text-center text-slate-900 relative overflow-hidden">
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+              <ShieldCheck size={48} className="mx-auto mb-3 opacity-90 relative z-10"/>
+              <h3 className="text-xl font-black uppercase tracking-widest relative z-10">Protocolo de Puerta</h3>
+            </div>
+            <div className="p-6 sm:p-8 space-y-5 text-slate-600 dark:text-slate-300 text-sm font-medium leading-relaxed">
+              <p>Para garantizar que el escáner funcione a la perfección, <b className="text-slate-900 dark:text-white">incluso si se cae el internet</b> en la locación, sigue estas dos reglas de oro:</p>
+              
+              <div className="bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 p-4 rounded-xl space-y-4 shadow-inner">
+                <div className="flex items-start">
+                  <span className="bg-amber-100 text-amber-600 w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 mr-3 mt-0.5">1</span> 
+                  <p><b>No cierres esta pestaña.</b> Puedes bloquear la pantalla de tu celular y guardarlo, pero no cierres el navegador.</p>
+                </div>
+                <div className="flex items-start">
+                  <span className="bg-amber-100 text-amber-600 w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 mr-3 mt-0.5">2</span> 
+                  <p><b>Evita abrir otras Apps.</b> Usar Instagram o la cámara normal de tu celular consume memoria y podría reiniciar este escáner.</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 pt-0 mt-2">
+              <button onClick={() => setShowProtocol(false)} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-transform shadow-xl">
+                Entendido, Iniciar Escáner
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -11511,7 +11573,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     return () => { unsubLic(); unsubRes(); unsubVentas(); };
   }, []);
 
-  const handleCreateLicense = async (e) => {
+ const handleCreateLicense = async (e) => {
     e.preventDefault();
     setIsCreating(true);
     try {
@@ -11533,7 +11595,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         }
       }
 
-      // 🔴 REPARACIÓN DE MEMORIA: Guardamos los interruptores en el USUARIO también
       await setDoc(doc(db, "usuarios", newEventId), { 
         email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, 
         nombres: formData.nombres, status: 'activo', urlInvitacion: formData.urlInvitacion, creadoPor: authData.email, 
@@ -11562,9 +11623,45 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         cliente: formData.nombres
       });
 
+      // 🔴 INYECCIÓN DE DATOS FANTASMA (ONBOARDING VIP) 🔴
+      const tableDemoId = `mesa_demo_${Date.now()}`;
+      const guest1DemoId = `guest_demo_1_${Date.now()}`;
+      const guest2DemoId = `guest_demo_2_${Date.now()}`;
+      
+      const promesasDemo = [
+        setDoc(doc(db, "eventos", newEventId, "mesas", tableDemoId), {
+          id: tableDemoId, name: "Mesa VIP (Ejemplo)", capacity: 10, tipo: "redonda",
+          configDetalle: { tipo: "redonda", capacidadRedonda: 10 }, x: null, y: null, rotation: 0
+        }),
+        setDoc(doc(db, "eventos", newEventId, "invitados", guest1DemoId), {
+          id: guest1DemoId, name: "Familia de Ejemplo", passes: 4, originalPasses: 4, childrenPasses: 0,
+          status: "confirmado", side: "general", entered: 0, tableId: tableDemoId, sent: true,
+          subGuests: [
+            {id: `${guest1DemoId}_0`, name: "Juan Pérez", isChild: false, entered: false},
+            {id: `${guest1DemoId}_1`, name: "María Gómez", isChild: false, entered: false},
+            {id: `${guest1DemoId}_2`, name: "Acompañante 1", isChild: false, entered: false},
+            {id: `${guest1DemoId}_3`, name: "Acompañante 2", isChild: false, entered: false}
+          ]
+        }),
+        setDoc(doc(db, "eventos", newEventId, "invitados", guest2DemoId), {
+          id: guest2DemoId, name: "Amigo Festejados (Ejemplo)", passes: 1, originalPasses: 1, childrenPasses: 0,
+          status: "pendiente", side: "general", entered: 0, tableId: null, sent: false, subGuests: []
+        }),
+        setDoc(doc(db, "eventos", newEventId, "gastos", `gasto_demo_1_${Date.now()}`), {
+          id: `gasto_demo_1_${Date.now()}`, concepto: "Lugar / Hacienda (Ejemplo)", categoria: "Lugar",
+          estimado: 80000, pagado: 40000, fechaLimite: "2026-12-01", historial: []
+        }),
+        setDoc(doc(db, "eventos", newEventId, "tareas", `tarea_demo_1_${Date.now()}`), {
+          id: `tarea_demo_1_${Date.now()}`, titulo: "Definir lista de invitados oficial", categoria: "Logística", 
+          fechaLimite: "", estado: "proceso"
+        })
+      ];
+      await Promise.all(promesasDemo);
+      // 🔴 FIN INYECCIÓN DE DATOS FANTASMA 🔴
+
       setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role, urlInvitacion: formData.urlInvitacion, esRecurrente: esClienteRecurrente });
       setClientPhone('');
-      setDialog({ isOpen: true, type: 'alert', title: 'Nueva Licencia Creada', message: `La bóveda para ${formData.nombres} está lista y operativa.` });
+      setDialog({ isOpen: true, type: 'alert', title: 'Nueva Licencia Creada', message: `La bóveda para ${formData.nombres} está lista con datos de ejemplo.` });
     } catch (error) {
       setDialog({ isOpen: true, type: 'alert', title: 'Error del Sistema', message: `Ocurrió un error al crear la licencia: ${error.message}` });
     }
