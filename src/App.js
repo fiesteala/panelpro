@@ -7862,7 +7862,10 @@ const GuestCameraView = ({ eventId }) => {
     toastTimerRef.current = setTimeout(() => setToast(null), 3500);
   };
   
-  const [guestName, setGuestName] = useState(() => localStorage.getItem('eventmaster_guestName') || '');
+  // 🔴 MAGIA: Ahora buscamos el nombre específicamente para ESTE eventId
+  const [guestName, setGuestName] = useState(() => localStorage.getItem(`eventmaster_guestName_${eventId}`) || '');
+  const [tempPublicName, setTempPublicName] = useState(''); // Para el input del modo público
+
   const [guestAvatar, setGuestAvatar] = useState(''); 
   const [guestCode, setGuestCode] = useState('');
   const [authGuest, setAuthGuest] = useState(null); 
@@ -7959,13 +7962,23 @@ const GuestCameraView = ({ eventId }) => {
   
   const scannerRef = useRef(null);
 
+  // 🔴 FUNCIÓN DE LOGIN MODO PÚBLICO
+  const handlePublicLogin = (e) => {
+    e.preventDefault();
+    const finalName = tempPublicName.trim();
+    if (!finalName) return;
+    setGuestName(finalName);
+    // Guarda el nombre específicamente atado a este evento
+    localStorage.setItem(`eventmaster_guestName_${eventId}`, finalName);
+  };
+
   // 🔴 FUNCIÓN DE CERRAR SESIÓN BLINDADA
   const handleGuestLogout = () => {
     setAuthGuest(null);
     setGuestName('');
     setGuestAvatar('');
     localStorage.removeItem('eventmaster_authGuestId');
-    localStorage.removeItem('eventmaster_guestName');
+    localStorage.removeItem(`eventmaster_guestName_${eventId}`); // Borra el nombre público de ESTE evento
     localStorage.removeItem('eventmaster_currentEventId'); // Borramos el candado
     setShowMenu(false);
     // Limpiamos la URL para que no vuelva a iniciar sesión automáticamente
@@ -8010,8 +8023,7 @@ const GuestCameraView = ({ eventId }) => {
       setGuestName(foundUser.name);
       setGuestAvatar(localStorage.getItem(`eventmaster_avatar_${foundUser.id}`) || '');
       localStorage.setItem('eventmaster_authGuestId', foundUser.id);
-      localStorage.setItem('eventmaster_guestName', foundUser.name);
-      localStorage.setItem('eventmaster_currentEventId', eventId); // 🔴 CANDADO DE EVENTO APLICADO
+      localStorage.setItem('eventmaster_currentEventId', eventId); 
       window.history.replaceState({}, document.title, window.location.pathname + "?modo=camara&e=" + eventId);
     } else {
       showToast("Código no reconocido. Revisa tu pulsera.", "error");
@@ -8125,16 +8137,13 @@ const GuestCameraView = ({ eventId }) => {
       setSocialActivity(snap.docs.map(doc => doc.data()).sort((a, b) => b.timestamp - a.timestamp));
     });
 
-    // 🔴 REVISIÓN DEL CANDADO DE EVENTO
     const savedGuestId = localStorage.getItem('eventmaster_authGuestId');
     const savedEventId = localStorage.getItem('eventmaster_currentEventId'); 
 
     if (savedGuestId && savedEventId === eventId) {
-      // Si el ID guardado pertenece A ESTE EVENTO, lo dejamos entrar
       setAuthGuest({ id: savedGuestId, name: localStorage.getItem('eventmaster_guestName') });
       setGuestAvatar(localStorage.getItem(`eventmaster_avatar_${savedGuestId}`) || '');
     } else if (savedGuestId && savedEventId !== eventId) {
-      // 🔴 ¡ALERTA! El invitado escaneó otro evento diferente. Borramos su sesión vieja.
       localStorage.removeItem('eventmaster_authGuestId');
       localStorage.removeItem('eventmaster_guestName');
       localStorage.removeItem('eventmaster_currentEventId');
@@ -8282,7 +8291,7 @@ const GuestCameraView = ({ eventId }) => {
       if (validUrls.length === 0) throw new Error("Fallo al procesar fotos.");
 
       if(config?.modoPublico) {
-         localStorage.setItem('eventmaster_guestName', (guestName||'').trim());
+         localStorage.setItem(`eventmaster_guestName_${eventId}`, (guestName||'').trim());
          localStorage.setItem('eventmaster_currentEventId', eventId);
       }
 
@@ -8458,6 +8467,7 @@ const GuestCameraView = ({ eventId }) => {
     );
   };
 
+  // 🔴 PANTALLA DE ACCESO (MODO PRIVADO - CON CÓDIGO QR)
   if (!config?.modoPublico && !authGuest) {
     return (
       <div className={`min-h-screen ${tBgBase} flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans`}>
@@ -8497,10 +8507,33 @@ const GuestCameraView = ({ eventId }) => {
           </div>
 
           <div className="flex gap-2">
-            {/* 🔴 input en text-base para evitar zoom */}
             <input type="text" placeholder="Ej. usr_123_0" value={guestCode} onChange={(e) => setGuestCode(e.target.value)} className={`w-full ${tInputBg} border ${tBorder} p-4 rounded-xl outline-none focus:ring-2 focus:ring-pink-500 transition-all text-center font-bold ${tTextMain} text-base sm:text-lg uppercase`} />
             <button onClick={() => ejecutarLogin(guestCode)} className="px-5 bg-pink-600 text-white font-bold rounded-xl shadow-lg hover:bg-pink-700 transition-transform active:scale-95"><ArrowRight size={24}/></button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 🔴 PANTALLA DE ACCESO (MODO PÚBLICO - SOLO PIDE NOMBRE)
+  if (config?.modoPublico && !guestName) {
+    return (
+      <div className={`min-h-screen ${tBgBase} flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans`}>
+        <ToastOverlay />
+        <div className="absolute top-0 w-full h-64 bg-indigo-600/10 blur-[100px] rounded-full pointer-events-none"></div>
+        <div className={`w-full max-w-sm ${tBgCard} border ${tBorder} backdrop-blur-xl rounded-3xl shadow-2xl p-8 text-center z-10 flex flex-col animate-in zoom-in-95 duration-500`}>
+          <div className="w-16 h-16 bg-indigo-500/20 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-indigo-500/30">
+             <Users size={32} />
+          </div>
+          <h1 className={`text-2xl font-black ${tTextMain} mb-2 tracking-tight`}>¡Bienvenido!</h1>
+          <p className={`${tTextSub} text-xs mb-8`}>Ingresa tu nombre para firmar tus fotos y comentarios en el Muro Social.</p>
+          
+          <form onSubmit={handlePublicLogin} className="flex flex-col gap-4">
+            <input type="text" placeholder="Ej. Familia López" value={tempPublicName} onChange={(e) => setTempPublicName(e.target.value)} required className={`w-full ${tInputBg} border ${tBorder} p-4 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-center font-bold ${tTextMain} text-base`} />
+            <button type="submit" className="w-full py-4 bg-indigo-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg hover:bg-indigo-700 transition-transform active:scale-95">
+               Entrar a la Galería
+            </button>
+          </form>
         </div>
       </div>
     );
@@ -8531,7 +8564,6 @@ const GuestCameraView = ({ eventId }) => {
                 </button>
                 <div className={`w-full h-px ${tBorder} my-1`}></div>
                 
-                {/* 🔴 NUEVO BOTÓN DE CERRAR SESIÓN BLINDADO */}
                 <button onClick={handleGuestLogout} className={`flex items-center w-full px-4 py-3 rounded-xl hover:bg-rose-500 hover:text-white transition-colors text-rose-500`}>
                   <LogOut size={16} className="mr-3"/> <span className="text-sm font-bold">Cerrar Sesión</span>
                 </button>
@@ -8760,7 +8792,6 @@ const GuestCameraView = ({ eventId }) => {
                </div>
 
                <div>
-                 {/* 🔴 TEXT-BASE para evitar zoom en iOS */}
                  <textarea placeholder="Escribe un pie de foto..." value={postDraft.caption} onChange={e=>setPostDraft({...postDraft, caption: e.target.value})} className={`w-full p-4 rounded-2xl ${tInputBg} ${tTextMain} outline-none border ${tBorder} resize-none min-h-[100px] text-base sm:text-sm shadow-inner`} />
                </div>
                
