@@ -186,7 +186,8 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
     { 
       title: 'Planeación y Finanzas', 
       items: [ 
-        { id: 'dashboard', icon: LayoutDashboard, label: 'Resumen', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante', 'social_wall'] }, 
+        // 🔴 SE ELIMINÓ 'social_wall' DE AQUÍ PARA QUE NO VEAN EL RESUMEN
+        { id: 'dashboard', icon: LayoutDashboard, label: 'Resumen', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
         { id: 'tareas', icon: CheckSquare, label: 'Checklist', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
         { id: 'presupuesto', icon: Wallet, label: 'Presupuesto', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
         { id: 'proveedores', icon: Store, label: 'Proveedores', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] } 
@@ -212,7 +213,7 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
       items: [ 
         { id: 'timing', icon: Clock, label: 'El Minuto a Minuto', minLevel: 1, allowedPlans: ['plata', 'oro', 'diamante'] }, 
         { id: 'escaner', icon: Scan, label: 'Control Puerta (QR)', minLevel: 2, allowedPlans: ['oro', 'diamante'] }, 
-        // 🔴 AQUÍ ESTÁ LA MAGIA DEL SOCIAL WALL 🔴
+        // 🔴 AQUÍ SE MANTIENE EL SOCIAL WALL
         { id: 'galeria', icon: Camera, label: 'Muro Social (Vivo)', minLevel: 1, allowedPlans: ['diamante', 'social_wall'] } 
       ] 
     }
@@ -234,7 +235,6 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
     <>
       {isOpen && <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm z-20 xl:hidden" onClick={() => setIsOpen(false)} />}
       
-      {/* 🔴 Sidebar con efecto Cristal Extremo para dejar pasar las luces globales */}
       <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-white/50 dark:bg-[#050505]/40 backdrop-blur-3xl text-slate-600 dark:text-slate-400 transition-colors duration-700 ease-in-out flex flex-col border-r border-slate-200/50 dark:border-white/10 shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
         
         <div className="flex items-center justify-between p-6 border-b border-slate-200/50 dark:border-white/10 shrink-0 min-h-[88px] relative overflow-hidden bg-white/30 dark:bg-white/5">
@@ -244,12 +244,10 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
             ) : (
               <div className="flex flex-col justify-center">
                  {userRole === 'superadmin' || agencyName === 'BAULIA' || agencyName === 'EVENT MASTER' ? (
-                   // 🔴 AHORA EL LOGO OBEDECE A LA VARIABLE GLOBAL isDarkMode
                    <BauliaLogo className="h-8 w-auto mb-1" forceWhite={isDarkMode} />
                  ) : (
                    <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-widest uppercase font-editorial">{agencyName}</h1>
                  )}
-                 
                  <p className="text-[8px] text-amber-600 dark:text-amber-500 uppercase tracking-widest mt-0.5 font-bold">
                    {userRole === 'superadmin' ? 'God Mode' : userRole === 'planner' ? 'Planner Workspace' : 'Bóveda Premium'}
                  </p>
@@ -270,12 +268,11 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
           )}
 
           {menuGroups.map((group, gIdx) => {
-            // 🔴 NUEVO FILTRO: Verificamos el plan en texto, no solo el nivel numérico
             const visibleItems = group.items.filter(item => {
               if (item.allowedPlans) {
                 return item.allowedPlans.includes(userPlan.toLowerCase());
               }
-              return level >= item.minLevel; // Respaldo por si falta la propiedad
+              return level >= item.minLevel; 
             });
             
             if (visibleItems.length === 0) return null;
@@ -12958,7 +12955,22 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const userPlan = impersonating ? impersonating.plan : originalUserPlan;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(userRole === 'superadmin' ? 'licencias' : 'dashboard');  
+  
+  // 🔴 MAGIA 1: Si es Social Wall, la pestaña por defecto es la 'galeria'
+  const [activeTab, setActiveTab] = useState(() => {
+    if (userRole === 'superadmin') return 'licencias';
+    if (userPlan === 'social_wall') return 'galeria';
+    return 'dashboard';
+  });
+
+  // 🔴 MAGIA 2: Si estás como admin y saltas de una boda (Oro) al Muro Social de Sofi, te cambia la pestaña automáticamente a Galería
+  useEffect(() => {
+    if (userPlan === 'social_wall') {
+      setActiveTab('galeria');
+    } else if (activeTab === 'galeria' && !['diamante', 'social_wall'].includes(userPlan)) {
+      setActiveTab('dashboard');
+    }
+  }, [userPlan]);
   
   const [tareas, setTareas] = useState([]); 
   const [timing, setTiming] = useState([]); 
@@ -13017,14 +13029,14 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
             const oldG = prevGuestsRef.current.find(g => g.id === newG.id);
             if (oldG) {
                if ((oldG.status === 'pendiente' || oldG.status === 'por_invitar') && newG.status === 'confirmado') {
-                  addNotification('¡Nueva Confirmación!', `${newG.name} ha confirmado (${newG.passes} lugares).`, 'success', 'invitados');
+                 addNotification('¡Nueva Confirmación!', `${newG.name} ha confirmado (${newG.passes} lugares).`, 'success', 'invitados');
                } else if (oldG.status !== 'cancelado' && newG.status === 'cancelado') {
-                  addNotification('Invitación Declinada', `${newG.name} ha liberado sus lugares.`, 'danger', 'invitados');
+                 addNotification('Invitación Declinada', `${newG.name} ha liberado sus lugares.`, 'danger', 'invitados');
                } else if (oldG.status === 'confirmado' && newG.status === 'confirmado' && newG.passes < oldG.passes) {
-                  addNotification('Lugares Liberados', `${newG.name} redujo su grupo y liberó ${oldG.passes - newG.passes} lugar(es).`, 'warning', 'invitados');
+                 addNotification('Lugares Liberados', `${newG.name} redujo su grupo y liberó ${oldG.passes - newG.passes} lugar(es).`, 'warning', 'invitados');
                }
                if (newG.extraRequested > (oldG.extraRequested || 0)) {
-                  addNotification('Pases Extra', `${newG.name} solicita ${newG.extraRequested} pase(s) extra.`, 'warning', 'invitados');
+                 addNotification('Pases Extra', `${newG.name} solicita ${newG.extraRequested} pase(s) extra.`, 'warning', 'invitados');
                }
             }
          });
@@ -13045,11 +13057,9 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
     return () => { unsubConfigMain(); unsubWhiteLabel(); unsubGuests(); unsubGastos(); unsubProv(); unsubMesas(); unsubTareas(); unsubTiming(); unsubMapa(); unsubDeco(); unsubFotos(); };
   }, [eventId, userRole, impersonating, addNotification]);
 
-  // 🔴 OBTENEMOS LOS DATOS REALES PARA MANDARLOS A LOS COMPONENTES
   const isSuperAdminMode = originalUserRole === 'superadmin' && !impersonating;
   const activeEventData = impersonating || authData?.availableEvents?.find(e => e.eventId === eventId) || {};
   
-  // 🔴 CORRECCIÓN CLAVE: Si no hay tipo de evento, por defecto es 'general', así no sale el botón de Boda.
   const currentEventType = activeEventData.tipoEvento || 'general';
   const currentEventPlan = activeEventData.plan || 'diamante';
   const currentEventName = activeEventData.nombres || activeEventData.nombre || 'Evento Baulia';
@@ -13067,11 +13077,11 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'timing': return typeof TimingView !== 'undefined' ? <TimingView timing={timing} setTiming={setTiming} addNotification={addNotification} /> : null;
       case 'presupuesto': return typeof PresupuestoView !== 'undefined' ? <PresupuestoView authData={authData} gastos={gastos} setGastos={setGastos} proveedores={proveedores} setProveedores={setProveedores} presupuestoTotal={presupuestoTotal} setPresupuestoTotal={setPresupuestoTotal} addNotification={addNotification} /> : null;
       case 'proveedores': return typeof ProveedoresView !== 'undefined' ? <ProveedoresView proveedores={proveedores} setProveedores={setProveedores} gastos={gastos} setGastos={setGastos} addNotification={addNotification} /> : null;
-      case 'galeria': return userPlan === 'diamante' && typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} /> : null;
       
-      // 🔴 AQUÍ PASAMOS LA URL REAL DE LA INVITACIÓN
+      // 🔴 MAGIA 3: El Muro Social ahora permite tanto a Diamante como a Social Wall entrar
+      case 'galeria': return ['diamante', 'social_wall'].includes(userPlan) && typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} /> : null;
+      
       case 'invitacion': return typeof InvitacionView !== 'undefined' ? <InvitacionView guests={guests} urlInvitacion={activeEventData?.urlInvitacion} /> : null; 
-      
       case 'configuracion': return userRole === 'planner' && typeof ConfiguracionMaestraView !== 'undefined' ? <ConfiguracionMaestraView agencyConfig={agencyConfig} addNotification={addNotification} /> : null;
       default: return <div className="p-8 text-center text-slate-500 font-bold">Módulo bloqueado o en construcción.</div>;
     }
