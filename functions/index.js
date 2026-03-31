@@ -57,7 +57,13 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
         }
       }
 
-      const planLimpio = plan.toLowerCase().includes('diamante') ? 'diamante' : 'oro';
+      // 🔴 AHORA EL ROBOT SABE QUÉ HACER CON EL SOCIAL WALL
+      let planLimpio = 'oro';
+      if (plan.toLowerCase().includes('diamante')) planLimpio = 'diamante';
+      if (plan.toLowerCase().includes('plata') || plan.toLowerCase().includes('firma')) planLimpio = 'plata';
+      if (plan.toLowerCase().includes('basico') || plan.toLowerCase().includes('esencial')) planLimpio = 'basico';
+      if (plan.toLowerCase().includes('social_wall')) planLimpio = 'social_wall'; // <--- MAGIA AÑADIDA
+
       const roleAsignado = plan.toLowerCase().includes('planner') ? 'planner' : 'cliente';
 
       // CREACIÓN DE BASES DE DATOS USANDO EL EVENT_ID ÚNICO
@@ -71,7 +77,10 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
         status: 'activo',
         creadoPor: 'Stripe (Web Automático)',
         referenciaPago: `Stripe: ${paymentIntent.id}`,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        // Para Social Wall, no necesitamos QRs de acceso ni contar pases por defecto
+        isQrEnabled: planLimpio !== 'social_wall', 
+        isPassCountEnabled: planLimpio !== 'social_wall'
       });
 
       await admin.firestore().collection("eventos").doc(eventId).set({
@@ -79,7 +88,9 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
         nombres: nombre,
         fecha: fecha,
         plan: planLimpio,
-        tipoEvento: 'boda'
+        tipoEvento: 'boda',
+        isQrEnabled: planLimpio !== 'social_wall',
+        isPassCountEnabled: planLimpio !== 'social_wall'
       });
 
       // 🔴 NUEVO: LIBRO MAYOR FINANCIERO INMUTABLE (Para tu Contador)
@@ -146,7 +157,10 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
 
             <div class="content">
               <p class="greeting">Hola <strong>${nombre}</strong>,</p>
-              <p class="body-text">Es un honor para nosotros acompañarte. Hemos preparado tu <b>Bóveda Premium</b>, diseñada para darte el poder absoluto sobre tu evento con la mayor elegancia.</p>
+              ${planLimpio === 'social_wall' 
+                ? '<p class="body-text">Es un honor para nosotros acompañarte. Hemos preparado tu <b>Muro Social Interactivo</b>, listo para proyectar los mejores momentos de tu evento en tiempo real.</p>'
+                : '<p class="body-text">Es un honor para nosotros acompañarte. Hemos preparado tu <b>Bóveda Premium</b>, diseñada para darte el poder absoluto sobre tu evento con la mayor elegancia.</p>'
+              }
               
               <div class="credentials-box">
                 <p class="cred-label">Tus Credenciales de Acceso</p>
@@ -157,7 +171,7 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
               </div>
 
               <div class="btn-container">
-                <a href="https://panel.baulia.com" class="btn">Desbloquear Bóveda</a>
+                <a href="https://panel.baulia.com" class="btn">Desbloquear Consola</a>
               </div>
             </div>
             

@@ -183,10 +183,39 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
   const level = planLevels[userPlan] || 2; 
 
   const menuGroups = [
-    { title: 'Planeación y Finanzas', items: [ { id: 'dashboard', icon: LayoutDashboard, label: 'Resumen', minLevel: 1 }, { id: 'tareas', icon: CheckSquare, label: 'Checklist', minLevel: 1 }, { id: 'presupuesto', icon: Wallet, label: 'Presupuesto', minLevel: 1 }, { id: 'proveedores', icon: Store, label: 'Proveedores', minLevel: 1 } ] },
-    { title: 'Gestión de Asistentes', items: [ { id: 'invitacion', icon: Smartphone, label: 'Ver Invitación App', minLevel: 1 }, { id: 'invitados', icon: Users, label: 'Lista de Invitados', minLevel: 1 }, { id: 'mesas', icon: LayoutGrid, label: 'Gestión de Mesas', minLevel: 2 } ] },
-    { title: 'Diseño Espacial', items: [ { id: 'decoracion', icon: Palette, label: 'Visualizador Decor.', minLevel: 2 }, { id: 'mapa', icon: MapIcon, label: 'Croquis del Salón', minLevel: 2 } ] },
-    { title: 'El Día del Evento', items: [ { id: 'timing', icon: Clock, label: 'El Minuto a Minuto', minLevel: 1 }, { id: 'escaner', icon: Scan, label: 'Control Puerta (QR)', minLevel: 2 }, { id: 'galeria', icon: ImageIcon, label: 'Muro Social (Vivo)', minLevel: 2 } ] }
+    { 
+      title: 'Planeación y Finanzas', 
+      items: [ 
+        { id: 'dashboard', icon: LayoutDashboard, label: 'Resumen', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante', 'social_wall'] }, 
+        { id: 'tareas', icon: CheckSquare, label: 'Checklist', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
+        { id: 'presupuesto', icon: Wallet, label: 'Presupuesto', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
+        { id: 'proveedores', icon: Store, label: 'Proveedores', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] } 
+      ] 
+    },
+    { 
+      title: 'Gestión de Asistentes', 
+      items: [ 
+        { id: 'invitacion', icon: Smartphone, label: 'Ver Invitación App', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
+        { id: 'invitados', icon: Users, label: 'Lista de Invitados', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
+        { id: 'mesas', icon: LayoutGrid, label: 'Gestión de Mesas', minLevel: 2, allowedPlans: ['oro', 'diamante'] } 
+      ] 
+    },
+    { 
+      title: 'Diseño Espacial', 
+      items: [ 
+        { id: 'decoracion', icon: Palette, label: 'Visualizador Decor.', minLevel: 2, allowedPlans: ['diamante'] }, 
+        { id: 'mapa', icon: MapIcon, label: 'Croquis del Salón', minLevel: 2, allowedPlans: ['diamante'] } 
+      ] 
+    },
+    { 
+      title: 'El Día del Evento', 
+      items: [ 
+        { id: 'timing', icon: Clock, label: 'El Minuto a Minuto', minLevel: 1, allowedPlans: ['plata', 'oro', 'diamante'] }, 
+        { id: 'escaner', icon: Scan, label: 'Control Puerta (QR)', minLevel: 2, allowedPlans: ['oro', 'diamante'] }, 
+        // 🔴 AQUÍ ESTÁ LA MAGIA DEL SOCIAL WALL 🔴
+        { id: 'galeria', icon: Camera, label: 'Muro Social (Vivo)', minLevel: 1, allowedPlans: ['diamante', 'social_wall'] } 
+      ] 
+    }
   ];
 
   const themeColors = {
@@ -241,7 +270,14 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
           )}
 
           {menuGroups.map((group, gIdx) => {
-            const visibleItems = group.items.filter(item => level >= item.minLevel);
+            // 🔴 NUEVO FILTRO: Verificamos el plan en texto, no solo el nivel numérico
+            const visibleItems = group.items.filter(item => {
+              if (item.allowedPlans) {
+                return item.allowedPlans.includes(userPlan.toLowerCase());
+              }
+              return level >= item.minLevel; // Respaldo por si falta la propiedad
+            });
+            
             if (visibleItems.length === 0) return null;
 
             return (
@@ -361,8 +397,8 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
   return (
     <div className="space-y-6 relative">
       
-      {/* 🔴 BANNER DE ONBOARDING (DATOS FANTASMA) */}
-      {isDemoMode && (
+      {/* 🔴 BANNER DE ONBOARDING (DATOS FANTASMA) - Oculto si es solo Social Wall */}
+      {isDemoMode && plan !== 'social_wall' && (
         <div className="bg-indigo-600 dark:bg-amber-500 rounded-2xl p-5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-in slide-in-from-top-4">
           <div className="flex items-center text-white dark:text-slate-900">
             <Sparkles size={24} className="mr-3 shrink-0 animate-pulse"/>
@@ -380,239 +416,268 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Centro de Mando</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Monitoreo en tiempo real de la Bóveda.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Monitoreo en tiempo real de tu evento.</p>
         </div>
         
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setPassModal({ ...passModal, open: true })} className="px-4 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-xs font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center">
             <Key size={14} className="mr-2 text-amber-500" /> Cambiar Contraseña
           </button>
-          <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="px-5 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center disabled:opacity-50">
-            {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
-            {isPreparingPrint ? 'Generando PDF...' : 'Descargar Reporte'}
-          </button>
+          {/* El botón de PDF se oculta si es Social Wall porque no hay mesas ni invitados que imprimir */}
+          {plan !== 'social_wall' && (
+            <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="px-5 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center disabled:opacity-50">
+              {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
+              {isPreparingPrint ? 'Generando PDF...' : 'Descargar Reporte'}
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-        <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors">Pases Asignados</p>
-              <h3 className="text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{totalPasses}</h3>
-            </div>
-            <div className="p-3 bg-indigo-100 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl group-hover:scale-110 transition-transform"><Users size={24} /></div>
-          </div>
-          <div className="mt-4 flex items-center text-sm">
-            <span className="text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-2 py-0.5 rounded text-[10px] uppercase tracking-widest transition-colors">{confirmationPercentage}% Confirmado</span>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors">Mesas Creadas</p>
-              <h3 className="text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{totalMesas}</h3>
-            </div>
-            <div className="p-3 bg-purple-100 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 text-purple-600 dark:text-purple-400 rounded-xl group-hover:scale-110 transition-transform"><Layers size={24} /></div>
-          </div>
-          <div className="mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
-            <div className="bg-purple-500 h-full rounded-full transition-all duration-500" style={{ width: `${ocupacionPorcentaje}%` }}></div>
-          </div>
-          <p className="text-[10px] text-slate-500 mt-3 font-bold uppercase tracking-widest transition-colors">
-            <span className="text-purple-600 dark:text-purple-400 transition-colors">{capacidadTotalSillas} Sillas</span> • {ocupacionPorcentaje}% uso
+      {/* 🟢 MAGIA AQUÍ: SI ES SOCIAL WALL, MOSTRAMOS LA CONSOLA VIP. SI NO, LAS GRÁFICAS NORMALES */}
+      {plan === 'social_wall' ? (
+        <div className="bg-slate-900 dark:bg-[#0a0a0a] rounded-3xl p-8 sm:p-12 text-center text-white border border-slate-800 dark:border-white/10 shadow-2xl relative overflow-hidden transition-colors mt-6">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] h-full bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+          
+          <Sparkles size={64} className="mx-auto mb-6 text-amber-500 animate-pulse"/>
+          <h2 className="text-3xl sm:text-5xl font-black mb-4 tracking-tight">Tu Muro Social está listo</h2>
+          <p className="text-slate-400 text-sm sm:text-base max-w-lg mx-auto mb-8">
+            Bienvenido a tu experiencia interactiva. Todo tu ecosistema está optimizado para proyectar las fotos de tu evento en tiempo real. Cero estrés, 100% Alta Costura.
           </p>
+          
+          <div className="flex flex-col sm:flex-row justify-center gap-4 relative z-10">
+            {setActiveTab && (
+              <button onClick={() => setActiveTab('social_wall')} className="px-8 py-4 bg-amber-500 hover:bg-amber-400 text-slate-900 font-black rounded-xl uppercase tracking-widest text-xs transition-colors shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center justify-center">
+                 Abrir Consola del Proyector
+              </button>
+            )}
+          </div>
         </div>
-
-        <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors">Gasto Estimado</p>
-              <h3 className="text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">${(totalEstimado / 1000).toFixed(0)}k</h3>
-            </div>
-            <div className="p-3 bg-amber-100 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl group-hover:scale-110 transition-transform"><Wallet size={24} /></div>
-          </div>
-          <div className="mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
-            <div className={`h-full rounded-full transition-colors ${budgetPercentage > 100 ? 'bg-rose-500' : 'bg-amber-500'}`} style={{ width: `${Math.min(budgetPercentage, 100)}%` }}></div>
-          </div>
-          <p className="text-[10px] text-slate-500 mt-3 font-bold uppercase tracking-widest flex justify-between transition-colors">
-            <span>Pagado: ${(totalPagado/1000).toFixed(1)}k</span>
-            <span className={budgetPercentage > 100 ? 'text-rose-500' : ''}>{budgetPercentage}% del total</span>
-          </p>
-        </div>
-
-        <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors">Avance Evento</p>
-              <h3 className="text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{tareasPorcentaje}%</h3>
-            </div>
-            <div className="p-3 bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl group-hover:scale-110 transition-transform"><CheckSquare size={24} /></div>
-          </div>
-          <div className="mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
-            <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${tareasPorcentaje}%` }}></div>
-          </div>
-          <p className="text-[10px] text-slate-500 mt-3 font-bold uppercase tracking-widest transition-colors">
-            <span className="text-emerald-600 dark:text-emerald-400 transition-colors">{tareasCompletadas} Listas</span> de {tareasTotal} tareas
-          </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col transition-colors">
-          <div className="p-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 rounded-t-2xl transition-colors">
-            <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-sm transition-colors"><ListTodo size={16} className="mr-2 text-indigo-500 dark:text-indigo-400"/> Prioridades Logísticas</h3>
-            {setActiveTab && <button onClick={() => setActiveTab('tareas')} className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 uppercase tracking-widest print:hidden transition-colors">Ver Tablero</button>}
-          </div>
-          <div className="p-5 flex-1">
-            {tareasPendientes.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-500 py-6 transition-colors">
-                <CheckCircle size={40} className="mb-3 text-emerald-500/30"/>
-                <p className="text-xs font-bold uppercase tracking-widest">Sin tareas urgentes.</p>
+      ) : (
+        <>
+          {/* VISTA NORMAL (ORO/DIAMANTE) - GRÁFICAS DE MESAS, DINERO, ETC. */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mt-6">
+            <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors">Pases Asignados</p>
+                  <h3 className="text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{totalPasses}</h3>
+                </div>
+                <div className="p-3 bg-indigo-100 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl group-hover:scale-110 transition-transform"><Users size={24} /></div>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {tareasPendientes.map(tarea => {
-                  const vencida = isOverdue(tarea.fechaLimite);
-                  return (
-                    <div key={tarea.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
-                      <div className={`mt-1 w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] shrink-0 ${vencida ? 'bg-rose-500 text-rose-500 animate-pulse' : 'bg-amber-400 text-amber-400'}`}></div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-bold truncate transition-colors ${vencida ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-slate-200'}`}>{tarea.titulo}</p>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <span className="text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-black/50 px-2 py-0.5 rounded border border-slate-300 dark:border-white/10 transition-colors">{tarea.categoria}</span>
-                          {tarea.fechaLimite && <span className={`text-[9px] font-bold tracking-widest transition-colors ${vencida ? 'text-rose-600 dark:text-rose-500' : 'text-slate-500 dark:text-slate-500'}`}><Calendar size={10} className="inline mr-0.5"/> {tarea.fechaLimite}</span>}
+              <div className="mt-4 flex items-center text-sm">
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-2 py-0.5 rounded text-[10px] uppercase tracking-widest transition-colors">{confirmationPercentage}% Confirmado</span>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors">Mesas Creadas</p>
+                  <h3 className="text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{totalMesas}</h3>
+                </div>
+                <div className="p-3 bg-purple-100 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 text-purple-600 dark:text-purple-400 rounded-xl group-hover:scale-110 transition-transform"><Layers size={24} /></div>
+              </div>
+              <div className="mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
+                <div className="bg-purple-500 h-full rounded-full transition-all duration-500" style={{ width: `${ocupacionPorcentaje}%` }}></div>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-3 font-bold uppercase tracking-widest transition-colors">
+                <span className="text-purple-600 dark:text-purple-400 transition-colors">{capacidadTotalSillas} Sillas</span> • {ocupacionPorcentaje}% uso
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors">Gasto Estimado</p>
+                  <h3 className="text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">${(totalEstimado / 1000).toFixed(0)}k</h3>
+                </div>
+                <div className="p-3 bg-amber-100 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl group-hover:scale-110 transition-transform"><Wallet size={24} /></div>
+              </div>
+              <div className="mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
+                <div className={`h-full rounded-full transition-colors ${budgetPercentage > 100 ? 'bg-rose-500' : 'bg-amber-500'}`} style={{ width: `${Math.min(budgetPercentage, 100)}%` }}></div>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-3 font-bold uppercase tracking-widest flex justify-between transition-colors">
+                <span>Pagado: ${(totalPagado/1000).toFixed(1)}k</span>
+                <span className={budgetPercentage > 100 ? 'text-rose-500' : ''}>{budgetPercentage}% del total</span>
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors">Avance Evento</p>
+                  <h3 className="text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{tareasPorcentaje}%</h3>
+                </div>
+                <div className="p-3 bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl group-hover:scale-110 transition-transform"><CheckSquare size={24} /></div>
+              </div>
+              <div className="mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
+                <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${tareasPorcentaje}%` }}></div>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-3 font-bold uppercase tracking-widest transition-colors">
+                <span className="text-emerald-600 dark:text-emerald-400 transition-colors">{tareasCompletadas} Listas</span> de {tareasTotal} tareas
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <div className="bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col transition-colors">
+              <div className="p-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 rounded-t-2xl transition-colors">
+                <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-sm transition-colors"><ListTodo size={16} className="mr-2 text-indigo-500 dark:text-indigo-400"/> Prioridades Logísticas</h3>
+                {setActiveTab && <button onClick={() => setActiveTab('tareas')} className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 uppercase tracking-widest print:hidden transition-colors">Ver Tablero</button>}
+              </div>
+              <div className="p-5 flex-1">
+                {tareasPendientes.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-slate-500 py-6 transition-colors">
+                    <CheckCircle size={40} className="mb-3 text-emerald-500/30"/>
+                    <p className="text-xs font-bold uppercase tracking-widest">Sin tareas urgentes.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {tareasPendientes.map(tarea => {
+                      const vencida = isOverdue(tarea.fechaLimite);
+                      return (
+                        <div key={tarea.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                          <div className={`mt-1 w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] shrink-0 ${vencida ? 'bg-rose-500 text-rose-500 animate-pulse' : 'bg-amber-400 text-amber-400'}`}></div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-bold truncate transition-colors ${vencida ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-slate-200'}`}>{tarea.titulo}</p>
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <span className="text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-black/50 px-2 py-0.5 rounded border border-slate-300 dark:border-white/10 transition-colors">{tarea.categoria}</span>
+                              {tarea.fechaLimite && <span className={`text-[9px] font-bold tracking-widest transition-colors ${vencida ? 'text-rose-600 dark:text-rose-500' : 'text-slate-500 dark:text-slate-500'}`}><Calendar size={10} className="inline mr-0.5"/> {tarea.fechaLimite}</span>}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col transition-colors">
-          <div className="p-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 rounded-t-2xl transition-colors">
-            <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-sm transition-colors"><AlertTriangle size={16} className="mr-2 text-amber-500"/> Alertas Financieras</h3>
-            {setActiveTab && <button onClick={() => setActiveTab('presupuesto')} className="text-[10px] font-bold text-amber-600 dark:text-amber-500 hover:text-amber-800 dark:hover:text-amber-400 uppercase tracking-widest print:hidden transition-colors">Abrir Bóveda</button>}
-          </div>
-          <div className="p-5 flex-1">
-            {pagosPendientes.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-500 py-6 transition-colors">
-                <CheckCircle size={40} className="mb-3 text-emerald-500/30"/>
-                <p className="text-xs font-bold uppercase tracking-widest">Finanzas Sanas.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {pagosPendientes.map(pago => {
-                  const deuda = pago.estimado - pago.pagado;
-                  const vencido = isOverdue(pago.fechaLimite);
-                  return (
-                    <div key={pago.id} className="flex justify-between items-center bg-slate-50 dark:bg-white/5 p-3 rounded-xl border border-slate-100 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
-                      <div className="min-w-0 flex-1 mr-3">
-                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate transition-colors">{pago.concepto}</p>
-                        <p className={`text-[9px] font-bold mt-1 uppercase tracking-widest flex items-center transition-colors ${vencido ? 'text-rose-600 dark:text-rose-500' : 'text-slate-500 dark:text-slate-500'}`}>
-                          <Clock size={10} className="mr-1"/> {pago.fechaLimite ? `Límite: ${pago.fechaLimite}` : 'Sin plazo'}
-                        </p>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-[9px] text-slate-500 dark:text-slate-500 font-bold uppercase tracking-widest mb-0.5 transition-colors">Pendiente</p>
-                        <p className={`text-base font-black transition-colors ${vencido ? 'text-rose-600 dark:text-rose-500' : 'text-amber-600 dark:text-amber-500'}`}>{formatMoney(deuda)}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ÁREA INVISIBLE PARA EL RENDER DEL REPORTE EJECUTIVO */}
-      <div style={{ position: 'absolute', top: '-10000px', left: '-10000px', zIndex: -9999 }}>
-        <div id="hidden-executive-report" className="bg-white relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
-           
-           <div className="absolute top-0 left-0 w-full h-3" style={{ backgroundColor: accentColor }}></div>
-
-           <div className="flex justify-between items-center mb-12 mt-4">
-              <div>
-                <h1 className="text-5xl font-editorial font-bold text-slate-900 leading-none">Reporte Ejecutivo</h1>
-                <p className="text-base font-black tracking-[0.2em] uppercase mt-3" style={{ color: accentColor }}>{eventName}</p>
-              </div>
-              <div className="text-right flex flex-col items-end">
-                <BauliaLogo className="h-10" forceWhite={false} />
-                <p className="text-[8px] text-slate-400 mt-2 uppercase tracking-[0.3em] font-bold">Tecnología Inteligente</p>
-              </div>
-           </div>
-
-           <div className="grid grid-cols-2 gap-10 mb-10">
-             <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
-                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Logística de Asistentes</p>
-                <p className="text-5xl font-editorial text-slate-900 mb-2">{totalPasses}</p>
-                <p className="text-xs font-bold" style={{ color: accentColor }}>{confirmationPercentage}% Confirmación oficial</p>
-                <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${confirmationPercentage}%`, backgroundColor: accentColor }}></div></div>
-             </div>
-             <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
-                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Acomodo y Mesas</p>
-                <p className="text-5xl font-editorial text-slate-900 mb-2">{totalMesas} <span className="text-lg text-slate-400 font-sans font-light">mesas</span></p>
-                <p className="text-xs font-bold" style={{ color: accentColor }}>{capacidadTotalSillas} Sillas totales • {ocupacionPorcentaje}% Ocupación</p>
-                <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${ocupacionPorcentaje}%`, backgroundColor: accentColor }}></div></div>
-             </div>
-           </div>
-
-           <div className="grid grid-cols-2 gap-10 mb-12">
-             <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
-                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Estado de la Bóveda</p>
-                <p className="text-5xl font-editorial text-slate-900 mb-2">${(totalEstimado / 1000).toFixed(1)}k</p>
-                <p className="text-xs font-bold flex justify-between" style={{ color: accentColor }}>
-                  <span>Abonado: ${(totalPagado/1000).toFixed(1)}k</span>
-                </p>
-                <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${Math.min(budgetPercentage, 100)}%`, backgroundColor: accentColor }}></div></div>
-             </div>
-             <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
-                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Avance de Planeación</p>
-                <p className="text-5xl font-editorial text-slate-900 mb-2">{tareasPorcentaje}%</p>
-                <p className="text-xs font-bold" style={{ color: accentColor }}>{tareasCompletadas} de {tareasTotal} objetivos listos</p>
-                <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${tareasPorcentaje}%`, backgroundColor: accentColor }}></div></div>
-             </div>
-           </div>
-
-           <div className="grid grid-cols-2 gap-10">
-             <div>
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-800 mb-4 border-b border-slate-200 pb-2">Logística Inmediata</h3>
-                {tareasPendientes.length === 0 ? <p className="text-xs text-slate-400 italic">El cronograma está limpio.</p> : (
-                  <ul className="space-y-3">
-                    {tareasPendientes.map(t => (
-                      <li key={t.id} className="text-xs text-slate-600 flex justify-between items-center border-b border-slate-100 pb-1.5 last:border-0">
-                        <span className="font-medium pr-2 truncate">{t.titulo}</span>
-                        <span className="text-slate-400 shrink-0 font-mono text-[10px]">{t.fechaLimite || '-'}</span>
-                      </li>
-                    ))}
-                  </ul>
+                      )
+                    })}
+                  </div>
                 )}
-             </div>
-             <div>
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-800 mb-4 border-b border-slate-200 pb-2">Deudas Próximas</h3>
-                {pagosPendientes.length === 0 ? <p className="text-xs text-slate-400 italic">Finanzas sanas.</p> : (
-                  <ul className="space-y-3">
-                    {pagosPendientes.map(p => (
-                      <li key={p.id} className="text-xs text-slate-600 flex justify-between items-center border-b border-slate-100 pb-1.5 last:border-0">
-                        <span className="font-medium pr-2 truncate">{p.concepto}</span>
-                        <span className="font-black text-slate-900 shrink-0">{formatMoney(p.estimado - p.pagado)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-             </div>
-           </div>
+              </div>
+            </div>
 
-           <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
-              <span>Fecha de Emisión: {new Date().toLocaleDateString('es-MX')}</span>
-              <span>Confidencial • {eventName}</span>
-           </div>
+            <div className="bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col transition-colors">
+              <div className="p-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 rounded-t-2xl transition-colors">
+                <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-sm transition-colors"><AlertTriangle size={16} className="mr-2 text-amber-500"/> Alertas Financieras</h3>
+                {setActiveTab && <button onClick={() => setActiveTab('presupuesto')} className="text-[10px] font-bold text-amber-600 dark:text-amber-500 hover:text-amber-800 dark:hover:text-amber-400 uppercase tracking-widest print:hidden transition-colors">Abrir Bóveda</button>}
+              </div>
+              <div className="p-5 flex-1">
+                {pagosPendientes.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-slate-500 py-6 transition-colors">
+                    <CheckCircle size={40} className="mb-3 text-emerald-500/30"/>
+                    <p className="text-xs font-bold uppercase tracking-widest">Finanzas Sanas.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {pagosPendientes.map(pago => {
+                      const deuda = pago.estimado - pago.pagado;
+                      const vencido = isOverdue(pago.fechaLimite);
+                      return (
+                        <div key={pago.id} className="flex justify-between items-center bg-slate-50 dark:bg-white/5 p-3 rounded-xl border border-slate-100 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                          <div className="min-w-0 flex-1 mr-3">
+                            <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate transition-colors">{pago.concepto}</p>
+                            <p className={`text-[9px] font-bold mt-1 uppercase tracking-widest flex items-center transition-colors ${vencido ? 'text-rose-600 dark:text-rose-500' : 'text-slate-500 dark:text-slate-500'}`}>
+                              <Clock size={10} className="mr-1"/> {pago.fechaLimite ? `Límite: ${pago.fechaLimite}` : 'Sin plazo'}
+                            </p>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <p className="text-[9px] text-slate-500 dark:text-slate-500 font-bold uppercase tracking-widest mb-0.5 transition-colors">Pendiente</p>
+                            <p className={`text-base font-black transition-colors ${vencido ? 'text-rose-600 dark:text-rose-500' : 'text-amber-600 dark:text-amber-500'}`}>{formatMoney(deuda)}</p>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ÁREA INVISIBLE PARA EL RENDER DEL REPORTE EJECUTIVO (Oculto en Social Wall) */}
+      {plan !== 'social_wall' && (
+        <div style={{ position: 'absolute', top: '-10000px', left: '-10000px', zIndex: -9999 }}>
+          <div id="hidden-executive-report" className="bg-white relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
+             
+             <div className="absolute top-0 left-0 w-full h-3" style={{ backgroundColor: accentColor }}></div>
+
+             <div className="flex justify-between items-center mb-12 mt-4">
+                <div>
+                  <h1 className="text-5xl font-editorial font-bold text-slate-900 leading-none">Reporte Ejecutivo</h1>
+                  <p className="text-base font-black tracking-[0.2em] uppercase mt-3" style={{ color: accentColor }}>{eventName}</p>
+                </div>
+                <div className="text-right flex flex-col items-end">
+                  <BauliaLogo className="h-10" forceWhite={false} />
+                  <p className="text-[8px] text-slate-400 mt-2 uppercase tracking-[0.3em] font-bold">Tecnología Inteligente</p>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-2 gap-10 mb-10">
+               <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
+                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Logística de Asistentes</p>
+                  <p className="text-5xl font-editorial text-slate-900 mb-2">{totalPasses}</p>
+                  <p className="text-xs font-bold" style={{ color: accentColor }}>{confirmationPercentage}% Confirmación oficial</p>
+                  <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${confirmationPercentage}%`, backgroundColor: accentColor }}></div></div>
+               </div>
+               <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
+                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Acomodo y Mesas</p>
+                  <p className="text-5xl font-editorial text-slate-900 mb-2">{totalMesas} <span className="text-lg text-slate-400 font-sans font-light">mesas</span></p>
+                  <p className="text-xs font-bold" style={{ color: accentColor }}>{capacidadTotalSillas} Sillas totales • {ocupacionPorcentaje}% Ocupación</p>
+                  <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${ocupacionPorcentaje}%`, backgroundColor: accentColor }}></div></div>
+               </div>
+             </div>
+
+             <div className="grid grid-cols-2 gap-10 mb-12">
+               <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
+                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Estado de la Bóveda</p>
+                  <p className="text-5xl font-editorial text-slate-900 mb-2">${(totalEstimado / 1000).toFixed(1)}k</p>
+                  <p className="text-xs font-bold flex justify-between" style={{ color: accentColor }}>
+                    <span>Abonado: ${(totalPagado/1000).toFixed(1)}k</span>
+                  </p>
+                  <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${Math.min(budgetPercentage, 100)}%`, backgroundColor: accentColor }}></div></div>
+               </div>
+               <div className="p-6 border border-slate-200/60 rounded-2xl bg-white/60">
+                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Avance de Planeación</p>
+                  <p className="text-5xl font-editorial text-slate-900 mb-2">{tareasPorcentaje}%</p>
+                  <p className="text-xs font-bold" style={{ color: accentColor }}>{tareasCompletadas} de {tareasTotal} objetivos listos</p>
+                  <div className="w-full bg-slate-200 h-0.5 mt-3"><div className="h-0.5" style={{ width: `${tareasPorcentaje}%`, backgroundColor: accentColor }}></div></div>
+               </div>
+             </div>
+
+             <div className="grid grid-cols-2 gap-10">
+               <div>
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-800 mb-4 border-b border-slate-200 pb-2">Logística Inmediata</h3>
+                  {tareasPendientes.length === 0 ? <p className="text-xs text-slate-400 italic">El cronograma está limpio.</p> : (
+                    <ul className="space-y-3">
+                      {tareasPendientes.map(t => (
+                        <li key={t.id} className="text-xs text-slate-600 flex justify-between items-center border-b border-slate-100 pb-1.5 last:border-0">
+                          <span className="font-medium pr-2 truncate">{t.titulo}</span>
+                          <span className="text-slate-400 shrink-0 font-mono text-[10px]">{t.fechaLimite || '-'}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+               </div>
+               <div>
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-800 mb-4 border-b border-slate-200 pb-2">Deudas Próximas</h3>
+                  {pagosPendientes.length === 0 ? <p className="text-xs text-slate-400 italic">Finanzas sanas.</p> : (
+                    <ul className="space-y-3">
+                      {pagosPendientes.map(p => (
+                        <li key={p.id} className="text-xs text-slate-600 flex justify-between items-center border-b border-slate-100 pb-1.5 last:border-0">
+                          <span className="font-medium pr-2 truncate">{p.concepto}</span>
+                          <span className="font-black text-slate-900 shrink-0">{formatMoney(p.estimado - p.pagado)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+               </div>
+             </div>
+
+             <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[7px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
+                <span>Fecha de Emisión: {new Date().toLocaleDateString('es-MX')}</span>
+                <span>Confidencial • {eventName}</span>
+             </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* MODAL DE CAMBIO DE CONTRASEÑA */}
       {passModal.open && (
@@ -10322,46 +10387,99 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       {/* 🔴 MODAL CHECKOUT MEJORADO (DOS PASOS EN LA MISMA PANTALLA) */}
       {checkoutModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className={`bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full ${checkoutModal === 'selector' ? 'max-w-2xl' : 'max-w-md'} overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 flex flex-col max-h-[90vh] transition-all duration-300`}>
+          <div className={`bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full ${checkoutModal === 'selector' ? 'max-w-4xl' : 'max-w-md'} overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 flex flex-col max-h-[90vh] transition-all duration-300`}>
             
             {checkoutModal === 'selector' ? (
               <div className="p-8 flex flex-col h-full">
                 <div className="flex justify-between items-center mb-6 shrink-0">
                   <div>
                     <h3 className="font-editorial text-3xl font-bold text-slate-900 dark:text-white mb-1">Selecciona tu Nivel</h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-xs">Elige la bóveda que se adapte a la magnitud de tu evento.</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-xs">Elige la bóveda o el servicio independiente que necesites.</p>
                   </div>
                   <button onClick={() => setCheckoutModal(null)} className="p-2 text-slate-400 hover:text-rose-500 bg-slate-100 dark:bg-white/5 rounded-full transition-colors"><X size={20}/></button>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto max-h-[60vh] custom-scrollbar pr-2 pb-4">
-                  {[
-                    { id: 'basico', plan: 'Esencial', precio: '990', desc: 'La elegancia indispensable. Invitación, RSVP simple y GPS.', icon: <Smartphone size={24}/> },
-                    { id: 'plata', plan: 'Firma', precio: '1,490', desc: 'Recupera tu inversión. Suma Mesa de Regalos e Itinerario.', icon: <Wallet size={24}/> },
-                    { id: 'oro', plan: 'Premium', precio: '1,990', desc: 'Cero colados. Panel Maestro, Control QR de puerta.', icon: <ShieldCheck size={24}/>, popular: true },
-                    { id: 'diamante', plan: 'Alta Costura', precio: '2,990', desc: 'La suite definitiva. Control espacial y Muro Social inmersivo.', icon: <LayoutDashboard size={24}/> }
-                  ].map(plan => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[70vh] custom-scrollbar pr-2 pb-4">
+                  
+                  {/* COLUMNA 1: PLANES COMPLETOS */}
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5 pb-2 mb-4">Ecosistema Completo (SaaS)</h4>
+                    {[
+                      { id: 'basico', plan: 'Esencial', precio: '990', desc: 'La elegancia indispensable. Invitación, RSVP simple y GPS.', icon: <Smartphone size={24}/> },
+                      { id: 'plata', plan: 'Firma', precio: '1,490', desc: 'Recupera tu inversión. Suma Mesa de Regalos e Itinerario.', icon: <Wallet size={24}/> },
+                      { id: 'oro', plan: 'Premium', precio: '1,990', desc: 'Cero colados. Panel Maestro, Control QR de puerta.', icon: <ShieldCheck size={24}/>, popular: true },
+                      { id: 'diamante', plan: 'Alta Costura', precio: '2,990', desc: 'La suite definitiva. Control espacial y Muro Social inmersivo.', icon: <LayoutDashboard size={24}/> }
+                    ].map(plan => (
+                      <button 
+                        key={plan.id}
+                        onClick={() => { setPlanSeleccionado({ plan: plan.plan, precio: plan.precio }); setCheckoutModal('pago'); }}
+                        className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 group relative overflow-hidden ${plan.popular ? 'border-amber-500/50 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/10' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] hover:border-indigo-300 dark:hover:border-white/30 hover:bg-slate-100 dark:hover:bg-white/5'}`}
+                      >
+                        {plan.popular && <div className="absolute top-0 right-0 bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg">El Estándar</div>}
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-inner ${plan.popular ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500' : 'bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white'}`}>
+                            {plan.icon}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-0.5">{plan.plan}</h4>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">{plan.desc}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="font-black text-xl text-slate-900 dark:text-white">${plan.precio}</p>
+                            <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">MXN</p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* COLUMNA 2: PRODUCTOS INDEPENDIENTES (LA MINA DE ORO) */}
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5 pb-2 mb-4">Experiencias Independientes</h4>
+                    
+                    {/* 🔴 TARJETA DEL SOCIAL WALL */}
                     <button 
-                      key={plan.id}
-                      onClick={() => { setPlanSeleccionado({ plan: plan.plan, precio: plan.precio }); setCheckoutStep(2); }}
-                      className={`text-left p-5 rounded-2xl border transition-all duration-300 group relative overflow-hidden ${plan.popular ? 'border-amber-500/50 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/10' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] hover:border-indigo-300 dark:hover:border-white/30 hover:bg-slate-100 dark:hover:bg-white/5'}`}
+                      onClick={() => { setPlanSeleccionado({ plan: 'Social_Wall', precio: '1490.00' }); setCheckoutModal('pago'); }}
+                      className="w-full text-left p-6 rounded-3xl border-2 border-indigo-500/30 dark:border-indigo-500/50 bg-indigo-50 dark:bg-[#111] hover:bg-indigo-100 dark:hover:bg-[#151515] hover:border-indigo-500 transition-all duration-300 group relative overflow-hidden"
                     >
-                      {plan.popular && <div className="absolute top-0 right-0 bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg">El Estándar</div>}
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 shadow-inner ${plan.popular ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500' : 'bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white'}`}>
-                        {plan.icon}
+                      <div className="absolute -right-6 -top-6 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-indigo-500/40 transition-colors"></div>
+                      <div className="flex flex-col gap-4 relative z-10">
+                        <div className="flex justify-between items-start">
+                          <div className="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <Camera size={28} />
+                          </div>
+                          <div className="text-right">
+                            <span className="bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">NUEVO</span>
+                            <p className="font-black text-3xl text-slate-900 dark:text-white leading-none">$1,490</p>
+                            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">MXN / Pago Único</p>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-editorial font-bold text-2xl text-slate-900 dark:text-white mb-2">Baulia Social Wall</h4>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                            ¿Ya tienes invitaciones físicas pero quieres tecnología en tu fiesta? Convierte las pantallas de tu salón en una <b>experiencia inmersiva en vivo</b> donde las fotos de tus invitados vuelan directamente al proyector.
+                          </p>
+                          
+                          <ul className="space-y-2">
+                            <li className="flex items-center text-[10px] font-bold text-slate-700 dark:text-slate-300"><CheckCircle size={14} className="text-indigo-500 mr-2"/> Consola de Proyección (DJ/VJ)</li>
+                            <li className="flex items-center text-[10px] font-bold text-slate-700 dark:text-slate-300"><CheckCircle size={14} className="text-indigo-500 mr-2"/> Descarga de QRs para las mesas</li>
+                            <li className="flex items-center text-[10px] font-bold text-slate-700 dark:text-slate-300"><CheckCircle size={14} className="text-indigo-500 mr-2"/> Cero apps. Se usa desde la cámara normal.</li>
+                          </ul>
+                        </div>
                       </div>
-                      <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-1">{plan.plan}</h4>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-4 h-6 leading-relaxed">{plan.desc}</p>
-                      <p className="font-black text-xl text-slate-900 dark:text-white">${plan.precio} <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">MXN</span></p>
                     </button>
-                  ))}
+                    {/* FIN DE LA TARJETA DEL SOCIAL WALL */}
+
+                  </div>
+
                 </div>
               </div>
             ) : (
               <>
                 <div className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 shrink-0">
                   <div className="flex justify-between items-center mb-1">
-                    <h3 className="font-editorial font-bold text-2xl text-slate-900 dark:text-white">Reservar Bóveda</h3>
+                    <h3 className="font-editorial font-bold text-2xl text-slate-900 dark:text-white">Reservar Compra</h3>
                     <div className="flex gap-3">
                       <button onClick={() => setCheckoutModal('selector')} className="text-slate-400 hover:text-indigo-500 dark:hover:text-amber-500 text-[10px] font-bold uppercase tracking-widest transition-colors">Volver</button>
                       <button onClick={() => setCheckoutModal(null)} className="text-slate-400 hover:text-rose-500 transition-colors"><X size={20}/></button>
@@ -10373,7 +10491,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 <div className="p-6 overflow-y-auto flex-1 custom-scrollbar bg-slate-50 dark:bg-transparent">
                   <Elements stripe={stripePromise}>
                     <CheckoutForm 
-                      planSeleccionado={planSeleccionado || checkoutModal} 
+                      planSeleccionado={planSeleccionado} 
                       onSuccess={handlePaymentSuccess} 
                       onCancel={() => setCheckoutModal('selector')} 
                     />
@@ -10404,7 +10522,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </h3>
             
             <p className="text-slate-600 dark:text-slate-400 text-sm mb-10 font-light leading-relaxed">
-              Tu bóveda privada ha sido creada con éxito. Hemos enviado las credenciales de acceso a tu correo electrónico para que comiences a diseñar tu evento sin estrés.
+              Tu servicio ha sido creado con éxito. Hemos enviado las credenciales de acceso a tu correo electrónico para que comiences a disfrutar de la plataforma.
             </p>
             
             <button onClick={() => {setCheckoutSuccess(false); window.location.href = 'https://panel.baulia.com';}} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold rounded-full shadow-xl hover:bg-slate-800 dark:hover:bg-slate-200 hover:scale-[1.02] transition-all uppercase tracking-widest text-[10px]">
@@ -10693,7 +10811,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             
             <div className={`absolute top-16 sm:top-20 left-10 sm:left-12 z-20 transition-all duration-700 transform group-hover:scale-105 group-hover:-rotate-2 drop-shadow-xl ${accentColor === 'monochrome' ? 'text-slate-800 dark:text-white' : accentThemes[accentColor]?.text}`}>
                 <h3 style={{ fontFamily: '"Birthstone", cursive', fontSize: '4.5rem', lineHeight: '1' }} className="font-medium -rotate-6">
-                    Ana y Rodrigo
+                  Ana y Rodrigo
                 </h3>
             </div>
 
@@ -11413,7 +11531,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const isSuperAdmin = authData?.role === 'superadmin';
   const isStaff = authData?.role === 'staff';
 
-  const PRECIOS = { basico: 990, plata: 1490, oro: 1990, diamante: 2990 };
+  // 🔴 AQUÍ SE AGREGÓ EL PRECIO DEL SOCIAL WALL
+  const PRECIOS = { basico: 990, plata: 1490, oro: 1990, diamante: 2990, social_wall: 1490 };
 
   const tiposDeEvento = [
     { id: 'boda', label: 'Boda', placeholder: 'Ej. Carlos y Sofia', labelNombre: 'Nombre de los Novios' },
@@ -11455,7 +11574,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     return () => { unsubLic(); unsubRes(); unsubVentas(); };
   }, []);
 
- const handleCreateLicense = async (e) => {
+  const handleCreateLicense = async (e) => {
     e.preventDefault();
     setIsCreating(true);
     try {
@@ -11505,7 +11624,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         cliente: formData.nombres
       });
 
-      // 🔴 INYECCIÓN DE DATOS FANTASMA (ONBOARDING VIP) 🔴
+      // INYECCIÓN DE DATOS FANTASMA (ONBOARDING VIP)
       const tableDemoId = `mesa_demo_${Date.now()}`;
       const guest1DemoId = `guest_demo_1_${Date.now()}`;
       const guest2DemoId = `guest_demo_2_${Date.now()}`;
@@ -11539,7 +11658,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         })
       ];
       await Promise.all(promesasDemo);
-      // 🔴 FIN INYECCIÓN DE DATOS FANTASMA 🔴
 
       setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role, urlInvitacion: formData.urlInvitacion, esRecurrente: esClienteRecurrente });
       setClientPhone('');
@@ -11567,7 +11685,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       const isQrChecked = editingLic.isQrEnabled !== false; 
       const isPassChecked = editingLic.isPassCountEnabled !== false;
 
-      // 🔴 REPARACIÓN DE MEMORIA: Actualizamos los interruptores en el USUARIO también
       await updateDoc(doc(db, "usuarios", editingLic.id), { 
         urlInvitacion: safeUrl, 
         plan: editingLic.plan, 
@@ -11610,6 +11727,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     let mensaje = `✨ ¡Hola ${successData.nombres}! `;
     if (successData.plan === 'basico' || successData.plan === 'plata') {
       mensaje += `Tu invitación digital está casi lista. Podrás verla pronto en este enlace:\n🔗 ${successData.urlInvitacion || 'Enlace pendiente'}`;
+    } else if (successData.plan === 'social_wall') {
+      mensaje += `Tu Muro Social está listo para brillar.\n\nAccede a tu consola privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña: ${successData.password}\n\n¡Entra ahora para configurar todo!`;
     } else {
       mensaje += `Tu Panel de Control Premium para tu ${tipoTexto} está listo.\n\nAccede a tu plataforma privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña: ${successData.password}\n\n¡Guarda estos accesos, te servirán para gestionar todos los detalles!`;
     }
@@ -11641,14 +11760,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const ventasDelMes = ventas.filter(v => v.mesAnio === mesSeleccionado);
   const ingresoMensualTotal = ventasDelMes.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
   
-  const desglosePlanes = { basico: 0, plata: 0, oro: 0, diamante: 0 };
+  const desglosePlanes = { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0 };
   ventasDelMes.forEach(v => { if(desglosePlanes[v.plan] !== undefined) desglosePlanes[v.plan] += (Number(v.monto) || 0); });
 
   const totalesPorLicencia = licencias.reduce((acc, user) => {
     const tipo = (user.plan || 'basico').toLowerCase().trim();
     acc[tipo] = (acc[tipo] || 0) + 1;
     return acc;
-  }, { basico: 0, plata: 0, oro: 0, diamante: 0 });
+  }, { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0 });
 
   const exportarCorteContador = () => {
     const csvRows = ventasDelMes.map(v => {
@@ -11723,22 +11842,22 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       </div>
 
       {adminTab === 'licencias' && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-2">
           <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between transition-colors">
              <div><p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Básico</p><p className="text-2xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.basico}</p></div>
-             <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400"><Users size={18}/></div>
           </div>
           <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between transition-colors">
              <div><p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Plata</p><p className="text-2xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.plata}</p></div>
-             <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400"><Wallet size={18}/></div>
           </div>
           <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex items-center justify-between transition-colors">
              <div><p className="text-[10px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">Oro</p><p className="text-2xl font-black text-amber-700 dark:text-amber-400">{totalesPorLicencia.oro}</p></div>
-             <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500"><ShieldCheck size={18}/></div>
           </div>
           <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 shadow-sm flex items-center justify-between transition-colors">
              <div><p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Diamante</p><p className="text-2xl font-black text-indigo-700 dark:text-indigo-400">{totalesPorLicencia.diamante}</p></div>
-             <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400"><LayoutDashboard size={18}/></div>
+          </div>
+          <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-pink-200 dark:border-pink-500/20 shadow-sm flex items-center justify-between transition-colors">
+             <div><p className="text-[10px] font-bold text-pink-600 dark:text-pink-400 uppercase tracking-widest">Muro Social</p><p className="text-2xl font-black text-pink-700 dark:text-pink-400">{totalesPorLicencia.social_wall}</p></div>
+             <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-500/10 flex items-center justify-center text-pink-600 dark:text-pink-400"><Camera size={18}/></div>
           </div>
         </div>
       )}
@@ -11763,7 +11882,66 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                 <FileSpreadsheet size={18} className="mr-2 text-emerald-400 dark:text-emerald-600"/> Descargar Excel
               </button>
            </div>
-           {/* Resto de Finanzas se mantiene igual... */}
+           
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl p-6 border border-slate-200 dark:border-white/10 shadow-sm">
+                <h3 className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-2">Ingreso Bruto del Mes</h3>
+                <p className="text-4xl font-black text-emerald-600 dark:text-emerald-400 mb-6">{formatMoney(ingresoMensualTotal)}</p>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Básico ({desglosePlanes.basico / PRECIOS.basico || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.basico)}</span></div>
+                  <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Plata ({desglosePlanes.plata / PRECIOS.plata || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.plata)}</span></div>
+                  <div className="flex justify-between items-center text-sm"><span className="text-amber-600 dark:text-amber-500 font-medium">Plan Oro ({desglosePlanes.oro / PRECIOS.oro || 0})</span><span className="font-bold text-amber-600 dark:text-amber-500">{formatMoney(desglosePlanes.oro)}</span></div>
+                  <div className="flex justify-between items-center text-sm"><span className="text-indigo-600 dark:text-indigo-400 font-medium">Plan Diamante ({desglosePlanes.diamante / PRECIOS.diamante || 0})</span><span className="font-bold text-indigo-600 dark:text-indigo-400">{formatMoney(desglosePlanes.diamante)}</span></div>
+                  <div className="flex justify-between items-center text-sm"><span className="text-pink-600 dark:text-pink-400 font-medium">Muro Social ({desglosePlanes.social_wall / PRECIOS.social_wall || 0})</span><span className="font-bold text-pink-600 dark:text-pink-400">{formatMoney(desglosePlanes.social_wall)}</span></div>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111]"><h3 className="font-bold text-sm text-slate-800 dark:text-white">Últimas Transacciones ({ventasDelMes.length})</h3></div>
+                <div className="max-h-64 overflow-y-auto custom-scrollbar p-2">
+                  {ventasDelMes.length === 0 ? <p className="text-center text-slate-400 p-8 text-sm">No hay ventas registradas en este mes.</p> : ventasDelMes.map((v, i) => (
+                    <div key={i} className="p-3 border-b border-slate-100 dark:border-white/5 last:border-0 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-white/5 transition-colors rounded-lg">
+                      <div>
+                        <p className="font-bold text-slate-800 dark:text-white text-sm leading-none mb-1">{v.cliente}</p>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-widest">{v.plan} • Ref: {v.referencia}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-black text-emerald-600 dark:text-emerald-400">{formatMoney(v.monto)}</p>
+                        <p className="text-[9px] text-slate-400">{v.fecha?.toDate ? v.fecha.toDate().toLocaleDateString('es-MX') : ''}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {adminTab === 'resenas' && isSuperAdmin && (
+        <div className="animate-in fade-in bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+          <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
+             <h3 className="font-bold text-slate-800 dark:text-white text-sm">Auditoría de Calidad ({resenasList.length})</h3>
+             <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Solo las "Aprobadas" se ven en la Landing Page</p>
+          </div>
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             {resenasList.map(r => (
+               <div key={r.id} className={`p-5 rounded-2xl border transition-colors relative ${r.status === 'aprobada' ? 'bg-amber-50/30 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10'}`}>
+                 <div className="absolute top-4 right-4">
+                   <button onClick={() => updateDoc(doc(db, "resenas", r.id), { status: r.status === 'aprobada' ? 'pendiente' : 'aprobada' })} className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded shadow-sm transition-colors ${r.status === 'aprobada' ? 'bg-amber-500 text-white' : 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400'}`}>
+                     {r.status === 'aprobada' ? 'Pública' : 'Aprobar'}
+                   </button>
+                 </div>
+                 <div className="flex gap-1 mb-3">
+                   {[1,2,3,4,5].map(star => <Star key={star} size={14} className={r.rating >= star ? 'fill-amber-500 text-amber-500' : 'text-slate-300 dark:text-slate-700'} />)}
+                 </div>
+                 <p className="text-sm text-slate-700 dark:text-slate-300 italic mb-4 font-light leading-relaxed">"{r.comment}"</p>
+                 <div className="border-t border-slate-100 dark:border-white/10 pt-3">
+                   <input type="text" value={r.authorName} onChange={(e) => updateDoc(doc(db, "resenas", r.id), { authorName: e.target.value })} className="font-bold text-sm bg-transparent outline-none border-b border-transparent focus:border-amber-500 w-full text-slate-900 dark:text-white transition-colors" />
+                   <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">{r.authorType}</p>
+                 </div>
+               </div>
+             ))}
+             {resenasList.length === 0 && <div className="col-span-full text-center py-10 text-slate-400">Aún no hay reseñas registradas.</div>}
+          </div>
         </div>
       )}
 
@@ -11824,8 +12002,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lic.tipoEvento || 'Boda'}</span>
                            </td>
                            <td className="px-5 py-4 text-center">
-                             <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'}`}>
-                               {lic.plan}
+                             <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : lic.plan === 'social_wall' ? 'bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'}`}>
+                               {lic.plan.replace('_', ' ')}
                              </span>
                            </td>
                            <td className="px-5 py-4 max-w-[200px] truncate">
@@ -11910,11 +12088,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                   
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Paquete Vendido</label>
+                    
+                    {/* 🔴 AQUÍ SE AGREGÓ LA OPCIÓN DE MURO SOCIAL AL CREAR */}
                     <select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 dark:text-white text-sm cursor-pointer transition-colors mb-3">
                       <option value="basico">Plan Básico ($990)</option>
                       <option value="plata">Plan Plata ($1,490)</option>
                       <option value="oro">Plan Oro ($1,990)</option>
                       <option value="diamante">Plan Diamante ($2,990)</option>
+                      <option value="social_wall">Muro Social Independiente ($1,490)</option>
                     </select>
 
                     <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
@@ -11947,7 +12128,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                 <div className="flex space-x-3">
                   <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold text-xs hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Cancelar</button>
                   <button type="submit" disabled={isCreating} className="flex-1 py-3.5 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-xs shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 disabled:opacity-50 transition-colors">
-                    {isCreating ? 'Procesando...' : 'Crear Licencia y Registrar Venta'}
+                    {isCreating ? 'Procesando...' : 'Crear Licencia'}
                   </button>
                 </div>
               </form>
@@ -11977,7 +12158,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         </div>
       )}
 
-      {/* 🔴 MODAL PARA EDITAR LICENCIA */}
+      {/* MODAL PARA EDITAR LICENCIA */}
       {isEditModalOpen && editingLic && (
         <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto border border-transparent dark:border-white/10 transition-colors">
@@ -12001,8 +12182,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Plan</label>
+                    
+                    {/* 🔴 AQUÍ SE AGREGÓ LA OPCIÓN DE MURO SOCIAL AL EDITAR */}
                     <select value={editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
-                      <option value="basico">Básico</option><option value="plata">Plata</option><option value="oro">Oro</option><option value="diamante">Diamante</option>
+                      <option value="basico">Básico</option>
+                      <option value="plata">Plata</option>
+                      <option value="oro">Oro</option>
+                      <option value="diamante">Diamante</option>
+                      <option value="social_wall">Social Wall</option>
                     </select>
                   </div>
                 </div>
