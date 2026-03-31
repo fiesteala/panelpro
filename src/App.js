@@ -1365,7 +1365,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     }
   };
 
-  // 🔴 CORRECCIÓN 1: GENERADOR DE PULSERAS EXACTAS (25x19cm, 10 pulseras por hoja con adhesivo)
+  // 🔴 GENERADOR DE PULSERAS VIP EXACTAS (25x19cm, 10 por hoja con adhesivo)
   const triggerQRPdfDownload = async () => {
     const allIndividualsForQR = safeGuests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').flatMap(g => (g.subGuests || []).map(sg => ({ ...sg, familyName: g.name, familyId: g.id })));
     if (allIndividualsForQR.length === 0) {
@@ -1380,7 +1380,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       try {
         const { jsPDF } = await import('jspdf');
         const html2canvas = (await import('html2canvas')).default;
-        // React y ReactDOM son necesarios para renderizar el virtual DOM
         const ReactDOMClient = await import('react-dom/client'); 
         
         const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
@@ -1428,11 +1427,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         
         root.render(<>{QRPagesToRender}</>);
         
-        // Esperar a que los QRs carguen
         await new Promise(resolve => setTimeout(resolve, 2000));
         
         const pages = tempContainer.querySelectorAll('.hidden-qr-pdf-page');
-        // Documento Landscape de 250mm x 190mm
         const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [250, 190] });
         
         for (let i = 0; i < pages.length; i++) {
@@ -1456,7 +1453,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
   const toggleCol = (col) => setExportCols(prev => ({ ...prev, [col]: !prev[col] }));
 
-  // 🔴 CORRECCIÓN 2: ESTUDIO DE IMPRESIÓN ELEGANTE Y ESTILO WORD
+  // 🔴 ESTUDIO DE IMPRESIÓN ELEGANTE Y ESTILO WORD
   const triggerListPdfDownload = async () => {
     setIsPreparingListPrint(true);
     setTimeout(async () => {
@@ -1646,7 +1643,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 </div>
               </div>
 
-              {/* LIENZO DE HOJAS (FONDO OSCURO, HOJAS BLANCAS CENTRADAS) */}
+              {/* LIENZO DE HOJAS */}
               <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8 bg-[#111] print:bg-white print:p-0 print:overflow-visible">
                 
                 <style>{`
@@ -1916,7 +1913,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       </div>
 
-      {/* MODALES MANUALES OMITIDOS AQUÍ POR ESPACIO PERO EL TUYO ESTÁ CORRECTO. NO LOS TOQUÉ. */}
       {/* MODAL AGREGAR INVITADO */}
       {addModal.open && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
@@ -8158,14 +8154,16 @@ const GuestCameraView = ({ eventId }) => {
     setActiveChallenge(null); 
   };
 
+  // 🔴 PREVENCIÓN DE MEMORIA RAM SATURADA EN IPHONES
   const cancelPost = () => {
+    if (postDraft && postDraft.previewUrls) {
+       postDraft.previewUrls.forEach(url => URL.revokeObjectURL(url));
+    }
     setPostDraft(null);
   };
 
   const publishPost = async () => {
-    // 🔴 BLINDAJE FINAL: Ya no usa la variable global. Usa la que está aislada por evento.
     if (!currentUserName) { showToast("Ingresa tu nombre para publicar.", "error"); return; }
-
     setIsUploading(true);
 
     try {
@@ -8204,6 +8202,11 @@ const GuestCameraView = ({ eventId }) => {
       };
       
       await setDoc(doc(db, "eventos", eventId, "fotos", nuevaFoto.id), nuevaFoto);
+      
+      // 🔴 LIMPIEZA DE MEMORIA RAM TRAS PUBLICAR
+      if (postDraft && postDraft.previewUrls) {
+         postDraft.previewUrls.forEach(url => URL.revokeObjectURL(url));
+      }
       setPostDraft(null);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
@@ -8212,6 +8215,11 @@ const GuestCameraView = ({ eventId }) => {
       }
     } catch (error) { 
       showToast("Hubo un error al intentar publicar.", "error"); 
+      // Si falla la red, también limpiamos para no trabar el celular
+      if (postDraft && postDraft.previewUrls) {
+         postDraft.previewUrls.forEach(url => URL.revokeObjectURL(url));
+      }
+      setPostDraft(null);
     } finally {
       setIsUploading(false);
     }
