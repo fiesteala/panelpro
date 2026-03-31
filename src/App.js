@@ -1365,7 +1365,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     }
   };
 
-  // 🔴 RESTAURADO: GENERADOR DE PULSERAS VIP EXACTAS (100% Funcional sin importar librerías raras)
+  // 🔴 RESTAURADO: GENERADOR DE PULSERAS VIP EXACTAS
   const triggerQRPdfDownload = async () => {
     const allIndividualsForQR = safeGuests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').flatMap(g => (g.subGuests || []).map(sg => ({ ...sg, familyName: g.name, familyId: g.id })));
     if (allIndividualsForQR.length === 0) {
@@ -1451,7 +1451,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
   const toggleCol = (col) => setExportCols(prev => ({ ...prev, [col]: !prev[col] }));
 
-  // 🔴 CORRECCIÓN 2: ESTUDIO DE IMPRESIÓN (ESTILO WORD PURO Y ELEGANTE)
   const triggerListPdfDownload = async () => {
     setIsPreparingListPrint(true);
     setTimeout(async () => {
@@ -1547,7 +1546,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
              listToRender = allList;
           }
 
-          const PAGE_1_LIMIT = 28; // Caben más porque quitamos los fondos anchos
+          const PAGE_1_LIMIT = 28; 
           const PAGE_N_LIMIT = 35;
           const firstPageItems = listToRender.slice(0, PAGE_1_LIMIT);
           const extraItems = listToRender.slice(PAGE_1_LIMIT);
@@ -1589,68 +1588,46 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           );
 
           return (
-            <div className="fixed inset-0 z-[9999] bg-slate-900/90 backdrop-blur-sm flex flex-col overflow-hidden animate-in fade-in transition-colors">
+            <div className="fixed inset-0 z-[9999] bg-slate-200 flex flex-col overflow-hidden animate-in fade-in transition-colors">
               
-              {/* HEADER DE HERRAMIENTAS (FLOTANTE Y OSCURO) */}
-              <div className="h-auto md:h-20 bg-[#0a0a0a] text-white px-6 py-4 flex flex-col md:flex-row items-center justify-between shrink-0 border-b border-white/10 shadow-2xl print:hidden gap-4 relative z-50">
+              {/* TOOLBAR SUPERIOR DE EDICIÓN CLARO Y ELEGANTE */}
+              <div className="h-auto md:h-16 bg-white text-slate-800 px-6 py-3 flex flex-col md:flex-row items-center justify-between shrink-0 border-b border-slate-300 shadow-sm print:hidden gap-4 z-50">
+                
                 <div className="flex items-center space-x-4 w-full md:w-auto">
-                  <button onClick={() => setExportViewOpen(false)} className="p-2 bg-rose-500 hover:bg-rose-600 text-white rounded-full transition-colors shadow-lg shadow-rose-500/30"><X size={20}/></button>
-                  <div>
-                    <h3 className="font-bold text-sm md:text-base">Estudio de Impresión</h3>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-widest">Documento Ejecutivo (Tamaño Carta)</p>
-                  </div>
+                  <button onClick={() => setExportViewOpen(false)} className="px-4 py-2 bg-slate-100 hover:bg-rose-100 hover:text-rose-600 text-slate-600 rounded-lg transition-colors font-bold text-xs flex items-center shadow-sm">
+                    <X size={16} className="mr-2"/> Cerrar Vista Previa
+                  </button>
                 </div>
                 
-                <div className="flex items-center gap-4 flex-wrap justify-center">
+                {/* CONTROLES DE COLUMNAS ESTILO PILL */}
+                <div className="flex items-center bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex-wrap justify-center gap-1 shadow-inner">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-2 ml-1">Columnas:</span>
+                  <button onClick={() => toggleCol('nombre')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.nombre ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Nombre</button>
+                  {passCountEnabled && <button onClick={() => toggleCol('pases')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.pases ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Pases</button>}
+                  <button onClick={() => toggleCol('estatus')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.estatus ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Estatus</button>
+                  <button onClick={() => toggleCol('telefono')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.telefono ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Teléfono</button>
+                  <button onClick={() => toggleCol('mesa')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.mesa ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Mesa</button>
+                </div>
+
+                <div className="flex items-center gap-3">
                   {isWeddingMode && (
-                    <div className="flex items-center bg-white/5 border border-white/10 px-3 py-2 rounded-xl cursor-pointer hover:bg-white/10 transition-colors" onClick={() => setSplitBySide(!splitBySide)}>
-                       <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mr-3">Separar Lados</span>
-                       <div className={`relative w-8 h-4 rounded-full transition-colors ${splitBySide ? 'bg-amber-500' : 'bg-slate-700'}`}>
-                          <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${splitBySide ? 'translate-x-4' : 'translate-x-0'}`}></div>
-                       </div>
-                    </div>
+                    <button onClick={() => setSplitBySide(!splitBySide)} className={`flex items-center px-4 py-2 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm ${splitBySide ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                      <Layers size={14} className="mr-2"/> {splitBySide ? 'Agrupado por Lados' : 'Separar Lados'}
+                    </button>
                   )}
-
-                  {/* BOTONES PARA MOSTRAR/OCULTAR COLUMNAS */}
-                  <div className="flex items-center bg-white/5 p-1 rounded-xl border border-white/10 flex-wrap justify-center">
-                    <button onClick={() => toggleCol('nombre')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.nombre ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Nombre</button>
-                    {passCountEnabled && <button onClick={() => toggleCol('pases')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.pases ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Pases</button>}
-                    <button onClick={() => toggleCol('estatus')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.estatus ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Estatus</button>
-                    <button onClick={() => toggleCol('telefono')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.telefono ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Teléfono</button>
-                    <button onClick={() => toggleCol('mesa')} className={`text-[9px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg transition-colors ${exportCols.mesa ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>Mesa</button>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                     <button onClick={() => window.print()} className="px-5 py-2.5 bg-white text-slate-900 hover:bg-slate-200 rounded-xl text-sm font-bold flex items-center shadow-lg transition-all">
-                       <Printer size={16} className="mr-2"/> Imprimir
-                     </button>
-                     <button onClick={exportToExcel} className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold flex items-center shadow-lg transition-all hidden lg:flex">
-                       <FileSpreadsheet size={16} className="mr-2"/> Excel
-                     </button>
-                     <button onClick={triggerListPdfDownload} disabled={isPreparingListPrint} className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-black flex items-center shadow-[0_0_15px_rgba(79,70,229,0.4)] transition-all disabled:opacity-50">
-                       {isPreparingListPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
-                       {isPreparingListPrint ? 'Preparando...' : 'Descargar PDF'}
-                     </button>
-                  </div>
+                  <button onClick={triggerListPdfDownload} disabled={isPreparingListPrint} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold flex items-center shadow-md transition-all disabled:opacity-50">
+                    {isPreparingListPrint ? <RefreshCw size={14} className="mr-2 animate-spin"/> : <Download size={14} className="mr-2"/>} Descargar PDF
+                  </button>
                 </div>
               </div>
 
-              {/* LIENZO DE HOJAS (ESTILO WORD) */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8 bg-[#111] print:bg-white print:p-0 print:overflow-visible">
+              {/* LIENZO DE HOJAS ESTILO WORD */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8 print:bg-white print:p-0 print:overflow-visible">
                 
-                <style>{`
-                  @media print {
-                    body * { visibility: hidden; }
-                    .list-pdf-page, .list-pdf-page * { visibility: visible; }
-                    .list-pdf-page { position: absolute; left: 0; top: 0; margin: 0; box-shadow: none; width: 100%; page-break-after: always; }
-                    .print\\:hidden { display: none !important; }
-                  }
-                `}</style>
-
                 {/* PÁGINA 1 */}
-                <div className="list-pdf-page bg-white shrink-0 mx-auto mb-8 shadow-2xl relative" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '25mm 20mm', boxSizing: 'border-box', overflow: 'hidden' }}>
+                <div className="list-pdf-page bg-white shrink-0 mx-auto shadow-xl relative" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '25mm 20mm', boxSizing: 'border-box', overflow: 'hidden' }}>
                   
-                  {/* Membrete Estilo Word */}
+                  {/* Membrete Estilo Clásico/Word */}
                   <header className="flex justify-between items-start border-b-[3px] border-slate-900 pb-6 mb-6">
                     <div>
                       <h1 className="text-3xl font-editorial font-black text-slate-900 uppercase tracking-widest">Reporte de Asistencia</h1>
@@ -1663,7 +1640,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     </div>
                   </header>
                   
-                  {/* Estadísticas en texto plano, elegante */}
+                  {/* Estadísticas Limpias */}
                   <div className="flex gap-10 mb-8 border-b border-slate-200 pb-6 text-slate-800">
                      <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">{passCountEnabled ? 'Total Pases' : 'Invitados Totales'}</span><span className="text-xl font-bold">{passCountEnabled ? totalPases : safeGuests.length}</span></div>
                      <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Confirmados</span><span className="text-xl font-bold">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</span></div>
@@ -1681,7 +1658,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
                 {/* PÁGINAS EXTRA */}
                 {extraPages.map((pageRows, pIdx) => (
-                  <div key={`extrapage_${pIdx}`} className="list-pdf-page bg-white shrink-0 mx-auto mb-8 shadow-2xl relative" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '25mm 20mm', boxSizing: 'border-box', overflow: 'hidden' }}>
+                  <div key={`extrapage_${pIdx}`} className="list-pdf-page bg-white shrink-0 mx-auto shadow-xl relative" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '25mm 20mm', boxSizing: 'border-box', overflow: 'hidden' }}>
                      <header className="flex justify-between items-center pb-4 mb-6 border-b border-slate-900">
                        <h2 className="text-lg font-editorial font-bold text-slate-900 uppercase tracking-widest">Reporte de Asistencia (Cont.)</h2>
                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{eventName}</span>
