@@ -12876,6 +12876,9 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const userRole = impersonating ? impersonating.role : originalUserRole;
   const userPlan = impersonating ? impersonating.plan : originalUserPlan;
 
+  // 🔴 MODO APP ÚNICA: Detecta si es un producto independiente
+  const isSingleAppMode = userPlan === 'social_wall' || userPlan === 'security_kit';
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // 🔴 MAGIA DE RUTAS REPARADA: Si es Kit de Seguridad, arranca directo en el Escáner
@@ -12991,19 +12994,20 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const currentEventPlan = activeEventData.plan || 'diamante';
   const currentEventName = activeEventData.nombres || activeEventData.nombre || 'Evento Baulia';
 
-  // 🔴 BLOQUEOS RÍGIDOS: Protegemos cada módulo para que no se filtre a planes equivocados
   const renderContent = () => {
+    // 🔴 BLINDAJE MAESTRO: Forza la aplicación exclusiva pase lo que pase
+    if (userPlan === 'security_kit') {
+      return typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null;
+    }
+    if (userPlan === 'social_wall') {
+      return typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} /> : null;
+    }
+
     switch(activeTab) {
       case 'licencias': return isSuperAdminMode && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} authData={authData} /> : null;
-      
-      // Resumen bloqueado a Social Wall y Security Kit
       case 'dashboard': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof DashboardView !== 'undefined' ? <DashboardView authData={authData} guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null;      
-      
       case 'invitados': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={currentEventType} userPlan={currentEventPlan} eventName={currentEventName} urlInvitacion={activeEventData?.urlInvitacion} /> : null;      
-      
-      // Escáner habilitado para Oro, Diamante y Security Kit
-      case 'escaner': return ['oro', 'diamante', 'security_kit'].includes(userPlan) && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
-      
+      case 'escaner': return ['oro', 'diamante'].includes(userPlan) && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
       case 'mesas': return ['oro', 'diamante'].includes(userPlan) && typeof MesasView !== 'undefined' ? <MesasView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
       case 'mapa': return userPlan === 'diamante' && typeof MapaView !== 'undefined' ? <MapaView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} globalSearch={globalSearch} elements={mapElements} setElements={setMapElements} /> : null;
       case 'decoracion': return userPlan === 'diamante' && typeof DecoracionView !== 'undefined' ? <DecoracionView elements={decoElements} setElements={setDecoElements} addNotification={addNotification} /> : null; 
@@ -13011,13 +13015,9 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'timing': return ['plata', 'oro', 'diamante'].includes(userPlan) && typeof TimingView !== 'undefined' ? <TimingView timing={timing} setTiming={setTiming} addNotification={addNotification} /> : null;
       case 'presupuesto': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof PresupuestoView !== 'undefined' ? <PresupuestoView authData={authData} gastos={gastos} setGastos={setGastos} proveedores={proveedores} setProveedores={setProveedores} presupuestoTotal={presupuestoTotal} setPresupuestoTotal={setPresupuestoTotal} addNotification={addNotification} /> : null;
       case 'proveedores': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof ProveedoresView !== 'undefined' ? <ProveedoresView proveedores={proveedores} setProveedores={setProveedores} gastos={gastos} setGastos={setGastos} addNotification={addNotification} /> : null;
-      
-      // Galería habilitada para Diamante y Social Wall
-      case 'galeria': return ['diamante', 'social_wall'].includes(userPlan) && typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} /> : null;
-      
+      case 'galeria': return ['diamante'].includes(userPlan) && typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} /> : null;
       case 'invitacion': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof InvitacionView !== 'undefined' ? <InvitacionView guests={guests} urlInvitacion={activeEventData?.urlInvitacion} /> : null; 
       case 'configuracion': return userRole === 'planner' && typeof ConfiguracionMaestraView !== 'undefined' ? <ConfiguracionMaestraView agencyConfig={agencyConfig} addNotification={addNotification} /> : null;
-      
       default: return <div className="p-8 text-center text-slate-500 font-bold">Módulo bloqueado o no disponible en tu plan actual.</div>;
     }
   };
@@ -13057,7 +13057,8 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
         ))}
       </div>
 
-      {typeof Sidebar !== 'undefined' && !isSuperAdminMode && (
+      {/* 🔴 MODO APP ÚNICA: Destruimos el Sidebar si es un plan independiente */}
+      {typeof Sidebar !== 'undefined' && !isSuperAdminMode && !isSingleAppMode && (
         <Sidebar 
           isOpen={sidebarOpen} 
           setIsOpen={setSidebarOpen} 
