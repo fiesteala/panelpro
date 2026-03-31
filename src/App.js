@@ -11500,43 +11500,75 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS (ACTUALIZADO: KIT SEGURIDAD) ---
+// --- COMPONENTE: CENTRO DE LICENCIAS Y FINANZAS B2B ---
 // ==========================================
 const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  const [formData, setFormData] = useState({ 
-    nombres: '', email: '', plan: 'oro', tipoEvento: 'boda', role: 'cliente', 
-    urlInvitacion: '', referenciaPago: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true 
-  });
+  const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true });
   const [editingLic, setEditingLic] = useState(null);
+
   const [isCreating, setIsCreating] = useState(false);
   const [successData, setSuccessData] = useState(null);
   const [clientPhone, setClientPhone] = useState('');
+  
   const [licencias, setLicencias] = useState([]);
+  const [resenasList, setResenasList] = useState([]);
   const [ventas, setVentas] = useState([]); 
+  
+  const [correosVisibles, setCorreosVisibles] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [mesSeleccionado, setMesSeleccionado] = useState(new Date().toISOString().slice(0, 7));
+  
+  const currentMonthYear = new Date().toISOString().slice(0, 7);
+  const [mesSeleccionado, setMesSeleccionado] = useState(currentMonthYear);
+
   const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null });
+
+  const isSuperAdmin = authData?.role === 'superadmin';
+  const isStaff = authData?.role === 'staff';
 
   const PRECIOS = { basico: 990, plata: 1490, oro: 1990, diamante: 2990, social_wall: 1490, security_kit: 1490 };
 
   const tiposDeEvento = [
-    { id: 'boda', label: 'Boda' }, { id: 'xv_anos', label: 'XV Años' }, { id: 'cumpleanos', label: 'Cumpleaños' },
-    { id: 'empresarial', label: 'Empresarial' }, { id: 'general', label: 'General / Otro' }
+    { id: 'boda', label: 'Boda', placeholder: 'Ej. Carlos y Sofia', labelNombre: 'Nombre de los Novios' },
+    { id: 'xv_anos', label: 'XV Años', placeholder: 'Ej. Maria Fernanda', labelNombre: 'Nombre de la Quinceañera' },
+    { id: 'cumpleanos', label: 'Cumpleaños', placeholder: 'Ej. Juan Perez', labelNombre: 'Nombre del Festejado' },
+    { id: 'empresarial', label: 'Empresarial', placeholder: 'Ej. Convencion Telcel', labelNombre: 'Nombre de la Empresa' },
+    { id: 'general', label: 'General / Otro', placeholder: 'Ej. Posada Anual', labelNombre: 'Nombre del Evento' }
   ];
 
+  const eventoSeleccionado = tiposDeEvento.find(t => t.id === formData.tipoEvento) || tiposDeEvento[0];
+
   useEffect(() => {
+    const getSafeTime = (field) => {
+      if (!field) return 0;
+      if (typeof field.toMillis === 'function') return field.toMillis();
+      if (field.seconds) return field.seconds * 1000;
+      return 0;
+    };
+
     const unsubLic = onSnapshot(collection(db, "usuarios"), (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setLicencias(data.filter(u => u.role !== 'superadmin').sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+      const clientes = data.filter(u => u.role !== 'superadmin' && u.role !== 'staff');
+      clientes.sort((a, b) => getSafeTime(b.createdAt) - getSafeTime(a.createdAt));
+      setLicencias(clientes);
     });
+
+    const unsubRes = onSnapshot(collection(db, "resenas"), (snap) => {
+      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      data.sort((a, b) => getSafeTime(b.createdAt) - getSafeTime(a.createdAt));
+      setResenasList(data);
+    });
+
     const unsubVentas = onSnapshot(collection(db, "ventas"), (snap) => {
-      setVentas(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => (b.fecha?.seconds || 0) - (a.fecha?.seconds || 0)));
+      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      data.sort((a, b) => getSafeTime(b.fecha) - getSafeTime(a.fecha));
+      setVentas(data);
     });
-    return () => { unsubLic(); unsubVentas(); };
+
+    return () => { unsubLic(); unsubRes(); unsubVentas(); };
   }, []);
 
   const handleCreateLicense = async (e) => {
@@ -11547,142 +11579,657 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       const newEventId = slug + '-' + Math.random().toString(36).slice(-4); 
       const newEmail = formData.email.trim().toLowerCase();
       let newPassword = Math.random().toString(36).slice(-8) + "!";
+      let esClienteRecurrente = false;
 
-      // Registro en Firebase Auth
       try {
         await createUserWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
         await signOut(secondaryAuth); 
       } catch (authError) {
-        if (authError.code === 'auth/email-already-in-use') newPassword = "Tu contraseña actual";
-        else throw authError;
+        if (authError.code === 'auth/email-already-exists' || authError.code === 'auth/email-already-in-use') {
+          esClienteRecurrente = true;
+          newPassword = "Tu contraseña actual de Baulia"; 
+        } else {
+          throw authError; 
+        }
       }
 
-      // Registro en BD Usuarios
       await setDoc(doc(db, "usuarios", newEventId), { 
-        email: newEmail, role: formData.role, plan: formData.plan, eventId: newEventId, 
-        nombres: formData.nombres, status: 'activo', horaEvento: formData.horaEvento,
-        referenciaPago: formData.referenciaPago, createdAt: serverTimestamp()
+        email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, 
+        nombres: formData.nombres, status: 'activo', urlInvitacion: formData.urlInvitacion, creadoPor: authData.email, 
+        referenciaPago: formData.referenciaPago, createdAt: serverTimestamp(),
+        isQrEnabled: formData.isQrEnabled, 
+        isPassCountEnabled: formData.isPassCountEnabled,
+        horaEvento: formData.horaEvento
       });
 
-      // Registro en BD Evento
       await setDoc(doc(db, "eventos", newEventId), { 
-          nombres: formData.nombres, plan: formData.plan, horaEvento: formData.horaEvento,
-          isQrEnabled: true, isPassCountEnabled: true
+          presupuestoTotal: 150000, 
+          nombres: formData.nombres, 
+          plan: formData.plan, 
+          tipoEvento: formData.tipoEvento,
+          isQrEnabled: formData.isQrEnabled,
+          isPassCountEnabled: formData.isPassCountEnabled,
+          horaEvento: formData.horaEvento
       });
 
-      // Registro en Libro Mayor
+      const mesAnioAct = new Date().toISOString().slice(0, 7);
       await setDoc(doc(db, "ventas", newEventId), {
-        fecha: serverTimestamp(), mesAnio: new Date().toISOString().slice(0, 7),
-        monto: PRECIOS[formData.plan] || 0, plan: formData.plan, vendedor: authData.email, cliente: formData.nombres
+        fecha: serverTimestamp(),
+        mesAnio: mesAnioAct,
+        monto: PRECIOS[formData.plan] || 0,
+        plan: formData.plan,
+        vendedor: authData.email,
+        referencia: formData.referenciaPago,
+        cliente: formData.nombres
       });
 
-      setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan });
-      setIsModalOpen(false);
+      // 🔴 INYECCIÓN DE DATOS FANTASMA (ONBOARDING VIP) 🔴
+      const tableDemoId = `mesa_demo_${Date.now()}`;
+      const guest1DemoId = `guest_demo_1_${Date.now()}`;
+      const guest2DemoId = `guest_demo_2_${Date.now()}`;
+      
+      const promesasDemo = [
+        setDoc(doc(db, "eventos", newEventId, "mesas", tableDemoId), {
+          id: tableDemoId, name: "Mesa VIP (Ejemplo)", capacity: 10, tipo: "redonda",
+          configDetalle: { tipo: "redonda", capacidadRedonda: 10 }, x: null, y: null, rotation: 0
+        }),
+        setDoc(doc(db, "eventos", newEventId, "invitados", guest1DemoId), {
+          id: guest1DemoId, name: "Familia de Ejemplo", passes: 4, originalPasses: 4, childrenPasses: 0,
+          status: "confirmado", side: "general", entered: 0, tableId: tableDemoId, sent: true,
+          subGuests: [
+            {id: `${guest1DemoId}_0`, name: "Juan Pérez", isChild: false, entered: false},
+            {id: `${guest1DemoId}_1`, name: "María Gómez", isChild: false, entered: false},
+            {id: `${guest1DemoId}_2`, name: "Acompañante 1", isChild: false, entered: false},
+            {id: `${guest1DemoId}_3`, name: "Acompañante 2", isChild: false, entered: false}
+          ]
+        }),
+        setDoc(doc(db, "eventos", newEventId, "invitados", guest2DemoId), {
+          id: guest2DemoId, name: "Amigo Festejados (Ejemplo)", passes: 1, originalPasses: 1, childrenPasses: 0,
+          status: "pendiente", side: "general", entered: 0, tableId: null, sent: false, subGuests: []
+        }),
+        setDoc(doc(db, "eventos", newEventId, "gastos", `gasto_demo_1_${Date.now()}`), {
+          id: `gasto_demo_1_${Date.now()}`, concepto: "Lugar / Hacienda (Ejemplo)", categoria: "Lugar",
+          estimado: 80000, pagado: 40000, fechaLimite: "2026-12-01", historial: []
+        }),
+        setDoc(doc(db, "eventos", newEventId, "tareas", `tarea_demo_1_${Date.now()}`), {
+          id: `tarea_demo_1_${Date.now()}`, titulo: "Definir lista de invitados oficial", categoria: "Logística", 
+          fechaLimite: "", estado: "proceso"
+        })
+      ];
+      await Promise.all(promesasDemo);
+      // 🔴 FIN INYECCIÓN DE DATOS FANTASMA 🔴
+
+      setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role, urlInvitacion: formData.urlInvitacion, esRecurrente: esClienteRecurrente });
+      setClientPhone('');
+      setDialog({ isOpen: true, type: 'alert', title: 'Nueva Licencia Creada', message: `La bóveda para ${formData.nombres} está lista con datos de ejemplo.` });
     } catch (error) {
-      alert("Error: " + error.message);
+      setDialog({ isOpen: true, type: 'alert', title: 'Error del Sistema', message: `Ocurrió un error al crear la licencia: ${error.message}` });
     }
     setIsCreating(false);
   };
 
+  const handleUpdateLicense = async (e) => {
+    e.preventDefault();
+    try {
+      const oldPrice = PRECIOS[editingLic.originalPlan] || 0;
+      const newPrice = PRECIOS[editingLic.plan] || 0;
+
+      if (newPrice < oldPrice) {
+         setDialog({ isOpen: true, type: 'alert', title: 'Acción no permitida', message: 'No se puede reducir (downgrade) el plan de un cliente. Solo se permiten Upgrades a planes superiores.' });
+         return;
+      }
+
+      const safeUrl = editingLic.urlInvitacion || "";
+      const safeNombre = editingLic.nombres || "";
+      const safeTipo = editingLic.tipoEvento || "general";
+      const isQrChecked = editingLic.isQrEnabled !== false; 
+      const isPassChecked = editingLic.isPassCountEnabled !== false;
+
+      await updateDoc(doc(db, "usuarios", editingLic.id), { 
+        urlInvitacion: safeUrl, 
+        plan: editingLic.plan, 
+        nombres: safeNombre, 
+        tipoEvento: safeTipo,
+        isQrEnabled: isQrChecked,
+        isPassCountEnabled: isPassChecked,
+        horaEvento: editingLic.horaEvento || '18:00'
+      });
+
+      try {
+        await updateDoc(doc(db, "eventos", editingLic.eventId), {
+           nombres: safeNombre,
+           plan: editingLic.plan,
+           tipoEvento: safeTipo,
+           isQrEnabled: isQrChecked,
+           isPassCountEnabled: isPassChecked,
+           horaEvento: editingLic.horaEvento || '18:00'
+        });
+      } catch(err) { console.log("Doc evento no listo", err); }
+
+      if (newPrice > oldPrice) {
+         try {
+           await updateDoc(doc(db, "ventas", editingLic.eventId), { plan: editingLic.plan, monto: newPrice });
+         } catch(err) { console.log("Doc venta no listo", err); }
+      }
+
+      setIsEditModalOpen(false); 
+      setEditingLic(null);
+      setDialog({ isOpen: true, type: 'alert', title: 'Bóveda Actualizada', message: newPrice > oldPrice ? 'El Upgrade se realizó y el estado financiero se actualizó.' : 'Los cambios se guardaron correctamente.' });
+    } catch (error) { 
+      console.error(error);
+      setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'Fallo al conectar con la base de datos: ' + error.message }); 
+    }
+  };
+
+  const handleSendWhatsApp = () => {
+    if (clientPhone.length < 10) { setDialog({ isOpen: true, type: 'alert', title: 'Información Incompleta', message: 'Ingresa un número de 10 dígitos.' }); return; }
+    const domain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://panel.baulia.com'; 
+    const tipoTexto = successData.role === 'planner' ? 'Agencia / Organizador' : successData.tipoEvento;
+    
+    let mensaje = `✨ ¡Hola ${successData.nombres}! `;
+    if (successData.plan === 'basico' || successData.plan === 'plata') {
+      mensaje += `Tu invitación digital está casi lista. Podrás verla pronto en este enlace:\n🔗 ${successData.urlInvitacion || 'Enlace pendiente'}`;
+    } else {
+      mensaje += `Tu Panel de Control Premium para tu ${tipoTexto} está listo.\n\nAccede a tu plataforma privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña: ${successData.password}\n\n¡Guarda estos accesos, te servirán para gestionar todos los detalles!`;
+    }
+    window.open(`https://wa.me/${clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`, '_blank');
+  };
+
+  const toggleStatus = (lic) => {
+    const nuevoEstatus = lic.status === 'suspendido' ? 'activo' : 'suspendido';
+    const accionText = nuevoEstatus === 'suspendido' ? 'SUSPENDER' : 'ACTIVAR';
+    setDialog({ isOpen: true, type: 'confirm', title: `${accionText === 'SUSPENDER' ? 'Suspender' : 'Activar'} Licencia`, message: `¿Estás seguro que deseas ${accionText} la plataforma de ${lic.nombres}?`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await updateDoc(doc(db, "usuarios", lic.id), { status: nuevoEstatus }); } });
+  };
+
+  const handleDelete = (lic) => {
+    if (!isSuperAdmin) { setDialog({ isOpen: true, type: 'alert', title: 'Acceso Denegado', message: 'Solo la Dirección puede eliminar cuentas permanentemente. Usa el botón "Suspender".' }); return; }
+    setDialog({ isOpen: true, type: 'confirm', title: 'Eliminar Permanentemente', message: `⚠️ PELIGRO: ¿Seguro de eliminar la información de ${lic.nombres}? (El registro de ventas y finanzas NO se borrará, quedará como histórico).`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await deleteDoc(doc(db, "usuarios", lic.id)); await deleteDoc(doc(db, "eventos", lic.eventId)); } });
+  };
+
+  const toggleVerCorreo = (id) => setCorreosVisibles(prev => ({ ...prev, [id]: !prev[id] }));
+  const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
+
+  const filteredLicencias = licencias.filter(lic => 
+    (lic.nombres && lic.nombres.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (lic.email && lic.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (lic.eventId && lic.eventId.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const mesesDisponibles = [...new Set(ventas.map(v => v.mesAnio))].sort().reverse();
+  if (!mesesDisponibles.includes(currentMonthYear)) mesesDisponibles.unshift(currentMonthYear);
+  const ventasDelMes = ventas.filter(v => v.mesAnio === mesSeleccionado);
+  const ingresoMensualTotal = ventasDelMes.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
+  
+  const desglosePlanes = { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, security_kit: 0 };
+  ventasDelMes.forEach(v => { if(desglosePlanes[v.plan] !== undefined) desglosePlanes[v.plan] += (Number(v.monto) || 0); });
+
+  const totalesPorLicencia = licencias.reduce((acc, user) => {
+    const tipo = (user.plan || 'basico').toLowerCase().trim();
+    acc[tipo] = (acc[tipo] || 0) + 1;
+    return acc;
+  }, { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, security_kit: 0 });
+
+  const exportarCorteContador = () => {
+    const csvRows = ventasDelMes.map(v => {
+      const fechaLimpia = v.fecha?.toDate ? v.fecha.toDate().toLocaleDateString('es-MX') : 'Reciente';
+      return `${fechaLimpia},${v.cliente},${v.plan.toUpperCase()},${v.vendedor},${v.referencia},${v.monto}`;
+    });
+    const headers = "Fecha,Cliente,Plan Vendido,Vendedor,Referencia Bancaria,Monto MXN\n";
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURI(headers + csvRows.join("\n"));
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", `Corte_Baulia_${mesSeleccionado}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center bg-slate-900 p-8 rounded-3xl text-white shadow-xl">
-        <div>
-          <h2 className="text-3xl font-black flex items-center"><ShieldCheck className="mr-3 text-amber-500"/> Centro de Emisión</h2>
-          <p className="opacity-70 text-sm">Emisión de licencias para Bóvedas, Muros Sociales y Kits de Seguridad.</p>
-        </div>
-        <button onClick={() => setIsModalOpen(true)} className="px-6 py-3 bg-amber-500 text-slate-900 rounded-xl font-bold hover:scale-105 transition-transform shadow-lg">
-          + Nueva Licencia
-        </button>
-      </div>
-
-      {/* TABLA DE LICENCIAS (Sigue igual, solo se mostrará el nuevo plan) */}
-      <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-sm">
-         <div className="p-6 border-b border-slate-100 dark:border-white/5 font-bold">Clientes con Licencia Activa</div>
-         <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-               <thead className="bg-slate-50 dark:bg-[#111] text-[10px] uppercase font-black text-slate-400">
-                  <tr>
-                    <th className="p-5">Cliente</th><th className="p-5 text-center">Plan</th><th className="p-5 text-center">Estatus</th><th className="p-5 text-right">Acciones</th>
-                  </tr>
-               </thead>
-               <tbody>
-                  {licencias.map(lic => (
-                    <tr key={lic.id} className="border-b border-slate-50 dark:border-white/5 hover:bg-slate-50/50">
-                       <td className="p-5">
-                          <p className="font-bold text-slate-800 dark:text-white">{lic.nombres}</p>
-                          <p className="text-[10px] text-slate-400 font-mono">{lic.email}</p>
-                       </td>
-                       <td className="p-5 text-center">
-                          <span className={`px-2 py-1 rounded text-[9px] font-black uppercase ${lic.plan === 'security_kit' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{lic.plan.replace('_', ' ')}</span>
-                       </td>
-                       <td className="p-5 text-center"><div className={`w-2 h-2 rounded-full mx-auto ${lic.status === 'activo' ? 'bg-emerald-500' : 'bg-rose-500'}`}></div></td>
-                       <td className="p-5 text-right">
-                          <button onClick={() => onImpersonate(lic)} className="p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors"><ExternalLink size={16}/></button>
-                       </td>
-                    </tr>
-                  ))}
-               </tbody>
-            </table>
-         </div>
-      </div>
-
-      {/* MODAL CREAR LICENCIA */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95">
-             <h3 className="text-xl font-black mb-6">Activar Nueva Bóveda</h3>
-             <form onSubmit={handleCreateLicense} className="space-y-4">
-                <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 mb-1 block">Nombre Cliente / Evento</label>
-                  <input type="text" required value={formData.nombres} onChange={e=>setFormData({...formData, nombres: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border rounded-xl outline-none focus:border-amber-500" />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 mb-1 block">Correo de Acceso</label>
-                  <input type="email" required value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border rounded-xl outline-none focus:border-amber-500" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                   <div>
-                     <label className="text-[10px] font-black uppercase text-slate-400 mb-1 block">Paquete</label>
-                     <select value={formData.plan} onChange={e=>setFormData({...formData, plan: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border rounded-xl font-bold text-xs">
-                        <option value="oro">Bóveda Oro</option>
-                        <option value="diamante">Bóveda Diamante</option>
-                        <option value="social_wall">Muro Social Solo</option>
-                        <option value="security_kit">Kit Seguridad Solo</option>
-                     </select>
-                   </div>
-                   <div>
-                     <label className="text-[10px] font-black uppercase text-slate-400 mb-1 block">Hora de Inicio</label>
-                     <input type="time" value={formData.horaEvento} onChange={e=>setFormData({...formData, horaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border rounded-xl font-bold text-xs" />
-                   </div>
-                </div>
-                <button type="submit" disabled={isCreating} className="w-full py-4 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black uppercase tracking-widest text-xs shadow-lg disabled:opacity-50">
-                   {isCreating ? 'Creando Bóveda...' : 'Activar Licencia'}
-                </button>
-                <button type="button" onClick={()=>setIsModalOpen(false)} className="w-full py-2 text-slate-400 text-xs font-bold">Cancelar</button>
-             </form>
+    <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
+      {dialog.isOpen && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-transparent dark:border-white/20 transition-colors">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ${dialog.type === 'alert' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-500'}`}>
+              {dialog.type === 'alert' ? <AlertTriangle size={32} /> : <AlertCircle size={32} />}
+            </div>
+            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">{dialog.title}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">{dialog.message}</p>
+            <div className="flex space-x-3">
+              {dialog.type === 'confirm' && <button onClick={() => setDialog({ ...dialog, isOpen: false })} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Cancelar</button>}
+              <button onClick={() => { if(dialog.onConfirm) dialog.onConfirm(); else setDialog({ ...dialog, isOpen: false }); }} className={`flex-1 py-3.5 text-white rounded-xl font-bold shadow-lg transition-transform active:scale-95 ${dialog.type === 'alert' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/30'}`}>
+                {dialog.type === 'confirm' ? 'Sí, proceder' : 'Entendido'}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* EXITO MODAL (Resumido para enviar por WhatsApp) */}
-      {successData && (
-        <div className="fixed inset-0 z-[300] bg-slate-900/90 flex items-center justify-center p-4">
-           <div className="bg-white p-8 rounded-3xl w-full max-w-sm text-center shadow-2xl">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle size={32}/></div>
-              <h3 className="text-xl font-black">¡Bóveda Lista!</h3>
-              <p className="text-sm text-slate-500 mb-6">Los accesos han sido generados para {successData.nombres}.</p>
-              <div className="text-left bg-slate-50 p-4 rounded-xl mb-6 text-xs space-y-2">
-                 <p><b>Usuario:</b> {successData.email}</p>
-                 <p><b>Clave:</b> {successData.password}</p>
+      <div className={`bg-gradient-to-r ${isSuperAdmin ? 'from-amber-500 to-orange-600' : 'from-indigo-600 to-blue-700'} rounded-3xl p-8 shadow-xl text-white flex items-center justify-between`}>
+        <div>
+          <span className="bg-black/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">
+            {isSuperAdmin ? 'Nivel 3: Acceso Maestro' : 'Nivel 2: Workspace Staff'}
+          </span>
+          <h2 className="text-3xl font-black flex items-center mb-2"><Building className="mr-3" size={36}/> {isSuperAdmin ? 'Centro de Operaciones' : 'Panel Operativo'}</h2>
+          <p className="text-white/80 max-w-lg text-sm">Administra tus clientes o revisa el estado de cuenta y auditoría financiera inmutable.</p>
+        </div>
+        <div className="hidden md:flex w-24 h-24 bg-white/10 rounded-full items-center justify-center border-4 border-white/20 shadow-inner">
+          {isSuperAdmin ? <Lock size={40} className="text-white" /> : <Users size={40} className="text-white" />}
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="flex gap-4 bg-white dark:bg-[#0a0a0a] p-2 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm w-full md:w-max overflow-x-auto transition-colors">
+           <button onClick={() => setAdminTab('licencias')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'licencias' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
+             <Building size={16}/> Clientes Activos
+           </button>
+           {isSuperAdmin && (
+             <>
+               <button onClick={() => setAdminTab('finanzas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'finanzas' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
+                 <PieChart size={16}/> Corte Financiero
+               </button>
+               <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
+                 <Star size={16}/> Reseñas
+               </button>
+             </>
+           )}
+        </div>
+        {adminTab === 'licencias' && (
+          <div className="relative w-full md:w-96">
+            <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+            <input type="text" placeholder="Buscar cliente por correo o nombre..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-12 pr-4 py-3 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-2xl text-sm text-slate-900 dark:text-white outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-sm transition-colors" />
+          </div>
+        )}
+      </div>
+
+      {adminTab === 'licencias' && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+          <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between transition-colors">
+             <div><p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Básico</p><p className="text-2xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.basico}</p></div>
+             <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400"><Users size={18}/></div>
+          </div>
+          <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between transition-colors">
+             <div><p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Plata</p><p className="text-2xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.plata}</p></div>
+             <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400"><Wallet size={18}/></div>
+          </div>
+          <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex items-center justify-between transition-colors">
+             <div><p className="text-[10px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">Oro</p><p className="text-2xl font-black text-amber-700 dark:text-amber-400">{totalesPorLicencia.oro}</p></div>
+             <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500"><ShieldCheck size={18}/></div>
+          </div>
+          <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 shadow-sm flex items-center justify-between transition-colors">
+             <div><p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Diamante</p><p className="text-2xl font-black text-indigo-700 dark:text-indigo-400">{totalesPorLicencia.diamante}</p></div>
+             <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400"><LayoutDashboard size={18}/></div>
+          </div>
+        </div>
+      )}
+
+      {adminTab === 'finanzas' && isSuperAdmin && (
+        <div className="animate-in fade-in space-y-6">
+           <div className="flex flex-col md:flex-row justify-between items-center bg-white dark:bg-[#0a0a0a] p-5 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
+              <div className="flex items-center mb-4 md:mb-0">
+                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mr-4 border border-transparent dark:border-emerald-500/30"><Wallet size={24}/></div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Periodo a evaluar</p>
+                  <select value={mesSeleccionado} onChange={(e) => setMesSeleccionado(e.target.value)} className="text-xl font-black text-slate-800 dark:text-white bg-transparent outline-none cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    {mesesDisponibles.map(m => {
+                      const date = new Date(m + '-02'); 
+                      const mesNombre = date.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
+                      return <option key={m} value={m} className="bg-white dark:bg-[#111]">{mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1)} {m === currentMonthYear ? '(Mes Actual)' : ''}</option>
+                    })}
+                  </select>
+                </div>
               </div>
-              <input type="tel" placeholder="WhatsApp del cliente..." value={clientPhone} onChange={e=>setClientPhone(e.target.value)} className="w-full p-3 border rounded-xl mb-3 text-center font-bold" />
-              <button onClick={() => {
-                const msg = `🗝️ ¡Hola ${successData.nombres}! Tu acceso a Baulia está listo.\n\n🔗 https://panel.baulia.com\n👤 Usuario: ${successData.email}\n🔑 Clave: ${successData.password}`;
-                window.open(`https://wa.me/${clientPhone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
-              }} className="w-full py-4 bg-emerald-500 text-white rounded-xl font-bold mb-2">Enviar Accesos</button>
-              <button onClick={()=>setSuccessData(null)} className="text-slate-400 text-xs font-bold">Cerrar</button>
+              <button onClick={exportarCorteContador} className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold shadow-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center">
+                <FileSpreadsheet size={18} className="mr-2 text-emerald-400 dark:text-emerald-600"/> Descargar Excel
+              </button>
            </div>
+           
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl p-6 border border-slate-200 dark:border-white/10 shadow-sm">
+                <h3 className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-2">Ingreso Bruto del Mes</h3>
+                <p className="text-4xl font-black text-emerald-600 dark:text-emerald-400 mb-6">{formatMoney(ingresoMensualTotal)}</p>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Básico ({desglosePlanes.basico / PRECIOS.basico || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.basico)}</span></div>
+                  <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Plata ({desglosePlanes.plata / PRECIOS.plata || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.plata)}</span></div>
+                  <div className="flex justify-between items-center text-sm"><span className="text-amber-600 dark:text-amber-500 font-medium">Plan Oro ({desglosePlanes.oro / PRECIOS.oro || 0})</span><span className="font-bold text-amber-600 dark:text-amber-500">{formatMoney(desglosePlanes.oro)}</span></div>
+                  <div className="flex justify-between items-center text-sm"><span className="text-indigo-600 dark:text-indigo-400 font-medium">Plan Diamante ({desglosePlanes.diamante / PRECIOS.diamante || 0})</span><span className="font-bold text-indigo-600 dark:text-indigo-400">{formatMoney(desglosePlanes.diamante)}</span></div>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111]"><h3 className="font-bold text-sm text-slate-800 dark:text-white">Últimas Transacciones ({ventasDelMes.length})</h3></div>
+                <div className="max-h-64 overflow-y-auto custom-scrollbar p-2">
+                  {ventasDelMes.length === 0 ? <p className="text-center text-slate-400 p-8 text-sm">No hay ventas registradas en este mes.</p> : ventasDelMes.map((v, i) => (
+                    <div key={i} className="p-3 border-b border-slate-100 dark:border-white/5 last:border-0 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-white/5 transition-colors rounded-lg">
+                      <div>
+                        <p className="font-bold text-slate-800 dark:text-white text-sm leading-none mb-1">{v.cliente}</p>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-widest">{v.plan} • Ref: {v.referencia}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-black text-emerald-600 dark:text-emerald-400">{formatMoney(v.monto)}</p>
+                        <p className="text-[9px] text-slate-400">{v.fecha?.toDate ? v.fecha.toDate().toLocaleDateString('es-MX') : ''}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {adminTab === 'resenas' && isSuperAdmin && (
+        <div className="animate-in fade-in bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+          <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
+             <h3 className="font-bold text-slate-800 dark:text-white text-sm">Auditoría de Calidad ({resenasList.length})</h3>
+             <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Solo las "Aprobadas" se ven en la Landing Page</p>
+          </div>
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             {resenasList.map(r => (
+               <div key={r.id} className={`p-5 rounded-2xl border transition-colors relative ${r.status === 'aprobada' ? 'bg-amber-50/30 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10'}`}>
+                 <div className="absolute top-4 right-4">
+                   <button onClick={() => updateDoc(doc(db, "resenas", r.id), { status: r.status === 'aprobada' ? 'pendiente' : 'aprobada' })} className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded shadow-sm transition-colors ${r.status === 'aprobada' ? 'bg-amber-500 text-white' : 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400'}`}>
+                     {r.status === 'aprobada' ? 'Pública' : 'Aprobar'}
+                   </button>
+                 </div>
+                 <div className="flex gap-1 mb-3">
+                   {[1,2,3,4,5].map(star => <Star key={star} size={14} className={r.rating >= star ? 'fill-amber-500 text-amber-500' : 'text-slate-300 dark:text-slate-700'} />)}
+                 </div>
+                 <p className="text-sm text-slate-700 dark:text-slate-300 italic mb-4 font-light leading-relaxed">"{r.comment}"</p>
+                 <div className="border-t border-slate-100 dark:border-white/10 pt-3">
+                   <input type="text" value={r.authorName} onChange={(e) => updateDoc(doc(db, "resenas", r.id), { authorName: e.target.value })} className="font-bold text-sm bg-transparent outline-none border-b border-transparent focus:border-amber-500 w-full text-slate-900 dark:text-white transition-colors" />
+                   <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">{r.authorType}</p>
+                 </div>
+               </div>
+             ))}
+             {resenasList.length === 0 && <div className="col-span-full text-center py-10 text-slate-400">Aún no hay reseñas registradas.</div>}
+          </div>
+        </div>
+      )}
+
+      {adminTab === 'licencias' && (
+        <div className="animate-in fade-in">
+          
+          <div className="mb-6 flex gap-4">
+            <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true }); }} className="px-8 py-4 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-slate-800 dark:hover:bg-amber-400 transition-colors flex items-center hover:scale-105 transform">
+              <Plus size={20} className="mr-2 text-amber-500 dark:text-slate-900"/> Nueva Venta (Crear Bóveda)
+            </button>
+          </div>
+
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+             <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
+               <h3 className="font-bold text-slate-800 dark:text-white text-sm">Directorio de Clientes Activos ({filteredLicencias.length})</h3>
+             </div>
+             
+             <div className="overflow-x-auto pb-24">
+               <table className="w-full text-left whitespace-nowrap min-w-[1000px]">
+                 <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest transition-colors">
+                   <tr>
+                     <th className="px-5 py-3 font-bold">Cliente / ID</th>
+                     <th className="px-5 py-3 font-bold">Acceso (Correo)</th>
+                     <th className="px-5 py-3 font-bold text-center">Tipo</th>
+                     <th className="px-5 py-3 font-bold text-center">Plan</th>
+                     <th className="px-5 py-3 font-bold">Link Invitación</th>
+                     <th className="px-5 py-3 font-bold text-center">Estatus</th>
+                     <th className="px-5 py-3 font-bold text-right">Controles</th>
+                   </tr>
+                 </thead>
+                 <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
+                   {filteredLicencias.length === 0 ? (
+                     <tr><td colSpan="7" className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">No se encontraron clientes.</td></tr>
+                   ) : (
+                     filteredLicencias.map((lic) => {
+                       const estaSuspendido = lic.status === 'suspendido';
+                       const correoVisible = correosVisibles[lic.id];
+                       const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
+                       
+                       return (
+                         <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40 dark:bg-rose-500/10' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
+                           <td className="px-5 py-4">
+                             <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800 dark:text-rose-500' : 'text-slate-800 dark:text-white'}`}>
+                               {lic.nombres || 'Sin Nombre'} 
+                               {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
+                             </p>
+                             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{lic.eventId}</p>
+                           </td>
+                           <td className="px-5 py-4">
+                             <div className="flex items-center text-slate-600 dark:text-slate-300 bg-slate-100/70 dark:bg-white/5 px-2 py-1.5 rounded-lg w-max border border-slate-200/50 dark:border-white/10 transition-colors">
+                               <span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span>
+                               <button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-amber-500 transition-colors">
+                                 {correoVisible ? <EyeOff size={14} /> : <Eye size={14} />}
+                               </button>
+                             </div>
+                           </td>
+                           <td className="px-5 py-4 text-center">
+                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lic.tipoEvento || 'Boda'}</span>
+                           </td>
+                           <td className="px-5 py-4 text-center">
+                             <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'}`}>
+                               {lic.plan}
+                             </span>
+                           </td>
+                           <td className="px-5 py-4 max-w-[200px] truncate">
+                             {lic.urlInvitacion ? (
+                               <a href={lic.urlInvitacion} target="_blank" rel="noreferrer" className="text-sky-500 dark:text-sky-400 hover:underline text-[10px] font-bold truncate block" title={lic.urlInvitacion}>
+                                 {lic.urlInvitacion}
+                               </a>
+                             ) : (
+                               <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">Pendiente de subir</span>
+                             )}
+                           </td>
+                           <td className="px-5 py-4 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
+                           <td className="px-5 py-4 text-right">
+                              <div className="flex items-center justify-end space-x-2">
+                                <button onClick={() => { 
+                                    setEditingLic({...lic, originalPlan: lic.plan, isQrEnabled: lic.isQrEnabled !== false, isPassCountEnabled: lic.isPassCountEnabled !== false}); 
+                                    setIsEditModalOpen(true); 
+                                  }} 
+                                  title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"><Edit2 size={16} />
+                                </button>
+                                
+                                {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan, tipoEvento: lic.tipoEvento || 'general', urlInvitacion: lic.urlInvitacion || '' })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-transparent dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"><ExternalLink size={16} /></button>}
+                                <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors border border-transparent ${estaSuspendido ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 hover:bg-emerald-200 dark:hover:bg-emerald-500/20 dark:border-emerald-500/20' : 'text-amber-600 dark:text-amber-500 bg-amber-100 dark:bg-amber-500/10 hover:bg-amber-200 dark:hover:bg-amber-500/20 dark:border-amber-500/20'}`}><Power size={16} /></button>
+                                {isSuperAdmin && (
+                                  <button onClick={() => handleDelete(lic)} title="Eliminar Bóveda (Se conserva Finanzas)" className="p-2 rounded-lg text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-transparent dark:border-rose-500/20 hover:text-white hover:bg-rose-500 dark:hover:bg-rose-500 dark:hover:text-white transition-colors"><Trash2 size={16} /></button>
+                                )}
+                              </div>
+                           </td>
+                         </tr>
+                       )
+                     })
+                   )}
+                 </tbody>
+               </table>
+             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL CREAR LICENCIA */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar border border-transparent dark:border-white/10 transition-colors">
+            {!successData ? (
+              <form onSubmit={handleCreateLicense} className="p-8">
+                <div className="text-center mb-6">
+                  <div className="w-14 h-14 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-transparent dark:border-amber-500/30"><Key size={24} /></div>
+                  <h3 className="text-xl font-black text-slate-800 dark:text-white transition-colors">Registrar Venta Directa</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 transition-colors">El vendedor y el monto quedarán registrados permanentemente en el libro mayor.</p>
+                </div>
+                
+                <div className="space-y-4 mb-6">
+                  <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-xl transition-colors">
+                    <label className="block text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Wallet size={12} className="mr-1"/> Referencia de Pago (Obligatorio)</label>
+                    <input type="text" required value={formData.referenciaPago} onChange={e => setFormData({...formData, referenciaPago: e.target.value})} placeholder="Ej: Pago en Efectivo, Transf BBVA..." className="w-full p-3 bg-white dark:bg-[#111] border border-emerald-200 dark:border-emerald-500/30 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Tipo de Evento</label>
+                      <select value={formData.tipoEvento} onChange={e => setFormData({...formData, tipoEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 dark:text-white text-xs cursor-pointer transition-colors">
+                        {tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-[10px] font-bold text-indigo-600 dark:text-amber-500 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Users size={12} className="mr-1"/> Rol</label>
+                      <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full p-3 bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/20 text-indigo-900 dark:text-amber-400 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 font-black text-xs cursor-pointer transition-colors">
+                        <option value="cliente">Cliente Final</option>
+                        <option value="planner">Agencia Planner</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 transition-colors">{formData.role === 'planner' ? 'Nombre de la Agencia' : eventoSeleccionado.labelNombre}</label>
+                    <input type="text" autoFocus required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} placeholder={formData.role === 'planner' ? 'Ej. Elite Planners' : eventoSeleccionado.placeholder} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Mail size={12} className="mr-1.5" /> Correo de Acceso</label>
+                    <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-800 dark:text-white text-sm transition-colors" />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Paquete Vendido</label>
+                    <select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 dark:text-white text-sm cursor-pointer transition-colors mb-3">
+                      <option value="basico">Plan Básico ($990)</option>
+                      <option value="plata">Plan Plata ($1,490)</option>
+                      <option value="oro">Plan Oro ($1,990)</option>
+                      <option value="diamante">Plan Diamante ($2,990)</option>
+                      <option value="social_wall">Social Wall ($1,490)</option>
+                      <option value="security_kit">Kit Seguridad ($1,490)</option>
+                    </select>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1.5"/> Hora de Inicio (Solo Kit de Seguridad)</label>
+                      <input type="time" value={formData.horaEvento} onChange={e => setFormData({...formData, horaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors mb-3" />
+                    </div>
+
+                    <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
+                      <div>
+                        <p className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
+                        <p className="text-[9px] text-indigo-500 dark:text-indigo-300/70 mt-0.5">Apágalo si el cliente quiere invitación simple.</p>
+                      </div>
+                      <button type="button" onClick={() => setFormData({...formData, isQrEnabled: !formData.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                         <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${formData.isQrEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
+                      <div>
+                        <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
+                        <p className="text-[9px] text-emerald-500 dark:text-emerald-300/70 mt-0.5">Apágalo para una confirmación general sin números.</p>
+                      </div>
+                      <button type="button" onClick={() => setFormData({...formData, isPassCountEnabled: !formData.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                         <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${formData.isPassCountEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> Link Invitación URL (Opcional)</label>
+                    <input type="url" value={formData.urlInvitacion} onChange={e => setFormData({...formData, urlInvitacion: e.target.value})} placeholder="https://baulia.com/..." className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-medium text-sky-600 dark:text-sky-400 text-xs transition-colors" />
+                  </div>
+                </div>
+
+                <div className="flex space-x-3">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold text-xs hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Cancelar</button>
+                  <button type="submit" disabled={isCreating} className="flex-1 py-3.5 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-xs shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 disabled:opacity-50 transition-colors">
+                    {isCreating ? 'Procesando...' : 'Crear Licencia y Registrar Venta'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="p-8 text-center bg-slate-50 dark:bg-transparent transition-colors">
+                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-transparent dark:border-emerald-500/30"><CheckCircle size={40} /></div>
+                <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2 transition-colors">¡Accesos Creados!</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 transition-colors">La venta se registró en el Libro Mayor por <b>{authData.email.split('@')[0]}</b>.</p>
+                <div className="bg-white dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 text-left text-sm mb-6 shadow-sm transition-colors">
+                  <p className="mb-3"><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Usuario:</span> <b className="text-slate-800 dark:text-white transition-colors">{successData.email}</b></p>
+                  <p><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Contraseña:</span> <b className="text-slate-800 dark:text-white font-mono text-base transition-colors">{successData.password}</b></p>
+                </div>
+                <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 p-5 rounded-2xl mb-6 shadow-sm transition-colors">
+                  <label className="block text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-3 text-left flex items-center transition-colors"><MessageCircle size={14} className="mr-1.5"/> Enviar accesos por WhatsApp</label>
+                  <div className="flex space-x-2 mb-4">
+                    <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold p-3 rounded-xl flex items-center justify-center border border-transparent dark:border-emerald-500/30 transition-colors">+52</span>
+                    <input type="tel" placeholder="10 dígitos del cliente..." value={clientPhone} onChange={e => setClientPhone(e.target.value)} className="w-full p-3 bg-white dark:bg-[#111] border border-emerald-200 dark:border-emerald-500/30 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-800 dark:text-white transition-colors" />
+                  </div>
+                  <button onClick={handleSendWhatsApp} className="w-full py-4 bg-emerald-500 text-white dark:text-slate-900 rounded-xl font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all active:scale-95 flex items-center justify-center">
+                    <Send size={18} className="mr-2" /> Enviar Mensaje
+                  </button>
+                </div>
+                <button onClick={() => setIsModalOpen(false)} className="w-full py-4 text-slate-500 dark:text-slate-400 font-bold hover:text-slate-800 dark:hover:text-white transition-colors">Cerrar Ventana</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 🔴 MODAL PARA EDITAR LICENCIA */}
+      {isEditModalOpen && editingLic && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto border border-transparent dark:border-white/10 transition-colors">
+             <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors"><h3 className="font-bold text-lg text-slate-800 dark:text-white">Editar Licencia</h3><button onClick={() => {setIsEditModalOpen(false); setEditingLic(null);}} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button></div>
+             <form onSubmit={handleUpdateLicense} className="p-6 space-y-5">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Nombre del Cliente / Evento</label>
+                  <input type="text" required value={editingLic.nombres || ''} onChange={e => setEditingLic({...editingLic, nombres: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> URL de su Invitación Pública</label>
+                  <input type="url" value={editingLic.urlInvitacion || ''} onChange={e => setEditingLic({...editingLic, urlInvitacion: e.target.value})} placeholder="https://baulia.com/bodas/su-boda" className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-medium text-sky-600 dark:text-sky-400 text-sm transition-colors" />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Tipo de Evento</label>
+                    <select value={editingLic.tipoEvento || 'general'} onChange={e => setEditingLic({...editingLic, tipoEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
+                      {tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Plan</label>
+                    <select value={editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
+                      <option value="basico">Básico</option>
+                      <option value="plata">Plata</option>
+                      <option value="oro">Oro</option>
+                      <option value="diamante">Diamante</option>
+                      <option value="social_wall">Social Wall</option>
+                      <option value="security_kit">Kit Seguridad</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1.5"/> Hora de Inicio (Solo Kit de Seguridad)</label>
+                  <input type="time" value={editingLic.horaEvento || ''} onChange={e => setEditingLic({...editingLic, horaEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                </div>
+
+                <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
+                  <div>
+                    <p className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
+                    <p className="text-[9px] text-indigo-500 dark:text-indigo-300/70 mt-0.5">Apágalo si el cliente quiere invitación simple.</p>
+                  </div>
+                  <button type="button" onClick={() => setEditingLic({...editingLic, isQrEnabled: !editingLic.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                     <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.isQrEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
+                  <div>
+                    <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
+                    <p className="text-[9px] text-emerald-500 dark:text-emerald-300/70 mt-0.5">Apágalo para una confirmación general sin números.</p>
+                  </div>
+                  <button type="button" onClick={() => setEditingLic({...editingLic, isPassCountEnabled: !editingLic.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                     <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.isPassCountEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                  </button>
+                </div>
+
+                <div className="bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 p-3 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-500/20 flex items-start transition-colors">
+                  <AlertCircle size={16} className="mr-2 flex-shrink-0 mt-0.5" />
+                  Nota: Puedes subir (Upgrade) el plan del cliente. El sistema actualizará el estado financiero automáticamente. No se permiten reducciones de plan.
+                </div>
+                <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 transition-colors mt-4">
+                  Guardar Cambios
+                </button>
+             </form>
+          </div>
         </div>
       )}
     </div>
