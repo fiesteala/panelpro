@@ -8158,6 +8158,10 @@ const GuestCameraView = ({ eventId }) => {
     setActiveChallenge(null); 
   };
 
+  const cancelPost = () => {
+    setPostDraft(null);
+  };
+
   const publishPost = async () => {
     // 🔴 BLINDAJE FINAL: Ya no usa la variable global. Usa la que está aislada por evento.
     if (!currentUserName) { showToast("Ingresa tu nombre para publicar.", "error"); return; }
@@ -8443,6 +8447,7 @@ const GuestCameraView = ({ eventId }) => {
                   <Moon size={16} className="mr-3"/> <span className="text-sm font-bold">{isDarkMode ? 'Modo Día' : 'Modo Noche'}</span>
                 </button>
                 <div className={`w-full h-px ${tBorder} my-1`}></div>
+                
                 <button onClick={handleGuestLogout} className={`flex items-center w-full px-4 py-3 rounded-xl hover:bg-rose-500 hover:text-white transition-colors text-rose-500`}>
                   <LogOut size={16} className="mr-3"/> <span className="text-sm font-bold">Cerrar Sesión</span>
                 </button>
