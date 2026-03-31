@@ -186,7 +186,6 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
     { 
       title: 'Planeación y Finanzas', 
       items: [ 
-        // 🔴 SE ELIMINÓ 'social_wall' DE AQUÍ PARA QUE NO VEAN EL RESUMEN
         { id: 'dashboard', icon: LayoutDashboard, label: 'Resumen', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
         { id: 'tareas', icon: CheckSquare, label: 'Checklist', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
         { id: 'presupuesto', icon: Wallet, label: 'Presupuesto', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
@@ -212,8 +211,8 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
       title: 'El Día del Evento', 
       items: [ 
         { id: 'timing', icon: Clock, label: 'El Minuto a Minuto', minLevel: 1, allowedPlans: ['plata', 'oro', 'diamante'] }, 
-        { id: 'escaner', icon: Scan, label: 'Control Puerta (QR)', minLevel: 2, allowedPlans: ['oro', 'diamante'] }, 
-        // 🔴 AQUÍ SE MANTIENE EL SOCIAL WALL
+        // 🔴 AQUÍ DESBLOQUEAMOS EL ESCÁNER PARA EL KIT DE SEGURIDAD
+        { id: 'escaner', icon: Scan, label: 'Control Puerta (QR)', minLevel: 2, allowedPlans: ['oro', 'diamante', 'security_kit'] }, 
         { id: 'galeria', icon: Camera, label: 'Muro Social (Vivo)', minLevel: 1, allowedPlans: ['diamante', 'social_wall'] } 
       ] 
     }
@@ -443,7 +442,7 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
           
           <div className="flex flex-col sm:flex-row justify-center gap-4 relative z-10">
             {setActiveTab && (
-              <button onClick={() => setActiveTab('social_wall')} className="px-8 py-4 bg-amber-500 hover:bg-amber-400 text-slate-900 font-black rounded-xl uppercase tracking-widest text-xs transition-colors shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center justify-center">
+              <button onClick={() => setActiveTab('galeria')} className="px-8 py-4 bg-amber-500 hover:bg-amber-400 text-slate-900 font-black rounded-xl uppercase tracking-widest text-xs transition-colors shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center justify-center">
                  Abrir Consola del Proyector
               </button>
             )}
