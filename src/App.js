@@ -10262,6 +10262,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const macIframeRef = useRef(null);
   const iphoneIframeRef = useRef(null);
   const [activeDevice, setActiveDevice] = useState('iphone'); 
+  const [planSeleccionado, setPlanSeleccionado] = useState(null);
 
   useEffect(() => {
     setActiveDevice('iphone');
@@ -10313,7 +10314,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     return () => { if (showroomPhoneRef.current) observer.unobserve(showroomPhoneRef.current); };
   }, []);
 
-  // 🔴 AQUI ESTAN LOS NOMBRES ORIGINALES RESTAURADOS PARA EL CHECKOUT
+  // 🔴 NOMBRES DE PLANES RESTAURADOS A SU ORIGEN EN BASE DE DATOS
   const planes = [
     { id: 'basico', nombre: 'Básico', precio: '990', desc: 'Invitación, RSVP simple y GPS.', icon: <Smartphone size={24}/> },
     { id: 'plata', nombre: 'Plata', precio: '1,490', desc: 'Suma Mesa de Regalos e Itinerario.', icon: <Wallet size={24}/> },
@@ -10392,7 +10393,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </a>
       )}
 
-      {/* 🔴 MODAL CHECKOUT MEJORADO (DOS PASOS EN LA MISMA PANTALLA) */}
+      {/* 🔴 MODAL CHECKOUT CENTRALIZADO */}
       {checkoutModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className={`bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full ${checkoutModal === 'selector' ? 'max-w-4xl' : 'max-w-md'} overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 flex flex-col max-h-[90vh] transition-all duration-300`}>
@@ -10412,15 +10413,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   {/* COLUMNA 1: PLANES COMPLETOS */}
                   <div className="space-y-4">
                     <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5 pb-2 mb-4">Ecosistema Completo (SaaS)</h4>
-                    {[
-                      { id: 'basico', plan: 'Básico', precio: '990', desc: 'La elegancia indispensable. Invitación, RSVP simple y GPS.', icon: <Smartphone size={24}/> },
-                      { id: 'plata', plan: 'Plata', precio: '1,490', desc: 'Recupera tu inversión. Suma Mesa de Regalos e Itinerario.', icon: <Wallet size={24}/> },
-                      { id: 'oro', plan: 'Oro', precio: '1,990', desc: 'Cero colados. Panel Maestro, Control QR de puerta.', icon: <ShieldCheck size={24}/>, popular: true },
-                      { id: 'diamante', plan: 'Diamante', precio: '2,990', desc: 'La suite definitiva. Control espacial y Muro Social inmersivo.', icon: <LayoutDashboard size={24}/> }
-                    ].map(plan => (
+                    {planes.map(plan => (
                       <button 
                         key={plan.id}
-                        onClick={() => { setPlanSeleccionado({ plan: plan.plan, precio: plan.precio }); setCheckoutModal('pago'); }}
+                        onClick={() => { setPlanSeleccionado({ plan: plan.nombre, precio: plan.precio }); setCheckoutModal('pago'); }}
                         className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 group relative overflow-hidden ${plan.popular ? 'border-amber-500/50 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/10' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] hover:border-indigo-300 dark:hover:border-white/30 hover:bg-slate-100 dark:hover:bg-white/5'}`}
                       >
                         {plan.popular && <div className="absolute top-0 right-0 bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg">El Estándar</div>}
@@ -10429,7 +10425,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             {plan.icon}
                           </div>
                           <div className="flex-1">
-                            <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-0.5">{plan.plan}</h4>
+                            <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-0.5">{plan.nombre}</h4>
                             <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">{plan.desc}</p>
                           </div>
                           <div className="text-right shrink-0">
@@ -10445,9 +10441,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   <div className="space-y-4">
                     <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5 pb-2 mb-4">Experiencias Independientes</h4>
                     
-                    {/* 🔴 TARJETA DEL SOCIAL WALL EN EL CHECKOUT */}
                     <button 
-                      onClick={() => { setPlanSeleccionado({ plan: 'Social_Wall', precio: '1490.00' }); setCheckoutModal('pago'); }}
+                      onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: '1490.00' }); setCheckoutModal('pago'); }}
                       className="w-full text-left p-6 rounded-3xl border-2 border-indigo-500/30 dark:border-indigo-500/50 bg-indigo-50 dark:bg-[#111] hover:bg-indigo-100 dark:hover:bg-[#151515] hover:border-indigo-500 transition-all duration-300 group relative overflow-hidden"
                     >
                       <div className="absolute -right-6 -top-6 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-indigo-500/40 transition-colors"></div>
@@ -10477,8 +10472,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
                       </div>
                     </button>
-                    {/* FIN DE LA TARJETA DEL SOCIAL WALL */}
-
                   </div>
 
                 </div>
@@ -11157,7 +11150,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
                      </div>
 
-                     <button onClick={() => { setPlanSeleccionado({ plan: 'Social_Wall', precio: '1490.00' }); setCheckoutStep(2); }} className="px-8 py-4 bg-white text-indigo-900 font-black rounded-full text-sm uppercase tracking-widest shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-105 transition-all">
+                     <button onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: '1490.00' }); setCheckoutModal('pago'); }} className="px-8 py-4 bg-white text-indigo-900 font-black rounded-full text-sm uppercase tracking-widest shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-105 transition-all">
                         Comprar Muro Social
                      </button>
                   </RevealSection>
@@ -11198,9 +11191,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* ========================================== */}
-      {/* SECCIÓN DE PRECIOS VIP */}
+      {/* SECCIÓN DE PRECIOS VIP (SaaS GRID) */}
       {/* ========================================== */}
-      <div id="planes" className="py-32 px-4 max-w-7xl mx-auto z-10 relative">
+      <div id="planes" className="py-32 px-4 max-w-[1400px] mx-auto z-10 relative">
         <RevealSection className="text-center mb-20">
           <span className="px-4 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-black uppercase tracking-[0.2em] border border-amber-500/20 shadow-sm">
             Membresía Vitalicia
@@ -11217,114 +11210,108 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           </div>
         </RevealSection>
 
-        {/* 🔴 GRID PRINCIPAL (SAAS) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-center mb-16">
+        {/* 🔴 GRID PRINCIPAL DE 5 COLUMNAS (4 SaaS + 1 Social Wall) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 items-center mb-16">
           
           {/* PAQUETE 1: BÁSICO */}
-          <RevealSection delay={100} className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative h-full flex flex-col">
-            <h3 className="text-2xl font-editorial font-bold text-slate-900 dark:text-white mb-2">Básico</h3>
+          <RevealSection delay={100} className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-6 lg:p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative h-full flex flex-col">
+            <h3 className="text-xl lg:text-2xl font-editorial font-bold text-slate-900 dark:text-white mb-2">Básico</h3>
             <p className="text-xs text-slate-500 mb-6 h-8 font-medium">La elegancia indispensable para anunciar tu evento.</p>
-            <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
+            <div className="text-2xl lg:text-3xl font-light text-slate-900 dark:text-white mb-8">
               $990 <span className="text-sm text-slate-400 font-normal">MXN</span>
             </div>
-            <ul className="space-y-4 mb-8 text-sm text-slate-600 dark:text-slate-300 flex-1">
+            <ul className="space-y-4 mb-8 text-xs lg:text-sm text-slate-600 dark:text-slate-300 flex-1">
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Invitación interactiva</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> RSVP Universal</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Cuenta regresiva</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mapas y rutas GPS</li>
             </ul>
-            <button onClick={() => { setPlanSeleccionado({ plan: 'Básico', precio: '990.00' }); setCheckoutStep(2); }} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors mt-auto">
+            <button onClick={() => { setPlanSeleccionado({ plan: 'Básico', precio: '990.00' }); setCheckoutModal('pago'); }} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors mt-auto">
               Reservar Básico
             </button>
           </RevealSection>
 
           {/* PAQUETE 2: PLATA */}
-          <RevealSection delay={200} className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative h-full flex flex-col">
-            <h3 className="text-2xl font-editorial font-bold text-slate-900 dark:text-white mb-2">Plata</h3>
+          <RevealSection delay={200} className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-6 lg:p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative h-full flex flex-col">
+            <h3 className="text-xl lg:text-2xl font-editorial font-bold text-slate-900 dark:text-white mb-2">Plata</h3>
             <p className="text-xs text-slate-500 mb-6 h-8 font-medium">Recupera tu inversión con regalos en efectivo.</p>
-            <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
+            <div className="text-2xl lg:text-3xl font-light text-slate-900 dark:text-white mb-8">
               $1,490 <span className="text-sm text-slate-400 font-normal">MXN</span>
             </div>
-            <ul className="space-y-4 mb-8 text-sm text-slate-600 dark:text-slate-300 flex-1">
+            <ul className="space-y-4 mb-8 text-xs lg:text-sm text-slate-600 dark:text-slate-300 flex-1">
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Todo lo del Básico</b></li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Mesa de Regalos / Efectivo</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Itinerario del evento</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Dress Code visual</li>
             </ul>
-            <button onClick={() => { setPlanSeleccionado({ plan: 'Plata', precio: '1490.00' }); setCheckoutStep(2); }} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors mt-auto">
+            <button onClick={() => { setPlanSeleccionado({ plan: 'Plata', precio: '1490.00' }); setCheckoutModal('pago'); }} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors mt-auto">
               Reservar Plata
             </button>
           </RevealSection>
 
           {/* PAQUETE 3: ORO (DESTACADO) */}
-          <RevealSection delay={300} className="bg-slate-900 dark:bg-[#111111] rounded-3xl p-8 border-2 border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.15)] transform md:-translate-y-4 relative z-10 h-full flex flex-col">
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md">
+          <RevealSection delay={300} className="bg-slate-900 dark:bg-[#111111] rounded-3xl p-6 lg:p-8 border-2 border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.15)] transform lg:-translate-y-4 relative z-10 h-full flex flex-col">
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md whitespace-nowrap">
               El Estándar
             </div>
-            <h3 className="text-2xl font-editorial font-bold text-white mb-2 mt-2">Oro</h3>
+            <h3 className="text-xl lg:text-2xl font-editorial font-bold text-white mb-2 mt-2">Oro</h3>
             <p className="text-xs text-amber-200/70 mb-6 h-8 font-medium">Cero colados. Seguridad y control absoluto.</p>
-            <div className="text-4xl font-light text-amber-500 mb-8">
+            <div className="text-2xl lg:text-4xl font-light text-amber-500 mb-8">
               $1,990 <span className="text-sm text-amber-500/50 font-normal">MXN</span>
             </div>
-            <ul className="space-y-4 mb-8 text-sm text-slate-300 flex-1">
+            <ul className="space-y-4 mb-8 text-xs lg:text-sm text-slate-300 flex-1">
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Todo lo del Plata</b></li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Pases QR Infértiles</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> RSVP Blindado (Por pases)</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Escáner para Hostess</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Bóveda Financiera</li>
             </ul>
-            <button onClick={() => { setPlanSeleccionado({ plan: 'Oro VIP', precio: '1990.00' }); setCheckoutStep(2); }} className="w-full py-4 rounded-full bg-gradient-to-r from-amber-500 to-yellow-600 text-white text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-lg mt-auto">
+            <button onClick={() => { setPlanSeleccionado({ plan: 'Oro', precio: '1990.00' }); setCheckoutModal('pago'); }} className="w-full py-4 rounded-full bg-gradient-to-r from-amber-500 to-yellow-600 text-white text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-lg mt-auto">
               Desbloquear Oro
             </button>
           </RevealSection>
 
           {/* PAQUETE 4: DIAMANTE */}
-          <RevealSection delay={400} className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative h-full flex flex-col">
-            <h3 className="text-2xl font-editorial font-bold text-slate-900 dark:text-white mb-2">Diamante</h3>
+          <RevealSection delay={400} className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-6 lg:p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative h-full flex flex-col">
+            <h3 className="text-xl lg:text-2xl font-editorial font-bold text-slate-900 dark:text-white mb-2">Diamante</h3>
             <p className="text-xs text-slate-500 mb-6 h-8 font-medium">La suite definitiva. Control espacial y pantallas.</p>
-            <div className="text-3xl font-light text-slate-900 dark:text-white mb-8">
+            <div className="text-2xl lg:text-3xl font-light text-slate-900 dark:text-white mb-8">
               $2,990 <span className="text-sm text-slate-400 font-normal">MXN</span>
             </div>
-            <ul className="space-y-4 mb-8 text-sm text-slate-600 dark:text-slate-300 flex-1">
+            <ul className="space-y-4 mb-8 text-xs lg:text-sm text-slate-600 dark:text-slate-300 flex-1">
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Todo lo del Oro</b></li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Acomodo de Mesas 2D</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Muro Social Inmersivo</li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Estudio de Decoración</li>
             </ul>
-            <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20quiero%20reservar%20el%20Plan%20Diamante', '_blank')} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors mt-auto">
-              Asesoría Personal
+            <button onClick={() => { setPlanSeleccionado({ plan: 'Diamante', precio: '2990.00' }); setCheckoutModal('pago'); }} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors mt-auto">
+              Reservar Diamante
             </button>
           </RevealSection>
-        </div>
 
-        {/* 🔴 EXPERIENCIA INDEPENDIENTE (MURO SOCIAL) EN LA VISTA PRINCIPAL */}
-        <RevealSection delay={500} className="max-w-4xl mx-auto border-t border-slate-200 dark:border-white/10 pt-16 mt-8">
-            <h3 className="text-center font-bold text-slate-400 tracking-widest uppercase mb-8 text-xs">Experiencia Independiente</h3>
-            
-            <div className="bg-indigo-50 dark:bg-[#111] border-2 border-indigo-500/30 dark:border-indigo-500/50 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden group hover:border-indigo-500 transition-colors">
-               <div className="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none group-hover:bg-indigo-500/20 transition-colors"></div>
-               
-               <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">
-                  <div className="w-20 h-20 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 group-hover:scale-105 transition-transform">
-                     <Camera size={36} />
-                  </div>
-                  <div>
-                     <span className="bg-indigo-600 text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-sm inline-block mb-2">NUEVO</span>
-                     <h4 className="font-editorial text-3xl font-bold text-slate-900 dark:text-white">Baulia Social Wall</h4>
-                     <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">El muro interactivo para proyectar tu fiesta en vivo.</p>
-                  </div>
-               </div>
-
-               <div className="flex flex-col md:items-end w-full md:w-auto relative z-10">
-                  <div className="text-4xl font-light text-indigo-600 dark:text-indigo-400 mb-4 md:mb-2 text-center md:text-right">
-                     $1,490 <span className="text-sm text-slate-400 font-normal block md:inline">MXN / Pago Único</span>
-                  </div>
-                  <button onClick={() => { setPlanSeleccionado({ plan: 'Social_Wall', precio: '1490.00' }); setCheckoutStep(2); }} className="w-full md:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold text-[10px] uppercase tracking-widest shadow-lg transition-colors">
-                     Comprar Muro
-                  </button>
-               </div>
+          {/* PAQUETE 5: SOCIAL WALL (MINA DE ORO) */}
+          <RevealSection delay={500} className="bg-indigo-50 dark:bg-[#111] rounded-3xl p-6 lg:p-8 border-2 border-indigo-500/30 shadow-lg hover:shadow-xl transition-shadow relative h-full flex flex-col group overflow-hidden">
+            <div className="absolute -right-6 -top-6 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-indigo-500/40 transition-colors"></div>
+            <div className="absolute -top-4 right-4 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest py-1 px-3 rounded-full shadow-md z-10">
+              NUEVO
             </div>
-        </RevealSection>
+            <h3 className="text-xl lg:text-2xl font-editorial font-bold text-indigo-900 dark:text-indigo-400 mb-2 relative z-10">Social Wall</h3>
+            <p className="text-xs text-slate-500 mb-6 h-8 font-medium relative z-10">Convierte las pantallas de tu fiesta en una galería en vivo.</p>
+            <div className="text-2xl lg:text-3xl font-light text-slate-900 dark:text-white mb-8 relative z-10">
+              $1,490 <span className="text-sm text-slate-400 font-normal">MXN</span>
+            </div>
+            <ul className="space-y-4 mb-8 text-xs lg:text-sm text-slate-600 dark:text-slate-300 flex-1 relative z-10">
+              <li className="flex items-start"><Check size={16} className="text-indigo-500 mr-2 shrink-0 mt-0.5"/> <b>Servicio Independiente</b></li>
+              <li className="flex items-start"><Check size={16} className="text-indigo-500 mr-2 shrink-0 mt-0.5"/> Consola de Proyección</li>
+              <li className="flex items-start"><Check size={16} className="text-indigo-500 mr-2 shrink-0 mt-0.5"/> Moderación en Tiempo Real</li>
+              <li className="flex items-start"><Check size={16} className="text-indigo-500 mr-2 shrink-0 mt-0.5"/> QRs de mesa descargables</li>
+            </ul>
+            <button onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: '1490.00' }); setCheckoutModal('pago'); }} className="w-full py-3 rounded-full bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-700 transition-colors mt-auto shadow-md relative z-10">
+              Comprar Muro
+            </button>
+          </RevealSection>
+
+        </div>
 
         {/* TABLA COMPARATIVA */}
         <RevealSection delay={600} className="mt-32 max-w-5xl mx-auto hidden md:block relative z-10">
