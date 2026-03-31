@@ -7862,17 +7862,27 @@ const GuestCameraView = ({ eventId }) => {
     toastTimerRef.current = setTimeout(() => setToast(null), 3500);
   };
   
-  // 🔴 MAGIA: Ahora buscamos el nombre específicamente para ESTE eventId
-  const [guestName, setGuestName] = useState(() => localStorage.getItem(`eventmaster_guestName_${eventId}`) || '');
-  const [tempPublicName, setTempPublicName] = useState(''); // Para el input del modo público
+  // 🔴 MAGIA DE AISLAMIENTO: Las llaves ahora son únicas por cada evento
+  const publicNameKey = `baulia_public_${eventId}`;
+  const privateIdKey = `baulia_privId_${eventId}`;
+  const privateNameKey = `baulia_privName_${eventId}`;
+  const avatarKey = `baulia_avatar_${eventId}`;
 
-  const [guestAvatar, setGuestAvatar] = useState(''); 
+  const [guestName, setGuestName] = useState(() => localStorage.getItem(publicNameKey) || '');
+  const [tempPublicName, setTempPublicName] = useState(''); 
+
+  const [authGuest, setAuthGuest] = useState(() => {
+    const savedId = localStorage.getItem(privateIdKey);
+    const savedName = localStorage.getItem(privateNameKey);
+    return savedId ? { id: savedId, name: savedName } : null;
+  });
+  
+  const [guestAvatar, setGuestAvatar] = useState(() => localStorage.getItem(avatarKey) || ''); 
+  
   const [guestCode, setGuestCode] = useState('');
-  const [authGuest, setAuthGuest] = useState(null); 
   const [allGuests, setAllGuests] = useState([]); 
 
   const [feedFotos, setFeedFotos] = useState([]);
-  
   const [postDraft, setPostDraft] = useState(null); 
   const [showChallengeModal, setShowChallengeModal] = useState(false);
   const [activeChallenge, setActiveChallenge] = useState(null);
@@ -7889,20 +7899,7 @@ const GuestCameraView = ({ eventId }) => {
     "Foto grupal con TODOS los de tu mesa 🍽️",
     "Encuentra a alguien con tu mismo color de ropa y tómense foto 👗",
     "Captura el momento exacto de una carcajada 😂",
-    "Selfie haciendo 'pico de pato' con la abuela o tía mayor 🦆",
-    "Foto épica del DJ en plena acción 🎧",
-    "Una foto romántica de una pareja invitada ❤️",
-    "El postre o la comida antes de que la devoren 🍰",
-    "Selfie tuya con el centro de mesa en la cabeza 👑",
-    "¡Alguien tomando un shot! ¡Salud! 🥃",
-    "Foto de unos zapatos increíbles o muy locos 👠",
-    "Captura a los papás de los festejados muy orgullosos 🥰",
-    "Haz un corazón con las manos junto a tu mejor amigo(a) 🫶",
-    "Foto del bartender preparando una obra de arte 🍸",
-    "Selfie en el espejo del baño (¡Un clásico!) 🪞",
-    "Alguien con la corbata chueca o sin zapatos en la pista 👞",
-    "Selfie imitando la pose de una estatua o foto del salón 🗽",
-    "Captura el abrazo más tierno de la noche 🤗"
+    "Selfie haciendo 'pico de pato' con la abuela o tía mayor 🦆"
   ];
   
   const [activePostComments, setActivePostComments] = useState(null);
@@ -7944,7 +7941,7 @@ const GuestCameraView = ({ eventId }) => {
   const tTextSub = isDarkMode ? 'text-zinc-400' : 'text-slate-500';
   const tInputBg = isDarkMode ? 'bg-zinc-800 focus:bg-zinc-700' : 'bg-slate-50 focus:bg-white';
 
-  const currentUserName = !config?.modoPublico ? (authGuest?.name || '') : (guestName || '').trim();
+  const currentUserName = config?.modoPublico ? guestName : authGuest?.name;
 
   const DiceIcon = ({ className, size = 24 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -7959,30 +7956,27 @@ const GuestCameraView = ({ eventId }) => {
 
   const allGuestsRef = useRef([]);
   useEffect(() => { allGuestsRef.current = allGuests; }, [allGuests]);
-  
   const scannerRef = useRef(null);
 
-  // 🔴 FUNCIÓN DE LOGIN MODO PÚBLICO
+  // 🔴 LOGIN PÚBLICO (Crea sesión solo para este evento)
   const handlePublicLogin = (e) => {
     e.preventDefault();
     const finalName = tempPublicName.trim();
     if (!finalName) return;
     setGuestName(finalName);
-    // Guarda el nombre específicamente atado a este evento
-    localStorage.setItem(`eventmaster_guestName_${eventId}`, finalName);
+    localStorage.setItem(publicNameKey, finalName);
   };
 
-  // 🔴 FUNCIÓN DE CERRAR SESIÓN BLINDADA
+  // 🔴 CERRAR SESIÓN BLINDADA (Borra solo los datos de ESTE evento)
   const handleGuestLogout = () => {
     setAuthGuest(null);
     setGuestName('');
     setGuestAvatar('');
-    localStorage.removeItem('eventmaster_authGuestId');
-    localStorage.removeItem(`eventmaster_guestName_${eventId}`); // Borra el nombre público de ESTE evento
-    localStorage.removeItem('eventmaster_currentEventId'); // Borramos el candado
+    localStorage.removeItem(publicNameKey);
+    localStorage.removeItem(privateIdKey);
+    localStorage.removeItem(privateNameKey);
+    localStorage.removeItem(avatarKey);
     setShowMenu(false);
-    // Limpiamos la URL para que no vuelva a iniciar sesión automáticamente
-    window.history.replaceState({}, document.title, window.location.pathname + "?modo=camara&e=" + eventId);
   };
 
   const ejecutarLogin = async (codigoIngresado) => {
@@ -7990,7 +7984,6 @@ const GuestCameraView = ({ eventId }) => {
     if (!code) return;
     
     let foundUser = null;
-    
     for (const g of allGuestsRef.current) {
       if (g.id && g.id.toLowerCase() === code) { foundUser = { id: g.id, name: g.name }; break; }
       if (g.subGuests && g.subGuests.length > 0) {
@@ -8020,10 +8013,8 @@ const GuestCameraView = ({ eventId }) => {
 
     if (foundUser) {
       setAuthGuest(foundUser);
-      setGuestName(foundUser.name);
-      setGuestAvatar(localStorage.getItem(`eventmaster_avatar_${foundUser.id}`) || '');
-      localStorage.setItem('eventmaster_authGuestId', foundUser.id);
-      localStorage.setItem('eventmaster_currentEventId', eventId); 
+      localStorage.setItem(privateIdKey, foundUser.id);
+      localStorage.setItem(privateNameKey, foundUser.name);
       window.history.replaceState({}, document.title, window.location.pathname + "?modo=camara&e=" + eventId);
     } else {
       showToast("Código no reconocido. Revisa tu pulsera.", "error");
@@ -8045,15 +8036,9 @@ const GuestCameraView = ({ eventId }) => {
         
         html5QrCode.start(
           { facingMode: "environment" },
-          { 
-             fps: 15, 
-             aspectRatio: 1.0, 
-             qrbox: function(width, height) { return { width: width * 0.95, height: height * 0.95 }; }
-          },
+          { fps: 15, aspectRatio: 1.0, qrbox: function(width, height) { return { width: width * 0.95, height: height * 0.95 }; }},
           (decodedText) => {
-             if (scannerRef.current && scannerRef.current.isScanning) {
-                scannerRef.current.pause();
-             }
+             if (scannerRef.current && scannerRef.current.isScanning) scannerRef.current.pause();
              
              let code = decodedText;
              try {
@@ -8061,18 +8046,11 @@ const GuestCameraView = ({ eventId }) => {
                 code = parsedUrl.searchParams.get('u') || parsedUrl.searchParams.get('usr') || parsedUrl.searchParams.get('uid') || parsedUrl.searchParams.get('invitado') || code;
              } catch(e) {}
              
-             if (!code) {
-                 const match = decodedText.match(/(?:u|usr|invitado)=([^&]+)/i);
-                 if (match && match[1]) code = match[1];
-                 else code = decodedText;
-             }
-             
              if (!code || code === 'null' || code === 'undefined') { 
                 showToast("Código inválido", "error"); 
                 if (scannerRef.current) scannerRef.current.resume();
                 return; 
              }
-
              setGuestCode(code);
              
              if (scannerRef.current) {
@@ -8092,7 +8070,7 @@ const GuestCameraView = ({ eventId }) => {
           (err) => {}
         ).catch(err => {
            setIsScanning(false);
-           showToast("Debes Permitir el uso de la Cámara para acceder.", "error");
+           showToast("Permite el uso de la Cámara para acceder.", "error");
         });
       } catch(e) { setIsScanning(false); }
     }, 200);
@@ -8137,21 +8115,6 @@ const GuestCameraView = ({ eventId }) => {
       setSocialActivity(snap.docs.map(doc => doc.data()).sort((a, b) => b.timestamp - a.timestamp));
     });
 
-    const savedGuestId = localStorage.getItem('eventmaster_authGuestId');
-    const savedEventId = localStorage.getItem('eventmaster_currentEventId'); 
-
-    if (savedGuestId && savedEventId === eventId) {
-      setAuthGuest({ id: savedGuestId, name: localStorage.getItem('eventmaster_guestName') });
-      setGuestAvatar(localStorage.getItem(`eventmaster_avatar_${savedGuestId}`) || '');
-    } else if (savedGuestId && savedEventId !== eventId) {
-      localStorage.removeItem('eventmaster_authGuestId');
-      localStorage.removeItem('eventmaster_guestName');
-      localStorage.removeItem('eventmaster_currentEventId');
-      setAuthGuest(null);
-      setGuestName('');
-      setGuestAvatar('');
-    }
-
     return () => { unsubConfig(); unsubFotos(); unsubGuests(); unsubActivity(); };
   }, [activePostComments, eventId]);
 
@@ -8173,9 +8136,7 @@ const GuestCameraView = ({ eventId }) => {
   useEffect(() => {
      let timer;
      if (!config?.modoPublico && !authGuest) {
-         timer = setTimeout(() => {
-             startLoginScanner();
-         }, 1000); 
+         timer = setTimeout(() => { startLoginScanner(); }, 1000); 
      }
      return () => {
          if (timer) clearTimeout(timer);
@@ -8207,8 +8168,7 @@ const GuestCameraView = ({ eventId }) => {
         const avatarUrl = `${urlParts[0]}/upload/c_thumb,g_face,h_150,w_150,f_auto,q_auto/${urlParts[1]}`;
         
         setGuestAvatar(avatarUrl);
-        const userId = authGuest ? authGuest.id : 'public';
-        localStorage.setItem(`eventmaster_avatar_${userId}`, avatarUrl);
+        localStorage.setItem(avatarKey, avatarUrl);
 
         if (currentUserName) {
           const promesasUpdate = feedFotos.map(foto => {
@@ -8264,13 +8224,9 @@ const GuestCameraView = ({ eventId }) => {
     setActiveChallenge(null); 
   };
 
-  const cancelPost = () => {
-    setPostDraft(null);
-  };
-
   const publishPost = async () => {
-    const nombreFinal = !config?.modoPublico ? authGuest?.name : (guestName || '').trim();
-    if (!nombreFinal) { showToast("Ingresa tu nombre para publicar.", "error"); return; }
+    // 🔴 BLINDAJE FINAL: Ya no usa la variable global. Usa la que está aislada por evento.
+    if (!currentUserName) { showToast("Ingresa tu nombre para publicar.", "error"); return; }
 
     setIsUploading(true);
 
@@ -8290,11 +8246,6 @@ const GuestCameraView = ({ eventId }) => {
       const validUrls = uploadedUrls.filter(url => url !== null);
       if (validUrls.length === 0) throw new Error("Fallo al procesar fotos.");
 
-      if(config?.modoPublico) {
-         localStorage.setItem(`eventmaster_guestName_${eventId}`, (guestName||'').trim());
-         localStorage.setItem('eventmaster_currentEventId', eventId);
-      }
-
       let finalCaption = (postDraft.caption || '').trim();
       if (config?.hashtag && !finalCaption.toLowerCase().includes(config.hashtag.toLowerCase())) {
          finalCaption = finalCaption ? `${finalCaption} ${config.hashtag}` : config.hashtag;
@@ -8303,7 +8254,7 @@ const GuestCameraView = ({ eventId }) => {
       const nuevaFoto = {
         id: Date.now().toString(), 
         urls: validUrls, 
-        autor: nombreFinal, 
+        autor: currentUserName, 
         avatar: guestAvatar, 
         mensaje: finalCaption,
         emotion: postDraft.emotion,
@@ -8319,7 +8270,7 @@ const GuestCameraView = ({ eventId }) => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
       if(config?.moderacion) {
-        showToast("¡Subida! Un administrador la revisará en breve.", "info");
+        showToast("¡Subida! Se mostrará en pantalla en breve.", "info");
       }
     } catch (error) { 
       showToast("Hubo un error al intentar publicar.", "error"); 
@@ -8329,10 +8280,7 @@ const GuestCameraView = ({ eventId }) => {
   };
 
   const toggleLike = async (foto) => {
-    if (!currentUserName) { 
-      showToast("Por favor, ingresa tu nombre para interactuar.", "error"); 
-      return; 
-    }
+    if (!currentUserName) { showToast("Por favor, ingresa tu nombre para interactuar.", "error"); return; }
     let likesArray = Array.isArray(foto.likes) ? [...foto.likes] : [];
     const isLiking = !likesArray.includes(currentUserName);
     
@@ -8406,7 +8354,7 @@ const GuestCameraView = ({ eventId }) => {
     setCommentText(''); setReplyingTo(null);
   };
 
-  const storageKey = `eventmaster_lastReadSocial_${authGuest ? authGuest.id : guestName}`;
+  const storageKey = `baulia_lastReadSocial_${eventId}_${currentUserName}`;
   const lastReadStamp = Number(localStorage.getItem(storageKey) || 0);
   const myNotifications = socialActivity.filter(a => a.targetUser === currentUserName);
   const unreadCount = myNotifications.filter(a => a.timestamp > lastReadStamp).length;
@@ -8467,17 +8415,15 @@ const GuestCameraView = ({ eventId }) => {
     );
   };
 
-  // 🔴 PANTALLA DE ACCESO (MODO PRIVADO - CON CÓDIGO QR)
+  // 🔴 PANTALLA DE ACCESO MODO PRIVADO
   if (!config?.modoPublico && !authGuest) {
     return (
       <div className={`min-h-screen ${tBgBase} flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans`}>
-        
         <style>{`
           #qr-reader-login { width: 100% !important; height: 100% !important; border: none !important; position: absolute !important; inset: 0 !important; }
           #qr-reader-login video { object-fit: cover !important; width: 100% !important; height: 100% !important; border-radius: 1.5rem !important; }
           #qr-reader-login canvas { display: none !important; }
         `}</style>
-
         <ToastOverlay />
         <div className="absolute top-0 w-full h-64 bg-pink-600/10 blur-[100px] rounded-full pointer-events-none"></div>
         <div className={`w-full max-w-sm ${tBgCard} border ${tBorder} backdrop-blur-xl rounded-3xl shadow-2xl p-8 text-center z-10 flex flex-col`}>
@@ -8515,7 +8461,7 @@ const GuestCameraView = ({ eventId }) => {
     );
   }
 
-  // 🔴 PANTALLA DE ACCESO (MODO PÚBLICO - SOLO PIDE NOMBRE)
+  // 🔴 PANTALLA DE ACCESO MODO PÚBLICO (SOLO PIDE NOMBRE Y ESTÁ AISLADA POR EVENTO)
   if (config?.modoPublico && !guestName) {
     return (
       <div className={`min-h-screen ${tBgBase} flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans`}>
@@ -8563,7 +8509,6 @@ const GuestCameraView = ({ eventId }) => {
                   <Moon size={16} className="mr-3"/> <span className="text-sm font-bold">{isDarkMode ? 'Modo Día' : 'Modo Noche'}</span>
                 </button>
                 <div className={`w-full h-px ${tBorder} my-1`}></div>
-                
                 <button onClick={handleGuestLogout} className={`flex items-center w-full px-4 py-3 rounded-xl hover:bg-rose-500 hover:text-white transition-colors text-rose-500`}>
                   <LogOut size={16} className="mr-3"/> <span className="text-sm font-bold">Cerrar Sesión</span>
                 </button>
