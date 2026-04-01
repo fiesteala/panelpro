@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc, setDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
-import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Trash2, Image as ImageIcon, Download, Eye } from 'lucide-react';
+import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Trash2, Image as ImageIcon, Download, Eye, Edit3 } from 'lucide-react';
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: GESTOR DE PULSERAS VIP (V4 - QRS INDIVIDUALES) ---
+// --- COMPONENTE: GESTOR DE PULSERAS VIP (V5 - NOMBRES ULTRA PREMIUM) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ eventName: '', eventDate: '', eventType: 'boda', logoBase64: '' });
   const [wristbandList, setWristbandList] = useState([]);
-  
-  // 🔴 CORRECCIÓN: Agregamos control para Niños
   const [newEntry, setNewEntry] = useState({ name: '', adultPasses: 1, childrenPasses: 0 });
   const [isLocked, setIsLocked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,7 +28,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         const listRef = collection(db, "eventos", eventId, "invitados");
         const listSnap = await getDocs(listRef);
         const listData = listSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        // Filtramos solo los que son del kit de seguridad para no mezclar si en el futuro cambian de plan
         setWristbandList(listData.filter(g => g.isSecurityKit));
       } catch (error) {
         console.error("Error cargando datos:", error);
@@ -85,9 +82,8 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
   const removeLogo = () => {
       if(isLocked) return;
       setDesignConfig({ ...designConfig, logoBase64: '' });
-  }
+  };
 
-  // 🔴 CORRECCIÓN: Desglose de Sub-Invitados para QRs únicos
   const handleAddEntry = async (e) => {
     e.preventDefault();
     if (isLocked) return;
@@ -104,10 +100,10 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     
     const newId = `p_${Date.now()}`;
     
-    // Generamos los QRs individuales (Acompañantes y niños)
+    // Generamos acompañantes genéricos, el cliente podrá editarlos en la tabla
     const initSubGuests = Array(totalPases).fill(null).map((_, i) => ({
       id: `usr_${newId}_${i}`,
-      name: i === 0 ? guestName : '', 
+      name: i === 0 ? guestName : (i >= adultos ? `Niño ${i - adultos + 1}` : `Acompañante ${i}`), 
       isChild: i >= adultos, 
       entered: false
     }));
@@ -131,7 +127,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       await setDoc(doc(db, "eventos", eventId, "invitados", newId), newDoc);
       setWristbandList(prev => [{ id: newId, ...newDoc }, ...prev]); 
       setNewEntry({ name: '', adultPasses: 1, childrenPasses: 0 }); 
-      if(addNotification) addNotification('Agregado', `${guestName} añadido a la lista.`, 'success');
+      if(addNotification) addNotification('Agregado', `${guestName} y acompañantes añadidos.`, 'success');
     } catch (error) {
       if(addNotification) addNotification('Error', `No se pudo guardar: ${error.message}`, 'error');
     }
@@ -147,29 +143,62 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     }
   };
 
-  // 🔴 CORRECCIÓN: Plantilla CSV con Niños
+  // 🔴 EDICIÓN EN VIVO (Ultra Premium)
+  const handleUpdateNameInline = async (parentId, subGuestId, newName) => {
+    if (isLocked || !newName.trim()) return;
+    
+    const parentIndex = wristbandList.findIndex(g => g.id === parentId);
+    if (parentIndex === -1) return;
+
+    const updatedList = [...wristbandList];
+    const parent = { ...updatedList[parentIndex] };
+    const subIndex = parent.subGuests.findIndex(sg => sg.id === subGuestId);
+
+    // Actualizamos el nombre en la memoria
+    if (subIndex > -1) {
+        parent.subGuests[subIndex].name = newName.trim();
+        // Si es el titular (subGuest 0), actualizamos también el nombre principal
+        if (subIndex === 0) parent.name = newName.trim();
+    }
+
+    updatedList[parentIndex] = parent;
+    setWristbandList(updatedList);
+
+    // Guardamos silenciosamente en Firebase
+    try {
+        await updateDoc(doc(db, "eventos", eventId, "invitados", parentId), {
+            name: parent.name,
+            subGuests: parent.subGuests
+        });
+    } catch (err) {
+        console.error("Error guardando nombre inline:", err);
+    }
+  };
+
+  // 🔴 PLANTILLA CSV HÍBRIDA (Instrucciones Claras)
   const downloadTemplate = () => {
-    const csvContent = "data:text/csv;charset=utf-8,Nombre del Titular o Familia,Adultos,Niños\nFamilia Garza,2,2\nJuan Perez,1,0\nSofia Rodriguez,2,0";
+    const csvContent = "data:text/csv;charset=utf-8,Titular o Familia,Adultos Extras (Nombres separados por / o cantidad),Niños Extras (Nombres separados por / o cantidad)\nFamilia Garza,Ana / Carlos / Roberto,Mia / Luisito\nJuan Perez,2,0\nSofia Rodriguez,1,1\nCarlos Slim,0,0";
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "Plantilla_Pulseras_Baulia.csv");
+    link.setAttribute("download", "Plantilla_Inteligente_Pulseras.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
+  // 🔴 LECTOR CSV INTELIGENTE
   const handleFileUpload = (e) => {
     if (isLocked) return;
     const file = e.target.files[0];
     if (!file) return;
 
     if (!file.name.endsWith('.csv')) {
-        if(addNotification) addNotification('Formato Incorrecto', 'El archivo debe ser .CSV. Descarga la plantilla para ver el formato correcto.', 'error');
+        if(addNotification) addNotification('Formato Incorrecto', 'El archivo debe ser .CSV.', 'error');
         return;
     }
 
-    if(addNotification) addNotification('Procesando', 'Generando QRs únicos...', 'info');
+    if(addNotification) addNotification('Procesando', 'Analizando nombres y cantidades...', 'info');
 
     const reader = new FileReader();
     reader.onload = async (event) => {
@@ -177,32 +206,49 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       const rows = text.split(/\r?\n/).filter(r => r.trim()); 
       
       let startIdx = 0;
-      if (rows[0].toLowerCase().includes('nombre')) startIdx = 1;
+      if (rows[0].toLowerCase().includes('titular') || rows[0].toLowerCase().includes('nombre')) startIdx = 1;
       
       const promesas = [];
       const nuevosItems = [];
 
       for(let i = startIdx; i < rows.length; i++) {
-        const cols = rows[i].split(/,|;/); 
+        // Usamos split(',') simple. Si usan comas dentro de los nombres se romperá, por eso la plantilla dice "separados por /"
+        const cols = rows[i].split(','); 
         if (cols[0] && cols[0].trim() !== '') {
           const guestName = cols[0].trim();
-          const adultos = parseInt(cols[1]) || 1;
-          const ninos = parseInt(cols[2]) || 0;
-          const totalPases = adultos + ninos;
+          const adCol = cols[1] ? cols[1].trim() : "0";
+          const niCol = cols[2] ? cols[2].trim() : "0";
+
+          // Procesar Adultos
+          let adArray = [];
+          if (/^\d+$/.test(adCol) && Number(adCol) > 0) { // Si es puramente un número
+              for(let k=0; k<Number(adCol); k++) adArray.push(`Acompañante ${k+1}`);
+          } else if (!/^\d+$/.test(adCol) && adCol.length > 0) { // Si contiene letras/nombres
+              adArray = adCol.split('/').map(n=>n.trim()).filter(n=>n);
+          }
+
+          // Procesar Niños
+          let niArray = [];
+          if (/^\d+$/.test(niCol) && Number(niCol) > 0) {
+              for(let k=0; k<Number(niCol); k++) niArray.push(`Niño ${k+1}`);
+          } else if (!/^\d+$/.test(niCol) && niCol.length > 0) {
+              niArray = niCol.split('/').map(n=>n.trim()).filter(n=>n);
+          }
+
+          const totalPases = 1 + adArray.length + niArray.length;
           const newId = `p_${Date.now()}_${i}`;
-          
-          const initSubGuests = Array(totalPases).fill(null).map((_, idx) => ({
-            id: `usr_${newId}_${idx}`,
-            name: idx === 0 ? guestName : '', 
-            isChild: idx >= adultos, 
-            entered: false
-          }));
+
+          const initSubGuests = [
+              { id: `usr_${newId}_0`, name: guestName, isChild: false, entered: false },
+              ...adArray.map((n, idx) => ({ id: `usr_${newId}_A${idx}`, name: n, isChild: false, entered: false })),
+              ...niArray.map((n, idx) => ({ id: `usr_${newId}_N${idx}`, name: n, isChild: true, entered: false }))
+          ];
 
           const newDoc = { 
             name: guestName, 
             passes: totalPases,
             originalPasses: totalPases,
-            childrenPasses: ninos,
+            childrenPasses: niArray.length,
             status: 'confirmado',
             side: 'general',
             entered: 0,
@@ -221,8 +267,9 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       try {
         await Promise.all(promesas);
         setWristbandList(prev => [...nuevosItems, ...prev]);
-        if(addNotification) addNotification('¡Éxito!', `Se importaron ${nuevosItems.length} titulares con sus acompañantes.`, 'success');
+        if(addNotification) addNotification('¡Éxito!', `Se importaron ${nuevosItems.length} grupos correctamente.`, 'success');
       } catch (err) {
+        console.error("Error en CSV:", err);
         if(addNotification) addNotification('Error', 'Hubo un fallo al guardar la lista en la nube.', 'error');
       }
     };
@@ -246,6 +293,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       setIsLocked(true);
       if(addNotification) addNotification('¡Pedido Enviado!', 'La orden fue recibida por el taller de producción.', 'success');
     } catch (error) {
+      console.error(error);
       if(addNotification) addNotification('Error', 'Fallo al procesar el envío.', 'error');
     }
   };
@@ -254,7 +302,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
   const totalPulserasSolicitadas = wristbandList.reduce((sum, item) => sum + (Number(item.passes) || 0), 0);
 
-  // 🔴 Aplanamos la lista para mostrar a los acompañantes en la tabla
+  // Aplanamos la lista para mostrar a cada individuo en la tabla
   const getFlattenedGuests = (guestList) => {
     const flattened = [];
     guestList.forEach(guest => {
@@ -262,7 +310,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         flattened.push({
           _rowId: sg.id,
           parentGuest: guest,
-          displayName: sg.name || (sg.isChild ? 'Niño (Brazalete Extra)' : 'Acompañante (Brazalete Extra)'),
+          displayName: sg.name || (sg.isChild ? 'Niño' : 'Acompañante'),
           isMain: idx === 0,
           isChild: sg.isChild,
           pin: sg.id
@@ -307,7 +355,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
             </div>
             <form onSubmit={handleSaveDesign} className="p-6 space-y-5">
               
-              {/* SUBIDA DE LOGO */}
               <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-2xl border border-dashed border-slate-300 dark:border-white/20 text-center">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Logo del Evento (Opcional)</p>
                   {designConfig.logoBase64 ? (
@@ -403,7 +450,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
             <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
               <div>
                   <h3 className="font-bold text-slate-800 dark:text-white text-sm flex items-center"><Users size={16} className="mr-2 text-indigo-500" /> Desglose para Impresión</h3>
-                  <p className="text-[10px] text-slate-500 mt-1">Escribe los nombres uno a uno o importa tu archivo Excel.</p>
+                  <p className="text-[10px] text-slate-500 mt-1">Escribe los nombres uno a uno o importa tu archivo CSV Inteligente.</p>
               </div>
               
               {!isLocked && (
@@ -423,14 +470,14 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
             {!isLocked && (
                 <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-white dark:bg-transparent">
                     <form onSubmit={handleAddEntry} className="flex flex-col xl:flex-row w-full gap-2">
-                        <input type="text" required placeholder="Nombre de la Familia/Invitado..." value={newEntry.name} onChange={e=>setNewEntry({...newEntry, name: e.target.value})} className="flex-1 p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-800 dark:text-white outline-none focus:border-indigo-500" />
+                        <input type="text" required placeholder="Nombre Titular (Ej. Familia Garza)" value={newEntry.name} onChange={e=>setNewEntry({...newEntry, name: e.target.value})} className="flex-1 p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-800 dark:text-white outline-none focus:border-indigo-500" />
                         <div className="flex gap-2">
-                          <div className="flex flex-col w-20">
-                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1">Adultos</span>
+                          <div className="flex flex-col w-24">
+                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1">Total Adultos</span>
                             <input type="number" min="1" value={newEntry.adultPasses} onChange={e=>setNewEntry({...newEntry, adultPasses: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-indigo-600 dark:text-amber-500 outline-none focus:border-indigo-500" />
                           </div>
-                          <div className="flex flex-col w-20">
-                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1">Niños</span>
+                          <div className="flex flex-col w-24">
+                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1">Total Niños</span>
                             <input type="number" min="0" value={newEntry.childrenPasses} onChange={e=>setNewEntry({...newEntry, childrenPasses: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-sky-600 dark:text-sky-400 outline-none focus:border-indigo-500" />
                           </div>
                           <button type="submit" className="px-4 mt-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center font-bold text-xs h-[46px]"><Plus size={18} className="md:mr-1" /> <span className="hidden md:inline">Agregar</span></button>
@@ -447,20 +494,28 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                 </div>
               ) : (
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 dark:bg-[#111] text-[10px] uppercase font-black text-slate-400 tracking-widest sticky top-0 border-b border-slate-200 dark:border-white/5">
+                  <thead className="bg-slate-50 dark:bg-[#111] text-[10px] uppercase font-black text-slate-400 tracking-widest sticky top-0 border-b border-slate-200 dark:border-white/5 z-10">
                     <tr>
-                      <th className="px-6 py-3">Brazalete / Nombre a Imprimir</th>
+                      <th className="px-6 py-3">Nombre en Brazalete (Clic para editar)</th>
                       <th className="px-4 py-3 text-center">Tipo</th>
                       <th className="px-4 py-3 text-right">Controles</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                     {flattenedList.map((row) => (
-                      <tr key={row._rowId} className={`transition-colors hover:bg-slate-50 dark:hover:bg-white/5 ${row.isMain ? 'bg-white dark:bg-transparent border-t-2 border-slate-100 dark:border-white/5' : 'bg-slate-50/30 dark:bg-white/[0.02]'}`}>
-                        <td className="px-6 py-3">
-                          <span className={`${row.isMain ? 'font-bold text-slate-800 dark:text-white' : 'font-normal text-slate-500 dark:text-slate-400'}`}>
-                            {row.displayName}
-                          </span>
+                      <tr key={row._rowId} className={`transition-colors hover:bg-slate-50 dark:hover:bg-white/5 ${row.isMain ? 'bg-white dark:bg-transparent border-t-[3px] border-slate-200 dark:border-white/10' : 'bg-slate-50/50 dark:bg-white/[0.02]'}`}>
+                        <td className="px-6 py-3 flex items-center">
+                          {/* 🔴 EL INPUT INVISIBLE PREMIUM */}
+                          <div className="relative w-full group flex items-center">
+                              {!isLocked && <Edit3 size={12} className="absolute -left-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />}
+                              <input 
+                                  type="text" 
+                                  defaultValue={row.displayName} 
+                                  disabled={isLocked}
+                                  onBlur={(e) => handleUpdateNameInline(row.parentGuest.id, row.pin, e.target.value)}
+                                  className={`w-full bg-transparent outline-none border-b border-transparent focus:border-indigo-500 transition-colors ${row.isMain ? 'font-bold text-slate-800 dark:text-white' : 'font-medium text-slate-500 dark:text-slate-400'} disabled:opacity-80`}
+                              />
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-center">
                           {row.isChild ? (
