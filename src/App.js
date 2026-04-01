@@ -11510,7 +11510,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true });
+  // 🔴 AÑADIDA: fechaEvento para blindar el tiempo del Escáner
+  const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true });
   const [editingLic, setEditingLic] = useState(null);
 
   const [isCreating, setIsCreating] = useState(false);
@@ -11602,6 +11603,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         referenciaPago: formData.referenciaPago, createdAt: serverTimestamp(),
         isQrEnabled: formData.isQrEnabled, 
         isPassCountEnabled: formData.isPassCountEnabled,
+        fechaEvento: formData.fechaEvento, // 🔴 FECHA BLINDADA
         horaEvento: formData.horaEvento
       });
 
@@ -11612,6 +11614,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           tipoEvento: formData.tipoEvento,
           isQrEnabled: formData.isQrEnabled,
           isPassCountEnabled: formData.isPassCountEnabled,
+          fecha: formData.fechaEvento, // 🔴 FECHA PARA EL RELOJ DE 24H
           horaEvento: formData.horaEvento
       });
 
@@ -11626,7 +11629,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         cliente: formData.nombres
       });
 
-      // 🔴 INYECCIÓN DE DATOS FANTASMA (ONBOARDING VIP) 🔴
+      // INYECCIÓN DE DATOS FANTASMA (ONBOARDING VIP)
       const tableDemoId = `mesa_demo_${Date.now()}`;
       const guest1DemoId = `guest_demo_1_${Date.now()}`;
       const guest2DemoId = `guest_demo_2_${Date.now()}`;
@@ -11660,7 +11663,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         })
       ];
       await Promise.all(promesasDemo);
-      // 🔴 FIN INYECCIÓN DE DATOS FANTASMA 🔴
 
       setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role, urlInvitacion: formData.urlInvitacion, esRecurrente: esClienteRecurrente });
       setClientPhone('');
@@ -11688,6 +11690,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       const isQrChecked = editingLic.isQrEnabled !== false; 
       const isPassChecked = editingLic.isPassCountEnabled !== false;
 
+      // 🔴 ACTUALIZACIÓN BLINDADA
       await updateDoc(doc(db, "usuarios", editingLic.id), { 
         urlInvitacion: safeUrl, 
         plan: editingLic.plan, 
@@ -11695,6 +11698,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         tipoEvento: safeTipo,
         isQrEnabled: isQrChecked,
         isPassCountEnabled: isPassChecked,
+        fechaEvento: editingLic.fechaEvento || '',
         horaEvento: editingLic.horaEvento || '18:00'
       });
 
@@ -11705,6 +11709,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
            tipoEvento: safeTipo,
            isQrEnabled: isQrChecked,
            isPassCountEnabled: isPassChecked,
+           fecha: editingLic.fechaEvento || '',
            horaEvento: editingLic.horaEvento || '18:00'
         });
       } catch(err) { console.log("Doc evento no listo", err); }
@@ -11844,24 +11849,43 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         )}
       </div>
 
+      {/* 🔴 TABLERO PANORÁMICO (TODAS LAS TARJETAS Y BOTÓN EN UNA FILA) */}
       {adminTab === 'licencias' && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
-          <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between transition-colors">
-             <div><p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Básico</p><p className="text-2xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.basico}</p></div>
-             <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400"><Users size={18}/></div>
-          </div>
-          <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between transition-colors">
-             <div><p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Plata</p><p className="text-2xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.plata}</p></div>
-             <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400"><Wallet size={18}/></div>
-          </div>
-          <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex items-center justify-between transition-colors">
-             <div><p className="text-[10px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">Oro</p><p className="text-2xl font-black text-amber-700 dark:text-amber-400">{totalesPorLicencia.oro}</p></div>
-             <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500"><ShieldCheck size={18}/></div>
-          </div>
-          <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 shadow-sm flex items-center justify-between transition-colors">
-             <div><p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Diamante</p><p className="text-2xl font-black text-indigo-700 dark:text-indigo-400">{totalesPorLicencia.diamante}</p></div>
-             <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400"><LayoutDashboard size={18}/></div>
-          </div>
+        <div className="flex flex-col xl:flex-row gap-3 mb-6 w-full overflow-x-auto pb-2 custom-scrollbar">
+           
+           <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true }); }} className="shrink-0 px-6 py-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-2xl font-black shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform flex items-center justify-center min-w-[200px]">
+              <Plus size={18} className="mr-2 text-amber-500 dark:text-slate-900"/> Nueva Bóveda
+           </button>
+
+           <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+             <div><p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Básico</p><p className="text-xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.basico}</p></div>
+             <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500"><Users size={14}/></div>
+           </div>
+           
+           <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-slate-300 dark:border-slate-600 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+             <div><p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Plata</p><p className="text-xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.plata}</p></div>
+             <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300"><Wallet size={14}/></div>
+           </div>
+           
+           <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+             <div><p className="text-[9px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">Oro</p><p className="text-xl font-black text-amber-700 dark:text-amber-400">{totalesPorLicencia.oro}</p></div>
+             <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500"><ShieldCheck size={14}/></div>
+           </div>
+           
+           <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+             <div><p className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Diamante</p><p className="text-xl font-black text-indigo-700 dark:text-indigo-400">{totalesPorLicencia.diamante}</p></div>
+             <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400"><LayoutDashboard size={14}/></div>
+           </div>
+           
+           <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-pink-200 dark:border-pink-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+             <div><p className="text-[9px] font-bold text-pink-600 dark:text-pink-400 uppercase tracking-widest">Social Wall</p><p className="text-xl font-black text-pink-700 dark:text-pink-400">{totalesPorLicencia.social_wall}</p></div>
+             <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-500/10 flex items-center justify-center text-pink-600 dark:text-pink-400"><Camera size={14}/></div>
+           </div>
+
+           <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+             <div><p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Security Kit</p><p className="text-xl font-black text-emerald-700 dark:text-emerald-400">{totalesPorLicencia.security_kit}</p></div>
+             <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400"><Scan size={14}/></div>
+           </div>
         </div>
       )}
 
@@ -11949,13 +11973,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
       {adminTab === 'licencias' && (
         <div className="animate-in fade-in">
-          
-          <div className="mb-6 flex gap-4">
-            <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true }); }} className="px-8 py-4 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-slate-800 dark:hover:bg-amber-400 transition-colors flex items-center hover:scale-105 transform">
-              <Plus size={20} className="mr-2 text-amber-500 dark:text-slate-900"/> Nueva Venta (Crear Bóveda)
-            </button>
-          </div>
-
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
              <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
                <h3 className="font-bold text-slate-800 dark:text-white text-sm">Directorio de Clientes Activos ({filteredLicencias.length})</h3>
@@ -12004,8 +12021,15 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lic.tipoEvento || 'Boda'}</span>
                            </td>
                            <td className="px-5 py-4 text-center">
-                             <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'}`}>
-                               {lic.plan}
+                             {/* 🔴 ETIQUETAS DE PLANES CON COLORES PERFECTOS */}
+                             <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border 
+                               ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : 
+                                 lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 
+                                 lic.plan === 'plata' ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600' :
+                                 lic.plan === 'social_wall' ? 'bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20' :
+                                 lic.plan === 'security_kit' ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' :
+                                 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-white/10'}`}>
+                               {lic.plan.replace('_', ' ')}
                              </span>
                            </td>
                            <td className="px-5 py-4 max-w-[200px] truncate">
@@ -12096,12 +12120,19 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       <option value="oro">Plan Oro ($1,990)</option>
                       <option value="diamante">Plan Diamante ($2,990)</option>
                       <option value="social_wall">Social Wall ($1,490)</option>
-                      <option value="security_kit">Kit Seguridad ($1,490)</option>
+                      <option value="security_kit">Security Kit ($1,490)</option>
                     </select>
 
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1.5"/> Hora de Inicio (Solo Kit de Seguridad)</label>
-                      <input type="time" value={formData.horaEvento} onChange={e => setFormData({...formData, horaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors mb-3" />
+                    {/* 🔴 CAMPOS DE TIEMPO BLINDADOS */}
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
+                        <input type="date" required={formData.plan === 'security_kit'} value={formData.fechaEvento} onChange={e => setFormData({...formData, fechaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1"/> Hora de Inicio</label>
+                        <input type="time" value={formData.horaEvento} onChange={e => setFormData({...formData, horaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
@@ -12194,14 +12225,20 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       <option value="oro">Oro</option>
                       <option value="diamante">Diamante</option>
                       <option value="social_wall">Social Wall</option>
-                      <option value="security_kit">Kit Seguridad</option>
+                      <option value="security_kit">Security Kit</option>
                     </select>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1.5"/> Hora de Inicio (Solo Kit de Seguridad)</label>
-                  <input type="time" value={editingLic.horaEvento || ''} onChange={e => setEditingLic({...editingLic, horaEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
+                    <input type="date" value={editingLic.fechaEvento || ''} onChange={e => setEditingLic({...editingLic, fechaEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1"/> Hora de Inicio</label>
+                    <input type="time" value={editingLic.horaEvento || ''} onChange={e => setEditingLic({...editingLic, horaEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
