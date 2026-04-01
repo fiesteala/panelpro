@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc, setDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
 import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Trash2, Image as ImageIcon, Download, Eye } from 'lucide-react';
-// 🔴 Ajusta la ruta de Firebase si es necesario
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: GESTOR DE PULSERAS VIP (V2 CON VISTA PREVIA) ---
+// --- COMPONENTE: GESTOR DE PULSERAS VIP (V3 - CORREGIDO BBDD) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ eventName: '', eventDate: '', eventType: 'boda', logoBase64: '' });
@@ -27,9 +26,11 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
           if (data.pulserasStatus === 'enviado') setIsLocked(true);
         }
 
-        const listRef = collection(db, "eventos", eventId, "pulseras");
+        // 🔴 CORRECCIÓN: Leemos desde la colección 'invitados' para que el Escáner los detecte
+        const listRef = collection(db, "eventos", eventId, "invitados");
         const listSnap = await getDocs(listRef);
         const listData = listSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Filtramos solo los que agregamos desde este panel (si es necesario) o mostramos todos
         setWristbandList(listData);
       } catch (error) {
         console.error("Error cargando datos:", error);
@@ -47,6 +48,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       await updateDoc(doc(db, "eventos", eventId), { pulserasConfig: designConfig });
       if(addNotification) addNotification('Diseño Guardado', 'Los datos de la pulsera se actualizaron.', 'success');
     } catch (error) {
+      console.error(error);
       if(addNotification) addNotification('Error', 'Fallo al guardar el diseño.', 'error');
     }
   };
@@ -67,7 +69,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         const img = new Image();
         img.onload = () => {
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 400; // Reducimos tamaño para no saturar Firebase
+            const MAX_WIDTH = 400; 
             const scaleSize = MAX_WIDTH / img.width;
             canvas.width = MAX_WIDTH;
             canvas.height = img.height * scaleSize;
@@ -88,41 +90,60 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       setDesignConfig({ ...designConfig, logoBase64: '' });
   }
 
-  // 4. AGREGAR MANUALMENTE (CORREGIDO)
+  // 4. AGREGAR MANUALMENTE (CORREGIDO - ESCRIBE EN 'INVITADOS')
   const handleAddEntry = async (e) => {
     e.preventDefault();
     if (isLocked) return;
     
     const guestName = newEntry.name.trim();
+    const guestPasses = Number(newEntry.passes) || 1;
+
     if (!guestName) {
         if(addNotification) addNotification('Falta el nombre', 'Ingresa el nombre del invitado.', 'warning');
         return;
     }
     
     const newId = `p_${Date.now()}`;
-    const newDoc = { name: guestName, passes: Number(newEntry.passes) || 1 };
+    
+    // 🔴 CORRECCIÓN: Estructura exacta que pide tu Escáner de Puerta
+    const newDoc = { 
+      name: guestName, 
+      passes: guestPasses, 
+      originalPasses: guestPasses,
+      childrenPasses: 0,
+      status: 'confirmado', // Ya va confirmado para que pueda entrar
+      side: 'general', 
+      entered: 0, 
+      tableId: null, 
+      sent: false, 
+      subGuests: [], 
+      extraRequested: 0,
+      isSecurityKit: true 
+    };
     
     try {
-      await setDoc(doc(db, "eventos", eventId, "pulseras", newId), newDoc);
-      setWristbandList(prev => [{ id: newId, ...newDoc }, ...prev]); // Lo agrega al inicio de la lista
-      setNewEntry({ name: '', passes: 1 }); // Limpia los inputs
+      await setDoc(doc(db, "eventos", eventId, "invitados", newId), newDoc);
+      setWristbandList(prev => [{ id: newId, ...newDoc }, ...prev]); 
+      setNewEntry({ name: '', passes: 1 }); 
       if(addNotification) addNotification('Agregado', `${guestName} añadido a la lista.`, 'success');
     } catch (error) {
-      if(addNotification) addNotification('Error', 'No se pudo guardar en la base de datos.', 'error');
+      console.error("Error al agregar invitado:", error);
+      if(addNotification) addNotification('Error', `No se pudo guardar: ${error.message}`, 'error');
     }
   };
 
   const handleRemoveEntry = async (id) => {
     if (isLocked) return;
     try {
-      await deleteDoc(doc(db, "eventos", eventId, "pulseras", id));
+      await deleteDoc(doc(db, "eventos", eventId, "invitados", id));
       setWristbandList(prev => prev.filter(item => item.id !== id));
     } catch (error) {
+      console.error(error);
       if(addNotification) addNotification('Error', 'No se pudo eliminar.', 'error');
     }
   };
 
-  // 5. GESTIÓN DE EXCEL/CSV
+  // 5. GESTIÓN DE EXCEL/CSV (CORREGIDO - ESCRIBE EN 'INVITADOS')
   const downloadTemplate = () => {
     const csvContent = "data:text/csv;charset=utf-8,Nombre del Invitado o Familia,Cantidad de Pulseras\nFamilia Garza,4\nJuan Perez,1\nSofia Rodriguez,2";
     const encodedUri = encodeURI(csvContent);
@@ -149,27 +170,39 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     const reader = new FileReader();
     reader.onload = async (event) => {
       const text = event.target.result;
-      // Normalizar saltos de línea y separar por filas
       const rows = text.split(/\r?\n/).filter(r => r.trim()); 
       
       let startIdx = 0;
-      // Si la primera fila contiene "nombre", es la cabecera, la saltamos
       if (rows[0].toLowerCase().includes('nombre')) startIdx = 1;
       
       const promesas = [];
       const nuevosItems = [];
 
       for(let i = startIdx; i < rows.length; i++) {
-        // Soporta comas o punto y coma como separador
         const cols = rows[i].split(/,|;/); 
         if (cols[0] && cols[0].trim() !== '') {
+          const guestName = cols[0].trim();
+          const guestPasses = parseInt(cols[1]) || 1;
           const newId = `p_${Date.now()}_${i}`;
+          
+          // 🔴 CORRECCIÓN: Estructura para el Escáner
           const newDoc = { 
-            name: cols[0].trim(), 
-            passes: parseInt(cols[1]) || 1 
+            name: guestName, 
+            passes: guestPasses,
+            originalPasses: guestPasses,
+            childrenPasses: 0,
+            status: 'confirmado',
+            side: 'general',
+            entered: 0,
+            tableId: null,
+            sent: false,
+            subGuests: [],
+            extraRequested: 0,
+            isSecurityKit: true
           };
+          
           nuevosItems.push({ id: newId, ...newDoc });
-          promesas.push(setDoc(doc(db, "eventos", eventId, "pulseras", newId), newDoc));
+          promesas.push(setDoc(doc(db, "eventos", eventId, "invitados", newId), newDoc));
         }
       }
 
@@ -178,11 +211,12 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         setWristbandList(prev => [...nuevosItems, ...prev]);
         if(addNotification) addNotification('¡Éxito!', `Se importaron ${nuevosItems.length} invitados.`, 'success');
       } catch (err) {
+        console.error("Error en CSV:", err);
         if(addNotification) addNotification('Error', 'Hubo un fallo al guardar la lista en la nube.', 'error');
       }
     };
     reader.readAsText(file);
-    e.target.value = null; // Reset input
+    e.target.value = null; 
   };
 
   // 6. ENVIAR AL TALLER
@@ -202,18 +236,18 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       setIsLocked(true);
       if(addNotification) addNotification('¡Pedido Enviado!', 'La orden fue recibida por el taller de producción.', 'success');
     } catch (error) {
+      console.error(error);
       if(addNotification) addNotification('Error', 'Fallo al procesar el envío.', 'error');
     }
   };
 
   if (isLoading) return <div className="p-10 text-center text-slate-500">Cargando plataforma...</div>;
 
-  const totalPulserasSolicitadas = wristbandList.reduce((sum, item) => sum + item.passes, 0);
+  const totalPulserasSolicitadas = wristbandList.reduce((sum, item) => sum + (Number(item.passes) || 0), 0);
 
   return (
     <div className="space-y-6 pb-10 animate-in fade-in duration-500">
       
-      {/* 🔴 ESTILOS PARA LA FUENTE MANUSCRITA EN LA VISTA PREVIA */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
         .font-firma { font-family: 'Great Vibes', cursive; }
