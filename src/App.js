@@ -12021,7 +12021,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lic.tipoEvento || 'Boda'}</span>
                            </td>
                            <td className="px-5 py-4 text-center">
-                             {/* 🔴 ETIQUETAS DE PLANES CON COLORES PERFECTOS */}
                              <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border 
                                ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : 
                                  lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 
@@ -12123,7 +12122,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       <option value="security_kit">Security Kit ($1,490)</option>
                     </select>
 
-                    {/* 🔴 CAMPOS DE TIEMPO BLINDADOS */}
                     <div className="grid grid-cols-2 gap-4 mb-3">
                       <div>
                         <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
@@ -12135,25 +12133,30 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
-                      <div>
-                        <p className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
-                        <p className="text-[9px] text-indigo-500 dark:text-indigo-300/70 mt-0.5">Apágalo si el cliente quiere invitación simple.</p>
-                      </div>
-                      <button type="button" onClick={() => setFormData({...formData, isQrEnabled: !formData.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
-                         <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${formData.isQrEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                      </button>
-                    </div>
+                    {/* 🔴 LÓGICA DE VISIBILIDAD APLICADA: Solo Oro y Diamante */}
+                    {['oro', 'diamante'].includes(formData.plan) && (
+                      <>
+                        <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
+                          <div>
+                            <p className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
+                            <p className="text-[9px] text-indigo-500 dark:text-indigo-300/70 mt-0.5">Apágalo si el cliente quiere invitación simple.</p>
+                          </div>
+                          <button type="button" onClick={() => setFormData({...formData, isQrEnabled: !formData.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                             <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${formData.isQrEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                          </button>
+                        </div>
 
-                    <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
-                      <div>
-                        <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
-                        <p className="text-[9px] text-emerald-500 dark:text-emerald-300/70 mt-0.5">Apágalo para una confirmación general sin números.</p>
-                      </div>
-                      <button type="button" onClick={() => setFormData({...formData, isPassCountEnabled: !formData.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
-                         <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${formData.isPassCountEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                      </button>
-                    </div>
+                        <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
+                          <div>
+                            <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
+                            <p className="text-[9px] text-emerald-500 dark:text-emerald-300/70 mt-0.5">Apágalo para una confirmación general sin números.</p>
+                          </div>
+                          <button type="button" onClick={() => setFormData({...formData, isPassCountEnabled: !formData.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                             <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${formData.isPassCountEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <div>
@@ -12241,25 +12244,30 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
-                  <div>
-                    <p className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
-                    <p className="text-[9px] text-indigo-500 dark:text-indigo-300/70 mt-0.5">Apágalo si el cliente quiere invitación simple.</p>
-                  </div>
-                  <button type="button" onClick={() => setEditingLic({...editingLic, isQrEnabled: !editingLic.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
-                     <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.isQrEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                  </button>
-                </div>
+                {/* 🔴 LÓGICA DE VISIBILIDAD APLICADA: Solo Oro y Diamante */}
+                {['oro', 'diamante'].includes(editingLic.plan) && (
+                  <>
+                    <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
+                      <div>
+                        <p className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
+                        <p className="text-[9px] text-indigo-500 dark:text-indigo-300/70 mt-0.5">Apágalo si el cliente quiere invitación simple.</p>
+                      </div>
+                      <button type="button" onClick={() => setEditingLic({...editingLic, isQrEnabled: !editingLic.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                         <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.isQrEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                      </button>
+                    </div>
 
-                <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
-                  <div>
-                    <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
-                    <p className="text-[9px] text-emerald-500 dark:text-emerald-300/70 mt-0.5">Apágalo para una confirmación general sin números.</p>
-                  </div>
-                  <button type="button" onClick={() => setEditingLic({...editingLic, isPassCountEnabled: !editingLic.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
-                     <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.isPassCountEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                  </button>
-                </div>
+                    <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
+                      <div>
+                        <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
+                        <p className="text-[9px] text-emerald-500 dark:text-emerald-300/70 mt-0.5">Apágalo para una confirmación general sin números.</p>
+                      </div>
+                      <button type="button" onClick={() => setEditingLic({...editingLic, isPassCountEnabled: !editingLic.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                         <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.isPassCountEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                      </button>
+                    </div>
+                  </>
+                )}
 
                 <div className="bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 p-3 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-500/20 flex items-start transition-colors">
                   <AlertCircle size={16} className="mr-2 flex-shrink-0 mt-0.5" />
