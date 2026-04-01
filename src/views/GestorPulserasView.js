@@ -4,12 +4,13 @@ import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Tr
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: GESTOR DE PULSERAS VIP (V6 - AUTO-EXPLICATIVO) ---
+// --- COMPONENTE: GESTOR DE PULSERAS VIP (V7 - ULTRA PREMIUM) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
-  const [designConfig, setDesignConfig] = useState({ eventName: '', eventDate: '', eventType: 'boda', logoBase64: '' });
+  // 🔴 Cambiamos Tipo/Fecha por Pre-título
+  const [designConfig, setDesignConfig] = useState({ preTitle: '', eventName: '', logoBase64: '' });
+  const [eventDateStr, setEventDateStr] = useState(''); // La fecha viene del SuperAdmin
   const [wristbandList, setWristbandList] = useState([]);
-  // 🔴 Cambiamos a "extras" empezando en 0
   const [newEntry, setNewEntry] = useState({ name: '', extraAdults: 0, extraChildren: 0 });
   const [isLocked, setIsLocked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,6 +25,9 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
           const data = docSnap.data();
           if (data.pulserasConfig) setDesignConfig(data.pulserasConfig);
           if (data.pulserasStatus === 'enviado') setIsLocked(true);
+          
+          // 🔴 Obtenemos la fecha sagrada del SuperAdmin
+          if (data.fecha) setEventDateStr(data.fecha);
         }
 
         const listRef = collection(db, "eventos", eventId, "invitados");
@@ -90,7 +94,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     if (isLocked) return;
     
     const guestName = newEntry.name.trim();
-    // 🔴 Matemáticas claras: El titular ya cuenta como 1
     const adExtras = Number(newEntry.extraAdults) || 0;
     const niExtras = Number(newEntry.extraChildren) || 0;
     const totalPases = 1 + adExtras + niExtras;
@@ -171,18 +174,37 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     }
   };
 
-  // 🔴 Plantilla CSV super clara
+  // 🔴 PLANTILLA CSV CORPORATIVA CON MEMBRETE
   const downloadTemplate = () => {
-    const csvContent = "data:text/csv;charset=utf-8,Titular o Familia,Acompañantes EXTRAS (Nombres separados por / o cantidad),Niños EXTRAS (Nombres separados por / o cantidad)\nFamilia Garza,Ana / Carlos / Roberto,Mia / Luisito\nJuan Perez,2,0\nSofia Rodriguez,1,1\nCarlos Slim,0,0";
-    const encodedUri = encodeURI(csvContent);
+    let csv = "";
+    // El Membrete que el sistema ignorará al subir
+    csv += "BAULIA TECHNOLOGIES - FORMATO OFICIAL DE PRODUCCIÓN DE ACCESOS\n";
+    csv += `Evento: ${designConfig.eventName || 'Tu Evento'}\n`;
+    csv += "=================================================================\n";
+    csv += "INSTRUCCIONES DE LLENADO:\n";
+    csv += "1. En 'Titular' escribe el nombre principal (Ej. Familia Garza). Esto genera 1 pulsera automática.\n";
+    csv += "2. En 'Acompañantes Extras' y 'Niños Extras' escribe SOLO NÚMEROS (Ej. 2). Si no llevan extras pon 0.\n";
+    csv += "3. Guarda el archivo manteniendo el formato CSV y súbelo a la plataforma.\n";
+    csv += "=================================================================\n\n";
+    
+    // Los encabezados reales
+    csv += "Titular o Familia,Acompañantes EXTRAS,Niños EXTRAS\n";
+    csv += "Familia Garza,2,2\n";
+    csv += "Juan Perez,1,0\n";
+    csv += "Sofia Rodriguez,0,1\n";
+
+    // BOM para que Excel lea los acentos perfecto
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "Plantilla_Inteligente_Pulseras.csv");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Plantilla_Pulseras_${designConfig.eventName ? designConfig.eventName.replace(/\s+/g, '_') : 'Baulia'}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
+  // 🔴 LECTOR CSV INTELIGENTE (SALTA EL MEMBRETE)
   const handleFileUpload = (e) => {
     if (isLocked) return;
     const file = e.target.files[0];
@@ -193,7 +215,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         return;
     }
 
-    if(addNotification) addNotification('Procesando', 'Analizando nombres y cantidades...', 'info');
+    if(addNotification) addNotification('Procesando', 'Analizando lista...', 'info');
 
     const reader = new FileReader();
     reader.onload = async (event) => {
@@ -201,7 +223,13 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       const rows = text.split(/\r?\n/).filter(r => r.trim()); 
       
       let startIdx = 0;
-      if (rows[0].toLowerCase().includes('titular') || rows[0].toLowerCase().includes('nombre')) startIdx = 1;
+      // Buscamos dinámicamente dónde empiezan los datos reales
+      for (let i = 0; i < rows.length; i++) {
+          if (rows[i].toLowerCase().includes('titular')) {
+              startIdx = i + 1;
+              break;
+          }
+      }
       
       const promesas = [];
       const nuevosItems = [];
@@ -213,34 +241,24 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
           const adCol = cols[1] ? cols[1].trim() : "0";
           const niCol = cols[2] ? cols[2].trim() : "0";
 
-          let adArray = [];
-          if (/^\d+$/.test(adCol) && Number(adCol) > 0) { 
-              for(let k=0; k<Number(adCol); k++) adArray.push(`Acompañante ${k+1}`);
-          } else if (!/^\d+$/.test(adCol) && adCol.length > 0) { 
-              adArray = adCol.split('/').map(n=>n.trim()).filter(n=>n);
-          }
+          // Solo tomamos números como dicta la plantilla
+          const adExtras = /^\d+$/.test(adCol) ? Number(adCol) : 0;
+          const niExtras = /^\d+$/.test(niCol) ? Number(niCol) : 0;
 
-          let niArray = [];
-          if (/^\d+$/.test(niCol) && Number(niCol) > 0) {
-              for(let k=0; k<Number(niCol); k++) niArray.push(`Niño ${k+1}`);
-          } else if (!/^\d+$/.test(niCol) && niCol.length > 0) {
-              niArray = niCol.split('/').map(n=>n.trim()).filter(n=>n);
-          }
-
-          const totalPases = 1 + adArray.length + niArray.length;
+          const totalPases = 1 + adExtras + niExtras;
           const newId = `p_${Date.now()}_${i}`;
 
           const initSubGuests = [
               { id: `usr_${newId}_0`, name: guestName, isChild: false, entered: false },
-              ...adArray.map((n, idx) => ({ id: `usr_${newId}_A${idx}`, name: n, isChild: false, entered: false })),
-              ...niArray.map((n, idx) => ({ id: `usr_${newId}_N${idx}`, name: n, isChild: true, entered: false }))
+              ...Array(adExtras).fill(null).map((_, idx) => ({ id: `usr_${newId}_A${idx}`, name: `Acompañante ${idx+1}`, isChild: false, entered: false })),
+              ...Array(niExtras).fill(null).map((_, idx) => ({ id: `usr_${newId}_N${idx}`, name: `Niño ${idx+1}`, isChild: true, entered: false }))
           ];
 
           const newDoc = { 
             name: guestName, 
             passes: totalPases,
             originalPasses: totalPases,
-            childrenPasses: niArray.length,
+            childrenPasses: niExtras,
             status: 'confirmado',
             side: 'general',
             entered: 0,
@@ -363,25 +381,14 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                   )}
               </div>
 
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Nombre Corto del Evento</label>
-                <input type="text" disabled={isLocked} required placeholder="Ej. Ana & Carlos" value={designConfig.eventName} onChange={e=>setDesignConfig({...designConfig, eventName: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 text-sm font-bold text-slate-800 dark:text-white disabled:opacity-50" />
-              </div>
-              
               <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Fecha Impresa</label>
-                    <input type="date" disabled={isLocked} required value={designConfig.eventDate} onChange={e=>setDesignConfig({...designConfig, eventDate: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 text-sm font-bold text-slate-800 dark:text-white disabled:opacity-50" />
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Pre-Título</label>
+                    <input type="text" disabled={isLocked} placeholder="Ej. Boda de:, Mis XV:" value={designConfig.preTitle || ''} onChange={e=>setDesignConfig({...designConfig, preTitle: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 text-sm font-bold text-slate-800 dark:text-white disabled:opacity-50" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tipo</label>
-                    <select disabled={isLocked} value={designConfig.eventType} onChange={e=>setDesignConfig({...designConfig, eventType: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 text-sm font-bold text-slate-800 dark:text-white disabled:opacity-50">
-                      <option value="boda">Boda</option>
-                      <option value="xv_anos">XV Años</option>
-                      <option value="graduacion">Graduación</option>
-                      <option value="empresarial">Empresarial</option>
-                      <option value="general">General / VIP</option>
-                    </select>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Nombre Principal</label>
+                    <input type="text" disabled={isLocked} required placeholder="Ej. Ana & Carlos" value={designConfig.eventName} onChange={e=>setDesignConfig({...designConfig, eventName: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 text-sm font-bold text-slate-800 dark:text-white disabled:opacity-50" />
                   </div>
               </div>
 
@@ -402,15 +409,19 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                 <div className="w-[12%] flex items-center justify-center border-r border-slate-100">
                     <span className="text-[5px] text-slate-400 font-bold -rotate-90 tracking-widest whitespace-nowrap">by BAULIA.COM</span>
                 </div>
-                <div className="w-[38%] flex flex-col items-center justify-center border-r border-slate-100 p-1">
+                <div className="w-[38%] flex flex-col items-center justify-center border-r border-slate-100 p-1 relative">
+                    {/* 🔴 Pre-título arriba */}
+                    {designConfig.preTitle && <span className="text-[5px] font-black text-slate-500 uppercase tracking-widest mb-0.5">{designConfig.preTitle}</span>}
+                    
                     {designConfig.logoBase64 ? (
-                        <img src={designConfig.logoBase64} alt="Logo" className="h-8 object-contain mb-1" />
+                        <img src={designConfig.logoBase64} alt="Logo" className="h-7 object-contain mb-1" />
                     ) : (
                         <div className="font-firma text-xl text-slate-800 leading-none mb-1 truncate w-full text-center px-1">
                             {designConfig.eventName || 'Evento VIP'}
                         </div>
                     )}
-                    <span className="text-[6px] font-black text-slate-500 uppercase tracking-widest">{designConfig.eventDate || 'Sin Fecha'}</span>
+                    {/* 🔴 Fecha extraída del SuperAdmin */}
+                    <span className="text-[5px] font-black text-slate-400 uppercase tracking-widest">{eventDateStr ? new Date(eventDateStr).toLocaleDateString('es-MX') : 'Fecha de Evento'}</span>
                 </div>
                 <div className="w-[25%] flex flex-col justify-center px-2">
                     <span className="text-[8px] font-black uppercase text-slate-900 truncate">Juan Pérez</span>
@@ -439,7 +450,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
           
           <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col">
             
-            {/* 🔴 NUEVO: BANNER DE INSTRUCCIONES CERO-DUDAS */}
             <div className="bg-sky-50 dark:bg-sky-900/20 border-b border-sky-100 dark:border-sky-800/30 p-4 flex items-start gap-3">
                <Info size={20} className="text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
                <div className="text-xs text-sky-800 dark:text-sky-200 leading-relaxed">
@@ -468,24 +478,26 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
               )}
             </div>
             
-            {/* AGREGAR MANUALMENTE */}
+            {/* 🔴 AGREGAR MANUALMENTE: ALINEACIÓN PERFECTA */}
             {!isLocked && (
                 <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-white dark:bg-transparent">
-                    <form onSubmit={handleAddEntry} className="flex flex-col xl:flex-row w-full gap-3">
-                        <div className="flex-1">
+                    <form onSubmit={handleAddEntry} className="flex flex-col sm:flex-row w-full gap-3 items-end">
+                        <div className="flex-1 w-full">
                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Titular (Incluye 1 pulsera)</span>
                            <input type="text" required placeholder="Ej. Familia Garza" value={newEntry.name} onChange={e=>setNewEntry({...newEntry, name: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-800 dark:text-white outline-none focus:border-indigo-500" />
                         </div>
-                        <div className="flex gap-2 items-end">
-                          <div className="flex flex-col w-[88px]">
+                        <div className="flex gap-2 w-full sm:w-auto items-end">
+                          <div className="flex flex-col w-full sm:w-24">
                             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Adultos Extras</span>
                             <input type="number" min="0" value={newEntry.extraAdults} onChange={e=>setNewEntry({...newEntry, extraAdults: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-indigo-600 dark:text-amber-500 outline-none focus:border-indigo-500" />
                           </div>
-                          <div className="flex flex-col w-[88px]">
+                          <div className="flex flex-col w-full sm:w-24">
                             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Niños Extras</span>
                             <input type="number" min="0" value={newEntry.extraChildren} onChange={e=>setNewEntry({...newEntry, extraChildren: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-sky-600 dark:text-sky-400 outline-none focus:border-indigo-500" />
                           </div>
-                          <button type="submit" className="px-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center font-bold text-xs h-[46px]"><Plus size={18} className="md:mr-1" /> <span className="hidden md:inline">Agregar</span></button>
+                          <button type="submit" className="px-4 w-full sm:w-auto bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center font-bold text-xs h-[46px]">
+                             <Plus size={18} className="md:mr-1" /> <span className="hidden md:inline">Agregar</span>
+                          </button>
                         </div>
                     </form>
                 </div>
@@ -510,7 +522,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                     {flattenedList.map((row) => (
                       <tr key={row._rowId} className={`transition-colors hover:bg-slate-50 dark:hover:bg-white/5 ${row.isMain ? 'bg-white dark:bg-transparent border-t-[3px] border-slate-200 dark:border-white/10' : 'bg-slate-50/50 dark:bg-white/[0.02]'}`}>
                         <td className="px-6 py-3 flex items-center">
-                          {/* 🔴 EL INPUT INVISIBLE PREMIUM */}
                           <div className="relative w-full group flex items-center bg-transparent hover:bg-slate-100 dark:hover:bg-white/5 rounded transition-colors p-1 -ml-1">
                               {!isLocked && <Edit3 size={12} className="absolute -left-3 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" />}
                               <input 
