@@ -4,12 +4,11 @@ import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Tr
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: GESTOR DE PULSERAS VIP (V7 - ULTRA PREMIUM) ---
+// --- COMPONENTE: GESTOR DE PULSERAS VIP (V8 - CSV HÍBRIDO INTELIGENTE) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
-  // 🔴 Cambiamos Tipo/Fecha por Pre-título
   const [designConfig, setDesignConfig] = useState({ preTitle: '', eventName: '', logoBase64: '' });
-  const [eventDateStr, setEventDateStr] = useState(''); // La fecha viene del SuperAdmin
+  const [eventDateStr, setEventDateStr] = useState(''); 
   const [wristbandList, setWristbandList] = useState([]);
   const [newEntry, setNewEntry] = useState({ name: '', extraAdults: 0, extraChildren: 0 });
   const [isLocked, setIsLocked] = useState(false);
@@ -25,8 +24,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
           const data = docSnap.data();
           if (data.pulserasConfig) setDesignConfig(data.pulserasConfig);
           if (data.pulserasStatus === 'enviado') setIsLocked(true);
-          
-          // 🔴 Obtenemos la fecha sagrada del SuperAdmin
           if (data.fecha) setEventDateStr(data.fecha);
         }
 
@@ -174,37 +171,37 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     }
   };
 
-  // 🔴 PLANTILLA CSV CORPORATIVA CON MEMBRETE
+  // 🔴 PLANTILLA CSV DOCUMENTAL (Con instrucciones ultra claras y ejemplos híbridos)
   const downloadTemplate = () => {
     let csv = "";
-    // El Membrete que el sistema ignorará al subir
     csv += "BAULIA TECHNOLOGIES - FORMATO OFICIAL DE PRODUCCIÓN DE ACCESOS\n";
     csv += `Evento: ${designConfig.eventName || 'Tu Evento'}\n`;
     csv += "=================================================================\n";
     csv += "INSTRUCCIONES DE LLENADO:\n";
-    csv += "1. En 'Titular' escribe el nombre principal (Ej. Familia Garza). Esto genera 1 pulsera automática.\n";
-    csv += "2. En 'Acompañantes Extras' y 'Niños Extras' escribe SOLO NÚMEROS (Ej. 2). Si no llevan extras pon 0.\n";
-    csv += "3. Guarda el archivo manteniendo el formato CSV y súbelo a la plataforma.\n";
+    csv += "1. En 'Titular o Familia' escribe el nombre principal (Ej. Familia Garza). Esto genera 1 pulsera automática.\n";
+    csv += "2. En 'Acompañantes Extras' y 'Niños Extras' si no tienes el nombre escribe SOLO NÚMEROS (Ej. 2). Si no llevan extras pon 0.\n";
+    csv += "3. Si tienes los nombres, escríbelos separados por una diagonal (Ej. Ana / Carlos / Roberto).\n";
+    csv += "4. Si tienes algunos nombres y otros no, ¡puedes mezclarlos! (Ej. Ana / 2) creará a 'Ana' y 2 pases genéricos.\n";
+    csv += "5. Guarda el archivo manteniendo el formato CSV y súbelo a la plataforma.\n";
     csv += "=================================================================\n\n";
     
-    // Los encabezados reales
     csv += "Titular o Familia,Acompañantes EXTRAS,Niños EXTRAS\n";
-    csv += "Familia Garza,2,2\n";
-    csv += "Juan Perez,1,0\n";
+    csv += "Familia Garza,Ana / Carlos / 2,Mia / 1\n";
+    csv += "Juan Perez,2,0\n";
     csv += "Sofia Rodriguez,0,1\n";
 
-    // BOM para que Excel lea los acentos perfecto
+    // BOM para UTF-8 (Acentos perfectos en Excel)
     const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `Plantilla_Pulseras_${designConfig.eventName ? designConfig.eventName.replace(/\s+/g, '_') : 'Baulia'}.csv`);
+    link.setAttribute("download", `Plantilla_Produccion_${designConfig.eventName ? designConfig.eventName.replace(/\s+/g, '_') : 'Baulia'}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // 🔴 LECTOR CSV INTELIGENTE (SALTA EL MEMBRETE)
+  // 🔴 LECTOR CSV HÍBRIDO (El cerebro mágico que lee Ana / 2)
   const handleFileUpload = (e) => {
     if (isLocked) return;
     const file = e.target.files[0];
@@ -215,7 +212,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         return;
     }
 
-    if(addNotification) addNotification('Procesando', 'Analizando lista...', 'info');
+    if(addNotification) addNotification('Procesando', 'Analizando matriz de nombres...', 'info');
 
     const reader = new FileReader();
     reader.onload = async (event) => {
@@ -223,13 +220,35 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       const rows = text.split(/\r?\n/).filter(r => r.trim()); 
       
       let startIdx = 0;
-      // Buscamos dinámicamente dónde empiezan los datos reales
+      // Buscamos dónde terminan las instrucciones de Baulia y empiezan los datos
       for (let i = 0; i < rows.length; i++) {
           if (rows[i].toLowerCase().includes('titular')) {
               startIdx = i + 1;
               break;
           }
       }
+
+      // Función mágica para procesar columnas mixtas (Ej: "Ana / 2")
+      const processExtrasCol = (colStr, prefixText) => {
+          if (!colStr) return [];
+          const parts = colStr.split('/').map(s => s.trim()).filter(s => s);
+          let countGeneric = 0;
+          let namedList = [];
+          
+          parts.forEach(p => {
+              if (/^\d+$/.test(p)) { // Si es un número puro
+                  countGeneric += parseInt(p, 10);
+              } else { // Si es texto/nombre
+                  namedList.push(p);
+              }
+          });
+
+          const finalArray = [...namedList];
+          for (let k = 0; k < countGeneric; k++) {
+              finalArray.push(`${prefixText} ${namedList.length + k + 1}`);
+          }
+          return finalArray;
+      };
       
       const promesas = [];
       const nuevosItems = [];
@@ -238,27 +257,27 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         const cols = rows[i].split(','); 
         if (cols[0] && cols[0].trim() !== '') {
           const guestName = cols[0].trim();
-          const adCol = cols[1] ? cols[1].trim() : "0";
-          const niCol = cols[2] ? cols[2].trim() : "0";
+          const adCol = cols[1] || "";
+          const niCol = cols[2] || "";
 
-          // Solo tomamos números como dicta la plantilla
-          const adExtras = /^\d+$/.test(adCol) ? Number(adCol) : 0;
-          const niExtras = /^\d+$/.test(niCol) ? Number(niCol) : 0;
+          // Usamos la función mágica para adultos y niños
+          const adArray = processExtrasCol(adCol, 'Acompañante');
+          const niArray = processExtrasCol(niCol, 'Niño');
 
-          const totalPases = 1 + adExtras + niExtras;
+          const totalPases = 1 + adArray.length + niArray.length;
           const newId = `p_${Date.now()}_${i}`;
 
           const initSubGuests = [
               { id: `usr_${newId}_0`, name: guestName, isChild: false, entered: false },
-              ...Array(adExtras).fill(null).map((_, idx) => ({ id: `usr_${newId}_A${idx}`, name: `Acompañante ${idx+1}`, isChild: false, entered: false })),
-              ...Array(niExtras).fill(null).map((_, idx) => ({ id: `usr_${newId}_N${idx}`, name: `Niño ${idx+1}`, isChild: true, entered: false }))
+              ...adArray.map((n, idx) => ({ id: `usr_${newId}_A${idx}`, name: n, isChild: false, entered: false })),
+              ...niArray.map((n, idx) => ({ id: `usr_${newId}_N${idx}`, name: n, isChild: true, entered: false }))
           ];
 
           const newDoc = { 
             name: guestName, 
             passes: totalPases,
             originalPasses: totalPases,
-            childrenPasses: niExtras,
+            childrenPasses: niArray.length,
             status: 'confirmado',
             side: 'general',
             entered: 0,
@@ -410,7 +429,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                     <span className="text-[5px] text-slate-400 font-bold -rotate-90 tracking-widest whitespace-nowrap">by BAULIA.COM</span>
                 </div>
                 <div className="w-[38%] flex flex-col items-center justify-center border-r border-slate-100 p-1 relative">
-                    {/* 🔴 Pre-título arriba */}
                     {designConfig.preTitle && <span className="text-[5px] font-black text-slate-500 uppercase tracking-widest mb-0.5">{designConfig.preTitle}</span>}
                     
                     {designConfig.logoBase64 ? (
@@ -420,7 +438,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                             {designConfig.eventName || 'Evento VIP'}
                         </div>
                     )}
-                    {/* 🔴 Fecha extraída del SuperAdmin */}
                     <span className="text-[5px] font-black text-slate-400 uppercase tracking-widest">{eventDateStr ? new Date(eventDateStr).toLocaleDateString('es-MX') : 'Fecha de Evento'}</span>
                 </div>
                 <div className="w-[25%] flex flex-col justify-center px-2">
@@ -478,7 +495,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
               )}
             </div>
             
-            {/* 🔴 AGREGAR MANUALMENTE: ALINEACIÓN PERFECTA */}
+            {/* 🔴 AGREGAR MANUALMENTE: ALINEACIÓN PERFECTA (items-end en todos los contenedores) */}
             {!isLocked && (
                 <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-white dark:bg-transparent">
                     <form onSubmit={handleAddEntry} className="flex flex-col sm:flex-row w-full gap-3 items-end">
