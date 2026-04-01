@@ -11510,7 +11510,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  // 🔴 AÑADIDA: fechaEvento para blindar el tiempo del Escáner
   const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true });
   const [editingLic, setEditingLic] = useState(null);
 
@@ -11603,7 +11602,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         referenciaPago: formData.referenciaPago, createdAt: serverTimestamp(),
         isQrEnabled: formData.isQrEnabled, 
         isPassCountEnabled: formData.isPassCountEnabled,
-        fechaEvento: formData.fechaEvento, // 🔴 FECHA BLINDADA
+        fechaEvento: formData.fechaEvento, 
         horaEvento: formData.horaEvento
       });
 
@@ -11614,7 +11613,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           tipoEvento: formData.tipoEvento,
           isQrEnabled: formData.isQrEnabled,
           isPassCountEnabled: formData.isPassCountEnabled,
-          fecha: formData.fechaEvento, // 🔴 FECHA PARA EL RELOJ DE 24H
+          fecha: formData.fechaEvento, 
           horaEvento: formData.horaEvento
       });
 
@@ -11629,7 +11628,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         cliente: formData.nombres
       });
 
-      // INYECCIÓN DE DATOS FANTASMA (ONBOARDING VIP)
       const tableDemoId = `mesa_demo_${Date.now()}`;
       const guest1DemoId = `guest_demo_1_${Date.now()}`;
       const guest2DemoId = `guest_demo_2_${Date.now()}`;
@@ -11690,7 +11688,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       const isQrChecked = editingLic.isQrEnabled !== false; 
       const isPassChecked = editingLic.isPassCountEnabled !== false;
 
-      // 🔴 ACTUALIZACIÓN BLINDADA
       await updateDoc(doc(db, "usuarios", editingLic.id), { 
         urlInvitacion: safeUrl, 
         plan: editingLic.plan, 
@@ -11849,7 +11846,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         )}
       </div>
 
-      {/* 🔴 TABLERO PANORÁMICO (TODAS LAS TARJETAS Y BOTÓN EN UNA FILA) */}
       {adminTab === 'licencias' && (
         <div className="flex flex-col xl:flex-row gap-3 mb-6 w-full overflow-x-auto pb-2 custom-scrollbar">
            
