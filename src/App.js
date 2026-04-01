@@ -8,13 +8,13 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import { 
   LayoutDashboard, Users, Map as MapIcon, Wallet, CheckSquare, Store, Clock, Palette, 
   Smartphone, Menu, Bell, Search as SearchIcon, X, MessageCircle, QrCode, UserPlus, FileText, UploadCloud, 
-  ExternalLink, Edit2, Trash2, AlertTriangle, FileSpreadsheet, CheckCircle, ArrowRight, 
+  ExternalLink, Edit2, Edit3, Trash2, AlertTriangle, FileSpreadsheet, CheckCircle, ArrowRight, ChevronRight,
   Download, Link, LogOut, RotateCw, Move, LayoutGrid, Plus, Minus, RefreshCw, Trash, Info, Hand, Spline, Maximize, 
   FlipHorizontal, Hexagon, Type, Layers, ArrowUp, ArrowDown, PaintBucket, Flower2, Trees, Cuboid, Magnet, 
   DollarSign, PieChart, TrendingDown, Upload, Building, Landmark, History, Phone, Mail, Calendar, Eye, EyeOff, MessageSquare, 
   FileSignature, AlertCircle, Star, Image as ImageIcon, CalendarDays, FileDown, 
   ListTodo, CheckCircle2, Circle, PlayCircle, AlignLeft, MapPin, ShieldCheck, Printer, Scan, Camera, Navigation as NavigationIcon, Navigation, MoreVertical,
-  Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Key, Power, Quote, Check,
+  Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Key, Power, Quote, Check, Factory,
   // 🔴 NUEVOS ICONOS PARA LA REVISTA ANATOMÍA:
   Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser
 } from 'lucide-react';
