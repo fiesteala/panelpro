@@ -11503,7 +11503,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS Y FINANZAS B2B ---
+// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B ---
 // ==========================================
 const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
@@ -11521,6 +11521,11 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const [resenasList, setResenasList] = useState([]);
   const [ventas, setVentas] = useState([]); 
   
+  // 🔴 NUEVO: ESTADOS PARA EL TALLER DE PRODUCCIÓN
+  const [pedidosTaller, setPedidosTaller] = useState([]);
+  const [ordenActiva, setOrdenActiva] = useState(null);
+  const [isFetchingOrden, setIsFetchingOrden] = useState(false);
+
   const [correosVisibles, setCorreosVisibles] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -11571,8 +11576,96 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       setVentas(data);
     });
 
-    return () => { unsubLic(); unsubRes(); unsubVentas(); };
+    // 🔴 NUEVO: ESCUCHADOR DEL TALLER (Detecta cuando pulserasStatus existe)
+    const unsubEventosTaller = onSnapshot(collection(db, "eventos"), (snap) => {
+      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const pedidos = data.filter(e => e.pulserasStatus === 'enviado' || e.pulserasStatus === 'impreso');
+      // Ordenamos los más recientes primero
+      pedidos.sort((a, b) => new Date(b.fechaEnvioTaller || 0) - new Date(a.fechaEnvioTaller || 0));
+      setPedidosTaller(pedidos);
+    });
+
+    return () => { unsubLic(); unsubRes(); unsubVentas(); unsubEventosTaller(); };
   }, []);
+
+  // ----------------------------------------------------
+  // 🏭 LÓGICA DEL TALLER DE PRODUCCIÓN
+  // ----------------------------------------------------
+  const procesarOrdenTaller = async (evento) => {
+    setIsFetchingOrden(true);
+    try {
+      // Extraemos la lista de invitados reales desde la bóveda del cliente
+      const listRef = collection(db, "eventos", evento.id, "invitados");
+      const listSnap = await getDocs(listRef);
+      const invitadosDB = listSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const invitadosVIP = invitadosDB.filter(g => g.isSecurityKit);
+
+      // Aplanamos a los invitados para tener pulseras individuales (Magia negra)
+      const flattened = [];
+      invitadosVIP.forEach(guest => {
+        (guest.subGuests || []).forEach((sg, idx) => {
+          flattened.push({
+            idReal: sg.id,
+            nombreAImprimir: sg.name || (sg.isChild ? 'Niño' : 'Acompañante'),
+            esNino: sg.isChild,
+            qrDataUrl: sg.id // En un futuro aquí puedes poner el enlace completo del escáner
+          });
+        });
+      });
+
+      setOrdenActiva({
+         eventoId: evento.id,
+         cliente: evento.nombres || 'Cliente Desconocido',
+         fechaPedido: evento.fechaEnvioTaller,
+         config: evento.pulserasConfig || {},
+         fechaEvento: evento.fecha,
+         listaImpresion: flattened,
+         status: evento.pulserasStatus
+      });
+    } catch (error) {
+      console.error("Error procesando orden:", error);
+      setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'No se pudo descargar la lista de este evento.' });
+    }
+    setIsFetchingOrden(false);
+  };
+
+  const marcarComoImpreso = async () => {
+     try {
+        await updateDoc(doc(db, "eventos", ordenActiva.eventoId), { pulserasStatus: 'impreso' });
+        setOrdenActiva({...ordenActiva, status: 'impreso'});
+        setDialog({ isOpen: true, type: 'alert', title: '¡Éxito!', message: 'El lote se marcó como impreso y despachado.' });
+     } catch (error) {
+        setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'Fallo al actualizar el estatus.' });
+     }
+  };
+
+  const descargarCSVProduccion = () => {
+      let csv = "ID_Brazalete,PreTitulo,Nombre_Evento,Fecha_Evento,Nombre_Invitado,Tipo,Codigo_QR\n";
+      
+      const evtName = ordenActiva.config.eventName || 'Evento VIP';
+      const preTitle = ordenActiva.config.preTitle || '';
+      const dateStr = ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : '';
+
+      ordenActiva.listaImpresion.forEach((item, index) => {
+          // Limpiamos comas en los textos para no romper el CSV
+          const cleanPre = preTitle.replace(/,/g, '');
+          const cleanEvt = evtName.replace(/,/g, '');
+          const cleanName = item.nombreAImprimir.replace(/,/g, '');
+          const tipo = item.esNino ? 'Niño' : 'Adulto';
+          
+          csv += `${index + 1},${cleanPre},${cleanEvt},${dateStr},${cleanName},${tipo},${item.qrDataUrl}\n`;
+      });
+
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `DataMerge_Produccion_${evtName.replace(/\s+/g, '_')}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  };
+  // ----------------------------------------------------
 
   const handleCreateLicense = async (e) => {
     e.preventDefault();
@@ -11627,40 +11720,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         referencia: formData.referenciaPago,
         cliente: formData.nombres
       });
-
-      const tableDemoId = `mesa_demo_${Date.now()}`;
-      const guest1DemoId = `guest_demo_1_${Date.now()}`;
-      const guest2DemoId = `guest_demo_2_${Date.now()}`;
-      
-      const promesasDemo = [
-        setDoc(doc(db, "eventos", newEventId, "mesas", tableDemoId), {
-          id: tableDemoId, name: "Mesa VIP (Ejemplo)", capacity: 10, tipo: "redonda",
-          configDetalle: { tipo: "redonda", capacidadRedonda: 10 }, x: null, y: null, rotation: 0
-        }),
-        setDoc(doc(db, "eventos", newEventId, "invitados", guest1DemoId), {
-          id: guest1DemoId, name: "Familia de Ejemplo", passes: 4, originalPasses: 4, childrenPasses: 0,
-          status: "confirmado", side: "general", entered: 0, tableId: tableDemoId, sent: true,
-          subGuests: [
-            {id: `${guest1DemoId}_0`, name: "Juan Pérez", isChild: false, entered: false},
-            {id: `${guest1DemoId}_1`, name: "María Gómez", isChild: false, entered: false},
-            {id: `${guest1DemoId}_2`, name: "Acompañante 1", isChild: false, entered: false},
-            {id: `${guest1DemoId}_3`, name: "Acompañante 2", isChild: false, entered: false}
-          ]
-        }),
-        setDoc(doc(db, "eventos", newEventId, "invitados", guest2DemoId), {
-          id: guest2DemoId, name: "Amigo Festejados (Ejemplo)", passes: 1, originalPasses: 1, childrenPasses: 0,
-          status: "pendiente", side: "general", entered: 0, tableId: null, sent: false, subGuests: []
-        }),
-        setDoc(doc(db, "eventos", newEventId, "gastos", `gasto_demo_1_${Date.now()}`), {
-          id: `gasto_demo_1_${Date.now()}`, concepto: "Lugar / Hacienda (Ejemplo)", categoria: "Lugar",
-          estimado: 80000, pagado: 40000, fechaLimite: "2026-12-01", historial: []
-        }),
-        setDoc(doc(db, "eventos", newEventId, "tareas", `tarea_demo_1_${Date.now()}`), {
-          id: `tarea_demo_1_${Date.now()}`, titulo: "Definir lista de invitados oficial", categoria: "Logística", 
-          fechaLimite: "", estado: "proceso"
-        })
-      ];
-      await Promise.all(promesasDemo);
 
       setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role, urlInvitacion: formData.urlInvitacion, esRecurrente: esClienteRecurrente });
       setClientPhone('');
@@ -11774,23 +11833,54 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     return acc;
   }, { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, security_kit: 0 });
 
-  const exportarCorteContador = () => {
-    const csvRows = ventasDelMes.map(v => {
-      const fechaLimpia = v.fecha?.toDate ? v.fecha.toDate().toLocaleDateString('es-MX') : 'Reciente';
-      return `${fechaLimpia},${v.cliente},${v.plan.toUpperCase()},${v.vendedor},${v.referencia},${v.monto}`;
-    });
-    const headers = "Fecha,Cliente,Plan Vendido,Vendedor,Referencia Bancaria,Monto MXN\n";
-    const csvContent = "data:text/csv;charset=utf-8," + encodeURI(headers + csvRows.join("\n"));
-    const link = document.createElement("a");
-    link.setAttribute("href", csvContent);
-    link.setAttribute("download", `Corte_Baulia_${mesSeleccionado}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  const pedidosNuevos = pedidosTaller.filter(p => p.pulserasStatus === 'enviado').length;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
+      
+      {/* 🔴 VISTA DE IMPRESIÓN (OCULTA HASTA QUE SE MANDA A IMPRIMIR) */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+        .font-firma { font-family: 'Great Vibes', cursive; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            .print-layer, .print-layer * { visibility: visible; }
+            .print-layer { position: absolute; left: 0; top: 0; width: 100vw; margin: 0; padding: 0; background: white; }
+            .break-after { page-break-after: always; }
+        }
+      `}</style>
+
+      {ordenActiva && (
+          <div className="print-layer hidden absolute bg-white text-black z-[99999] p-0 m-0 w-full min-h-screen font-sans">
+              {ordenActiva.listaImpresion.map((item, index) => {
+                  const isPageBreak = (index + 1) % 10 === 0;
+                  return (
+                      <div key={index} className={`flex h-[2.5cm] w-[25cm] border border-dashed border-gray-300 mb-[2mm] items-center overflow-hidden bg-white mx-auto ${isPageBreak ? 'break-after' : ''}`} style={{ boxSizing: 'border-box' }}>
+                          <div className="w-[10%] h-full bg-gray-100 border-r border-gray-300 flex items-center justify-center"><span className="-rotate-90 text-[8px] text-gray-500 tracking-widest font-bold">PEGAMENTO</span></div>
+                          <div className="w-[12%] h-full flex items-center justify-center border-r border-gray-200"><span className="-rotate-90 text-[6px] text-gray-400 font-bold tracking-widest">by BAULIA.COM</span></div>
+                          <div className="w-[38%] h-full flex flex-col justify-center items-center px-4 relative">
+                              {ordenActiva.config.preTitle && <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-0.5">{ordenActiva.config.preTitle}</span>}
+                              {ordenActiva.config.logoBase64 ? (
+                                  <img src={ordenActiva.config.logoBase64} alt="Logo" className="h-8 object-contain mb-1" />
+                              ) : (
+                                  <span className="font-firma text-2xl text-black leading-none mb-1 text-center w-full">{ordenActiva.config.eventName || 'Evento VIP'}</span>
+                              )}
+                              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : ''}</span>
+                          </div>
+                          <div className="w-[25%] h-full flex flex-col justify-center px-4 border-l border-gray-200">
+                              <span className="font-bold text-sm truncate uppercase">{item.nombreAImprimir}</span>
+                              <span className="text-[8px] text-gray-500 mt-1 uppercase font-bold">{item.esNino ? 'Pase Niño' : 'Pase VIP'}</span>
+                          </div>
+                          <div className="w-[15%] h-full flex items-center justify-center border-l border-gray-200 bg-white">
+                              <QrCode size={40} className="text-black" />
+                          </div>
+                      </div>
+                  );
+              })}
+          </div>
+      )}
+
       {dialog.isOpen && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-transparent dark:border-white/20 transition-colors">
@@ -11825,12 +11915,21 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="flex gap-4 bg-white dark:bg-[#0a0a0a] p-2 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm w-full md:w-max overflow-x-auto transition-colors">
            <button onClick={() => setAdminTab('licencias')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'licencias' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
-             <Building size={16}/> Clientes Activos
+             <Building size={16}/> Clientes
            </button>
+           
+           {/* 🔴 NUEVA PESTAÑA: TALLER DE PRODUCCIÓN */}
+           {isSuperAdmin && (
+             <button onClick={() => setAdminTab('taller')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'taller' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
+               <Factory size={16}/> Taller 
+               {pedidosNuevos > 0 && <span className="bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-1">{pedidosNuevos}</span>}
+             </button>
+           )}
+
            {isSuperAdmin && (
              <>
                <button onClick={() => setAdminTab('finanzas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'finanzas' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
-                 <PieChart size={16}/> Corte Financiero
+                 <PieChart size={16}/> Finanzas
                </button>
                <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
                  <Star size={16}/> Reseñas
@@ -11846,9 +11945,124 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         )}
       </div>
 
+      {/* 🔴 VISTA DEL TALLER DE PRODUCCIÓN */}
+      {adminTab === 'taller' && isSuperAdmin && (
+        <div className="animate-in fade-in space-y-6">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col md:flex-row">
+            
+            {/* LADO IZQUIERDO: LISTA DE PEDIDOS */}
+            <div className="w-full md:w-1/2 lg:w-2/5 border-r border-slate-200 dark:border-white/10">
+               <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111]">
+                 <h3 className="font-bold text-slate-800 dark:text-white text-sm">Bandeja de Pedidos ({pedidosTaller.length})</h3>
+                 <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Órdenes cerradas por el cliente</p>
+               </div>
+               <div className="overflow-y-auto max-h-[600px] custom-scrollbar">
+                  {pedidosTaller.length === 0 ? (
+                      <div className="p-10 text-center text-slate-400 flex flex-col items-center">
+                        <Factory size={40} className="mb-3 opacity-20" />
+                        <p className="text-sm font-bold">No hay pedidos pendientes.</p>
+                      </div>
+                  ) : (
+                      <ul className="divide-y divide-slate-100 dark:divide-white/5">
+                        {pedidosTaller.map(p => {
+                           const isNuevo = p.pulserasStatus === 'enviado';
+                           return (
+                              <li key={p.id} onClick={() => procesarOrdenTaller(p)} className={`p-4 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 transition-colors ${ordenActiva?.eventoId === p.id ? 'bg-indigo-50 dark:bg-indigo-500/20 border-l-4 border-indigo-500' : 'border-l-4 border-transparent'}`}>
+                                 <div className="flex justify-between items-start mb-1">
+                                    <span className="font-black text-slate-800 dark:text-white text-sm">{p.nombres}</span>
+                                    {isNuevo ? (
+                                        <span className="bg-rose-500 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded">Nuevo</span>
+                                    ) : (
+                                        <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded">Impreso</span>
+                                    )}
+                                 </div>
+                                 <div className="flex justify-between items-center text-xs text-slate-500">
+                                    <span className="flex items-center"><Calendar size={12} className="mr-1"/> {p.fechaEnvioTaller ? new Date(p.fechaEnvioTaller).toLocaleDateString() : 'Desconocida'}</span>
+                                    <span>Plan: {p.plan?.replace('_', ' ').toUpperCase()}</span>
+                                 </div>
+                              </li>
+                           )
+                        })}
+                      </ul>
+                  )}
+               </div>
+            </div>
+
+            {/* LADO DERECHO: DETALLE DE LA ORDEN Y EXTRACCIÓN */}
+            <div className="w-full md:w-1/2 lg:w-3/5 bg-slate-50/50 dark:bg-[#050505]">
+               {!ordenActiva ? (
+                   <div className="h-full flex flex-col items-center justify-center text-slate-400 p-10 text-center">
+                      <Printer size={60} className="mb-4 opacity-20" />
+                      <p className="text-lg font-black text-slate-600 dark:text-slate-300">Selecciona un pedido</p>
+                      <p className="text-xs mt-2 max-w-sm">Haz clic en una orden de la izquierda para extraer el diseño y generar los archivos de impresión (Data Merge).</p>
+                   </div>
+               ) : isFetchingOrden ? (
+                   <div className="h-full flex items-center justify-center text-indigo-500 font-bold animate-pulse">Extrayendo datos de la bóveda...</div>
+               ) : (
+                   <div className="p-6 space-y-6 animate-in fade-in">
+                       {/* Resumen Diseño */}
+                       <div className="bg-white dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-5">
+                          {ordenActiva.config.logoBase64 ? (
+                              <div className="w-20 h-20 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center p-2 shrink-0 border border-slate-200 dark:border-white/5">
+                                 <img src={ordenActiva.config.logoBase64} alt="Logo" className="max-h-full max-w-full object-contain" />
+                              </div>
+                          ) : (
+                              <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20">
+                                 <Palette size={30} className="text-indigo-400" />
+                              </div>
+                          )}
+                          <div className="flex-1">
+                             <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Datos Impresos en Pulsera</p>
+                             <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Pre-título:</span> {ordenActiva.config.preTitle || '(Vacío)'}</p>
+                             <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Nombre Principal:</span> {ordenActiva.config.eventName || 'No asignado'}</p>
+                             <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Fecha del Evento:</span> {ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : 'No asignada'}</p>
+                          </div>
+                       </div>
+
+                       {/* Resumen Cantidades */}
+                       <div className="grid grid-cols-2 gap-4">
+                           <div className="bg-indigo-600 text-white rounded-2xl p-5 shadow-lg flex flex-col items-center justify-center text-center">
+                               <p className="text-[10px] uppercase font-black tracking-widest opacity-80 mb-1">Total a Producir</p>
+                               <p className="text-4xl font-editorial font-black">{ordenActiva.listaImpresion.length}</p>
+                               <p className="text-[10px] opacity-80 mt-1">Brazaletes Físicos</p>
+                           </div>
+                           <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm flex flex-col justify-center space-y-2">
+                               <div className="flex justify-between items-center text-sm">
+                                  <span className="text-slate-500 font-bold">Adultos</span>
+                                  <span className="font-black text-slate-800 dark:text-white">{ordenActiva.listaImpresion.filter(i=>!i.esNino).length}</span>
+                               </div>
+                               <div className="flex justify-between items-center text-sm">
+                                  <span className="text-sky-500 font-bold">Niños</span>
+                                  <span className="font-black text-sky-600 dark:text-sky-400">{ordenActiva.listaImpresion.filter(i=>i.esNino).length}</span>
+                               </div>
+                           </div>
+                       </div>
+
+                       {/* Botones de Acción */}
+                       <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
+                           <button onClick={descargarCSVProduccion} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center">
+                               <FileText size={18} className="mr-2" /> Descargar CSV (Para Data Merge)
+                           </button>
+                           
+                           <button onClick={() => window.print()} className="w-full py-4 bg-white dark:bg-[#111] text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 rounded-xl font-bold text-xs uppercase tracking-widest shadow-sm hover:bg-slate-50 dark:hover:bg-white/5 transition-colors flex items-center justify-center">
+                               <Printer size={18} className="mr-2" /> Imprimir Plantilla Web Directa
+                           </button>
+
+                           {ordenActiva.status !== 'impreso' && (
+                               <button onClick={marcarComoImpreso} className="w-full mt-4 py-4 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs uppercase tracking-widest shadow-sm hover:bg-emerald-100 transition-colors flex items-center justify-center">
+                                   <CheckCircle2 size={18} className="mr-2" /> Marcar como Producido y Despachado
+                               </button>
+                           )}
+                       </div>
+                   </div>
+               )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {adminTab === 'licencias' && (
         <div className="flex flex-col xl:flex-row gap-3 mb-6 w-full overflow-x-auto pb-2 custom-scrollbar">
-           
            <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true }); }} className="shrink-0 px-6 py-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-2xl font-black shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform flex items-center justify-center min-w-[200px]">
               <Plus size={18} className="mr-2 text-amber-500 dark:text-slate-900"/> Nueva Bóveda
            </button>
@@ -12043,7 +12257,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                     setEditingLic({...lic, originalPlan: lic.plan, isQrEnabled: lic.isQrEnabled !== false, isPassCountEnabled: lic.isPassCountEnabled !== false}); 
                                     setIsEditModalOpen(true); 
                                   }} 
-                                  title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"><Edit2 size={16} />
+                                  title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"><Edit3 size={16} />
                                 </button>
                                 
                                 {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan, tipoEvento: lic.tipoEvento || 'general', urlInvitacion: lic.urlInvitacion || '' })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-transparent dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"><ExternalLink size={16} /></button>}
@@ -12129,7 +12343,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       </div>
                     </div>
 
-                    {/* 🔴 LÓGICA DE VISIBILIDAD APLICADA: Solo Oro y Diamante */}
                     {['oro', 'diamante'].includes(formData.plan) && (
                       <>
                         <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
@@ -12170,7 +12383,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
               </form>
             ) : (
               <div className="p-8 text-center bg-slate-50 dark:bg-transparent transition-colors">
-                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-transparent dark:border-emerald-500/30"><CheckCircle size={40} /></div>
+                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-transparent dark:border-emerald-500/30"><CheckCircle2 size={40} /></div>
                 <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2 transition-colors">¡Accesos Creados!</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 transition-colors">La venta se registró en el Libro Mayor por <b>{authData.email.split('@')[0]}</b>.</p>
                 <div className="bg-white dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 text-left text-sm mb-6 shadow-sm transition-colors">
@@ -12240,7 +12453,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                   </div>
                 </div>
 
-                {/* 🔴 LÓGICA DE VISIBILIDAD APLICADA: Solo Oro y Diamante */}
                 {['oro', 'diamante'].includes(editingLic.plan) && (
                   <>
                     <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
