@@ -19,6 +19,9 @@ import {
   Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser
 } from 'lucide-react';
 
+// 🔴 AQUÍ CONECTAMOS TU NUEVO MÓDULO EXCLUSIVO:
+import GestorPulserasView from './views/GestorPulserasView';
+
 // 🔴 CONEXIÓN A STRIPE (Reemplaza con tu clave Publicable de Stripe)
 const stripePromise = loadStripe('pk_test_51TBrAV3BmYGrtpk6QnQvZhounbmZAF7Ea107Fh734agWXri2z9N91BpgFKWeqBfiBq3ePLbFoTro0Z2fC0Qs5lnA00vL7mha3m');
 

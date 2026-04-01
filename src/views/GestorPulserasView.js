@@ -1,7 +1,13 @@
+import React, { useState, useEffect } from 'react';
+import { doc, getDoc, updateDoc, setDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
+import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Trash2 } from 'lucide-react';
+// 🔴 IMPORTANTE: Ajusta la ruta de '../firebase' para que coincida con donde está tu archivo firebase.js
+import { db } from '../firebase'; 
+
 // ==========================================
 // --- COMPONENTE: GESTOR DE PULSERAS (KIT DE SEGURIDAD B2B) ---
 // ==========================================
-const GestorPulserasView = ({ addNotification }) => {
+const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ eventName: '', eventDate: '', eventType: 'boda', logoUrl: '' });
   const [wristbandList, setWristbandList] = useState([]);
   const [newEntry, setNewEntry] = useState({ name: '', passes: 1 });
@@ -10,10 +16,11 @@ const GestorPulserasView = ({ addNotification }) => {
 
   // 1. Cargar datos iniciales desde Firebase
   useEffect(() => {
+    if (!eventId) return;
     const fetchData = async () => {
       try {
         // Cargar configuración de diseño y estatus
-        const docRef = doc(db, "eventos", ID_DEL_EVENTO);
+        const docRef = doc(db, "eventos", eventId);
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -23,7 +30,7 @@ const GestorPulserasView = ({ addNotification }) => {
         }
 
         // Cargar lista de invitados exclusiva para pulseras
-        const listRef = collection(db, "eventos", ID_DEL_EVENTO, "pulseras");
+        const listRef = collection(db, "eventos", eventId, "pulseras");
         const listSnap = await getDocs(listRef);
         const listData = listSnap.docs.map(d => ({ id: d.id, ...d.data() }));
         setWristbandList(listData);
@@ -33,14 +40,14 @@ const GestorPulserasView = ({ addNotification }) => {
       setIsLoading(false);
     };
     fetchData();
-  }, []);
+  }, [eventId]);
 
   // 2. Guardar el Diseño
   const handleSaveDesign = async (e) => {
     e.preventDefault();
     if (isLocked) return;
     try {
-      await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { pulserasConfig: designConfig });
+      await updateDoc(doc(db, "eventos", eventId), { pulserasConfig: designConfig });
       if(addNotification) addNotification('Diseño Guardado', 'Los datos de la pulsera se actualizaron.', 'success');
     } catch (error) {
       if(addNotification) addNotification('Error', 'Fallo al guardar el diseño.', 'error');
@@ -56,7 +63,7 @@ const GestorPulserasView = ({ addNotification }) => {
     const newDoc = { name: newEntry.name, passes: Number(newEntry.passes) || 1 };
     
     try {
-      await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "pulseras", newId), newDoc);
+      await setDoc(doc(db, "eventos", eventId, "pulseras", newId), newDoc);
       setWristbandList(prev => [...prev, { id: newId, ...newDoc }]);
       setNewEntry({ name: '', passes: 1 });
     } catch (error) {
@@ -68,7 +75,7 @@ const GestorPulserasView = ({ addNotification }) => {
   const handleRemoveEntry = async (id) => {
     if (isLocked) return;
     try {
-      await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "pulseras", id));
+      await deleteDoc(doc(db, "eventos", eventId, "pulseras", id));
       setWristbandList(prev => prev.filter(item => item.id !== id));
     } catch (error) {
       if(addNotification) addNotification('Error', 'No se pudo eliminar.', 'error');
@@ -104,7 +111,7 @@ const GestorPulserasView = ({ addNotification }) => {
             passes: parseInt(cols[1]) || 1 
           };
           nuevosItems.push({ id: newId, ...newDoc });
-          promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "pulseras", newId), newDoc));
+          promesas.push(setDoc(doc(db, "eventos", eventId, "pulseras", newId), newDoc));
         }
       }
 
@@ -131,7 +138,7 @@ const GestorPulserasView = ({ addNotification }) => {
     if (!confirm) return;
 
     try {
-      await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { 
+      await updateDoc(doc(db, "eventos", eventId), { 
          pulserasStatus: 'enviado',
          fechaEnvioTaller: new Date().toISOString()
       });
@@ -280,3 +287,5 @@ const GestorPulserasView = ({ addNotification }) => {
     </div>
   );
 };
+
+export default GestorPulserasView;
