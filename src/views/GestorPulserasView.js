@@ -4,7 +4,7 @@ import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Tr
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: GESTOR DE PULSERAS VIP (V8 - CSV HÍBRIDO INTELIGENTE) ---
+// --- COMPONENTE: GESTOR DE PULSERAS VIP (V9 - UX OPTIMIZADO) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ preTitle: '', eventName: '', logoBase64: '' });
@@ -171,26 +171,25 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     }
   };
 
-  // 🔴 PLANTILLA CSV DOCUMENTAL (Con instrucciones ultra claras y ejemplos híbridos)
+  // 🔴 PLANTILLA CSV CON INSTRUCCIONES ENTRE COMILLAS (Blindaje contra columnas rotas)
   const downloadTemplate = () => {
     let csv = "";
-    csv += "BAULIA TECHNOLOGIES - FORMATO OFICIAL DE PRODUCCIÓN DE ACCESOS\n";
-    csv += `Evento: ${designConfig.eventName || 'Tu Evento'}\n`;
-    csv += "=================================================================\n";
-    csv += "INSTRUCCIONES DE LLENADO:\n";
-    csv += "1. En 'Titular o Familia' escribe el nombre principal (Ej. Familia Garza). Esto genera 1 pulsera automática.\n";
-    csv += "2. En 'Acompañantes Extras' y 'Niños Extras' si no tienes el nombre escribe SOLO NÚMEROS (Ej. 2). Si no llevan extras pon 0.\n";
-    csv += "3. Si tienes los nombres, escríbelos separados por una diagonal (Ej. Ana / Carlos / Roberto).\n";
-    csv += "4. Si tienes algunos nombres y otros no, ¡puedes mezclarlos! (Ej. Ana / 2) creará a 'Ana' y 2 pases genéricos.\n";
-    csv += "5. Guarda el archivo manteniendo el formato CSV y súbelo a la plataforma.\n";
-    csv += "=================================================================\n\n";
+    csv += "\"BAULIA TECHNOLOGIES - FORMATO OFICIAL DE PRODUCCIÓN DE ACCESOS\"\n";
+    csv += `"Evento: ${designConfig.eventName || 'Tu Evento'}"\n`;
+    csv += "\"=================================================================\"\n";
+    csv += "\"INSTRUCCIONES DE LLENADO:\"\n";
+    csv += "\"1. En 'Titular o Familia' escribe el nombre principal (Ej. Familia Garza). Esto genera 1 pulsera automática.\"\n";
+    csv += "\"2. En 'Acompañantes Extras' y 'Niños Extras' si no tienes el nombre escribe SOLO NÚMEROS (Ej. 2). Si no llevan extras pon 0.\"\n";
+    csv += "\"3. Si tienes los nombres, escríbelos separados por una diagonal (Ej. Ana / Carlos / Roberto).\"\n";
+    csv += "\"4. Si tienes algunos nombres y otros no, ¡puedes mezclarlos! (Ej. Ana / 2) creará a 'Ana' y 2 pases genéricos.\"\n";
+    csv += "\"5. Guarda el archivo manteniendo el formato CSV y súbelo a la plataforma.\"\n";
+    csv += "\"=================================================================\"\n\n";
     
     csv += "Titular o Familia,Acompañantes EXTRAS,Niños EXTRAS\n";
     csv += "Familia Garza,Ana / Carlos / 2,Mia / 1\n";
     csv += "Juan Perez,2,0\n";
     csv += "Sofia Rodriguez,0,1\n";
 
-    // BOM para UTF-8 (Acentos perfectos en Excel)
     const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -201,7 +200,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     document.body.removeChild(link);
   };
 
-  // 🔴 LECTOR CSV HÍBRIDO (El cerebro mágico que lee Ana / 2)
   const handleFileUpload = (e) => {
     if (isLocked) return;
     const file = e.target.files[0];
@@ -220,7 +218,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       const rows = text.split(/\r?\n/).filter(r => r.trim()); 
       
       let startIdx = 0;
-      // Buscamos dónde terminan las instrucciones de Baulia y empiezan los datos
       for (let i = 0; i < rows.length; i++) {
           if (rows[i].toLowerCase().includes('titular')) {
               startIdx = i + 1;
@@ -228,7 +225,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
           }
       }
 
-      // Función mágica para procesar columnas mixtas (Ej: "Ana / 2")
       const processExtrasCol = (colStr, prefixText) => {
           if (!colStr) return [];
           const parts = colStr.split('/').map(s => s.trim()).filter(s => s);
@@ -236,9 +232,9 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
           let namedList = [];
           
           parts.forEach(p => {
-              if (/^\d+$/.test(p)) { // Si es un número puro
+              if (/^\d+$/.test(p)) { 
                   countGeneric += parseInt(p, 10);
-              } else { // Si es texto/nombre
+              } else { 
                   namedList.push(p);
               }
           });
@@ -256,11 +252,11 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       for(let i = startIdx; i < rows.length; i++) {
         const cols = rows[i].split(','); 
         if (cols[0] && cols[0].trim() !== '') {
-          const guestName = cols[0].trim();
-          const adCol = cols[1] || "";
-          const niCol = cols[2] || "";
+          // Eliminamos comillas si el usuario dejó algunas residuales
+          const guestName = cols[0].replace(/['"]/g, '').trim();
+          const adCol = cols[1] ? cols[1].replace(/['"]/g, '').trim() : "0";
+          const niCol = cols[2] ? cols[2].replace(/['"]/g, '').trim() : "0";
 
-          // Usamos la función mágica para adultos y niños
           const adArray = processExtrasCol(adCol, 'Acompañante');
           const niArray = processExtrasCol(niCol, 'Niño');
 
@@ -372,10 +368,10 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* COLUMNA IZQUIERDA: DISEÑO Y VISTA PREVIA */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* 🔴 COLUMNA IZQUIERDA: DISEÑO, VISTA PREVIA Y BOTÓN ENVIAR */}
+        <div className="lg:col-span-5 flex flex-col space-y-6">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors flex flex-col">
             <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex items-center">
                <Palette size={18} className="text-indigo-500 mr-2" />
@@ -438,7 +434,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                             {designConfig.eventName || 'Evento VIP'}
                         </div>
                     )}
-                    <span className="text-[5px] font-black text-slate-400 uppercase tracking-widest">{eventDateStr ? new Date(eventDateStr).toLocaleDateString('es-MX') : 'Fecha de Evento'}</span>
+                    <span className="text-[5px] font-black text-slate-400 uppercase tracking-widest">{eventDateStr ? new Date(eventDateStr).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : 'Fecha de Evento'}</span>
                 </div>
                 <div className="w-[25%] flex flex-col justify-center px-2">
                     <span className="text-[8px] font-black uppercase text-slate-900 truncate">Juan Pérez</span>
@@ -450,22 +446,24 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
              </div>
              <p className="text-[9px] text-center text-slate-400 mt-3 italic">Esta es una representación a escala. La pulsera física medirá 25cm de largo y se imprimirá en papel Tyvek de alta resistencia.</p>
           </div>
-        </div>
 
-        {/* COLUMNA DERECHA: LISTA DE NOMBRES */}
-        <div className="lg:col-span-7 flex flex-col space-y-6">
-          
-          <div className="bg-indigo-600 dark:bg-amber-500 rounded-3xl p-6 text-white dark:text-slate-900 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
-             <div className="text-center sm:text-left">
+          {/* 🔴 NUEVA POSICIÓN: TARJETA DE RESUMEN Y BOTÓN ENVIAR */}
+          <div className="bg-indigo-600 dark:bg-amber-500 rounded-3xl p-6 text-white dark:text-slate-900 shadow-xl flex flex-col items-center text-center gap-5">
+             <div>
                <p className="text-[10px] font-black uppercase tracking-widest mb-1 opacity-80">Total a Imprimir</p>
                <h3 className="text-5xl font-editorial font-black">{totalPulserasSolicitadas} <span className="text-base font-sans font-medium opacity-80">pulseras</span></h3>
              </div>
-             <button onClick={handleSendToWorkshop} disabled={isLocked || wristbandList.length === 0} className="w-full sm:w-auto py-4 px-8 bg-white text-indigo-700 dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center">
+             <button onClick={handleSendToWorkshop} disabled={isLocked || wristbandList.length === 0} className="w-full py-4 px-8 bg-white text-indigo-700 dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center">
                <Send size={16} className="mr-2" /> {isLocked ? 'Orden en Proceso' : 'Enviar a Taller'}
              </button>
           </div>
+
+        </div>
+
+        {/* 🔴 COLUMNA DERECHA: LISTA DE NOMBRES EXPANDIDA */}
+        <div className="lg:col-span-7 flex flex-col h-full min-h-[600px]">
           
-          <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col">
+          <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col h-full">
             
             <div className="bg-sky-50 dark:bg-sky-900/20 border-b border-sky-100 dark:border-sky-800/30 p-4 flex items-start gap-3">
                <Info size={20} className="text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
@@ -477,7 +475,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                </div>
             </div>
 
-            <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+            <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 shrink-0">
               <div>
                   <h3 className="font-bold text-slate-800 dark:text-white text-sm flex items-center"><Users size={16} className="mr-2 text-indigo-500" /> Desglose para Impresión</h3>
               </div>
@@ -495,9 +493,9 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
               )}
             </div>
             
-            {/* 🔴 AGREGAR MANUALMENTE: ALINEACIÓN PERFECTA (items-end en todos los contenedores) */}
+            {/* AGREGAR MANUALMENTE */}
             {!isLocked && (
-                <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-white dark:bg-transparent">
+                <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-white dark:bg-transparent shrink-0">
                     <form onSubmit={handleAddEntry} className="flex flex-col sm:flex-row w-full gap-3 items-end">
                         <div className="flex-1 w-full">
                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Titular (Incluye 1 pulsera)</span>
@@ -520,7 +518,8 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                 </div>
             )}
 
-            <div className="overflow-y-auto custom-scrollbar flex-1 max-h-[400px]">
+            {/* 🔴 AUMENTAMOS LA ALTURA MÁXIMA DE LA TABLA */}
+            <div className="overflow-y-auto custom-scrollbar flex-1 max-h-[700px]">
               {flattenedList.length === 0 ? (
                 <div className="h-full min-h-[250px] flex flex-col items-center justify-center text-slate-400 p-8 text-center">
                   <ListTodo size={40} className="mb-3 opacity-20" />
