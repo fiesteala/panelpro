@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc, setDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
-import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Trash2, Image as ImageIcon, Download, Eye, Edit3 } from 'lucide-react';
+import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Trash2, Image as ImageIcon, Download, Eye, Edit3, Info } from 'lucide-react';
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: GESTOR DE PULSERAS VIP (V5 - NOMBRES ULTRA PREMIUM) ---
+// --- COMPONENTE: GESTOR DE PULSERAS VIP (V6 - AUTO-EXPLICATIVO) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ eventName: '', eventDate: '', eventType: 'boda', logoBase64: '' });
   const [wristbandList, setWristbandList] = useState([]);
-  const [newEntry, setNewEntry] = useState({ name: '', adultPasses: 1, childrenPasses: 0 });
+  // 🔴 Cambiamos a "extras" empezando en 0
+  const [newEntry, setNewEntry] = useState({ name: '', extraAdults: 0, extraChildren: 0 });
   const [isLocked, setIsLocked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -89,30 +90,29 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     if (isLocked) return;
     
     const guestName = newEntry.name.trim();
-    const adultos = Number(newEntry.adultPasses) || 1;
-    const ninos = Number(newEntry.childrenPasses) || 0;
-    const totalPases = adultos + ninos;
+    // 🔴 Matemáticas claras: El titular ya cuenta como 1
+    const adExtras = Number(newEntry.extraAdults) || 0;
+    const niExtras = Number(newEntry.extraChildren) || 0;
+    const totalPases = 1 + adExtras + niExtras;
 
     if (!guestName) {
-        if(addNotification) addNotification('Falta el nombre', 'Ingresa el nombre del invitado.', 'warning');
+        if(addNotification) addNotification('Falta el nombre', 'Ingresa el nombre del invitado principal.', 'warning');
         return;
     }
     
     const newId = `p_${Date.now()}`;
     
-    // Generamos acompañantes genéricos, el cliente podrá editarlos en la tabla
-    const initSubGuests = Array(totalPases).fill(null).map((_, i) => ({
-      id: `usr_${newId}_${i}`,
-      name: i === 0 ? guestName : (i >= adultos ? `Niño ${i - adultos + 1}` : `Acompañante ${i}`), 
-      isChild: i >= adultos, 
-      entered: false
-    }));
+    const initSubGuests = [
+      { id: `usr_${newId}_0`, name: guestName, isChild: false, entered: false },
+      ...Array(adExtras).fill(null).map((_, i) => ({ id: `usr_${newId}_A${i}`, name: `Acompañante ${i+1}`, isChild: false, entered: false })),
+      ...Array(niExtras).fill(null).map((_, i) => ({ id: `usr_${newId}_N${i}`, name: `Niño ${i+1}`, isChild: true, entered: false }))
+    ];
     
     const newDoc = { 
       name: guestName, 
       passes: totalPases, 
       originalPasses: totalPases,
-      childrenPasses: ninos,
+      childrenPasses: niExtras,
       status: 'confirmado',
       side: 'general', 
       entered: 0, 
@@ -126,7 +126,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     try {
       await setDoc(doc(db, "eventos", eventId, "invitados", newId), newDoc);
       setWristbandList(prev => [{ id: newId, ...newDoc }, ...prev]); 
-      setNewEntry({ name: '', adultPasses: 1, childrenPasses: 0 }); 
+      setNewEntry({ name: '', extraAdults: 0, extraChildren: 0 }); 
       if(addNotification) addNotification('Agregado', `${guestName} y acompañantes añadidos.`, 'success');
     } catch (error) {
       if(addNotification) addNotification('Error', `No se pudo guardar: ${error.message}`, 'error');
@@ -143,7 +143,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     }
   };
 
-  // 🔴 EDICIÓN EN VIVO (Ultra Premium)
   const handleUpdateNameInline = async (parentId, subGuestId, newName) => {
     if (isLocked || !newName.trim()) return;
     
@@ -154,17 +153,14 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     const parent = { ...updatedList[parentIndex] };
     const subIndex = parent.subGuests.findIndex(sg => sg.id === subGuestId);
 
-    // Actualizamos el nombre en la memoria
     if (subIndex > -1) {
         parent.subGuests[subIndex].name = newName.trim();
-        // Si es el titular (subGuest 0), actualizamos también el nombre principal
         if (subIndex === 0) parent.name = newName.trim();
     }
 
     updatedList[parentIndex] = parent;
     setWristbandList(updatedList);
 
-    // Guardamos silenciosamente en Firebase
     try {
         await updateDoc(doc(db, "eventos", eventId, "invitados", parentId), {
             name: parent.name,
@@ -175,9 +171,9 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     }
   };
 
-  // 🔴 PLANTILLA CSV HÍBRIDA (Instrucciones Claras)
+  // 🔴 Plantilla CSV super clara
   const downloadTemplate = () => {
-    const csvContent = "data:text/csv;charset=utf-8,Titular o Familia,Adultos Extras (Nombres separados por / o cantidad),Niños Extras (Nombres separados por / o cantidad)\nFamilia Garza,Ana / Carlos / Roberto,Mia / Luisito\nJuan Perez,2,0\nSofia Rodriguez,1,1\nCarlos Slim,0,0";
+    const csvContent = "data:text/csv;charset=utf-8,Titular o Familia,Acompañantes EXTRAS (Nombres separados por / o cantidad),Niños EXTRAS (Nombres separados por / o cantidad)\nFamilia Garza,Ana / Carlos / Roberto,Mia / Luisito\nJuan Perez,2,0\nSofia Rodriguez,1,1\nCarlos Slim,0,0";
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -187,7 +183,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     document.body.removeChild(link);
   };
 
-  // 🔴 LECTOR CSV INTELIGENTE
   const handleFileUpload = (e) => {
     if (isLocked) return;
     const file = e.target.files[0];
@@ -212,22 +207,19 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       const nuevosItems = [];
 
       for(let i = startIdx; i < rows.length; i++) {
-        // Usamos split(',') simple. Si usan comas dentro de los nombres se romperá, por eso la plantilla dice "separados por /"
         const cols = rows[i].split(','); 
         if (cols[0] && cols[0].trim() !== '') {
           const guestName = cols[0].trim();
           const adCol = cols[1] ? cols[1].trim() : "0";
           const niCol = cols[2] ? cols[2].trim() : "0";
 
-          // Procesar Adultos
           let adArray = [];
-          if (/^\d+$/.test(adCol) && Number(adCol) > 0) { // Si es puramente un número
+          if (/^\d+$/.test(adCol) && Number(adCol) > 0) { 
               for(let k=0; k<Number(adCol); k++) adArray.push(`Acompañante ${k+1}`);
-          } else if (!/^\d+$/.test(adCol) && adCol.length > 0) { // Si contiene letras/nombres
+          } else if (!/^\d+$/.test(adCol) && adCol.length > 0) { 
               adArray = adCol.split('/').map(n=>n.trim()).filter(n=>n);
           }
 
-          // Procesar Niños
           let niArray = [];
           if (/^\d+$/.test(niCol) && Number(niCol) > 0) {
               for(let k=0; k<Number(niCol); k++) niArray.push(`Niño ${k+1}`);
@@ -302,7 +294,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
   const totalPulserasSolicitadas = wristbandList.reduce((sum, item) => sum + (Number(item.passes) || 0), 0);
 
-  // Aplanamos la lista para mostrar a cada individuo en la tabla
   const getFlattenedGuests = (guestList) => {
     const flattened = [];
     guestList.forEach(guest => {
@@ -447,10 +438,21 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
           </div>
           
           <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col">
+            
+            {/* 🔴 NUEVO: BANNER DE INSTRUCCIONES CERO-DUDAS */}
+            <div className="bg-sky-50 dark:bg-sky-900/20 border-b border-sky-100 dark:border-sky-800/30 p-4 flex items-start gap-3">
+               <Info size={20} className="text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+               <div className="text-xs text-sky-800 dark:text-sky-200 leading-relaxed">
+                  <strong className="block mb-1">¿Cómo funciona esta lista?</strong>
+                  1. El nombre <b>Titular</b> genera automáticamente <span className="underline">1 pulsera</span>.<br/>
+                  2. Agrega la cantidad de <b>Extras</b> (Acompañantes o Niños) que ingresarán con el titular.<br/>
+                  3. <b>Edición en vivo:</b> Da clic en los nombres generados en la tabla para poner el nombre real de cada acompañante antes de imprimir.
+               </div>
+            </div>
+
             <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
               <div>
                   <h3 className="font-bold text-slate-800 dark:text-white text-sm flex items-center"><Users size={16} className="mr-2 text-indigo-500" /> Desglose para Impresión</h3>
-                  <p className="text-[10px] text-slate-500 mt-1">Escribe los nombres uno a uno o importa tu archivo CSV Inteligente.</p>
               </div>
               
               {!isLocked && (
@@ -469,18 +471,21 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
             {/* AGREGAR MANUALMENTE */}
             {!isLocked && (
                 <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-white dark:bg-transparent">
-                    <form onSubmit={handleAddEntry} className="flex flex-col xl:flex-row w-full gap-2">
-                        <input type="text" required placeholder="Nombre Titular (Ej. Familia Garza)" value={newEntry.name} onChange={e=>setNewEntry({...newEntry, name: e.target.value})} className="flex-1 p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-800 dark:text-white outline-none focus:border-indigo-500" />
-                        <div className="flex gap-2">
-                          <div className="flex flex-col w-24">
-                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1">Total Adultos</span>
-                            <input type="number" min="1" value={newEntry.adultPasses} onChange={e=>setNewEntry({...newEntry, adultPasses: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-indigo-600 dark:text-amber-500 outline-none focus:border-indigo-500" />
+                    <form onSubmit={handleAddEntry} className="flex flex-col xl:flex-row w-full gap-3">
+                        <div className="flex-1">
+                           <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Titular (Incluye 1 pulsera)</span>
+                           <input type="text" required placeholder="Ej. Familia Garza" value={newEntry.name} onChange={e=>setNewEntry({...newEntry, name: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-800 dark:text-white outline-none focus:border-indigo-500" />
+                        </div>
+                        <div className="flex gap-2 items-end">
+                          <div className="flex flex-col w-[88px]">
+                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Adultos Extras</span>
+                            <input type="number" min="0" value={newEntry.extraAdults} onChange={e=>setNewEntry({...newEntry, extraAdults: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-indigo-600 dark:text-amber-500 outline-none focus:border-indigo-500" />
                           </div>
-                          <div className="flex flex-col w-24">
-                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1">Total Niños</span>
-                            <input type="number" min="0" value={newEntry.childrenPasses} onChange={e=>setNewEntry({...newEntry, childrenPasses: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-sky-600 dark:text-sky-400 outline-none focus:border-indigo-500" />
+                          <div className="flex flex-col w-[88px]">
+                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Niños Extras</span>
+                            <input type="number" min="0" value={newEntry.extraChildren} onChange={e=>setNewEntry({...newEntry, extraChildren: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-sky-600 dark:text-sky-400 outline-none focus:border-indigo-500" />
                           </div>
-                          <button type="submit" className="px-4 mt-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center font-bold text-xs h-[46px]"><Plus size={18} className="md:mr-1" /> <span className="hidden md:inline">Agregar</span></button>
+                          <button type="submit" className="px-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center font-bold text-xs h-[46px]"><Plus size={18} className="md:mr-1" /> <span className="hidden md:inline">Agregar</span></button>
                         </div>
                     </form>
                 </div>
@@ -506,8 +511,8 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                       <tr key={row._rowId} className={`transition-colors hover:bg-slate-50 dark:hover:bg-white/5 ${row.isMain ? 'bg-white dark:bg-transparent border-t-[3px] border-slate-200 dark:border-white/10' : 'bg-slate-50/50 dark:bg-white/[0.02]'}`}>
                         <td className="px-6 py-3 flex items-center">
                           {/* 🔴 EL INPUT INVISIBLE PREMIUM */}
-                          <div className="relative w-full group flex items-center">
-                              {!isLocked && <Edit3 size={12} className="absolute -left-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />}
+                          <div className="relative w-full group flex items-center bg-transparent hover:bg-slate-100 dark:hover:bg-white/5 rounded transition-colors p-1 -ml-1">
+                              {!isLocked && <Edit3 size={12} className="absolute -left-3 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" />}
                               <input 
                                   type="text" 
                                   defaultValue={row.displayName} 
