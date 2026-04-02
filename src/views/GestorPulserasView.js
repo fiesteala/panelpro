@@ -4,7 +4,7 @@ import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Tr
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: BAULIA BLACK LABEL - PRODUCCIÓN (V18 - CLOUDINARY ACTIVO) ---
+// --- COMPONENTE: BAULIA BLACK LABEL - PRODUCCIÓN (V19 - CSV BLINDADO) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ preTitle: '', eventName: '', logoBase64: '' });
@@ -53,7 +53,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     }
   };
 
-  // 🔴 SUBIDA A CLOUDINARY CON TUS CREDENCIALES
   const handleLogoUpload = async (e) => {
     if (isLocked) return;
     const file = e.target.files[0];
@@ -66,7 +65,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
     setIsUploadingLogo(true);
 
-    // Tus credenciales exactas
     const CLOUD_NAME = "duy0mcqsh"; 
     const UPLOAD_PRESET = "ml_default"; 
 
@@ -241,10 +239,16 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
           validRows = rawRows; 
       }
 
+      // 🔴 FILTRO TERMINATOR: Destruye cualquier instrucción de la plantilla que se haya colado
       const cleanRows = validRows.filter(row => {
           const lowerRow = row.toLowerCase().trim();
-          if (!lowerRow || lowerRow.replace(/,/g, '') === '') return false;
+          if (!lowerRow || lowerRow.replace(/,/g, '').replace(/;/g, '') === '') return false;
           if (lowerRow.includes('===') || lowerRow.includes('baulia')) return false;
+          if (lowerRow.includes('instrucciones')) return false;
+          if (lowerRow.includes('evento:')) return false;
+          if (lowerRow.includes('titular o familia')) return false;
+          if (/^[0-9]+\./.test(lowerRow)) return false; // Destruye "1. En 'Titular..."
+          if (lowerRow.includes('ej.')) return false;
           return true;
       });
 
@@ -273,7 +277,10 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       const nuevosItems = [];
 
       for(let i = 0; i < cleanRows.length; i++) {
-        const cols = cleanRows[i].split(','); 
+        // Soporte para archivos guardados con punto y coma en Excel europeo/mac
+        const delimiter = cleanRows[i].includes(';') ? ';' : ',';
+        const cols = cleanRows[i].split(delimiter); 
+        
         if (cols[0] && cols[0].trim() !== '') {
           const guestName = cols[0].replace(/['"]/g, '').trim();
           const adCol = cols[1] ? cols[1].replace(/['"]/g, '').trim() : "0";
@@ -371,15 +378,15 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       
       {confirmModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-all">
-            <div className="bg-[#050505] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-white/10 animate-in zoom-in-95">
-                <div className="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20 shadow-inner">
+            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-white/10 animate-in zoom-in-95">
+                <div className="w-16 h-16 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
                     <AlertTriangle size={32} />
                 </div>
-                <h3 className="text-xl font-black text-white mb-2">Confirmar Producción</h3>
-                <p className="text-sm text-slate-400 mb-6">Una vez enviado, NO podrás editar la lista de invitados ni el diseño. ¿Todo está perfecto?</p>
+                <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">Confirmar Producción</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Una vez enviado, NO podrás editar la lista de invitados ni el diseño. ¿Todo está perfecto?</p>
                 <div className="flex gap-3">
-                    <button onClick={() => setConfirmModal(false)} className="flex-1 py-3 bg-[#111] text-slate-300 rounded-xl font-bold hover:bg-white/5 transition-colors border border-white/5">Revisar</button>
-                    <button onClick={() => { setConfirmModal(false); executeSendToWorkshop(); }} className="flex-1 py-3 bg-amber-500 text-black rounded-xl font-bold shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:bg-amber-400 transition-colors">Sí, Enviar</button>
+                    <button onClick={() => setConfirmModal(false)} className="flex-1 py-3 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Revisar</button>
+                    <button onClick={() => { setConfirmModal(false); executeSendToWorkshop(); }} className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-colors">Sí, Enviar</button>
                 </div>
             </div>
         </div>
@@ -536,16 +543,16 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                     <form onSubmit={handleAddEntry} className="flex flex-col sm:flex-row w-full gap-3 items-end">
                         <div className="flex-1 w-full">
                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Titular (Incluye 1 pulsera)</span>
-                           <input type="text" required placeholder="Ej. Familia Garza" value={newEntry.name} onChange={e=>setNewEntry({...newEntry, name: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-800 dark:text-white outline-none focus:border-indigo-500" />
+                           <input type="text" required placeholder="Ej. Familia Garza" value={newEntry.name} onChange={e=>setNewEntry({...newEntry, name: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-800 dark:text-white outline-none focus:border-indigo-500 transition-colors" />
                         </div>
                         <div className="flex gap-2 w-full sm:w-auto items-end">
                           <div className="flex flex-col w-full sm:w-24">
                             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Adultos Extras</span>
-                            <input type="number" min="0" value={newEntry.extraAdults} onChange={e=>setNewEntry({...newEntry, extraAdults: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-indigo-600 dark:text-amber-500 outline-none focus:border-indigo-500" />
+                            <input type="number" min="0" value={newEntry.extraAdults} onChange={e=>setNewEntry({...newEntry, extraAdults: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-indigo-600 dark:text-amber-500 outline-none focus:border-indigo-500 transition-colors" />
                           </div>
                           <div className="flex flex-col w-full sm:w-24">
                             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Niños Extras</span>
-                            <input type="number" min="0" value={newEntry.extraChildren} onChange={e=>setNewEntry({...newEntry, extraChildren: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-sky-600 dark:text-sky-400 outline-none focus:border-indigo-500" />
+                            <input type="number" min="0" value={newEntry.extraChildren} onChange={e=>setNewEntry({...newEntry, extraChildren: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-sky-600 dark:text-sky-400 outline-none focus:border-indigo-500 transition-colors" />
                           </div>
                           <button type="submit" className="px-4 w-full sm:w-auto bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center font-bold text-xs h-[46px]">
                              <Plus size={18} className="md:mr-1" /> <span className="hidden md:inline">Agregar</span>
