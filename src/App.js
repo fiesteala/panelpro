@@ -11521,13 +11521,15 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const [resenasList, setResenasList] = useState([]);
   const [ventas, setVentas] = useState([]); 
   
-  // 🔴 NUEVO: ESTADOS PARA EL TALLER DE PRODUCCIÓN
   const [pedidosTaller, setPedidosTaller] = useState([]);
   const [ordenActiva, setOrdenActiva] = useState(null);
   const [isFetchingOrden, setIsFetchingOrden] = useState(false);
 
   const [correosVisibles, setCorreosVisibles] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // 🔴 NUEVO: Buscador independiente para el Taller
+  const [tallerSearchQuery, setTallerSearchQuery] = useState('');
   
   const currentMonthYear = new Date().toISOString().slice(0, 7);
   const [mesSeleccionado, setMesSeleccionado] = useState(currentMonthYear);
@@ -11576,11 +11578,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       setVentas(data);
     });
 
-    // 🔴 NUEVO: ESCUCHADOR DEL TALLER (Detecta cuando pulserasStatus existe)
     const unsubEventosTaller = onSnapshot(collection(db, "eventos"), (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const pedidos = data.filter(e => e.pulserasStatus === 'enviado' || e.pulserasStatus === 'impreso');
-      // Ordenamos los más recientes primero
       pedidos.sort((a, b) => new Date(b.fechaEnvioTaller || 0) - new Date(a.fechaEnvioTaller || 0));
       setPedidosTaller(pedidos);
     });
@@ -11588,19 +11588,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     return () => { unsubLic(); unsubRes(); unsubVentas(); unsubEventosTaller(); };
   }, []);
 
-  // ----------------------------------------------------
-  // 🏭 LÓGICA DEL TALLER DE PRODUCCIÓN
-  // ----------------------------------------------------
   const procesarOrdenTaller = async (evento) => {
     setIsFetchingOrden(true);
     try {
-      // Extraemos la lista de invitados reales desde la bóveda del cliente
       const listRef = collection(db, "eventos", evento.id, "invitados");
       const listSnap = await getDocs(listRef);
       const invitadosDB = listSnap.docs.map(d => ({ id: d.id, ...d.data() }));
       const invitadosVIP = invitadosDB.filter(g => g.isSecurityKit);
 
-      // Aplanamos a los invitados para tener pulseras individuales (Magia negra)
       const flattened = [];
       invitadosVIP.forEach(guest => {
         (guest.subGuests || []).forEach((sg, idx) => {
@@ -11608,7 +11603,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
             idReal: sg.id,
             nombreAImprimir: sg.name || (sg.isChild ? 'Niño' : 'Acompañante'),
             esNino: sg.isChild,
-            qrDataUrl: sg.id // En un futuro aquí puedes poner el enlace completo del escáner
+            qrDataUrl: sg.id 
           });
         });
       });
@@ -11638,34 +11633,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'Fallo al actualizar el estatus.' });
      }
   };
-
-  const descargarCSVProduccion = () => {
-      let csv = "ID_Brazalete,PreTitulo,Nombre_Evento,Fecha_Evento,Nombre_Invitado,Tipo,Codigo_QR\n";
-      
-      const evtName = ordenActiva.config.eventName || 'Evento VIP';
-      const preTitle = ordenActiva.config.preTitle || '';
-      const dateStr = ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : '';
-
-      ordenActiva.listaImpresion.forEach((item, index) => {
-          // Limpiamos comas en los textos para no romper el CSV
-          const cleanPre = preTitle.replace(/,/g, '');
-          const cleanEvt = evtName.replace(/,/g, '');
-          const cleanName = item.nombreAImprimir.replace(/,/g, '');
-          const tipo = item.esNino ? 'Niño' : 'Adulto';
-          
-          csv += `${index + 1},${cleanPre},${cleanEvt},${dateStr},${cleanName},${tipo},${item.qrDataUrl}\n`;
-      });
-
-      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", `DataMerge_Produccion_${evtName.replace(/\s+/g, '_')}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-  };
-  // ----------------------------------------------------
 
   const handleCreateLicense = async (e) => {
     e.preventDefault();
@@ -11794,7 +11761,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     if (successData.plan === 'basico' || successData.plan === 'plata') {
       mensaje += `Tu invitación digital está casi lista. Podrás verla pronto en este enlace:\n🔗 ${successData.urlInvitacion || 'Enlace pendiente'}`;
     } else {
-      mensaje += `Tu Panel de Control Premium para tu ${tipoTexto} está listo.\n\nAccede a tu plataforma privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña: ${successData.password}\n\n¡Guarda estos accesos, te servirán para gestionar todos los detalles!`;
+      // 🔴 AQUÍ SE AGREGA EL ID PARA EL WHATSAPP
+      mensaje += `Tu Panel de Control Premium para tu ${tipoTexto} está listo.\n\nAccede a tu plataforma privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña: ${successData.password}\n🆔 ID de Bóveda: ${successData.eventId}\n\n¡Guarda estos accesos, te servirán para gestionar todos los detalles!`;
     }
     window.open(`https://wa.me/${clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
@@ -11819,6 +11787,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     (lic.eventId && lic.eventId.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  // 🔴 NUEVO: Filtro para la bandeja del taller
+  const pedidosFiltrados = pedidosTaller.filter(p =>
+      (p.nombres && p.nombres.toLowerCase().includes(tallerSearchQuery.toLowerCase())) ||
+      (p.id && p.id.toLowerCase().includes(tallerSearchQuery.toLowerCase())) ||
+      (p.plan && p.plan.toLowerCase().includes(tallerSearchQuery.toLowerCase()))
+  );
+
   const mesesDisponibles = [...new Set(ventas.map(v => v.mesAnio))].sort().reverse();
   if (!mesesDisponibles.includes(currentMonthYear)) mesesDisponibles.unshift(currentMonthYear);
   const ventasDelMes = ventas.filter(v => v.mesAnio === mesSeleccionado);
@@ -11836,30 +11811,31 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const pedidosNuevos = pedidosTaller.filter(p => p.pulserasStatus === 'enviado').length;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
-      
-      {/* 🔴 VISTA DE IMPRESIÓN (OCULTA HASTA QUE SE MANDA A IMPRIMIR) */}
+    <>
+      {/* 🔴 VISTA DE IMPRESIÓN PDF PERFECTA (Solo se ve al imprimir) */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
         .font-firma { font-family: 'Great Vibes', cursive; }
         
         @media print {
-            body * { visibility: hidden; }
-            .print-layer, .print-layer * { visibility: visible; }
-            .print-layer { position: absolute; left: 0; top: 0; width: 100vw; margin: 0; padding: 0; background: white; }
-            .break-after { page-break-after: always; }
+            body * { display: none !important; }
+            #pdf-generator-layer { display: block !important; position: absolute; left: 0; top: 0; width: 100vw; margin: 0; padding: 0; background: white; }
+            #pdf-generator-layer * { display: block !important; }
+            #pdf-generator-layer .flex { display: flex !important; }
+            #pdf-generator-layer .flex-col { flex-direction: column !important; }
+            #pdf-generator-layer .items-center { align-items: center !important; }
+            #pdf-generator-layer .justify-center { justify-content: center !important; }
         }
       `}</style>
 
       {ordenActiva && (
-          <div className="print-layer hidden absolute bg-white text-black z-[99999] p-0 m-0 w-full min-h-screen font-sans">
+          <div id="pdf-generator-layer" className="hidden print:block absolute left-0 top-0 w-full bg-white text-black z-[99999] m-0 p-0 font-sans">
               {ordenActiva.listaImpresion.map((item, index) => {
-                  const isPageBreak = (index + 1) % 10 === 0;
                   return (
-                      <div key={index} className={`flex h-[2.5cm] w-[25cm] border border-dashed border-gray-300 mb-[2mm] items-center overflow-hidden bg-white mx-auto ${isPageBreak ? 'break-after' : ''}`} style={{ boxSizing: 'border-box' }}>
+                      <div key={index} className="flex h-[2.5cm] w-[25cm] border border-dashed border-gray-300 mb-[2mm] items-center overflow-hidden bg-white mx-auto" style={{ boxSizing: 'border-box', pageBreakInside: 'avoid' }}>
                           <div className="w-[10%] h-full bg-gray-100 border-r border-gray-300 flex items-center justify-center"><span className="-rotate-90 text-[8px] text-gray-500 tracking-widest font-bold">PEGAMENTO</span></div>
-                          <div className="w-[12%] h-full flex items-center justify-center border-r border-gray-200"><span className="-rotate-90 text-[6px] text-gray-400 font-bold tracking-widest">by BAULIA.COM</span></div>
-                          <div className="w-[38%] h-full flex flex-col justify-center items-center px-4 relative">
+                          <div className="w-[12%] h-full flex items-center justify-center border-r border-gray-200"><span className="-rotate-90 text-[6px] text-gray-400 font-bold tracking-widest whitespace-nowrap">by BAULIA.COM</span></div>
+                          <div className="w-[38%] h-full flex flex-col justify-center items-center px-4 relative border-r border-gray-100">
                               {ordenActiva.config.preTitle && <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-0.5">{ordenActiva.config.preTitle}</span>}
                               {ordenActiva.config.logoBase64 ? (
                                   <img src={ordenActiva.config.logoBase64} alt="Logo" className="h-8 object-contain mb-1" />
@@ -11881,614 +11857,619 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           </div>
       )}
 
-      {dialog.isOpen && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-transparent dark:border-white/20 transition-colors">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ${dialog.type === 'alert' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-500'}`}>
-              {dialog.type === 'alert' ? <AlertTriangle size={32} /> : <AlertCircle size={32} />}
+      {/* ========================================================================================= */}
+      {/* 🔴 INTERFAZ PRINCIPAL (Se oculta al imprimir PDF para que solo salga el diseño de arriba) */}
+      <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative print:hidden">
+        
+        {dialog.isOpen && (
+          <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-colors">
+            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-transparent dark:border-white/20 transition-colors">
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ${dialog.type === 'alert' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-500'}`}>
+                {dialog.type === 'alert' ? <AlertTriangle size={32} /> : <AlertCircle size={32} />}
+              </div>
+              <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">{dialog.title}</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">{dialog.message}</p>
+              <div className="flex space-x-3">
+                {dialog.type === 'confirm' && <button onClick={() => setDialog({ ...dialog, isOpen: false })} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Cancelar</button>}
+                <button onClick={() => { if(dialog.onConfirm) dialog.onConfirm(); else setDialog({ ...dialog, isOpen: false }); }} className={`flex-1 py-3.5 text-white rounded-xl font-bold shadow-lg transition-transform active:scale-95 ${dialog.type === 'alert' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/30'}`}>
+                  {dialog.type === 'confirm' ? 'Sí, proceder' : 'Entendido'}
+                </button>
+              </div>
             </div>
-            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">{dialog.title}</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">{dialog.message}</p>
-            <div className="flex space-x-3">
-              {dialog.type === 'confirm' && <button onClick={() => setDialog({ ...dialog, isOpen: false })} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Cancelar</button>}
-              <button onClick={() => { if(dialog.onConfirm) dialog.onConfirm(); else setDialog({ ...dialog, isOpen: false }); }} className={`flex-1 py-3.5 text-white rounded-xl font-bold shadow-lg transition-transform active:scale-95 ${dialog.type === 'alert' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/30'}`}>
-                {dialog.type === 'confirm' ? 'Sí, proceder' : 'Entendido'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className={`bg-gradient-to-r ${isSuperAdmin ? 'from-amber-500 to-orange-600' : 'from-indigo-600 to-blue-700'} rounded-3xl p-8 shadow-xl text-white flex items-center justify-between`}>
-        <div>
-          <span className="bg-black/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">
-            {isSuperAdmin ? 'Nivel 3: Acceso Maestro' : 'Nivel 2: Workspace Staff'}
-          </span>
-          <h2 className="text-3xl font-black flex items-center mb-2"><Building className="mr-3" size={36}/> {isSuperAdmin ? 'Centro de Operaciones' : 'Panel Operativo'}</h2>
-          <p className="text-white/80 max-w-lg text-sm">Administra tus clientes o revisa el estado de cuenta y auditoría financiera inmutable.</p>
-        </div>
-        <div className="hidden md:flex w-24 h-24 bg-white/10 rounded-full items-center justify-center border-4 border-white/20 shadow-inner">
-          {isSuperAdmin ? <Lock size={40} className="text-white" /> : <Users size={40} className="text-white" />}
-        </div>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="flex gap-4 bg-white dark:bg-[#0a0a0a] p-2 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm w-full md:w-max overflow-x-auto transition-colors">
-           <button onClick={() => setAdminTab('licencias')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'licencias' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
-             <Building size={16}/> Clientes
-           </button>
-           
-           {/* 🔴 NUEVA PESTAÑA: TALLER DE PRODUCCIÓN */}
-           {isSuperAdmin && (
-             <button onClick={() => setAdminTab('taller')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'taller' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
-               <Factory size={16}/> Taller 
-               {pedidosNuevos > 0 && <span className="bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-1">{pedidosNuevos}</span>}
-             </button>
-           )}
-
-           {isSuperAdmin && (
-             <>
-               <button onClick={() => setAdminTab('finanzas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'finanzas' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
-                 <PieChart size={16}/> Finanzas
-               </button>
-               <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
-                 <Star size={16}/> Reseñas
-               </button>
-             </>
-           )}
-        </div>
-        {adminTab === 'licencias' && (
-          <div className="relative w-full md:w-96">
-            <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-            <input type="text" placeholder="Buscar cliente por correo o nombre..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-12 pr-4 py-3 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-2xl text-sm text-slate-900 dark:text-white outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-sm transition-colors" />
           </div>
         )}
-      </div>
 
-      {/* 🔴 VISTA DEL TALLER DE PRODUCCIÓN */}
-      {adminTab === 'taller' && isSuperAdmin && (
-        <div className="animate-in fade-in space-y-6">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col md:flex-row">
-            
-            {/* LADO IZQUIERDO: LISTA DE PEDIDOS */}
-            <div className="w-full md:w-1/2 lg:w-2/5 border-r border-slate-200 dark:border-white/10">
-               <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111]">
-                 <h3 className="font-bold text-slate-800 dark:text-white text-sm">Bandeja de Pedidos ({pedidosTaller.length})</h3>
-                 <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Órdenes cerradas por el cliente</p>
-               </div>
-               <div className="overflow-y-auto max-h-[600px] custom-scrollbar">
-                  {pedidosTaller.length === 0 ? (
-                      <div className="p-10 text-center text-slate-400 flex flex-col items-center">
-                        <Factory size={40} className="mb-3 opacity-20" />
-                        <p className="text-sm font-bold">No hay pedidos pendientes.</p>
-                      </div>
-                  ) : (
-                      <ul className="divide-y divide-slate-100 dark:divide-white/5">
-                        {pedidosTaller.map(p => {
-                           const isNuevo = p.pulserasStatus === 'enviado';
-                           return (
-                              <li key={p.id} onClick={() => procesarOrdenTaller(p)} className={`p-4 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 transition-colors ${ordenActiva?.eventoId === p.id ? 'bg-indigo-50 dark:bg-indigo-500/20 border-l-4 border-indigo-500' : 'border-l-4 border-transparent'}`}>
-                                 <div className="flex justify-between items-start mb-1">
-                                    <span className="font-black text-slate-800 dark:text-white text-sm">{p.nombres}</span>
-                                    {isNuevo ? (
-                                        <span className="bg-rose-500 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded">Nuevo</span>
-                                    ) : (
-                                        <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded">Impreso</span>
-                                    )}
-                                 </div>
-                                 <div className="flex justify-between items-center text-xs text-slate-500">
-                                    <span className="flex items-center"><Calendar size={12} className="mr-1"/> {p.fechaEnvioTaller ? new Date(p.fechaEnvioTaller).toLocaleDateString() : 'Desconocida'}</span>
-                                    <span>Plan: {p.plan?.replace('_', ' ').toUpperCase()}</span>
-                                 </div>
-                              </li>
-                           )
-                        })}
-                      </ul>
-                  )}
-               </div>
-            </div>
-
-            {/* LADO DERECHO: DETALLE DE LA ORDEN Y EXTRACCIÓN */}
-            <div className="w-full md:w-1/2 lg:w-3/5 bg-slate-50/50 dark:bg-[#050505]">
-               {!ordenActiva ? (
-                   <div className="h-full flex flex-col items-center justify-center text-slate-400 p-10 text-center">
-                      <Printer size={60} className="mb-4 opacity-20" />
-                      <p className="text-lg font-black text-slate-600 dark:text-slate-300">Selecciona un pedido</p>
-                      <p className="text-xs mt-2 max-w-sm">Haz clic en una orden de la izquierda para extraer el diseño y generar los archivos de impresión (Data Merge).</p>
-                   </div>
-               ) : isFetchingOrden ? (
-                   <div className="h-full flex items-center justify-center text-indigo-500 font-bold animate-pulse">Extrayendo datos de la bóveda...</div>
-               ) : (
-                   <div className="p-6 space-y-6 animate-in fade-in">
-                       {/* Resumen Diseño */}
-                       <div className="bg-white dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-5">
-                          {ordenActiva.config.logoBase64 ? (
-                              <div className="w-20 h-20 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center p-2 shrink-0 border border-slate-200 dark:border-white/5">
-                                 <img src={ordenActiva.config.logoBase64} alt="Logo" className="max-h-full max-w-full object-contain" />
-                              </div>
-                          ) : (
-                              <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20">
-                                 <Palette size={30} className="text-indigo-400" />
-                              </div>
-                          )}
-                          <div className="flex-1">
-                             <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Datos Impresos en Pulsera</p>
-                             <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Pre-título:</span> {ordenActiva.config.preTitle || '(Vacío)'}</p>
-                             <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Nombre Principal:</span> {ordenActiva.config.eventName || 'No asignado'}</p>
-                             <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Fecha del Evento:</span> {ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : 'No asignada'}</p>
-                          </div>
-                       </div>
-
-                       {/* Resumen Cantidades */}
-                       <div className="grid grid-cols-2 gap-4">
-                           <div className="bg-indigo-600 text-white rounded-2xl p-5 shadow-lg flex flex-col items-center justify-center text-center">
-                               <p className="text-[10px] uppercase font-black tracking-widest opacity-80 mb-1">Total a Producir</p>
-                               <p className="text-4xl font-editorial font-black">{ordenActiva.listaImpresion.length}</p>
-                               <p className="text-[10px] opacity-80 mt-1">Brazaletes Físicos</p>
-                           </div>
-                           <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm flex flex-col justify-center space-y-2">
-                               <div className="flex justify-between items-center text-sm">
-                                  <span className="text-slate-500 font-bold">Adultos</span>
-                                  <span className="font-black text-slate-800 dark:text-white">{ordenActiva.listaImpresion.filter(i=>!i.esNino).length}</span>
-                               </div>
-                               <div className="flex justify-between items-center text-sm">
-                                  <span className="text-sky-500 font-bold">Niños</span>
-                                  <span className="font-black text-sky-600 dark:text-sky-400">{ordenActiva.listaImpresion.filter(i=>i.esNino).length}</span>
-                               </div>
-                           </div>
-                       </div>
-
-                       {/* Botones de Acción */}
-                       <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
-                           <button onClick={descargarCSVProduccion} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center">
-                               <FileText size={18} className="mr-2" /> Descargar CSV (Para Data Merge)
-                           </button>
-                           
-                           <button onClick={() => window.print()} className="w-full py-4 bg-white dark:bg-[#111] text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 rounded-xl font-bold text-xs uppercase tracking-widest shadow-sm hover:bg-slate-50 dark:hover:bg-white/5 transition-colors flex items-center justify-center">
-                               <Printer size={18} className="mr-2" /> Imprimir Plantilla Web Directa
-                           </button>
-
-                           {ordenActiva.status !== 'impreso' && (
-                               <button onClick={marcarComoImpreso} className="w-full mt-4 py-4 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs uppercase tracking-widest shadow-sm hover:bg-emerald-100 transition-colors flex items-center justify-center">
-                                   <CheckCircle2 size={18} className="mr-2" /> Marcar como Producido y Despachado
-                               </button>
-                           )}
-                       </div>
-                   </div>
-               )}
-            </div>
+        <div className={`bg-gradient-to-r ${isSuperAdmin ? 'from-amber-500 to-orange-600' : 'from-indigo-600 to-blue-700'} rounded-3xl p-8 shadow-xl text-white flex items-center justify-between`}>
+          <div>
+            <span className="bg-black/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">
+              {isSuperAdmin ? 'Nivel 3: Acceso Maestro' : 'Nivel 2: Workspace Staff'}
+            </span>
+            <h2 className="text-3xl font-black flex items-center mb-2"><Building className="mr-3" size={36}/> {isSuperAdmin ? 'Centro de Operaciones' : 'Panel Operativo'}</h2>
+            <p className="text-white/80 max-w-lg text-sm">Administra tus clientes o revisa el estado de cuenta y auditoría financiera inmutable.</p>
+          </div>
+          <div className="hidden md:flex w-24 h-24 bg-white/10 rounded-full items-center justify-center border-4 border-white/20 shadow-inner">
+            {isSuperAdmin ? <Lock size={40} className="text-white" /> : <Users size={40} className="text-white" />}
           </div>
         </div>
-      )}
 
-      {adminTab === 'licencias' && (
-        <div className="flex flex-col xl:flex-row gap-3 mb-6 w-full overflow-x-auto pb-2 custom-scrollbar">
-           <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true }); }} className="shrink-0 px-6 py-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-2xl font-black shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform flex items-center justify-center min-w-[200px]">
-              <Plus size={18} className="mr-2 text-amber-500 dark:text-slate-900"/> Nueva Bóveda
-           </button>
-
-           <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-             <div><p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Básico</p><p className="text-xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.basico}</p></div>
-             <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500"><Users size={14}/></div>
-           </div>
-           
-           <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-slate-300 dark:border-slate-600 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-             <div><p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Plata</p><p className="text-xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.plata}</p></div>
-             <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300"><Wallet size={14}/></div>
-           </div>
-           
-           <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-             <div><p className="text-[9px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">Oro</p><p className="text-xl font-black text-amber-700 dark:text-amber-400">{totalesPorLicencia.oro}</p></div>
-             <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500"><ShieldCheck size={14}/></div>
-           </div>
-           
-           <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-             <div><p className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Diamante</p><p className="text-xl font-black text-indigo-700 dark:text-indigo-400">{totalesPorLicencia.diamante}</p></div>
-             <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400"><LayoutDashboard size={14}/></div>
-           </div>
-           
-           <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-pink-200 dark:border-pink-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-             <div><p className="text-[9px] font-bold text-pink-600 dark:text-pink-400 uppercase tracking-widest">Social Wall</p><p className="text-xl font-black text-pink-700 dark:text-pink-400">{totalesPorLicencia.social_wall}</p></div>
-             <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-500/10 flex items-center justify-center text-pink-600 dark:text-pink-400"><Camera size={14}/></div>
-           </div>
-
-           <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-             <div><p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Security Kit</p><p className="text-xl font-black text-emerald-700 dark:text-emerald-400">{totalesPorLicencia.security_kit}</p></div>
-             <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400"><Scan size={14}/></div>
-           </div>
-        </div>
-      )}
-
-      {adminTab === 'finanzas' && isSuperAdmin && (
-        <div className="animate-in fade-in space-y-6">
-           <div className="flex flex-col md:flex-row justify-between items-center bg-white dark:bg-[#0a0a0a] p-5 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
-              <div className="flex items-center mb-4 md:mb-0">
-                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mr-4 border border-transparent dark:border-emerald-500/30"><Wallet size={24}/></div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Periodo a evaluar</p>
-                  <select value={mesSeleccionado} onChange={(e) => setMesSeleccionado(e.target.value)} className="text-xl font-black text-slate-800 dark:text-white bg-transparent outline-none cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-                    {mesesDisponibles.map(m => {
-                      const date = new Date(m + '-02'); 
-                      const mesNombre = date.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
-                      return <option key={m} value={m} className="bg-white dark:bg-[#111]">{mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1)} {m === currentMonthYear ? '(Mes Actual)' : ''}</option>
-                    })}
-                  </select>
-                </div>
-              </div>
-              <button onClick={exportarCorteContador} className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold shadow-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center">
-                <FileSpreadsheet size={18} className="mr-2 text-emerald-400 dark:text-emerald-600"/> Descargar Excel
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="flex gap-4 bg-white dark:bg-[#0a0a0a] p-2 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm w-full md:w-max overflow-x-auto transition-colors">
+            <button onClick={() => setAdminTab('licencias')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'licencias' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
+              <Building size={16}/> Clientes
+            </button>
+            
+            {isSuperAdmin && (
+              <button onClick={() => setAdminTab('taller')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'taller' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
+                <Factory size={16}/> Taller 
+                {pedidosNuevos > 0 && <span className="bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-1">{pedidosNuevos}</span>}
               </button>
-           </div>
-           
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl p-6 border border-slate-200 dark:border-white/10 shadow-sm">
-                <h3 className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-2">Ingreso Bruto del Mes</h3>
-                <p className="text-4xl font-black text-emerald-600 dark:text-emerald-400 mb-6">{formatMoney(ingresoMensualTotal)}</p>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Básico ({desglosePlanes.basico / PRECIOS.basico || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.basico)}</span></div>
-                  <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Plata ({desglosePlanes.plata / PRECIOS.plata || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.plata)}</span></div>
-                  <div className="flex justify-between items-center text-sm"><span className="text-amber-600 dark:text-amber-500 font-medium">Plan Oro ({desglosePlanes.oro / PRECIOS.oro || 0})</span><span className="font-bold text-amber-600 dark:text-amber-500">{formatMoney(desglosePlanes.oro)}</span></div>
-                  <div className="flex justify-between items-center text-sm"><span className="text-indigo-600 dark:text-indigo-400 font-medium">Plan Diamante ({desglosePlanes.diamante / PRECIOS.diamante || 0})</span><span className="font-bold text-indigo-600 dark:text-indigo-400">{formatMoney(desglosePlanes.diamante)}</span></div>
+            )}
+
+            {isSuperAdmin && (
+              <>
+                <button onClick={() => setAdminTab('finanzas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'finanzas' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
+                  <PieChart size={16}/> Finanzas
+                </button>
+                <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
+                  <Star size={16}/> Reseñas
+                </button>
+              </>
+            )}
+          </div>
+          {adminTab === 'licencias' && (
+            <div className="relative w-full md:w-96">
+              <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+              <input type="text" placeholder="Buscar cliente por correo o nombre..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-12 pr-4 py-3 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-2xl text-sm text-slate-900 dark:text-white outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-sm transition-colors" />
+            </div>
+          )}
+        </div>
+
+        {/* 🔴 VISTA DEL TALLER DE PRODUCCIÓN */}
+        {adminTab === 'taller' && isSuperAdmin && (
+          <div className="animate-in fade-in space-y-6">
+            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col md:flex-row">
+              
+              {/* LADO IZQUIERDO: LISTA DE PEDIDOS */}
+              <div className="w-full md:w-1/2 lg:w-2/5 border-r border-slate-200 dark:border-white/10 flex flex-col">
+                <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111]">
+                  <h3 className="font-bold text-slate-800 dark:text-white text-sm mb-3">Bandeja de Pedidos ({pedidosTaller.length})</h3>
+                  <div className="relative">
+                    <SearchIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input type="text" placeholder="Buscar por ID o nombre..." value={tallerSearchQuery} onChange={e => setTallerSearchQuery(e.target.value)} className="w-full pl-9 pr-3 py-2.5 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-xl text-xs outline-none focus:border-indigo-500 transition-colors" />
+                  </div>
+                </div>
+                <div className="overflow-y-auto h-[600px] custom-scrollbar">
+                    {pedidosFiltrados.length === 0 ? (
+                        <div className="p-10 text-center text-slate-400 flex flex-col items-center">
+                          <Factory size={40} className="mb-3 opacity-20" />
+                          <p className="text-sm font-bold">No hay pedidos que coincidan.</p>
+                        </div>
+                    ) : (
+                        <ul className="divide-y divide-slate-100 dark:divide-white/5">
+                          {pedidosFiltrados.map(p => {
+                            const isNuevo = p.pulserasStatus === 'enviado';
+                            return (
+                                <li key={p.id} onClick={() => procesarOrdenTaller(p)} className={`p-4 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 transition-colors ${ordenActiva?.eventoId === p.id ? 'bg-indigo-50 dark:bg-indigo-500/20 border-l-4 border-indigo-500' : 'border-l-4 border-transparent'}`}>
+                                  <div className="flex justify-between items-start mb-1">
+                                      <span className="font-black text-slate-800 dark:text-white text-sm">{p.nombres}</span>
+                                      {isNuevo ? (
+                                          <span className="bg-rose-500 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded">Nuevo</span>
+                                      ) : (
+                                          <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded">Impreso</span>
+                                      )}
+                                  </div>
+                                  <div className="flex justify-between items-end mt-2 text-xs text-slate-500">
+                                      <div>
+                                        <p className="font-mono text-[9px] text-indigo-400 mb-0.5">ID: {p.id}</p>
+                                        <p className="flex items-center"><Calendar size={10} className="mr-1"/> {p.fechaEnvioTaller ? new Date(p.fechaEnvioTaller).toLocaleDateString() : 'Desconocida'}</p>
+                                      </div>
+                                      <span>{p.plan?.replace('_', ' ').toUpperCase()}</span>
+                                  </div>
+                                </li>
+                            )
+                          })}
+                        </ul>
+                    )}
                 </div>
               </div>
-              <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111]"><h3 className="font-bold text-sm text-slate-800 dark:text-white">Últimas Transacciones ({ventasDelMes.length})</h3></div>
-                <div className="max-h-64 overflow-y-auto custom-scrollbar p-2">
-                  {ventasDelMes.length === 0 ? <p className="text-center text-slate-400 p-8 text-sm">No hay ventas registradas en este mes.</p> : ventasDelMes.map((v, i) => (
-                    <div key={i} className="p-3 border-b border-slate-100 dark:border-white/5 last:border-0 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-white/5 transition-colors rounded-lg">
-                      <div>
-                        <p className="font-bold text-slate-800 dark:text-white text-sm leading-none mb-1">{v.cliente}</p>
-                        <p className="text-[10px] text-slate-500 uppercase tracking-widest">{v.plan} • Ref: {v.referencia}</p>
+
+              {/* LADO DERECHO: DETALLE DE LA ORDEN Y EXTRACCIÓN */}
+              <div className="w-full md:w-1/2 lg:w-3/5 bg-slate-50/50 dark:bg-[#050505]">
+                {!ordenActiva ? (
+                    <div className="h-full flex flex-col items-center justify-center text-slate-400 p-10 text-center min-h-[500px]">
+                        <Printer size={60} className="mb-4 opacity-20" />
+                        <p className="text-lg font-black text-slate-600 dark:text-slate-300">Selecciona un pedido</p>
+                        <p className="text-xs mt-2 max-w-sm">Haz clic en una orden de la izquierda para extraer el diseño y generar los archivos de impresión PDF.</p>
+                    </div>
+                ) : isFetchingOrden ? (
+                    <div className="h-full flex items-center justify-center text-indigo-500 font-bold animate-pulse min-h-[500px]">Extrayendo datos de la bóveda...</div>
+                ) : (
+                    <div className="p-6 space-y-6 animate-in fade-in">
+                        <div className="bg-white dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-5">
+                            {ordenActiva.config.logoBase64 ? (
+                                <div className="w-20 h-20 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center p-2 shrink-0 border border-slate-200 dark:border-white/5">
+                                  <img src={ordenActiva.config.logoBase64} alt="Logo" className="max-h-full max-w-full object-contain" />
+                                </div>
+                            ) : (
+                                <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20">
+                                  <Palette size={30} className="text-indigo-400" />
+                                </div>
+                            )}
+                            <div className="flex-1">
+                              <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Datos Impresos en Pulsera</p>
+                              <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Pre-título:</span> {ordenActiva.config.preTitle || '(Vacío)'}</p>
+                              <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Nombre Principal:</span> {ordenActiva.config.eventName || 'No asignado'}</p>
+                              <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Fecha del Evento:</span> {ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : 'No asignada'}</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-indigo-600 text-white rounded-2xl p-5 shadow-lg flex flex-col items-center justify-center text-center">
+                                <p className="text-[10px] uppercase font-black tracking-widest opacity-80 mb-1">Total a Producir</p>
+                                <p className="text-4xl font-editorial font-black">{ordenActiva.listaImpresion.length}</p>
+                                <p className="text-[10px] opacity-80 mt-1">Brazaletes Físicos</p>
+                            </div>
+                            <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm flex flex-col justify-center space-y-2">
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-slate-500 font-bold">Adultos</span>
+                                    <span className="font-black text-slate-800 dark:text-white">{ordenActiva.listaImpresion.filter(i=>!i.esNino).length}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-sky-500 font-bold">Niños</span>
+                                    <span className="font-black text-sky-600 dark:text-sky-400">{ordenActiva.listaImpresion.filter(i=>i.esNino).length}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
+                            {/* 🔴 NUEVO: INSTRUCCIONES PDF CLARAS */}
+                            <button onClick={() => window.print()} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center">
+                                <Printer size={18} className="mr-2" /> Generar Archivo PDF (Vectorial)
+                            </button>
+                            <p className="text-[10px] text-center text-slate-500 font-bold mt-1">Al hacer clic, selecciona "Guardar como PDF" en la ventana de impresión.</p>
+
+                            {ordenActiva.status !== 'impreso' && (
+                                <button onClick={marcarComoImpreso} className="w-full mt-4 py-4 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs uppercase tracking-widest shadow-sm hover:bg-emerald-100 transition-colors flex items-center justify-center">
+                                    <CheckCircle2 size={18} className="mr-2" /> Marcar como Producido y Despachado
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {adminTab === 'licencias' && (
+          <div className="flex flex-col xl:flex-row gap-3 mb-6 w-full overflow-x-auto pb-2 custom-scrollbar">
+            <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true }); }} className="shrink-0 px-6 py-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-2xl font-black shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform flex items-center justify-center min-w-[200px]">
+                <Plus size={18} className="mr-2 text-amber-500 dark:text-slate-900"/> Nueva Bóveda
+            </button>
+
+            <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+              <div><p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Básico</p><p className="text-xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.basico}</p></div>
+              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500"><Users size={14}/></div>
+            </div>
+            
+            <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-slate-300 dark:border-slate-600 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+              <div><p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Plata</p><p className="text-xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.plata}</p></div>
+              <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300"><Wallet size={14}/></div>
+            </div>
+            
+            <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+              <div><p className="text-[9px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">Oro</p><p className="text-xl font-black text-amber-700 dark:text-amber-400">{totalesPorLicencia.oro}</p></div>
+              <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500"><ShieldCheck size={14}/></div>
+            </div>
+            
+            <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+              <div><p className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Diamante</p><p className="text-xl font-black text-indigo-700 dark:text-indigo-400">{totalesPorLicencia.diamante}</p></div>
+              <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400"><LayoutDashboard size={14}/></div>
+            </div>
+            
+            <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-pink-200 dark:border-pink-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+              <div><p className="text-[9px] font-bold text-pink-600 dark:text-pink-400 uppercase tracking-widest">Social Wall</p><p className="text-xl font-black text-pink-700 dark:text-pink-400">{totalesPorLicencia.social_wall}</p></div>
+              <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-500/10 flex items-center justify-center text-pink-600 dark:text-pink-400"><Camera size={14}/></div>
+            </div>
+
+            <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+              <div><p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Security Kit</p><p className="text-xl font-black text-emerald-700 dark:text-emerald-400">{totalesPorLicencia.security_kit}</p></div>
+              <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400"><Scan size={14}/></div>
+            </div>
+          </div>
+        )}
+
+        {adminTab === 'finanzas' && isSuperAdmin && (
+          <div className="animate-in fade-in space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-center bg-white dark:bg-[#0a0a0a] p-5 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
+                <div className="flex items-center mb-4 md:mb-0">
+                  <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mr-4 border border-transparent dark:border-emerald-500/30"><Wallet size={24}/></div>
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Periodo a evaluar</p>
+                    <select value={mesSeleccionado} onChange={(e) => setMesSeleccionado(e.target.value)} className="text-xl font-black text-slate-800 dark:text-white bg-transparent outline-none cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                      {mesesDisponibles.map(m => {
+                        const date = new Date(m + '-02'); 
+                        const mesNombre = date.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
+                        return <option key={m} value={m} className="bg-white dark:bg-[#111]">{mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1)} {m === currentMonthYear ? '(Mes Actual)' : ''}</option>
+                      })}
+                    </select>
+                  </div>
+                </div>
+                <button onClick={exportarCorteContador} className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold shadow-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center">
+                  <FileSpreadsheet size={18} className="mr-2 text-emerald-400 dark:text-emerald-600"/> Descargar Excel
+                </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl p-6 border border-slate-200 dark:border-white/10 shadow-sm">
+                  <h3 className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-2">Ingreso Bruto del Mes</h3>
+                  <p className="text-4xl font-black text-emerald-600 dark:text-emerald-400 mb-6">{formatMoney(ingresoMensualTotal)}</p>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Básico ({desglosePlanes.basico / PRECIOS.basico || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.basico)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Plata ({desglosePlanes.plata / PRECIOS.plata || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.plata)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-amber-600 dark:text-amber-500 font-medium">Plan Oro ({desglosePlanes.oro / PRECIOS.oro || 0})</span><span className="font-bold text-amber-600 dark:text-amber-500">{formatMoney(desglosePlanes.oro)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-indigo-600 dark:text-indigo-400 font-medium">Plan Diamante ({desglosePlanes.diamante / PRECIOS.diamante || 0})</span><span className="font-bold text-indigo-600 dark:text-indigo-400">{formatMoney(desglosePlanes.diamante)}</span></div>
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
+                  <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111]"><h3 className="font-bold text-sm text-slate-800 dark:text-white">Últimas Transacciones ({ventasDelMes.length})</h3></div>
+                  <div className="max-h-64 overflow-y-auto custom-scrollbar p-2">
+                    {ventasDelMes.length === 0 ? <p className="text-center text-slate-400 p-8 text-sm">No hay ventas registradas en este mes.</p> : ventasDelMes.map((v, i) => (
+                      <div key={i} className="p-3 border-b border-slate-100 dark:border-white/5 last:border-0 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-white/5 transition-colors rounded-lg">
+                        <div>
+                          <p className="font-bold text-slate-800 dark:text-white text-sm leading-none mb-1">{v.cliente}</p>
+                          <p className="text-[10px] text-slate-500 uppercase tracking-widest">{v.plan} • Ref: {v.referencia}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-black text-emerald-600 dark:text-emerald-400">{formatMoney(v.monto)}</p>
+                          <p className="text-[9px] text-slate-400">{v.fecha?.toDate ? v.fecha.toDate().toLocaleDateString('es-MX') : ''}</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-black text-emerald-600 dark:text-emerald-400">{formatMoney(v.monto)}</p>
-                        <p className="text-[9px] text-slate-400">{v.fecha?.toDate ? v.fecha.toDate().toLocaleDateString('es-MX') : ''}</p>
+                    ))}
+                  </div>
+                </div>
+            </div>
+          </div>
+        )}
+
+        {adminTab === 'resenas' && isSuperAdmin && (
+          <div className="animate-in fade-in bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+            <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
+               <h3 className="font-bold text-slate-800 dark:text-white text-sm">Auditoría de Calidad ({resenasList.length})</h3>
+               <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Solo las "Aprobadas" se ven en la Landing Page</p>
+            </div>
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+               {resenasList.map(r => (
+                 <div key={r.id} className={`p-5 rounded-2xl border transition-colors relative ${r.status === 'aprobada' ? 'bg-amber-50/30 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10'}`}>
+                   <div className="absolute top-4 right-4">
+                     <button onClick={() => updateDoc(doc(db, "resenas", r.id), { status: r.status === 'aprobada' ? 'pendiente' : 'aprobada' })} className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded shadow-sm transition-colors ${r.status === 'aprobada' ? 'bg-amber-500 text-white' : 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400'}`}>
+                       {r.status === 'aprobada' ? 'Pública' : 'Aprobar'}
+                     </button>
+                   </div>
+                   <div className="flex gap-1 mb-3">
+                     {[1,2,3,4,5].map(star => <Star key={star} size={14} className={r.rating >= star ? 'fill-amber-500 text-amber-500' : 'text-slate-300 dark:text-slate-700'} />)}
+                   </div>
+                   <p className="text-sm text-slate-700 dark:text-slate-300 italic mb-4 font-light leading-relaxed">"{r.comment}"</p>
+                   <div className="border-t border-slate-100 dark:border-white/10 pt-3">
+                     <input type="text" value={r.authorName} onChange={(e) => updateDoc(doc(db, "resenas", r.id), { authorName: e.target.value })} className="font-bold text-sm bg-transparent outline-none border-b border-transparent focus:border-amber-500 w-full text-slate-900 dark:text-white transition-colors" />
+                     <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">{r.authorType}</p>
+                   </div>
+                 </div>
+               ))}
+               {resenasList.length === 0 && <div className="col-span-full text-center py-10 text-slate-400">Aún no hay reseñas registradas.</div>}
+            </div>
+          </div>
+        )}
+
+        {adminTab === 'licencias' && (
+          <div className="animate-in fade-in">
+            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+               <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
+                 <h3 className="font-bold text-slate-800 dark:text-white text-sm">Directorio de Clientes Activos ({filteredLicencias.length})</h3>
+               </div>
+               
+               <div className="overflow-x-auto pb-24">
+                 <table className="w-full text-left whitespace-nowrap min-w-[1000px]">
+                   <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest transition-colors">
+                     <tr>
+                       <th className="px-5 py-3 font-bold">Cliente / ID</th>
+                       <th className="px-5 py-3 font-bold">Acceso (Correo)</th>
+                       <th className="px-5 py-3 font-bold text-center">Tipo</th>
+                       <th className="px-5 py-3 font-bold text-center">Plan</th>
+                       <th className="px-5 py-3 font-bold">Link Invitación</th>
+                       <th className="px-5 py-3 font-bold text-center">Estatus</th>
+                       <th className="px-5 py-3 font-bold text-right">Controles</th>
+                     </tr>
+                   </thead>
+                   <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
+                     {filteredLicencias.length === 0 ? (
+                       <tr><td colSpan="7" className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">No se encontraron clientes.</td></tr>
+                     ) : (
+                       filteredLicencias.map((lic) => {
+                         const estaSuspendido = lic.status === 'suspendido';
+                         const correoVisible = correosVisibles[lic.id];
+                         const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
+                         
+                         return (
+                           <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40 dark:bg-rose-500/10' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
+                             <td className="px-5 py-4">
+                               <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800 dark:text-rose-500' : 'text-slate-800 dark:text-white'}`}>
+                                 {lic.nombres || 'Sin Nombre'} 
+                                 {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
+                               </p>
+                               <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{lic.eventId}</p>
+                             </td>
+                             <td className="px-5 py-4">
+                               <div className="flex items-center text-slate-600 dark:text-slate-300 bg-slate-100/70 dark:bg-white/5 px-2 py-1.5 rounded-lg w-max border border-slate-200/50 dark:border-white/10 transition-colors">
+                                 <span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span>
+                                 <button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-amber-500 transition-colors">
+                                   {correoVisible ? <EyeOff size={14} /> : <Eye size={14} />}
+                                 </button>
+                               </div>
+                             </td>
+                             <td className="px-5 py-4 text-center">
+                               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lic.tipoEvento || 'Boda'}</span>
+                             </td>
+                             <td className="px-5 py-4 text-center">
+                               <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border 
+                                 ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : 
+                                   lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 
+                                   lic.plan === 'plata' ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600' :
+                                   lic.plan === 'social_wall' ? 'bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20' :
+                                   lic.plan === 'security_kit' ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' :
+                                   'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-white/10'}`}>
+                                 {lic.plan.replace('_', ' ')}
+                               </span>
+                             </td>
+                             <td className="px-5 py-4 max-w-[200px] truncate">
+                               {lic.urlInvitacion ? (
+                                 <a href={lic.urlInvitacion} target="_blank" rel="noreferrer" className="text-sky-500 dark:text-sky-400 hover:underline text-[10px] font-bold truncate block" title={lic.urlInvitacion}>
+                                   {lic.urlInvitacion}
+                                 </a>
+                               ) : (
+                                 <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">Pendiente de subir</span>
+                               )}
+                             </td>
+                             <td className="px-5 py-4 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
+                             <td className="px-5 py-4 text-right">
+                                <div className="flex items-center justify-end space-x-2">
+                                  <button onClick={() => { 
+                                      setEditingLic({...lic, originalPlan: lic.plan, isQrEnabled: lic.isQrEnabled !== false, isPassCountEnabled: lic.isPassCountEnabled !== false}); 
+                                      setIsEditModalOpen(true); 
+                                    }} 
+                                    title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"><Edit3 size={16} />
+                                  </button>
+                                  
+                                  {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan, tipoEvento: lic.tipoEvento || 'general', urlInvitacion: lic.urlInvitacion || '' })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-transparent dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"><ExternalLink size={16} /></button>}
+                                  <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors border border-transparent ${estaSuspendido ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 hover:bg-emerald-200 dark:hover:bg-emerald-500/20 dark:border-emerald-500/20' : 'text-amber-600 dark:text-amber-500 bg-amber-100 dark:bg-amber-500/10 hover:bg-amber-200 dark:hover:bg-amber-500/20 dark:border-amber-500/20'}`}><Power size={16} /></button>
+                                  {isSuperAdmin && (
+                                    <button onClick={() => handleDelete(lic)} title="Eliminar Bóveda (Se conserva Finanzas)" className="p-2 rounded-lg text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-transparent dark:border-rose-500/20 hover:text-white hover:bg-rose-500 dark:hover:bg-rose-500 dark:hover:text-white transition-colors"><Trash2 size={16} /></button>
+                                  )}
+                                </div>
+                             </td>
+                           </tr>
+                         )
+                       })
+                     )}
+                   </tbody>
+                 </table>
+               </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL CREAR LICENCIA */}
+        {isModalOpen && (
+          <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar border border-transparent dark:border-white/10 transition-colors">
+              {!successData ? (
+                <form onSubmit={handleCreateLicense} className="p-8">
+                  <div className="text-center mb-6">
+                    <div className="w-14 h-14 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-transparent dark:border-amber-500/30"><Key size={24} /></div>
+                    <h3 className="text-xl font-black text-slate-800 dark:text-white transition-colors">Registrar Venta Directa</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 transition-colors">El vendedor y el monto quedarán registrados permanentemente en el libro mayor.</p>
+                  </div>
+                  
+                  <div className="space-y-4 mb-6">
+                    <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-xl transition-colors">
+                      <label className="block text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Wallet size={12} className="mr-1"/> Referencia de Pago (Obligatorio)</label>
+                      <input type="text" required value={formData.referenciaPago} onChange={e => setFormData({...formData, referenciaPago: e.target.value})} placeholder="Ej: Pago en Efectivo, Transf BBVA..." className="w-full p-3 bg-white dark:bg-[#111] border border-emerald-200 dark:border-emerald-500/30 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                    </div>
+
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Tipo de Evento</label>
+                        <select value={formData.tipoEvento} onChange={e => setFormData({...formData, tipoEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 dark:text-white text-xs cursor-pointer transition-colors">
+                          {tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                        </select>
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-[10px] font-bold text-indigo-600 dark:text-amber-500 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Users size={12} className="mr-1"/> Rol</label>
+                        <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full p-3 bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/20 text-indigo-900 dark:text-amber-400 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 font-black text-xs cursor-pointer transition-colors">
+                          <option value="cliente">Cliente Final</option>
+                          <option value="planner">Agencia Planner</option>
+                        </select>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-           </div>
-        </div>
-      )}
 
-      {adminTab === 'resenas' && isSuperAdmin && (
-        <div className="animate-in fade-in bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
-          <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
-             <h3 className="font-bold text-slate-800 dark:text-white text-sm">Auditoría de Calidad ({resenasList.length})</h3>
-             <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Solo las "Aprobadas" se ven en la Landing Page</p>
-          </div>
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-             {resenasList.map(r => (
-               <div key={r.id} className={`p-5 rounded-2xl border transition-colors relative ${r.status === 'aprobada' ? 'bg-amber-50/30 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10'}`}>
-                 <div className="absolute top-4 right-4">
-                   <button onClick={() => updateDoc(doc(db, "resenas", r.id), { status: r.status === 'aprobada' ? 'pendiente' : 'aprobada' })} className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded shadow-sm transition-colors ${r.status === 'aprobada' ? 'bg-amber-500 text-white' : 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400'}`}>
-                     {r.status === 'aprobada' ? 'Pública' : 'Aprobar'}
-                   </button>
-                 </div>
-                 <div className="flex gap-1 mb-3">
-                   {[1,2,3,4,5].map(star => <Star key={star} size={14} className={r.rating >= star ? 'fill-amber-500 text-amber-500' : 'text-slate-300 dark:text-slate-700'} />)}
-                 </div>
-                 <p className="text-sm text-slate-700 dark:text-slate-300 italic mb-4 font-light leading-relaxed">"{r.comment}"</p>
-                 <div className="border-t border-slate-100 dark:border-white/10 pt-3">
-                   <input type="text" value={r.authorName} onChange={(e) => updateDoc(doc(db, "resenas", r.id), { authorName: e.target.value })} className="font-bold text-sm bg-transparent outline-none border-b border-transparent focus:border-amber-500 w-full text-slate-900 dark:text-white transition-colors" />
-                   <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">{r.authorType}</p>
-                 </div>
-               </div>
-             ))}
-             {resenasList.length === 0 && <div className="col-span-full text-center py-10 text-slate-400">Aún no hay reseñas registradas.</div>}
-          </div>
-        </div>
-      )}
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 transition-colors">{formData.role === 'planner' ? 'Nombre de la Agencia' : eventoSeleccionado.labelNombre}</label>
+                      <input type="text" autoFocus required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} placeholder={formData.role === 'planner' ? 'Ej. Elite Planners' : eventoSeleccionado.placeholder} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Mail size={12} className="mr-1.5" /> Correo de Acceso</label>
+                      <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-800 dark:text-white text-sm transition-colors" />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Paquete Vendido</label>
+                      <select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 dark:text-white text-sm cursor-pointer transition-colors mb-3">
+                        <option value="basico">Plan Básico ($990)</option>
+                        <option value="plata">Plan Plata ($1,490)</option>
+                        <option value="oro">Plan Oro ($1,990)</option>
+                        <option value="diamante">Plan Diamante ($2,990)</option>
+                        <option value="social_wall">Social Wall ($1,490)</option>
+                        <option value="security_kit">Security Kit ($1,490)</option>
+                      </select>
 
-      {adminTab === 'licencias' && (
-        <div className="animate-in fade-in">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
-             <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
-               <h3 className="font-bold text-slate-800 dark:text-white text-sm">Directorio de Clientes Activos ({filteredLicencias.length})</h3>
-             </div>
-             
-             <div className="overflow-x-auto pb-24">
-               <table className="w-full text-left whitespace-nowrap min-w-[1000px]">
-                 <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest transition-colors">
-                   <tr>
-                     <th className="px-5 py-3 font-bold">Cliente / ID</th>
-                     <th className="px-5 py-3 font-bold">Acceso (Correo)</th>
-                     <th className="px-5 py-3 font-bold text-center">Tipo</th>
-                     <th className="px-5 py-3 font-bold text-center">Plan</th>
-                     <th className="px-5 py-3 font-bold">Link Invitación</th>
-                     <th className="px-5 py-3 font-bold text-center">Estatus</th>
-                     <th className="px-5 py-3 font-bold text-right">Controles</th>
-                   </tr>
-                 </thead>
-                 <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
-                   {filteredLicencias.length === 0 ? (
-                     <tr><td colSpan="7" className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">No se encontraron clientes.</td></tr>
-                   ) : (
-                     filteredLicencias.map((lic) => {
-                       const estaSuspendido = lic.status === 'suspendido';
-                       const correoVisible = correosVisibles[lic.id];
-                       const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
-                       
-                       return (
-                         <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40 dark:bg-rose-500/10' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
-                           <td className="px-5 py-4">
-                             <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800 dark:text-rose-500' : 'text-slate-800 dark:text-white'}`}>
-                               {lic.nombres || 'Sin Nombre'} 
-                               {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
-                             </p>
-                             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{lic.eventId}</p>
-                           </td>
-                           <td className="px-5 py-4">
-                             <div className="flex items-center text-slate-600 dark:text-slate-300 bg-slate-100/70 dark:bg-white/5 px-2 py-1.5 rounded-lg w-max border border-slate-200/50 dark:border-white/10 transition-colors">
-                               <span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span>
-                               <button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-amber-500 transition-colors">
-                                 {correoVisible ? <EyeOff size={14} /> : <Eye size={14} />}
-                               </button>
-                             </div>
-                           </td>
-                           <td className="px-5 py-4 text-center">
-                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lic.tipoEvento || 'Boda'}</span>
-                           </td>
-                           <td className="px-5 py-4 text-center">
-                             <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border 
-                               ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : 
-                                 lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 
-                                 lic.plan === 'plata' ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600' :
-                                 lic.plan === 'social_wall' ? 'bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20' :
-                                 lic.plan === 'security_kit' ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' :
-                                 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-white/10'}`}>
-                               {lic.plan.replace('_', ' ')}
-                             </span>
-                           </td>
-                           <td className="px-5 py-4 max-w-[200px] truncate">
-                             {lic.urlInvitacion ? (
-                               <a href={lic.urlInvitacion} target="_blank" rel="noreferrer" className="text-sky-500 dark:text-sky-400 hover:underline text-[10px] font-bold truncate block" title={lic.urlInvitacion}>
-                                 {lic.urlInvitacion}
-                               </a>
-                             ) : (
-                               <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">Pendiente de subir</span>
-                             )}
-                           </td>
-                           <td className="px-5 py-4 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
-                           <td className="px-5 py-4 text-right">
-                              <div className="flex items-center justify-end space-x-2">
-                                <button onClick={() => { 
-                                    setEditingLic({...lic, originalPlan: lic.plan, isQrEnabled: lic.isQrEnabled !== false, isPassCountEnabled: lic.isPassCountEnabled !== false}); 
-                                    setIsEditModalOpen(true); 
-                                  }} 
-                                  title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"><Edit3 size={16} />
-                                </button>
-                                
-                                {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan, tipoEvento: lic.tipoEvento || 'general', urlInvitacion: lic.urlInvitacion || '' })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-transparent dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"><ExternalLink size={16} /></button>}
-                                <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors border border-transparent ${estaSuspendido ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 hover:bg-emerald-200 dark:hover:bg-emerald-500/20 dark:border-emerald-500/20' : 'text-amber-600 dark:text-amber-500 bg-amber-100 dark:bg-amber-500/10 hover:bg-amber-200 dark:hover:bg-amber-500/20 dark:border-amber-500/20'}`}><Power size={16} /></button>
-                                {isSuperAdmin && (
-                                  <button onClick={() => handleDelete(lic)} title="Eliminar Bóveda (Se conserva Finanzas)" className="p-2 rounded-lg text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-transparent dark:border-rose-500/20 hover:text-white hover:bg-rose-500 dark:hover:bg-rose-500 dark:hover:text-white transition-colors"><Trash2 size={16} /></button>
-                                )}
-                              </div>
-                           </td>
-                         </tr>
-                       )
-                     })
-                   )}
-                 </tbody>
-               </table>
-             </div>
-          </div>
-        </div>
-      )}
+                      <div className="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
+                          <input type="date" required={formData.plan === 'security_kit'} value={formData.fechaEvento} onChange={e => setFormData({...formData, fechaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1"/> Hora de Inicio</label>
+                          <input type="time" value={formData.horaEvento} onChange={e => setFormData({...formData, horaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
+                        </div>
+                      </div>
 
-      {/* MODAL CREAR LICENCIA */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar border border-transparent dark:border-white/10 transition-colors">
-            {!successData ? (
-              <form onSubmit={handleCreateLicense} className="p-8">
-                <div className="text-center mb-6">
-                  <div className="w-14 h-14 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-transparent dark:border-amber-500/30"><Key size={24} /></div>
-                  <h3 className="text-xl font-black text-slate-800 dark:text-white transition-colors">Registrar Venta Directa</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 transition-colors">El vendedor y el monto quedarán registrados permanentemente en el libro mayor.</p>
-                </div>
-                
-                <div className="space-y-4 mb-6">
-                  <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-xl transition-colors">
-                    <label className="block text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Wallet size={12} className="mr-1"/> Referencia de Pago (Obligatorio)</label>
-                    <input type="text" required value={formData.referenciaPago} onChange={e => setFormData({...formData, referenciaPago: e.target.value})} placeholder="Ej: Pago en Efectivo, Transf BBVA..." className="w-full p-3 bg-white dark:bg-[#111] border border-emerald-200 dark:border-emerald-500/30 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                      {['oro', 'diamante'].includes(formData.plan) && (
+                        <>
+                          <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
+                            <div>
+                              <p className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
+                              <p className="text-[9px] text-indigo-500 dark:text-indigo-300/70 mt-0.5">Apágalo si el cliente quiere invitación simple.</p>
+                            </div>
+                            <button type="button" onClick={() => setFormData({...formData, isQrEnabled: !formData.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                               <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${formData.isQrEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                            </button>
+                          </div>
+
+                          <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
+                            <div>
+                              <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
+                              <p className="text-[9px] text-emerald-500 dark:text-emerald-300/70 mt-0.5">Apágalo para una confirmación general sin números.</p>
+                            </div>
+                            <button type="button" onClick={() => setFormData({...formData, isPassCountEnabled: !formData.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                               <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${formData.isPassCountEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> Link Invitación URL (Opcional)</label>
+                      <input type="url" value={formData.urlInvitacion} onChange={e => setFormData({...formData, urlInvitacion: e.target.value})} placeholder="https://baulia.com/..." className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-medium text-sky-600 dark:text-sky-400 text-xs transition-colors" />
+                    </div>
                   </div>
 
-                  <div className="flex gap-4">
-                    <div className="flex-1">
+                  <div className="flex space-x-3">
+                    <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold text-xs hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Cancelar</button>
+                    <button type="submit" disabled={isCreating} className="flex-1 py-3.5 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-xs shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 disabled:opacity-50 transition-colors">
+                      {isCreating ? 'Procesando...' : 'Crear Licencia y Registrar Venta'}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="p-8 text-center bg-slate-50 dark:bg-transparent transition-colors">
+                  <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-transparent dark:border-emerald-500/30"><CheckCircle2 size={40} /></div>
+                  <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2 transition-colors">¡Accesos Creados!</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 transition-colors">La venta se registró en el Libro Mayor por <b>{authData.email.split('@')[0]}</b>.</p>
+                  <div className="bg-white dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 text-left text-sm mb-6 shadow-sm transition-colors">
+                    <p className="mb-3"><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Usuario:</span> <b className="text-slate-800 dark:text-white transition-colors">{successData.email}</b></p>
+                    <p><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Contraseña:</span> <b className="text-slate-800 dark:text-white font-mono text-base transition-colors">{successData.password}</b></p>
+                  </div>
+                  <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 p-5 rounded-2xl mb-6 shadow-sm transition-colors">
+                    <label className="block text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-3 text-left flex items-center transition-colors"><MessageCircle size={14} className="mr-1.5"/> Enviar accesos por WhatsApp</label>
+                    <div className="flex space-x-2 mb-4">
+                      <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold p-3 rounded-xl flex items-center justify-center border border-transparent dark:border-emerald-500/30 transition-colors">+52</span>
+                      <input type="tel" placeholder="10 dígitos del cliente..." value={clientPhone} onChange={e => setClientPhone(e.target.value)} className="w-full p-3 bg-white dark:bg-[#111] border border-emerald-200 dark:border-emerald-500/30 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-800 dark:text-white transition-colors" />
+                    </div>
+                    <button onClick={handleSendWhatsApp} className="w-full py-4 bg-emerald-500 text-white dark:text-slate-900 rounded-xl font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all active:scale-95 flex items-center justify-center">
+                      <Send size={18} className="mr-2" /> Enviar Mensaje
+                    </button>
+                  </div>
+                  <button onClick={() => setIsModalOpen(false)} className="w-full py-4 text-slate-500 dark:text-slate-400 font-bold hover:text-slate-800 dark:hover:text-white transition-colors">Cerrar Ventana</button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 🔴 MODAL PARA EDITAR LICENCIA */}
+        {isEditModalOpen && editingLic && (
+          <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto border border-transparent dark:border-white/10 transition-colors">
+               <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors"><h3 className="font-bold text-lg text-slate-800 dark:text-white">Editar Licencia</h3><button onClick={() => {setIsEditModalOpen(false); setEditingLic(null);}} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button></div>
+               <form onSubmit={handleUpdateLicense} className="p-6 space-y-5">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Nombre del Cliente / Evento</label>
+                    <input type="text" required value={editingLic.nombres || ''} onChange={e => setEditingLic({...editingLic, nombres: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> URL de su Invitación Pública</label>
+                    <input type="url" value={editingLic.urlInvitacion || ''} onChange={e => setEditingLic({...editingLic, urlInvitacion: e.target.value})} placeholder="https://baulia.com/bodas/su-boda" className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-medium text-sky-600 dark:text-sky-400 text-sm transition-colors" />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
                       <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Tipo de Evento</label>
-                      <select value={formData.tipoEvento} onChange={e => setFormData({...formData, tipoEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 dark:text-white text-xs cursor-pointer transition-colors">
+                      <select value={editingLic.tipoEvento || 'general'} onChange={e => setEditingLic({...editingLic, tipoEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
                         {tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
                       </select>
                     </div>
-                    <div className="flex-1">
-                      <label className="block text-[10px] font-bold text-indigo-600 dark:text-amber-500 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Users size={12} className="mr-1"/> Rol</label>
-                      <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full p-3 bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/20 text-indigo-900 dark:text-amber-400 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 font-black text-xs cursor-pointer transition-colors">
-                        <option value="cliente">Cliente Final</option>
-                        <option value="planner">Agencia Planner</option>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Plan</label>
+                      <select value={editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
+                        <option value="basico">Básico</option>
+                        <option value="plata">Plata</option>
+                        <option value="oro">Oro</option>
+                        <option value="diamante">Diamante</option>
+                        <option value="social_wall">Social Wall</option>
+                        <option value="security_kit">Security Kit</option>
                       </select>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 transition-colors">{formData.role === 'planner' ? 'Nombre de la Agencia' : eventoSeleccionado.labelNombre}</label>
-                    <input type="text" autoFocus required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} placeholder={formData.role === 'planner' ? 'Ej. Elite Planners' : eventoSeleccionado.placeholder} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Mail size={12} className="mr-1.5" /> Correo de Acceso</label>
-                    <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-800 dark:text-white text-sm transition-colors" />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Paquete Vendido</label>
-                    <select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 dark:text-white text-sm cursor-pointer transition-colors mb-3">
-                      <option value="basico">Plan Básico ($990)</option>
-                      <option value="plata">Plan Plata ($1,490)</option>
-                      <option value="oro">Plan Oro ($1,990)</option>
-                      <option value="diamante">Plan Diamante ($2,990)</option>
-                      <option value="social_wall">Social Wall ($1,490)</option>
-                      <option value="security_kit">Security Kit ($1,490)</option>
-                    </select>
-
-                    <div className="grid grid-cols-2 gap-4 mb-3">
-                      <div>
-                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
-                        <input type="date" required={formData.plan === 'security_kit'} value={formData.fechaEvento} onChange={e => setFormData({...formData, fechaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1"/> Hora de Inicio</label>
-                        <input type="time" value={formData.horaEvento} onChange={e => setFormData({...formData, horaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
-                      </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
+                      <input type="date" value={editingLic.fechaEvento || ''} onChange={e => setEditingLic({...editingLic, fechaEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
                     </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1"/> Hora de Inicio</label>
+                      <input type="time" value={editingLic.horaEvento || ''} onChange={e => setEditingLic({...editingLic, horaEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                    </div>
+                  </div>
 
-                    {['oro', 'diamante'].includes(formData.plan) && (
-                      <>
-                        <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
-                          <div>
-                            <p className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
-                            <p className="text-[9px] text-indigo-500 dark:text-indigo-300/70 mt-0.5">Apágalo si el cliente quiere invitación simple.</p>
-                          </div>
-                          <button type="button" onClick={() => setFormData({...formData, isQrEnabled: !formData.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
-                             <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${formData.isQrEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                          </button>
+                  {['oro', 'diamante'].includes(editingLic.plan) && (
+                    <>
+                      <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
+                        <div>
+                          <p className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
+                          <p className="text-[9px] text-indigo-500 dark:text-indigo-300/70 mt-0.5">Apágalo si el cliente quiere invitación simple.</p>
                         </div>
+                        <button type="button" onClick={() => setEditingLic({...editingLic, isQrEnabled: !editingLic.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                           <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.isQrEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                        </button>
+                      </div>
 
-                        <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
-                          <div>
-                            <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
-                            <p className="text-[9px] text-emerald-500 dark:text-emerald-300/70 mt-0.5">Apágalo para una confirmación general sin números.</p>
-                          </div>
-                          <button type="button" onClick={() => setFormData({...formData, isPassCountEnabled: !formData.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
-                             <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${formData.isPassCountEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                          </button>
+                      <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
+                        <div>
+                          <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
+                          <p className="text-[9px] text-emerald-500 dark:text-emerald-300/70 mt-0.5">Apágalo para una confirmación general sin números.</p>
                         </div>
-                      </>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> Link Invitación URL (Opcional)</label>
-                    <input type="url" value={formData.urlInvitacion} onChange={e => setFormData({...formData, urlInvitacion: e.target.value})} placeholder="https://baulia.com/..." className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-medium text-sky-600 dark:text-sky-400 text-xs transition-colors" />
-                  </div>
-                </div>
-
-                <div className="flex space-x-3">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold text-xs hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Cancelar</button>
-                  <button type="submit" disabled={isCreating} className="flex-1 py-3.5 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-xs shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 disabled:opacity-50 transition-colors">
-                    {isCreating ? 'Procesando...' : 'Crear Licencia y Registrar Venta'}
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="p-8 text-center bg-slate-50 dark:bg-transparent transition-colors">
-                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-transparent dark:border-emerald-500/30"><CheckCircle2 size={40} /></div>
-                <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2 transition-colors">¡Accesos Creados!</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 transition-colors">La venta se registró en el Libro Mayor por <b>{authData.email.split('@')[0]}</b>.</p>
-                <div className="bg-white dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 text-left text-sm mb-6 shadow-sm transition-colors">
-                  <p className="mb-3"><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Usuario:</span> <b className="text-slate-800 dark:text-white transition-colors">{successData.email}</b></p>
-                  <p><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Contraseña:</span> <b className="text-slate-800 dark:text-white font-mono text-base transition-colors">{successData.password}</b></p>
-                </div>
-                <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 p-5 rounded-2xl mb-6 shadow-sm transition-colors">
-                  <label className="block text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-3 text-left flex items-center transition-colors"><MessageCircle size={14} className="mr-1.5"/> Enviar accesos por WhatsApp</label>
-                  <div className="flex space-x-2 mb-4">
-                    <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold p-3 rounded-xl flex items-center justify-center border border-transparent dark:border-emerald-500/30 transition-colors">+52</span>
-                    <input type="tel" placeholder="10 dígitos del cliente..." value={clientPhone} onChange={e => setClientPhone(e.target.value)} className="w-full p-3 bg-white dark:bg-[#111] border border-emerald-200 dark:border-emerald-500/30 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-800 dark:text-white transition-colors" />
-                  </div>
-                  <button onClick={handleSendWhatsApp} className="w-full py-4 bg-emerald-500 text-white dark:text-slate-900 rounded-xl font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all active:scale-95 flex items-center justify-center">
-                    <Send size={18} className="mr-2" /> Enviar Mensaje
-                  </button>
-                </div>
-                <button onClick={() => setIsModalOpen(false)} className="w-full py-4 text-slate-500 dark:text-slate-400 font-bold hover:text-slate-800 dark:hover:text-white transition-colors">Cerrar Ventana</button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* 🔴 MODAL PARA EDITAR LICENCIA */}
-      {isEditModalOpen && editingLic && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto border border-transparent dark:border-white/10 transition-colors">
-             <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors"><h3 className="font-bold text-lg text-slate-800 dark:text-white">Editar Licencia</h3><button onClick={() => {setIsEditModalOpen(false); setEditingLic(null);}} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button></div>
-             <form onSubmit={handleUpdateLicense} className="p-6 space-y-5">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Nombre del Cliente / Evento</label>
-                  <input type="text" required value={editingLic.nombres || ''} onChange={e => setEditingLic({...editingLic, nombres: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> URL de su Invitación Pública</label>
-                  <input type="url" value={editingLic.urlInvitacion || ''} onChange={e => setEditingLic({...editingLic, urlInvitacion: e.target.value})} placeholder="https://baulia.com/bodas/su-boda" className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-medium text-sky-600 dark:text-sky-400 text-sm transition-colors" />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Tipo de Evento</label>
-                    <select value={editingLic.tipoEvento || 'general'} onChange={e => setEditingLic({...editingLic, tipoEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
-                      {tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Plan</label>
-                    <select value={editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
-                      <option value="basico">Básico</option>
-                      <option value="plata">Plata</option>
-                      <option value="oro">Oro</option>
-                      <option value="diamante">Diamante</option>
-                      <option value="social_wall">Social Wall</option>
-                      <option value="security_kit">Security Kit</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
-                    <input type="date" value={editingLic.fechaEvento || ''} onChange={e => setEditingLic({...editingLic, fechaEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1"/> Hora de Inicio</label>
-                    <input type="time" value={editingLic.horaEvento || ''} onChange={e => setEditingLic({...editingLic, horaEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
-                  </div>
-                </div>
-
-                {['oro', 'diamante'].includes(editingLic.plan) && (
-                  <>
-                    <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
-                      <div>
-                        <p className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
-                        <p className="text-[9px] text-indigo-500 dark:text-indigo-300/70 mt-0.5">Apágalo si el cliente quiere invitación simple.</p>
+                        <button type="button" onClick={() => setEditingLic({...editingLic, isPassCountEnabled: !editingLic.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                           <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.isPassCountEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                        </button>
                       </div>
-                      <button type="button" onClick={() => setEditingLic({...editingLic, isQrEnabled: !editingLic.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
-                         <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.isQrEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                      </button>
-                    </div>
+                    </>
+                  )}
 
-                    <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
-                      <div>
-                        <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
-                        <p className="text-[9px] text-emerald-500 dark:text-emerald-300/70 mt-0.5">Apágalo para una confirmación general sin números.</p>
-                      </div>
-                      <button type="button" onClick={() => setEditingLic({...editingLic, isPassCountEnabled: !editingLic.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
-                         <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.isPassCountEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                <div className="bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 p-3 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-500/20 flex items-start transition-colors">
-                  <AlertCircle size={16} className="mr-2 flex-shrink-0 mt-0.5" />
-                  Nota: Puedes subir (Upgrade) el plan del cliente. El sistema actualizará el estado financiero automáticamente. No se permiten reducciones de plan.
-                </div>
-                <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 transition-colors mt-4">
-                  Guardar Cambios
-                </button>
-             </form>
+                  <div className="bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 p-3 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-500/20 flex items-start transition-colors">
+                    <AlertCircle size={16} className="mr-2 flex-shrink-0 mt-0.5" />
+                    Nota: Puedes subir (Upgrade) el plan del cliente. El sistema actualizará el estado financiero automáticamente. No se permiten reducciones de plan.
+                  </div>
+                  <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 transition-colors mt-4">
+                    Guardar Cambios
+                  </button>
+               </form>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 };
 

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc, setDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
-import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Trash2, Image as ImageIcon, Download, Eye, Edit3, Info } from 'lucide-react';
+import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Trash2, Image as ImageIcon, Download, Eye, Edit3, Info, AlertTriangle } from 'lucide-react';
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: GESTOR DE PULSERAS VIP (V9 - UX OPTIMIZADO) ---
+// --- COMPONENTE: GESTOR DE PULSERAS VIP (V10 - MODAL PREMIUM & CSV BLINDADO) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ preTitle: '', eventName: '', logoBase64: '' });
@@ -13,6 +13,9 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
   const [newEntry, setNewEntry] = useState({ name: '', extraAdults: 0, extraChildren: 0 });
   const [isLocked, setIsLocked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // 🔴 NUEVO: Estado para el Modal Elegante
+  const [confirmModal, setConfirmModal] = useState(false);
 
   useEffect(() => {
     if (!eventId) return;
@@ -171,7 +174,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     }
   };
 
-  // 🔴 PLANTILLA CSV CON INSTRUCCIONES ENTRE COMILLAS (Blindaje contra columnas rotas)
   const downloadTemplate = () => {
     let csv = "";
     csv += "\"BAULIA TECHNOLOGIES - FORMATO OFICIAL DE PRODUCCIÓN DE ACCESOS\"\n";
@@ -217,12 +219,11 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       const text = event.target.result;
       const rows = text.split(/\r?\n/).filter(r => r.trim()); 
       
+      // 🔴 BLINDAJE ANTI-INSTRUCCIONES
       let startIdx = 0;
-      for (let i = 0; i < rows.length; i++) {
-          if (rows[i].toLowerCase().includes('titular')) {
-              startIdx = i + 1;
-              break;
-          }
+      const headerRowIdx = rows.findIndex(r => r.toLowerCase().includes('titular o familia'));
+      if (headerRowIdx !== -1) {
+          startIdx = headerRowIdx + 1; // Empezamos justo después de la cabecera
       }
 
       const processExtrasCol = (colStr, prefixText) => {
@@ -252,7 +253,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       for(let i = startIdx; i < rows.length; i++) {
         const cols = rows[i].split(','); 
         if (cols[0] && cols[0].trim() !== '') {
-          // Eliminamos comillas si el usuario dejó algunas residuales
           const guestName = cols[0].replace(/['"]/g, '').trim();
           const adCol = cols[1] ? cols[1].replace(/['"]/g, '').trim() : "0";
           const niCol = cols[2] ? cols[2].replace(/['"]/g, '').trim() : "0";
@@ -302,14 +302,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     e.target.value = null; 
   };
 
-  const handleSendToWorkshop = async () => {
-    if (wristbandList.length === 0) {
-      if(addNotification) addNotification('Lista Vacía', 'Agrega invitados antes de enviar a producción.', 'warning');
-      return;
-    }
-    const confirm = window.confirm("Una vez enviado al taller, NO podrás editar la lista ni el diseño. ¿Estás seguro de que todo está correcto?");
-    if (!confirm) return;
-
+  const executeSendToWorkshop = async () => {
     try {
       await updateDoc(doc(db, "eventos", eventId), { 
          pulserasStatus: 'enviado',
@@ -347,8 +340,25 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
   const flattenedList = getFlattenedGuests(wristbandList);
 
   return (
-    <div className="space-y-6 pb-10 animate-in fade-in duration-500">
+    <div className="space-y-6 pb-10 animate-in fade-in duration-500 relative">
       
+      {/* 🔴 NUEVO MODAL ELEGANTE (Sustituye la alerta nativa) */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-all">
+            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-white/10 animate-in zoom-in-95">
+                <div className="w-16 h-16 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                    <AlertTriangle size={32} />
+                </div>
+                <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">Confirmar Producción</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Una vez enviado al taller, NO podrás editar la lista de invitados ni el diseño del brazalete. ¿Todo está correcto?</p>
+                <div className="flex gap-3">
+                    <button onClick={() => setConfirmModal(false)} className="flex-1 py-3 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Revisar</button>
+                    <button onClick={() => { setConfirmModal(false); executeSendToWorkshop(); }} className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-colors">Sí, Enviar</button>
+                </div>
+            </div>
+        </div>
+      )}
+
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
         .font-firma { font-family: 'Great Vibes', cursive; }
@@ -370,7 +380,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* 🔴 COLUMNA IZQUIERDA: DISEÑO, VISTA PREVIA Y BOTÓN ENVIAR */}
+        {/* COLUMNA IZQUIERDA: DISEÑO, VISTA PREVIA Y BOTÓN ENVIAR */}
         <div className="lg:col-span-5 flex flex-col space-y-6">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors flex flex-col">
             <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex items-center">
@@ -413,7 +423,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
             </form>
           </div>
 
-          {/* 👁️ VISTA PREVIA EN VIVO */}
           <div className="bg-slate-100 dark:bg-[#111] rounded-3xl p-5 border border-slate-200 dark:border-white/5 shadow-inner">
              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center"><Eye size={12} className="mr-1.5"/> Vista Previa de Impresión</h4>
              
@@ -426,7 +435,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                 </div>
                 <div className="w-[38%] flex flex-col items-center justify-center border-r border-slate-100 p-1 relative">
                     {designConfig.preTitle && <span className="text-[5px] font-black text-slate-500 uppercase tracking-widest mb-0.5">{designConfig.preTitle}</span>}
-                    
                     {designConfig.logoBase64 ? (
                         <img src={designConfig.logoBase64} alt="Logo" className="h-7 object-contain mb-1" />
                     ) : (
@@ -447,20 +455,26 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
              <p className="text-[9px] text-center text-slate-400 mt-3 italic">Esta es una representación a escala. La pulsera física medirá 25cm de largo y se imprimirá en papel Tyvek de alta resistencia.</p>
           </div>
 
-          {/* 🔴 NUEVA POSICIÓN: TARJETA DE RESUMEN Y BOTÓN ENVIAR */}
           <div className="bg-indigo-600 dark:bg-amber-500 rounded-3xl p-6 text-white dark:text-slate-900 shadow-xl flex flex-col items-center text-center gap-5">
              <div>
                <p className="text-[10px] font-black uppercase tracking-widest mb-1 opacity-80">Total a Imprimir</p>
                <h3 className="text-5xl font-editorial font-black">{totalPulserasSolicitadas} <span className="text-base font-sans font-medium opacity-80">pulseras</span></h3>
              </div>
-             <button onClick={handleSendToWorkshop} disabled={isLocked || wristbandList.length === 0} className="w-full py-4 px-8 bg-white text-indigo-700 dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center">
+             {/* 🔴 LLAMAMOS AL MODAL EN VEZ DEL NATIVO */}
+             <button onClick={() => {
+                if (wristbandList.length === 0) {
+                   if(addNotification) addNotification('Lista Vacía', 'Agrega invitados antes de enviar a producción.', 'warning');
+                   return;
+                }
+                setConfirmModal(true);
+             }} disabled={isLocked || wristbandList.length === 0} className="w-full py-4 px-8 bg-white text-indigo-700 dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center">
                <Send size={16} className="mr-2" /> {isLocked ? 'Orden en Proceso' : 'Enviar a Taller'}
              </button>
           </div>
 
         </div>
 
-        {/* 🔴 COLUMNA DERECHA: LISTA DE NOMBRES EXPANDIDA */}
+        {/* COLUMNA DERECHA: LISTA DE NOMBRES EXPANDIDA */}
         <div className="lg:col-span-7 flex flex-col h-full min-h-[600px]">
           
           <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col h-full">
@@ -493,7 +507,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
               )}
             </div>
             
-            {/* AGREGAR MANUALMENTE */}
             {!isLocked && (
                 <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-white dark:bg-transparent shrink-0">
                     <form onSubmit={handleAddEntry} className="flex flex-col sm:flex-row w-full gap-3 items-end">
@@ -518,7 +531,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                 </div>
             )}
 
-            {/* 🔴 AUMENTAMOS LA ALTURA MÁXIMA DE LA TABLA */}
             <div className="overflow-y-auto custom-scrollbar flex-1 max-h-[700px]">
               {flattenedList.length === 0 ? (
                 <div className="h-full min-h-[250px] flex flex-col items-center justify-center text-slate-400 p-8 text-center">
