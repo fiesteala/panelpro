@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc, setDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
-import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Trash2, Image as ImageIcon, Download, Eye, Edit3, Info, AlertTriangle } from 'lucide-react';
+import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Trash2, Image as ImageIcon, Download, Eye, Edit3, Info, AlertTriangle, Loader2, X } from 'lucide-react';
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: GESTOR DE PULSERAS VIP (RESTAURADO Y BLINDADO) ---
+// --- COMPONENTE: BAULIA BLACK LABEL - PRODUCCIÓN (V18 - CLOUDINARY ACTIVO) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ preTitle: '', eventName: '', logoBase64: '' });
@@ -14,6 +14,8 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
   const [isLocked, setIsLocked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [confirmModal, setConfirmModal] = useState(false);
+  
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   useEffect(() => {
     if (!eventId) return;
@@ -31,8 +33,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         const listRef = collection(db, "eventos", eventId, "invitados");
         const listSnap = await getDocs(listRef);
         const listData = listSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        // Mantenemos la etiqueta original que funciona con tu sistema
-        setWristbandList(listData.filter(g => g.isSecurityKit));
+        setWristbandList(listData.filter(g => g.isSecurityKit || g.isBlackLabel));
       } catch (error) {
         console.error("Error cargando datos:", error);
       }
@@ -52,8 +53,8 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     }
   };
 
-  // 🔴 LECTOR DE IMÁGENES PURO (Cero crasheos y cero pantallas negras)
-  const handleLogoUpload = (e) => {
+  // 🔴 SUBIDA A CLOUDINARY CON TUS CREDENCIALES
+  const handleLogoUpload = async (e) => {
     if (isLocked) return;
     const file = e.target.files[0];
     if (!file) return;
@@ -63,20 +64,36 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         return;
     }
 
-    // Límite de 800KB para que Firebase no explote y no usemos el Canvas problemático
-    if (file.size > 800 * 1024) {
-        if(addNotification) addNotification('Logo muy pesado', 'La imagen debe pesar menos de 800 KB para asegurar calidad y transparencia.', 'warning');
-        return;
-    }
+    setIsUploadingLogo(true);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        setDesignConfig(prev => ({ ...prev, logoBase64: event.target.result }));
-    };
-    reader.onerror = () => {
-        if(addNotification) addNotification('Error', 'Hubo un problema al procesar la imagen.', 'error');
-    };
-    reader.readAsDataURL(file);
+    // Tus credenciales exactas
+    const CLOUD_NAME = "duy0mcqsh"; 
+    const UPLOAD_PRESET = "ml_default"; 
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
+
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      
+      if (data.secure_url) {
+        setDesignConfig(prev => ({ ...prev, logoBase64: data.secure_url }));
+      } else {
+        if(addNotification) addNotification('Error', 'No se pudo subir la imagen a la nube.', 'error');
+      }
+    } catch (err) {
+      console.error("Error en Cloudinary:", err);
+      if(addNotification) addNotification('Error', 'Fallo de conexión al subir la imagen.', 'error');
+    } finally {
+      setIsUploadingLogo(false);
+      e.target.value = null; 
+    }
   };
 
   const removeLogo = () => {
@@ -118,6 +135,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       sent: false, 
       subGuests: initSubGuests, 
       extraRequested: 0,
+      isBlackLabel: true, 
       isSecurityKit: true 
     };
     
@@ -214,7 +232,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       const text = event.target.result;
       const rawRows = text.split(/\r?\n/); 
       
-      // 🔴 MACHETAZO INTELIGENTE AL CSV
       const headerIndex = rawRows.findIndex(row => row.toLowerCase().includes('titular o familia'));
       
       let validRows = [];
@@ -286,6 +303,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
             sent: false,
             subGuests: initSubGuests,
             extraRequested: 0,
+            isBlackLabel: true,
             isSecurityKit: true
           };
           
@@ -353,15 +371,15 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       
       {confirmModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-all">
-            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-white/10 animate-in zoom-in-95">
-                <div className="w-16 h-16 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+            <div className="bg-[#050505] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-white/10 animate-in zoom-in-95">
+                <div className="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20 shadow-inner">
                     <AlertTriangle size={32} />
                 </div>
-                <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">Confirmar Producción</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Una vez enviado, NO podrás editar la lista de invitados ni el diseño. ¿Todo está perfecto?</p>
+                <h3 className="text-xl font-black text-white mb-2">Confirmar Producción</h3>
+                <p className="text-sm text-slate-400 mb-6">Una vez enviado, NO podrás editar la lista de invitados ni el diseño. ¿Todo está perfecto?</p>
                 <div className="flex gap-3">
-                    <button onClick={() => setConfirmModal(false)} className="flex-1 py-3 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Revisar</button>
-                    <button onClick={() => { setConfirmModal(false); executeSendToWorkshop(); }} className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-colors">Sí, Enviar</button>
+                    <button onClick={() => setConfirmModal(false)} className="flex-1 py-3 bg-[#111] text-slate-300 rounded-xl font-bold hover:bg-white/5 transition-colors border border-white/5">Revisar</button>
+                    <button onClick={() => { setConfirmModal(false); executeSendToWorkshop(); }} className="flex-1 py-3 bg-amber-500 text-black rounded-xl font-bold shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:bg-amber-400 transition-colors">Sí, Enviar</button>
                 </div>
             </div>
         </div>
@@ -397,7 +415,13 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
               
               <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-2xl border border-dashed border-slate-300 dark:border-white/20 text-center">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Logo del Evento (Opcional)</p>
-                  {designConfig.logoBase64 ? (
+                  
+                  {isUploadingLogo ? (
+                      <div className="flex flex-col items-center justify-center py-4">
+                          <Loader2 size={24} className="text-indigo-500 animate-spin mb-2" />
+                          <span className="text-xs font-bold text-slate-500 mt-2">Subiendo a la nube...</span>
+                      </div>
+                  ) : designConfig.logoBase64 ? (
                       <div className="relative inline-block">
                           <img src={designConfig.logoBase64} alt="Logo Evento" className="h-16 object-contain rounded bg-white p-1 shadow-sm" />
                           {!isLocked && <button type="button" onClick={removeLogo} className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-1 shadow-md hover:bg-rose-600"><X size={12}/></button>}
@@ -406,7 +430,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                       <label className={`flex flex-col items-center justify-center cursor-pointer transition-colors ${isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:text-indigo-600'}`}>
                           <ImageIcon size={24} className="text-slate-400 mb-2" />
                           <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Clic para subir imagen</span>
-                          <span className="text-[10px] text-slate-400 mt-1">JPG o PNG (Fondo blanco recomendado)</span>
+                          <span className="text-[10px] text-slate-400 mt-1">Sube tu logo y mantendremos la calidad</span>
                           <input type="file" accept="image/*" onChange={handleLogoUpload} disabled={isLocked} className="hidden" />
                       </label>
                   )}
@@ -423,7 +447,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                   </div>
               </div>
 
-              <button type="submit" disabled={isLocked} className="w-full py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-xs uppercase tracking-widest shadow-md hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors disabled:opacity-30">
+              <button type="submit" disabled={isLocked || isUploadingLogo} className="w-full py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-xs uppercase tracking-widest shadow-md hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors disabled:opacity-30">
                 Guardar Diseño
               </button>
             </form>
@@ -439,7 +463,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                 <div className="w-[12%] flex items-center justify-center border-r border-slate-100">
                     <span className="text-[5px] text-slate-400 font-bold -rotate-90 tracking-widest whitespace-nowrap">by BAULIA.COM</span>
                 </div>
-                <div className="w-[38%] flex flex-col items-center justify-center border-r border-slate-100 p-1 relative">
+                <div className="w-[38%] flex flex-col items-center justify-center border-r border-slate-100 p-1 relative overflow-hidden">
                     {designConfig.preTitle && <span className="text-[5px] font-black text-slate-500 uppercase tracking-widest mb-0.5">{designConfig.preTitle}</span>}
                     {designConfig.logoBase64 ? (
                         <img src={designConfig.logoBase64} alt="Logo" className="h-7 object-contain mb-1" />
@@ -458,7 +482,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                     <QrCode size={24} className="text-slate-800" strokeWidth={1.5} />
                 </div>
              </div>
-             <p className="text-[9px] text-center text-slate-400 mt-3 italic">Esta es una representación a escala. La pulsera física medirá 25cm de largo y se imprimirá en papel Tyvek de alta resistencia.</p>
+             <p className="text-[9px] text-center text-slate-400 mt-3 italic">Representación a escala. La pulsera física medirá 25cm de largo y se imprimirá en papel Tyvek de alta resistencia.</p>
           </div>
 
           <div className="bg-indigo-600 dark:bg-amber-500 rounded-3xl p-6 text-white dark:text-slate-900 shadow-xl flex flex-col items-center text-center gap-5">
@@ -490,7 +514,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                </div>
             </div>
 
-            <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 shrink-0">
+            <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-white dark:bg-[#111] flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 shrink-0">
               <div>
                   <h3 className="font-bold text-slate-800 dark:text-white text-sm flex items-center"><Users size={16} className="mr-2 text-indigo-500" /> Desglose para Impresión</h3>
               </div>
@@ -512,16 +536,16 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                     <form onSubmit={handleAddEntry} className="flex flex-col sm:flex-row w-full gap-3 items-end">
                         <div className="flex-1 w-full">
                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Titular (Incluye 1 pulsera)</span>
-                           <input type="text" required placeholder="Ej. Familia Garza" value={newEntry.name} onChange={e=>setNewEntry({...newEntry, name: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-800 dark:text-white outline-none focus:border-indigo-500 transition-colors" />
+                           <input type="text" required placeholder="Ej. Familia Garza" value={newEntry.name} onChange={e=>setNewEntry({...newEntry, name: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-800 dark:text-white outline-none focus:border-indigo-500" />
                         </div>
                         <div className="flex gap-2 w-full sm:w-auto items-end">
                           <div className="flex flex-col w-full sm:w-24">
                             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Adultos Extras</span>
-                            <input type="number" min="0" value={newEntry.extraAdults} onChange={e=>setNewEntry({...newEntry, extraAdults: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-indigo-600 dark:text-amber-500 outline-none focus:border-indigo-500 transition-colors" />
+                            <input type="number" min="0" value={newEntry.extraAdults} onChange={e=>setNewEntry({...newEntry, extraAdults: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-indigo-600 dark:text-amber-500 outline-none focus:border-indigo-500" />
                           </div>
                           <div className="flex flex-col w-full sm:w-24">
                             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Niños Extras</span>
-                            <input type="number" min="0" value={newEntry.extraChildren} onChange={e=>setNewEntry({...newEntry, extraChildren: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-sky-600 dark:text-sky-400 outline-none focus:border-indigo-500 transition-colors" />
+                            <input type="number" min="0" value={newEntry.extraChildren} onChange={e=>setNewEntry({...newEntry, extraChildren: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-sky-600 dark:text-sky-400 outline-none focus:border-indigo-500" />
                           </div>
                           <button type="submit" className="px-4 w-full sm:w-auto bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center font-bold text-xs h-[46px]">
                              <Plus size={18} className="md:mr-1" /> <span className="hidden md:inline">Agregar</span>
