@@ -11503,7 +11503,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V15 - PDF ALINEADO TOP) ---
+// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B ---
 // ==========================================
 const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
@@ -11657,7 +11657,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       document.body.removeChild(link);
   };
 
-  // 🔴 GENERADOR DE PDF NATIVO (ALINEADO ARRIBA Y SIN HOJA BLANCA FINAL)
   const generarPDFNativo = () => {
     const printWindow = window.open('', '_blank');
     const evtName = ordenActiva.config.eventName || 'Evento VIP';
@@ -11676,7 +11675,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
             
             @page { size: letter landscape; margin: 0; }
             
-            /* 🔴 justify-content: flex-start obliga a imprimir desde el borde superior */
             .sheet { 
                 width: 279mm; 
                 height: 215.9mm; 
@@ -11688,12 +11686,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                 margin: 0 auto; 
                 box-sizing: border-box;
             }
-            
-            /* 🔴 Evita que la última hoja tenga un salto de página (que creaba la hoja en blanco) */
-            .sheet:last-child {
-                page-break-after: auto;
-            }
-
+            .sheet:last-child { page-break-after: auto; }
             .wristband { width: 250mm; height: 19mm; border-bottom: 1px dashed #e5e7eb; border-left: 1px dashed #e5e7eb; border-right: 1px dashed #e5e7eb; display: flex; align-items: center; box-sizing: border-box; overflow: hidden; page-break-inside: avoid; }
             .wristband:first-child { border-top: 1px dashed #e5e7eb; }
             .zone-glue { width: 25mm; height: 100%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; border-right: 1px dashed #cbd5e1; }
@@ -11927,8 +11920,52 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
   return (
     <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+        .font-firma { font-family: 'Great Vibes', cursive; }
+        
+        @media print {
+            body * { display: none !important; }
+            #pdf-generator-layer { display: block !important; position: absolute; left: 0; top: 0; width: 100vw; margin: 0; padding: 0; background: white; }
+            #pdf-generator-layer * { display: block !important; }
+            #pdf-generator-layer .flex { display: flex !important; }
+            #pdf-generator-layer .flex-col { flex-direction: column !important; }
+            #pdf-generator-layer .items-center { align-items: center !important; }
+            #pdf-generator-layer .justify-center { justify-content: center !important; }
+        }
+      `}</style>
+
+      {ordenActiva && (
+          <div id="pdf-generator-layer" className="hidden print:block absolute left-0 top-0 w-full bg-white text-black z-[99999] m-0 p-0 font-sans">
+              {ordenActiva.listaImpresion.map((item, index) => {
+                  return (
+                      <div key={index} className="flex h-[2.5cm] w-[25cm] border border-dashed border-gray-300 mb-[2mm] items-center overflow-hidden bg-white mx-auto" style={{ boxSizing: 'border-box', pageBreakInside: 'avoid' }}>
+                          <div className="w-[10%] h-full bg-gray-100 border-r border-gray-300 flex items-center justify-center"><span className="-rotate-90 text-[8px] text-gray-500 tracking-widest font-bold">PEGAMENTO</span></div>
+                          <div className="w-[12%] h-full flex items-center justify-center border-r border-gray-200"><span className="-rotate-90 text-[6px] text-gray-400 font-bold tracking-widest whitespace-nowrap">by BAULIA.COM</span></div>
+                          <div className="w-[38%] h-full flex flex-col justify-center items-center px-4 relative border-r border-gray-100">
+                              {ordenActiva.config.preTitle && <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-0.5">{ordenActiva.config.preTitle}</span>}
+                              {ordenActiva.config.logoBase64 ? (
+                                  <img src={ordenActiva.config.logoBase64} alt="Logo" className="h-8 object-contain mb-1" />
+                              ) : (
+                                  <span className="font-firma text-2xl text-black leading-none mb-1 text-center w-full">{ordenActiva.config.eventName || 'Evento VIP'}</span>
+                              )}
+                              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : ''}</span>
+                          </div>
+                          <div className="w-[25%] h-full flex flex-col justify-center px-4 border-l border-gray-200">
+                              <span className="font-bold text-sm truncate uppercase">{item.nombreAImprimir}</span>
+                              <span className="text-[8px] text-gray-500 mt-1 uppercase font-bold">{item.esNino ? 'Pase Niño' : 'Pase VIP'}</span>
+                          </div>
+                          <div className="w-[15%] h-full flex items-center justify-center border-l border-gray-200 bg-white">
+                              <QrCode size={40} className="text-black" />
+                          </div>
+                      </div>
+                  );
+              })}
+          </div>
+      )}
+
       {/* ========================================================================================= */}
-      {/* 🔴 INTERFAZ PRINCIPAL (Se oculta al imprimir PDF para que solo salga el diseño de arriba) */}
+      {/* 🔴 INTERFAZ PRINCIPAL */}
       <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative print:hidden">
         
         {dialog.isOpen && (
@@ -12092,7 +12129,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
                             <div className="bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/30 p-3 rounded-xl flex items-start gap-2 mb-3">
                                 <Info size={16} className="text-sky-600 dark:text-sky-400 mt-0.5 shrink-0" />
-                                <p className="text-xs text-sky-800 dark:text-sky-200">En la ventana de impresión, asegúrate de seleccionar: <br/><b>Destino:</b> Guardar como PDF <br/><b>Orientación:</b> Horizontal (Landscape) <br/><b>Márgenes:</b> Ninguno.</p>
+                                <p className="text-xs text-sky-800 dark:text-sky-200">Al abrir el PDF, asegúrate de configurar tu impresora en tamaño <b>CARTA</b>, orientación <b>HORIZONTAL</b>, y escala <b>100%</b> o "Tamaño Real".</p>
                             </div>
                             <button onClick={generarPDFNativo} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center">
                                 <Printer size={18} className="mr-2" /> Abrir Generador PDF (Vectorial)
@@ -12111,44 +12148,145 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           </div>
         )}
 
+        {/* 🔴 TABLA DE CLIENTES (RESTITUIDA Y SEGURA) */}
         {adminTab === 'licencias' && (
-          <div className="flex flex-col xl:flex-row gap-3 mb-6 w-full overflow-x-auto pb-2 custom-scrollbar">
-            <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true }); }} className="shrink-0 px-6 py-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-2xl font-black shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform flex items-center justify-center min-w-[200px]">
-                <Plus size={18} className="mr-2 text-amber-500 dark:text-slate-900"/> Nueva Bóveda
-            </button>
+          <div className="space-y-6">
+            {/* CARDS */}
+            <div className="flex flex-col xl:flex-row gap-3 mb-6 w-full overflow-x-auto pb-2 custom-scrollbar">
+              <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true }); }} className="shrink-0 px-6 py-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-2xl font-black shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform flex items-center justify-center min-w-[200px]">
+                  <Plus size={18} className="mr-2 text-amber-500 dark:text-slate-900"/> Nueva Bóveda
+              </button>
 
-            <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-              <div><p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Básico</p><p className="text-xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.basico}</p></div>
-              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500"><Users size={14}/></div>
-            </div>
-            
-            <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-slate-300 dark:border-slate-600 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-              <div><p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Plata</p><p className="text-xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.plata}</p></div>
-              <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300"><Wallet size={14}/></div>
-            </div>
-            
-            <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-              <div><p className="text-[9px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">Oro</p><p className="text-xl font-black text-amber-700 dark:text-amber-400">{totalesPorLicencia.oro}</p></div>
-              <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500"><ShieldCheck size={14}/></div>
-            </div>
-            
-            <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-              <div><p className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Diamante</p><p className="text-xl font-black text-indigo-700 dark:text-indigo-400">{totalesPorLicencia.diamante}</p></div>
-              <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400"><LayoutDashboard size={14}/></div>
-            </div>
-            
-            <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-pink-200 dark:border-pink-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-              <div><p className="text-[9px] font-bold text-pink-600 dark:text-pink-400 uppercase tracking-widest">Social Wall</p><p className="text-xl font-black text-pink-700 dark:text-pink-400">{totalesPorLicencia.social_wall}</p></div>
-              <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-500/10 flex items-center justify-center text-pink-600 dark:text-pink-400"><Camera size={14}/></div>
+              <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+                <div><p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Básico</p><p className="text-xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.basico}</p></div>
+                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500"><Users size={14}/></div>
+              </div>
+              
+              <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-slate-300 dark:border-slate-600 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+                <div><p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Plata</p><p className="text-xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.plata}</p></div>
+                <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300"><Wallet size={14}/></div>
+              </div>
+              
+              <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+                <div><p className="text-[9px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">Oro</p><p className="text-xl font-black text-amber-700 dark:text-amber-400">{totalesPorLicencia.oro}</p></div>
+                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500"><ShieldCheck size={14}/></div>
+              </div>
+              
+              <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+                <div><p className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Diamante</p><p className="text-xl font-black text-indigo-700 dark:text-indigo-400">{totalesPorLicencia.diamante}</p></div>
+                <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400"><LayoutDashboard size={14}/></div>
+              </div>
+              
+              <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-pink-200 dark:border-pink-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+                <div><p className="text-[9px] font-bold text-pink-600 dark:text-pink-400 uppercase tracking-widest">Social Wall</p><p className="text-xl font-black text-pink-700 dark:text-pink-400">{totalesPorLicencia.social_wall}</p></div>
+                <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-500/10 flex items-center justify-center text-pink-600 dark:text-pink-400"><Camera size={14}/></div>
+              </div>
+
+              <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
+                <div><p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Security Kit</p><p className="text-xl font-black text-emerald-700 dark:text-emerald-400">{totalesPorLicencia.security_kit}</p></div>
+                <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400"><Scan size={14}/></div>
+              </div>
             </div>
 
-            <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-              <div><p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Security Kit</p><p className="text-xl font-black text-emerald-700 dark:text-emerald-400">{totalesPorLicencia.security_kit}</p></div>
-              <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400"><Scan size={14}/></div>
+            {/* TABLA */}
+            <div className="animate-in fade-in">
+              <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
+                <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
+                  <h3 className="font-bold text-slate-800 dark:text-white text-sm">Directorio de Clientes Activos ({filteredLicencias.length})</h3>
+                </div>
+                
+                <div className="overflow-x-auto pb-24">
+                  <table className="w-full text-left whitespace-nowrap min-w-[1000px]">
+                    <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest transition-colors">
+                      <tr>
+                        <th className="px-5 py-3 font-bold">Cliente / ID</th>
+                        <th className="px-5 py-3 font-bold">Acceso (Correo)</th>
+                        <th className="px-5 py-3 font-bold text-center">Tipo</th>
+                        <th className="px-5 py-3 font-bold text-center">Plan</th>
+                        <th className="px-5 py-3 font-bold">Link Invitación</th>
+                        <th className="px-5 py-3 font-bold text-center">Estatus</th>
+                        <th className="px-5 py-3 font-bold text-right">Controles</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
+                      {filteredLicencias.length === 0 ? (
+                        <tr><td colSpan="7" className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">No se encontraron clientes.</td></tr>
+                      ) : (
+                        filteredLicencias.map((lic) => {
+                          const estaSuspendido = lic.status === 'suspendido';
+                          const correoVisible = correosVisibles[lic.id];
+                          const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
+                          
+                          return (
+                            <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40 dark:bg-rose-500/10' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
+                              <td className="px-5 py-4">
+                                <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800 dark:text-rose-500' : 'text-slate-800 dark:text-white'}`}>
+                                  {lic.nombres || 'Sin Nombre'} 
+                                  {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
+                                </p>
+                                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{lic.eventId}</p>
+                              </td>
+                              <td className="px-5 py-4">
+                                <div className="flex items-center text-slate-600 dark:text-slate-300 bg-slate-100/70 dark:bg-white/5 px-2 py-1.5 rounded-lg w-max border border-slate-200/50 dark:border-white/10 transition-colors">
+                                  <span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span>
+                                  <button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-amber-500 transition-colors">
+                                    {correoVisible ? <EyeOff size={14} /> : <Eye size={14} />}
+                                  </button>
+                                </div>
+                              </td>
+                              <td className="px-5 py-4 text-center">
+                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lic.tipoEvento || 'Boda'}</span>
+                              </td>
+                              <td className="px-5 py-4 text-center">
+                                <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border 
+                                  ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : 
+                                    lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 
+                                    lic.plan === 'plata' ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600' :
+                                    lic.plan === 'social_wall' ? 'bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20' :
+                                    lic.plan === 'security_kit' ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' :
+                                    'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-white/10'}`}>
+                                  {lic.plan.replace('_', ' ')}
+                                </span>
+                              </td>
+                              <td className="px-5 py-4 max-w-[200px] truncate">
+                                {lic.urlInvitacion ? (
+                                  <a href={lic.urlInvitacion} target="_blank" rel="noreferrer" className="text-sky-500 dark:text-sky-400 hover:underline text-[10px] font-bold truncate block" title={lic.urlInvitacion}>
+                                    {lic.urlInvitacion}
+                                  </a>
+                                ) : (
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">Pendiente de subir</span>
+                                )}
+                              </td>
+                              <td className="px-5 py-4 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
+                              <td className="px-5 py-4 text-right">
+                                  <div className="flex items-center justify-end space-x-2">
+                                    <button onClick={() => { 
+                                        setEditingLic({...lic, originalPlan: lic.plan, isQrEnabled: lic.isQrEnabled !== false, isPassCountEnabled: lic.isPassCountEnabled !== false}); 
+                                        setIsEditModalOpen(true); 
+                                      }} 
+                                      title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"><Edit3 size={16} />
+                                    </button>
+                                    
+                                    {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan, tipoEvento: lic.tipoEvento || 'general', urlInvitacion: lic.urlInvitacion || '' })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-transparent dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"><ExternalLink size={16} /></button>}
+                                    <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors border border-transparent ${estaSuspendido ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 hover:bg-emerald-200 dark:hover:bg-emerald-500/20 dark:border-emerald-500/20' : 'text-amber-600 dark:text-amber-500 bg-amber-100 dark:bg-amber-500/10 hover:bg-amber-200 dark:hover:bg-amber-500/20 dark:border-amber-500/20'}`}><Power size={16} /></button>
+                                    {isSuperAdmin && (
+                                      <button onClick={() => handleDelete(lic)} title="Eliminar Bóveda (Se conserva Finanzas)" className="p-2 rounded-lg text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-transparent dark:border-rose-500/20 hover:text-white hover:bg-rose-500 dark:hover:bg-rose-500 dark:hover:text-white transition-colors"><Trash2 size={16} /></button>
+                                    )}
+                                  </div>
+                              </td>
+                            </tr>
+                          )
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
+        {/* FINANZAS */}
         {adminTab === 'finanzas' && isSuperAdmin && (
           <div className="animate-in fade-in space-y-6">
              <div className="flex flex-col md:flex-row justify-between items-center bg-white dark:bg-[#0a0a0a] p-5 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
@@ -12202,6 +12340,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           </div>
         )}
 
+        {/* RESEÑAS */}
         {adminTab === 'resenas' && isSuperAdmin && (
           <div className="animate-in fade-in bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
             <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
