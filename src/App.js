@@ -11504,7 +11504,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V16 - PDF LIMPIO PARA IMPRESIÓN) ---
+// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V16 - BLACK LABEL) ---
 // ==========================================
 const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
@@ -11537,7 +11537,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
   const isSuperAdmin = authData?.role === 'superadmin';
 
-  const PRECIOS = { basico: 990, plata: 1490, oro: 1990, diamante: 2990, social_wall: 1490, security_kit: 1490 };
+  // 🔴 CAMBIO A BLACK LABEL
+  const PRECIOS = { basico: 990, plata: 1490, oro: 1990, diamante: 2990, social_wall: 1490, baulia_black_label: 1490 };
 
   const tiposDeEvento = [
     { id: 'boda', label: 'Boda', placeholder: 'Ej. Carlos y Sofia', labelNombre: 'Nombre de los Novios' },
@@ -11592,7 +11593,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       const listRef = collection(db, "eventos", evento.id, "invitados");
       const listSnap = await getDocs(listRef);
       const invitadosDB = listSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const invitadosVIP = invitadosDB.filter(g => g.isSecurityKit);
+      // Filtramos retrocompatibles
+      const invitadosVIP = invitadosDB.filter(g => g.isSecurityKit || g.isBlackLabel);
 
       const flattened = [];
       invitadosVIP.forEach(guest => {
@@ -11658,7 +11660,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       document.body.removeChild(link);
   };
 
-  // 🔴 GENERADOR DE PDF NATIVO (100% LIMPIO PARA IMPRESIÓN TYVEK)
   const generarPDFNativo = () => {
     const printWindow = window.open('', '_blank');
     const evtName = ordenActiva.config.eventName || 'Evento VIP';
@@ -11674,9 +11675,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
             body, html { margin: 0; padding: 0; background: white; font-family: Arial, sans-serif; }
-            
             @page { size: letter landscape; margin: 0; }
-            
             .sheet { 
                 width: 279mm; 
                 height: 215.9mm; 
@@ -11689,13 +11688,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                 box-sizing: border-box;
             }
             .sheet:last-child { page-break-after: auto; }
-            
-            /* 🔴 SIN BORDES NI FONDOS GRISES */
             .wristband { width: 250mm; height: 19mm; display: flex; align-items: center; box-sizing: border-box; overflow: hidden; page-break-inside: avoid; }
             .zone-glue { width: 25mm; height: 100%; display: flex; align-items: center; justify-content: center; }
-            .zone-glue span { display: none; } /* Ocultamos la palabra PEGAMENTO */
             .zone-brand { width: 30mm; height: 100%; display: flex; align-items: center; justify-content: center; }
-            .zone-brand span { transform: rotate(-90deg); font-size: 6px; color: #94a3b8; font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
+            .zone-brand span { transform: rotate(-90deg); font-size: 6px; color: #000; font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
             .zone-design { width: 95mm; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 10px; }
             .z-pre { font-size: 6px; font-weight: 900; color: #000; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2px; }
             .z-name { font-family: 'Great Vibes', cursive; font-size: 24px; color: #000; line-height: 1; margin-bottom: 2px; }
@@ -11726,7 +11722,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
             content += `
             <div class="wristband">
-                <div class="zone-glue"><span>PEGAMENTO</span></div>
+                <div class="zone-glue"></div>
                 <div class="zone-brand"><span>by BAULIA.COM</span></div>
                 <div class="zone-design">${designHtml}</div>
                 <div class="zone-guest">
@@ -11910,66 +11906,21 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const ventasDelMes = ventas.filter(v => v.mesAnio === mesSeleccionado);
   const ingresoMensualTotal = ventasDelMes.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
   
-  const desglosePlanes = { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, security_kit: 0 };
+  const desglosePlanes = { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, baulia_black_label: 0 };
   ventasDelMes.forEach(v => { if(desglosePlanes[v.plan] !== undefined) desglosePlanes[v.plan] += (Number(v.monto) || 0); });
 
   const totalesPorLicencia = licencias.reduce((acc, user) => {
     const tipo = (user.plan || 'basico').toLowerCase().trim();
     acc[tipo] = (acc[tipo] || 0) + 1;
     return acc;
-  }, { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, security_kit: 0 });
+  }, { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, baulia_black_label: 0 });
 
   const pedidosNuevos = pedidosTaller.filter(p => p.pulserasStatus === 'enviado').length;
 
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
-        .font-firma { font-family: 'Great Vibes', cursive; }
-        
-        @media print {
-            body * { display: none !important; }
-            #pdf-generator-layer { display: block !important; position: absolute; left: 0; top: 0; width: 100vw; margin: 0; padding: 0; background: white; }
-            #pdf-generator-layer * { display: block !important; }
-            #pdf-generator-layer .flex { display: flex !important; }
-            #pdf-generator-layer .flex-col { flex-direction: column !important; }
-            #pdf-generator-layer .items-center { align-items: center !important; }
-            #pdf-generator-layer .justify-center { justify-content: center !important; }
-        }
-      `}</style>
-
-      {ordenActiva && (
-          <div id="pdf-generator-layer" className="hidden print:block absolute left-0 top-0 w-full bg-white text-black z-[99999] m-0 p-0 font-sans">
-              {ordenActiva.listaImpresion.map((item, index) => {
-                  return (
-                      <div key={index} className="flex h-[2.5cm] w-[25cm] mb-[2mm] items-center overflow-hidden bg-white mx-auto" style={{ boxSizing: 'border-box', pageBreakInside: 'avoid' }}>
-                          <div className="w-[10%] h-full bg-white flex items-center justify-center"></div>
-                          <div className="w-[12%] h-full flex items-center justify-center"><span className="-rotate-90 text-[6px] text-slate-400 font-bold tracking-widest whitespace-nowrap">by BAULIA.COM</span></div>
-                          <div className="w-[38%] h-full flex flex-col justify-center items-center px-4 relative">
-                              {ordenActiva.config.preTitle && <span className="text-[8px] font-black text-black uppercase tracking-widest mb-0.5">{ordenActiva.config.preTitle}</span>}
-                              {ordenActiva.config.logoBase64 ? (
-                                  <img src={ordenActiva.config.logoBase64} alt="Logo" className="h-8 object-contain mb-1" />
-                              ) : (
-                                  <span className="font-firma text-2xl text-black leading-none mb-1 text-center w-full">{ordenActiva.config.eventName || 'Evento VIP'}</span>
-                              )}
-                              <span className="text-[8px] font-black text-black uppercase tracking-widest">{ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : ''}</span>
-                          </div>
-                          <div className="w-[25%] h-full flex flex-col justify-center px-4">
-                              <span className="font-bold text-sm truncate uppercase text-black">{item.nombreAImprimir}</span>
-                              <span className="text-[8px] text-black mt-1 uppercase font-bold">{item.esNino ? 'Pase Niño' : 'Pase VIP'}</span>
-                          </div>
-                          <div className="w-[15%] h-full flex items-center justify-center bg-white">
-                              <QrCode size={40} className="text-black" />
-                          </div>
-                      </div>
-                  );
-              })}
-          </div>
-      )}
-
-      {/* ========================================================================================= */}
-      {/* 🔴 INTERFAZ PRINCIPAL */}
-      <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative print:hidden">
+      {/* 🔴 VISTA DE IMPRESIÓN (IGNORADA EN ESTE ARCHIVO PORQUE USA VENTANA NUEVA) */}
+      <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
         
         {dialog.isOpen && (
           <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-colors">
@@ -12151,10 +12102,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           </div>
         )}
 
-        {/* 🔴 TABLA DE CLIENTES (RESTITUIDA Y SEGURA) */}
+        {/* 🔴 TABLA DE CLIENTES */}
         {adminTab === 'licencias' && (
           <div className="space-y-6">
-            {/* CARDS */}
             <div className="flex flex-col xl:flex-row gap-3 mb-6 w-full overflow-x-auto pb-2 custom-scrollbar">
               <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true }); }} className="shrink-0 px-6 py-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-2xl font-black shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform flex items-center justify-center min-w-[200px]">
                   <Plus size={18} className="mr-2 text-amber-500 dark:text-slate-900"/> Nueva Bóveda
@@ -12185,13 +12135,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                 <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-500/10 flex items-center justify-center text-pink-600 dark:text-pink-400"><Camera size={14}/></div>
               </div>
 
-              <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-                <div><p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Security Kit</p><p className="text-xl font-black text-emerald-700 dark:text-emerald-400">{totalesPorLicencia.security_kit}</p></div>
-                <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400"><Scan size={14}/></div>
+              {/* 🔴 NUEVA TARJETA PREMIUM BLACK LABEL */}
+              <div className="flex-1 bg-gradient-to-br from-slate-900 to-black p-3 rounded-2xl border border-amber-500/30 shadow-lg flex items-center justify-between min-w-[130px] transition-colors">
+                <div><p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-widest">Black Label</p><p className="text-xl font-black text-amber-500">{totalesPorLicencia.baulia_black_label}</p></div>
+                <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500"><ShieldCheck size={14}/></div>
               </div>
             </div>
 
-            {/* TABLA */}
             <div className="animate-in fade-in">
               <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
                 <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
@@ -12241,14 +12191,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lic.tipoEvento || 'Boda'}</span>
                               </td>
                               <td className="px-5 py-4 text-center">
-                                <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border 
+                                <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border shadow-sm
                                   ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : 
                                     lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 
                                     lic.plan === 'plata' ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600' :
                                     lic.plan === 'social_wall' ? 'bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20' :
-                                    lic.plan === 'security_kit' ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' :
+                                    lic.plan === 'baulia_black_label' ? 'bg-slate-900 dark:bg-white text-amber-500 dark:text-slate-900 border-amber-500/50' :
                                     'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-white/10'}`}>
-                                  {lic.plan.replace('_', ' ')}
+                                  {lic.plan.replace(/_/g, ' ')}
                                 </span>
                               </td>
                               <td className="px-5 py-4 max-w-[200px] truncate">
@@ -12424,13 +12374,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         <option value="oro">Plan Oro ($1,990)</option>
                         <option value="diamante">Plan Diamante ($2,990)</option>
                         <option value="social_wall">Social Wall ($1,490)</option>
-                        <option value="security_kit">Security Kit ($1,490)</option>
+                        <option value="baulia_black_label">Baulia Black Label ($1,490)</option>
                       </select>
 
                       <div className="grid grid-cols-2 gap-4 mb-3">
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
-                          <input type="date" required={formData.plan === 'security_kit'} value={formData.fechaEvento} onChange={e => setFormData({...formData, fechaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
+                          <input type="date" required={formData.plan === 'baulia_black_label' || formData.plan === 'security_kit'} value={formData.fechaEvento} onChange={e => setFormData({...formData, fechaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1"/> Hora de Inicio</label>
@@ -12438,7 +12388,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         </div>
                       </div>
 
-                      {['oro', 'diamante'].includes(formData.plan) && (
+                      {['oro', 'diamante', 'baulia_black_label', 'security_kit'].includes(formData.plan) && (
                         <>
                           <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
                             <div>
@@ -12532,7 +12482,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         <option value="oro">Oro</option>
                         <option value="diamante">Diamante</option>
                         <option value="social_wall">Social Wall</option>
-                        <option value="security_kit">Security Kit</option>
+                        <option value="baulia_black_label">Baulia Black Label</option>
                       </select>
                     </div>
                   </div>
@@ -12548,7 +12498,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </div>
                   </div>
 
-                  {['oro', 'diamante'].includes(editingLic.plan) && (
+                  {['oro', 'diamante', 'baulia_black_label', 'security_kit'].includes(editingLic.plan) && (
                     <>
                       <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
                         <div>
