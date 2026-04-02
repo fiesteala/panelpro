@@ -4,7 +4,7 @@ import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Tr
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: BAULIA BLACK LABEL - PRODUCCIÓN (V14) ---
+// --- COMPONENTE: BAULIA BLACK LABEL - PRODUCCIÓN (V15 - ANTI-CRASH IMÁGENES) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ preTitle: '', eventName: '', logoBase64: '' });
@@ -31,7 +31,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         const listRef = collection(db, "eventos", eventId, "invitados");
         const listSnap = await getDocs(listRef);
         const listData = listSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        // Filtro actualizado para soportar el nuevo nombre manteniendo retrocompatibilidad
         setWristbandList(listData.filter(g => g.isSecurityKit || g.isBlackLabel));
       } catch (error) {
         console.error("Error cargando datos:", error);
@@ -52,6 +51,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     }
   };
 
+  // 🔴 NUEVO LECTOR DE IMÁGENES: Blindado contra pantallas negras
   const handleLogoUpload = (e) => {
     if (isLocked) return;
     const file = e.target.files[0];
@@ -62,43 +62,17 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         return;
     }
 
+    if (file.size > 2.5 * 1024 * 1024) {
+        if(addNotification) addNotification('Archivo muy pesado', 'El logo debe pesar menos de 2.5MB.', 'warning');
+        return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-            try {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 400; 
-                let scaleSize = 1;
-                
-                // Solo redimensionamos si la imagen es muy grande
-                if (img.width > MAX_WIDTH) {
-                    scaleSize = MAX_WIDTH / img.width;
-                }
-                
-                canvas.width = img.width * scaleSize;
-                canvas.height = img.height * scaleSize;
-                
-                const ctx = canvas.getContext('2d');
-                
-                // 🔴 SOLUCIÓN PANTALLA NEGRA: Pintamos un fondo blanco sólido primero
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Luego dibujamos la imagen encima
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                
-                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
-                setDesignConfig(prev => ({ ...prev, logoBase64: compressedBase64 }));
-            } catch (err) {
-                console.error(err);
-                if(addNotification) addNotification('Error de formato', 'La imagen es demasiado compleja. Intenta con otra.', 'error');
-            }
-        };
-        img.onerror = () => {
-            if(addNotification) addNotification('Error', 'El archivo de imagen está dañado.', 'error');
-        };
-        img.src = event.target.result;
+        setDesignConfig({ ...designConfig, logoBase64: event.target.result });
+    };
+    reader.onerror = () => {
+        if(addNotification) addNotification('Error', 'Hubo un problema al procesar la imagen.', 'error');
     };
     reader.readAsDataURL(file);
   };
@@ -143,7 +117,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       subGuests: initSubGuests, 
       extraRequested: 0,
       isBlackLabel: true, 
-      isSecurityKit: true // Retrocompatibilidad
+      isSecurityKit: true
     };
     
     try {
@@ -425,7 +399,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                       <label className={`flex flex-col items-center justify-center cursor-pointer transition-colors ${isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:text-amber-500'}`}>
                           <ImageIcon size={24} className="text-slate-400 mb-2" />
                           <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Clic para subir imagen</span>
-                          <span className="text-[10px] text-slate-400 mt-1">Recomendamos PNG con fondo transparente</span>
+                          <span className="text-[10px] text-slate-400 mt-1">Recomendamos PNG o JPG limpios</span>
                           <input type="file" accept="image/*" onChange={handleLogoUpload} disabled={isLocked} className="hidden" />
                       </label>
                   )}

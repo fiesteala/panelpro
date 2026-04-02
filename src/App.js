@@ -11504,7 +11504,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V16 - BLACK LABEL) ---
+// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V17 - BLACK LABEL) ---
 // ==========================================
 const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
@@ -11537,7 +11537,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
   const isSuperAdmin = authData?.role === 'superadmin';
 
-  // 🔴 CAMBIO A BLACK LABEL
   const PRECIOS = { basico: 990, plata: 1490, oro: 1990, diamante: 2990, social_wall: 1490, baulia_black_label: 1490 };
 
   const tiposDeEvento = [
@@ -11593,7 +11592,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       const listRef = collection(db, "eventos", evento.id, "invitados");
       const listSnap = await getDocs(listRef);
       const invitadosDB = listSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      // Filtramos retrocompatibles
       const invitadosVIP = invitadosDB.filter(g => g.isSecurityKit || g.isBlackLabel);
 
       const flattened = [];
@@ -11906,11 +11904,16 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const ventasDelMes = ventas.filter(v => v.mesAnio === mesSeleccionado);
   const ingresoMensualTotal = ventasDelMes.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
   
+  // 🔴 EL CEREBRO DE LAS ESTADÍSTICAS: Transforma Security Kit a Black Label en los números
   const desglosePlanes = { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, baulia_black_label: 0 };
-  ventasDelMes.forEach(v => { if(desglosePlanes[v.plan] !== undefined) desglosePlanes[v.plan] += (Number(v.monto) || 0); });
+  ventasDelMes.forEach(v => { 
+      const planKey = v.plan === 'security_kit' ? 'baulia_black_label' : v.plan;
+      if(desglosePlanes[planKey] !== undefined) desglosePlanes[planKey] += (Number(v.monto) || 0); 
+  });
 
   const totalesPorLicencia = licencias.reduce((acc, user) => {
-    const tipo = (user.plan || 'basico').toLowerCase().trim();
+    let tipo = (user.plan || 'basico').toLowerCase().trim();
+    if (tipo === 'security_kit') tipo = 'baulia_black_label';
     acc[tipo] = (acc[tipo] || 0) + 1;
     return acc;
   }, { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, baulia_black_label: 0 });
@@ -11919,7 +11922,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
   return (
     <>
-      {/* 🔴 VISTA DE IMPRESIÓN (IGNORADA EN ESTE ARCHIVO PORQUE USA VENTANA NUEVA) */}
       <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
         
         {dialog.isOpen && (
@@ -12023,7 +12025,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                         <p className="font-mono text-[9px] text-indigo-400 mb-0.5">ID: {p.id}</p>
                                         <p className="flex items-center"><Calendar size={10} className="mr-1"/> {p.fechaEnvioTaller ? new Date(p.fechaEnvioTaller).toLocaleDateString() : 'Desconocida'}</p>
                                       </div>
-                                      <span>{p.plan?.replace('_', ' ').toUpperCase()}</span>
+                                      <span>{(p.plan === 'security_kit' ? 'baulia_black_label' : p.plan)?.replace(/_/g, ' ').toUpperCase()}</span>
                                   </div>
                                 </li>
                             )
@@ -12102,9 +12104,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           </div>
         )}
 
-        {/* 🔴 TABLA DE CLIENTES */}
+        {/* 🔴 TABLA DE CLIENTES (MANTENIMIENTO DEL BLACK LABEL) */}
         {adminTab === 'licencias' && (
           <div className="space-y-6">
+            {/* CARDS */}
             <div className="flex flex-col xl:flex-row gap-3 mb-6 w-full overflow-x-auto pb-2 custom-scrollbar">
               <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true }); }} className="shrink-0 px-6 py-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-2xl font-black shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform flex items-center justify-center min-w-[200px]">
                   <Plus size={18} className="mr-2 text-amber-500 dark:text-slate-900"/> Nueva Bóveda
@@ -12135,13 +12138,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                 <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-500/10 flex items-center justify-center text-pink-600 dark:text-pink-400"><Camera size={14}/></div>
               </div>
 
-              {/* 🔴 NUEVA TARJETA PREMIUM BLACK LABEL */}
               <div className="flex-1 bg-gradient-to-br from-slate-900 to-black p-3 rounded-2xl border border-amber-500/30 shadow-lg flex items-center justify-between min-w-[130px] transition-colors">
                 <div><p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-widest">Black Label</p><p className="text-xl font-black text-amber-500">{totalesPorLicencia.baulia_black_label}</p></div>
                 <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500"><ShieldCheck size={14}/></div>
               </div>
             </div>
 
+            {/* TABLA: El cerebro traduce security_kit a Black Label */}
             <div className="animate-in fade-in">
               <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
                 <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
@@ -12170,6 +12173,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                           const correoVisible = correosVisibles[lic.id];
                           const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
                           
+                          // 🔴 AQUÍ SE HACE LA TRADUCCIÓN VISUAL
+                          const isBlackLabel = lic.plan === 'baulia_black_label' || lic.plan === 'security_kit';
+                          
                           return (
                             <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40 dark:bg-rose-500/10' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
                               <td className="px-5 py-4">
@@ -12196,9 +12202,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                     lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 
                                     lic.plan === 'plata' ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600' :
                                     lic.plan === 'social_wall' ? 'bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20' :
-                                    lic.plan === 'baulia_black_label' ? 'bg-slate-900 dark:bg-white text-amber-500 dark:text-slate-900 border-amber-500/50' :
+                                    isBlackLabel ? 'bg-[#0a0a0a] text-amber-500 border-amber-500/30' :
                                     'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-white/10'}`}>
-                                  {lic.plan.replace(/_/g, ' ')}
+                                  {isBlackLabel ? 'BLACK LABEL' : lic.plan.replace(/_/g, ' ')}
                                 </span>
                               </td>
                               <td className="px-5 py-4 max-w-[200px] truncate">
