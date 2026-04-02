@@ -11504,7 +11504,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B ---
+// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V16 - PDF LIMPIO PARA IMPRESIÓN) ---
 // ==========================================
 const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
@@ -11658,6 +11658,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       document.body.removeChild(link);
   };
 
+  // 🔴 GENERADOR DE PDF NATIVO (100% LIMPIO PARA IMPRESIÓN TYVEK)
   const generarPDFNativo = () => {
     const printWindow = window.open('', '_blank');
     const evtName = ordenActiva.config.eventName || 'Evento VIP';
@@ -11688,20 +11689,21 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                 box-sizing: border-box;
             }
             .sheet:last-child { page-break-after: auto; }
-            .wristband { width: 250mm; height: 19mm; border-bottom: 1px dashed #e5e7eb; border-left: 1px dashed #e5e7eb; border-right: 1px dashed #e5e7eb; display: flex; align-items: center; box-sizing: border-box; overflow: hidden; page-break-inside: avoid; }
-            .wristband:first-child { border-top: 1px dashed #e5e7eb; }
-            .zone-glue { width: 25mm; height: 100%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; border-right: 1px dashed #cbd5e1; }
-            .zone-glue span { transform: rotate(-90deg); font-size: 8px; color: #94a3b8; font-weight: bold; letter-spacing: 2px; }
-            .zone-brand { width: 30mm; height: 100%; display: flex; align-items: center; justify-content: center; border-right: 1px solid #f1f5f9; }
+            
+            /* 🔴 SIN BORDES NI FONDOS GRISES */
+            .wristband { width: 250mm; height: 19mm; display: flex; align-items: center; box-sizing: border-box; overflow: hidden; page-break-inside: avoid; }
+            .zone-glue { width: 25mm; height: 100%; display: flex; align-items: center; justify-content: center; }
+            .zone-glue span { display: none; } /* Ocultamos la palabra PEGAMENTO */
+            .zone-brand { width: 30mm; height: 100%; display: flex; align-items: center; justify-content: center; }
             .zone-brand span { transform: rotate(-90deg); font-size: 6px; color: #94a3b8; font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
-            .zone-design { width: 95mm; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-right: 1px solid #f1f5f9; padding: 0 10px; }
-            .z-pre { font-size: 6px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2px; }
+            .zone-design { width: 95mm; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 10px; }
+            .z-pre { font-size: 6px; font-weight: 900; color: #000; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2px; }
             .z-name { font-family: 'Great Vibes', cursive; font-size: 24px; color: #000; line-height: 1; margin-bottom: 2px; }
             .z-logo { max-height: 14mm; max-width: 80mm; object-fit: contain; margin-bottom: 2px; }
-            .z-date { font-size: 6px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-            .zone-guest { width: 62.5mm; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0 10px; border-right: 1px solid #f1f5f9; }
+            .z-date { font-size: 6px; font-weight: 900; color: #000; text-transform: uppercase; letter-spacing: 1px; }
+            .zone-guest { width: 62.5mm; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0 10px; }
             .g-name { font-size: 12px; font-weight: bold; color: #000; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .g-type { font-size: 8px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-top: 2px; }
+            .g-type { font-size: 8px; font-weight: bold; color: #000; text-transform: uppercase; margin-top: 2px; }
             .zone-qr { width: 37.5mm; height: 100%; display: flex; align-items: center; justify-content: center; }
         </style>
     </head>
@@ -11940,23 +11942,23 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           <div id="pdf-generator-layer" className="hidden print:block absolute left-0 top-0 w-full bg-white text-black z-[99999] m-0 p-0 font-sans">
               {ordenActiva.listaImpresion.map((item, index) => {
                   return (
-                      <div key={index} className="flex h-[2.5cm] w-[25cm] border border-dashed border-gray-300 mb-[2mm] items-center overflow-hidden bg-white mx-auto" style={{ boxSizing: 'border-box', pageBreakInside: 'avoid' }}>
-                          <div className="w-[10%] h-full bg-gray-100 border-r border-gray-300 flex items-center justify-center"><span className="-rotate-90 text-[8px] text-gray-500 tracking-widest font-bold">PEGAMENTO</span></div>
-                          <div className="w-[12%] h-full flex items-center justify-center border-r border-gray-200"><span className="-rotate-90 text-[6px] text-gray-400 font-bold tracking-widest whitespace-nowrap">by BAULIA.COM</span></div>
-                          <div className="w-[38%] h-full flex flex-col justify-center items-center px-4 relative border-r border-gray-100">
-                              {ordenActiva.config.preTitle && <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-0.5">{ordenActiva.config.preTitle}</span>}
+                      <div key={index} className="flex h-[2.5cm] w-[25cm] mb-[2mm] items-center overflow-hidden bg-white mx-auto" style={{ boxSizing: 'border-box', pageBreakInside: 'avoid' }}>
+                          <div className="w-[10%] h-full bg-white flex items-center justify-center"></div>
+                          <div className="w-[12%] h-full flex items-center justify-center"><span className="-rotate-90 text-[6px] text-slate-400 font-bold tracking-widest whitespace-nowrap">by BAULIA.COM</span></div>
+                          <div className="w-[38%] h-full flex flex-col justify-center items-center px-4 relative">
+                              {ordenActiva.config.preTitle && <span className="text-[8px] font-black text-black uppercase tracking-widest mb-0.5">{ordenActiva.config.preTitle}</span>}
                               {ordenActiva.config.logoBase64 ? (
                                   <img src={ordenActiva.config.logoBase64} alt="Logo" className="h-8 object-contain mb-1" />
                               ) : (
                                   <span className="font-firma text-2xl text-black leading-none mb-1 text-center w-full">{ordenActiva.config.eventName || 'Evento VIP'}</span>
                               )}
-                              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : ''}</span>
+                              <span className="text-[8px] font-black text-black uppercase tracking-widest">{ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : ''}</span>
                           </div>
-                          <div className="w-[25%] h-full flex flex-col justify-center px-4 border-l border-gray-200">
-                              <span className="font-bold text-sm truncate uppercase">{item.nombreAImprimir}</span>
-                              <span className="text-[8px] text-gray-500 mt-1 uppercase font-bold">{item.esNino ? 'Pase Niño' : 'Pase VIP'}</span>
+                          <div className="w-[25%] h-full flex flex-col justify-center px-4">
+                              <span className="font-bold text-sm truncate uppercase text-black">{item.nombreAImprimir}</span>
+                              <span className="text-[8px] text-black mt-1 uppercase font-bold">{item.esNino ? 'Pase Niño' : 'Pase VIP'}</span>
                           </div>
-                          <div className="w-[15%] h-full flex items-center justify-center border-l border-gray-200 bg-white">
+                          <div className="w-[15%] h-full flex items-center justify-center bg-white">
                               <QrCode size={40} className="text-black" />
                           </div>
                       </div>
