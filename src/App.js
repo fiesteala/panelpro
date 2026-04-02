@@ -21,6 +21,7 @@ import {
 
 // 🔴 AQUÍ CONECTAMOS TU NUEVO MÓDULO EXCLUSIVO:
 import GestorPulserasView from './views/GestorPulserasView';
+import GuardianBoveda from './views/GuardianBoveda';
 
 // 🔴 CONEXIÓN A STRIPE (Reemplaza con tu clave Publicable de Stripe)
 const stripePromise = loadStripe('pk_test_51TBrAV3BmYGrtpk6QnQvZhounbmZAF7Ea107Fh734agWXri2z9N91BpgFKWeqBfiBq3ePLbFoTro0Z2fC0Qs5lnA00vL7mha3m');
@@ -14034,7 +14035,11 @@ export default function App() {
   } 
   if (modoApp === 'invitacion') { 
     if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Enlace de invitación roto.</div>;
-    return <InvitacionPublicaView eventId={eventIdParam} guestUid={guestUidParam} />; 
+    return (
+      <GuardianBoveda eventId={eventIdParam}>
+         <InvitacionPublicaView eventId={eventIdParam} guestUid={guestUidParam} />
+      </GuardianBoveda>
+    ); 
   }
   if (modoApp === 'puerta') {
     if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 text-2xl mt-10">❌ Enlace de puerta inválido.</div>;
