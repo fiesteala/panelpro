@@ -11503,7 +11503,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V14 - PDF LANDSCAPE FORCE) ---
+// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V13 - LANDSCAPE PDF) ---
 // ==========================================
 const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
@@ -11657,7 +11657,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       document.body.removeChild(link);
   };
 
-  // 🔴 GENERADOR DE PDF NATIVO (FUERZA TAMAÑO CARTA Y HORIZONTAL)
+  // 🔴 GENERADOR DE PDF NATIVO HORIZONTAL (LANDSCAPE FORZADO)
   const generarPDFNativo = () => {
     const printWindow = window.open('', '_blank');
     const evtName = ordenActiva.config.eventName || 'Evento VIP';
@@ -11669,44 +11669,41 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Producción - ${evtName}</title>
+        <title>Impresión Pulseras - ${evtName}</title>
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
             body, html { margin: 0; padding: 0; background: white; font-family: Arial, sans-serif; }
             
-            /* 🔴 FORZAMOS CARTA (LETTER) Y HORIZONTAL (LANDSCAPE) */
-            @page { size: letter landscape; margin: 0; }
+            /* 🔴 ESTA LÍNEA OBLIGA A LA IMPRESORA A PONERSE EN HORIZONTAL */
+            @page { size: landscape; margin: 0; }
             
-            /* La hoja mide carta horizontal (279mm x 216mm) pero centramos la zona útil (250mm x 190mm) */
+            /* 🔴 LA HOJA MIDE EXACTAMENTE LO QUE EL TYVEK */
             .sheet { 
-                width: 279mm; 
-                height: 216mm; 
+                width: 25cm; 
+                height: 19cm; 
                 page-break-after: always; 
                 display: flex; 
                 flex-direction: column; 
-                align-items: center;
-                justify-content: center;
                 margin: 0 auto; 
                 box-sizing: border-box;
             }
-            .wristband { width: 250mm; height: 19mm; border-bottom: 1px dashed #e5e7eb; border-left: 1px dashed #e5e7eb; border-right: 1px dashed #e5e7eb; display: flex; align-items: center; box-sizing: border-box; overflow: hidden; }
-            .wristband:first-child { border-top: 1px dashed #e5e7eb; }
-            .zone-glue { width: 25mm; height: 100%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; border-right: 1px dashed #cbd5e1; }
+            .wristband { width: 25cm; height: 1.9cm; border-bottom: 1px dashed #e5e7eb; display: flex; align-items: center; box-sizing: border-box; overflow: hidden; }
+            .zone-glue { width: 2.5cm; height: 100%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; border-right: 1px dashed #cbd5e1; }
             .zone-glue span { transform: rotate(-90deg); font-size: 8px; color: #94a3b8; font-weight: bold; letter-spacing: 2px; }
-            .zone-brand { width: 30mm; height: 100%; display: flex; align-items: center; justify-content: center; border-right: 1px solid #f1f5f9; }
+            .zone-brand { width: 3cm; height: 100%; display: flex; align-items: center; justify-content: center; border-right: 1px solid #f1f5f9; }
             .zone-brand span { transform: rotate(-90deg); font-size: 6px; color: #94a3b8; font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
-            .zone-design { width: 95mm; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-right: 1px solid #f1f5f9; padding: 0 10px; }
+            .zone-design { width: 9.5cm; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-right: 1px solid #f1f5f9; padding: 0 10px; }
             .z-pre { font-size: 6px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2px; }
             .z-name { font-family: 'Great Vibes', cursive; font-size: 24px; color: #000; line-height: 1; margin-bottom: 2px; }
-            .z-logo { max-height: 14mm; max-width: 80mm; object-fit: contain; margin-bottom: 2px; }
+            .z-logo { max-height: 1.4cm; max-width: 8cm; object-fit: contain; margin-bottom: 2px; }
             .z-date { font-size: 6px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-            .zone-guest { width: 62.5mm; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0 10px; border-right: 1px solid #f1f5f9; }
+            .zone-guest { width: 6.25cm; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0 10px; border-right: 1px solid #f1f5f9; }
             .g-name { font-size: 12px; font-weight: bold; color: #000; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             .g-type { font-size: 8px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-top: 2px; }
-            .zone-qr { width: 37.5mm; height: 100%; display: flex; align-items: center; justify-content: center; }
+            .zone-qr { width: 3.75cm; height: 100%; display: flex; align-items: center; justify-content: center; }
         </style>
     </head>
-    <body onload="setTimeout(function(){ window.print(); }, 1000)">
+    <body onload="setTimeout(function(){ window.print(); }, 1500)">
     `;
 
     const chunked = [];
@@ -11733,7 +11730,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     <div class="g-type">${item.esNino ? 'Pase Niño' : 'Pase VIP'}</div>
                 </div>
                 <div class="zone-qr">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${item.qrDataUrl}" style="width:14mm; height:14mm;" />
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${item.qrDataUrl}" style="width:1.4cm; height:1.4cm;" />
                 </div>
             </div>
             `;
@@ -12082,13 +12079,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
                       <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
                           {/* 🔴 NUEVO PDF NATIVO HORIZONTAL */}
-                          <div className="bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/30 p-3 rounded-xl flex items-start gap-2 mb-3">
-                              <Info size={16} className="text-sky-600 dark:text-sky-400 mt-0.5 shrink-0" />
-                              <p className="text-xs text-sky-800 dark:text-sky-200">En la ventana de impresión, asegúrate de seleccionar: <br/><b>Destino:</b> Guardar como PDF <br/><b>Orientación:</b> Horizontal (Landscape) <br/><b>Márgenes:</b> Ninguno.</p>
-                          </div>
                           <button onClick={generarPDFNativo} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center">
-                              <Printer size={18} className="mr-2" /> Abrir Generador PDF (Vectorial)
+                              <Printer size={18} className="mr-2" /> Generar Archivo PDF (Vectorial)
                           </button>
+                          <p className="text-[10px] text-center text-slate-500 font-bold mt-1">Se abrirá una ventana nueva. Imprime o Guarda como PDF en disposición Horizontal (Landscape).</p>
 
                           {ordenActiva.status !== 'impreso' && (
                               <button onClick={marcarComoImpreso} className="w-full mt-4 py-4 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs uppercase tracking-widest shadow-sm hover:bg-emerald-100 transition-colors flex items-center justify-center">
