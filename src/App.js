@@ -11504,7 +11504,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V19 - BLINDADO ANTI-ERRORES JSX) ---
+// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V19 - BLINDADO Y REVERTIDO) ---
 // ==========================================
 const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
@@ -11537,7 +11537,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
   const isSuperAdmin = authData?.role === 'superadmin';
 
-  const PRECIOS = { basico: 990, plata: 1490, oro: 1990, diamante: 2990, social_wall: 1490, baulia_black_label: 1490 };
+  // 🔴 RESTAURADO: El backend se queda con security_kit para que no explote App.js
+  const PRECIOS = { basico: 990, plata: 1490, oro: 1990, diamante: 2990, social_wall: 1490, security_kit: 1490 };
 
   const tiposDeEvento = [
     { id: 'boda', label: 'Boda', placeholder: 'Ej. Carlos y Sofia', labelNombre: 'Nombre de los Novios' },
@@ -11630,6 +11631,32 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
      } catch (error) {
         setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'Fallo al actualizar el estatus.' });
      }
+  };
+
+  const descargarCSVProduccion = () => {
+      let csv = "ID_Brazalete,PreTitulo,Nombre_Evento,Fecha_Evento,Nombre_Invitado,Tipo,Codigo_QR\n";
+      
+      const evtName = ordenActiva.config.eventName || 'Evento VIP';
+      const preTitle = ordenActiva.config.preTitle || '';
+      const dateStr = ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : '';
+
+      ordenActiva.listaImpresion.forEach((item, index) => {
+          const cleanPre = preTitle.replace(/,/g, '');
+          const cleanEvt = evtName.replace(/,/g, '');
+          const cleanName = item.nombreAImprimir.replace(/,/g, '');
+          const tipo = item.esNino ? 'Niño' : 'Adulto';
+          
+          csv += `${index + 1},${cleanPre},${cleanEvt},${dateStr},${cleanName},${tipo},${item.qrDataUrl}\n`;
+      });
+
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `DataMerge_Produccion_${evtName.replace(/\s+/g, '_')}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
   };
 
   const generarPDFNativo = () => {
@@ -11878,25 +11905,24 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const ventasDelMes = ventas.filter(v => v.mesAnio === mesSeleccionado);
   const ingresoMensualTotal = ventasDelMes.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
   
-  const desglosePlanes = { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, baulia_black_label: 0 };
+  const desglosePlanes = { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, security_kit: 0 };
   ventasDelMes.forEach(v => { 
-      const planKey = v.plan === 'security_kit' ? 'baulia_black_label' : v.plan;
+      const planKey = v.plan === 'security_kit' ? 'security_kit' : v.plan;
       if(desglosePlanes[planKey] !== undefined) desglosePlanes[planKey] += (Number(v.monto) || 0); 
   });
 
   const totalesPorLicencia = licencias.reduce((acc, user) => {
     let tipo = (user.plan || 'basico').toLowerCase().trim();
-    if (tipo === 'security_kit') tipo = 'baulia_black_label';
     acc[tipo] = (acc[tipo] || 0) + 1;
     return acc;
-  }, { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, baulia_black_label: 0 });
+  }, { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, security_kit: 0 });
 
   const pedidosNuevos = pedidosTaller.filter(p => p.pulserasStatus === 'enviado').length;
 
   const exportarCorteContador = () => {
     const csvRows = ventasDelMes.map(v => {
       const fechaLimpia = v.fecha?.toDate ? v.fecha.toDate().toLocaleDateString('es-MX') : 'Reciente';
-      const planLimpio = (v.plan === 'security_kit' || v.plan === 'baulia_black_label') ? 'BLACK LABEL' : v.plan.toUpperCase().replace(/_/g, ' ');
+      const planLimpio = v.plan === 'security_kit' ? 'BLACK LABEL' : v.plan.toUpperCase().replace(/_/g, ' ');
       return `${fechaLimpia},${v.cliente},${planLimpio},${v.vendedor},${v.referencia},${v.monto}`;
     });
     const headers = "Fecha,Cliente,Plan Vendido,Vendedor,Referencia Bancaria,Monto MXN\n";
@@ -11909,7 +11935,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     document.body.removeChild(link);
   };
 
-  // 🔴 LA CAJA MAESTRA (<div>) PARA EVITAR ERRORES JSX EN APP.JS
   return (
     <div className="w-full relative">
       <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative print:hidden">
@@ -12015,7 +12040,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                         <p className="font-mono text-[9px] text-indigo-400 mb-0.5">ID: {p.id}</p>
                                         <p className="flex items-center"><Calendar size={10} className="mr-1"/> {p.fechaEnvioTaller ? new Date(p.fechaEnvioTaller).toLocaleDateString() : 'Desconocida'}</p>
                                       </div>
-                                      <span>{(p.plan === 'security_kit' ? 'baulia_black_label' : p.plan)?.replace(/_/g, ' ').toUpperCase()}</span>
+                                      <span>{(p.plan === 'security_kit' ? 'black_label' : p.plan)?.replace(/_/g, ' ').toUpperCase()}</span>
                                   </div>
                                 </li>
                             )
@@ -12094,7 +12119,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           </div>
         )}
 
-        {/* 🔴 TABLA DE CLIENTES (MANTENIMIENTO DEL BLACK LABEL) */}
+        {/* 🔴 TABLA DE CLIENTES */}
         {adminTab === 'licencias' && (
           <div className="space-y-6">
             {/* CARDS */}
@@ -12129,12 +12154,12 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
               </div>
 
               <div className="flex-1 bg-gradient-to-br from-slate-900 to-black p-3 rounded-2xl border border-amber-500/30 shadow-lg flex items-center justify-between min-w-[130px] transition-colors">
-                <div><p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-widest">Black Label</p><p className="text-xl font-black text-amber-500">{totalesPorLicencia.baulia_black_label}</p></div>
+                <div><p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-widest">Black Label</p><p className="text-xl font-black text-amber-500">{totalesPorLicencia.security_kit}</p></div>
                 <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500"><ShieldCheck size={14}/></div>
               </div>
             </div>
 
-            {/* TABLA: El cerebro traduce security_kit a Black Label */}
+            {/* TABLA: Traducción visual */}
             <div className="animate-in fade-in">
               <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
                 <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
@@ -12163,9 +12188,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                           const correoVisible = correosVisibles[lic.id];
                           const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
                           
-                          // 🔴 AQUÍ SE HACE LA TRADUCCIÓN VISUAL
-                          const isBlackLabel = lic.plan === 'baulia_black_label' || lic.plan === 'security_kit';
-                          
                           return (
                             <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40 dark:bg-rose-500/10' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
                               <td className="px-5 py-4">
@@ -12192,9 +12214,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                     lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 
                                     lic.plan === 'plata' ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600' :
                                     lic.plan === 'social_wall' ? 'bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20' :
-                                    isBlackLabel ? 'bg-[#0a0a0a] text-amber-500 border-amber-500/30' :
+                                    lic.plan === 'security_kit' ? 'bg-[#0a0a0a] text-amber-500 border-amber-500/30' :
                                     'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-white/10'}`}>
-                                  {isBlackLabel ? 'BLACK LABEL' : lic.plan.replace(/_/g, ' ')}
+                                  {lic.plan === 'security_kit' ? 'BLACK LABEL' : lic.plan.replace(/_/g, ' ')}
                                 </span>
                               </td>
                               <td className="px-5 py-4 max-w-[200px] truncate">
@@ -12267,7 +12289,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     <div className="flex justify-between items-center text-sm"><span className="text-amber-600 dark:text-amber-500 font-medium">Plan Oro ({Math.floor(desglosePlanes.oro / PRECIOS.oro) || 0})</span><span className="font-bold text-amber-600 dark:text-amber-500">{formatMoney(desglosePlanes.oro)}</span></div>
                     <div className="flex justify-between items-center text-sm"><span className="text-indigo-600 dark:text-indigo-400 font-medium">Plan Diamante ({Math.floor(desglosePlanes.diamante / PRECIOS.diamante) || 0})</span><span className="font-bold text-indigo-600 dark:text-indigo-400">{formatMoney(desglosePlanes.diamante)}</span></div>
                     <div className="flex justify-between items-center text-sm"><span className="text-pink-600 dark:text-pink-400 font-medium">Social Wall ({Math.floor(desglosePlanes.social_wall / PRECIOS.social_wall) || 0})</span><span className="font-bold text-pink-600 dark:text-pink-400">{formatMoney(desglosePlanes.social_wall)}</span></div>
-                    <div className="flex justify-between items-center text-sm"><span className="text-slate-800 dark:text-white font-medium">Black Label ({Math.floor(desglosePlanes.baulia_black_label / PRECIOS.baulia_black_label) || 0})</span><span className="font-bold text-slate-800 dark:text-white">{formatMoney(desglosePlanes.baulia_black_label)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-slate-800 dark:text-white font-medium">Black Label ({Math.floor(desglosePlanes.security_kit / PRECIOS.security_kit) || 0})</span><span className="font-bold text-slate-800 dark:text-white">{formatMoney(desglosePlanes.security_kit)}</span></div>
                   </div>
                 </div>
                 <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
@@ -12277,7 +12299,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       <div key={i} className="p-3 border-b border-slate-100 dark:border-white/5 last:border-0 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-white/5 transition-colors rounded-lg">
                         <div>
                           <p className="font-bold text-slate-800 dark:text-white text-sm leading-none mb-1">{v.cliente}</p>
-                          <p className="text-[10px] text-slate-500 uppercase tracking-widest">{(v.plan === 'security_kit' ? 'baulia_black_label' : v.plan).replace(/_/g, ' ')} • Ref: {v.referencia}</p>
+                          <p className="text-[10px] text-slate-500 uppercase tracking-widest">{v.plan === 'security_kit' ? 'BLACK LABEL' : v.plan.replace(/_/g, ' ')} • Ref: {v.referencia}</p>
                         </div>
                         <div className="text-right">
                           <p className="font-black text-emerald-600 dark:text-emerald-400">{formatMoney(v.monto)}</p>
@@ -12372,13 +12394,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         <option value="oro">Plan Oro ($1,990)</option>
                         <option value="diamante">Plan Diamante ($2,990)</option>
                         <option value="social_wall">Social Wall ($1,490)</option>
-                        <option value="baulia_black_label">Baulia Black Label ($1,490)</option>
+                        <option value="security_kit">Black Label ($1,490)</option>
                       </select>
 
                       <div className="grid grid-cols-2 gap-4 mb-3">
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
-                          <input type="date" required={formData.plan === 'baulia_black_label'} value={formData.fechaEvento} onChange={e => setFormData({...formData, fechaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
+                          <input type="date" required={formData.plan === 'security_kit'} value={formData.fechaEvento} onChange={e => setFormData({...formData, fechaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1"/> Hora de Inicio</label>
@@ -12386,7 +12408,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         </div>
                       </div>
 
-                      {['oro', 'diamante', 'baulia_black_label'].includes(formData.plan) && (
+                      {/* 🔴 CORRECCIÓN: Los botones QR/RSVP solo salen en Oro y Diamante (Se ocultan en Black Label) */}
+                      {['oro', 'diamante'].includes(formData.plan) && (
                         <>
                           <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
                             <div>
@@ -12474,13 +12497,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Plan</label>
-                      <select value={editingLic.plan === 'security_kit' ? 'baulia_black_label' : editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
+                      <select value={editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
                         <option value="basico">Básico</option>
                         <option value="plata">Plata</option>
                         <option value="oro">Oro</option>
                         <option value="diamante">Diamante</option>
                         <option value="social_wall">Social Wall</option>
-                        <option value="baulia_black_label">Baulia Black Label</option>
+                        <option value="security_kit">Black Label</option>
                       </select>
                     </div>
                   </div>
@@ -12496,7 +12519,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </div>
                   </div>
 
-                  {['oro', 'diamante', 'baulia_black_label'].includes(editingLic.plan) && (
+                  {['oro', 'diamante'].includes(editingLic.plan) && (
                     <>
                       <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
                         <div>
