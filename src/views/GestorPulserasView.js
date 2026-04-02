@@ -4,7 +4,7 @@ import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Tr
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: BAULIA BLACK LABEL - PRODUCCIÓN (V15 - ANTI-CRASH IMÁGENES) ---
+// --- COMPONENTE: BAULIA BLACK LABEL - PRODUCCIÓN ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ preTitle: '', eventName: '', logoBase64: '' });
@@ -51,7 +51,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     }
   };
 
-  // 🔴 NUEVO LECTOR DE IMÁGENES: Blindado contra pantallas negras
   const handleLogoUpload = (e) => {
     if (isLocked) return;
     const file = e.target.files[0];
@@ -69,10 +68,37 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-        setDesignConfig({ ...designConfig, logoBase64: event.target.result });
-    };
-    reader.onerror = () => {
-        if(addNotification) addNotification('Error', 'Hubo un problema al procesar la imagen.', 'error');
+        const img = new Image();
+        img.onload = () => {
+            try {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 400; 
+                let scaleSize = 1;
+                
+                if (img.width > MAX_WIDTH) {
+                    scaleSize = MAX_WIDTH / img.width;
+                }
+                
+                canvas.width = img.width * scaleSize;
+                canvas.height = img.height * scaleSize;
+                
+                const ctx = canvas.getContext('2d');
+                
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                setDesignConfig(prev => ({ ...prev, logoBase64: compressedBase64 }));
+            } catch (err) {
+                console.error(err);
+                if(addNotification) addNotification('Error de formato', 'La imagen es demasiado compleja.', 'error');
+            }
+        };
+        img.onerror = () => {
+            if(addNotification) addNotification('Error', 'El archivo de imagen está dañado.', 'error');
+        };
+        img.src = event.target.result;
     };
     reader.readAsDataURL(file);
   };
@@ -117,7 +143,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       subGuests: initSubGuests, 
       extraRequested: 0,
       isBlackLabel: true, 
-      isSecurityKit: true
+      isSecurityKit: true 
     };
     
     try {

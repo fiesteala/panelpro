@@ -11378,10 +11378,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </p>
               
               <div className="flex space-x-3">
-                 <button onClick={() => window.open('https://instagram.com/baulia', '_blank')} className="w-10 h-10 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="Instagram">
+                 <button onClick={() => window.open('https://www.instagram.com/bauliaoficial/', '_blank')} className="w-10 h-10 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="Instagram">
                    <IconIG />
                  </button>
-                 <button onClick={() => window.open('https://facebook.com/baulia', '_blank')} className="w-10 h-10 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="Facebook">
+                 <button onClick={() => window.open('https://www.facebook.com/bauliaoficial', '_blank')} className="w-10 h-10 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="Facebook">
                    <IconFB />
                  </button>
                  <button onClick={() => window.open('https://tiktok.com/@baulia', '_blank')} className="w-10 h-10 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="TikTok">
@@ -11504,7 +11504,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V17 - BLACK LABEL) ---
+// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V19 - BLINDADO ANTI-ERRORES JSX) ---
 // ==========================================
 const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
@@ -11904,7 +11904,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const ventasDelMes = ventas.filter(v => v.mesAnio === mesSeleccionado);
   const ingresoMensualTotal = ventasDelMes.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
   
-  // 🔴 EL CEREBRO DE LAS ESTADÍSTICAS: Transforma Security Kit a Black Label en los números
   const desglosePlanes = { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, baulia_black_label: 0 };
   ventasDelMes.forEach(v => { 
       const planKey = v.plan === 'security_kit' ? 'baulia_black_label' : v.plan;
@@ -11920,6 +11919,23 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
   const pedidosNuevos = pedidosTaller.filter(p => p.pulserasStatus === 'enviado').length;
 
+  const exportarCorteContador = () => {
+    const csvRows = ventasDelMes.map(v => {
+      const fechaLimpia = v.fecha?.toDate ? v.fecha.toDate().toLocaleDateString('es-MX') : 'Reciente';
+      const planLimpio = (v.plan === 'security_kit' || v.plan === 'baulia_black_label') ? 'BLACK LABEL' : v.plan.toUpperCase().replace(/_/g, ' ');
+      return `${fechaLimpia},${v.cliente},${planLimpio},${v.vendedor},${v.referencia},${v.monto}`;
+    });
+    const headers = "Fecha,Cliente,Plan Vendido,Vendedor,Referencia Bancaria,Monto MXN\n";
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURI(headers + csvRows.join("\n"));
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", `Corte_Baulia_${mesSeleccionado}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // 🔴 LA CAJA MAESTRA DE TITANIO (<> ... </>)
   return (
     <>
       <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
@@ -12171,10 +12187,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         filteredLicencias.map((lic) => {
                           const estaSuspendido = lic.status === 'suspendido';
                           const correoVisible = correosVisibles[lic.id];
-                          const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
                           
                           // 🔴 AQUÍ SE HACE LA TRADUCCIÓN VISUAL
                           const isBlackLabel = lic.plan === 'baulia_black_label' || lic.plan === 'security_kit';
+                          const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
                           
                           return (
                             <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40 dark:bg-rose-500/10' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
@@ -12272,10 +12288,12 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                   <h3 className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-2">Ingreso Bruto del Mes</h3>
                   <p className="text-4xl font-black text-emerald-600 dark:text-emerald-400 mb-6">{formatMoney(ingresoMensualTotal)}</p>
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Básico ({desglosePlanes.basico / PRECIOS.basico || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.basico)}</span></div>
-                    <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Plata ({desglosePlanes.plata / PRECIOS.plata || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.plata)}</span></div>
-                    <div className="flex justify-between items-center text-sm"><span className="text-amber-600 dark:text-amber-500 font-medium">Plan Oro ({desglosePlanes.oro / PRECIOS.oro || 0})</span><span className="font-bold text-amber-600 dark:text-amber-500">{formatMoney(desglosePlanes.oro)}</span></div>
-                    <div className="flex justify-between items-center text-sm"><span className="text-indigo-600 dark:text-indigo-400 font-medium">Plan Diamante ({desglosePlanes.diamante / PRECIOS.diamante || 0})</span><span className="font-bold text-indigo-600 dark:text-indigo-400">{formatMoney(desglosePlanes.diamante)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Básico ({Math.floor(desglosePlanes.basico / PRECIOS.basico) || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.basico)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Plata ({Math.floor(desglosePlanes.plata / PRECIOS.plata) || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.plata)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-amber-600 dark:text-amber-500 font-medium">Plan Oro ({Math.floor(desglosePlanes.oro / PRECIOS.oro) || 0})</span><span className="font-bold text-amber-600 dark:text-amber-500">{formatMoney(desglosePlanes.oro)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-indigo-600 dark:text-indigo-400 font-medium">Plan Diamante ({Math.floor(desglosePlanes.diamante / PRECIOS.diamante) || 0})</span><span className="font-bold text-indigo-600 dark:text-indigo-400">{formatMoney(desglosePlanes.diamante)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-pink-600 dark:text-pink-400 font-medium">Social Wall ({Math.floor(desglosePlanes.social_wall / PRECIOS.social_wall) || 0})</span><span className="font-bold text-pink-600 dark:text-pink-400">{formatMoney(desglosePlanes.social_wall)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-slate-800 dark:text-white font-medium">Black Label ({Math.floor(desglosePlanes.baulia_black_label / PRECIOS.baulia_black_label) || 0})</span><span className="font-bold text-slate-800 dark:text-white">{formatMoney(desglosePlanes.baulia_black_label)}</span></div>
                   </div>
                 </div>
                 <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
@@ -12285,7 +12303,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       <div key={i} className="p-3 border-b border-slate-100 dark:border-white/5 last:border-0 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-white/5 transition-colors rounded-lg">
                         <div>
                           <p className="font-bold text-slate-800 dark:text-white text-sm leading-none mb-1">{v.cliente}</p>
-                          <p className="text-[10px] text-slate-500 uppercase tracking-widest">{v.plan} • Ref: {v.referencia}</p>
+                          <p className="text-[10px] text-slate-500 uppercase tracking-widest">{(v.plan === 'security_kit' ? 'baulia_black_label' : v.plan).replace(/_/g, ' ')} • Ref: {v.referencia}</p>
                         </div>
                         <div className="text-right">
                           <p className="font-black text-emerald-600 dark:text-emerald-400">{formatMoney(v.monto)}</p>
@@ -12386,7 +12404,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       <div className="grid grid-cols-2 gap-4 mb-3">
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
-                          <input type="date" required={formData.plan === 'baulia_black_label' || formData.plan === 'security_kit'} value={formData.fechaEvento} onChange={e => setFormData({...formData, fechaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
+                          <input type="date" required={formData.plan === 'baulia_black_label'} value={formData.fechaEvento} onChange={e => setFormData({...formData, fechaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1"/> Hora de Inicio</label>
@@ -12394,7 +12412,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         </div>
                       </div>
 
-                      {['oro', 'diamante', 'baulia_black_label', 'security_kit'].includes(formData.plan) && (
+                      {['oro', 'diamante', 'baulia_black_label'].includes(formData.plan) && (
                         <>
                           <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
                             <div>
@@ -12482,7 +12500,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Plan</label>
-                      <select value={editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
+                      <select value={editingLic.plan === 'security_kit' ? 'baulia_black_label' : editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
                         <option value="basico">Básico</option>
                         <option value="plata">Plata</option>
                         <option value="oro">Oro</option>
