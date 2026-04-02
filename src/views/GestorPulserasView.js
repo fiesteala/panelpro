@@ -4,7 +4,7 @@ import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Tr
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: BAULIA BLACK LABEL - PRODUCCIÓN ---
+// --- COMPONENTE: BAULIA BLACK LABEL - PRODUCCIÓN (V16 - IMÁGENES PURAS Y MACHETAZO CSV) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ preTitle: '', eventName: '', logoBase64: '' });
@@ -51,6 +51,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     }
   };
 
+  // 🔴 LECTOR DE IMÁGENES PURO: Sin canvas, sin transformaciones, 100% a prueba de fallos
   const handleLogoUpload = (e) => {
     if (isLocked) return;
     const file = e.target.files[0];
@@ -68,37 +69,11 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-            try {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 400; 
-                let scaleSize = 1;
-                
-                if (img.width > MAX_WIDTH) {
-                    scaleSize = MAX_WIDTH / img.width;
-                }
-                
-                canvas.width = img.width * scaleSize;
-                canvas.height = img.height * scaleSize;
-                
-                const ctx = canvas.getContext('2d');
-                
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                
-                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
-                setDesignConfig(prev => ({ ...prev, logoBase64: compressedBase64 }));
-            } catch (err) {
-                console.error(err);
-                if(addNotification) addNotification('Error de formato', 'La imagen es demasiado compleja.', 'error');
-            }
-        };
-        img.onerror = () => {
-            if(addNotification) addNotification('Error', 'El archivo de imagen está dañado.', 'error');
-        };
-        img.src = event.target.result;
+        // Guardamos el string base64 directo a la base de datos sin procesarlo
+        setDesignConfig(prev => ({ ...prev, logoBase64: event.target.result }));
+    };
+    reader.onerror = () => {
+        if(addNotification) addNotification('Error', 'Hubo un problema al leer la imagen.', 'error');
     };
     reader.readAsDataURL(file);
   };
@@ -239,14 +214,23 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       const text = event.target.result;
       const rawRows = text.split(/\r?\n/); 
       
-      const cleanRows = rawRows.filter(row => {
+      // 🔴 MACHETAZO CSV: Buscamos la línea exacta de la cabecera
+      const headerIndex = rawRows.findIndex(row => row.toLowerCase().includes('titular o familia'));
+      
+      let validRows = [];
+      if (headerIndex !== -1) {
+          // Tomamos SÓLO lo que está DEBAJO de la cabecera (excluyéndola a ella misma)
+          validRows = rawRows.slice(headerIndex + 1);
+      } else {
+          validRows = rawRows; // Si el cliente borró la cabecera, tomamos todo a riesgo
+      }
+
+      // Limpieza final de filas vacías
+      const cleanRows = validRows.filter(row => {
           const lowerRow = row.toLowerCase().trim();
-          if (!lowerRow || lowerRow === ',,' || lowerRow === ',') return false;
-          if (lowerRow.includes('baulia') || lowerRow.includes('instrucciones') || lowerRow.includes('===') || lowerRow.includes('evento:')) return false;
-          if (lowerRow.includes('titular o familia')) return false;
-          if (/^[0-9]+\./.test(lowerRow)) return false;
-          if (lowerRow.includes('ej. ana')) return false;
-          return true; 
+          if (!lowerRow || lowerRow.replace(/,/g, '') === '') return false;
+          if (lowerRow.includes('===') || lowerRow.includes('baulia')) return false;
+          return true;
       });
 
       const processExtrasCol = (colStr, prefixText) => {

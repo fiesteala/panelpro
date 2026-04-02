@@ -11632,32 +11632,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
      }
   };
 
-  const descargarCSVProduccion = () => {
-      let csv = "ID_Brazalete,PreTitulo,Nombre_Evento,Fecha_Evento,Nombre_Invitado,Tipo,Codigo_QR\n";
-      
-      const evtName = ordenActiva.config.eventName || 'Evento VIP';
-      const preTitle = ordenActiva.config.preTitle || '';
-      const dateStr = ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : '';
-
-      ordenActiva.listaImpresion.forEach((item, index) => {
-          const cleanPre = preTitle.replace(/,/g, '');
-          const cleanEvt = evtName.replace(/,/g, '');
-          const cleanName = item.nombreAImprimir.replace(/,/g, '');
-          const tipo = item.esNino ? 'Niño' : 'Adulto';
-          
-          csv += `${index + 1},${cleanPre},${cleanEvt},${dateStr},${cleanName},${tipo},${item.qrDataUrl}\n`;
-      });
-
-      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", `DataMerge_Produccion_${evtName.replace(/\s+/g, '_')}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-  };
-
   const generarPDFNativo = () => {
     const printWindow = window.open('', '_blank');
     const evtName = ordenActiva.config.eventName || 'Evento VIP';
@@ -11935,10 +11909,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     document.body.removeChild(link);
   };
 
-  // 🔴 LA CAJA MAESTRA DE TITANIO (<> ... </>)
+  // 🔴 LA CAJA MAESTRA (<div>) PARA EVITAR ERRORES JSX EN APP.JS
   return (
-    <>
-      <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative">
+    <div className="w-full relative">
+      <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative print:hidden">
         
         {dialog.isOpen && (
           <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-colors">
@@ -12187,10 +12161,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         filteredLicencias.map((lic) => {
                           const estaSuspendido = lic.status === 'suspendido';
                           const correoVisible = correosVisibles[lic.id];
+                          const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
                           
                           // 🔴 AQUÍ SE HACE LA TRADUCCIÓN VISUAL
                           const isBlackLabel = lic.plan === 'baulia_black_label' || lic.plan === 'security_kit';
-                          const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
                           
                           return (
                             <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40 dark:bg-rose-500/10' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
@@ -12522,7 +12496,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </div>
                   </div>
 
-                  {['oro', 'diamante', 'baulia_black_label', 'security_kit'].includes(editingLic.plan) && (
+                  {['oro', 'diamante', 'baulia_black_label'].includes(editingLic.plan) && (
                     <>
                       <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
                         <div>
@@ -12558,7 +12532,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 
