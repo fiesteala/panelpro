@@ -10299,7 +10299,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
       {/* OCULTAMOS EL BOTÓN DE WHATSAPP SI ALGUNA REVISTA ESTÁ ABIERTA */}
       {!showAnatomy && !showPanelAnatomy && (
-        <a href="https://wa.me/525512345678?text=Hola,%20quiero%20reservar%20una%20Bóveda%20Baulia" target="_blank" rel="noreferrer" className="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-[0_10px_20px_rgba(16,185,129,0.4)] hover:scale-110 hover:bg-emerald-400 transition-all z-50 group flex items-center justify-center">
+        <a href="https://wa.me/529222107575?text=Hola,%20quiero%20reservar%20una%20Bóveda%20Baulia" target="_blank" rel="noreferrer" className="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-[0_10px_20px_rgba(16,185,129,0.4)] hover:scale-110 hover:bg-emerald-400 transition-all z-50 group flex items-center justify-center">
           <MessageCircle size={28} />
           <span className="absolute right-full mr-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
             Asesoría Concierge
@@ -11503,7 +11503,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V12 - PDF NATIVO) ---
+// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V14 - PDF LANDSCAPE FORCE) ---
 // ==========================================
 const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
@@ -11657,7 +11657,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       document.body.removeChild(link);
   };
 
-  // 🔴 GENERADOR DE PDF NATIVO (100% EFECTIVO, CERO BLANK PAGES)
+  // 🔴 GENERADOR DE PDF NATIVO (FUERZA TAMAÑO CARTA Y HORIZONTAL)
   const generarPDFNativo = () => {
     const printWindow = window.open('', '_blank');
     const evtName = ordenActiva.config.eventName || 'Evento VIP';
@@ -11669,13 +11669,28 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Impresión Pulseras - ${evtName}</title>
+        <title>Producción - ${evtName}</title>
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
             body, html { margin: 0; padding: 0; background: white; font-family: Arial, sans-serif; }
-            @page { size: 250mm 190mm landscape; margin: 0; }
-            .sheet { width: 250mm; height: 190mm; page-break-after: always; display: flex; flex-direction: column; }
-            .wristband { width: 250mm; height: 19mm; border-bottom: 1px dashed #e5e7eb; display: flex; align-items: center; box-sizing: border-box; overflow: hidden; }
+            
+            /* 🔴 FORZAMOS CARTA (LETTER) Y HORIZONTAL (LANDSCAPE) */
+            @page { size: letter landscape; margin: 0; }
+            
+            /* La hoja mide carta horizontal (279mm x 216mm) pero centramos la zona útil (250mm x 190mm) */
+            .sheet { 
+                width: 279mm; 
+                height: 216mm; 
+                page-break-after: always; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto; 
+                box-sizing: border-box;
+            }
+            .wristband { width: 250mm; height: 19mm; border-bottom: 1px dashed #e5e7eb; border-left: 1px dashed #e5e7eb; border-right: 1px dashed #e5e7eb; display: flex; align-items: center; box-sizing: border-box; overflow: hidden; }
+            .wristband:first-child { border-top: 1px dashed #e5e7eb; }
             .zone-glue { width: 25mm; height: 100%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; border-right: 1px dashed #cbd5e1; }
             .zone-glue span { transform: rotate(-90deg); font-size: 8px; color: #94a3b8; font-weight: bold; letter-spacing: 2px; }
             .zone-brand { width: 30mm; height: 100%; display: flex; align-items: center; justify-content: center; border-right: 1px solid #f1f5f9; }
@@ -11691,7 +11706,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
             .zone-qr { width: 37.5mm; height: 100%; display: flex; align-items: center; justify-content: center; }
         </style>
     </head>
-    <body onload="setTimeout(function(){ window.print(); window.close(); }, 1500)">
+    <body onload="setTimeout(function(){ window.print(); }, 1000)">
     `;
 
     const chunked = [];
@@ -11971,12 +11986,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         )}
       </div>
 
-      {/* 🔴 VISTA DEL TALLER DE PRODUCCIÓN */}
       {adminTab === 'taller' && isSuperAdmin && (
         <div className="animate-in fade-in space-y-6">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col md:flex-row">
             
-            {/* LADO IZQUIERDO: LISTA DE PEDIDOS */}
             <div className="w-full md:w-1/2 lg:w-2/5 border-r border-slate-200 dark:border-white/10 flex flex-col">
               <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111]">
                 <h3 className="font-bold text-slate-800 dark:text-white text-sm mb-3">Bandeja de Pedidos ({pedidosTaller.length})</h3>
@@ -12020,7 +12033,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
               </div>
             </div>
 
-            {/* LADO DERECHO: DETALLE DE LA ORDEN Y EXTRACCIÓN */}
             <div className="w-full md:w-1/2 lg:w-3/5 bg-slate-50/50 dark:bg-[#050505]">
               {!ordenActiva ? (
                   <div className="h-full flex flex-col items-center justify-center text-slate-400 p-10 text-center min-h-[500px]">
@@ -12069,11 +12081,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       </div>
 
                       <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
-                          {/* 🔴 NUEVO: INSTRUCCIONES PDF CLARAS NATIVAS */}
+                          {/* 🔴 NUEVO PDF NATIVO HORIZONTAL */}
+                          <div className="bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/30 p-3 rounded-xl flex items-start gap-2 mb-3">
+                              <Info size={16} className="text-sky-600 dark:text-sky-400 mt-0.5 shrink-0" />
+                              <p className="text-xs text-sky-800 dark:text-sky-200">En la ventana de impresión, asegúrate de seleccionar: <br/><b>Destino:</b> Guardar como PDF <br/><b>Orientación:</b> Horizontal (Landscape) <br/><b>Márgenes:</b> Ninguno.</p>
+                          </div>
                           <button onClick={generarPDFNativo} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center">
-                              <Printer size={18} className="mr-2" /> Generar Archivo PDF (Vectorial)
+                              <Printer size={18} className="mr-2" /> Abrir Generador PDF (Vectorial)
                           </button>
-                          <p className="text-[10px] text-center text-slate-500 font-bold mt-1">Se abrirá una ventana limpia. Guarda como PDF para llevar a Illustrator.</p>
 
                           {ordenActiva.status !== 'impreso' && (
                               <button onClick={marcarComoImpreso} className="w-full mt-4 py-4 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs uppercase tracking-widest shadow-sm hover:bg-emerald-100 transition-colors flex items-center justify-center">
@@ -12204,103 +12219,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                </div>
              ))}
              {resenasList.length === 0 && <div className="col-span-full text-center py-10 text-slate-400">Aún no hay reseñas registradas.</div>}
-          </div>
-        </div>
-      )}
-
-      {adminTab === 'licencias' && (
-        <div className="animate-in fade-in">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
-             <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
-               <h3 className="font-bold text-slate-800 dark:text-white text-sm">Directorio de Clientes Activos ({filteredLicencias.length})</h3>
-             </div>
-             
-             <div className="overflow-x-auto pb-24">
-               <table className="w-full text-left whitespace-nowrap min-w-[1000px]">
-                 <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest transition-colors">
-                   <tr>
-                     <th className="px-5 py-3 font-bold">Cliente / ID</th>
-                     <th className="px-5 py-3 font-bold">Acceso (Correo)</th>
-                     <th className="px-5 py-3 font-bold text-center">Tipo</th>
-                     <th className="px-5 py-3 font-bold text-center">Plan</th>
-                     <th className="px-5 py-3 font-bold">Link Invitación</th>
-                     <th className="px-5 py-3 font-bold text-center">Estatus</th>
-                     <th className="px-5 py-3 font-bold text-right">Controles</th>
-                   </tr>
-                 </thead>
-                 <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
-                   {filteredLicencias.length === 0 ? (
-                     <tr><td colSpan="7" className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">No se encontraron clientes.</td></tr>
-                   ) : (
-                     filteredLicencias.map((lic) => {
-                       const estaSuspendido = lic.status === 'suspendido';
-                       const correoVisible = correosVisibles[lic.id];
-                       const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
-                       
-                       return (
-                         <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40 dark:bg-rose-500/10' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
-                           <td className="px-5 py-4">
-                             <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800 dark:text-rose-500' : 'text-slate-800 dark:text-white'}`}>
-                               {lic.nombres || 'Sin Nombre'} 
-                               {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
-                             </p>
-                             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{lic.eventId}</p>
-                           </td>
-                           <td className="px-5 py-4">
-                             <div className="flex items-center text-slate-600 dark:text-slate-300 bg-slate-100/70 dark:bg-white/5 px-2 py-1.5 rounded-lg w-max border border-slate-200/50 dark:border-white/10 transition-colors">
-                               <span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span>
-                               <button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-amber-500 transition-colors">
-                                 {correoVisible ? <EyeOff size={14} /> : <Eye size={14} />}
-                               </button>
-                             </div>
-                           </td>
-                           <td className="px-5 py-4 text-center">
-                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lic.tipoEvento || 'Boda'}</span>
-                           </td>
-                           <td className="px-5 py-4 text-center">
-                             <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border 
-                               ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : 
-                                 lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 
-                                 lic.plan === 'plata' ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600' :
-                                 lic.plan === 'social_wall' ? 'bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20' :
-                                 lic.plan === 'security_kit' ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' :
-                                 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-white/10'}`}>
-                               {lic.plan.replace('_', ' ')}
-                             </span>
-                           </td>
-                           <td className="px-5 py-4 max-w-[200px] truncate">
-                             {lic.urlInvitacion ? (
-                               <a href={lic.urlInvitacion} target="_blank" rel="noreferrer" className="text-sky-500 dark:text-sky-400 hover:underline text-[10px] font-bold truncate block" title={lic.urlInvitacion}>
-                                 {lic.urlInvitacion}
-                               </a>
-                             ) : (
-                               <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">Pendiente de subir</span>
-                             )}
-                           </td>
-                           <td className="px-5 py-4 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
-                           <td className="px-5 py-4 text-right">
-                              <div className="flex items-center justify-end space-x-2">
-                                <button onClick={() => { 
-                                    setEditingLic({...lic, originalPlan: lic.plan, isQrEnabled: lic.isQrEnabled !== false, isPassCountEnabled: lic.isPassCountEnabled !== false}); 
-                                    setIsEditModalOpen(true); 
-                                  }} 
-                                  title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"><Edit3 size={16} />
-                                </button>
-                                
-                                {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan, tipoEvento: lic.tipoEvento || 'general', urlInvitacion: lic.urlInvitacion || '' })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-transparent dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"><ExternalLink size={16} /></button>}
-                                <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors border border-transparent ${estaSuspendido ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 hover:bg-emerald-200 dark:hover:bg-emerald-500/20 dark:border-emerald-500/20' : 'text-amber-600 dark:text-amber-500 bg-amber-100 dark:bg-amber-500/10 hover:bg-amber-200 dark:hover:bg-amber-500/20 dark:border-amber-500/20'}`}><Power size={16} /></button>
-                                {isSuperAdmin && (
-                                  <button onClick={() => handleDelete(lic)} title="Eliminar Bóveda (Se conserva Finanzas)" className="p-2 rounded-lg text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-transparent dark:border-rose-500/20 hover:text-white hover:bg-rose-500 dark:hover:bg-rose-500 dark:hover:text-white transition-colors"><Trash2 size={16} /></button>
-                                )}
-                              </div>
-                           </td>
-                         </tr>
-                       )
-                     })
-                   )}
-                 </tbody>
-               </table>
-             </div>
           </div>
         </div>
       )}

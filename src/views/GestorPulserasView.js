@@ -4,7 +4,7 @@ import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Tr
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: GESTOR DE PULSERAS VIP (V11 - CSV BLINDADO) ---
+// --- COMPONENTE: GESTOR DE PULSERAS VIP (V13 - CSV BLINDADO TITANIO) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ preTitle: '', eventName: '', logoBase64: '' });
@@ -216,31 +216,22 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       const text = event.target.result;
       const rawRows = text.split(/\r?\n/); 
       
-      // 🔴 TRITURADOR DE BASURA: Limpia el CSV de todo el membrete
-      let cleanRows = [];
-      let startReading = false;
-
-      for (let i = 0; i < rawRows.length; i++) {
-          const lowerRow = rawRows[i].toLowerCase();
+      // 🔴 FILTRO DE TITANIO: Destruye las instrucciones sin piedad
+      const cleanRows = rawRows.filter(row => {
+          const lowerRow = row.toLowerCase().trim();
+          // Si está vacía
+          if (!lowerRow || lowerRow === ',,' || lowerRow === ',') return false;
+          // Si tiene palabras de nuestro membrete
+          if (lowerRow.includes('baulia') || lowerRow.includes('instrucciones') || lowerRow.includes('===') || lowerRow.includes('evento:')) return false;
+          // Si es la cabecera de las columnas
+          if (lowerRow.includes('titular o familia')) return false;
+          // Si empieza con un número y un punto (Ej. "1. ", "2. ")
+          if (/^[0-9]+\./.test(lowerRow)) return false;
+          // Si es la fila de ejemplo que dice "(ej. ana / carlos)"
+          if (lowerRow.includes('ej. ana')) return false;
           
-          // Si encontramos la fila de encabezados reales, prendemos la bandera y saltamos
-          if (lowerRow.includes('titular o familia') || lowerRow.includes('titular,')) {
-              startReading = true;
-              continue;
-          }
-
-          // Si estamos leyendo, comprobamos que no sea basura y lo agregamos
-          if (startReading) {
-              if (rawRows[i].trim() !== '' && !rawRows[i].includes('===') && !lowerRow.includes('instrucciones')) {
-                  cleanRows.push(rawRows[i]);
-              }
-          }
-      }
-
-      // Fallback extremo: Si el cliente borró la palabra "Titular", eliminamos las primeras 10 líneas a fuerza
-      if (!startReading) {
-          cleanRows = rawRows.slice(10).filter(r => r.trim() !== '' && !r.includes('===') && !r.toLowerCase().includes('instrucciones'));
-      }
+          return true; // Solo deja pasar nombres reales
+      });
 
       const processExtrasCol = (colStr, prefixText) => {
           if (!colStr) return [];
@@ -362,7 +353,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
   return (
     <div className="space-y-6 pb-10 animate-in fade-in duration-500 relative">
       
-      {/* 🔴 NUEVO MODAL ELEGANTE */}
       {confirmModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-all">
             <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-white/10 animate-in zoom-in-95">
@@ -384,7 +374,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         .font-firma { font-family: 'Great Vibes', cursive; }
       `}</style>
 
-      {/* CABECERA */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">Gestor de Pulseras VIP</h2>
@@ -400,7 +389,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* COLUMNA IZQUIERDA */}
         <div className="lg:col-span-5 flex flex-col space-y-6">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors flex flex-col">
             <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex items-center">
@@ -492,7 +480,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
           </div>
         </div>
 
-        {/* COLUMNA DERECHA: LISTA DE NOMBRES EXPANDIDA */}
         <div className="lg:col-span-7 flex flex-col h-full min-h-[600px]">
           <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col h-full">
             <div className="bg-sky-50 dark:bg-sky-900/20 border-b border-sky-100 dark:border-sky-800/30 p-4 flex items-start gap-3">
@@ -597,6 +584,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
               )}
             </div>
           </div>
+
         </div>
       </div>
     </div>
