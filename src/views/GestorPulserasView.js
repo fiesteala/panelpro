@@ -4,7 +4,7 @@ import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Tr
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: GESTOR DE PULSERAS VIP (V12 - CSV BLINDADO EXTREMO) ---
+// --- COMPONENTE: GESTOR DE PULSERAS VIP (V13 - CSV BLINDADO TITANIO) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ preTitle: '', eventName: '', logoBase64: '' });
@@ -179,9 +179,10 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     csv += "\"=================================================================\"\n";
     csv += "\"INSTRUCCIONES DE LLENADO:\"\n";
     csv += "\"1. En 'Titular o Familia' escribe el nombre principal. Esto genera 1 pulsera automática.\"\n";
-    csv += "\"2. En 'Acompañantes' y 'Niños' si no tienes nombre pon NUMEROS (Ej. 2). Si no hay extras pon 0.\"\n";
+    csv += "\"2. En 'Acompañantes Extras' y 'Niños Extras' si no tienes el nombre escribe SOLO NÚMEROS (Ej. 2). Si no llevan extras pon 0.\"\n";
     csv += "\"3. Si tienes los nombres, escríbelos separados por una diagonal (Ej. Ana / Carlos).\"\n";
-    csv += "\"4. Guarda el archivo manteniendo el formato CSV y súbelo a la plataforma.\"\n";
+    csv += "\"4. Puedes combinar nombre y número de pases separados con la / si no te sabes los demás nombres (Ej. Ana / 2).\"\n";
+    csv += "\"5. Guarda el archivo manteniendo el formato CSV y súbelo a la plataforma.\"\n";
     csv += "\"=================================================================\"\n\n";
     
     csv += "Titular o Familia,Acompañantes EXTRAS,Niños EXTRAS\n";
@@ -216,26 +217,15 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       const text = event.target.result;
       const rawRows = text.split(/\r?\n/); 
       
-      // 🔴 BLINDAJE EXTREMO: Buscar la cabecera real ignorando todo lo de arriba
-      const headerIndex = rawRows.findIndex(row => 
-          row.toLowerCase().includes('titular') && 
-          row.toLowerCase().includes('extras')
-      );
-      
-      let cleanRows = [];
-      if (headerIndex !== -1) {
-          // Tomamos absolutamente todo lo que esté DEBAJO de la cabecera
-          cleanRows = rawRows.slice(headerIndex + 1);
-      } else {
-          // Si por alguna razón borró la cabecera, trituramos las instrucciones
-          cleanRows = rawRows.filter(row => {
-              const r = row.toLowerCase();
-              return !r.includes('baulia') && !r.includes('instrucciones') && !r.includes('===') && !r.includes('evento:');
-          });
-      }
-
-      // Nos aseguramos de no procesar filas vacías o que solo tengan comas ",,"
-      cleanRows = cleanRows.filter(r => r.replace(/,/g, '').replace(/['"]/g, '').trim() !== '');
+      const cleanRows = rawRows.filter(row => {
+          const lowerRow = row.toLowerCase().trim();
+          if (!lowerRow || lowerRow === ',,' || lowerRow === ',') return false;
+          if (lowerRow.includes('baulia') || lowerRow.includes('instrucciones') || lowerRow.includes('===') || lowerRow.includes('evento:')) return false;
+          if (lowerRow.includes('titular o familia')) return false;
+          if (/^[0-9]+\./.test(lowerRow)) return false;
+          if (lowerRow.includes('ej. ana')) return false;
+          return true; 
+      });
 
       const processExtrasCol = (colStr, prefixText) => {
           if (!colStr) return [];
@@ -357,7 +347,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
   return (
     <div className="space-y-6 pb-10 animate-in fade-in duration-500 relative">
       
-      {/* MODAL ELEGANTE DE CONFIRMACIÓN */}
       {confirmModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-all">
             <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-white/10 animate-in zoom-in-95">
@@ -379,7 +368,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         .font-firma { font-family: 'Great Vibes', cursive; }
       `}</style>
 
-      {/* CABECERA */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">Gestor de Pulseras VIP</h2>
@@ -395,7 +383,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* COLUMNA IZQUIERDA */}
         <div className="lg:col-span-5 flex flex-col space-y-6">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors flex flex-col">
             <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex items-center">
@@ -487,7 +474,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
           </div>
         </div>
 
-        {/* COLUMNA DERECHA: LISTA DE NOMBRES */}
         <div className="lg:col-span-7 flex flex-col h-full min-h-[600px]">
           <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col h-full">
             <div className="bg-sky-50 dark:bg-sky-900/20 border-b border-sky-100 dark:border-sky-800/30 p-4 flex items-start gap-3">
