@@ -13815,7 +13815,7 @@ const ShowcaseSimulatorView = () => {
 };
 
 // ==========================================
-// 3. EL ENRUTADOR PRINCIPAL (App) - CEREBRO MAESTRO
+// 3. EL ENRUTADOR PRINCIPAL (App) - CEREBRO MAESTRO (V14 - RUTAS BLINDADAS)
 // ==========================================
 export default function App() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -13825,7 +13825,13 @@ export default function App() {
 
   // 🔴 MAGIA DE RUTAS: DETECTAR SI ES BAULIA.COM O PANEL.BAULIA.COM
   const hostname = window.location.hostname;
-  const pathname = window.location.pathname.replace(/^\/+/g, '').replace('index.html', '');
+  
+  // 🔴 FIX DE RUTAS: Limpieza extrema del pathname para no romper el Iframe
+  let pathname = window.location.pathname;
+  if (pathname.startsWith('/')) pathname = pathname.substring(1);
+  if (pathname.endsWith('/')) pathname = pathname.substring(0, pathname.length - 1);
+  pathname = pathname.replace('index.html', '');
+
   const isPanel = hostname.startsWith('panel.') || hostname.includes('localhost');
 
   // ==========================================
@@ -13833,7 +13839,6 @@ export default function App() {
   // ==========================================
   const [themeSetting, setThemeSetting] = useState(() => localStorage.getItem('baulia_theme') || 'auto');
   const [systemIsDark, setSystemIsDark] = useState(false);
-  // 🔴 SOLUCIÓN APLICADA: Se agregó "email: null" al estado inicial para que exista en memoria
   const [authData, setAuthData] = useState({ isAuthenticated: false, email: null, role: null, plan: null, eventId: null });
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [accountSuspended, setAccountSuspended] = useState(false);
@@ -13874,17 +13879,14 @@ export default function App() {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       try {
         if (user && user.email) {
-          // 🔴 AHORA ESCUCHAMOS EN TIEMPO REAL (onSnapshot en lugar de getDocs)
           const q = query(collection(db, "usuarios"), where("email", "==", user.email.toLowerCase()));
           
           unsubData = onSnapshot(q, (querySnapshot) => {
             if (!querySnapshot.empty) {
               const userEventsList = querySnapshot.docs.map(doc => doc.data());
               
-              // Ordenamos en memoria
               userEventsList.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
               
-              // 🔴 FILTRO DE AUTO-CADUCIDAD (30 DÍAS) Y SUSPENDIDOS
               const activeEvents = [];
               const today = new Date();
 
@@ -13896,7 +13898,6 @@ export default function App() {
                   const diffTime = today.getTime() - eventDate.getTime();
                   const diffDays = diffTime / (1000 * 3600 * 24);
                   
-                  // Si ya pasaron más de 30 días, lo ocultamos del cliente
                   if (diffDays > 30) continue;
                 }
                 activeEvents.push(e);
@@ -13912,7 +13913,7 @@ export default function App() {
                  
                  setAuthData({ 
                    isAuthenticated: true, 
-                   email: user.email, // 🔴 ESTA ES LA CLAVE QUE FALTABA: Guardamos el correo en memoria
+                   email: user.email, 
                    role: selectedEvent.role, 
                    plan: selectedEvent.plan, 
                    eventId: selectedEvent.eventId,
@@ -13937,7 +13938,7 @@ export default function App() {
 
     return () => {
       unsubscribeAuth();
-      if (unsubData) unsubData(); // Limpiamos el radar al salir
+      if (unsubData) unsubData(); 
     };
   }, []);
 
@@ -13959,8 +13960,8 @@ export default function App() {
   // 3. ENRUTAMIENTO (AHORA SÍ, YA PODEMOS REDIRIGIR)
   // ==========================================
 
-  // Si entra a baulia.com/boda-ana-y-luis
-  if (!isPanel && pathname && !eventIdParam) {
+  // 🔴 FIX: Si la ruta tiene nombre (ej. boda-ana) y no somos panel, asumimos que es el Iframe Público
+  if (!isPanel && pathname && pathname.length > 1 && !eventIdParam) {
      eventIdParam = pathname;
      if (!modoApp) modoApp = 'invitacion';
   }
@@ -13975,27 +13976,28 @@ export default function App() {
     return <ShowcaseSimulatorView />;
   }
 
-  // 🟢 3. RUTAS PÚBLICAS (INVITADOS)
+  // 🟢 3. RUTAS PÚBLICAS Y HERRAMIENTAS
   if (modoApp === 'camara') { 
     if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Enlace roto (Falta código de evento).</div>;
     return <GuestCameraView eventId={eventIdParam} />; 
   } 
+  
   if (modoApp === 'proyector') { 
     if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Enlace roto (Falta código de evento).</div>;
     return <GuestProyectorView eventId={eventIdParam} />; 
   } 
+  
   if (modoApp === 'invitacion') { 
     if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Enlace de invitación roto.</div>;
-    return (
-      <GuardianBoveda eventId={eventIdParam}>
-         <InvitacionPublicaView eventId={eventIdParam} guestUid={guestUidParam} />
-      </GuardianBoveda>
-    ); 
+    // 🔴 FIX: Iframe directo y sin envolturas de GuardianBoveda (que era código muerto)
+    return <InvitacionPublicaView eventId={eventIdParam} guestUid={guestUidParam} />;
   }
+  
   if (modoApp === 'puerta') {
     if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 text-2xl mt-10">❌ Enlace de puerta inválido.</div>;
     return <HostessStandaloneView eventId={eventIdParam} />;
   }
+  
   if (modoApp === 'monitor') { 
    if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Falta código de evento.</div>;
    return <MonitorRecepcionView eventId={eventIdParam} />; 
@@ -14026,7 +14028,7 @@ export default function App() {
   return (
     <>
       <AdminDashboard authData={authData} cycleTheme={cycleTheme} themeSetting={themeSetting} isDarkMode={isDarkMode} />
-      <ReviewHarvester authData={authData} />
+      {typeof ReviewHarvester !== 'undefined' && <ReviewHarvester authData={authData} />}
     </>
   );
 }
