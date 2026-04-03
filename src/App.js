@@ -11503,7 +11503,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: CENTRO DE LICENCIAS Y TALLER B2B (V19 - BLINDADO Y REVERTIDO) ---
+// --- COMPONENTE: PANEL DE ADMINISTRACIÓN PROTEGIDO ---
 // ==========================================
 const SuperAdminView = ({ onImpersonate, authData }) => {
   const [adminTab, setAdminTab] = useState('licencias'); 
@@ -11536,7 +11536,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
   const isSuperAdmin = authData?.role === 'superadmin';
 
-  // 🔴 RESTAURADO: El backend se queda con security_kit para que no explote App.js
   const PRECIOS = { basico: 990, plata: 1490, oro: 1990, diamante: 2990, social_wall: 1490, security_kit: 1490 };
 
   const tiposDeEvento = [
@@ -11601,7 +11600,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
             idReal: sg.id,
             nombreAImprimir: sg.name || (sg.isChild ? 'Niño' : 'Acompañante'),
             esNino: sg.isChild,
-            // 🔴 EL FIX: Ahora el QR tiene el formato exacto que espera tu escáner
+            // 🔴 EL FIX: Enlace web completo + ID INDIVIDUAL DE CADA PULSERA (sg.id)
             qrDataUrl: `https://baulia.com/${evento.id}?u=${sg.id}` 
           });
         });
@@ -11631,32 +11630,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
      } catch (error) {
         setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'Fallo al actualizar el estatus.' });
      }
-  };
-
-  const descargarCSVProduccion = () => {
-      let csv = "ID_Brazalete,PreTitulo,Nombre_Evento,Fecha_Evento,Nombre_Invitado,Tipo,Codigo_QR\n";
-      
-      const evtName = ordenActiva.config.eventName || 'Evento VIP';
-      const preTitle = ordenActiva.config.preTitle || '';
-      const dateStr = ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : '';
-
-      ordenActiva.listaImpresion.forEach((item, index) => {
-          const cleanPre = preTitle.replace(/,/g, '');
-          const cleanEvt = evtName.replace(/,/g, '');
-          const cleanName = item.nombreAImprimir.replace(/,/g, '');
-          const tipo = item.esNino ? 'Niño' : 'Adulto';
-          
-          csv += `${index + 1},${cleanPre},${cleanEvt},${dateStr},${cleanName},${tipo},${item.qrDataUrl}\n`;
-      });
-
-      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", `DataMerge_Produccion_${evtName.replace(/\s+/g, '_')}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
   };
 
   const generarPDFNativo = () => {
@@ -11729,7 +11702,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     <div class="g-type">${item.esNino ? 'Pase Niño' : 'Pase VIP'}</div>
                 </div>
                 <div class="zone-qr">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${item.qrDataUrl}" style="width:14mm; height:14mm;" />
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(item.qrDataUrl)}" style="width:14mm; height:14mm;" />
                 </div>
             </div>
             `;
@@ -12040,7 +12013,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                         <p className="font-mono text-[9px] text-indigo-400 mb-0.5">ID: {p.id}</p>
                                         <p className="flex items-center"><Calendar size={10} className="mr-1"/> {p.fechaEnvioTaller ? new Date(p.fechaEnvioTaller).toLocaleDateString() : 'Desconocida'}</p>
                                       </div>
-                                      <span>{(p.plan === 'security_kit' ? 'black_label' : p.plan)?.replace(/_/g, ' ').toUpperCase()}</span>
+                                      <span>{(p.plan === 'security_kit' ? 'baulia_black_label' : p.plan)?.replace(/_/g, ' ').toUpperCase()}</span>
                                   </div>
                                 </li>
                             )
@@ -12188,6 +12161,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                           const correoVisible = correosVisibles[lic.id];
                           const noTienePanel = lic.plan === 'basico' || lic.plan === 'plata';
                           
+                          const isBlackLabel = lic.plan === 'baulia_black_label' || lic.plan === 'security_kit';
+                          
                           return (
                             <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40 dark:bg-rose-500/10' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
                               <td className="px-5 py-4">
@@ -12214,9 +12189,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                     lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 
                                     lic.plan === 'plata' ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600' :
                                     lic.plan === 'social_wall' ? 'bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20' :
-                                    lic.plan === 'security_kit' ? 'bg-[#0a0a0a] text-amber-500 border-amber-500/30' :
+                                    isBlackLabel ? 'bg-[#0a0a0a] text-amber-500 border-amber-500/30' :
                                     'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-white/10'}`}>
-                                  {lic.plan === 'security_kit' ? 'BLACK LABEL' : lic.plan.replace(/_/g, ' ')}
+                                  {isBlackLabel ? 'BLACK LABEL' : lic.plan.replace(/_/g, ' ')}
                                 </span>
                               </td>
                               <td className="px-5 py-4 max-w-[200px] truncate">
@@ -12408,8 +12383,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         </div>
                       </div>
 
-                      {/* 🔴 CORRECCIÓN: Los botones QR/RSVP solo salen en Oro y Diamante (Se ocultan en Black Label) */}
-                      {['oro', 'diamante'].includes(formData.plan) && (
+                      {['oro', 'diamante', 'security_kit'].includes(formData.plan) && (
                         <>
                           <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
                             <div>
@@ -12497,7 +12471,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Plan</label>
-                      <select value={editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
+                      <select value={editingLic.plan === 'security_kit' ? 'security_kit' : editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
                         <option value="basico">Básico</option>
                         <option value="plata">Plata</option>
                         <option value="oro">Oro</option>
@@ -12519,7 +12493,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </div>
                   </div>
 
-                  {['oro', 'diamante'].includes(editingLic.plan) && (
+                  {['oro', 'diamante', 'security_kit'].includes(editingLic.plan) && (
                     <>
                       <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
                         <div>
