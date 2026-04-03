@@ -21,7 +21,7 @@ import {
 
 // 🔴 AQUÍ CONECTAMOS TU NUEVO MÓDULO EXCLUSIVO:
 import GestorPulserasView from './views/GestorPulserasView';
-import GuardianBoveda from './views/GuardianBoveda';
+import MonitorRecepcionView from './views/MonitorRecepcionView';
 
 // 🔴 CONEXIÓN A STRIPE (Reemplaza con tu clave Publicable de Stripe)
 const stripePromise = loadStripe('pk_test_51TBrAV3BmYGrtpk6QnQvZhounbmZAF7Ea107Fh734agWXri2z9N91BpgFKWeqBfiBq3ePLbFoTro0Z2fC0Qs5lnA00vL7mha3m');
@@ -200,7 +200,6 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
       title: 'Gestión de Asistentes', 
       items: [ 
         { id: 'invitacion', icon: Smartphone, label: 'Ver Invitación App', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
-        // 🔴 PERMISO AÑADIDO: Kit de seguridad ahora puede ver este botón
         { id: 'invitados', icon: Users, label: 'Lista de Invitados', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante', 'security_kit'] }, 
         { id: 'mesas', icon: LayoutGrid, label: 'Gestión de Mesas', minLevel: 2, allowedPlans: ['oro', 'diamante'] } 
       ] 
@@ -216,8 +215,9 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
       title: 'El Día del Evento', 
       items: [ 
         { id: 'timing', icon: Clock, label: 'El Minuto a Minuto', minLevel: 1, allowedPlans: ['plata', 'oro', 'diamante'] }, 
-        // 🔴 PERMISO AÑADIDO: Escáner
         { id: 'escaner', icon: Scan, label: 'Control Puerta (QR)', minLevel: 2, allowedPlans: ['oro', 'diamante', 'security_kit'] }, 
+        // 🔴 NUEVO BOTÓN: Monitor en Vivo para Diamante y Black Label (security_kit)
+        { id: 'monitor', icon: Activity, label: 'Monitor en Vivo', minLevel: 2, allowedPlans: ['diamante', 'security_kit'] }, 
         { id: 'galeria', icon: Camera, label: 'Muro Social (Vivo)', minLevel: 1, allowedPlans: ['diamante', 'social_wall'] } 
       ] 
     }
@@ -11602,7 +11602,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
             idReal: sg.id,
             nombreAImprimir: sg.name || (sg.isChild ? 'Niño' : 'Acompañante'),
             esNino: sg.isChild,
-            qrDataUrl: sg.id 
+            // 🔴 EL FIX: Ahora el QR tiene el formato exacto que espera tu escáner
+            qrDataUrl: `https://baulia.com/${evento.id}?u=${sg.id}` 
           });
         });
       });
@@ -13216,7 +13217,8 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   useEffect(() => {
     if (userPlan === 'social_wall' && activeTab !== 'galeria') {
       setActiveTab('galeria');
-    } else if (userPlan === 'security_kit' && !['invitados', 'escaner'].includes(activeTab)) {
+    } else if (userPlan === 'security_kit' && !['invitados', 'escaner', 'monitor'].includes(activeTab)) {
+      // 🔴 SE AGREGÓ 'monitor' A LOS PERMISOS DEL BLACK LABEL
       setActiveTab('invitados');
     } else if (!isSingleAppMode && userPlan !== 'security_kit' && (activeTab === 'galeria' && userPlan !== 'diamante' && userPlan !== 'social_wall')) {
       setActiveTab('dashboard');
@@ -13329,7 +13331,6 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'licencias': return isSuperAdminMode && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} authData={authData} /> : null;
       case 'dashboard': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof DashboardView !== 'undefined' ? <DashboardView authData={authData} guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null;      
       
-      // 🔴 AQUÍ CONECTAMOS TU NUEVA CARPETA VIEWS
       case 'invitados': 
         if (userPlan === 'security_kit') {
             return typeof GestorPulserasView !== 'undefined' ? <GestorPulserasView addNotification={addNotification} eventId={eventId} /> : null;
@@ -13338,6 +13339,9 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       
       case 'escaner': return ['oro', 'diamante', 'security_kit'].includes(userPlan) && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
       
+      // 🔴 SE CONECTÓ LA PANTALLA DEL MONITOR AQUÍ
+      case 'monitor': return ['security_kit', 'diamante', 'baulia_black_label'].includes(userPlan) && typeof MonitorRecepcionView !== 'undefined' ? <MonitorRecepcionView eventId={eventId} eventName={currentEventName} /> : null; 
+
       case 'mesas': return ['oro', 'diamante'].includes(userPlan) && typeof MesasView !== 'undefined' ? <MesasView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
       case 'mapa': return userPlan === 'diamante' && typeof MapaView !== 'undefined' ? <MapaView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} globalSearch={globalSearch} elements={mapElements} setElements={setMapElements} /> : null;
       case 'decoracion': return userPlan === 'diamante' && typeof DecoracionView !== 'undefined' ? <DecoracionView elements={decoElements} setElements={setDecoElements} addNotification={addNotification} /> : null; 
@@ -14017,6 +14021,10 @@ export default function App() {
   if (modoApp === 'puerta') {
     if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 text-2xl mt-10">❌ Enlace de puerta inválido.</div>;
     return <HostessStandaloneView eventId={eventIdParam} />;
+  }
+  if (modoApp === 'monitor') { 
+   if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Falta código de evento.</div>;
+   return <MonitorRecepcionView eventId={eventIdParam} />; 
   }
 
   // 🟢 4. ZONA SEGURA (PANEL DE CLIENTES/ADMIN)
