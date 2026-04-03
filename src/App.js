@@ -13815,7 +13815,7 @@ const ShowcaseSimulatorView = () => {
 };
 
 // ==========================================
-// 3. EL ENRUTADOR PRINCIPAL (App) - CEREBRO MAESTRO (V14 - RUTAS BLINDADAS)
+// 3. EL ENRUTADOR PRINCIPAL (App) - CEREBRO MAESTRO
 // ==========================================
 export default function App() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -13825,13 +13825,7 @@ export default function App() {
 
   // 🔴 MAGIA DE RUTAS: DETECTAR SI ES BAULIA.COM O PANEL.BAULIA.COM
   const hostname = window.location.hostname;
-  
-  // 🔴 FIX DE RUTAS: Limpieza extrema del pathname para no romper el Iframe
-  let pathname = window.location.pathname;
-  if (pathname.startsWith('/')) pathname = pathname.substring(1);
-  if (pathname.endsWith('/')) pathname = pathname.substring(0, pathname.length - 1);
-  pathname = pathname.replace('index.html', '');
-
+  const pathname = window.location.pathname.replace(/^\/+/g, '').replace('index.html', '');
   const isPanel = hostname.startsWith('panel.') || hostname.includes('localhost');
 
   // ==========================================
@@ -13885,8 +13879,10 @@ export default function App() {
             if (!querySnapshot.empty) {
               const userEventsList = querySnapshot.docs.map(doc => doc.data());
               
+              // Ordenamos en memoria
               userEventsList.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
               
+              // 🔴 FILTRO DE AUTO-CADUCIDAD (30 DÍAS) Y SUSPENDIDOS
               const activeEvents = [];
               const today = new Date();
 
@@ -13898,6 +13894,7 @@ export default function App() {
                   const diffTime = today.getTime() - eventDate.getTime();
                   const diffDays = diffTime / (1000 * 3600 * 24);
                   
+                  // Si ya pasaron más de 30 días, lo ocultamos del cliente
                   if (diffDays > 30) continue;
                 }
                 activeEvents.push(e);
@@ -13938,7 +13935,7 @@ export default function App() {
 
     return () => {
       unsubscribeAuth();
-      if (unsubData) unsubData(); 
+      if (unsubData) unsubData(); // Limpiamos el radar al salir
     };
   }, []);
 
@@ -13960,8 +13957,8 @@ export default function App() {
   // 3. ENRUTAMIENTO (AHORA SÍ, YA PODEMOS REDIRIGIR)
   // ==========================================
 
-  // 🔴 FIX: Si la ruta tiene nombre (ej. boda-ana) y no somos panel, asumimos que es el Iframe Público
-  if (!isPanel && pathname && pathname.length > 1 && !eventIdParam) {
+  // Si entra a baulia.com/boda-ana-y-luis
+  if (!isPanel && pathname && !eventIdParam) {
      eventIdParam = pathname;
      if (!modoApp) modoApp = 'invitacion';
   }
@@ -13976,28 +13973,26 @@ export default function App() {
     return <ShowcaseSimulatorView />;
   }
 
-  // 🟢 3. RUTAS PÚBLICAS Y HERRAMIENTAS
+  // 🟢 3. RUTAS PÚBLICAS (INVITADOS)
   if (modoApp === 'camara') { 
     if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Enlace roto (Falta código de evento).</div>;
     return <GuestCameraView eventId={eventIdParam} />; 
   } 
-  
   if (modoApp === 'proyector') { 
     if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Enlace roto (Falta código de evento).</div>;
     return <GuestProyectorView eventId={eventIdParam} />; 
   } 
   
+  // 🔴 AQUÍ VOLÓ EL GUARDIAN PARA SIEMPRE
   if (modoApp === 'invitacion') { 
     if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Enlace de invitación roto.</div>;
-    // 🔴 FIX: Iframe directo y sin envolturas de GuardianBoveda (que era código muerto)
-    return <InvitacionPublicaView eventId={eventIdParam} guestUid={guestUidParam} />;
+    return <InvitacionPublicaView eventId={eventIdParam} guestUid={guestUidParam} />; 
   }
-  
+
   if (modoApp === 'puerta') {
     if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 text-2xl mt-10">❌ Enlace de puerta inválido.</div>;
     return <HostessStandaloneView eventId={eventIdParam} />;
   }
-  
   if (modoApp === 'monitor') { 
    if (!eventIdParam) return <div className="p-10 text-center font-bold text-rose-500 mt-10 text-xl">Error: Falta código de evento.</div>;
    return <MonitorRecepcionView eventId={eventIdParam} />; 
