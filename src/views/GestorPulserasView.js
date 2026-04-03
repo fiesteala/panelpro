@@ -4,7 +4,7 @@ import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Tr
 import { db } from '../firebase'; 
 
 // ==========================================
-// --- COMPONENTE: BAULIA BLACK LABEL - PRODUCCIÓN (V19 - CSV BLINDADO) ---
+// --- COMPONENTE: BAULIA BLACK LABEL - PRODUCCIÓN (V20 - CSV TITANIO) ---
 // ==========================================
 const GestorPulserasView = ({ addNotification, eventId }) => {
   const [designConfig, setDesignConfig] = useState({ preTitle: '', eventName: '', logoBase64: '' });
@@ -230,25 +230,30 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       const text = event.target.result;
       const rawRows = text.split(/\r?\n/); 
       
-      const headerIndex = rawRows.findIndex(row => row.toLowerCase().includes('titular o familia'));
-      
-      let validRows = [];
-      if (headerIndex !== -1) {
-          validRows = rawRows.slice(headerIndex + 1);
-      } else {
-          validRows = rawRows; 
-      }
+      // 🔴 EL FILTRO DE TITANIO: Elimina comillas tramposas de Excel e ignora la basura
+      const cleanRows = rawRows.filter(row => {
+          // Quitamos las comillas invisibles que pone Excel para que las validaciones no fallen
+          const cleanStr = row.toLowerCase().replace(/['"]/g, '').trim();
 
-      // 🔴 FILTRO TERMINATOR: Destruye cualquier instrucción de la plantilla que se haya colado
-      const cleanRows = validRows.filter(row => {
-          const lowerRow = row.toLowerCase().trim();
-          if (!lowerRow || lowerRow.replace(/,/g, '').replace(/;/g, '') === '') return false;
-          if (lowerRow.includes('===') || lowerRow.includes('baulia')) return false;
-          if (lowerRow.includes('instrucciones')) return false;
-          if (lowerRow.includes('evento:')) return false;
-          if (lowerRow.includes('titular o familia')) return false;
-          if (/^[0-9]+\./.test(lowerRow)) return false; // Destruye "1. En 'Titular..."
-          if (lowerRow.includes('ej.')) return false;
+          // Ignorar líneas vacías o de puras comas
+          if (!cleanStr || cleanStr.replace(/[,;]/g, '') === '') return false;
+          
+          // Destrucción total de cualquier rastro de la plantilla
+          if (cleanStr.includes('baulia') || 
+              cleanStr.includes('===') || 
+              cleanStr.includes('instrucciones') || 
+              cleanStr.includes('evento:') || 
+              cleanStr.includes('titular o familia') || 
+              cleanStr.includes('guarda el archivo') || 
+              cleanStr.includes('formato oficial') ||
+              cleanStr.includes('ej.')) {
+              return false;
+          }
+
+          // Destrucción de listas numeradas (ej. "1. En titular", "5. Guarda...")
+          if (/^[0-9]+\./.test(cleanStr)) return false;
+
+          // Si pasó todas las defensas, es un invitado real
           return true;
       });
 
@@ -277,11 +282,12 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       const nuevosItems = [];
 
       for(let i = 0; i < cleanRows.length; i++) {
-        // Soporte para archivos guardados con punto y coma en Excel europeo/mac
+        // Soporte para archivos de Mac (Numbers) que separan por punto y coma
         const delimiter = cleanRows[i].includes(';') ? ';' : ',';
         const cols = cleanRows[i].split(delimiter); 
         
         if (cols[0] && cols[0].trim() !== '') {
+          // Ya no necesitamos replace quotes aquí, pero por si acaso lo dejamos
           const guestName = cols[0].replace(/['"]/g, '').trim();
           const adCol = cols[1] ? cols[1].replace(/['"]/g, '').trim() : "0";
           const niCol = cols[2] ? cols[2].replace(/['"]/g, '').trim() : "0";
@@ -378,15 +384,15 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       
       {confirmModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-all">
-            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-white/10 animate-in zoom-in-95">
+            <div className="bg-[#050505] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-white/10 animate-in zoom-in-95">
                 <div className="w-16 h-16 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
                     <AlertTriangle size={32} />
                 </div>
-                <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">Confirmar Producción</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Una vez enviado, NO podrás editar la lista de invitados ni el diseño. ¿Todo está perfecto?</p>
+                <h3 className="text-xl font-black text-white mb-2">Confirmar Producción</h3>
+                <p className="text-sm text-slate-400 mb-6">Una vez enviado, NO podrás editar la lista de invitados ni el diseño. ¿Todo está perfecto?</p>
                 <div className="flex gap-3">
-                    <button onClick={() => setConfirmModal(false)} className="flex-1 py-3 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Revisar</button>
-                    <button onClick={() => { setConfirmModal(false); executeSendToWorkshop(); }} className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-colors">Sí, Enviar</button>
+                    <button onClick={() => setConfirmModal(false)} className="flex-1 py-3 bg-slate-100 dark:bg-[#111] text-slate-300 rounded-xl font-bold hover:bg-white/5 transition-colors border border-white/5">Revisar</button>
+                    <button onClick={() => { setConfirmModal(false); executeSendToWorkshop(); }} className="flex-1 py-3 bg-amber-500 text-black rounded-xl font-bold shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:bg-amber-400 transition-colors">Sí, Enviar</button>
                 </div>
             </div>
         </div>
@@ -554,7 +560,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Niños Extras</span>
                             <input type="number" min="0" value={newEntry.extraChildren} onChange={e=>setNewEntry({...newEntry, extraChildren: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-sky-600 dark:text-sky-400 outline-none focus:border-indigo-500 transition-colors" />
                           </div>
-                          <button type="submit" className="px-4 w-full sm:w-auto bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center font-bold text-xs h-[46px]">
+                          <button type="submit" className="px-4 w-full sm:w-auto bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center justify-center font-bold text-xs h-[46px]">
                              <Plus size={18} className="md:mr-1" /> <span className="hidden md:inline">Agregar</span>
                           </button>
                         </div>
