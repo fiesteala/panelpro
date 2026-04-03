@@ -10228,12 +10228,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     return () => { if (showroomPhoneRef.current) observer.unobserve(showroomPhoneRef.current); };
   }, []);
 
-  // 🔴 NOMBRES DE PLANES RESTAURADOS A SU ORIGEN EN BASE DE DATOS
   const planes = [
     { id: 'basico', nombre: 'Básico', precio: '990', desc: 'Invitación, RSVP simple y GPS.', icon: <Smartphone size={24}/> },
     { id: 'plata', nombre: 'Plata', precio: '1,490', desc: 'Suma Mesa de Regalos e Itinerario.', icon: <Wallet size={24}/> },
     { id: 'oro', nombre: 'Oro', precio: '1,990', desc: 'Panel Maestro, Control QR y Mesas.', icon: <ShieldCheck size={24}/>, popular: true },
-    { id: 'diamante', nombre: 'Diamante', precio: '2,990', desc: 'Bocetador 3D y Muro Social.', icon: <LayoutDashboard size={24}/> }
+    { id: 'diamante', nombre: 'Diamante', precio: '2,990', desc: 'La Suite Definitiva. Incluye Muro Social y Black Label.', icon: <Gem size={24}/> }
   ];
 
   const demos = {
@@ -10247,30 +10246,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   };
   const currentDemo = demos[activeCategory];
 
-  useEffect(() => {
-    const q = query(collection(db, "resenas"), where("status", "==", "aprobada"));
-    const unsub = onSnapshot(q, (snap) => {
-      const fetched = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      fetched.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
-      setLiveReviews(fetched);
-    });
-    return () => unsub();
-  }, []);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        let { d, h, m, s } = prev;
-        s--;
-        if (s < 0) { s = 59; m--; }
-        if (m < 0) { m = 59; h--; }
-        if (h < 0) { h = 23; d--; }
-        return { d, h, m, s };
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   const handlePaymentSuccess = (datosCliente) => {
     setCheckoutModal(null);
     setCheckoutSuccess(true);
@@ -10278,7 +10253,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
   const IconFB = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>;
   const IconIG = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 1.727-6.98 6.077-.058 1.28-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 1.718 6.781 6.077 6.98 1.28.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-1.718 6.979-6.077.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-1.717-6.78-6.077-6.98-1.28-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>;
-  const IconWA = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.88-.653-1.473-1.46-1.646-1.757-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>;
   const IconTK = () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v7.2c0 1.63-.31 3.23-1.11 4.6-1.18 2.01-3.21 3.44-5.5 3.86-2.5.46-5.22-.09-7.25-1.67-1.95-1.52-3.13-3.87-3.2-6.38-.08-2.82 1.25-5.61 3.54-7.24 1.48-1.06 3.32-1.5 5.12-1.37v4.03c-1.04-.15-2.15.02-3.05.62-.92.6-1.53 1.57-1.64 2.66-.1 1.05.28 2.11 1.02 2.85.76.76 1.86 1.1 2.92 1.03 1.16-.08 2.21-.71 2.78-1.7.35-.61.54-1.32.55-2.03V.02z"/></svg>;
 
   const accentThemes = {
@@ -10334,8 +10308,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 group relative overflow-hidden ${plan.popular ? 'border-amber-500/50 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/10' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] hover:border-indigo-300 dark:hover:border-white/30 hover:bg-slate-100 dark:hover:bg-white/5'}`}
                       >
                         {plan.popular && <div className="absolute top-0 right-0 bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg">El Estándar</div>}
+                        
+                        {/* ETIQUETA DIAMANTE PODEROSA */}
+                        {plan.id === 'diamante' && <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg flex items-center"><Gem size={10} className="mr-1"/> Suite Todo Incluido</div>}
+
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-inner ${plan.popular ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500' : 'bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white'}`}>
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-inner ${plan.popular ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500' : plan.id === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white'}`}>
                             {plan.icon}
                           </div>
                           <div className="flex-1">
@@ -10353,8 +10331,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
                   {/* COLUMNA 2: PRODUCTOS INDEPENDIENTES (LA MINA DE ORO) */}
                   <div className="space-y-4">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5 pb-2 mb-4">Experiencias Independientes</h4>
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5 pb-2 mb-4">Experiencias y Complementos</h4>
                     
+                    {/* SOCIAL WALL CARD */}
                     <button 
                       onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: '1490.00' }); setCheckoutModal('pago'); }}
                       className="w-full text-left p-6 rounded-3xl border-2 border-indigo-500/30 dark:border-indigo-500/50 bg-indigo-50 dark:bg-[#111] hover:bg-indigo-100 dark:hover:bg-[#151515] hover:border-indigo-500 transition-all duration-300 group relative overflow-hidden"
@@ -10366,7 +10345,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             <Camera size={28} />
                           </div>
                           <div className="text-right">
-                            <span className="bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">NUEVO</span>
+                            <span className="bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">MÁS VENDIDO</span>
                             <p className="font-black text-3xl text-slate-900 dark:text-white leading-none">$1,490</p>
                             <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">MXN / Pago Único</p>
                           </div>
@@ -10377,15 +10356,43 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                           <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
                             Convierte las pantallas de tu salón en una <b>experiencia inmersiva en vivo</b> donde las fotos de tus invitados vuelan directamente al proyector.
                           </p>
-                          
-                          <ul className="space-y-2">
-                            <li className="flex items-center text-[10px] font-bold text-slate-700 dark:text-slate-300"><CheckCircle size={14} className="text-indigo-500 mr-2"/> Consola de Proyección (DJ/VJ)</li>
-                            <li className="flex items-center text-[10px] font-bold text-slate-700 dark:text-slate-300"><CheckCircle size={14} className="text-indigo-500 mr-2"/> Descarga de QRs para las mesas</li>
-                            <li className="flex items-center text-[10px] font-bold text-slate-700 dark:text-slate-300"><CheckCircle size={14} className="text-indigo-500 mr-2"/> Cero apps. Se usa desde la cámara normal.</li>
-                          </ul>
+                          <div className="bg-white/50 dark:bg-black/30 border border-indigo-200 dark:border-indigo-500/20 p-2 rounded-lg text-[9px] font-bold text-indigo-700 dark:text-indigo-400 flex items-center">
+                             <Gem size={12} className="mr-1.5"/> INCLUIDO SIN COSTO EN PLAN DIAMANTE
+                          </div>
                         </div>
                       </div>
                     </button>
+
+                    {/* BLACK LABEL CARD */}
+                    <button 
+                      onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: '1490.00' }); setCheckoutModal('pago'); }}
+                      className="w-full text-left p-6 rounded-3xl border-2 border-[#1a1a1a] dark:border-white/10 bg-[#050505] hover:border-amber-500/50 transition-all duration-300 group relative overflow-hidden"
+                    >
+                      <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-amber-500/40 transition-colors"></div>
+                      <div className="flex flex-col gap-4 relative z-10">
+                        <div className="flex justify-between items-start">
+                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-600 to-yellow-400 text-slate-900 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.5)] group-hover:scale-110 transition-transform">
+                            <Lock size={28} />
+                          </div>
+                          <div className="text-right">
+                            <span className="bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">VIP / FÍSICO</span>
+                            <p className="font-black text-3xl text-white leading-none">$1,490</p>
+                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">MXN / Licencia</p>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-editorial font-bold text-2xl text-white mb-2">Baulia Black Label</h4>
+                          <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                            El lujo del control físico. Gestor de producción para brazaletes VIP y <b>Monitor en Tiempo Real</b> de la puerta para el anfitrión.
+                          </p>
+                          <div className="bg-amber-500/10 border border-amber-500/20 p-2 rounded-lg text-[9px] font-bold text-amber-500 flex items-center">
+                             <Gem size={12} className="mr-1.5"/> INCLUIDO SIN COSTO EN PLAN DIAMANTE
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+
                   </div>
 
                 </div>
@@ -10770,7 +10777,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                    <p className="text-slate-500 dark:text-slate-400 text-sm">Pasa el cursor / Toca</p>
                  </div>
                  <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-sm border transition-colors duration-500 ${fakeRsvp ? 'bg-emerald-500 border-emerald-500' : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'}`}>
-                   {fakeRsvp ? <CheckCircle size={24} className="text-white animate-in zoom-in duration-300"/> : <UserPlus size={24} className="text-slate-400"/>}
+                   {fakeRsvp ? <CheckCircle size={24} className="text-white animate-in zoom-in duration-300"/> : <Plus size={24} className="text-slate-400"/>}
                  </div>
                </div>
             </div>
@@ -11022,8 +11029,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* ========================================== */}
-      {/* SECCIÓN DE MARKETING: MURO SOCIAL (LA MINA DE ORO) */}
+      {/* 🔴 NUEVA SECCIÓN DE EXPERIENCIAS FÍSICAS (SOCIAL WALL & BLACK LABEL) */}
       {/* ========================================== */}
+      
+      {/* 1. SOCIAL WALL */}
       <section id="muro-social" className="py-24 bg-indigo-900 dark:bg-[#050505] text-white relative overflow-hidden transition-colors duration-700">
          <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/20 blur-[150px] rounded-full pointer-events-none"></div>
          
@@ -11032,9 +11041,15 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                
                <div className="w-full lg:w-1/2">
                   <RevealSection>
-                     <span className="px-4 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-black uppercase tracking-[0.2em] border border-indigo-500/30 shadow-sm mb-6 inline-block">
-                        Experiencia Independiente
-                     </span>
+                     <div className="flex flex-wrap gap-3 mb-6">
+                       <span className="px-4 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-black uppercase tracking-[0.2em] border border-indigo-500/30 shadow-sm inline-block">
+                          Experiencia Independiente
+                       </span>
+                       <span className="px-4 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-black uppercase tracking-[0.2em] border border-amber-500/30 shadow-sm inline-flex items-center">
+                          <Gem size={14} className="mr-2"/> Incluido en Plan Diamante
+                       </span>
+                     </div>
+
                      <h2 className="text-5xl md:text-6xl font-editorial font-medium mb-6 tracking-tight leading-tight">
                         Baulia Social Wall.<br/>
                         <span className="italic text-indigo-300">Tu fiesta en vivo.</span>
@@ -11104,19 +11119,116 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
          </div>
       </section>
 
+      {/* 2. BLACK LABEL (NUEVA SECCIÓN VIP) */}
+      <section id="black-label" className="py-24 bg-[#0a0a0a] text-white relative overflow-hidden transition-colors duration-700 border-t border-white/5">
+         <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[800px] h-[800px] bg-amber-500/10 blur-[150px] rounded-full pointer-events-none"></div>
+         
+         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10">
+            <div className="flex flex-col lg:flex-row-reverse items-center gap-16">
+               
+               <div className="w-full lg:w-1/2">
+                  <RevealSection>
+                     <div className="flex flex-wrap gap-3 mb-6">
+                       <span className="px-4 py-1 rounded-full bg-amber-500/10 text-amber-500 text-xs font-black uppercase tracking-[0.2em] border border-amber-500/30 shadow-sm inline-block">
+                          El Lujo del Control Físico
+                       </span>
+                       <span className="px-4 py-1 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-[0.2em] border border-indigo-500/30 shadow-sm inline-flex items-center">
+                          <Gem size={14} className="mr-2"/> Incluido en Plan Diamante
+                       </span>
+                     </div>
+
+                     <h2 className="text-5xl md:text-6xl font-editorial font-medium mb-6 tracking-tight leading-tight">
+                        Baulia Black Label.<br/>
+                        <span className="italic text-amber-500">Pases VIP Impresos.</span>
+                     </h2>
+                     <p className="text-slate-400 text-lg mb-8 font-light leading-relaxed max-w-xl">
+                        ¿Un evento de ultra-lujo? Lleva la logística a otro nivel. Genera e imprime tus propios <b>brazaletes físicos Tyvek</b> con QR encriptado.
+                     </p>
+
+                     <div className="space-y-6 mb-10">
+                        <div className="flex items-start">
+                           <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mr-4 shrink-0">
+                              <Lock size={20} className="text-amber-500"/>
+                           </div>
+                           <div>
+                              <h4 className="font-bold text-lg text-white">Taller de Producción Interno</h4>
+                              <p className="text-sm text-slate-500">Sube tu logo y genera automáticamente los archivos listos para imprenta con calidad vectorial.</p>
+                           </div>
+                        </div>
+                        <div className="flex items-start">
+                           <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mr-4 shrink-0">
+                              <LayoutDashboard size={20} className="text-amber-500"/>
+                           </div>
+                           <div>
+                              <h4 className="font-bold text-lg text-white">Radar en Tiempo Real</h4>
+                              <p className="text-sm text-slate-500">Un dashboard exclusivo para el anfitrión. Ve cómo sube el velocímetro mientras tu staff escanea las pulseras en la puerta.</p>
+                           </div>
+                        </div>
+                     </div>
+
+                     <button onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: '1490.00' }); setCheckoutModal('pago'); }} className="px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-900 font-black rounded-full text-sm uppercase tracking-widest shadow-[0_0_30px_rgba(245,158,11,0.2)] hover:scale-105 transition-all">
+                        Solicitar Licencia
+                     </button>
+                  </RevealSection>
+               </div>
+
+               <div className="w-full lg:w-1/2">
+                  <RevealSection delay={200}>
+                     <div className="relative w-full aspect-square md:aspect-[4/3] bg-[#111] rounded-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col p-8">
+                        
+                        <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
+                           <div>
+                             <p className="text-amber-500 font-black text-[10px] uppercase tracking-widest flex items-center"><Scan size={14} className="mr-2"/> Radar de Puerta</p>
+                             <h3 className="text-white font-editorial text-2xl font-bold mt-1">Gala Diamante</h3>
+                           </div>
+                           <div className="text-right">
+                             <p className="text-slate-500 font-black text-[10px] uppercase tracking-widest">Ingresos</p>
+                             <p className="text-white font-black text-2xl">184 / 200</p>
+                           </div>
+                        </div>
+
+                        <div className="flex-1 flex items-center justify-center relative">
+                           {/* Fake Circular Progress */}
+                           <svg className="w-48 h-48 -rotate-90 transform drop-shadow-2xl" viewBox="0 0 100 100">
+                               <circle cx="50" cy="50" r="45" fill="none" stroke="#222" strokeWidth="8" />
+                               <circle cx="50" cy="50" r="45" fill="none" stroke="#f59e0b" strokeWidth="8" strokeDasharray="283" strokeDashoffset="25" />
+                           </svg>
+                           <div className="absolute flex flex-col items-center">
+                               <span className="text-5xl font-black text-amber-500 drop-shadow-lg">92%</span>
+                               <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mt-1">Aforo</span>
+                           </div>
+                        </div>
+
+                        <div className="mt-8 bg-black/50 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
+                           <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
+                             <CheckCircle size={20} />
+                           </div>
+                           <div>
+                             <p className="text-white font-bold text-sm">Familia Garza</p>
+                             <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">4 de 4 pases escaneados • Hace 1 min</p>
+                           </div>
+                        </div>
+                     </div>
+                  </RevealSection>
+               </div>
+
+            </div>
+         </div>
+      </section>
+
       {/* ========================================== */}
-      {/* SECCIÓN DE PRECIOS VIP (SaaS GRID) */}
+      {/* SECCIÓN DE PRECIOS SAAS (4 COLUMNAS LIMPIAS) */}
       {/* ========================================== */}
       <div id="planes" className="py-32 px-4 max-w-[1400px] mx-auto z-10 relative">
         <RevealSection className="text-center mb-20">
           <span className="px-4 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-black uppercase tracking-[0.2em] border border-amber-500/20 shadow-sm">
-            Membresía Vitalicia
+            El Software de Gestión
           </span>
           <h2 className="text-5xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white mt-8 mb-6 transition-colors">
             La Colección
           </h2>
           <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-sm md:text-base transition-colors mb-6 font-light">
-            Obtén las llaves de tu Bóveda hoy mismo. Cero mensualidades, un solo pago y control total hasta el último minuto de tu fiesta.
+            Selecciona la bóveda perfecta para tu evento. Cero mensualidades, un solo pago y control total hasta el último minuto de tu fiesta.
           </p>
           <div className="inline-flex items-center justify-center bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 px-6 py-3 rounded-full text-xs font-bold shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 animate-pulse"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
@@ -11124,8 +11236,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           </div>
         </RevealSection>
 
-        {/* 🔴 GRID PRINCIPAL DE 5 COLUMNAS (4 SaaS + 1 Social Wall) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 items-center mb-16">
+        {/* GRID DE 4 COLUMNAS (SOLO SAAS) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-center mb-16">
           
           {/* PAQUETE 1: BÁSICO */}
           <RevealSection delay={100} className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-6 lg:p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative h-full flex flex-col">
@@ -11185,53 +11297,39 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </button>
           </RevealSection>
 
-          {/* PAQUETE 4: DIAMANTE */}
-          <RevealSection delay={400} className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-6 lg:p-8 border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl transition-shadow relative h-full flex flex-col">
-            <h3 className="text-xl lg:text-2xl font-editorial font-bold text-slate-900 dark:text-white mb-2">Diamante</h3>
-            <p className="text-xs text-slate-500 mb-6 h-8 font-medium">La suite definitiva. Control espacial y pantallas.</p>
-            <div className="text-2xl lg:text-3xl font-light text-slate-900 dark:text-white mb-8">
-              $2,990 <span className="text-sm text-slate-400 font-normal">MXN</span>
+          {/* PAQUETE 4: DIAMANTE (LA SUITE DEFINITIVA) */}
+          <RevealSection delay={400} className="bg-indigo-950 dark:bg-[#0a0a14] rounded-3xl p-6 lg:p-8 border border-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.1)] hover:shadow-[0_0_40px_rgba(99,102,241,0.2)] transition-shadow relative h-full flex flex-col overflow-hidden">
+            <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg flex items-center shadow-md">
+              <Gem size={10} className="mr-1"/> Suite Todo Incluido
             </div>
-            <ul className="space-y-4 mb-8 text-xs lg:text-sm text-slate-600 dark:text-slate-300 flex-1">
+            
+            <h3 className="text-xl lg:text-2xl font-editorial font-bold text-white mb-2">Diamante</h3>
+            <p className="text-xs text-indigo-300/80 mb-6 h-8 font-medium">La suite definitiva. Control espacial, pantallas y brazaletes.</p>
+            
+            <div className="text-2xl lg:text-3xl font-light text-white mb-8">
+              $2,990 <span className="text-sm text-indigo-400/50 font-normal">MXN</span>
+            </div>
+            
+            <ul className="space-y-4 mb-8 text-xs lg:text-sm text-indigo-100 flex-1 relative z-10">
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Todo lo del Oro</b></li>
               <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Acomodo de Mesas 2D</li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Muro Social Inmersivo</li>
-              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> Estudio de Decoración</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Baulia Social Wall</b> (Muro Vivo)</li>
+              <li className="flex items-start"><Check size={16} className="text-amber-500 mr-2 shrink-0 mt-0.5"/> <b>Baulia Black Label</b> (Pulseras)</li>
             </ul>
-            <button onClick={() => { setPlanSeleccionado({ plan: 'Diamante', precio: '2990.00' }); setCheckoutModal('pago'); }} className="w-full py-3 rounded-full border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-colors mt-auto">
+            
+            <button onClick={() => { setPlanSeleccionado({ plan: 'Diamante', precio: '2990.00' }); setCheckoutModal('pago'); }} className="w-full py-4 rounded-full bg-white text-indigo-900 text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-lg mt-auto relative z-10">
               Reservar Diamante
             </button>
-          </RevealSection>
-
-          {/* PAQUETE 5: SOCIAL WALL (MINA DE ORO) */}
-          <RevealSection delay={500} className="bg-indigo-50 dark:bg-[#111] rounded-3xl p-6 lg:p-8 border-2 border-indigo-500/30 shadow-lg hover:shadow-xl transition-shadow relative h-full flex flex-col group overflow-hidden">
-            <div className="absolute -right-6 -top-6 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-indigo-500/40 transition-colors"></div>
-            <div className="absolute -top-4 right-4 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest py-1 px-3 rounded-full shadow-md z-10">
-              NUEVO
-            </div>
-            <h3 className="text-xl lg:text-2xl font-editorial font-bold text-indigo-900 dark:text-indigo-400 mb-2 relative z-10">Social Wall</h3>
-            <p className="text-xs text-slate-500 mb-6 h-8 font-medium relative z-10">Convierte las pantallas de tu fiesta en una galería en vivo.</p>
-            <div className="text-2xl lg:text-3xl font-light text-slate-900 dark:text-white mb-8 relative z-10">
-              $1,490 <span className="text-sm text-slate-400 font-normal">MXN</span>
-            </div>
-            <ul className="space-y-4 mb-8 text-xs lg:text-sm text-slate-600 dark:text-slate-300 flex-1 relative z-10">
-              <li className="flex items-start"><Check size={16} className="text-indigo-500 mr-2 shrink-0 mt-0.5"/> <b>Servicio Independiente</b></li>
-              <li className="flex items-start"><Check size={16} className="text-indigo-500 mr-2 shrink-0 mt-0.5"/> Consola de Proyección</li>
-              <li className="flex items-start"><Check size={16} className="text-indigo-500 mr-2 shrink-0 mt-0.5"/> Moderación en Tiempo Real</li>
-              <li className="flex items-start"><Check size={16} className="text-indigo-500 mr-2 shrink-0 mt-0.5"/> QRs de mesa descargables</li>
-            </ul>
-            <button onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: '1490.00' }); setCheckoutModal('pago'); }} className="w-full py-3 rounded-full bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-700 transition-colors mt-auto shadow-md relative z-10">
-              Comprar Muro
-            </button>
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-500/20 blur-3xl rounded-full pointer-events-none"></div>
           </RevealSection>
 
         </div>
 
-        {/* TABLA COMPARATIVA */}
+        {/* TABLA COMPARATIVA SAAS */}
         <RevealSection delay={600} className="mt-32 max-w-5xl mx-auto hidden md:block relative z-10">
           <div className="text-center mb-10">
             <h3 className="text-3xl font-editorial font-medium text-slate-900 dark:text-white transition-colors">Anatomía de la Colección</h3>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 font-light">Comparativa detallada del nivel tecnológico de cada bóveda.</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 font-light">Comparativa detallada del nivel tecnológico de cada bóveda de software.</p>
           </div>
 
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-xl overflow-hidden transition-colors duration-700">
@@ -11320,7 +11418,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   { n: 'App Escáner para Puerta', b: false, p: false, o: true, d: true },
                   { n: 'Bóveda Financiera (Gastos)', b: false, p: false, o: true, d: true },
                   { n: 'Acomodo de mesas visual', b: false, p: false, o: false, d: true },
-                  { n: 'Muro Social (Proyector)', b: false, p: false, o: false, d: true },
+                  { n: 'Muro Social (En Vivo)', b: false, p: false, o: false, d: 'INCLUIDO' },
+                  { n: 'Black Label (Pulseras VIP)', b: false, p: false, o: false, d: 'INCLUIDO' },
                 ].map((row, i) => (
                   <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <td className="py-4 px-8 text-slate-700 dark:text-slate-300 font-medium">{row.n}</td>
@@ -11430,7 +11529,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
              <p className="text-[9px] text-slate-400 uppercase tracking-widest transition-colors">&copy; {new Date().getFullYear()} Baulia Technologies.</p>
              <div className="hidden md:block w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></div>
              <p className="text-[9px] text-slate-500 font-bold flex items-center justify-center uppercase tracking-widest transition-colors">
-               Hecho con <Heart size={10} className="mx-1.5 fill-slate-300 dark:fill-slate-700 text-slate-300 dark:text-slate-700"/> en México.
+                Hecho con <Heart size={10} className="mx-1.5 fill-slate-300 dark:fill-slate-700 text-slate-300 dark:text-slate-700"/> en México.
              </p>
            </div>
         </div>
