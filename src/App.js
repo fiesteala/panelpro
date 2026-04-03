@@ -11600,8 +11600,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
             idReal: sg.id,
             nombreAImprimir: sg.name || (sg.isChild ? 'Niño' : 'Acompañante'),
             esNino: sg.isChild,
-            // 🔴 EL FIX: Enlace web completo + ID INDIVIDUAL DE CADA PULSERA (sg.id)
-            qrDataUrl: `https://baulia.com/${evento.id}?u=${sg.id}` 
+            // 🔴 EL FIX DE ESCÁNER: El ID individual puro y crudo. 
+            // Con el nuevo CSV, el escáner ahora sí encontrará a la familia.
+            qrDataUrl: sg.id 
           });
         });
       });
