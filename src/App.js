@@ -15,7 +15,7 @@ import {
   FileSignature, AlertCircle, Star, Image as ImageIcon, CalendarDays, FileDown, 
   ListTodo, CheckCircle2, Circle, PlayCircle, AlignLeft, MapPin, ShieldCheck, Printer, Scan, Camera, Navigation as NavigationIcon, Navigation, MoreVertical,
   Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Key, Power, Quote, Check, Factory,
-  Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser, Activity
+  Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser, Activity, Gem
 } from 'lucide-react';
 
 // 🔴 AQUÍ CONECTAMOS TU NUEVO MÓDULO EXCLUSIVO:
@@ -9224,7 +9224,10 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           paymentMethodId: paymentMethod.id,
-          plan: planSeleccionado.plan, 
+          // Mapeamos el nombre comercial al ID interno del plan si es necesario
+          plan: planSeleccionado.plan === 'Black Label' ? 'security_kit' : 
+                planSeleccionado.plan === 'Social Wall' ? 'social_wall' : 
+                planSeleccionado.plan.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""), 
           precio: planSeleccionado.precio,
           nombre: nombre,
           email: email,
