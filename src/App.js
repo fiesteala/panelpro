@@ -15,8 +15,7 @@ import {
   FileSignature, AlertCircle, Star, Image as ImageIcon, CalendarDays, FileDown, 
   ListTodo, CheckCircle2, Circle, PlayCircle, AlignLeft, MapPin, ShieldCheck, Printer, Scan, Camera, Navigation as NavigationIcon, Navigation, MoreVertical,
   Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Key, Power, Quote, Check, Factory,
-  // 🔴 NUEVOS ICONOS PARA LA REVISTA ANATOMÍA:
-  Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser
+  Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser, Activity
 } from 'lucide-react';
 
 // 🔴 AQUÍ CONECTAMOS TU NUEVO MÓDULO EXCLUSIVO:
