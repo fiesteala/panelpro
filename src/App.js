@@ -13825,7 +13825,7 @@ export default function App() {
 
   // 🔴 MAGIA DE RUTAS: DETECTAR SI ES BAULIA.COM O PANEL.BAULIA.COM
   const hostname = window.location.hostname;
-  const pathname = window.location.pathname.replace(/^\/+/g, '').replace('index.html', '');
+  const pathname = window.location.pathname.replace(/^\/+/g, '').replace(/\/+$/, '').replace('index.html', '');
   const isPanel = hostname.startsWith('panel.') || hostname.includes('localhost');
 
   // ==========================================
