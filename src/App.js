@@ -10596,7 +10596,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </section>
 
-      {/* SHOWROOM INTERACTIVO */}
+      {/* SHOWROOM INTERACTIVO (CORREGIDO Y ALINEADO) */}
       <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#050505] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden flex items-center">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber-500/5 dark:bg-amber-600/10 blur-[150px] rounded-full pointer-events-none"></div>
 
@@ -10607,7 +10607,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     
                     <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white dark:from-[#080808] to-transparent opacity-40 z-0 transition-colors pointer-events-none"></div>
 
-                    {/* COLUMNA IZQUIERDA */}
+                    {/* COLUMNA IZQUIERDA (Textos) */}
                     <div className="w-5/12 xl:w-1/3 relative z-30 flex flex-col justify-center h-full gap-10 py-6">
                         
                         <div className="flex flex-col gap-6">
@@ -10660,13 +10660,15 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA */}
+                    {/* COLUMNA DERECHA (Dispositivos) - CONTENEDOR MAESTRO */}
                     <div className="w-7/12 xl:w-2/3 relative flex items-center justify-end z-20">
-                        <div className="relative w-full max-w-[850px] translate-x-[25%]">
+                        {/* Contenedor relativo que dicta la altura y base de ambos dispositivos */}
+                        <div className="relative w-full max-w-[850px] aspect-[16/10] translate-x-[15%]">
                             
-                            <div className={`relative w-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-700 ${activeDevice === 'mac' ? 'scale-[1.02] z-30' : 'scale-100 z-10 opacity-70 blur-[1px]'}`}>
+                            {/* MACBOOK */}
+                            <div className={`absolute top-0 right-0 w-[90%] h-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-700 ${activeDevice === 'mac' ? 'scale-[1.02] z-30' : 'scale-100 z-10 opacity-70 blur-[1px]'}`}>
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-6 bg-black rounded-b-2xl z-30"></div>
-                                <div className="w-full aspect-[16/10] bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
+                                <div className="w-full h-full bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
                                     <iframe 
                                       ref={macIframeRef}
                                       src={currentDemo.url} 
@@ -10683,13 +10685,16 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                       </div>
                                     )}
                                 </div>
-                                <div className="relative w-[105%] -left-[2.5%] h-4 bg-slate-400 dark:bg-slate-700 rounded-b-3xl shadow-xl z-30 transition-colors">
+                                <div className="absolute -bottom-4 left-[-2.5%] w-[105%] h-4 bg-slate-400 dark:bg-slate-700 rounded-b-3xl shadow-xl z-30 transition-colors">
                                    <div className="w-40 h-1.5 bg-slate-300 dark:bg-slate-600 mx-auto rounded-b-md"></div>
                                 </div>
                             </div>
 
-                            <div className={`absolute bottom-[-15%] left-[-20%] xl:left-[-35%] transition-all duration-700 ease-out origin-bottom ${activeDevice === 'iphone' ? 'z-40 scale-[1.05]' : 'z-20 scale-95 opacity-80 blur-[1px]'}`}>
-                                <div style={{ width: '220px', height: '458px' }} className="relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto">
+                            {/* IPHONE (Alineado con absolute) */}
+                            {/* bottom-[0%] lo alinea exactamente a la base de la Mac. 
+                                left-[0%] lo saca hacia la izquierda de la Mac (puedes ajustar a -5% o 5% si lo quieres más adentro/afuera) */}
+                            <div className={`absolute bottom-[0%] left-[0%] transition-all duration-700 ease-out origin-bottom ${activeDevice === 'iphone' ? 'z-40 scale-[1.05]' : 'z-20 scale-95 opacity-80 blur-[1px]'}`}>
+                                <div style={{ width: '220px', height: '458px' }} className="relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0">
                                     <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-[30%] h-[16px] bg-black rounded-full z-30 flex justify-end items-center pr-1.5">
                                       <div className="w-1.5 h-1.5 rounded-full bg-slate-800/80 mr-1"></div>
                                       <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
@@ -10720,6 +10725,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
 
