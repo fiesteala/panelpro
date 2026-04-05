@@ -7626,23 +7626,23 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
           {/* BLOQUE 2: SEGURIDAD (Privacidad y Filtros) */}
           <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
             <div className="mb-4">
-               <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><ShieldCheck size={16} className="text-rose-500"/> Seguridad y Privacidad</h4>
-               <p className="text-[9px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-                 <b className="text-slate-700 dark:text-slate-300">Privacidad:</b> Público (QR general) o Privado (QR personal).<br/>
-                 <b className="text-slate-700 dark:text-slate-300">Moderador:</b> Aprueba las fotos abajo antes de proyectarlas.
+               <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><ShieldCheck size={16} className="text-rose-500"/> Seguridad y Filtros</h4>
+               <p className="text-[9px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">
+                 <b className="text-slate-700 dark:text-slate-300">Público/Privado:</b> Controla quién entra al muro.<br/>
+                 <b className="text-slate-700 dark:text-slate-300">Moderador:</b> Actívalo para aprobar las fotos manualmente antes de que salgan en la pantalla.
                </p>
             </div>
-            <div className="flex gap-2">
-               {/* Toggle Publico/Privado Compacto */}
-               <div className="flex items-center bg-white dark:bg-[#050505] p-1 rounded-lg border border-slate-200 dark:border-white/10 flex-1 shadow-sm">
-                  <button onClick={() => updateConfig('modoPublico', true)} className={`flex-1 text-[9px] font-bold uppercase tracking-wider py-1.5 rounded-md transition-all ${config.modoPublico ? 'bg-emerald-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Público</button>
-                  <button onClick={() => updateConfig('modoPublico', false)} className={`flex-1 text-[9px] font-bold uppercase tracking-wider py-1.5 rounded-md transition-all ${!config.modoPublico ? 'bg-rose-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Privado</button>
+            <div className="flex gap-2 items-center">
+               {/* Toggle Publico/Privado Súper Compacto */}
+               <div className="flex items-center bg-white dark:bg-[#050505] p-0.5 rounded-md border border-slate-200 dark:border-white/10 shadow-sm shrink-0">
+                  <button onClick={() => updateConfig('modoPublico', true)} className={`text-[8px] font-black uppercase tracking-widest px-2 py-1.5 rounded transition-all ${config.modoPublico ? 'bg-emerald-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Público</button>
+                  <button onClick={() => updateConfig('modoPublico', false)} className={`text-[8px] font-black uppercase tracking-widest px-2 py-1.5 rounded transition-all ${!config.modoPublico ? 'bg-rose-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Privado</button>
                </div>
-               {/* Toggle Moderacion con etiqueta */}
-               <div className="flex items-center bg-white dark:bg-[#050505] px-2 py-1 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm shrink-0 gap-2">
-                  <span className="text-[8px] font-black uppercase text-slate-400 tracking-widest hidden sm:block">DJ</span>
-                  <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-8 h-4 rounded-full transition-colors ${config.moderacion ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`} title="Activar/Desactivar Moderador">
-                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${config.moderacion ? 'translate-x-4' : 'translate-x-0'}`}></div>
+               {/* Toggle Moderador Compacto */}
+               <div className="flex items-center bg-white dark:bg-[#050505] px-2 py-1.5 rounded-md border border-slate-200 dark:border-white/10 shadow-sm flex-1 justify-between gap-1">
+                  <span className="text-[8px] font-black uppercase text-slate-500 tracking-widest truncate">Moderador</span>
+                  <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-7 h-3.5 rounded-full transition-colors shrink-0 ${config.moderacion ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`} title="Activar/Desactivar Moderador">
+                    <div className={`absolute top-[2px] left-[2px] w-2.5 h-2.5 bg-white rounded-full transition-transform ${config.moderacion ? 'translate-x-3.5' : 'translate-x-0'}`}></div>
                   </button>
                </div>
             </div>
