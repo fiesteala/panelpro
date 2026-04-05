@@ -7458,11 +7458,13 @@ const GaleriaView = ({ photos, addNotification }) => {
 
   const getCleanBaseUrl = () => window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
   
-  const guestLink = `${getCleanBaseUrl()}/?modo=camara&e=${ID_DEL_EVENTO}`;
-  const proyectorLink = `${getCleanBaseUrl()}/?modo=proyector&e=${ID_DEL_EVENTO}`; 
+  // IMPORTANTE: Asegúrate de tener la variable ID_DEL_EVENTO definida en tu contexto (App.js)
+  const guestLink = `${getCleanBaseUrl()}/?modo=camara&e=${typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test-id'}`;
+  const proyectorLink = `${getCleanBaseUrl()}/?modo=proyector&e=${typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test-id'}`; 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(guestLink)}&margin=10`;
 
   useEffect(() => {
+    if (typeof ID_DEL_EVENTO === 'undefined') return;
     const unsub = onSnapshot(doc(db, "eventos", ID_DEL_EVENTO, "configuracion", "galeria"), (docSnap) => {
       if (docSnap.exists()) setConfig(docSnap.data());
     });
@@ -7470,6 +7472,7 @@ const GaleriaView = ({ photos, addNotification }) => {
   }, []);
 
   const updateConfig = async (key, value) => {
+    if (typeof ID_DEL_EVENTO === 'undefined') return;
     const newConfig = { ...config, [key]: value };
     setConfig(newConfig);
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "configuracion", "galeria"), newConfig, { merge: true });
@@ -7492,11 +7495,13 @@ const GaleriaView = ({ photos, addNotification }) => {
   };
 
   const handleDelete = async (id) => {
+    if (typeof ID_DEL_EVENTO === 'undefined') return;
     await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "fotos", id));
     setViewingPost(null); 
   };
 
   const toggleApproval = async (foto, approved) => {
+    if (typeof ID_DEL_EVENTO === 'undefined') return;
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "fotos", foto.id), { ...foto, status: approved ? 'approved' : 'rejected' });
     if(addNotification) addNotification(approved ? 'Foto Aprobada' : 'Foto Rechazada', approved ? 'Ya se ve en el proyector' : 'Oculta para todos', 'success');
   };
@@ -7574,53 +7579,115 @@ const GaleriaView = ({ photos, addNotification }) => {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-4 pb-6 relative z-10 transition-colors duration-500">
+    <div className="h-full flex flex-col space-y-4 pb-6 relative z-10 transition-colors duration-500 max-w-5xl mx-auto">
       
-      <div className="bg-white dark:bg-[#0a0a0a] px-4 py-3 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col xl:flex-row items-center justify-between gap-4 shrink-0 transition-colors">
-        <div className="flex items-center gap-3 w-full xl:w-auto shrink-0">
-          <div className="w-10 h-10 bg-indigo-50 dark:bg-amber-500/10 rounded-xl flex items-center justify-center text-indigo-600 dark:text-amber-500"><ImageIcon size={20}/></div>
-          <h2 className="text-xl font-editorial font-black text-slate-800 dark:text-white tracking-tight">Muro Social</h2>
+      {/* HEADER DE LA PESTAÑA */}
+      <div className="bg-white dark:bg-[#0a0a0a] px-6 py-4 rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col xl:flex-row items-center justify-between gap-4 shrink-0 transition-colors">
+        <div className="flex items-center gap-4 w-full xl:w-auto shrink-0">
+          <div className="w-12 h-12 bg-indigo-50 dark:bg-amber-500/10 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-amber-500 shadow-sm border border-indigo-100 dark:border-amber-500/20">
+            <Camera size={24}/>
+          </div>
+          <div>
+            <h2 className="text-2xl font-editorial font-black text-slate-800 dark:text-white tracking-tight leading-none">Muro Social</h2>
+            <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mt-1">Pantallas en Vivo</p>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-end gap-3 w-full xl:w-auto">
-          <div className="flex items-center bg-slate-50 dark:bg-[#111] px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/5 transition-colors">
-             <ShieldCheck size={14} className={`mr-1.5 ${config.moderacion ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`}/>
-             <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 mr-2 uppercase tracking-widest">Moderación</span>
-             <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-8 h-4 rounded-full transition-colors ${config.moderacion ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
-                <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${config.moderacion ? 'translate-x-4' : 'translate-x-0'}`}></div>
+          {/* TOOGLE DE MODERACIÓN */}
+          <div className="flex items-center bg-slate-50 dark:bg-[#111] px-4 py-2 rounded-xl border border-slate-200 dark:border-white/5 transition-colors shadow-inner">
+             <ShieldCheck size={16} className={`mr-2 ${config.moderacion ? 'text-rose-500' : 'text-slate-400 dark:text-slate-500'}`}/>
+             <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 mr-3 uppercase tracking-widest">Moderación DJ</span>
+             <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-10 h-5 rounded-full transition-colors shadow-sm ${config.moderacion ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${config.moderacion ? 'translate-x-5' : 'translate-x-0'}`}></div>
              </button>
           </div>
 
-          <div className="flex items-center bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200 dark:border-white/5 transition-colors">
-            <button onClick={() => updateConfig('modoPublico', true)} className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${config.modoPublico ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'}`}>Público</button>
-            <button onClick={() => updateConfig('modoPublico', false)} className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${!config.modoPublico ? 'bg-rose-500 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'}`}>Privado</button>
+          <div className="flex items-center bg-slate-100 dark:bg-white/5 p-1 rounded-xl border border-slate-200 dark:border-white/5 transition-colors shadow-inner">
+            <button onClick={() => updateConfig('modoPublico', true)} className={`text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all ${config.modoPublico ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'}`}>Público</button>
+            <button onClick={() => updateConfig('modoPublico', false)} className={`text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all ${!config.modoPublico ? 'bg-rose-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'}`}>Privado</button>
           </div>
 
-          <div className="flex items-center bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-lg px-3 py-1.5 focus-within:border-indigo-500 dark:focus-within:border-amber-500 transition-colors w-32 shrink-0">
+          <div className="flex items-center bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-xl px-4 py-2 focus-within:border-indigo-500 dark:focus-within:border-amber-500 transition-colors w-36 shrink-0 shadow-inner">
             <span className="text-slate-400 font-bold mr-1 text-sm">#</span>
             <input type="text" value={config.hashtag?.replace('#', '') || ''} onChange={(e) => setConfig({...config, hashtag: '#' + e.target.value.replace(/\s+/g, '')})} onBlur={(e) => updateConfig('hashtag', config.hashtag)} placeholder="Boda" className="bg-transparent text-slate-800 dark:text-white font-bold text-xs outline-none w-full placeholder:text-slate-400"/>
           </div>
 
-          <input type="file" accept="image/png" ref={fileInputRef} onChange={handleFrameUpload} className="hidden" />
-          <button onClick={() => fileInputRef.current.click()} className="flex items-center px-4 py-2 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-lg text-[10px] uppercase tracking-widest font-bold hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 transition-all shadow-sm">
-            <ImageIcon size={14} className="mr-1.5" /> Marco PNG
+          <input type="file" accept="image/png" ref={fileInputRef} className="hidden" />
+          <button onClick={() => fileInputRef.current.click()} className="flex items-center px-5 py-2.5 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-xl text-[10px] uppercase tracking-widest font-bold hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 transition-all shadow-sm">
+            <ImageIcon size={16} className="mr-2" /> Marco
           </button>
 
-          <button onClick={downloadAllPhotos} disabled={isZipping} className={`flex items-center px-4 py-2 text-white rounded-lg text-[10px] uppercase tracking-widest font-bold transition-all shadow-sm ${isZipping ? 'bg-slate-400 dark:bg-slate-600' : 'bg-emerald-500 hover:bg-emerald-600 dark:shadow-[0_0_10px_rgba(16,185,129,0.3)]'}`}>
-            {isZipping ? <RefreshCw size={14} className="mr-1.5 animate-spin"/> : <Download size={14} className="mr-1.5"/>} ZIP
+          <button onClick={downloadAllPhotos} disabled={isZipping} className={`flex items-center px-5 py-2.5 text-white rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all shadow-md ${isZipping ? 'bg-slate-400 dark:bg-slate-600' : 'bg-emerald-500 hover:bg-emerald-600 hover:scale-105'}`}>
+            {isZipping ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} ZIP
           </button>
-
-          <button onClick={() => setShowQR(true)} className="flex items-center px-4 py-2 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-lg text-[10px] uppercase tracking-widest font-bold hover:bg-indigo-700 dark:hover:bg-amber-400 transition-all shadow-md dark:shadow-[0_0_10px_rgba(245,158,11,0.3)]"><QrCode size={14} className="mr-1.5" /> QR Mesas</button>
-          <button onClick={() => setShowProyectorModal(true)} className="flex items-center px-4 py-2 bg-slate-800 dark:bg-white text-white dark:text-slate-900 rounded-lg text-[10px] uppercase tracking-widest font-bold hover:bg-slate-900 dark:hover:bg-slate-200 transition-all shadow-md"><PlayCircle size={14} className="mr-1.5" /> Pantallas</button>
         </div>
       </div>
 
-      <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl p-4 overflow-y-auto bg-slate-50/50 dark:bg-transparent custom-scrollbar transition-colors">
+      {/* 💡 GUÍA RÁPIDA: INSTRUCCIONES PARA EL CLIENTE (ALTA COSTURA) */}
+      <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[2.5rem] p-8 shadow-sm dark:shadow-2xl transition-colors">
+        <div className="flex items-center gap-3 mb-8 border-b border-slate-100 dark:border-white/5 pb-6">
+          <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-amber-500/10 flex items-center justify-center text-indigo-600 dark:text-amber-500 border border-indigo-100 dark:border-amber-500/20">
+            <Info size={20} />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-white text-xl font-editorial">¿Cómo funciona tu Muro Social?</h3>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500 dark:text-slate-400 mt-1">Guía rápida en 3 pasos</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          <button onClick={() => setShowQR(true)} className="flex flex-col text-left p-6 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-[2rem] hover:border-indigo-400 dark:hover:border-amber-500/50 transition-all group shadow-sm hover:shadow-lg relative overflow-hidden">
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-indigo-500/5 dark:bg-amber-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 dark:group-hover:bg-amber-500/10 transition-colors pointer-events-none"></div>
+            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-slate-300 shadow-sm mb-4 group-hover:scale-110 transition-transform relative z-10">
+              <QrCode size={20} />
+            </div>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-2 relative z-10">1. QRs de Mesa</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4 flex-1 relative z-10">
+              Descarga e imprime este código. Tus invitados lo escanearán para tomar y subir fotos en vivo desde sus celulares.
+            </p>
+            <div className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-amber-500 flex items-center relative z-10">
+              Descargar Código <ArrowRight size={14} className="ml-1 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </button>
+
+          <div className="flex flex-col text-left p-6 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-[2rem] transition-all shadow-sm relative overflow-hidden">
+            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 flex items-center justify-center text-rose-500 dark:text-rose-400 shadow-sm mb-4 relative z-10">
+              <ShieldCheck size={20} />
+            </div>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-2 relative z-10">2. Para ti (Moderador)</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed flex-1 relative z-10">
+              Si activas la moderación (botón de arriba), las fotos llegarán a la galería de abajo para que tú o tu DJ las aprueben antes de salir en pantalla.
+            </p>
+          </div>
+
+          <button onClick={() => setShowProyectorModal(true)} className="flex flex-col text-left p-6 bg-indigo-600 dark:bg-indigo-900/30 border border-indigo-500 dark:border-indigo-500/50 rounded-[2rem] hover:bg-indigo-700 dark:hover:bg-indigo-900/50 transition-all group shadow-xl shadow-indigo-500/20 relative overflow-hidden">
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-colors pointer-events-none"></div>
+            <div className="w-12 h-12 rounded-2xl bg-white/10 dark:bg-[#050505] border border-white/20 dark:border-indigo-500/30 flex items-center justify-center text-white dark:text-indigo-300 shadow-sm mb-4 group-hover:scale-110 transition-transform relative z-10">
+              <PlayCircle size={24} />
+            </div>
+            <h4 className="font-bold text-white text-base mb-2 relative z-10">3. Abrir Proyector</h4>
+            <p className="text-xs text-indigo-100 dark:text-indigo-200/60 leading-relaxed mb-4 flex-1 relative z-10">
+              Abre el enlace en la computadora conectada a las pantallas de tu salón. ¡Ahí volarán las fotos!
+            </p>
+            <div className="text-[10px] font-black uppercase tracking-widest text-indigo-100 dark:text-indigo-300 flex items-center relative z-10">
+              Enviar Enlace al DJ <ArrowRight size={14} className="ml-1 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </button>
+
+        </div>
+      </div>
+
+      {/* GALERÍA DE FOTOS */}
+      <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl p-6 overflow-y-auto bg-slate-50/50 dark:bg-transparent custom-scrollbar transition-colors">
         {photos.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
-            <ImageIcon size={64} className="mb-4 opacity-20" />
-            <h3 className="text-xl font-bold text-slate-700 dark:text-white font-editorial tracking-wide">Aún no hay fotos</h3>
-            <p className="text-sm font-medium mt-2">Invita a tus asistentes a escanear el QR.</p>
+          <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 min-h-[300px]">
+            <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center mb-6">
+              <ImageIcon size={40} className="opacity-50" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-700 dark:text-white font-editorial tracking-wide mb-2">Aún no hay fotos</h3>
+            <p className="text-sm font-medium">Invita a tus asistentes a escanear el QR de las mesas.</p>
           </div>
         ) : (
           <div className="columns-2 md:columns-4 gap-4 pb-10">
@@ -7638,21 +7705,21 @@ const GaleriaView = ({ photos, addNotification }) => {
                   key={foto.id} 
                   onClick={() => setViewingPost(foto)} 
                   style={{ WebkitColumnBreakInside: 'avoid', pageBreakInside: 'avoid', breakInside: 'avoid' }}
-                  className={`group mb-4 w-full rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border cursor-pointer ${isPending ? 'border-amber-400 ring-2 ring-amber-200' : 'border-slate-200 dark:border-white/10'}`}
+                  className={`group mb-4 w-full rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border cursor-pointer ${isPending ? 'border-amber-400 ring-2 ring-amber-200 dark:border-amber-500/50 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10'}`}
                 >
                   <div className="relative w-full aspect-[3/4] bg-slate-200 dark:bg-slate-800">
                     <img src={portada} alt="Foto" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                     {config.marcoUrl && <img src={config.marcoUrl} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />}
                     
                     {isPending && (
-                       <div className="absolute top-2 left-2 z-20 bg-amber-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full flex items-center shadow-lg uppercase tracking-widest">
-                          <AlertCircle size={12} className="mr-1.5"/> PENDIENTE
+                       <div className="absolute top-3 left-3 z-20 bg-amber-500 text-white text-[10px] font-black px-3 py-1.5 rounded-full flex items-center shadow-lg uppercase tracking-widest">
+                          <AlertCircle size={14} className="mr-1.5"/> PENDIENTE
                        </div>
                     )}
 
                     {isCarousel && (
-                      <div className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded-lg backdrop-blur-sm z-10 shadow-md">
-                        <Layers size={14} />
+                      <div className="absolute top-3 right-3 bg-black/60 text-white p-2 rounded-xl backdrop-blur-md z-10 shadow-md">
+                        <Layers size={16} />
                       </div>
                     )}
 
@@ -7660,30 +7727,30 @@ const GaleriaView = ({ photos, addNotification }) => {
                       <div className="flex justify-end gap-2">
                         {isPending && (
                           <>
-                             <button onClick={(e) => { e.stopPropagation(); toggleApproval(foto, true); }} className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full backdrop-blur-md shadow-md"><CheckCircle size={16} /></button>
-                             <button onClick={(e) => { e.stopPropagation(); toggleApproval(foto, false); }} className="p-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-full backdrop-blur-md shadow-md"><X size={16} /></button>
+                             <button onClick={(e) => { e.stopPropagation(); toggleApproval(foto, true); }} className="p-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full backdrop-blur-md shadow-xl hover:scale-110 transition-transform"><CheckCircle size={18} /></button>
+                             <button onClick={(e) => { e.stopPropagation(); toggleApproval(foto, false); }} className="p-3 bg-rose-500 hover:bg-rose-600 text-white rounded-full backdrop-blur-md shadow-xl hover:scale-110 transition-transform"><X size={18} /></button>
                           </>
                         )}
                         {!isPending && (
-                          <button onClick={(e) => { e.stopPropagation(); handleDelete(foto.id); }} className="p-2.5 bg-white/20 hover:bg-rose-500 text-white rounded-full backdrop-blur-md transition-colors" title="Borrar Publicación">
-                            <Trash2 size={16} />
+                          <button onClick={(e) => { e.stopPropagation(); handleDelete(foto.id); }} className="p-3 bg-white/20 hover:bg-rose-500 text-white rounded-full backdrop-blur-md transition-colors shadow-lg" title="Borrar Publicación">
+                            <Trash2 size={18} />
                           </button>
                         )}
                       </div>
                       
                       <div className="mt-auto">
-                        {foto.mensaje && <p className="text-white/90 text-xs mb-1.5 line-clamp-2 drop-shadow-md">{renderTextWithHashtags(foto.mensaje)}</p>}
+                        {foto.mensaje && <p className="text-white/90 text-xs mb-2 line-clamp-2 drop-shadow-md leading-relaxed">{renderTextWithHashtags(foto.mensaje)}</p>}
                         <div className="flex justify-between items-end">
                           <div className="flex flex-col">
                              <p className="text-white font-bold text-sm drop-shadow-md">{foto.autor}</p>
-                             <p className="text-white/70 text-[10px]">{foto.fecha}</p>
+                             <p className="text-white/70 text-[10px] font-bold uppercase tracking-wider">{foto.fecha}</p>
                           </div>
                           <div className="flex gap-2">
-                            <span className="flex items-center text-white bg-white/20 px-2 py-1 rounded-full backdrop-blur-md text-[10px] font-bold">
-                              <MessageCircle size={10} className="mr-1" /> {commentCount}
+                            <span className="flex items-center text-white bg-white/20 px-2.5 py-1.5 rounded-full backdrop-blur-md text-[10px] font-bold shadow-sm">
+                              <MessageCircle size={12} className="mr-1.5" /> {commentCount}
                             </span>
-                            <span className="flex items-center text-white bg-rose-500/80 px-2 py-1 rounded-full backdrop-blur-md text-[10px] font-bold">
-                              <Heart size={10} className="mr-1 fill-white" /> {likesCount}
+                            <span className="flex items-center text-white bg-rose-500/80 px-2.5 py-1.5 rounded-full backdrop-blur-md text-[10px] font-bold shadow-sm">
+                              <Heart size={12} className="mr-1.5 fill-white" /> {likesCount}
                             </span>
                           </div>
                         </div>
@@ -7698,69 +7765,104 @@ const GaleriaView = ({ photos, addNotification }) => {
         )}
       </div>
 
+      {/* MODAL: VER PUBLICACIÓN DETALLADA */}
       {viewingPost && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
-            <div className="p-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50 dark:bg-white/5 shrink-0 transition-colors">
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
+            <div className="p-5 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50 dark:bg-[#111] shrink-0 transition-colors">
               <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-amber-500/20 overflow-hidden mr-3 border border-transparent dark:border-amber-500/30"><img src={viewingPost.avatar || ''} className="w-full h-full object-cover"/></div>
-                <div><h3 className="font-bold text-slate-800 dark:text-white text-sm">{viewingPost.autor}</h3></div>
+                <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-amber-500/20 overflow-hidden mr-4 border border-transparent dark:border-amber-500/30">
+                  <img src={viewingPost.avatar || ''} className="w-full h-full object-cover"/>
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-white text-base">{viewingPost.autor}</h3>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">{viewingPost.fecha}</p>
+                </div>
               </div>
-              <button onClick={() => setViewingPost(null)} className="p-2 bg-slate-200 dark:bg-white/10 rounded-full text-slate-600 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20 transition-colors"><X size={16}/></button>
+              <button onClick={() => setViewingPost(null)} className="p-3 bg-slate-200 dark:bg-white/10 rounded-full text-slate-600 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20 transition-colors"><X size={18}/></button>
             </div>
-            <div className="flex-1 overflow-y-auto bg-white dark:bg-[#050505] custom-scrollbar transition-colors">
-              <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar bg-slate-900 relative">
+            
+            <div className="flex-1 overflow-y-auto bg-slate-900 dark:bg-black custom-scrollbar transition-colors relative">
+              <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar relative">
                  {(viewingPost.urls || [viewingPost.url]).map((u, idx) => (
-                   <div key={idx} className="w-full flex-shrink-0 snap-center relative">
-                     <img src={u} className="w-full max-h-[60vh] object-contain mx-auto" />
-                     {config.marcoUrl && <img src={config.marcoUrl} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />}
+                   <div key={idx} className="w-full flex-shrink-0 snap-center relative flex items-center justify-center min-h-[50vh]">
+                     <img src={u} className="w-full max-h-[70vh] object-contain mx-auto" />
+                     {config.marcoUrl && <img src={config.marcoUrl} className="absolute inset-0 w-full h-full object-contain pointer-events-none" />}
                    </div>
                  ))}
               </div>
-              <div className="p-5 flex justify-between bg-slate-50 dark:bg-[#0a0a0a] border-t border-slate-100 dark:border-white/5 transition-colors">
-                <button onClick={() => handleDelete(viewingPost.id)} className="text-[10px] font-black uppercase tracking-widest text-rose-500 bg-rose-50 dark:bg-rose-500/10 px-5 py-2.5 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors">Borrar Publicación</button>
-                {config.moderacion && viewingPost.status === 'pending' && (
-                  <div className="flex gap-2">
-                    <button onClick={() => toggleApproval(viewingPost, false)} className="text-[10px] font-black uppercase tracking-widest text-white bg-rose-500 px-5 py-2.5 rounded-xl shadow-md hover:bg-rose-600 transition-colors"><X size={14} className="inline mr-1.5"/> Rechazar</button>
-                    <button onClick={() => toggleApproval(viewingPost, true)} className="text-[10px] font-black uppercase tracking-widest text-white bg-emerald-500 px-5 py-2.5 rounded-xl shadow-md hover:bg-emerald-600 transition-colors"><CheckCircle size={14} className="inline mr-1.5"/> Aprobar</button>
-                  </div>
-                )}
-              </div>
+            </div>
+
+            <div className="p-6 flex justify-between items-center bg-slate-50 dark:bg-[#111] border-t border-slate-100 dark:border-white/5 transition-colors shrink-0">
+              <button onClick={() => handleDelete(viewingPost.id)} className="text-[10px] font-black uppercase tracking-widest text-rose-500 bg-rose-50 dark:bg-rose-500/10 px-6 py-3.5 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors shadow-sm flex items-center">
+                <Trash2 size={16} className="mr-2"/> Borrar
+              </button>
+              
+              {config.moderacion && viewingPost.status === 'pending' && (
+                <div className="flex gap-3">
+                  <button onClick={() => toggleApproval(viewingPost, false)} className="text-[10px] font-black uppercase tracking-widest text-white bg-rose-500 px-6 py-3.5 rounded-xl shadow-lg hover:bg-rose-600 hover:scale-105 transition-all flex items-center">
+                    <X size={16} className="mr-2"/> Rechazar
+                  </button>
+                  <button onClick={() => toggleApproval(viewingPost, true)} className="text-[10px] font-black uppercase tracking-widest text-white bg-emerald-500 px-6 py-3.5 rounded-xl shadow-lg hover:bg-emerald-600 hover:scale-105 transition-all flex items-center">
+                    <CheckCircle size={16} className="mr-2"/> Aprobar
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
+      {/* MODAL: PROYECTOR (DJ) */}
       {showProyectorModal && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-8 relative animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
-             <button onClick={() => setShowProyectorModal(false)} className="absolute top-5 right-5 text-slate-400 hover:text-rose-500"><X size={20}/></button>
-             <div className="w-16 h-16 bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-white rounded-full flex items-center justify-center mx-auto mb-4 border border-transparent dark:border-white/10"><PlayCircle size={32}/></div>
-             <h3 className="font-editorial font-black text-2xl text-slate-800 dark:text-white mb-2 text-center transition-colors">Modo Proyector</h3>
-             <button onClick={() => {navigator.clipboard.writeText(proyectorLink); if(addNotification) addNotification('Copiado', 'Enlace copiado al portapapeles', 'success');}} className="w-full py-4 mb-6 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors uppercase tracking-widest text-[10px]"><Link size={16} className="mr-2"/> Copiar enlace directo</button>
-             <div className="border-t border-slate-200 dark:border-white/10 pt-6 transition-colors">
-                <label className="block text-[10px] font-bold mb-3 text-slate-600 dark:text-slate-400 text-center uppercase tracking-widest">Enviar al staff por WhatsApp</label>
-                <div className="flex gap-2">
-                  <input type="text" placeholder="10 dígitos del DJ o Planner..." value={djPhone} onChange={e=>setDjPhone(e.target.value)} className="w-full p-4 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:border-emerald-500 transition-colors" />
-                  <button onClick={sendProyectorWhatsApp} className="px-6 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors shadow-md dark:shadow-[0_0_15px_rgba(16,185,129,0.3)]"><Send size={18}/></button>
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-10 relative animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
+             <button onClick={() => setShowProyectorModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-rose-500 bg-slate-100 dark:bg-white/10 p-2 rounded-full transition-colors"><X size={20}/></button>
+             
+             <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-indigo-100 dark:border-indigo-500/30 shadow-inner">
+               <PlayCircle size={40}/>
+             </div>
+             
+             <h3 className="font-editorial font-black text-3xl text-slate-900 dark:text-white mb-2 text-center transition-colors">Modo Proyector</h3>
+             <p className="text-xs text-slate-500 dark:text-slate-400 text-center mb-8">Este es el enlace que debe abrirse en la computadora conectada a las pantallas de tu salón.</p>
+             
+             <button onClick={() => {navigator.clipboard.writeText(proyectorLink); if(addNotification) addNotification('Copiado', 'Enlace copiado al portapapeles', 'success');}} className="w-full py-4 mb-8 bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors uppercase tracking-widest text-[10px] shadow-sm">
+               <Link size={16} className="mr-2"/> Copiar enlace directo
+             </button>
+             
+             <div className="border-t border-slate-200 dark:border-white/10 pt-8 transition-colors">
+                <label className="block text-[10px] font-black mb-4 text-slate-500 dark:text-slate-400 text-center uppercase tracking-widest">Enviar por WhatsApp al DJ</label>
+                <div className="flex gap-3">
+                  <input type="text" placeholder="10 dígitos del celular..." value={djPhone} onChange={e=>setDjPhone(e.target.value)} className="w-full px-5 py-4 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors placeholder:text-slate-400 shadow-inner" />
+                  <button onClick={sendProyectorWhatsApp} className="px-6 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/30 flex items-center justify-center shrink-0">
+                    <Send size={20}/>
+                  </button>
                 </div>
              </div>
           </div>
         </div>
       )}
 
+      {/* MODAL: CÓDIGO QR PARA MESAS */}
       {showQR && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-8 text-center relative animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
-            <button onClick={() => setShowQR(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-800 dark:hover:text-white bg-slate-100 dark:bg-white/10 p-2 rounded-full transition-colors"><X size={20}/></button>
-            <h3 className="font-editorial font-black text-2xl text-slate-900 dark:text-white mb-2 transition-colors">Tu Código QR</h3>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-6 font-bold">Para imprimir en mesas</p>
-            <div className="bg-white p-3 rounded-3xl border-4 border-slate-100 dark:border-white/5 inline-block mb-8 shadow-sm">
-              <img src={qrUrl} alt="QR Code" className="w-48 h-48 mx-auto mix-blend-multiply" />
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl p-10 text-center relative animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
+            <button onClick={() => setShowQR(false)} className="absolute top-5 right-5 text-slate-400 hover:text-slate-800 dark:hover:text-white bg-slate-100 dark:bg-white/10 p-2 rounded-full transition-colors"><X size={20}/></button>
+            
+            <h3 className="font-editorial font-black text-3xl text-slate-900 dark:text-white mb-2 transition-colors">Tu Código QR</h3>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-8 font-bold">Imprime y ponlo en las mesas</p>
+            
+            <div className="bg-white p-4 rounded-3xl border-8 border-slate-100 dark:border-[#111] inline-block mb-10 shadow-lg transform hover:scale-105 transition-transform">
+              <img src={qrUrl} alt="QR Code" className="w-56 h-56 mx-auto mix-blend-multiply" />
             </div>
+            
             <div className="flex flex-col gap-3">
-              <button onClick={forceDownloadQR} className="w-full py-4 bg-indigo-600 dark:bg-amber-500 hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors text-white dark:text-slate-900 rounded-xl font-black shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] uppercase tracking-widest text-[10px]"><Download size={16} className="inline mr-2"/> Descargar PNG</button>
-              <button onClick={() => {navigator.clipboard.writeText(guestLink); if(addNotification) addNotification('Copiado', 'Link manual copiado al portapapeles', 'success');}} className="w-full py-4 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors uppercase tracking-widest text-[10px]"><Link size={16} className="mr-2"/> Copiar enlace manual</button>
+              <button onClick={forceDownloadQR} className="w-full py-4 bg-indigo-600 dark:bg-amber-500 hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors text-white dark:text-slate-900 rounded-xl font-black shadow-lg dark:shadow-[0_0_20px_rgba(245,158,11,0.3)] uppercase tracking-widest text-[10px]">
+                <Download size={16} className="inline mr-2"/> Descargar PNG
+              </button>
+              <button onClick={() => {navigator.clipboard.writeText(guestLink); if(addNotification) addNotification('Copiado', 'Link manual copiado al portapapeles', 'success');}} className="w-full py-4 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors uppercase tracking-widest text-[10px]">
+                <Link size={16} className="mr-2"/> Copiar enlace manual
+              </button>
             </div>
           </div>
         </div>
