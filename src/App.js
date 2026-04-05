@@ -10755,13 +10755,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
             {!isMobileDevice ? (
                 // ==========================================
-                // --- VERSIÓN ESCRITORIO (SIMULADORES MAC E IPHONE) ---
+                // --- VERSIÓN ESCRITORIO (SIMULADORES MAC E IPHONE INTACTOS) ---
                 // ==========================================
                 <RevealSection delay={200} className="w-full relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 items-stretch flex group p-12 min-h-[680px]">
                     
                     <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white dark:from-[#080808] to-transparent opacity-40 z-0 transition-colors pointer-events-none"></div>
 
-                    {/* COLUMNA IZQUIERDA (Textos y Selección) */}
+                    {/* COLUMNA IZQUIERDA (Textos y Selección de Arte) */}
                     <div className="w-5/12 xl:w-1/3 relative z-30 flex flex-col justify-center h-full gap-10 py-6">
                         
                         <div className="flex flex-col gap-6">
@@ -10771,7 +10771,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                     Tu evento es único. <br className="hidden md:block"/> tu diseño también.
                                 </h2>
                             </div>
-                            
                             <p className="text-base lg:text-lg text-slate-600 dark:text-slate-400 font-light leading-relaxed transition-colors duration-700 max-w-md">
                                 Explora nuestras galerías interactivas. En Baulia no usamos plantillas genéricas; operamos como un estudio de diseño de élite. Adaptamos la estética al nivel y la sofisticación de tu evento.
                             </p>
@@ -10779,15 +10778,15 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
                         <div className="flex flex-col gap-8">
                             
-                            {/* 🔴 NUEVO SELECTOR DE ARTE DIGITAL */}
+                            {/* 🔴 SELECTOR DE ARTE DIGITAL (TEMA DINÁMICO) */}
                             <div className="relative w-full max-w-[320px] z-50">
                               <div 
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                 className="w-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 py-4 px-6 rounded-2xl cursor-pointer flex items-center justify-between shadow-sm hover:shadow-md transition-all relative overflow-hidden group"
                               >
-                                 {/* Formas abstractas (Blobs) de fondo según el tema */}
-                                 <div className={`absolute -top-4 -right-4 w-16 h-16 rounded-full opacity-30 blur-md transition-colors duration-500 ${currentDemo.blob1}`}></div>
-                                 <div className={`absolute -bottom-4 right-10 w-12 h-12 rounded-full opacity-30 blur-md transition-colors duration-500 ${currentDemo.blob2}`}></div>
+                                 {/* Burbujas de color (Blobs) temáticas */}
+                                 <div className={`absolute -top-6 -right-2 w-16 h-16 rounded-full opacity-60 mix-blend-multiply dark:mix-blend-screen transition-colors duration-500 ${currentDemo.blob1}`}></div>
+                                 <div className={`absolute -bottom-4 right-6 w-14 h-14 rounded-full opacity-60 mix-blend-multiply dark:mix-blend-screen transition-colors duration-500 ${currentDemo.blob2}`}></div>
                                  
                                  <span className="font-bold text-xs uppercase tracking-widest text-slate-800 dark:text-white relative z-10 drop-shadow-sm">
                                    {currentDemo.label}
@@ -10795,26 +10794,21 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                  <ChevronDown size={16} className={`text-slate-400 transform transition-transform duration-300 relative z-10 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                               </div>
 
-                              {/* Opciones Desplegables */}
                               {isDropdownOpen && (
                                 <div className="absolute top-full left-0 w-full mt-2 bg-white/95 dark:bg-[#111]/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col p-2 animate-in fade-in slide-in-from-top-2">
                                   {Object.values(demos).map(demo => (
                                     <button 
                                       key={demo.id}
                                       onClick={() => { setActiveCategory(demo.id); setIsDropdownOpen(false); }}
-                                      className={`text-left px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all relative overflow-hidden group flex items-center justify-between ${activeCategory === demo.id ? 'bg-slate-50 dark:bg-white/5' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}
+                                      className={`text-left px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all relative overflow-hidden flex items-center justify-between ${activeCategory === demo.id ? 'bg-slate-50 dark:bg-white/5' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}
                                     >
-                                      <div className="flex items-center gap-3 relative z-10">
-                                         {/* Paleta visual miniatura */}
-                                         <div className="w-6 h-6 rounded-full flex shrink-0 relative overflow-hidden border border-slate-200 dark:border-white/10 shadow-inner">
-                                            <div className={`absolute -left-1 -top-1 w-5 h-5 rounded-full ${demo.blob1}`}></div>
-                                            <div className={`absolute -right-1 -bottom-1 w-5 h-5 rounded-full ${demo.blob2}`}></div>
-                                         </div>
-                                         <span className={`transition-colors ${activeCategory === demo.id ? 'text-amber-500' : 'text-slate-700 dark:text-slate-300 group-hover:text-amber-500'}`}>
-                                            {demo.label}
-                                         </span>
+                                      <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center pr-4 opacity-60 mix-blend-multiply dark:mix-blend-screen">
+                                        <div className={`w-6 h-6 rounded-full -mr-2 ${demo.blob1}`}></div>
+                                        <div className={`w-6 h-6 rounded-full ${demo.blob2}`}></div>
                                       </div>
-                                      {activeCategory === demo.id && <Check size={14} className="text-amber-500" />}
+                                      <span className={`relative z-10 transition-colors ${activeCategory === demo.id ? 'text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>
+                                        {demo.label}
+                                      </span>
                                     </button>
                                   ))}
                                 </div>
@@ -10842,9 +10836,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA (MAC y iPHONE) */}
+                    {/* COLUMNA DERECHA (MAC y iPHONE) - INTACTA COMO LA TENÍAS */}
                     <div className="w-7/12 xl:w-2/3 relative flex items-center justify-end z-20">
-                        {/* Contenedor relativo que dicta la altura de ambos */}
                         <div className="relative w-full max-w-[850px] aspect-[16/10] translate-x-[15%]">
                             
                             <div className={`absolute top-0 right-0 w-[90%] h-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-700 ${activeDevice === 'mac' ? 'scale-[1.02] z-30' : 'scale-100 z-10 opacity-70 blur-[1px]'}`}>
@@ -10853,21 +10846,15 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                     <iframe 
                                       ref={macIframeRef}
                                       src={currentDemo.url} 
-                                      className="absolute top-0 left-0 border-0 origin-top-left pointer-events-none" 
+                                      className="absolute top-0 left-0 border-0 origin-top-left" 
                                       style={{ width: '250%', height: '250%', transform: 'scale(0.4)' }} 
                                       title={`Mac Demo ${currentDemo.label}`}
                                     ></iframe>
                                     
-                                    {activeDevice !== 'mac' ? (
+                                    {activeDevice !== 'mac' && (
                                       <div onClick={() => switchFocus('mac')} className="absolute inset-0 z-20 bg-black/10 backdrop-blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
                                          <div className="bg-slate-900/90 text-white text-xs font-bold px-6 py-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl flex items-center transform scale-95 group-hover:scale-100">
                                             <PlayCircle size={18} className="mr-2 text-amber-500"/> Haz clic para explorar en Mac
-                                         </div>
-                                      </div>
-                                    ) : (
-                                      <div onClick={() => setFullScreenDemo(currentDemo.url)} className="absolute inset-0 z-20 bg-transparent cursor-pointer flex items-center justify-center group transition-all duration-500">
-                                         <div className="bg-slate-900/90 text-white text-xs font-bold px-6 py-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl flex items-center transform scale-95 group-hover:scale-100">
-                                            <Maximize size={18} className="mr-2 text-amber-500"/> Pantalla Completa
                                          </div>
                                       </div>
                                     )}
@@ -10888,7 +10875,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                       <iframe 
                                         ref={iphoneIframeRef}
                                         src={currentDemo.url} 
-                                        className="border-0 absolute top-0 left-0 pointer-events-none" 
+                                        className="border-0 absolute top-0 left-0" 
                                         title={`iPhone Demo ${currentDemo.label}`}
                                         style={{ 
                                             width: '390px', 
@@ -10898,18 +10885,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         }}
                                       ></iframe>
 
-                                      {activeDevice !== 'iphone' ? (
+                                      {activeDevice !== 'iphone' && (
                                         <div onClick={() => switchFocus('iphone')} className="absolute inset-0 z-20 bg-black/10 backdrop-blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
                                            <div className="bg-slate-900/90 text-white text-[10px] font-bold px-4 py-3 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl text-center flex flex-col items-center transform scale-95 group-hover:scale-100">
                                               <Smartphone size={24} className="mb-1 text-amber-500"/>
                                               Tocar para usar<br/>en Móvil
-                                           </div>
-                                        </div>
-                                      ) : (
-                                        <div onClick={() => setFullScreenDemo(currentDemo.url)} className="absolute inset-0 z-20 bg-transparent cursor-pointer flex items-center justify-center group transition-all duration-500">
-                                           <div className="bg-slate-900/90 text-white text-[10px] font-bold px-4 py-3 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl text-center flex flex-col items-center transform scale-95 group-hover:scale-100">
-                                              <Maximize size={24} className="mb-1 text-amber-500"/>
-                                              Abrir Demo<br/>Interactivo
                                            </div>
                                         </div>
                                       )}
@@ -10923,7 +10903,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 </RevealSection>
             ) : (
                 // ==========================================
-                // --- VERSIÓN MÓVIL (TARJETA PREMIUM CON BOTÓN DIRECTO) ---
+                // --- VERSIÓN MÓVIL (TARJETA DE PRESENTACIÓN INTERACTIVA) ---
                 // ==========================================
                 <RevealSection delay={200} className="w-full flex flex-col gap-8 px-2 max-w-md mx-auto">
                     
@@ -10939,8 +10919,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                             className="w-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 py-5 px-6 rounded-[2rem] cursor-pointer flex items-center justify-between shadow-md relative overflow-hidden group"
                           >
-                             <div className={`absolute -top-4 -right-4 w-16 h-16 rounded-full opacity-30 blur-md transition-colors duration-500 ${currentDemo.blob1}`}></div>
-                             <div className={`absolute -bottom-4 right-10 w-12 h-12 rounded-full opacity-30 blur-md transition-colors duration-500 ${currentDemo.blob2}`}></div>
+                             <div className={`absolute -top-4 -right-4 w-16 h-16 rounded-full opacity-60 mix-blend-multiply dark:mix-blend-screen transition-colors duration-500 ${currentDemo.blob1}`}></div>
+                             <div className={`absolute -bottom-4 right-10 w-12 h-12 rounded-full opacity-60 mix-blend-multiply dark:mix-blend-screen transition-colors duration-500 ${currentDemo.blob2}`}></div>
                              
                              <span className="font-bold text-sm uppercase tracking-widest text-slate-800 dark:text-white relative z-10 drop-shadow-sm">
                                {currentDemo.label}
@@ -10956,16 +10936,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                   onClick={() => { setActiveCategory(demo.id); setIsDropdownOpen(false); }}
                                   className={`text-left px-5 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all relative overflow-hidden flex items-center justify-between ${activeCategory === demo.id ? 'bg-slate-50 dark:bg-white/5' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}
                                 >
-                                  <div className="flex items-center gap-4 relative z-10">
-                                     <div className="w-8 h-8 rounded-full flex shrink-0 relative overflow-hidden border border-slate-200 dark:border-white/10 shadow-inner">
-                                        <div className={`absolute -left-1 -top-1 w-6 h-6 rounded-full ${demo.blob1}`}></div>
-                                        <div className={`absolute -right-1 -bottom-1 w-6 h-6 rounded-full ${demo.blob2}`}></div>
-                                     </div>
-                                     <span className={`transition-colors ${activeCategory === demo.id ? 'text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>
-                                        {demo.label}
-                                     </span>
+                                  <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center pr-5 opacity-60 mix-blend-multiply dark:mix-blend-screen">
+                                    <div className={`w-8 h-8 rounded-full -mr-3 ${demo.blob1}`}></div>
+                                    <div className={`w-8 h-8 rounded-full ${demo.blob2}`}></div>
                                   </div>
-                                  {activeCategory === demo.id && <Check size={18} className="text-amber-500" />}
+                                  <span className={`relative z-10 transition-colors ${activeCategory === demo.id ? 'text-amber-600 dark:text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>
+                                    {demo.label}
+                                  </span>
                                 </button>
                               ))}
                             </div>
@@ -10986,6 +10963,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </p>
 
                         <div className="w-full space-y-4 relative z-10">
+                            {/* 🔴 ABRE EL OVERLAY INTERNO SIN SALIR DE LA PÁGINA */}
                             <button 
                                 onClick={() => setFullScreenDemo(currentDemo.url)} 
                                 className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center"
@@ -11431,9 +11409,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       {/* ========================================== */}
       {/* 🔴 NUEVA SECCIÓN: BLACK LABEL (Lujo Físico) */}
       {/* ========================================== */}
-      {/* ========================================== */}
-      {/* 🔴 NUEVA SECCIÓN: BLACK LABEL (Lujo Físico) */}
-      {/* ========================================== */}
       <section id="black-label" className="py-24 bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white relative overflow-hidden transition-colors duration-700 border-t border-slate-200 dark:border-white/5">
          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[60vw] h-[60vw] bg-amber-500/5 blur-[150px] rounded-full pointer-events-none transition-colors duration-700"></div>
 
@@ -11826,25 +11801,30 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           </div>
         </div>
       )}
-      {/* 🔴 OVERLAY: DEMO A PANTALLA COMPLETA (VISOR INTERNO) */}
+      {/* 🔴 OVERLAY: DEMO A PANTALLA COMPLETA (MÓVIL - DENTRO DE LA PÁGINA) */}
       {fullScreenDemo && (
-        <div className="fixed inset-0 z-[999999] bg-black animate-in slide-in-from-bottom-full duration-500 flex flex-col">
+        <div className="fixed inset-0 z-[999999] bg-black animate-in slide-in-from-bottom-full duration-300 flex flex-col">
            
-           <iframe 
-             src={fullScreenDemo} 
-             className="w-full flex-1 border-0" 
-             title="Demo a Pantalla Completa"
-           />
-           
-           {/* Botón flotante para regresar sin salir del sistema */}
-           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-50">
+           {/* HEADER DE NAVEGACIÓN PARA CERRAR EL DEMO */}
+           <div className="bg-[#111] border-b border-white/10 px-4 py-3 flex items-center justify-between z-10 shadow-md">
+               <div className="flex items-center gap-2 text-white">
+                  <BauliaLogo className="h-5 w-auto" forceWhite={true} />
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest border-l border-white/20 pl-2">Demo en Vivo</span>
+               </div>
                <button 
                  onClick={() => setFullScreenDemo(null)} 
-                 className="bg-slate-900/90 dark:bg-white/90 backdrop-blur-xl text-white dark:text-slate-900 px-8 py-4 rounded-full font-black text-[10px] uppercase tracking-widest shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-white/20 hover:scale-105 transition-transform flex items-center justify-center whitespace-nowrap"
+                 className="bg-white/10 hover:bg-rose-500/20 text-white hover:text-rose-400 px-4 py-2 rounded-full font-bold text-[10px] uppercase tracking-widest transition-colors flex items-center border border-white/10"
                >
-                  <X size={16} className="mr-2" /> Volver a Baulia
+                  <X size={14} className="mr-1.5" /> Cerrar
                </button>
            </div>
+
+           {/* IFRAME DE LA INVITACIÓN */}
+           <iframe 
+             src={fullScreenDemo} 
+             className="w-full flex-1 border-0 bg-white" 
+             title="Demo a Pantalla Completa"
+           />
         </div>
       )}
     </div>
