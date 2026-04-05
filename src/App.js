@@ -7627,9 +7627,9 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
           <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
             <div className="mb-4">
                <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><ShieldCheck size={16} className="text-rose-500"/> Seguridad y Privacidad</h4>
-               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">
-                 <b className="text-slate-700 dark:text-slate-300">Público:</b> Escaneo QR general + Nombre.<br/>
-                 <b className="text-slate-700 dark:text-slate-300">Privado:</b> Solo con Pase QR personal.
+               <p className="text-[9px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                 <b className="text-slate-700 dark:text-slate-300">Privacidad:</b> Público (QR general) o Privado (QR personal).<br/>
+                 <b className="text-slate-700 dark:text-slate-300">Moderador:</b> Aprueba las fotos abajo antes de proyectarlas.
                </p>
             </div>
             <div className="flex gap-2">
@@ -7638,8 +7638,9 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
                   <button onClick={() => updateConfig('modoPublico', true)} className={`flex-1 text-[9px] font-bold uppercase tracking-wider py-1.5 rounded-md transition-all ${config.modoPublico ? 'bg-emerald-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Público</button>
                   <button onClick={() => updateConfig('modoPublico', false)} className={`flex-1 text-[9px] font-bold uppercase tracking-wider py-1.5 rounded-md transition-all ${!config.modoPublico ? 'bg-rose-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Privado</button>
                </div>
-               {/* Toggle Moderacion */}
-               <div className="flex items-center bg-white dark:bg-[#050505] px-3 py-1 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm shrink-0">
+               {/* Toggle Moderacion con etiqueta */}
+               <div className="flex items-center bg-white dark:bg-[#050505] px-2 py-1 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm shrink-0 gap-2">
+                  <span className="text-[8px] font-black uppercase text-slate-400 tracking-widest hidden sm:block">DJ</span>
                   <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-8 h-4 rounded-full transition-colors ${config.moderacion ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`} title="Activar/Desactivar Moderador">
                     <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${config.moderacion ? 'translate-x-4' : 'translate-x-0'}`}></div>
                   </button>
