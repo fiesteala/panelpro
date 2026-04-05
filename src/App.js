@@ -7628,7 +7628,8 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
             <div className="mb-4">
                <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><ShieldCheck size={16} className="text-rose-500"/> Seguridad y Filtros</h4>
                <p className="text-[9px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">
-                 <b className="text-slate-700 dark:text-slate-300">Público/Privado:</b> Controla quién entra al muro.<br/>
+                 <b className="text-slate-700 dark:text-slate-300">Público:</b> Escaneo QR general + Nombre.<br/>
+                 <b className="text-slate-700 dark:text-slate-300">Privado:</b> Solo con Pase QR personal.<br/>
                  <b className="text-slate-700 dark:text-slate-300">Moderador:</b> Actívalo para aprobar las fotos manualmente antes de que salgan en la pantalla.
                </p>
             </div>
