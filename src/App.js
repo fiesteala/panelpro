@@ -7442,7 +7442,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
 };
 
 // ==========================================
-// --- COMPONENTE: GALERÍA EN VIVO (DARK PREMIUM) ---
+// --- COMPONENTE: GALERÍA EN VIVO (DARK PREMIUM COMPACTO) ---
 // ==========================================
 const GaleriaView = ({ photos, addNotification }) => {
   const [showQR, setShowQR] = useState(false); 
@@ -7579,107 +7579,93 @@ const GaleriaView = ({ photos, addNotification }) => {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-4 pb-6 relative z-10 transition-colors duration-500 max-w-5xl mx-auto">
+    <div className="h-full flex flex-col space-y-4 pb-6 relative z-10 transition-colors duration-500 max-w-[1200px] mx-auto w-full">
       
-      {/* HEADER DE LA PESTAÑA */}
-      <div className="bg-white dark:bg-[#0a0a0a] px-6 py-4 rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col xl:flex-row items-center justify-between gap-4 shrink-0 transition-colors">
-        <div className="flex items-center gap-4 w-full xl:w-auto shrink-0">
-          <div className="w-12 h-12 bg-indigo-50 dark:bg-amber-500/10 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-amber-500 shadow-sm border border-indigo-100 dark:border-amber-500/20">
-            <Camera size={24}/>
-          </div>
-          <div>
-            <h2 className="text-2xl font-editorial font-black text-slate-800 dark:text-white tracking-tight leading-none">Muro Social</h2>
-            <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mt-1">Pantallas en Vivo</p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-end gap-3 w-full xl:w-auto">
-          {/* TOOGLE DE MODERACIÓN */}
-          <div className="flex items-center bg-slate-50 dark:bg-[#111] px-4 py-2 rounded-xl border border-slate-200 dark:border-white/5 transition-colors shadow-inner">
-             <ShieldCheck size={16} className={`mr-2 ${config.moderacion ? 'text-rose-500' : 'text-slate-400 dark:text-slate-500'}`}/>
-             <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 mr-3 uppercase tracking-widest">Moderación DJ</span>
-             <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-10 h-5 rounded-full transition-colors shadow-sm ${config.moderacion ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
-                <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${config.moderacion ? 'translate-x-5' : 'translate-x-0'}`}></div>
-             </button>
-          </div>
-
-          <div className="flex items-center bg-slate-100 dark:bg-white/5 p-1 rounded-xl border border-slate-200 dark:border-white/5 transition-colors shadow-inner">
-            <button onClick={() => updateConfig('modoPublico', true)} className={`text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all ${config.modoPublico ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'}`}>Público</button>
-            <button onClick={() => updateConfig('modoPublico', false)} className={`text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all ${!config.modoPublico ? 'bg-rose-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'}`}>Privado</button>
-          </div>
-
-          <div className="flex items-center bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-xl px-4 py-2 focus-within:border-indigo-500 dark:focus-within:border-amber-500 transition-colors w-36 shrink-0 shadow-inner">
-            <span className="text-slate-400 font-bold mr-1 text-sm">#</span>
-            <input type="text" value={config.hashtag?.replace('#', '') || ''} onChange={(e) => setConfig({...config, hashtag: '#' + e.target.value.replace(/\s+/g, '')})} onBlur={(e) => updateConfig('hashtag', config.hashtag)} placeholder="Boda" className="bg-transparent text-slate-800 dark:text-white font-bold text-xs outline-none w-full placeholder:text-slate-400"/>
-          </div>
-
-          <input type="file" accept="image/png" ref={fileInputRef} className="hidden" />
-          <button onClick={() => fileInputRef.current.click()} className="flex items-center px-5 py-2.5 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-xl text-[10px] uppercase tracking-widest font-bold hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 transition-all shadow-sm">
-            <ImageIcon size={16} className="mr-2" /> Marco
-          </button>
-
-          <button onClick={downloadAllPhotos} disabled={isZipping} className={`flex items-center px-5 py-2.5 text-white rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all shadow-md ${isZipping ? 'bg-slate-400 dark:bg-slate-600' : 'bg-emerald-500 hover:bg-emerald-600 hover:scale-105'}`}>
-            {isZipping ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} ZIP
-          </button>
-        </div>
-      </div>
-
-      {/* 💡 GUÍA RÁPIDA: INSTRUCCIONES PARA EL CLIENTE (ALTA COSTURA) */}
-      <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[2.5rem] p-8 shadow-sm dark:shadow-2xl transition-colors">
-        <div className="flex items-center gap-3 mb-8 border-b border-slate-100 dark:border-white/5 pb-6">
-          <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-amber-500/10 flex items-center justify-center text-indigo-600 dark:text-amber-500 border border-indigo-100 dark:border-amber-500/20">
-            <Info size={20} />
-          </div>
-          <div>
-            <h3 className="font-bold text-slate-900 dark:text-white text-xl font-editorial">¿Cómo funciona tu Muro Social?</h3>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500 dark:text-slate-400 mt-1">Guía rápida en 3 pasos</p>
-          </div>
-        </div>
+      {/* 💡 PANEL DE CONTROL COMPACTO E INTUITIVO */}
+      <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm p-6 shrink-0 transition-colors">
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* HEADER Y DESCARGA GENERAL */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 border-b border-slate-100 dark:border-white/5 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-amber-500/10 flex items-center justify-center text-indigo-600 dark:text-amber-500">
+              <Camera size={20} />
+            </div>
+            <div>
+              <h2 className="text-xl font-editorial font-bold text-slate-900 dark:text-white leading-tight">Social Wall</h2>
+              <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Pantallas en Vivo</p>
+            </div>
+          </div>
           
-          <button onClick={() => setShowQR(true)} className="flex flex-col text-left p-6 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-[2rem] hover:border-indigo-400 dark:hover:border-amber-500/50 transition-all group shadow-sm hover:shadow-lg relative overflow-hidden">
-            <div className="absolute -right-4 -top-4 w-24 h-24 bg-indigo-500/5 dark:bg-amber-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 dark:group-hover:bg-amber-500/10 transition-colors pointer-events-none"></div>
-            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-slate-300 shadow-sm mb-4 group-hover:scale-110 transition-transform relative z-10">
-              <QrCode size={20} />
-            </div>
-            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-2 relative z-10">1. QRs de Mesa</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4 flex-1 relative z-10">
-              Descarga e imprime este código. Tus invitados lo escanearán para tomar y subir fotos en vivo desde sus celulares.
-            </p>
-            <div className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-amber-500 flex items-center relative z-10">
-              Descargar Código <ArrowRight size={14} className="ml-1 group-hover:translate-x-1 transition-transform" />
-            </div>
+          <button onClick={downloadAllPhotos} disabled={isZipping || photos.length === 0} className={`flex items-center justify-center px-6 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all shadow-sm ${isZipping ? 'bg-slate-400 dark:bg-slate-700 text-white' : photos.length === 0 ? 'bg-slate-100 dark:bg-white/5 text-slate-400 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600 text-white hover:scale-105 shadow-emerald-500/20'}`}>
+            {isZipping ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
+            {isZipping ? 'Empaquetando...' : 'Descargar Álbum (.ZIP)'}
           </button>
+        </div>
 
-          <div className="flex flex-col text-left p-6 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-[2rem] transition-all shadow-sm relative overflow-hidden">
-            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 flex items-center justify-center text-rose-500 dark:text-rose-400 shadow-sm mb-4 relative z-10">
-              <ShieldCheck size={20} />
+        {/* 3 BLOQUES COMPACTOS DE ACCIÓN */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          
+          {/* BLOQUE 1: PROYECCIÓN (El Muro Físico) */}
+          <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
+            <div className="mb-4">
+               <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><MonitorPlay size={16} className="text-indigo-500 dark:text-amber-500"/> Proyección y Acceso</h4>
+               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">QR para las mesas e interfaz para la pantalla gigante del salón.</p>
             </div>
-            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-2 relative z-10">2. Para ti (Moderador)</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed flex-1 relative z-10">
-              Si activas la moderación (botón de arriba), las fotos llegarán a la galería de abajo para que tú o tu DJ las aprueben antes de salir en pantalla.
-            </p>
+            <div className="grid grid-cols-2 gap-2">
+               <button onClick={() => setShowQR(true)} className="flex items-center justify-center px-2 py-2 bg-white dark:bg-[#050505] text-slate-700 dark:text-white rounded-lg border border-slate-200 dark:border-white/10 hover:border-indigo-400 dark:hover:border-amber-500/50 text-[9px] font-bold uppercase tracking-wider transition-colors shadow-sm">
+                 <QrCode size={14} className="mr-1.5"/> QR Mesas
+               </button>
+               <button onClick={() => setShowProyectorModal(true)} className="flex items-center justify-center px-2 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-[9px] font-bold uppercase tracking-wider transition-colors shadow-sm shadow-indigo-500/20">
+                 <PlayCircle size={14} className="mr-1.5"/> Proyector
+               </button>
+            </div>
           </div>
 
-          <button onClick={() => setShowProyectorModal(true)} className="flex flex-col text-left p-6 bg-indigo-600 dark:bg-indigo-900/30 border border-indigo-500 dark:border-indigo-500/50 rounded-[2rem] hover:bg-indigo-700 dark:hover:bg-indigo-900/50 transition-all group shadow-xl shadow-indigo-500/20 relative overflow-hidden">
-            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-colors pointer-events-none"></div>
-            <div className="w-12 h-12 rounded-2xl bg-white/10 dark:bg-[#050505] border border-white/20 dark:border-indigo-500/30 flex items-center justify-center text-white dark:text-indigo-300 shadow-sm mb-4 group-hover:scale-110 transition-transform relative z-10">
-              <PlayCircle size={24} />
+          {/* BLOQUE 2: SEGURIDAD (Privacidad y Filtros) */}
+          <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
+            <div className="mb-4">
+               <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><ShieldCheck size={16} className="text-rose-500"/> Filtros y Privacidad</h4>
+               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Decide quién puede ver el muro web y filtra las fotos antes de proyectarlas.</p>
             </div>
-            <h4 className="font-bold text-white text-base mb-2 relative z-10">3. Abrir Proyector</h4>
-            <p className="text-xs text-indigo-100 dark:text-indigo-200/60 leading-relaxed mb-4 flex-1 relative z-10">
-              Abre el enlace en la computadora conectada a las pantallas de tu salón. ¡Ahí volarán las fotos!
-            </p>
-            <div className="text-[10px] font-black uppercase tracking-widest text-indigo-100 dark:text-indigo-300 flex items-center relative z-10">
-              Enviar Enlace al DJ <ArrowRight size={14} className="ml-1 group-hover:translate-x-1 transition-transform" />
+            <div className="flex gap-2">
+               {/* Toggle Publico/Privado Compacto */}
+               <div className="flex items-center bg-white dark:bg-[#050505] p-1 rounded-lg border border-slate-200 dark:border-white/10 flex-1 shadow-sm">
+                  <button onClick={() => updateConfig('modoPublico', true)} className={`flex-1 text-[9px] font-bold uppercase tracking-wider py-1.5 rounded-md transition-all ${config.modoPublico ? 'bg-emerald-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Público</button>
+                  <button onClick={() => updateConfig('modoPublico', false)} className={`flex-1 text-[9px] font-bold uppercase tracking-wider py-1.5 rounded-md transition-all ${!config.modoPublico ? 'bg-rose-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Privado</button>
+               </div>
+               {/* Toggle Moderacion */}
+               <div className="flex items-center bg-white dark:bg-[#050505] px-3 py-1 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm shrink-0">
+                  <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-8 h-4 rounded-full transition-colors ${config.moderacion ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`} title="Activar/Desactivar Moderador">
+                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${config.moderacion ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                  </button>
+               </div>
             </div>
-          </button>
+          </div>
+
+          {/* BLOQUE 3: DISEÑO (Marco y Hashtag) */}
+          <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
+            <div className="mb-4">
+               <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><Palette size={16} className="text-sky-500"/> Personalización</h4>
+               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Agrega un marco a las fotos (PNG transparente) y un hashtag al muro.</p>
+            </div>
+            <div className="flex gap-2">
+               {/* Input Hashtag */}
+               <div className="flex items-center bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-1.5 flex-1 shadow-sm focus-within:border-sky-500 transition-colors">
+                 <span className="text-slate-400 font-bold mr-1 text-[10px]">#</span>
+                 <input type="text" value={config.hashtag?.replace('#', '') || ''} onChange={(e) => setConfig({...config, hashtag: '#' + e.target.value.replace(/\s+/g, '')})} onBlur={() => updateConfig('hashtag', config.hashtag)} placeholder="Boda" className="bg-transparent text-slate-800 dark:text-white font-bold text-[10px] uppercase outline-none w-full placeholder:text-slate-400"/>
+               </div>
+               {/* Boton Marco */}
+               <input type="file" accept="image/png" ref={fileInputRef} onChange={handleFrameUpload} className="hidden" />
+               <button onClick={() => fileInputRef.current.click()} className="flex items-center justify-center px-3 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-lg text-[9px] uppercase tracking-widest font-bold hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 transition-all shadow-sm shrink-0">
+                 <ImageIcon size={14} className="mr-1.5" /> {config.marcoUrl ? 'Cambiar' : 'Marco'}
+               </button>
+            </div>
+          </div>
 
         </div>
       </div>
 
-      {/* GALERÍA DE FOTOS */}
+      {/* GALERÍA DE FOTOS (Espacio Maximizado) */}
       <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl p-6 overflow-y-auto bg-slate-50/50 dark:bg-transparent custom-scrollbar transition-colors">
         {photos.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 min-h-[300px]">
