@@ -15,7 +15,7 @@ import {
   FileSignature, AlertCircle, Star, Image as ImageIcon, CalendarDays, FileDown, 
   ListTodo, CheckCircle2, Circle, PlayCircle, AlignLeft, MapPin, ShieldCheck, Printer, Scan, Camera, Navigation as NavigationIcon, Navigation, MoreVertical,
   Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Key, Power, Quote, Check, Factory,
-  Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser, Activity, Gem, UserCheck, BarChart3, Binary, MonitorPlay
+  Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser, Activity, Gem, UserCheck, BarChart3, Binary, MonitorPlay, ChevronDown
 } from 'lucide-react';
 
 // 🔴 AQUÍ CONECTAMOS TU NUEVO MÓDULO EXCLUSIVO:
@@ -10262,10 +10262,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   // ESTADOS PARA EL SHOWROOM INCRUSTADO
   const [activeCategory, setActiveCategory] = useState('boda');
   const [isMobileDevice, setIsMobileDevice] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // ESTADOS PARA NOTIFICACIONES DINÁMICAS (HERO)
   const [notifIndex, setNotifIndex] = useState(0);
+  
+  // 🔴 NUEVOS ESTADOS PARA EL SHOWROOM
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [fullScreenDemo, setFullScreenDemo] = useState(null);
   
   const macIframeRef = useRef(null);
   const iphoneIframeRef = useRef(null);
@@ -10320,14 +10321,15 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     { id: 'diamante', nombre: 'Diamante', precio: '2,990', desc: 'La Suite Definitiva. Incluye Muro Social y Black Label.', icon: <Gem size={24}/> }
   ];
 
+  // 🔴 EL OBJETO DEMOS AHORA TIENE EL "ADN VISUAL" DE CADA EVENTO (blob1 y blob2)
   const demos = {
-    boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica y paletas sobrias. El estándar de alta costura nupcial.', features: ['Mesa de Regalos', 'Cuenta Regresiva', 'Pases QR VIP', 'GPS Directo'] },
-    xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón y energía vibrante para la mejor noche de tu vida.', features: ['Muro de Fotos', 'Dress Code Neón', 'Itinerario de Gala', 'Música Automática'] },
-    baby_shower: { id: 'baby_shower', label: 'Baby Shower', url: '/demos/baby_shower/index.html', desc: 'Ternura, interactividad y emoción para recibir a la nueva vida.', features: ['Muro de Fotos', 'Galería', 'Mensajes', 'Música Automática'] },
-    cumple_formal: { id: 'cumple_formal', label: 'Cumpleaños', url: '/demos/cumple_formal/index.html', desc: 'Sofisticación pura para celebrar décadas con mucho estilo.', features: ['Muro de Fotos', 'Galería', 'Itinerario de Gala', 'Música Automática'] },
-    tematicas: { id: 'tematicas', label: 'Fiestas Temáticas', url: '/demos/infantil/index.html', desc: 'Llevamos cualquier concepto al máximo nivel con inmersión total.', features: ['Diseños Temáticos', 'Cuenta Regresiva', 'Galería', 'Música Automática'] }, 
-    bautizo: { id: 'bautizo', label: 'Bautizos', url: '/demos/bautizo/index.html', desc: 'Tonos pastel y diseños angelicales para momentos íntimos en familia.', features: ['Muro de Fotos', 'Galería', 'Mesa de Regalos', 'Música Automática'] },
-    corporativo: { id: 'corporativo', label: 'Galas y Eventos', url: '/demos/corporativo/index.html', desc: 'Convenciones, conciertos y lanzamientos de marca con logística blindada.', features: ['Acreditaciones QR', 'Control de Acceso', 'Itinerario', 'Mapeo 3D'] }
+    boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica y paletas sobrias. El estándar de alta costura nupcial.', features: ['Mesa de Regalos', 'Cuenta Regresiva', 'Pases QR VIP', 'GPS Directo'], blob1: 'bg-[#D4AF37]', blob2: 'bg-[#FDFBF7]' },
+    xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón y energía vibrante para la mejor noche de tu vida.', features: ['Muro de Fotos', 'Dress Code Neón', 'Itinerario de Gala', 'Música Automática'], blob1: 'bg-fuchsia-500', blob2: 'bg-cyan-400' },
+    baby_shower: { id: 'baby_shower', label: 'Baby Shower', url: '/demos/baby_shower/index.html', desc: 'Ternura, interactividad y emoción para recibir a la nueva vida.', features: ['Muro de Fotos', 'Galería', 'Mensajes', 'Música Automática'], blob1: 'bg-sky-300', blob2: 'bg-pink-300' },
+    cumple_formal: { id: 'cumple_formal', label: 'Cumpleaños', url: '/demos/cumple_formal/index.html', desc: 'Sofisticación pura para celebrar décadas con mucho estilo.', features: ['Muro de Fotos', 'Galería', 'Itinerario de Gala', 'Música Automática'], blob1: 'bg-amber-600', blob2: 'bg-slate-800' },
+    tematicas: { id: 'tematicas', label: 'Fiestas Temáticas', url: '/demos/infantil/index.html', desc: 'Llevamos cualquier concepto al máximo nivel con inmersión total.', features: ['Diseños Temáticos', 'Cuenta Regresiva', 'Galería', 'Música Automática'], blob1: 'bg-emerald-400', blob2: 'bg-yellow-400' }, 
+    bautizo: { id: 'bautizo', label: 'Bautizos', url: '/demos/bautizo/index.html', desc: 'Tonos pastel y diseños angelicales para momentos íntimos en familia.', features: ['Muro de Fotos', 'Galería', 'Mesa de Regalos', 'Música Automática'], blob1: 'bg-blue-100', blob2: 'bg-amber-100' },
+    corporativo: { id: 'corporativo', label: 'Galas y Eventos', url: '/demos/corporativo/index.html', desc: 'Convenciones, conciertos y lanzamientos de marca con logística blindada.', features: ['Acreditaciones QR', 'Control de Acceso', 'Itinerario', 'Mapeo 3D'], blob1: 'bg-slate-700', blob2: 'bg-indigo-400' }
   };
   const currentDemo = demos[activeCategory];
 
@@ -10590,14 +10592,14 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-500/5 dark:bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
 
       {/* NAVEGACIÓN FLOTANTE (RESPONSIVA) */}
-      <nav className="fixed w-full z-50 top-0 pt-4 md:pt-6 px-4 md:px-8 pointer-events-none">
+      <nav className="fixed w-full z-50 top-0 pt-4 md:pt-6 px-4 md:px-8 pointer-events-none transition-all duration-300">
         
         {/* BARRA PRINCIPAL */}
-        <div className="max-w-[1400px] mx-auto bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-2xl border border-slate-200/50 dark:border-white/10 h-16 md:h-20 rounded-[2rem] flex items-center justify-between px-4 md:px-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] pointer-events-auto transition-colors duration-700 relative z-50">
+        <div className="max-w-[1400px] mx-auto bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-2xl border border-slate-200/50 dark:border-white/10 h-16 md:h-20 rounded-[2rem] flex items-center justify-between px-4 md:px-6 shadow-sm dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] pointer-events-auto transition-colors duration-700 relative z-50">
             
             {/* LOGO */}
             <a href="/" className="flex items-center group">
-               <BauliaLogo className="h-7 md:h-10 w-auto" />
+               <BauliaLogo className="h-6 md:h-8 w-auto" />
             </a>
 
             {/* MENÚ DE ESCRITORIO (Oculto en móviles) */}
@@ -10608,10 +10610,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               
               <button 
                 onClick={() => setShowAnatomy(true)} 
-                className="bg-[#FDFBF7] border border-[#D4AF37]/50 px-5 py-2 rounded-full shadow-[0_4px_15px_rgba(247,108,130,0.2)] hover:shadow-[0_6px_25px_rgba(247,108,130,0.4)] hover:scale-105 transition-all flex items-center group ml-2"
+                className="bg-[#FDFBF7] dark:bg-white/5 border border-[#D4AF37]/50 px-5 py-2 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all flex items-center group ml-2"
               >
                 <BookOpenText size={16} className="text-[#8DB580] mr-2.5 group-hover:-rotate-12 transition-transform duration-300"/>
-                <span style={{ fontFamily: '"Cormorant Garamond", serif', fontWeight: 600 }} className="text-[#2A2A2A] text-[13px] tracking-[0.2em] uppercase mr-2">
+                <span style={{ fontFamily: '"Cormorant Garamond", serif', fontWeight: 600 }} className="text-slate-900 dark:text-white text-[13px] tracking-[0.2em] uppercase mr-2">
                   Baulia
                 </span>
                 <span style={{ fontFamily: '"Pinyon Script", cursive' }} className="text-[#F76C82] text-[24px] lowercase tracking-normal leading-none mt-1">
@@ -10621,7 +10623,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </div>
 
             {/* CONTROLES DERECHOS (Visibles en ambos) */}
-            <div className="flex items-center gap-2 md:gap-4">
+            <div className="flex items-center gap-3 md:gap-4">
               
               {/* Botón Tema */}
               <button onClick={cycleTheme} className="p-2 text-slate-400 hover:text-amber-600 dark:text-slate-500 dark:hover:text-amber-400 transition-colors" title={`Modo: ${themeSetting.toUpperCase()}`}>
@@ -10652,7 +10654,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
         {/* PANEL DESPLEGABLE MÓVIL (Glassmorphism) */}
         {isMobileMenuOpen && (
-          <div className="absolute top-20 md:top-24 left-4 right-4 md:left-8 md:right-8 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-3xl border border-slate-200/50 dark:border-white/10 rounded-[2rem] shadow-2xl p-6 flex flex-col gap-6 lg:hidden pointer-events-auto animate-in slide-in-from-top-4 duration-300">
+          <div className="absolute top-20 left-4 right-4 bg-white/95 dark:bg-[#111]/95 backdrop-blur-3xl border border-slate-200/50 dark:border-white/10 rounded-[2rem] shadow-2xl p-6 flex flex-col gap-6 lg:hidden pointer-events-auto animate-in slide-in-from-top-4 duration-300 z-40">
             
             <a href="#showroom" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-widest text-slate-800 dark:text-slate-200 hover:text-amber-500 transition-colors border-b border-slate-100 dark:border-white/5 pb-4">
               La Colección
@@ -10668,7 +10670,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             
             <button 
               onClick={() => { setShowAnatomy(true); setIsMobileMenuOpen(false); }} 
-              className="w-full bg-[#FDFBF7] dark:bg-white/5 border border-[#D4AF37]/50 px-5 py-4 rounded-xl shadow-sm flex items-center justify-center group"
+              className="w-full bg-[#FDFBF7] dark:bg-[#050505] border border-[#D4AF37]/50 px-5 py-4 rounded-xl shadow-sm flex items-center justify-center group"
             >
               <BookOpenText size={18} className="text-[#8DB580] mr-3"/>
               <span style={{ fontFamily: '"Cormorant Garamond", serif', fontWeight: 600 }} className="text-slate-900 dark:text-white text-sm tracking-[0.2em] uppercase mr-2">
@@ -10745,18 +10747,21 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </section>
 
-      {/* SHOWROOM INTERACTIVO (CORREGIDO Y ALINEADO) */}
+      {/* SHOWROOM INTERACTIVO */}
       <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#050505] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden flex items-center">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber-500/5 dark:bg-amber-600/10 blur-[150px] rounded-full pointer-events-none"></div>
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 w-full flex flex-col items-center">
 
             {!isMobileDevice ? (
+                // ==========================================
+                // --- VERSIÓN ESCRITORIO (SIMULADORES MAC E IPHONE) ---
+                // ==========================================
                 <RevealSection delay={200} className="w-full relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 items-stretch flex group p-12 min-h-[680px]">
                     
                     <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white dark:from-[#080808] to-transparent opacity-40 z-0 transition-colors pointer-events-none"></div>
 
-                    {/* COLUMNA IZQUIERDA (Textos) */}
+                    {/* COLUMNA IZQUIERDA (Textos y Selección) */}
                     <div className="w-5/12 xl:w-1/3 relative z-30 flex flex-col justify-center h-full gap-10 py-6">
                         
                         <div className="flex flex-col gap-6">
@@ -10773,19 +10778,47 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
 
                         <div className="flex flex-col gap-8">
-                            <div className="relative w-full max-w-[280px] z-10">
-                                <select
-                                    value={activeCategory}
-                                    onChange={(e) => setActiveCategory(e.target.value)}
-                                    className="w-full appearance-none bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white py-4 px-6 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-sm focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
-                                >
-                                    {Object.values(demos).map(demo => (
-                                        <option key={demo.id} value={demo.id}>{demo.label}</option>
-                                    ))}
-                                </select>
-                                <div className="absolute inset-y-0 right-0 flex items-center px-5 pointer-events-none text-amber-500">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            
+                            {/* 🔴 NUEVO SELECTOR DE ARTE DIGITAL */}
+                            <div className="relative w-full max-w-[320px] z-50">
+                              <div 
+                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                className="w-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 py-4 px-6 rounded-2xl cursor-pointer flex items-center justify-between shadow-sm hover:shadow-md transition-all relative overflow-hidden group"
+                              >
+                                 {/* Formas abstractas (Blobs) de fondo según el tema */}
+                                 <div className={`absolute -top-4 -right-4 w-16 h-16 rounded-full opacity-30 blur-md transition-colors duration-500 ${currentDemo.blob1}`}></div>
+                                 <div className={`absolute -bottom-4 right-10 w-12 h-12 rounded-full opacity-30 blur-md transition-colors duration-500 ${currentDemo.blob2}`}></div>
+                                 
+                                 <span className="font-bold text-xs uppercase tracking-widest text-slate-800 dark:text-white relative z-10 drop-shadow-sm">
+                                   {currentDemo.label}
+                                 </span>
+                                 <ChevronDown size={16} className={`text-slate-400 transform transition-transform duration-300 relative z-10 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                              </div>
+
+                              {/* Opciones Desplegables */}
+                              {isDropdownOpen && (
+                                <div className="absolute top-full left-0 w-full mt-2 bg-white/95 dark:bg-[#111]/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col p-2 animate-in fade-in slide-in-from-top-2">
+                                  {Object.values(demos).map(demo => (
+                                    <button 
+                                      key={demo.id}
+                                      onClick={() => { setActiveCategory(demo.id); setIsDropdownOpen(false); }}
+                                      className={`text-left px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all relative overflow-hidden group flex items-center justify-between ${activeCategory === demo.id ? 'bg-slate-50 dark:bg-white/5' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}
+                                    >
+                                      <div className="flex items-center gap-3 relative z-10">
+                                         {/* Paleta visual miniatura */}
+                                         <div className="w-6 h-6 rounded-full flex shrink-0 relative overflow-hidden border border-slate-200 dark:border-white/10 shadow-inner">
+                                            <div className={`absolute -left-1 -top-1 w-5 h-5 rounded-full ${demo.blob1}`}></div>
+                                            <div className={`absolute -right-1 -bottom-1 w-5 h-5 rounded-full ${demo.blob2}`}></div>
+                                         </div>
+                                         <span className={`transition-colors ${activeCategory === demo.id ? 'text-amber-500' : 'text-slate-700 dark:text-slate-300 group-hover:text-amber-500'}`}>
+                                            {demo.label}
+                                         </span>
+                                      </div>
+                                      {activeCategory === demo.id && <Check size={14} className="text-amber-500" />}
+                                    </button>
+                                  ))}
                                 </div>
+                              )}
                             </div>
 
                             <button onClick={() => setShowAnatomy(true)} className="relative overflow-hidden w-full sm:w-max px-6 py-4 bg-[#FDFBF7] border border-[#D4AF37]/50 rounded-2xl shadow-[0_10px_30px_rgba(212,175,55,0.2)] hover:shadow-[0_10px_40px_rgba(212,175,55,0.4)] transition-all group flex items-center justify-start text-left mt-2">
@@ -10809,27 +10842,32 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA (Dispositivos) - CONTENEDOR MAESTRO */}
+                    {/* COLUMNA DERECHA (MAC y iPHONE) */}
                     <div className="w-7/12 xl:w-2/3 relative flex items-center justify-end z-20">
-                        {/* Contenedor relativo que dicta la altura y base de ambos dispositivos */}
+                        {/* Contenedor relativo que dicta la altura de ambos */}
                         <div className="relative w-full max-w-[850px] aspect-[16/10] translate-x-[15%]">
                             
-                            {/* MACBOOK */}
                             <div className={`absolute top-0 right-0 w-[90%] h-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-700 ${activeDevice === 'mac' ? 'scale-[1.02] z-30' : 'scale-100 z-10 opacity-70 blur-[1px]'}`}>
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-6 bg-black rounded-b-2xl z-30"></div>
                                 <div className="w-full h-full bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
                                     <iframe 
                                       ref={macIframeRef}
                                       src={currentDemo.url} 
-                                      className="absolute top-0 left-0 border-0 origin-top-left" 
+                                      className="absolute top-0 left-0 border-0 origin-top-left pointer-events-none" 
                                       style={{ width: '250%', height: '250%', transform: 'scale(0.4)' }} 
                                       title={`Mac Demo ${currentDemo.label}`}
                                     ></iframe>
                                     
-                                    {activeDevice !== 'mac' && (
+                                    {activeDevice !== 'mac' ? (
                                       <div onClick={() => switchFocus('mac')} className="absolute inset-0 z-20 bg-black/10 backdrop-blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
                                          <div className="bg-slate-900/90 text-white text-xs font-bold px-6 py-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl flex items-center transform scale-95 group-hover:scale-100">
                                             <PlayCircle size={18} className="mr-2 text-amber-500"/> Haz clic para explorar en Mac
+                                         </div>
+                                      </div>
+                                    ) : (
+                                      <div onClick={() => setFullScreenDemo(currentDemo.url)} className="absolute inset-0 z-20 bg-transparent cursor-pointer flex items-center justify-center group transition-all duration-500">
+                                         <div className="bg-slate-900/90 text-white text-xs font-bold px-6 py-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl flex items-center transform scale-95 group-hover:scale-100">
+                                            <Maximize size={18} className="mr-2 text-amber-500"/> Pantalla Completa
                                          </div>
                                       </div>
                                     )}
@@ -10839,11 +10877,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 </div>
                             </div>
 
-                            {/* IPHONE (Alineado con absolute) */}
-                            {/* bottom-[0%] lo alinea exactamente a la base de la Mac. 
-                                left-[0%] lo saca hacia la izquierda de la Mac (puedes ajustar a -5% o 5% si lo quieres más adentro/afuera) */}
-                            <div className={`absolute bottom-[0%] left-[0%] transition-all duration-700 ease-out origin-bottom ${activeDevice === 'iphone' ? 'z-40 scale-[1.05]' : 'z-20 scale-95 opacity-80 blur-[1px]'}`}>
-                                <div style={{ width: '220px', height: '458px' }} className="relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0">
+                            <div className={`absolute bottom-[0%] left-[10%] -translate-x-1/2 transition-all duration-700 ease-out origin-bottom ${activeDevice === 'iphone' ? 'z-40 scale-[1.05]' : 'z-20 scale-95 opacity-80 blur-[1px]'}`}>
+                                <div style={{ width: '220px', height: '458px' }} className="relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 origin-bottom transform scale-[0.70] xl:scale-100 transition-transform duration-700">
                                     <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-[30%] h-[16px] bg-black rounded-full z-30 flex justify-end items-center pr-1.5">
                                       <div className="w-1.5 h-1.5 rounded-full bg-slate-800/80 mr-1"></div>
                                       <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
@@ -10853,7 +10888,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                       <iframe 
                                         ref={iphoneIframeRef}
                                         src={currentDemo.url} 
-                                        className="border-0 absolute top-0 left-0" 
+                                        className="border-0 absolute top-0 left-0 pointer-events-none" 
                                         title={`iPhone Demo ${currentDemo.label}`}
                                         style={{ 
                                             width: '390px', 
@@ -10863,11 +10898,18 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         }}
                                       ></iframe>
 
-                                      {activeDevice !== 'iphone' && (
+                                      {activeDevice !== 'iphone' ? (
                                         <div onClick={() => switchFocus('iphone')} className="absolute inset-0 z-20 bg-black/10 backdrop-blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
                                            <div className="bg-slate-900/90 text-white text-[10px] font-bold px-4 py-3 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl text-center flex flex-col items-center transform scale-95 group-hover:scale-100">
                                               <Smartphone size={24} className="mb-1 text-amber-500"/>
                                               Tocar para usar<br/>en Móvil
+                                           </div>
+                                        </div>
+                                      ) : (
+                                        <div onClick={() => setFullScreenDemo(currentDemo.url)} className="absolute inset-0 z-20 bg-transparent cursor-pointer flex items-center justify-center group transition-all duration-500">
+                                           <div className="bg-slate-900/90 text-white text-[10px] font-bold px-4 py-3 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl text-center flex flex-col items-center transform scale-95 group-hover:scale-100">
+                                              <Maximize size={24} className="mb-1 text-amber-500"/>
+                                              Abrir Demo<br/>Interactivo
                                            </div>
                                         </div>
                                       )}
@@ -10880,15 +10922,86 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
                 </RevealSection>
             ) : (
-                <RevealSection delay={200} className="w-full bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-3xl p-8 text-center transition-colors">
-                     <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20 text-amber-500">
-                         <Smartphone size={32}/>
-                     </div>
-                     <p className="text-slate-900 dark:text-white font-editorial text-xl font-bold mb-2 transition-colors">Vívelo en tu Teléfono</p>
-                     <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 transition-colors">Selecciona una categoría arriba para abrir la demostración interactiva a pantalla completa en tu dispositivo.</p>
-                     <button onClick={() => setShowAnatomy(true)} className="w-full px-6 py-3 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm">
-                        Descubre nuestra Anatomía
-                     </button>
+                // ==========================================
+                // --- VERSIÓN MÓVIL (TARJETA PREMIUM CON BOTÓN DIRECTO) ---
+                // ==========================================
+                <RevealSection delay={200} className="w-full flex flex-col gap-8 px-2 max-w-md mx-auto">
+                    
+                    <div className="text-center">
+                        <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-[10px] block mb-3 transition-colors">La Colección Privada</span>
+                        <h2 className="text-4xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight leading-tight mb-6">
+                            Tu evento es único.<br/>Tu diseño también.
+                        </h2>
+                        
+                        {/* 🔴 SELECTOR DE ARTE DIGITAL (MÓVIL) */}
+                        <div className="relative w-full z-50">
+                          <div 
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                            className="w-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 py-5 px-6 rounded-[2rem] cursor-pointer flex items-center justify-between shadow-md relative overflow-hidden group"
+                          >
+                             <div className={`absolute -top-4 -right-4 w-16 h-16 rounded-full opacity-30 blur-md transition-colors duration-500 ${currentDemo.blob1}`}></div>
+                             <div className={`absolute -bottom-4 right-10 w-12 h-12 rounded-full opacity-30 blur-md transition-colors duration-500 ${currentDemo.blob2}`}></div>
+                             
+                             <span className="font-bold text-sm uppercase tracking-widest text-slate-800 dark:text-white relative z-10 drop-shadow-sm">
+                               {currentDemo.label}
+                             </span>
+                             <ChevronDown size={20} className={`text-slate-400 transform transition-transform duration-300 relative z-10 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                          </div>
+
+                          {isDropdownOpen && (
+                            <div className="absolute top-full left-0 w-full mt-2 bg-white/95 dark:bg-[#111]/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col p-3 animate-in fade-in slide-in-from-top-2">
+                              {Object.values(demos).map(demo => (
+                                <button 
+                                  key={demo.id}
+                                  onClick={() => { setActiveCategory(demo.id); setIsDropdownOpen(false); }}
+                                  className={`text-left px-5 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all relative overflow-hidden flex items-center justify-between ${activeCategory === demo.id ? 'bg-slate-50 dark:bg-white/5' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}
+                                >
+                                  <div className="flex items-center gap-4 relative z-10">
+                                     <div className="w-8 h-8 rounded-full flex shrink-0 relative overflow-hidden border border-slate-200 dark:border-white/10 shadow-inner">
+                                        <div className={`absolute -left-1 -top-1 w-6 h-6 rounded-full ${demo.blob1}`}></div>
+                                        <div className={`absolute -right-1 -bottom-1 w-6 h-6 rounded-full ${demo.blob2}`}></div>
+                                     </div>
+                                     <span className={`transition-colors ${activeCategory === demo.id ? 'text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>
+                                        {demo.label}
+                                     </span>
+                                  </div>
+                                  {activeCategory === demo.id && <Check size={18} className="text-amber-500" />}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-xl p-8 flex flex-col items-center text-center relative overflow-hidden group transition-colors duration-500">
+                        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-indigo-500/5 z-0 pointer-events-none"></div>
+                        
+                        <div className="w-20 h-20 bg-amber-50 dark:bg-amber-500/10 rounded-full flex items-center justify-center text-amber-600 dark:text-amber-500 mb-6 relative z-10 shadow-inner border border-amber-100 dark:border-amber-500/20">
+                            <Smartphone size={32} strokeWidth={1.5}/>
+                        </div>
+                        
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 relative z-10 transition-colors">{currentDemo.label}</h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8 relative z-10 transition-colors">
+                            {currentDemo.desc}
+                        </p>
+
+                        <div className="w-full space-y-4 relative z-10">
+                            <button 
+                                onClick={() => setFullScreenDemo(currentDemo.url)} 
+                                className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center"
+                            >
+                                <PlayCircle size={18} className="mr-2"/> Ver Demo en Vivo
+                            </button>
+                            
+                            <button 
+                                onClick={() => setShowAnatomy(true)} 
+                                className="w-full py-4 bg-transparent border-2 border-amber-500/30 text-amber-600 dark:text-amber-500 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors flex items-center justify-center"
+                            >
+                                <BookOpenText size={16} className="mr-2"/> Explorar Anatomía
+                            </button>
+                        </div>
+                    </div>
+                    
                 </RevealSection>
             )}
 
@@ -11713,7 +11826,27 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           </div>
         </div>
       )}
-
+      {/* 🔴 OVERLAY: DEMO A PANTALLA COMPLETA (VISOR INTERNO) */}
+      {fullScreenDemo && (
+        <div className="fixed inset-0 z-[999999] bg-black animate-in slide-in-from-bottom-full duration-500 flex flex-col">
+           
+           <iframe 
+             src={fullScreenDemo} 
+             className="w-full flex-1 border-0" 
+             title="Demo a Pantalla Completa"
+           />
+           
+           {/* Botón flotante para regresar sin salir del sistema */}
+           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-50">
+               <button 
+                 onClick={() => setFullScreenDemo(null)} 
+                 className="bg-slate-900/90 dark:bg-white/90 backdrop-blur-xl text-white dark:text-slate-900 px-8 py-4 rounded-full font-black text-[10px] uppercase tracking-widest shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-white/20 hover:scale-105 transition-transform flex items-center justify-center whitespace-nowrap"
+               >
+                  <X size={16} className="mr-2" /> Volver a Baulia
+               </button>
+           </div>
+        </div>
+      )}
     </div>
   );
 };
