@@ -7456,7 +7456,7 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
   const cloudName = "duy0mcqsh"; 
   const uploadPreset = "ml_default"; 
 
-  // 🔴 CORRECCIÓN: Extraemos el ID real del evento de forma segura para evitar crasheos (ReferenceError)
+  // Extraemos el ID real del evento de forma segura
   const idReal = eventoId || new URLSearchParams(window.location.search).get('e') || 'demo_id';
 
   const getCleanBaseUrl = () => window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
@@ -7607,7 +7607,7 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
         {/* 3 BLOQUES COMPACTOS DE ACCIÓN */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           
-          {/* BLOQUE 1: PROYECCIÓN */}
+          {/* BLOQUE 1: PROYECCIÓN (El Muro Físico) */}
           <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
             <div className="mb-4">
                <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><MonitorPlay size={16} className="text-indigo-500 dark:text-amber-500"/> Proyección y Acceso</h4>
@@ -7623,17 +7623,22 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
             </div>
           </div>
 
-          {/* BLOQUE 2: SEGURIDAD Y PRIVACIDAD */}
+          {/* BLOQUE 2: SEGURIDAD (Privacidad y Filtros) */}
           <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
             <div className="mb-4">
-               <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><ShieldCheck size={16} className="text-rose-500"/> Filtros y Privacidad</h4>
-               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Decide quién puede ver el muro web y filtra las fotos antes de proyectarlas.</p>
+               <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><ShieldCheck size={16} className="text-rose-500"/> Seguridad y Privacidad</h4>
+               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">
+                 <b className="text-slate-700 dark:text-slate-300">Público:</b> Escaneo QR general + Nombre.<br/>
+                 <b className="text-slate-700 dark:text-slate-300">Privado:</b> Solo con Pase QR personal.
+               </p>
             </div>
             <div className="flex gap-2">
+               {/* Toggle Publico/Privado Compacto */}
                <div className="flex items-center bg-white dark:bg-[#050505] p-1 rounded-lg border border-slate-200 dark:border-white/10 flex-1 shadow-sm">
                   <button onClick={() => updateConfig('modoPublico', true)} className={`flex-1 text-[9px] font-bold uppercase tracking-wider py-1.5 rounded-md transition-all ${config.modoPublico ? 'bg-emerald-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Público</button>
                   <button onClick={() => updateConfig('modoPublico', false)} className={`flex-1 text-[9px] font-bold uppercase tracking-wider py-1.5 rounded-md transition-all ${!config.modoPublico ? 'bg-rose-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Privado</button>
                </div>
+               {/* Toggle Moderacion */}
                <div className="flex items-center bg-white dark:bg-[#050505] px-3 py-1 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm shrink-0">
                   <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-8 h-4 rounded-full transition-colors ${config.moderacion ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`} title="Activar/Desactivar Moderador">
                     <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${config.moderacion ? 'translate-x-4' : 'translate-x-0'}`}></div>
@@ -7642,17 +7647,19 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
             </div>
           </div>
 
-          {/* BLOQUE 3: DISEÑO E IDENTIDAD */}
+          {/* BLOQUE 3: DISEÑO (Marco y Hashtag) */}
           <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
             <div className="mb-4">
                <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><Palette size={16} className="text-sky-500"/> Personalización</h4>
                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Agrega un marco a las fotos (PNG transparente) y un hashtag al muro.</p>
             </div>
             <div className="flex gap-2">
+               {/* Input Hashtag */}
                <div className="flex items-center bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-1.5 flex-1 shadow-sm focus-within:border-sky-500 transition-colors">
                  <span className="text-slate-400 font-bold mr-1 text-[10px]">#</span>
                  <input type="text" value={config.hashtag?.replace('#', '') || ''} onChange={(e) => setConfig({...config, hashtag: '#' + e.target.value.replace(/\s+/g, '')})} onBlur={() => updateConfig('hashtag', config.hashtag)} placeholder="Boda" className="bg-transparent text-slate-800 dark:text-white font-bold text-[10px] uppercase outline-none w-full placeholder:text-slate-400"/>
                </div>
+               {/* Boton Marco */}
                <input type="file" accept="image/png" ref={fileInputRef} onChange={handleFrameUpload} className="hidden" />
                <button onClick={() => fileInputRef.current.click()} className="flex items-center justify-center px-3 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-lg text-[9px] uppercase tracking-widest font-bold hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 transition-all shadow-sm shrink-0">
                  <ImageIcon size={14} className="mr-1.5" /> {config.marcoUrl ? 'Cambiar' : 'Marco'}
