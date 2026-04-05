@@ -15,7 +15,7 @@ import {
   FileSignature, AlertCircle, Star, Image as ImageIcon, CalendarDays, FileDown, 
   ListTodo, CheckCircle2, Circle, PlayCircle, AlignLeft, MapPin, ShieldCheck, Printer, Scan, Camera, Navigation as NavigationIcon, Navigation, MoreVertical,
   Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Key, Power, Quote, Check, Factory,
-  Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser, Activity, Gem, UserCheck, BarChart3, Binary
+  Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser, Activity, Gem, UserCheck, BarChart3, Binary, MonitorPlay
 } from 'lucide-react';
 
 // 🔴 AQUÍ CONECTAMOS TU NUEVO MÓDULO EXCLUSIVO:
@@ -7444,7 +7444,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
 // ==========================================
 // --- COMPONENTE: GALERÍA EN VIVO (DARK PREMIUM COMPACTO) ---
 // ==========================================
-const GaleriaView = ({ photos, addNotification }) => {
+const GaleriaView = ({ photos, addNotification, eventoId }) => {
   const [showQR, setShowQR] = useState(false); 
   const [showProyectorModal, setShowProyectorModal] = useState(false); 
   const [djPhone, setDjPhone] = useState(''); 
@@ -7456,26 +7456,28 @@ const GaleriaView = ({ photos, addNotification }) => {
   const cloudName = "duy0mcqsh"; 
   const uploadPreset = "ml_default"; 
 
+  // 🔴 CORRECCIÓN: Extraemos el ID real del evento de forma segura para evitar crasheos (ReferenceError)
+  const idReal = eventoId || new URLSearchParams(window.location.search).get('e') || 'demo_id';
+
   const getCleanBaseUrl = () => window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
   
-  // IMPORTANTE: Asegúrate de tener la variable ID_DEL_EVENTO definida en tu contexto (App.js)
-  const guestLink = `${getCleanBaseUrl()}/?modo=camara&e=${typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test-id'}`;
-  const proyectorLink = `${getCleanBaseUrl()}/?modo=proyector&e=${typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test-id'}`; 
+  const guestLink = `${getCleanBaseUrl()}/?modo=camara&e=${idReal}`;
+  const proyectorLink = `${getCleanBaseUrl()}/?modo=proyector&e=${idReal}`; 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(guestLink)}&margin=10`;
 
   useEffect(() => {
-    if (typeof ID_DEL_EVENTO === 'undefined') return;
-    const unsub = onSnapshot(doc(db, "eventos", ID_DEL_EVENTO, "configuracion", "galeria"), (docSnap) => {
+    if (!idReal || idReal === 'demo_id') return;
+    const unsub = onSnapshot(doc(db, "eventos", idReal, "configuracion", "galeria"), (docSnap) => {
       if (docSnap.exists()) setConfig(docSnap.data());
     });
     return () => unsub();
-  }, []);
+  }, [idReal]);
 
   const updateConfig = async (key, value) => {
-    if (typeof ID_DEL_EVENTO === 'undefined') return;
+    if (!idReal || idReal === 'demo_id') return;
     const newConfig = { ...config, [key]: value };
     setConfig(newConfig);
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "configuracion", "galeria"), newConfig, { merge: true });
+    await setDoc(doc(db, "eventos", idReal, "configuracion", "galeria"), newConfig, { merge: true });
     if(addNotification) addNotification('Ajuste Guardado', 'La configuración se actualizó en vivo.', 'success');
   };
 
@@ -7495,14 +7497,14 @@ const GaleriaView = ({ photos, addNotification }) => {
   };
 
   const handleDelete = async (id) => {
-    if (typeof ID_DEL_EVENTO === 'undefined') return;
-    await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "fotos", id));
+    if (!idReal || idReal === 'demo_id') return;
+    await deleteDoc(doc(db, "eventos", idReal, "fotos", id));
     setViewingPost(null); 
   };
 
   const toggleApproval = async (foto, approved) => {
-    if (typeof ID_DEL_EVENTO === 'undefined') return;
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "fotos", foto.id), { ...foto, status: approved ? 'approved' : 'rejected' });
+    if (!idReal || idReal === 'demo_id') return;
+    await setDoc(doc(db, "eventos", idReal, "fotos", foto.id), { ...foto, status: approved ? 'approved' : 'rejected' });
     if(addNotification) addNotification(approved ? 'Foto Aprobada' : 'Foto Rechazada', approved ? 'Ya se ve en el proyector' : 'Oculta para todos', 'success');
   };
 
@@ -7605,7 +7607,7 @@ const GaleriaView = ({ photos, addNotification }) => {
         {/* 3 BLOQUES COMPACTOS DE ACCIÓN */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           
-          {/* BLOQUE 1: PROYECCIÓN (El Muro Físico) */}
+          {/* BLOQUE 1: PROYECCIÓN */}
           <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
             <div className="mb-4">
                <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><MonitorPlay size={16} className="text-indigo-500 dark:text-amber-500"/> Proyección y Acceso</h4>
@@ -7621,19 +7623,17 @@ const GaleriaView = ({ photos, addNotification }) => {
             </div>
           </div>
 
-          {/* BLOQUE 2: SEGURIDAD (Privacidad y Filtros) */}
+          {/* BLOQUE 2: SEGURIDAD Y PRIVACIDAD */}
           <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
             <div className="mb-4">
                <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><ShieldCheck size={16} className="text-rose-500"/> Filtros y Privacidad</h4>
                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Decide quién puede ver el muro web y filtra las fotos antes de proyectarlas.</p>
             </div>
             <div className="flex gap-2">
-               {/* Toggle Publico/Privado Compacto */}
                <div className="flex items-center bg-white dark:bg-[#050505] p-1 rounded-lg border border-slate-200 dark:border-white/10 flex-1 shadow-sm">
                   <button onClick={() => updateConfig('modoPublico', true)} className={`flex-1 text-[9px] font-bold uppercase tracking-wider py-1.5 rounded-md transition-all ${config.modoPublico ? 'bg-emerald-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Público</button>
                   <button onClick={() => updateConfig('modoPublico', false)} className={`flex-1 text-[9px] font-bold uppercase tracking-wider py-1.5 rounded-md transition-all ${!config.modoPublico ? 'bg-rose-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Privado</button>
                </div>
-               {/* Toggle Moderacion */}
                <div className="flex items-center bg-white dark:bg-[#050505] px-3 py-1 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm shrink-0">
                   <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-8 h-4 rounded-full transition-colors ${config.moderacion ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`} title="Activar/Desactivar Moderador">
                     <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${config.moderacion ? 'translate-x-4' : 'translate-x-0'}`}></div>
@@ -7642,19 +7642,17 @@ const GaleriaView = ({ photos, addNotification }) => {
             </div>
           </div>
 
-          {/* BLOQUE 3: DISEÑO (Marco y Hashtag) */}
+          {/* BLOQUE 3: DISEÑO E IDENTIDAD */}
           <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
             <div className="mb-4">
                <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><Palette size={16} className="text-sky-500"/> Personalización</h4>
                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Agrega un marco a las fotos (PNG transparente) y un hashtag al muro.</p>
             </div>
             <div className="flex gap-2">
-               {/* Input Hashtag */}
                <div className="flex items-center bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-1.5 flex-1 shadow-sm focus-within:border-sky-500 transition-colors">
                  <span className="text-slate-400 font-bold mr-1 text-[10px]">#</span>
                  <input type="text" value={config.hashtag?.replace('#', '') || ''} onChange={(e) => setConfig({...config, hashtag: '#' + e.target.value.replace(/\s+/g, '')})} onBlur={() => updateConfig('hashtag', config.hashtag)} placeholder="Boda" className="bg-transparent text-slate-800 dark:text-white font-bold text-[10px] uppercase outline-none w-full placeholder:text-slate-400"/>
                </div>
-               {/* Boton Marco */}
                <input type="file" accept="image/png" ref={fileInputRef} onChange={handleFrameUpload} className="hidden" />
                <button onClick={() => fileInputRef.current.click()} className="flex items-center justify-center px-3 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-lg text-[9px] uppercase tracking-widest font-bold hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 transition-all shadow-sm shrink-0">
                  <ImageIcon size={14} className="mr-1.5" /> {config.marcoUrl ? 'Cambiar' : 'Marco'}
@@ -7758,7 +7756,7 @@ const GaleriaView = ({ photos, addNotification }) => {
             <div className="p-5 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50 dark:bg-[#111] shrink-0 transition-colors">
               <div className="flex items-center">
                 <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-amber-500/20 overflow-hidden mr-4 border border-transparent dark:border-amber-500/30">
-                  <img src={viewingPost.avatar || ''} className="w-full h-full object-cover"/>
+                  <img src={viewingPost.avatar || ''} className="w-full h-full object-cover" alt="Avatar"/>
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-900 dark:text-white text-base">{viewingPost.autor}</h3>
@@ -7772,8 +7770,8 @@ const GaleriaView = ({ photos, addNotification }) => {
               <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar relative">
                  {(viewingPost.urls || [viewingPost.url]).map((u, idx) => (
                    <div key={idx} className="w-full flex-shrink-0 snap-center relative flex items-center justify-center min-h-[50vh]">
-                     <img src={u} className="w-full max-h-[70vh] object-contain mx-auto" />
-                     {config.marcoUrl && <img src={config.marcoUrl} className="absolute inset-0 w-full h-full object-contain pointer-events-none" />}
+                     <img src={u} className="w-full max-h-[70vh] object-contain mx-auto" alt="Post"/>
+                     {config.marcoUrl && <img src={config.marcoUrl} className="absolute inset-0 w-full h-full object-contain pointer-events-none" alt="Marco"/>}
                    </div>
                  ))}
               </div>
