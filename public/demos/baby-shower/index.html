@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -417,10 +418,14 @@ END:VCALENDAR`;
                         className="absolute top-0 left-0 w-full h-[120vh] z-0 pointer-events-none transition-opacity duration-75"
                         style={{ opacity: Math.max(0, 1 - scrollY / 600) }}
                     >
-                        <div 
-                            className="absolute inset-0 bg-cover bg-center"
-                            style={{ backgroundImage: "url('/baby-shower/portada.png')" }}
-                        ></div>
+                        {/* Actualizado a <img> nativo con clases object-cover
+                            Esto es idéntico a backgroundImage pero previene errores de carga en algunos servidores 
+                        */}
+                        <img 
+                            src="/baby-shower/portada.png" 
+                            alt="Portada Baby Shower" 
+                            className="absolute inset-0 w-full h-full object-cover object-center"
+                        />
                         <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/50 to-blush"></div>
                     </div>
 
