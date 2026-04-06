@@ -10880,15 +10880,56 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
                 </RevealSection>
             ) : (
-                <RevealSection delay={200} className="w-full bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-3xl p-8 text-center transition-colors">
-                     <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20 text-amber-500">
-                         <Smartphone size={32}/>
-                     </div>
-                     <p className="text-slate-900 dark:text-white font-editorial text-xl font-bold mb-2 transition-colors">Vívelo en tu Teléfono</p>
-                     <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 transition-colors">Selecciona una categoría arriba para abrir la demostración interactiva a pantalla completa en tu dispositivo.</p>
-                     <button onClick={() => setShowAnatomy(true)} className="w-full px-6 py-3 bg-transparent border-2 border-amber-500 text-amber-600 dark:text-amber-500 rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white dark:hover:text-slate-900 transition-colors shadow-sm">
-                        Descubre nuestra Anatomía
-                     </button>
+                // ==========================================
+                // --- VERSIÓN MÓVIL (LISTA DE DEMOS DIRECTOS CON ADN VISUAL) ---
+                // ==========================================
+                <RevealSection delay={200} className="w-full flex flex-col gap-6 px-2 max-w-md mx-auto">
+                    
+                    <div className="text-center mb-2">
+                        <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-[10px] block mb-3 transition-colors">La Colección Privada</span>
+                        <h2 className="text-4xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
+                            Tu evento es único.<br/>Tu diseño también.
+                        </h2>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm font-light">Toca cualquier diseño para vivir la experiencia interactiva a pantalla completa.</p>
+                    </div>
+                    
+                    {/* 🔴 LISTA DE BOTONES CON ADN VISUAL (Estilo Magazine) */}
+                    <div className="flex flex-col gap-4 relative z-50">
+                        {Object.values(demos).map(demo => (
+                            <button 
+                                key={demo.id}
+                                type="button"
+                                onClick={() => setFullScreenDemo(demo.url)}
+                                className="w-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 p-5 rounded-[2rem] shadow-sm hover:shadow-xl transition-all relative overflow-hidden group flex items-center justify-between text-left"
+                            >
+                                {/* Formas abstractas (Blobs) imitando el botón Magazine */}
+                                <div className={`absolute -top-6 -right-2 w-24 h-24 rounded-full opacity-40 mix-blend-multiply dark:mix-blend-screen transition-transform duration-500 group-hover:scale-150 ${demo.blob1}`}></div>
+                                <div className={`absolute -bottom-4 right-12 w-16 h-16 rounded-full opacity-40 mix-blend-multiply dark:mix-blend-screen transition-transform duration-500 group-hover:scale-150 ${demo.blob2}`}></div>
+                                
+                                <div className="flex flex-col items-start relative z-10">
+                                    <span className="font-bold text-lg text-slate-900 dark:text-white drop-shadow-sm mb-1">
+                                        {demo.label}
+                                    </span>
+                                    <span className="text-[9px] uppercase tracking-widest text-slate-500 dark:text-slate-300 font-bold flex items-center">
+                                        <PlayCircle size={12} className="mr-1.5" /> Toca para abrir
+                                    </span>
+                                </div>
+                                
+                                <div className="relative z-10 w-10 h-10 rounded-full bg-white/50 dark:bg-black/20 backdrop-blur-md flex items-center justify-center border border-white/50 shadow-sm text-slate-700 dark:text-white group-hover:translate-x-1 transition-transform">
+                                    <ChevronRight size={18} />
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+
+                    <button 
+                        type="button"
+                        onClick={() => setShowAnatomy(true)} 
+                        className="w-full mt-4 py-5 bg-transparent border-2 border-amber-500/30 text-amber-600 dark:text-amber-500 rounded-[2rem] font-bold text-xs uppercase tracking-widest hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors flex items-center justify-center shadow-sm"
+                    >
+                        <BookOpenText size={18} className="mr-2"/> Explorar Anatomía
+                    </button>
+                    
                 </RevealSection>
             )}
 
@@ -11713,7 +11754,33 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           </div>
         </div>
       )}
+      {/* 🔴 OVERLAY: DEMO A PANTALLA COMPLETA (VISOR INTERNO) */}
+      {fullScreenDemo && (
+        <div className="fixed inset-0 z-[999999] bg-black animate-in slide-in-from-bottom-full duration-300 flex flex-col">
+           
+           {/* HEADER DE NAVEGACIÓN PARA CERRAR EL DEMO */}
+           <div className="bg-[#050505] border-b border-white/10 px-4 py-4 flex items-center justify-between z-10 shadow-md">
+               <div className="flex items-center gap-2 text-white">
+                  <BauliaLogo className="h-6 w-auto" forceWhite={true} />
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest border-l border-white/20 pl-2 ml-1">Demo en Vivo</span>
+               </div>
+               <button 
+                 type="button"
+                 onClick={() => setFullScreenDemo(null)} 
+                 className="bg-white/10 hover:bg-rose-500 text-white px-5 py-2.5 rounded-full font-bold text-[10px] uppercase tracking-widest transition-colors flex items-center border border-white/10 shadow-sm"
+               >
+                  <X size={14} className="mr-1.5" /> Volver a Baulia
+               </button>
+           </div>
 
+           {/* IFRAME DE LA INVITACIÓN */}
+           <iframe 
+             src={fullScreenDemo} 
+             className="w-full flex-1 border-0 bg-white" 
+             title="Demo a Pantalla Completa"
+           />
+        </div>
+      )}
     </div>
   );
 };
