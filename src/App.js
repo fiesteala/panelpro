@@ -10321,7 +10321,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     { id: 'diamante', nombre: 'Diamante', precio: '2,990', desc: 'La Suite Definitiva. Incluye Muro Social y Black Label.', icon: <Gem size={24}/> }
   ];
 
-  // 🔴 EL OBJETO DEMOS AHORA TIENE EL "ADN VISUAL" DE CADA EVENTO (blob1 y blob2)
   const demos = {
     boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica y paletas sobrias. El estándar de alta costura nupcial.', features: ['Mesa de Regalos', 'Cuenta Regresiva', 'Pases QR VIP', 'GPS Directo'], blob1: 'bg-[#D4AF37]', blob2: 'bg-[#FDFBF7]' },
     xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón y energía vibrante para la mejor noche de tu vida.', features: ['Muro de Fotos', 'Dress Code Neón', 'Itinerario de Gala', 'Música Automática'], blob1: 'bg-fuchsia-500', blob2: 'bg-cyan-400' },
@@ -10755,15 +10754,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
             {!isMobileDevice ? (
                 // ==========================================
-                // --- VERSIÓN ESCRITORIO (SIMULADORES MAC E IPHONE INTACTOS) ---
+                // --- VERSIÓN ESCRITORIO (RESTAURADA A TU CÓDIGO ORIGINAL) ---
                 // ==========================================
                 <RevealSection delay={200} className="w-full relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 items-stretch flex group p-12 min-h-[680px]">
                     
                     <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white dark:from-[#080808] to-transparent opacity-40 z-0 transition-colors pointer-events-none"></div>
 
-                    {/* COLUMNA IZQUIERDA (Textos y Selección de Arte) */}
                     <div className="w-5/12 xl:w-1/3 relative z-30 flex flex-col justify-center h-full gap-10 py-6">
-                        
                         <div className="flex flex-col gap-6">
                             <div className="flex flex-col gap-3">
                                 <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs block transition-colors">La Colección Privada</span>
@@ -10777,45 +10774,22 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
 
                         <div className="flex flex-col gap-8">
-                            
-                            {/* 🔴 SELECTOR DE ARTE DIGITAL (TEMA DINÁMICO) */}
-                            <div className="relative w-full max-w-[320px] z-50">
-                              <div 
-                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                className="w-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 py-4 px-6 rounded-2xl cursor-pointer flex items-center justify-between shadow-sm hover:shadow-md transition-all relative overflow-hidden group"
-                              >
-                                 {/* Burbujas de color (Blobs) temáticas */}
-                                 <div className={`absolute -top-6 -right-2 w-16 h-16 rounded-full opacity-60 mix-blend-multiply dark:mix-blend-screen transition-colors duration-500 ${currentDemo.blob1}`}></div>
-                                 <div className={`absolute -bottom-4 right-6 w-14 h-14 rounded-full opacity-60 mix-blend-multiply dark:mix-blend-screen transition-colors duration-500 ${currentDemo.blob2}`}></div>
-                                 
-                                 <span className="font-bold text-xs uppercase tracking-widest text-slate-800 dark:text-white relative z-10 drop-shadow-sm">
-                                   {currentDemo.label}
-                                 </span>
-                                 <ChevronDown size={16} className={`text-slate-400 transform transition-transform duration-300 relative z-10 ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                              </div>
-
-                              {isDropdownOpen && (
-                                <div className="absolute top-full left-0 w-full mt-2 bg-white/95 dark:bg-[#111]/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col p-2 animate-in fade-in slide-in-from-top-2">
-                                  {Object.values(demos).map(demo => (
-                                    <button 
-                                      key={demo.id}
-                                      onClick={() => { setActiveCategory(demo.id); setIsDropdownOpen(false); }}
-                                      className={`text-left px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all relative overflow-hidden flex items-center justify-between ${activeCategory === demo.id ? 'bg-slate-50 dark:bg-white/5' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}
-                                    >
-                                      <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center pr-4 opacity-60 mix-blend-multiply dark:mix-blend-screen">
-                                        <div className={`w-6 h-6 rounded-full -mr-2 ${demo.blob1}`}></div>
-                                        <div className={`w-6 h-6 rounded-full ${demo.blob2}`}></div>
-                                      </div>
-                                      <span className={`relative z-10 transition-colors ${activeCategory === demo.id ? 'text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>
-                                        {demo.label}
-                                      </span>
-                                    </button>
-                                  ))}
+                            <div className="relative w-full max-w-[280px] z-10">
+                                <select
+                                    value={activeCategory}
+                                    onChange={(e) => setActiveCategory(e.target.value)}
+                                    className="w-full appearance-none bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white py-4 px-6 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-sm focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
+                                >
+                                    {Object.values(demos).map(demo => (
+                                        <option key={demo.id} value={demo.id}>{demo.label}</option>
+                                    ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-0 flex items-center px-5 pointer-events-none text-amber-500">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                                 </div>
-                              )}
                             </div>
 
-                            <button onClick={() => setShowAnatomy(true)} className="relative overflow-hidden w-full sm:w-max px-6 py-4 bg-[#FDFBF7] border border-[#D4AF37]/50 rounded-2xl shadow-[0_10px_30px_rgba(212,175,55,0.2)] hover:shadow-[0_10px_40px_rgba(212,175,55,0.4)] transition-all group flex items-center justify-start text-left mt-2">
+                            <button type="button" onClick={() => setShowAnatomy(true)} className="relative overflow-hidden w-full sm:w-max px-6 py-4 bg-[#FDFBF7] border border-[#D4AF37]/50 rounded-2xl shadow-[0_10px_30px_rgba(212,175,55,0.2)] hover:shadow-[0_10px_40px_rgba(212,175,55,0.4)] transition-all group flex items-center justify-start text-left mt-2">
                              <svg viewBox="0 0 200 200" className="absolute -top-4 -right-4 w-20 h-20 opacity-30 group-hover:scale-110 group-hover:opacity-50 transition-all duration-500" xmlns="http://www.w3.org/2000/svg">
                                 <g transform="scale(0.8) translate(20, 20)">
                                    <path d="M 40 100 C 10 70, 20 20, 80 10 C 80 60, 60 90, 40 100 Z" fill="#8DB580"/>
@@ -10836,13 +10810,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA (MAC y iPHONE) - INTACTA COMO LA TENÍAS */}
                     <div className="w-7/12 xl:w-2/3 relative flex items-center justify-end z-20">
-                        <div className="relative w-full max-w-[850px] aspect-[16/10] translate-x-[15%]">
+                        <div className="relative w-full max-w-[850px] translate-x-[25%]">
                             
-                            <div className={`absolute top-0 right-0 w-[90%] h-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-700 ${activeDevice === 'mac' ? 'scale-[1.02] z-30' : 'scale-100 z-10 opacity-70 blur-[1px]'}`}>
+                            <div className={`relative w-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-700 ${activeDevice === 'mac' ? 'scale-[1.02] z-30' : 'scale-100 z-10 opacity-70 blur-[1px]'}`}>
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-6 bg-black rounded-b-2xl z-30"></div>
-                                <div className="w-full h-full bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
+                                <div className="w-full aspect-[16/10] bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
                                     <iframe 
                                       ref={macIframeRef}
                                       src={currentDemo.url} 
@@ -10859,13 +10832,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                       </div>
                                     )}
                                 </div>
-                                <div className="absolute -bottom-4 left-[-2.5%] w-[105%] h-4 bg-slate-400 dark:bg-slate-700 rounded-b-3xl shadow-xl z-30 transition-colors">
+                                <div className="relative w-[105%] -left-[2.5%] h-4 bg-slate-400 dark:bg-slate-700 rounded-b-3xl shadow-xl z-30 transition-colors">
                                    <div className="w-40 h-1.5 bg-slate-300 dark:bg-slate-600 mx-auto rounded-b-md"></div>
                                 </div>
                             </div>
 
-                            <div className={`absolute bottom-[0%] left-[10%] -translate-x-1/2 transition-all duration-700 ease-out origin-bottom ${activeDevice === 'iphone' ? 'z-40 scale-[1.05]' : 'z-20 scale-95 opacity-80 blur-[1px]'}`}>
-                                <div style={{ width: '220px', height: '458px' }} className="relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 origin-bottom transform scale-[0.70] xl:scale-100 transition-transform duration-700">
+                            <div className={`absolute bottom-[-15%] left-[-20%] xl:left-[-35%] transition-all duration-700 ease-out origin-bottom ${activeDevice === 'iphone' ? 'z-40 scale-[1.05]' : 'z-20 scale-95 opacity-80 blur-[1px]'}`}>
+                                <div style={{ width: '220px', height: '458px' }} className="relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto">
                                     <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-[30%] h-[16px] bg-black rounded-full z-30 flex justify-end items-center pr-1.5">
                                       <div className="w-1.5 h-1.5 rounded-full bg-slate-800/80 mr-1"></div>
                                       <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
@@ -10896,14 +10869,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
                 </RevealSection>
             ) : (
                 // ==========================================
-                // --- VERSIÓN MÓVIL (TARJETA DE PRESENTACIÓN INTERACTIVA) ---
+                // --- VERSIÓN MÓVIL (MENÚ DE ARTE + VISOR SEGURO) ---
                 // ==========================================
                 <RevealSection delay={200} className="w-full flex flex-col gap-8 px-2 max-w-md mx-auto">
                     
@@ -10913,9 +10885,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             Tu evento es único.<br/>Tu diseño también.
                         </h2>
                         
-                        {/* 🔴 SELECTOR DE ARTE DIGITAL (MÓVIL) */}
+                        {/* SELECTOR DESPLEGABLE CON COLORES */}
                         <div className="relative w-full z-50">
-                          <div 
+                          <button 
+                            type="button"
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                             className="w-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 py-5 px-6 rounded-[2rem] cursor-pointer flex items-center justify-between shadow-md relative overflow-hidden group"
                           >
@@ -10926,12 +10899,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                {currentDemo.label}
                              </span>
                              <ChevronDown size={20} className={`text-slate-400 transform transition-transform duration-300 relative z-10 ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                          </div>
+                          </button>
 
                           {isDropdownOpen && (
                             <div className="absolute top-full left-0 w-full mt-2 bg-white/95 dark:bg-[#111]/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col p-3 animate-in fade-in slide-in-from-top-2">
                               {Object.values(demos).map(demo => (
                                 <button 
+                                  type="button"
                                   key={demo.id}
                                   onClick={() => { setActiveCategory(demo.id); setIsDropdownOpen(false); }}
                                   className={`text-left px-5 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all relative overflow-hidden flex items-center justify-between ${activeCategory === demo.id ? 'bg-slate-50 dark:bg-white/5' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}
@@ -10963,8 +10937,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </p>
 
                         <div className="w-full space-y-4 relative z-10">
-                            {/* 🔴 ABRE EL OVERLAY INTERNO SIN SALIR DE LA PÁGINA */}
                             <button 
+                                type="button"
                                 onClick={() => setFullScreenDemo(currentDemo.url)} 
                                 className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center"
                             >
@@ -10972,6 +10946,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             </button>
                             
                             <button 
+                                type="button"
                                 onClick={() => setShowAnatomy(true)} 
                                 className="w-full py-4 bg-transparent border-2 border-amber-500/30 text-amber-600 dark:text-amber-500 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors flex items-center justify-center"
                             >
@@ -11801,17 +11776,17 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           </div>
         </div>
       )}
-      {/* 🔴 OVERLAY: DEMO A PANTALLA COMPLETA (MÓVIL - DENTRO DE LA PÁGINA) */}
+      {/* 🔴 OVERLAY: DEMO A PANTALLA COMPLETA (VISOR INTERNO MÓVIL) */}
       {fullScreenDemo && (
         <div className="fixed inset-0 z-[999999] bg-black animate-in slide-in-from-bottom-full duration-300 flex flex-col">
            
-           {/* HEADER DE NAVEGACIÓN PARA CERRAR EL DEMO */}
            <div className="bg-[#111] border-b border-white/10 px-4 py-3 flex items-center justify-between z-10 shadow-md">
                <div className="flex items-center gap-2 text-white">
                   <BauliaLogo className="h-5 w-auto" forceWhite={true} />
                   <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest border-l border-white/20 pl-2">Demo en Vivo</span>
                </div>
                <button 
+                 type="button"
                  onClick={() => setFullScreenDemo(null)} 
                  className="bg-white/10 hover:bg-rose-500/20 text-white hover:text-rose-400 px-4 py-2 rounded-full font-bold text-[10px] uppercase tracking-widest transition-colors flex items-center border border-white/10"
                >
@@ -11819,7 +11794,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                </button>
            </div>
 
-           {/* IFRAME DE LA INVITACIÓN */}
            <iframe 
              src={fullScreenDemo} 
              className="w-full flex-1 border-0 bg-white" 
