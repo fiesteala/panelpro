@@ -1,3 +1,3 @@
 git add .
-git commit -m "landingpage version movil menu principal"
+git commit -m "landingpage version movil menu hamburguesa"
 git push origin main
