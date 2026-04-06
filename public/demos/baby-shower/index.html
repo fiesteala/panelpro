@@ -1,0 +1,891 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- ========================================== -->
+    <!-- OPEN GRAPH ESTRICTO (WhatsApp Preview)     -->
+    <!-- ========================================== -->
+    <meta property="og:title" content="Pase VIP - Tania Estefania" />
+    <meta property="og:description" content="Abre tu invitación y confirma tu asistencia." />
+    <!-- REGLA ESTRICTA: Enlace absoluto público -->
+    <meta property="og:image" content="https://tusitio.com/baby-shower/cover.jpg" />
+    <meta property="og:url" content="https://baulia.com" />
+    <meta property="og:type" content="website" />
+
+    <title>Baby Shower | Tania Estefania</title>
+
+    <!-- Google Fonts: Alta Costura -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Great+Vibes&family=Montserrat:wght@200;300;400&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuración de Tailwind para Lujo -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blush: '#FFF0F2',
+                        dustyrose: '#D8A7B1',
+                        gold: '#C5A059',
+                        champagne: '#F7E7CE'
+                    },
+                    fontFamily: {
+                        serif: ['Cormorant Garamond', 'serif'],
+                        cursive: ['Great Vibes', 'cursive'],
+                        sans: ['Montserrat', 'sans-serif']
+                    },
+                    animation: {
+                        'float-slow': 'float 45s linear infinite',
+                        'float-medium': 'float 35s linear infinite',
+                        'float-fast': 'float 25s linear infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%': { transform: 'translateY(10vh) translateX(0px) rotate(0deg) scale(0.8)', opacity: '0' },
+                            '10%': { opacity: '1' },
+                            '33%': { transform: 'translateY(-30vh) translateX(15px) rotate(10deg) scale(1)' },
+                            '66%': { transform: 'translateY(-70vh) translateX(-15px) rotate(-10deg) scale(0.9)' },
+                            '90%': { opacity: '1' },
+                            '100%': { transform: 'translateY(-120vh) translateX(5px) rotate(15deg) scale(1.1)', opacity: '0' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Estilos Personalizados y Preloader CSS -->
+    <style>
+        body { margin: 0; -webkit-font-smoothing: antialiased; background-color: #FFF0F2; }
+        
+        /* Preloader Puro CSS (No bloquea React, desaparece solo) */
+        #luxury-preloader {
+            position: fixed;
+            inset: 0;
+            background-color: #FFF0F2;
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeOutPreloader 1.5s ease-in-out forwards;
+            animation-delay: 0.8s;
+            pointer-events: none;
+        }
+        .preloader-monogram {
+            font-family: 'Great Vibes', cursive;
+            font-size: 4rem;
+            color: #D8A7B1;
+            animation: subtleScale 1s ease-in-out infinite alternate;
+        }
+        @keyframes fadeOutPreloader {
+            to { opacity: 0; visibility: hidden; }
+        }
+        @keyframes subtleScale {
+            from { transform: scale(0.95); opacity: 0.7; }
+            to { transform: scale(1.05); opacity: 1; }
+        }
+
+        /* Utilidades Glassmorphism Premium */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(216, 167, 177, 0.2);
+        }
+
+        /* Animación Ecualizador */
+        .eq-bar {
+            width: 3px;
+            background-color: #C5A059;
+            border-radius: 2px;
+            transition: height 0.2s ease;
+        }
+        .playing .eq-bar:nth-child(1) { animation: eq 1s infinite alternate; }
+        .playing .eq-bar:nth-child(2) { animation: eq 0.8s infinite alternate-reverse; animation-delay: 0.2s; }
+        .playing .eq-bar:nth-child(3) { animation: eq 1.2s infinite alternate; animation-delay: 0.4s; }
+        @keyframes eq {
+            0% { height: 4px; }
+            100% { height: 16px; }
+        }
+    </style>
+
+    <!-- React, ReactDOM, Babel (CDN) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+
+    <!-- Preloader CSS Puro -->
+    <div id="luxury-preloader">
+        <div class="preloader-monogram">TE</div>
+    </div>
+
+    <!-- Contenedor Raíz de React -->
+    <div id="root"></div>
+
+    <!-- Lógica de React -->
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+
+        // Componentes SVG Minimalistas y Rediseñados (Diseño Alta Costura)
+        const RattleIcon = ({ className }) => (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {/* Cabezal de la sonaja */}
+                <circle cx="12" cy="7" r="5" />
+                {/* Puntos internos de decoración */}
+                <circle cx="12" cy="7" r="1" fill="currentColor" />
+                <circle cx="10" cy="5.5" r="0.5" fill="currentColor" />
+                <circle cx="14" cy="5.5" r="0.5" fill="currentColor" />
+                <circle cx="10" cy="8.5" r="0.5" fill="currentColor" />
+                <circle cx="14" cy="8.5" r="0.5" fill="currentColor" />
+                {/* Mango */}
+                <path d="M12 12v6" />
+                {/* Anillo base */}
+                <circle cx="12" cy="20" r="2" />
+                {/* Lazo/moño sutil */}
+                <path d="M9 13c1.5-1 4.5-1 6 0" />
+            </svg>
+        );
+
+        const PacifierIcon = ({ className }) => (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {/* Chupón (tetina) */}
+                <path d="M9 10c0-3 1.5-5 3-5s3 2 3 5" />
+                {/* Escudo protector */}
+                <rect x="5" y="10" width="14" height="4" rx="2" />
+                {/* Unión */}
+                <path d="M10 14v2h4v-2" />
+                {/* Argolla */}
+                <circle cx="12" cy="18" r="3" />
+            </svg>
+        );
+
+        // --- COMPONENTE VIP DE ANIMACIÓN (Fade In Up) ---
+        const FadeInSection = ({ children, delay = 0 }) => {
+            const [isVisible, setVisible] = useState(false);
+            const domRef = useRef();
+            
+            useEffect(() => {
+                const observer = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            setVisible(true);
+                            observer.unobserve(domRef.current);
+                        }
+                    });
+                }, { threshold: 0.1 });
+                
+                if (domRef.current) observer.observe(domRef.current);
+                return () => { if (domRef.current) observer.unobserve(domRef.current); }
+            }, []);
+            
+            return (
+                <div 
+                    ref={domRef} 
+                    className={`transition-all duration-1000 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
+                    style={{ transitionDelay: `${delay}ms` }}
+                >
+                    {children}
+                </div>
+            );
+        };
+
+        const App = () => {
+            // Protección Anti-Robo en React
+            useEffect(() => {
+                const preventAction = (e) => e.preventDefault();
+                document.addEventListener('contextmenu', preventAction);
+                document.addEventListener('selectstart', preventAction);
+                document.addEventListener('dragstart', preventAction);
+                return () => {
+                    document.removeEventListener('contextmenu', preventAction);
+                    document.removeEventListener('selectstart', preventAction);
+                    document.removeEventListener('dragstart', preventAction);
+                };
+            }, []);
+
+            // Estados Generales
+            const [guestName, setGuestName] = useState(null);
+            const [language, setLanguage] = useState('es');
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [timeLeft, setTimeLeft] = useState({ Días: 0, Hrs: 0, Min: 0, Seg: 0 });
+            const [scrollY, setScrollY] = useState(0);
+            
+            // Estados para las Funciones Especiales (Fases 3 y 4)
+            const [copied, setCopied] = useState(false);
+            const [currentGalleryIdx, setCurrentGalleryIdx] = useState(0); 
+            const [demoFormStatus, setDemoFormStatus] = useState('form');
+            const [isModalOpen, setIsModalOpen] = useState(false); // <-- Nuevo estado para el Modal
+
+            const audioRef = useRef(null);
+
+            // Listener de Scroll para dinámica de fondo fotográfico
+            useEffect(() => {
+                const handleScroll = () => setScrollY(window.scrollY);
+                window.addEventListener('scroll', handleScroll, { passive: true });
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            // Temporizador Cinemático para la Galería (Efecto Ken Burns)
+            useEffect(() => {
+                const timer = setInterval(() => {
+                    setCurrentGalleryIdx((prev) => (prev + 1) % 6);
+                }, 5000); 
+                return () => clearInterval(timer);
+            }, []);
+
+            // Fecha del evento (Modificable)
+            const eventDate = new Date("2026-06-15T16:00:00").getTime();
+
+            // Lógica de Cuenta Regresiva
+            useEffect(() => {
+                const timer = setInterval(() => {
+                    const now = new Date().getTime();
+                    const distance = eventDate - now;
+
+                    if (distance > 0) {
+                        setTimeLeft({
+                            Días: Math.floor(distance / (1000 * 60 * 60 * 24)),
+                            Hrs: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                            Min: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+                            Seg: Math.floor((distance % (1000 * 60)) / 1000)
+                        });
+                    } else {
+                        clearInterval(timer);
+                    }
+                }, 1000);
+                return () => clearInterval(timer);
+            }, [eventDate]);
+
+            // ID del evento solicitado
+            const EVENT_ID = "ID_EXACTO_EN_FIREBASE";
+
+            // Extracción Inteligente VIP (Sin bloquear UI)
+            useEffect(() => {
+                const fetchGuestData = async () => {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const guestUid = urlParams.get('u');
+
+                    if (guestUid) {
+                        try {
+                            const response = await fetch(`https://firestore.googleapis.com/v1/projects/panel-de-control-intelig-db278/databases/(default)/documents/eventos/${EVENT_ID}/invitados/${guestUid}`);
+                            if (response.ok) {
+                                const data = await response.json();
+                                if (data.fields && data.fields.name && data.fields.name.stringValue) {
+                                    setGuestName(data.fields.name.stringValue);
+                                }
+                            }
+                        } catch (error) {
+                            console.error("Error al obtener datos del invitado:", error);
+                        }
+                    }
+                };
+
+                fetchGuestData();
+            }, []);
+
+            // Control de Música Minimalista
+            const toggleMusic = () => {
+                if (audioRef.current) {
+                    if (isPlaying) {
+                        audioRef.current.pause();
+                    } else {
+                        audioRef.current.play().catch(e => console.log("Interacción requerida primero"));
+                    }
+                    setIsPlaying(!isPlaying);
+                }
+            };
+
+            // Simulación de Traductor
+            const toggleLanguage = () => {
+                setLanguage(prev => prev === 'es' ? 'en' : 'es');
+            };
+
+            // Copiado Seguro al Portapapeles (UX Estricto)
+            const handleCopy = (text) => {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000); 
+                } catch (err) {
+                    console.error('Error al copiar', err);
+                }
+                document.body.removeChild(textArea);
+            };
+
+            // Navegación GPS Estricta
+            const handleGPS = (address) => {
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                const isAndroid = /android/i.test(navigator.userAgent);
+                const encodedAddress = encodeURIComponent(address);
+                
+                if (isIOS) {
+                    window.location.href = `maps://?q=${encodedAddress}`;
+                } else if (isAndroid) {
+                    window.location.href = `geo:0,0?q=${encodedAddress}`;
+                } else {
+                    window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank');
+                }
+            };
+
+            // Generador de .ics Estricto
+            const handleAddToCalendar = () => {
+                const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:Baby Shower Tania Estefania
+DESCRIPTION:Acompáñanos a celebrar la llegada de nuestra niña.
+LOCATION:Salón de Eventos Los Arcos, Ciudad
+DTSTART:20260615T160000Z
+DTEND:20260615T210000Z
+END:VEVENT
+END:VCALENDAR`;
+                const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'Baby_Shower_Tania.ics');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            // Generación de Elementos Flotantes (Sonajas y Chupones)
+            const floatingElements = useMemo(() => {
+                const elements = [];
+                const types = ['rattle', 'pacifier'];
+                const speeds = ['animate-float-slow', 'animate-float-medium', 'animate-float-fast'];
+                
+                for (let i = 0; i < 15; i++) {
+                    const isRattle = types[Math.floor(Math.random() * types.length)] === 'rattle';
+                    const speed = speeds[Math.floor(Math.random() * speeds.length)];
+                    const leftPos = Math.floor(Math.random() * 100);
+                    // Retraso negativo ajustado a la nueva duración
+                    const delay = -(Math.random() * 45); 
+                    
+                    elements.push(
+                        <div 
+                            key={i} 
+                            className={`absolute text-dustyrose/40 ${speed}`}
+                            style={{ left: `${leftPos}%`, animationDelay: `${delay}s`, top: '100%' }}
+                        >
+                            {isRattle ? 
+                                <RattleIcon className="w-10 h-10 md:w-14 md:h-14" /> : 
+                                <PacifierIcon className="w-10 h-10 md:w-14 md:h-14" />
+                            }
+                        </div>
+                    );
+                }
+                return elements;
+            }, []);
+
+            return (
+                <main className="relative w-full min-h-screen bg-blush selection:bg-dustyrose selection:text-white font-sans overflow-x-hidden">
+                    
+                    {/* Audio Oculto */}
+                    <audio 
+                        ref={audioRef} 
+                        src="/baby-shower/cancion.mp3" 
+                        loop 
+                        preload="auto"
+                    ></audio>
+
+                    {/* === FONDOS DINÁMICOS DE ALTA COSTURA === */}
+                    <div className="fixed inset-0 z-0 pointer-events-none bg-blush">
+                        <div className="absolute inset-0 overflow-hidden opacity-80">
+                            {floatingElements}
+                        </div>
+                    </div>
+
+                    <div 
+                        className="absolute top-0 left-0 w-full h-[120vh] z-0 pointer-events-none transition-opacity duration-75"
+                        style={{ opacity: Math.max(0, 1 - scrollY / 600) }}
+                    >
+                        <div 
+                            className="absolute inset-0 bg-cover bg-center"
+                            style={{ backgroundImage: "url('/baby-shower/portada.png')" }}
+                        ></div>
+                        <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/50 to-blush"></div>
+                    </div>
+
+                    {/* CONTENIDO PRINCIPAL SCROLLABLE (Z-20) */}
+                    <div className="relative z-20 w-full flex flex-col items-center">
+                        
+                        {/* === SECCIÓN 1: PORTADA HERO === */}
+                        <section className="relative w-full min-h-screen flex flex-col justify-end items-center px-6 pb-20 pt-[45vh] text-center z-20">
+                            
+                            <button 
+                                onClick={toggleLanguage}
+                                className="absolute top-6 right-6 md:top-10 md:right-10 text-xs font-sans tracking-[0.2em] text-dustyrose hover:text-gold transition-colors duration-300 z-30"
+                            >
+                                {language === 'es' ? 'EN' : 'ES'}
+                            </button>
+
+                            <div className="flex flex-col items-center z-20 relative w-full max-w-lg">
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[120%] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.7)_0%,rgba(255,255,255,0.4)_45%,transparent_75%)] blur-lg -z-10 pointer-events-none"></div>
+
+                                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-[0.5px] border-gold flex items-center justify-center mb-6 bg-white/70 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.8)]">
+                                    <span className="font-cursive text-3xl md:text-4xl text-gold mt-2">TE</span>
+                                </div>
+
+                                <p className="font-sans text-xs md:text-sm tracking-[0.3em] uppercase text-gray-700 mb-3 drop-shadow-[0_0_8px_rgba(255,255,255,1)] font-bold">
+                                    {language === 'es' ? 'Baby Shower de' : 'Baby Shower of'}
+                                </p>
+                                
+                                <h1 className="font-cursive text-6xl md:text-8xl text-gray-900 mb-5 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">
+                                    Tania Estefania
+                                </h1>
+
+                                <div className="w-16 h-[1px] bg-gold/70 mb-5"></div>
+
+                                <p className="font-serif text-lg md:text-xl text-gray-800 italic leading-relaxed px-6 py-4 mb-8 bg-white/40 backdrop-blur-sm rounded-3xl shadow-sm border-[0.5px] border-white/50 w-full">
+                                    {language === 'es' 
+                                        ? '"Un nuevo y dulce latido se suma a nuestra familia, llenando nuestros días de color rosa."'
+                                        : '"A new and sweet heartbeat joins our family, filling our days with the color pink."'}
+                                </p>
+
+                                {guestName && (
+                                    <div className="glass-panel px-8 py-5 rounded-2xl animate-[fadeInUp_1s_ease-out]">
+                                        <p className="font-sans text-xs tracking-[0.15em] text-dustyrose uppercase mb-2">
+                                            {language === 'es' ? 'Pase Especial Para' : 'Special Pass For'}
+                                        </p>
+                                        <p className="font-serif text-2xl md:text-3xl text-gray-900 font-medium">
+                                            {guestName}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+
+                        {/* === SECCIÓN 2: CUENTA REGRESIVA === */}
+                        <section className="w-full max-w-4xl px-6 py-32 flex flex-col items-center text-center">
+                            <FadeInSection>
+                                <h2 className="font-cursive text-5xl md:text-6xl text-dustyrose mb-12">
+                                    {language === 'es' ? 'Faltan' : 'Countdown'}
+                                </h2>
+                                <div className="flex gap-4 md:gap-8 justify-center items-center">
+                                    {Object.entries(timeLeft).map(([unit, value], idx) => (
+                                        <div key={idx} className="flex flex-col items-center">
+                                            <div className="w-16 h-16 md:w-24 md:h-24 rounded-full border-[0.5px] border-gold/40 bg-white/40 backdrop-blur-md shadow-[0_8px_32px_0_rgba(216,167,177,0.15)] flex items-center justify-center mb-4 transition-transform hover:scale-105 duration-500">
+                                                <span className="font-serif text-2xl md:text-4xl text-gray-800">{value}</span>
+                                            </div>
+                                            <span className="text-[10px] md:text-xs tracking-[0.2em] uppercase text-gray-500">{unit}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </FadeInSection>
+                        </section>
+
+                        {/* === SECCIÓN 3: UBICACIÓN Y RECEPCIÓN === */}
+                        <section className="w-full max-w-5xl px-6 py-24">
+                            <FadeInSection>
+                                <div className="glass-panel p-8 md:p-16 rounded-3xl text-center relative overflow-hidden">
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-[1px] bg-gradient-to-r from-transparent via-gold to-transparent"></div>
+                                    
+                                    <h2 className="font-cursive text-5xl md:text-6xl text-gray-800 mb-6">
+                                        {language === 'es' ? 'Cuándo & Dónde' : 'When & Where'}
+                                    </h2>
+                                    
+                                    <p className="font-serif text-xl md:text-2xl text-gray-600 mb-2">15 de Junio, 2026</p>
+                                    <p className="font-sans text-xs tracking-[0.2em] text-dustyrose uppercase mb-12">16:00 Hrs</p>
+
+                                    <div className="flex flex-col items-center mb-12">
+                                        <h3 className="font-serif text-2xl text-gray-800 mb-3">Salón Los Arcos</h3>
+                                        <p className="font-sans text-sm text-gray-500 font-light max-w-xs leading-relaxed">
+                                            Av. Paseo de las Flores 1234, Col. Jardines del Valle, Ciudad.
+                                        </p>
+                                    </div>
+
+                                    <div className="flex flex-col sm:flex-row justify-center gap-6 mt-8">
+                                        <button 
+                                            onClick={() => handleGPS('Av. Paseo de las Flores 1234, Ciudad')}
+                                            className="px-8 py-4 bg-white/70 border-[0.5px] border-gold/50 text-gray-700 font-sans text-xs tracking-widest uppercase rounded-full hover:bg-gold hover:text-white transition-all duration-500"
+                                        >
+                                            {language === 'es' ? 'Abrir GPS / Mapas' : 'Open GPS / Maps'}
+                                        </button>
+                                        <button 
+                                            onClick={handleAddToCalendar}
+                                            className="px-8 py-4 bg-dustyrose/90 text-white font-sans text-xs tracking-widest uppercase rounded-full hover:bg-gray-800 transition-all duration-500 shadow-[0_8px_20px_rgba(216,167,177,0.4)]"
+                                        >
+                                            {language === 'es' ? 'Agregar al Calendario' : 'Add to Calendar'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </FadeInSection>
+                        </section>
+
+                        {/* === SECCIÓN 4: ITINERARIO === */}
+                        <section className="w-full max-w-3xl px-6 py-32">
+                            <FadeInSection>
+                                <div className="text-center mb-20">
+                                    <h2 className="font-cursive text-5xl md:text-6xl text-gray-800">
+                                        {language === 'es' ? 'Itinerario' : 'Itinerary'}
+                                    </h2>
+                                    <div className="w-12 h-[1px] bg-gold/50 mx-auto mt-8"></div>
+                                </div>
+
+                                <div className="relative border-l-[0.5px] border-gold/40 ml-4 md:mx-auto md:ml-12 space-y-16 pb-10">
+                                    {[
+                                        { time: '16:00', title: 'Recepción', desc: 'Bebidas de bienvenida y acomodo de invitados.' },
+                                        { time: '17:00', title: 'Juegos y Dinámicas', desc: 'Divirtámonos juntas celebrando la dulce espera.' },
+                                        { time: '18:30', title: 'Cena', desc: 'Degustación de platillos especiales en honor a Tania.' },
+                                        { time: '20:00', title: 'Mesa de Postres', desc: 'Corte de pastel y toma de fotografías familiares.' }
+                                    ].map((item, idx) => (
+                                        <div key={idx} className="relative pl-10 md:pl-16">
+                                            <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-dustyrose ring-4 ring-blush/80"></div>
+                                            <FadeInSection delay={idx * 150}>
+                                                <span className="font-sans text-[10px] md:text-xs tracking-widest text-gold mb-2 block">{item.time}</span>
+                                                <h3 className="font-serif text-2xl text-gray-800 mb-2">{item.title}</h3>
+                                                <p className="font-sans text-sm text-gray-500 font-light max-w-sm">{item.desc}</p>
+                                            </FadeInSection>
+                                        </div>
+                                    ))}
+                                </div>
+                            </FadeInSection>
+                        </section>
+
+                        {/* === SECCIÓN 5: DRESS CODE === */}
+                        <section className="w-full max-w-4xl px-6 py-24 text-center">
+                            <FadeInSection>
+                                <div className="glass-panel p-12 md:p-20 rounded-[40px] flex flex-col items-center relative overflow-hidden">
+                                    <div className="w-20 h-20 rounded-full bg-white/50 flex items-center justify-center mb-8 border-[0.5px] border-gold/30 shadow-sm">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="#D8A7B1" strokeWidth="1" className="w-10 h-10">
+                                            <path d="M12 4c-1.5 0-2.5 1-2.5 2.5V8M12 4c1.5 0 2.5 1 2.5 2.5V8M9.5 8h5M7 11h10l1 9H6l1-9z"/>
+                                            <path d="M12 11v9"/>
+                                        </svg>
+                                    </div>
+                                    <h2 className="font-cursive text-5xl md:text-6xl text-gray-800 mb-6">Dress Code</h2>
+                                    <p className="font-sans text-xs tracking-[0.3em] text-gold uppercase mb-8">Smart Casual / Tonos Claros</p>
+                                    <p className="font-serif text-lg md:text-xl text-gray-600 max-w-lg mx-auto italic leading-relaxed">
+                                        {language === 'es' 
+                                            ? 'Sugerimos acompañarnos utilizando prendas en colores blanco, beige o rosas pastel. Por favor, evitar tonalidades oscuras.'
+                                            : 'We kindly suggest wearing white, beige, or pastel pink tones. Please avoid dark colors.'}
+                                    </p>
+                                </div>
+                            </FadeInSection>
+                        </section>
+
+                        {/* === SECCIÓN 6: GALERÍA EDITORIAL CINEMÁTICA === */}
+                        <section className="w-full py-24">
+                            <FadeInSection>
+                                <div className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden shadow-[0_20px_50px_rgba(216,167,177,0.3)]">
+                                    {[
+                                        "/baby-shower/foto1.jpg",
+                                        "/baby-shower/foto2.jpg",
+                                        "/baby-shower/foto3.jpg",
+                                        "/baby-shower/foto4.jpg",
+                                        "/baby-shower/foto5.jpg",
+                                        "/baby-shower/foto6.jpg"
+                                    ].map((src, idx) => (
+                                        <div key={idx} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentGalleryIdx ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
+                                            <img src={src} alt={`Momento ${idx + 1}`} className={`w-full h-full object-cover filter sepia-[0.2] transition-transform duration-[6000ms] ease-out ${idx === currentGalleryIdx ? 'scale-110' : 'scale-100'}`} />
+                                        </div>
+                                    ))}
+                                    <div className="absolute inset-0 bg-dustyrose/30 mix-blend-overlay z-20 pointer-events-none"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent z-20 pointer-events-none"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent z-20 pointer-events-none"></div>
+
+                                    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center pointer-events-none text-white text-center px-6">
+                                        <p className="font-sans text-[10px] md:text-xs tracking-[0.4em] uppercase mb-4 drop-shadow-md text-white/90">
+                                            {language === 'es' ? 'Nuestra Historia' : 'Our Story'}
+                                        </p>
+                                        <h2 className="font-cursive text-6xl md:text-8xl drop-shadow-[0_2px_15px_rgba(0,0,0,0.5)] mb-6 text-white">
+                                            {language === 'es' ? 'Momentos Especiales' : 'Special Moments'}
+                                        </h2>
+                                        <div className="w-16 h-[1px] bg-white/60 drop-shadow-md"></div>
+                                    </div>
+
+                                    <div className="absolute bottom-8 left-0 right-0 z-30 flex justify-center gap-3">
+                                        {[0, 1, 2, 3, 4, 5].map((idx) => (
+                                            <button 
+                                                key={idx}
+                                                onClick={() => setCurrentGalleryIdx(idx)}
+                                                className={`h-[2px] transition-all duration-500 rounded-full ${idx === currentGalleryIdx ? 'w-10 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]' : 'w-4 bg-white/40 hover:bg-white/70'}`}
+                                                aria-label={`Ver foto ${idx + 1}`}
+                                            ></button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </FadeInSection>
+                        </section>
+
+                        {/* === SECCIÓN 7: MESA DE REGALOS / LLUVIA DE SOBRES === */}
+                        <section className="w-full max-w-4xl px-6 py-24 text-center">
+                            <FadeInSection>
+                                <div className="glass-panel p-10 md:p-16 rounded-[40px] relative overflow-hidden">
+                                    <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full bg-white/50 border border-gold/30 shadow-[0_0_15px_rgba(197,160,89,0.1)]">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="#C5A059" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+                                            <rect x="3" y="8" width="18" height="12" rx="2" />
+                                            <path d="M12 8v12" />
+                                            <path d="M16 8c0-2-2-4-4-4s-4 2-4 4" />
+                                        </svg>
+                                    </div>
+                                    <h2 className="font-cursive text-5xl md:text-6xl text-gray-800 mb-6">
+                                        {language === 'es' ? 'Lluvia de Sobres' : 'Wishing Well'}
+                                    </h2>
+                                    <p className="font-serif text-lg md:text-xl text-gray-600 max-w-lg mx-auto italic mb-10 leading-relaxed">
+                                        {language === 'es' 
+                                            ? 'Tu presencia es nuestro mejor regalo. Si deseas tener un detalle adicional con nosotros, agradecemos profundamente tu aportación.'
+                                            : 'Your presence is our best gift. If you wish to give something extra, we deeply appreciate your contribution.'}
+                                    </p>
+                                    
+                                    <div className="mx-auto bg-white/60 backdrop-blur-md rounded-3xl p-8 border-[0.5px] border-gold/30 shadow-sm w-full max-w-sm relative">
+                                        <div className="absolute top-2 left-2 w-2 h-2 border-t border-l border-gold/50"></div>
+                                        <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-gold/50"></div>
+                                        <div className="absolute bottom-2 left-2 w-2 h-2 border-b border-l border-gold/50"></div>
+                                        <div className="absolute bottom-2 right-2 w-2 h-2 border-b border-r border-gold/50"></div>
+
+                                        <p className="font-sans text-xs tracking-[0.2em] uppercase text-dustyrose mb-2 font-medium">Banco Premium</p>
+                                        <p className="font-serif text-2xl md:text-3xl text-gray-800 mb-8 tracking-widest font-medium">
+                                            0123 4567 8901 2345
+                                        </p>
+                                        
+                                        <button 
+                                            onClick={() => handleCopy('0123456789012345')}
+                                            className={`w-full py-4 rounded-full font-sans text-xs tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 
+                                                ${copied 
+                                                    ? 'bg-[#E8F5E9] text-[#2E7D32] border border-[#A5D6A7] shadow-none' 
+                                                    : 'bg-dustyrose text-white hover:bg-gray-800 shadow-[0_8px_20px_rgba(216,167,177,0.4)]'}`}
+                                        >
+                                            {copied ? (
+                                                <>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                    {language === 'es' ? '¡Copiado Exitosamente!' : 'Copied Successfully!'}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                                    {language === 'es' ? 'Copiar CLABE' : 'Copy CLABE'}
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </FadeInSection>
+                        </section>
+
+                        {/* === SECCIÓN 8: MURO SOCIAL & FILTRO INSTAGRAM === */}
+                        <section className="w-full max-w-4xl px-6 py-24 text-center">
+                            <FadeInSection>
+                                <h2 className="font-cursive text-5xl md:text-6xl text-gray-800 mb-6">
+                                    {language === 'es' ? 'Captura la Magia' : 'Capture the Magic'}
+                                </h2>
+                                <p className="font-sans text-sm md:text-base text-gray-500 mb-8 max-w-md mx-auto leading-relaxed">
+                                    {language === 'es' 
+                                        ? 'Ayúdanos a inmortalizar este día tan especial. Usa nuestro hashtag para compartir tus mejores fotos con nosotros.' 
+                                        : 'Help us immortalize this special day. Use our hashtag to share your best photos with us.'}
+                                </p>
+                                
+                                <div className="inline-block mb-14 border-b border-gold/30 pb-4 px-8">
+                                    <p className="font-cursive text-4xl md:text-5xl text-gold drop-shadow-sm tracking-wide">
+                                        #BabyShowerTania
+                                    </p>
+                                </div>
+                                
+                                <div className="flex justify-center">
+                                    <a 
+                                        href="https://instagram.com/ar/TU_ID_DE_FILTRO" 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="group relative px-8 md:px-12 py-5 bg-gradient-to-r from-dustyrose to-dustyrose/80 rounded-full flex items-center gap-4 overflow-hidden shadow-[0_8px_25px_rgba(216,167,177,0.5)] transition-transform hover:scale-105 hover:shadow-[0_12px_30px_rgba(216,167,177,0.6)]"
+                                    >
+                                        <div className="absolute inset-0 bg-white/30 group-hover:translate-x-full transition-transform duration-700 ease-out -translate-x-[150%] -skew-x-12"></div>
+                                        
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 z-10">
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                                        </svg>
+                                        
+                                        <span className="font-sans text-xs md:text-sm tracking-widest uppercase text-white font-medium z-10">
+                                            {language === 'es' ? 'Probar Filtro de Instagram' : 'Try Instagram Filter'}
+                                        </span>
+                                    </a>
+                                </div>
+                            </FadeInSection>
+                        </section>
+
+                        {/* === SECCIÓN 9: BOTÓN RSVP (ABRE MODAL) === */}
+                        <section className="w-full max-w-3xl px-6 py-24 mb-10 text-center">
+                            <FadeInSection>
+                                <h2 className="font-cursive text-5xl md:text-6xl text-gray-800 mb-6">
+                                    {language === 'es' ? '¿Nos Acompañas?' : 'Will You Join Us?'}
+                                </h2>
+                                <p className="font-serif text-lg md:text-xl text-gray-600 mb-10 italic max-w-md mx-auto">
+                                    {language === 'es' 
+                                        ? 'Por favor, confirma tu asistencia para ayudarnos a preparar todo con amor.' 
+                                        : 'Please confirm your attendance to help us prepare everything with love.'}
+                                </p>
+                                <button 
+                                    onClick={() => { setIsModalOpen(true); setDemoFormStatus('form'); }}
+                                    className="px-12 py-5 bg-gray-900 text-white font-sans text-xs md:text-sm tracking-widest uppercase rounded-full hover:bg-gold transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.2)]"
+                                >
+                                    {language === 'es' ? 'Confirmar Asistencia' : 'Confirm Attendance'}
+                                </button>
+                            </FadeInSection>
+                        </section>
+
+                        {/* === FOOTER OFICIAL (INYECCIÓN SEGURA) === */}
+                        <footer className="w-full py-16 flex flex-col items-center justify-center text-center z-20 pb-40">
+                            <p className="font-sans text-[10px] tracking-[0.4em] uppercase text-gray-500 mb-6 font-medium">Tecnología por</p>
+                            <div
+                                className="hover:scale-105 transition-transform duration-500 cursor-pointer w-auto h-8 md:h-10 opacity-90 drop-shadow-sm"
+                                onClick={() => window.parent.location.href = 'https://baulia.com'}
+                                dangerouslySetInnerHTML={{ __html: `<svg viewBox="0 0 915 201" fill="none" xmlns="http://www.w3.org/2000/svg" style="height: 100%; width: auto; overflow: visible; display: inline-block;"><style>.baulia-text { fill: #1C1917; transition: fill 0.5s ease; } .baulia-diamond-animator { transform-origin: 100px 100px; transform: rotate(45deg) scale(0.8); transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); } .baulia-diamond-shape { fill: transparent; stroke: #D4AF37; stroke-width: 1.72px; transition: fill 0.5s ease, stroke-width 0.3s ease; } .baulia-b { fill: #D4AF37; transition: all 0.6s ease; transform-origin: 100px 100px; } svg:hover .baulia-diamond-animator { transform: rotate(135deg) scale(0.85); } svg:hover .baulia-diamond-shape { stroke-width: 3px; } svg:hover .baulia-b { transform: scale(1.05); fill: #FDF1A9; }</style><g class="baulia-text"><path d="M265.12,78.58h-.35c0-2.04-.75-3.8-2.24-5.25-1.5-1.46-3.27-2.18-5.31-2.18h-1.42l-.12-1.18h9.44v8.62ZM265.12,143.97v8.62h-9.44l.12-1.18h1.42c2.05,0,3.82-.73,5.31-2.18,1.49-1.46,2.24-3.21,2.24-5.25h.35ZM272.44,69.96v82.62h-7.67v-82.62h7.67ZM279.17,69.96c5.51,0,10.17.83,13.99,2.48,3.82,1.65,6.71,3.95,8.68,6.91,1.97,2.95,2.95,6.39,2.95,10.33,0,3.3-.63,6.2-1.89,8.68-1.26,2.48-2.87,4.49-4.84,6.02-1.97,1.53-4.05,2.62-6.26,3.25,4.17.63,7.77,2.01,10.8,4.13,3.03,2.12,5.35,4.78,6.96,7.97,1.61,3.19,2.42,6.75,2.42,10.68,0,4.41-1.06,8.28-3.19,11.63-2.12,3.35-5.25,5.94-9.38,7.79-4.13,1.85-9.11,2.77-14.93,2.77h-13.1c.08-1.42.12-2.83.12-4.25h12.51c4.09,0,7.55-.73,10.39-2.18,2.83-1.46,5-3.6,6.49-6.43,1.49-2.83,2.24-6.22,2.24-10.15,0-4.41-.85-7.99-2.54-10.74-1.69-2.75-3.88-4.84-6.55-6.26-2.68-1.42-5.57-2.38-8.68-2.89-3.11-.51-6.08-.77-8.91-.77v-1.06c1.81,0,3.82-.2,6.02-.59,2.2-.39,4.33-1.18,6.37-2.36,2.04-1.18,3.74-2.93,5.08-5.25,1.34-2.32,2.01-5.37,2.01-9.15,0-3.54-.65-6.57-1.95-9.09-1.3-2.52-3.23-4.43-5.78-5.72-2.56-1.3-5.72-1.95-9.5-1.95h-10.86c0-.08-.1-.41-.29-1-.2-.59-.49-1.51-.89-2.77h12.51Z"/><path d="M381.98,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM407.36,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.86-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM424,120.36v3.54h-36.95v-3.54h36.95ZM407.36,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM429.31,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95,1.18-1.3,1.34-3.13.47-5.49Z"/><path d="M506.51,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM513.83,69.96v51.94c0,5.67,1.04,10.66,3.13,14.99,2.08,4.33,5.02,7.69,8.79,10.09,3.78,2.4,8.14,3.6,13.1,3.6,5.27,0,9.87-1.14,13.81-3.42,3.93-2.28,7-5.45,9.21-9.5,2.2-4.05,3.31-8.79,3.31-14.22v-53.47h5.55v53.47c0,6.14-1.32,11.51-3.95,16.11-2.64,4.6-6.36,8.2-11.15,10.8-4.8,2.6-10.39,3.9-16.76,3.9s-12.26-1.28-17.17-3.84c-4.92-2.56-8.73-6.14-11.45-10.74-2.71-4.6-4.07-9.97-4.07-16.11v-53.59h7.67ZM521.97,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38ZM538.73,61.58c1.65-1.81,3.31-3.6,4.96-5.37,1.65-1.77,3.32-3.5,5.02-5.19s3.36-3.32,5.02-4.9c.87.94,1.73,1.93,2.6,2.95.87,1.02,1.61,2.12,2.24,3.31-2.12,1.18-4.25,2.36-6.37,3.54-2.12,1.18-4.23,2.3-6.31,3.36-2.09,1.06-4.19,2.11-6.31,3.13l-.83-.83ZM565.53,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM578.86,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38Z"/><path d="M646.97,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM646.97,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM654.29,69.96v82.62h-7.67v-82.62h7.67ZM653.94,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18s-2.22,3.21-2.3,5.25h-.35ZM686.16,148.93v3.66h-32.22v-3.66h32.22ZM693.36,133.46l-6.85,19.12h-19.59l4.25-3.66c4.17,0,7.57-.65,10.21-1.95,2.64-1.3,4.78-3.13,6.43-5.49,1.65-2.36,3.11-5.04,4.37-8.03h1.18Z"/><path d="M758.75,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM758.75,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM766.07,69.96v82.62h-7.67v-82.62h7.67ZM765.72,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18-1.46,1.46-2.22,3.21-2.3,5.25h-.35ZM765.72,143.97h.35c.08,2.05.84,3.8,2.3,5.25,1.46,1.46,3.21,2.18,5.25,2.18h1.53v1.18h-9.44v-8.62Z"/><path d="M846.33,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM871.71,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.87-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM888.35,120.36v3.54h-36.95v-3.54h36.95ZM871.71,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM893.67,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95s1.34-3.13.47-5.49Z"/></g><g class="baulia-diamond-animator"><rect class="baulia-diamond-shape" x=".86" y=".86" width="198.64" height="198.64" transform="translate(0 200.36) rotate(-90)" stroke-miterlimit="10" /></g><path class="baulia-b" d="M116.87,94.54l6.01-.41c6.47,0,11.27,1.21,14.42,3.62,3.14,2.42,4.72,5.83,4.72,10.25s-2.01,9.59-6.01,15.51c-4.01,5.92-9.2,11.3-15.58,16.13h7.79c3.19,0,5.42-.14,6.7-.41,1.27-.27,2-.41,2.19-.41,1.27,0,1.91.68,1.91,2.05s-.91,2.1-2.73,2.19c-7.02,0-13.76-.09-20.23-.27-10.2,6.47-20.23,9.7-30.07,9.7-4.65,0-8.34-.87-11.07-2.6s-4.1-3.48-4.1-5.26.75-3.16,2.25-4.17c1.5-1,3.62-1.5,6.36-1.5,10.66,0,22.59.23,35.81.68,5.47-4.46,9.84-9.64,13.12-15.51,3.28-5.88,4.92-11.18,4.92-15.92,0-7.56-4.06-11.34-12.16-11.34-3.19,0-6.49.5-9.91,1.5-3.42,1-5.47,1.71-6.15,2.12s-1.12.61-1.3.61c-.55,0-.82-.39-.82-1.16s1.18-1.71,3.55-2.8c10.39-5.01,20.54-11.68,30.48-20.02,9.93-8.34,14.9-14.28,14.9-17.83,0-1.64-1.28-2.46-3.83-2.46-10.39.09-24.65,7.88-42.78,23.37-3.65,9.38-9.64,20.91-17.97,34.58-8.34,13.67-17.06,25.9-26.17,36.69-9.11,10.8-15.9,16.19-20.36,16.19-2.73,0-4.1-1.41-4.1-4.24,0-6.47,6.13-17.99,18.38-34.58,12.25-16.58,26.12-31.84,41.61-45.78,2.73-6.65,4.1-11.5,4.1-14.56s-.73-5.47-2.19-7.24c-1.46-1.78-3.6-3.08-6.42-3.9-4.46-1.18-9.18-1.78-14.14-1.78s-8.77.12-11.41.34c-2.64.23-5.86.68-9.64,1.37-3.78.68-6.86,1.87-9.22,3.55-2.37,1.69-3.55,3.83-3.55,6.42s1.27,4.6,3.83,6.01c2.55,1.41,5.67,2.39,9.36,2.94s7.36,1.14,11,1.78c3.64,.64,6.74,1.89,9.29,3.76,2.55,1.87,3.83,4.49,3.83,7.86,0,.91-.2,1.37-.61,1.37s-.73-.14-.96-.41c-.23-.27-.62-.82-1.16-1.64-.82-1.18-2.03-2.1-3.62-2.73-1.59-.64-4.06-1.25-7.38-1.84-3.33-.59-6.47-1.23-9.43-1.91-2.96-.68-5.94-1.57-8.95-2.66-3.01-1.09-5.42-2.64-7.24-4.65-1.82-2-2.73-4.35-2.73-7.04s1.14-5.08,3.42-7.17c2.28-2.1,5.28-3.74,9.02-4.92,7.65-2.28,15.63-3.42,23.92-3.42,21.5,0,32.25,5.65,32.25,16.95,0,1-.23,2.51-.68,4.51,18.4-14.85,33.35-22.28,44.83-22.28,5.1,0,7.65,1.55,7.65,4.65,0,4.46-4.67,10.8-14.01,19-9.34,8.2-18.98,14.58-28.9,19.13ZM44.17,163.69c2.64,0,9.73-8.45,21.25-25.35,11.52-16.9,20.75-32.64,27.68-47.22-13.67,13.03-25.76,26.58-36.29,40.66-10.52,14.08-15.78,23.66-15.78,28.77,0,2.09,1.05,3.14,3.14,3.14ZM111,142.64l-24.74-.55c-7.02,0-10.52,1.05-10.52,3.14,0,1.18,1.18,2.3,3.55,3.35,2.37,1.05,5.1,1.57,8.2,1.57,8.11,0,15.94-2.5,23.51-7.52Z"/></svg>` }}
+                            />
+                        </footer>
+                        
+                    </div>
+
+                    {/* Reproductor de Música Minimalista (Lado Derecho) */}
+                    <button 
+                        onClick={toggleMusic}
+                        className="fixed bottom-6 right-6 md:bottom-10 md:right-10 w-12 h-12 rounded-full glass-panel flex items-center justify-center cursor-pointer hover:bg-white/60 transition-all duration-300 z-[9990] shadow-lg border border-gold/30"
+                        aria-label="Toggle Music"
+                    >
+                        <div className={`flex items-end justify-center space-x-1 h-4 w-4 ${isPlaying ? 'playing' : ''}`}>
+                            <div className="eq-bar h-[4px]"></div>
+                            <div className="eq-bar h-[10px]"></div>
+                            <div className="eq-bar h-[6px]"></div>
+                        </div>
+                    </button>
+
+                    {/* === BOTÓN FLOTANTE INTELIGENTE DE COMPRA (CRÍTICO) === */}
+                    <button
+                        onClick={() => {
+                            if (window !== window.parent) {
+                                // Estamos dentro de un iframe (Ej. Creador de Baulia)
+                                window.parent.postMessage('open_checkout', '*');
+                            } else {
+                                // Es un link directo (Visualización externa)
+                                window.location.href = 'https://baulia.com/#planes';
+                            }
+                        }}
+                        className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white font-sans text-xs md:text-sm tracking-widest uppercase rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.4)] border border-gray-700/50 hover:scale-105 transition-transform duration-300 flex items-center gap-2 whitespace-nowrap"
+                    >
+                        <span className="text-sm">✨</span> Adquirir esta tecnología
+                    </button>
+
+                    {/* === MODAL DE RSVP (FORMULARIO Y SUCCESS DEMO) === */}
+                    {isModalOpen && (
+                        <div className="fixed inset-0 z-[10000] flex items-center justify-center px-4">
+                            {/* Backdrop desenfocado */}
+                            <div 
+                                className="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity" 
+                                onClick={() => setIsModalOpen(false)}
+                            ></div>
+
+                            {/* Contenido del Modal (Glassmorphism) */}
+                            <div className="relative w-full max-w-md glass-panel p-8 md:p-12 rounded-[40px] shadow-2xl bg-white/90 animate-[fadeInUp_0.3s_ease-out] text-center border-[0.5px] border-white">
+                                
+                                {/* Botón Cerrar (X) */}
+                                <button 
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="absolute top-6 right-6 text-gray-400 hover:text-gray-800 transition-colors bg-white/50 rounded-full p-2"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
+
+                                <h2 className="font-cursive text-4xl md:text-5xl text-gray-800 mb-4 mt-2">
+                                    {language === 'es' ? 'Reserva tu lugar' : 'Reserve your spot'}
+                                </h2>
+                                <div className="w-12 h-[1px] bg-gold/50 mx-auto mb-8"></div>
+
+                                {demoFormStatus === 'form' ? (
+                                    <form 
+                                        onSubmit={(e) => { 
+                                            e.preventDefault(); 
+                                            setDemoFormStatus('success'); 
+                                        }} 
+                                        className="flex flex-col gap-5 w-full mx-auto"
+                                    >
+                                        <div className="flex flex-col text-left">
+                                            <label className="font-sans text-[10px] tracking-widest uppercase text-dustyrose mb-2 ml-4">Nombre y Apellido</label>
+                                            <input 
+                                                required 
+                                                type="text" 
+                                                placeholder="Ej. Ana García" 
+                                                className="w-full bg-white/60 border border-gold/30 rounded-full px-6 py-4 font-serif text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-gold/40 transition-shadow shadow-inner placeholder:text-gray-400" 
+                                            />
+                                        </div>
+                                        <div className="flex flex-col text-left relative">
+                                            <label className="font-sans text-[10px] tracking-widest uppercase text-dustyrose mb-2 ml-4">Pases a confirmar</label>
+                                            <select className="w-full bg-white/60 border border-gold/30 rounded-full px-6 py-4 font-serif text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-gold/40 transition-shadow shadow-inner appearance-none cursor-pointer pr-12">
+                                                <option>1 Pase</option>
+                                                <option>2 Pases</option>
+                                                <option>3 Pases</option>
+                                            </select>
+                                            {/* Icono flecha nativo de diseño cerrado */}
+                                            <div className="absolute right-6 top-[3.3rem] pointer-events-none text-gold">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                            </div>
+                                        </div>
+                                        <button 
+                                            type="submit" 
+                                            className="mt-4 w-full py-4 rounded-full bg-gray-800 text-white font-sans text-xs tracking-widest uppercase hover:bg-gold transition-colors duration-500 shadow-[0_8px_25px_rgba(0,0,0,0.2)]"
+                                        >
+                                            Generar Pase QR
+                                        </button>
+                                    </form>
+                                ) : (
+                                    <div className="flex flex-col items-center animate-[fadeInUp_0.5s_ease-out] py-4">
+                                        <div className="w-20 h-20 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(74,222,128,0.2)]">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        </div>
+                                        <p className="font-serif text-2xl md:text-3xl text-gray-800 mb-4 leading-relaxed font-medium">
+                                            ¡Excelente!
+                                        </p>
+                                        <p className="font-sans text-sm text-gray-500 max-w-xs leading-relaxed mb-8">
+                                            En una versión real, esto le generaría un código QR único a tu invitado. <br/><br/>
+                                            <strong className="text-gold font-semibold tracking-wide block mt-2">¡Crea tu propio evento en Baulia para desbloquear esta función!</strong>
+                                        </p>
+                                        <button 
+                                            onClick={() => setIsModalOpen(false)} 
+                                            className="px-8 py-3 bg-gray-100 rounded-full text-gray-600 font-sans text-[10px] tracking-widest uppercase hover:bg-gray-200 transition-all duration-300"
+                                        >
+                                            Cerrar
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                </main>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+    
+    <!-- Protección Anti-Robo de Código HTML Nativo (Bloqueo de atajos F12, Ctrl+U) -->
+    <script>
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false; // F12
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Ctrl+Shift+I
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false; // Ctrl+Shift+C
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; // Ctrl+Shift+J
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U
+        }
+    </script>
+</body>
+</html>
