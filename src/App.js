@@ -10264,6 +10264,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // 🔴 ESTADO VITAL PARA EL VISOR MÓVIL (Evita la pantalla negra)
+  const [fullScreenDemo, setFullScreenDemo] = useState(null);
+
   // ESTADOS PARA NOTIFICACIONES DINÁMICAS (HERO)
   const [notifIndex, setNotifIndex] = useState(0);
   
@@ -10320,14 +10323,15 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     { id: 'diamante', nombre: 'Diamante', precio: '2,990', desc: 'La Suite Definitiva. Incluye Muro Social y Black Label.', icon: <Gem size={24}/> }
   ];
 
+  // 🔴 DEMOS CON ADN VISUAL (blob1 y blob2)
   const demos = {
-    boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica y paletas sobrias. El estándar de alta costura nupcial.', features: ['Mesa de Regalos', 'Cuenta Regresiva', 'Pases QR VIP', 'GPS Directo'] },
-    xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón y energía vibrante para la mejor noche de tu vida.', features: ['Muro de Fotos', 'Dress Code Neón', 'Itinerario de Gala', 'Música Automática'] },
-    baby_shower: { id: 'baby_shower', label: 'Baby Shower', url: '/demos/baby_shower/index.html', desc: 'Ternura, interactividad y emoción para recibir a la nueva vida.', features: ['Muro de Fotos', 'Galería', 'Mensajes', 'Música Automática'] },
-    cumple_formal: { id: 'cumple_formal', label: 'Cumpleaños', url: '/demos/cumple_formal/index.html', desc: 'Sofisticación pura para celebrar décadas con mucho estilo.', features: ['Muro de Fotos', 'Galería', 'Itinerario de Gala', 'Música Automática'] },
-    tematicas: { id: 'tematicas', label: 'Fiestas Temáticas', url: '/demos/infantil/index.html', desc: 'Llevamos cualquier concepto al máximo nivel con inmersión total.', features: ['Diseños Temáticos', 'Cuenta Regresiva', 'Galería', 'Música Automática'] }, 
-    bautizo: { id: 'bautizo', label: 'Bautizos', url: '/demos/bautizo/index.html', desc: 'Tonos pastel y diseños angelicales para momentos íntimos en familia.', features: ['Muro de Fotos', 'Galería', 'Mesa de Regalos', 'Música Automática'] },
-    corporativo: { id: 'corporativo', label: 'Galas y Eventos', url: '/demos/corporativo/index.html', desc: 'Convenciones, conciertos y lanzamientos de marca con logística blindada.', features: ['Acreditaciones QR', 'Control de Acceso', 'Itinerario', 'Mapeo 3D'] }
+    boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica y paletas sobrias. El estándar de alta costura nupcial.', features: ['Mesa de Regalos', 'Cuenta Regresiva', 'Pases QR VIP', 'GPS Directo'], blob1: 'bg-[#D4AF37]', blob2: 'bg-[#FDFBF7]' },
+    xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón y energía vibrante para la mejor noche de tu vida.', features: ['Muro de Fotos', 'Dress Code Neón', 'Itinerario de Gala', 'Música Automática'], blob1: 'bg-fuchsia-500', blob2: 'bg-cyan-400' },
+    baby_shower: { id: 'baby_shower', label: 'Baby Shower', url: '/demos/baby_shower/index.html', desc: 'Ternura, interactividad y emoción para recibir a la nueva vida.', features: ['Muro de Fotos', 'Galería', 'Mensajes', 'Música Automática'], blob1: 'bg-sky-300', blob2: 'bg-pink-300' },
+    cumple_formal: { id: 'cumple_formal', label: 'Cumpleaños', url: '/demos/cumple_formal/index.html', desc: 'Sofisticación pura para celebrar décadas con mucho estilo.', features: ['Muro de Fotos', 'Galería', 'Itinerario de Gala', 'Música Automática'], blob1: 'bg-amber-600', blob2: 'bg-slate-800' },
+    tematicas: { id: 'tematicas', label: 'Fiestas Temáticas', url: '/demos/infantil/index.html', desc: 'Llevamos cualquier concepto al máximo nivel con inmersión total.', features: ['Diseños Temáticos', 'Cuenta Regresiva', 'Galería', 'Música Automática'], blob1: 'bg-emerald-400', blob2: 'bg-yellow-400' }, 
+    bautizo: { id: 'bautizo', label: 'Bautizos', url: '/demos/bautizo/index.html', desc: 'Tonos pastel y diseños angelicales para momentos íntimos en familia.', features: ['Muro de Fotos', 'Galería', 'Mesa de Regalos', 'Música Automática'], blob1: 'bg-blue-100', blob2: 'bg-amber-100' },
+    corporativo: { id: 'corporativo', label: 'Galas y Eventos', url: '/demos/corporativo/index.html', desc: 'Convenciones, conciertos y lanzamientos de marca con logística blindada.', features: ['Acreditaciones QR', 'Control de Acceso', 'Itinerario', 'Mapeo 3D'], blob1: 'bg-slate-700', blob2: 'bg-indigo-400' }
   };
   const currentDemo = demos[activeCategory];
 
@@ -10349,7 +10353,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
   const currentNotif = heroNotifications[notifIndex];
 
-  // CARACTERÍSTICAS DE LA TABLA COMPARATIVA (De image_6.png)
   const característicasTabla = [
     { n: 'Diseño Inmersivo Alta Costura', b: true, p: true, o: true, d: true, icon: <Palette/>, grupo: 'LA EXPERIENCIA (FRONTEND PARA INVITADOS)' },
     { n: 'Invitacion personalizada por invitado', b: false, p: false, o: true, d: true, icon: <AlignLeft/>, grupo: 'LA EXPERIENCIA (FRONTEND PARA INVITADOS)' },
@@ -10458,7 +10461,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     ))}
                   </div>
 
-                  {/* COLUMNA 2: PRODUCTOS INDEPENDIENTES (LA MINA DE ORO) */}
+                  {/* COLUMNA 2: PRODUCTOS INDEPENDIENTES */}
                   <div className="space-y-4">
                     <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5 pb-2 mb-4">Experiencias y Complementos</h4>
                     
@@ -10600,7 +10603,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                <BauliaLogo className="h-7 md:h-10 w-auto" />
             </a>
 
-            {/* MENÚ DE ESCRITORIO (Oculto en móviles) */}
+            {/* MENÚ DE ESCRITORIO */}
             <div className="hidden lg:flex gap-8 text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 items-center">
               <a href="#showroom" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">La Colección</a>
               <a href="#experiencia" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Características</a>
@@ -10620,10 +10623,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </button>
             </div>
 
-            {/* CONTROLES DERECHOS (Visibles en ambos) */}
+            {/* CONTROLES DERECHOS */}
             <div className="flex items-center gap-2 md:gap-4">
-              
-              {/* Botón Tema */}
               <button onClick={cycleTheme} className="p-2 text-slate-400 hover:text-amber-600 dark:text-slate-500 dark:hover:text-amber-400 transition-colors" title={`Modo: ${themeSetting.toUpperCase()}`}>
                 {themeSetting === 'auto' ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -10634,38 +10635,31 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 )}
               </button>
 
-              {/* Botón Acceso Clientes */}
               <button onClick={() => window.location.href = 'https://panel.baulia.com'} className="text-[9px] md:text-xs font-black uppercase tracking-widest text-white dark:text-slate-900 bg-slate-900 dark:bg-white px-4 py-2 md:px-5 md:py-2.5 rounded-full hover:scale-105 transition-transform shadow-md whitespace-nowrap">
                 Entrar
               </button>
 
-              {/* Menú Hamburguesa (Solo Móvil) */}
               <button 
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
                 className="p-2 lg:hidden text-slate-900 dark:text-white"
               >
                 {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
-
             </div>
         </div>
 
-        {/* PANEL DESPLEGABLE MÓVIL (Glassmorphism) */}
+        {/* PANEL DESPLEGABLE MÓVIL */}
         {isMobileMenuOpen && (
           <div className="absolute top-20 md:top-24 left-4 right-4 md:left-8 md:right-8 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-3xl border border-slate-200/50 dark:border-white/10 rounded-[2rem] shadow-2xl p-6 flex flex-col gap-6 lg:hidden pointer-events-auto animate-in slide-in-from-top-4 duration-300">
-            
             <a href="#showroom" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-widest text-slate-800 dark:text-slate-200 hover:text-amber-500 transition-colors border-b border-slate-100 dark:border-white/5 pb-4">
               La Colección
             </a>
-            
             <a href="#experiencia" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-widest text-slate-800 dark:text-slate-200 hover:text-amber-500 transition-colors border-b border-slate-100 dark:border-white/5 pb-4">
               Características
             </a>
-            
             <a href="#boveda" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-widest text-slate-800 dark:text-slate-200 hover:text-amber-500 transition-colors border-b border-slate-100 dark:border-white/5 pb-4">
               El Software
             </a>
-            
             <button 
               onClick={() => { setShowAnatomy(true); setIsMobileMenuOpen(false); }} 
               className="w-full bg-[#FDFBF7] dark:bg-white/5 border border-[#D4AF37]/50 px-5 py-4 rounded-xl shadow-sm flex items-center justify-center group"
@@ -10678,7 +10672,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 Magazine
               </span>
             </button>
-
           </div>
         )}
       </nav>
@@ -10745,18 +10738,20 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </section>
 
-      {/* SHOWROOM INTERACTIVO (CORREGIDO Y ALINEADO) */}
+      {/* SHOWROOM INTERACTIVO */}
       <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#050505] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden flex items-center">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber-500/5 dark:bg-amber-600/10 blur-[150px] rounded-full pointer-events-none"></div>
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 w-full flex flex-col items-center">
 
             {!isMobileDevice ? (
+                // ==========================================
+                // --- VERSIÓN ESCRITORIO (INTACTA) ---
+                // ==========================================
                 <RevealSection delay={200} className="w-full relative bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-inner transition-colors duration-700 items-stretch flex group p-12 min-h-[680px]">
                     
                     <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white dark:from-[#080808] to-transparent opacity-40 z-0 transition-colors pointer-events-none"></div>
 
-                    {/* COLUMNA IZQUIERDA (Textos) */}
                     <div className="w-5/12 xl:w-1/3 relative z-30 flex flex-col justify-center h-full gap-10 py-6">
                         
                         <div className="flex flex-col gap-6">
@@ -10809,12 +10804,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA (Dispositivos) - CONTENEDOR MAESTRO */}
                     <div className="w-7/12 xl:w-2/3 relative flex items-center justify-end z-20">
-                        {/* Contenedor relativo que dicta la altura y base de ambos dispositivos */}
                         <div className="relative w-full max-w-[850px] aspect-[16/10] translate-x-[15%]">
                             
-                            {/* MACBOOK */}
                             <div className={`absolute top-0 right-0 w-[90%] h-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-700 ${activeDevice === 'mac' ? 'scale-[1.02] z-30' : 'scale-100 z-10 opacity-70 blur-[1px]'}`}>
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-6 bg-black rounded-b-2xl z-30"></div>
                                 <div className="w-full h-full bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
@@ -10839,9 +10831,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 </div>
                             </div>
 
-                            {/* IPHONE (Alineado con absolute) */}
-                            {/* bottom-[0%] lo alinea exactamente a la base de la Mac. 
-                                left-[0%] lo saca hacia la izquierda de la Mac (puedes ajustar a -5% o 5% si lo quieres más adentro/afuera) */}
                             <div className={`absolute bottom-[0%] left-[0%] transition-all duration-700 ease-out origin-bottom ${activeDevice === 'iphone' ? 'z-40 scale-[1.05]' : 'z-20 scale-95 opacity-80 blur-[1px]'}`}>
                                 <div style={{ width: '220px', height: '458px' }} className="relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0">
                                     <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-[30%] h-[16px] bg-black rounded-full z-30 flex justify-end items-center pr-1.5">
@@ -10881,7 +10870,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 </RevealSection>
             ) : (
                 // ==========================================
-                // --- VERSIÓN MÓVIL (LISTA DE DEMOS DIRECTOS CON ADN VISUAL) ---
+                // --- VERSIÓN MÓVIL (LISTA DE DEMOS CON ADN VISUAL) ---
                 // ==========================================
                 <RevealSection delay={200} className="w-full flex flex-col gap-6 px-2 max-w-md mx-auto">
                     
@@ -10893,7 +10882,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         <p className="text-slate-500 dark:text-slate-400 text-sm font-light">Toca cualquier diseño para vivir la experiencia interactiva a pantalla completa.</p>
                     </div>
                     
-                    {/* 🔴 LISTA DE BOTONES CON ADN VISUAL (Estilo Magazine) */}
+                    {/* 🔴 LISTA DE BOTONES CON ADN VISUAL */}
                     <div className="flex flex-col gap-4 relative z-50">
                         {Object.values(demos).map(demo => (
                             <button 
@@ -10902,20 +10891,20 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 onClick={() => setFullScreenDemo(demo.url)}
                                 className="w-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 p-5 rounded-[2rem] shadow-sm hover:shadow-xl transition-all relative overflow-hidden group flex items-center justify-between text-left"
                             >
-                                {/* Formas abstractas (Blobs) imitando el botón Magazine */}
-                                <div className={`absolute -top-6 -right-2 w-24 h-24 rounded-full opacity-40 mix-blend-multiply dark:mix-blend-screen transition-transform duration-500 group-hover:scale-150 ${demo.blob1}`}></div>
-                                <div className={`absolute -bottom-4 right-12 w-16 h-16 rounded-full opacity-40 mix-blend-multiply dark:mix-blend-screen transition-transform duration-500 group-hover:scale-150 ${demo.blob2}`}></div>
+                                {/* Formas abstractas (Blobs) temáticas */}
+                                <div className={`absolute -top-6 -right-2 w-24 h-24 rounded-full opacity-40 mix-blend-multiply dark:mix-blend-screen transition-transform duration-500 group-hover:scale-150 ${demo.blob1 || 'bg-amber-500'}`}></div>
+                                <div className={`absolute -bottom-4 right-12 w-16 h-16 rounded-full opacity-40 mix-blend-multiply dark:mix-blend-screen transition-transform duration-500 group-hover:scale-150 ${demo.blob2 || 'bg-indigo-500'}`}></div>
                                 
                                 <div className="flex flex-col items-start relative z-10">
                                     <span className="font-bold text-lg text-slate-900 dark:text-white drop-shadow-sm mb-1">
                                         {demo.label}
                                     </span>
-                                    <span className="text-[9px] uppercase tracking-widest text-slate-500 dark:text-slate-300 font-bold flex items-center">
+                                    <span className="text-[9px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold flex items-center">
                                         <PlayCircle size={12} className="mr-1.5" /> Toca para abrir
                                     </span>
                                 </div>
                                 
-                                <div className="relative z-10 w-10 h-10 rounded-full bg-white/50 dark:bg-black/20 backdrop-blur-md flex items-center justify-center border border-white/50 shadow-sm text-slate-700 dark:text-white group-hover:translate-x-1 transition-transform">
+                                <div className="relative z-10 w-10 h-10 rounded-full bg-white/50 dark:bg-black/20 backdrop-blur-md flex items-center justify-center border border-white/50 dark:border-white/10 shadow-sm text-slate-700 dark:text-white group-hover:translate-x-1 transition-transform">
                                     <ChevronRight size={18} />
                                 </div>
                             </button>
@@ -11305,7 +11294,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                    </p>
                  </div>
 
-                 {/* 🔴 EL BOTÓN AHORA VIVE AQUÍ ADENTRO, LLENANDO EL ESPACIO */}
                  <div className="mt-10 relative z-10">
                     <button onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: '1490.00' }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(79,70,229,0.3)]">
                        <Camera size={18} className="mr-3 text-white/70" /> Comprar Muro Social ($1,490)
@@ -11359,15 +11347,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       {/* ========================================== */}
       {/* 🔴 NUEVA SECCIÓN: BLACK LABEL (Lujo Físico) */}
       {/* ========================================== */}
-      {/* ========================================== */}
-      {/* 🔴 NUEVA SECCIÓN: BLACK LABEL (Lujo Físico) */}
-      {/* ========================================== */}
       <section id="black-label" className="py-24 bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white relative overflow-hidden transition-colors duration-700 border-t border-slate-200 dark:border-white/5">
          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[60vw] h-[60vw] bg-amber-500/5 blur-[150px] rounded-full pointer-events-none transition-colors duration-700"></div>
 
          <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 flex flex-col items-center">
             
-            {/* HEADER CENTRALIZADO (Igual que Social Wall) */}
             <RevealSection className="text-center mb-16 max-w-3xl">
               <div className="inline-flex gap-3 bg-white/80 dark:bg-[#111]/80 backdrop-blur-md px-5 py-2.5 rounded-full border border-amber-200 dark:border-amber-500/20 shadow-sm mb-6">
                  <Gem size={20} className="text-amber-500" />
@@ -11386,7 +11370,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch w-full">
               
-              {/* TARJETA IZQUIERDA (Info + Botón) */}
               <RevealSection delay={200} className="bg-white dark:bg-[#111] rounded-[2.5rem] p-10 md:p-12 border border-slate-200 dark:border-white/5 shadow-xl dark:shadow-none flex flex-col justify-between group overflow-hidden relative h-full transition-colors">
                 <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
                 <div className="relative z-10 mb-8">
@@ -11399,7 +11382,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     </p>
                 </div>
                 
-                {/* 🔴 EL BOTÓN AHORA VIVE AQUÍ ADENTRO, LLENANDO EL ESPACIO */}
                 <div className="mt-10 relative z-10">
                    <button onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: '1490.00' }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-900 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(245,158,11,0.3)]">
                       <Printer size={18} className="mr-3 text-slate-900/70" /> Comprar Licencia Física ($1,490)
@@ -11407,7 +11389,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 </div>
               </RevealSection>
 
-              {/* TARJETA DERECHA (Radar) */}
               <RevealSection delay={400} className="bg-white dark:bg-[#111] rounded-[2.5rem] p-10 md:p-12 border border-slate-200 dark:border-white/5 shadow-xl dark:shadow-none flex flex-col group overflow-hidden relative h-full transition-colors">
                 <div className="absolute -top-10 -left-10 w-40 h-40 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
                 <div className="relative z-10 mb-8">
@@ -11693,6 +11674,34 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </footer>
 
+      {/* 🔴 OVERLAY: DEMO A PANTALLA COMPLETA (VISOR INTERNO MÓVIL) */}
+      {fullScreenDemo && (
+        <div className="fixed inset-0 z-[999999] bg-black animate-in slide-in-from-bottom-full duration-300 flex flex-col">
+           
+           {/* HEADER PARA CERRAR EL DEMO */}
+           <div className="bg-[#050505] border-b border-white/10 px-4 py-4 flex items-center justify-between z-10 shadow-md">
+               <div className="flex items-center gap-2 text-white">
+                  <span className="text-xs font-editorial font-bold italic tracking-widest text-white">Baulia</span>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest border-l border-white/20 pl-2 ml-1">Demo en Vivo</span>
+               </div>
+               <button 
+                 type="button"
+                 onClick={() => setFullScreenDemo(null)} 
+                 className="bg-white/10 hover:bg-rose-500 text-white px-5 py-2 rounded-full font-bold text-[10px] uppercase tracking-widest transition-colors flex items-center border border-white/10 shadow-sm"
+               >
+                  <X size={14} className="mr-1.5" /> Volver
+               </button>
+           </div>
+
+           {/* IFRAME DE LA INVITACIÓN */}
+           <iframe 
+             src={fullScreenDemo} 
+             className="w-full flex-1 border-0 bg-white" 
+             title="Demo a Pantalla Completa"
+           />
+        </div>
+      )}
+
       </div> {/* <--- CIERRE DEL WRAPPER DEL CONTENIDO PRINCIPAL */}
 
       {/* MODALES LEGALES Y ACERCA DE (OVERLAYS) */}
@@ -11752,33 +11761,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               )}
             </div>
           </div>
-        </div>
-      )}
-      {/* 🔴 OVERLAY: DEMO A PANTALLA COMPLETA (VISOR INTERNO MÓVIL) VA AQUÍ AFUERA */}
-      {fullScreenDemo && (
-        <div className="fixed inset-0 z-[999999] bg-black animate-in slide-in-from-bottom-full duration-300 flex flex-col">
-           
-           {/* HEADER PARA CERRAR EL DEMO */}
-           <div className="bg-[#050505] border-b border-white/10 px-4 py-4 flex items-center justify-between z-10 shadow-md">
-               <div className="flex items-center gap-2 text-white">
-                  <span className="text-xs font-editorial font-bold italic tracking-widest text-white">Baulia</span>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest border-l border-white/20 pl-2 ml-1">Demo en Vivo</span>
-               </div>
-               <button 
-                 type="button"
-                 onClick={() => setFullScreenDemo(null)} 
-                 className="bg-white/10 hover:bg-rose-500 text-white px-5 py-2 rounded-full font-bold text-[10px] uppercase tracking-widest transition-colors flex items-center border border-white/10 shadow-sm"
-               >
-                  <X size={14} className="mr-1.5" /> Volver
-               </button>
-           </div>
-
-           {/* IFRAME DE LA INVITACIÓN */}
-           <iframe 
-             src={fullScreenDemo} 
-             className="w-full flex-1 border-0 bg-white" 
-             title="Demo a Pantalla Completa"
-           />
         </div>
       )}
 
