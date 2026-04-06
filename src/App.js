@@ -10897,6 +10897,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 0%, 100% { transform: translateY(0px); }
                                 50% { transform: translateY(-6px); }
                             }
+                            @keyframes floatCloudMini {
+                                0% { transform: translate(-60px, var(--y-offset)) scale(var(--scale)) rotate(var(--rot)); }
+                                100% { transform: translate(350px, var(--y-offset)) scale(var(--scale)) rotate(var(--rot)); }
+                            }
                         `}</style>
 
                         {Object.values(demos).map(demo => {
@@ -10942,7 +10946,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 );
                             }
 
-                            // 💎 2. ESTILOS: INVITACIÓN DE CUMPLEAÑOS (Clara, Con Flor Gigante y Cut-off)
+                            // 💎 2. ESTILOS: INVITACIÓN DE CUMPLEAÑOS
                             if (demo.id === 'cumple_formal') {
                                 return (
                                     <button 
@@ -10989,7 +10993,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 );
                             }
 
-                            // 🎮 3. ESTILOS: INVITACIÓN MINECRAFT (Redondeado pero Pixelado)
+                            // 🎮 3. ESTILOS: INVITACIÓN MINECRAFT 
                             if (demo.id === 'tematicas') {
                                 return (
                                     <button 
@@ -11020,7 +11024,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 );
                             }
 
-                            // 🕊️ 4. ESTILOS: INVITACIÓN BAUTIZO (Ivory, Champagne y Great Vibes)
+                            // 🕊️ 4. ESTILOS: INVITACIÓN BAUTIZO (Ivory, Nubes y Ositos)
                             if (demo.id === 'bautizo') {
                                 return (
                                     <button 
@@ -11029,12 +11033,26 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         onClick={() => setFullScreenDemo(demo.url)}
                                         className="w-full bg-[#FAF9F6] border border-[#D4AF37]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_30px_rgba(212,175,55,0.15)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
                                     >
-                                        {/* Luces sutiles angelicales (Sage y Champagne) */}
                                         <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#8A9A86]/10 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         <div className="absolute -bottom-8 left-8 w-24 h-24 bg-[#D4AF37]/10 blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         
+                                        {/* ☁️ OSITOS Y NUBES FLOTANTES */}
+                                        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30 group-hover:opacity-60 transition-opacity duration-700">
+                                            <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 12s linear infinite', animationDelay: '0s', '--y-offset': '10px', '--scale': '0.9', '--rot': '-5deg' }}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg>
+                                            </div>
+                                            <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 18s linear infinite', animationDelay: '-5s', '--y-offset': '35px', '--scale': '0.7', '--rot': '10deg' }}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="14" r="4.5" /><circle cx="12" cy="8" r="3.5" /><circle cx="8.5" cy="5.5" r="1.5" /><circle cx="15.5" cy="5.5" r="1.5" /><circle cx="6.5" cy="13" r="1.5" /><circle cx="17.5" cy="13" r="1.5" /><circle cx="9.5" cy="18" r="1.5" /><circle cx="14.5" cy="18" r="1.5" /><path d="M11.5 9.5h1" strokeWidth="1.2" strokeLinecap="round" /></svg>
+                                            </div>
+                                            <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 15s linear infinite', animationDelay: '-10s', '--y-offset': '60px', '--scale': '0.8', '--rot': '5deg' }}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg>
+                                            </div>
+                                            <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 22s linear infinite', animationDelay: '-12s', '--y-offset': '15px', '--scale': '0.6', '--rot': '-10deg' }}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="14" r="4.5" /><circle cx="12" cy="8" r="3.5" /><circle cx="8.5" cy="5.5" r="1.5" /><circle cx="15.5" cy="5.5" r="1.5" /><circle cx="6.5" cy="13" r="1.5" /><circle cx="17.5" cy="13" r="1.5" /><circle cx="9.5" cy="18" r="1.5" /><circle cx="14.5" cy="18" r="1.5" /><path d="M11.5 9.5h1" strokeWidth="1.2" strokeLinecap="round" /></svg>
+                                            </div>
+                                        </div>
+
                                         <div className="flex flex-col items-start relative z-10">
-                                            {/* Monograma de fondo en Great Vibes */}
                                             <div className="absolute -left-2 -top-5 opacity-5 pointer-events-none text-[#D4AF37]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '4rem', lineHeight: '1' }}>
                                                 JA
                                             </div>
