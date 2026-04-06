@@ -10884,31 +10884,101 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     
                     {/* 🔴 LISTA DE BOTONES CON ADN VISUAL */}
                     <div className="flex flex-col gap-4 relative z-50">
-                        {Object.values(demos).map(demo => (
-                            <button 
-                                key={demo.id}
-                                type="button"
-                                onClick={() => setFullScreenDemo(demo.url)}
-                                className="w-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 p-5 rounded-[2rem] shadow-sm hover:shadow-xl transition-all relative overflow-hidden group flex items-center justify-between text-left"
-                            >
-                                {/* Formas abstractas (Blobs) temáticas */}
-                                <div className={`absolute -top-6 -right-2 w-24 h-24 rounded-full opacity-40 mix-blend-multiply dark:mix-blend-screen transition-transform duration-500 group-hover:scale-150 ${demo.blob1 || 'bg-amber-500'}`}></div>
-                                <div className={`absolute -bottom-4 right-12 w-16 h-16 rounded-full opacity-40 mix-blend-multiply dark:mix-blend-screen transition-transform duration-500 group-hover:scale-150 ${demo.blob2 || 'bg-indigo-500'}`}></div>
-                                
-                                <div className="flex flex-col items-start relative z-10">
-                                    <span className="font-bold text-lg text-slate-900 dark:text-white drop-shadow-sm mb-1">
-                                        {demo.label}
-                                    </span>
-                                    <span className="text-[9px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold flex items-center">
-                                        <PlayCircle size={12} className="mr-1.5" /> Toca para abrir
-                                    </span>
-                                </div>
-                                
-                                <div className="relative z-10 w-10 h-10 rounded-full bg-white/50 dark:bg-black/20 backdrop-blur-md flex items-center justify-center border border-white/50 dark:border-white/10 shadow-sm text-slate-700 dark:text-white group-hover:translate-x-1 transition-transform">
-                                    <ChevronRight size={18} />
-                                </div>
-                            </button>
-                        ))}
+                        
+                        {/* INYECTAMOS LA ANIMACIÓN DE PÉTALOS (Aislada solo para estos botones) */}
+                        <style>{`
+                            @keyframes petalFallMini {
+                                0% { transform: translateY(-20px) rotate(0deg) scale(0.8); opacity: 0; }
+                                20% { opacity: 0.6; }
+                                80% { opacity: 0.6; }
+                                100% { transform: translateY(120px) rotate(360deg) scale(1); opacity: 0; }
+                            }
+                        `}</style>
+
+                        {Object.values(demos).map(demo => {
+                            // 💎 ESTILOS ESPECÍFICOS PARA LA INVITACIÓN DE BODA (ISABELLA & ALEXANDER)
+                            if (demo.id === 'boda') {
+                                return (
+                                    <button 
+                                        key={demo.id}
+                                        type="button"
+                                        onClick={() => setFullScreenDemo(demo.url)}
+                                        className="w-full bg-[#FDFBF7] border border-[#D4AF37]/30 p-6 rounded-[2.5rem] shadow-[0_15px_35px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_rgba(212,175,55,0.15)] hover:-translate-y-1 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
+                                    >
+                                        {/* Fondo sutil tipo papel / Textura */}
+                                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-[0.03]"></div>
+                                        
+                                        {/* Luces ambientales (Sage y Rose) */}
+                                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#8DB580]/10 blur-[40px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -bottom-10 left-10 w-24 h-24 bg-[#F4AAB9]/10 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        
+                                        {/* 🌸 PÉTALOS CAYENDO (Animación CSS inyectada) */}
+                                        <div className="absolute top-0 left-[20%] w-2 h-3 bg-[#F4AAB9] opacity-0 pointer-events-none" style={{ animation: 'petalFallMini 4s linear infinite', borderRadius: '50% 0 50% 50%' }}></div>
+                                        <div className="absolute top-0 left-[50%] w-2.5 h-3.5 bg-[#D4AF37] opacity-0 pointer-events-none" style={{ animation: 'petalFallMini 5s linear infinite 1.5s', borderRadius: '50% 0 50% 50%' }}></div>
+                                        <div className="absolute top-0 left-[80%] w-2 h-3 bg-[#F4AAB9] opacity-0 pointer-events-none" style={{ animation: 'petalFallMini 4.5s linear infinite 2.5s', borderRadius: '50% 0 50% 50%' }}></div>
+
+                                        <div className="flex flex-col items-start relative z-10">
+                                            {/* Monograma sutil de fondo */}
+                                            <div className="absolute -left-2 -top-2 opacity-5 pointer-events-none" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '4rem', lineHeight: '1' }}>
+                                                I<span style={{ fontFamily: '"Pinyon Script", cursive' }}>&</span>A
+                                            </div>
+                                            
+                                            <span 
+                                                className="text-[10px] tracking-[0.4em] text-[#8DB580] uppercase mb-2 font-bold"
+                                                style={{ fontFamily: '"Montserrat", sans-serif' }}
+                                            >
+                                                Alta Costura
+                                            </span>
+                                            
+                                            <span 
+                                                className="text-3xl text-[#2C3531] mb-1 font-light tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300"
+                                                style={{ fontFamily: '"Cormorant Garamond", serif' }}
+                                            >
+                                                Bodas de Lujo
+                                            </span>
+                                            
+                                            <span 
+                                                className="text-[9px] uppercase tracking-widest text-[#2C3531]/50 font-bold flex items-center mt-2"
+                                                style={{ fontFamily: '"Montserrat", sans-serif' }}
+                                            >
+                                                <PlayCircle size={12} className="mr-1.5 text-[#D4AF37]" /> Toca para abrir
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="relative z-10 w-12 h-12 rounded-full bg-white flex items-center justify-center border border-[#D4AF37]/30 shadow-sm text-[#2C3531] group-hover:bg-[#F4AAB9]/10 group-hover:border-[#F4AAB9] transition-colors duration-500">
+                                            <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform duration-300 text-[#D4AF37] group-hover:text-[#D88A9B]" />
+                                        </div>
+                                    </button>
+                                );
+                            }
+
+                            // ESTILO ESTÁNDAR PARA EL RESTO DE LOS BOTONES
+                            return (
+                                <button 
+                                    key={demo.id}
+                                    type="button"
+                                    onClick={() => setFullScreenDemo(demo.url)}
+                                    className="w-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 p-5 rounded-[2rem] shadow-sm hover:shadow-xl transition-all relative overflow-hidden group flex items-center justify-between text-left"
+                                >
+                                    {/* Formas abstractas (Blobs) temáticas */}
+                                    <div className={`absolute -top-6 -right-2 w-24 h-24 rounded-full opacity-40 mix-blend-multiply dark:mix-blend-screen transition-transform duration-500 group-hover:scale-150 ${demo.blob1 || 'bg-amber-500'}`}></div>
+                                    <div className={`absolute -bottom-4 right-12 w-16 h-16 rounded-full opacity-40 mix-blend-multiply dark:mix-blend-screen transition-transform duration-500 group-hover:scale-150 ${demo.blob2 || 'bg-indigo-500'}`}></div>
+                                    
+                                    <div className="flex flex-col items-start relative z-10">
+                                        <span className="font-bold text-lg text-slate-900 dark:text-white drop-shadow-sm mb-1">
+                                            {demo.label}
+                                        </span>
+                                        <span className="text-[9px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold flex items-center">
+                                            <PlayCircle size={12} className="mr-1.5" /> Toca para abrir
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="relative z-10 w-10 h-10 rounded-full bg-white/50 dark:bg-black/20 backdrop-blur-md flex items-center justify-center border border-white/50 dark:border-white/10 shadow-sm text-slate-700 dark:text-white group-hover:translate-x-1 transition-transform">
+                                        <ChevronRight size={18} />
+                                    </div>
+                                </button>
+                            );
+                        })}
                     </div>
 
                     <button 
