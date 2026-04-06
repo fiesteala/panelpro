@@ -10262,7 +10262,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   // ESTADOS PARA EL SHOWROOM INCRUSTADO
   const [activeCategory, setActiveCategory] = useState('boda');
   const [isMobileDevice, setIsMobileDevice] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // ESTADOS PARA NOTIFICACIONES DINÁMICAS (HERO)
   const [notifIndex, setNotifIndex] = useState(0);
@@ -10589,98 +10588,45 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 dark:bg-amber-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
         <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-500/5 dark:bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
 
-      {/* NAVEGACIÓN FLOTANTE (RESPONSIVA) */}
+      {/* NAVEGACIÓN FLOTANTE */}
       <nav className="fixed w-full z-50 top-0 pt-4 md:pt-6 px-4 md:px-8 pointer-events-none">
-        
-        {/* BARRA PRINCIPAL */}
-        <div className="max-w-[1400px] mx-auto bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-2xl border border-slate-200/50 dark:border-white/10 h-16 md:h-20 rounded-[2rem] flex items-center justify-between px-4 md:px-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] pointer-events-auto transition-colors duration-700 relative z-50">
-            
-            {/* LOGO */}
+        <div className="max-w-[1400px] mx-auto bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-2xl border border-slate-200/50 dark:border-white/10 h-16 md:h-20 rounded-[2rem] flex items-center justify-between px-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] pointer-events-auto transition-colors duration-700">
             <a href="/" className="flex items-center group">
-               <BauliaLogo className="h-7 md:h-10 w-auto" />
+               <BauliaLogo className="h-8 md:h-10 w-auto" />
             </a>
-
-            {/* MENÚ DE ESCRITORIO (Oculto en móviles) */}
-            <div className="hidden lg:flex gap-8 text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 items-center">
-              <a href="#showroom" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">La Colección</a>
-              <a href="#experiencia" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Características</a>
-              <a href="#boveda" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">El Software</a>
-              
-              <button 
-                onClick={() => setShowAnatomy(true)} 
-                className="bg-[#FDFBF7] border border-[#D4AF37]/50 px-5 py-2 rounded-full shadow-[0_4px_15px_rgba(247,108,130,0.2)] hover:shadow-[0_6px_25px_rgba(247,108,130,0.4)] hover:scale-105 transition-all flex items-center group ml-2"
-              >
-                <BookOpenText size={16} className="text-[#8DB580] mr-2.5 group-hover:-rotate-12 transition-transform duration-300"/>
-                <span style={{ fontFamily: '"Cormorant Garamond", serif', fontWeight: 600 }} className="text-[#2A2A2A] text-[13px] tracking-[0.2em] uppercase mr-2">
-                  Baulia
-                </span>
-                <span style={{ fontFamily: '"Pinyon Script", cursive' }} className="text-[#F76C82] text-[24px] lowercase tracking-normal leading-none mt-1">
-                  Magazine
-                </span>
-              </button>
-            </div>
-
-            {/* CONTROLES DERECHOS (Visibles en ambos) */}
-            <div className="flex items-center gap-2 md:gap-4">
-              
-              {/* Botón Tema */}
-              <button onClick={cycleTheme} className="p-2 text-slate-400 hover:text-amber-600 dark:text-slate-500 dark:hover:text-amber-400 transition-colors" title={`Modo: ${themeSetting.toUpperCase()}`}>
-                {themeSetting === 'auto' ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                ) : themeSetting === 'dark' ? (
-                  <Moon size={18} />
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                )}
-              </button>
-
-              {/* Botón Acceso Clientes */}
-              <button onClick={() => window.location.href = 'https://panel.baulia.com'} className="text-[9px] md:text-xs font-black uppercase tracking-widest text-white dark:text-slate-900 bg-slate-900 dark:bg-white px-4 py-2 md:px-5 md:py-2.5 rounded-full hover:scale-105 transition-transform shadow-md whitespace-nowrap">
-                Entrar
-              </button>
-
-              {/* Menú Hamburguesa (Solo Móvil) */}
-              <button 
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-                className="p-2 lg:hidden text-slate-900 dark:text-white"
-              >
-                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
-
-            </div>
-        </div>
-
-        {/* PANEL DESPLEGABLE MÓVIL (Glassmorphism) */}
-        {isMobileMenuOpen && (
-          <div className="absolute top-20 md:top-24 left-4 right-4 md:left-8 md:right-8 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-3xl border border-slate-200/50 dark:border-white/10 rounded-[2rem] shadow-2xl p-6 flex flex-col gap-6 lg:hidden pointer-events-auto animate-in slide-in-from-top-4 duration-300">
-            
-            <a href="#showroom" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-widest text-slate-800 dark:text-slate-200 hover:text-amber-500 transition-colors border-b border-slate-100 dark:border-white/5 pb-4">
-              La Colección
-            </a>
-            
-            <a href="#experiencia" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-widest text-slate-800 dark:text-slate-200 hover:text-amber-500 transition-colors border-b border-slate-100 dark:border-white/5 pb-4">
-              Características
-            </a>
-            
-            <a href="#boveda" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-widest text-slate-800 dark:text-slate-200 hover:text-amber-500 transition-colors border-b border-slate-100 dark:border-white/5 pb-4">
-              El Software
-            </a>
+          <div className="hidden lg:flex gap-8 text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 items-center">
+            <a href="#showroom" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">La Colección</a>
+            <a href="#experiencia" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Características</a>
+            <a href="#boveda" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">El Software</a>
             
             <button 
-              onClick={() => { setShowAnatomy(true); setIsMobileMenuOpen(false); }} 
-              className="w-full bg-[#FDFBF7] dark:bg-white/5 border border-[#D4AF37]/50 px-5 py-4 rounded-xl shadow-sm flex items-center justify-center group"
+              onClick={() => setShowAnatomy(true)} 
+              className="bg-[#FDFBF7] border border-[#D4AF37]/50 px-5 py-2 rounded-full shadow-[0_4px_15px_rgba(247,108,130,0.2)] hover:shadow-[0_6px_25px_rgba(247,108,130,0.4)] hover:scale-105 transition-all flex items-center group ml-2"
             >
-              <BookOpenText size={18} className="text-[#8DB580] mr-3"/>
-              <span style={{ fontFamily: '"Cormorant Garamond", serif', fontWeight: 600 }} className="text-slate-900 dark:text-white text-sm tracking-[0.2em] uppercase mr-2">
+              <BookOpenText size={16} className="text-[#8DB580] mr-2.5 group-hover:-rotate-12 transition-transform duration-300"/>
+              <span style={{ fontFamily: '"Cormorant Garamond", serif', fontWeight: 600 }} className="text-[#2A2A2A] text-[13px] tracking-[0.2em] uppercase mr-2">
                 Baulia
               </span>
-              <span style={{ fontFamily: '"Pinyon Script", cursive' }} className="text-[#F76C82] text-2xl lowercase tracking-normal leading-none mt-1">
+              <span style={{ fontFamily: '"Pinyon Script", cursive' }} className="text-[#F76C82] text-[24px] lowercase tracking-normal leading-none mt-1">
                 Magazine
               </span>
             </button>
-
           </div>
-        )}
+          <div className="flex items-center gap-4">
+            <button onClick={cycleTheme} className="text-slate-400 hover:text-amber-600 dark:text-slate-500 dark:hover:text-amber-400 transition-colors" title={`Modo: ${themeSetting.toUpperCase()}`}>
+              {themeSetting === 'auto' ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              ) : themeSetting === 'dark' ? (
+                <Moon size={20} />
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              )}
+            </button>
+            <button onClick={() => window.location.href = 'https://panel.baulia.com'} className="text-[10px] md:text-xs font-black uppercase tracking-widest text-white dark:text-slate-900 bg-slate-900 dark:bg-white px-5 py-2.5 md:px-6 md:py-3 rounded-full hover:scale-105 transition-transform shadow-md">
+              Acceso Clientes
+            </button>
+          </div>
+        </div>
       </nav>
 
       {/* HERO SECTION */}
