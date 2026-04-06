@@ -10949,18 +10949,14 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         key={demo.id}
                                         type="button"
                                         onClick={() => setFullScreenDemo(demo.url)}
-                                        // Fondo claro Ivory, sombra suave.
                                         className="w-full bg-[#FDFBF7] border border-[#D4AF37]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.05)] hover:shadow-[0_15px_30px_rgba(212,175,55,0.15)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
                                     >
-                                        {/* Luces sutiles con tema Primavera (Pink y Yellow) */}
                                         <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#F76C82]/10 blur-[40px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         <div className="absolute -bottom-10 left-8 w-24 h-24 bg-[#FFD166]/10 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         
-                                        {/* 🌸 FLOR GIGANTE (Spring Vibrante) - Posicionada abajo a la derecha, recortada */}
                                         <div className="absolute -bottom-16 -right-20 pointer-events-none opacity-60 z-0 group-hover:scale-110 transition-transform duration-1000 delay-100" style={{ animation: 'floatMini 6s ease-in-out infinite' }}>
                                             <svg viewBox="0 0 200 200" className="w-64 h-64" xmlns="http://www.w3.org/2000/svg">
                                                 <g transform="scale(0.8) translate(20, 20)">
-                                                    {/* Usamos los colores originales de la invitación */}
                                                     <path d="M 40 100 C 10 70, 20 20, 80 10 C 80 60, 60 90, 40 100 Z" fill="#8DB580" opacity="0.8"/>
                                                     <path d="M 100 40 C 70 10, 20 20, 10 80 C 60 80, 90 60, 100 40 Z" fill="#A3C697" opacity="0.9"/>
                                                     <circle cx="120" cy="70" r="30" fill="#FFD166" />
@@ -10971,28 +10967,66 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         </div>
 
                                         <div className="flex flex-col items-start relative z-10">
-                                            {/* Monograma 30 de fondo sutil en Oro */}
                                             <div className="absolute -left-3 -top-3 opacity-5 pointer-events-none text-[#D4AF37]" style={{ fontFamily: '"Pinyon Script", cursive', fontSize: '3rem', lineHeight: '1' }}>
                                                 30
                                             </div>
                                             
-                                            {/* Subtexto en Spring Green */}
                                             <span className="text-[8px] tracking-[0.4em] text-[#8DB580] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>
                                                 Celebrando la vida
                                             </span>
-                                            {/* Texto Principal: Fondo claro -> texto oscuro. Hover rosa. */}
                                             <span className="text-2xl text-[#1a1a1a] font-light tracking-wide group-hover:text-[#F76C82] transition-colors duration-300" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
                                                 {demo.label}
                                             </span>
-                                            {/* Pequeño texto ajustado para modo claro */}
                                             <span className="text-[8px] uppercase tracking-widest text-[#2C3531]/60 font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}>
                                                 <PlayCircle size={10} className="mr-1.5 text-[#D4AF37]" /> Toca para abrir
                                             </span>
                                         </div>
                                         
-                                        {/* Flecha container en modo claro adaptando estilo Boda */}
                                         <div className="relative z-10 w-10 h-10 rounded-full bg-white flex items-center justify-center border border-[#D4AF37]/30 shadow-sm text-[#2A2A2A] group-hover:bg-[#F76C82]/10 group-hover:border-[#F76C82] transition-colors duration-500 shrink-0">
                                             <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300 text-[#D4AF37] group-hover:text-[#F76C82]" />
+                                        </div>
+                                    </button>
+                                );
+                            }
+
+                            // 🎮 3. ESTILOS: INVITACIÓN MINECRAFT (Textura de tierra, pasto y pixel font)
+                            if (demo.id === 'tematicas') {
+                                return (
+                                    <button 
+                                        key={demo.id}
+                                        type="button"
+                                        onClick={() => setFullScreenDemo(demo.url)}
+                                        // 🔴 Fondo Tierra de Minecraft + Borde Negro
+                                        className="w-full bg-[#5d4037] border-4 border-black py-3.5 px-6 shadow-[inset_-4px_-4px_0px_0px_rgba(0,0,0,0.5),_inset_4px_4px_0px_0px_rgba(255,255,255,0.5)] active:translate-y-1 active:shadow-[inset_4px_4px_0px_0px_rgba(0,0,0,0.5),_inset_-4px_-4px_0px_0px_rgba(255,255,255,0.5)] transition-all relative overflow-hidden group flex items-center justify-between text-left"
+                                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%233e2723\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'%3E%3Cpath d=\'M0 0h40v40H0V0zm20 20h20v20H20V20zM0 20h20v20H0V20zM20 0h20v20H20V0z\'/%3E%3C/g%3E%3C/svg%3E")' }}
+                                    >
+                                        {/* Franja de Pasto en la parte superior */}
+                                        <div className="absolute top-0 left-0 w-full h-4 bg-[#388e3c] border-b-4 border-[#1b5e20] pointer-events-none"></div>
+
+                                        <div className="flex flex-col items-start relative z-10 pt-2">
+                                            <span 
+                                                className="text-[12px] tracking-[0.2em] text-[#388e3c] drop-shadow-[2px_2px_0_#000] uppercase mb-0.5" 
+                                                style={{ fontFamily: '"VT323", monospace' }}
+                                            >
+                                                Mundo Gamer
+                                            </span>
+                                            <span 
+                                                className="text-3xl text-white drop-shadow-[2px_2px_0_#000] group-hover:text-green-400 transition-colors" 
+                                                style={{ fontFamily: '"VT323", monospace', lineHeight: '0.9' }}
+                                            >
+                                                {demo.label}
+                                            </span>
+                                            <span 
+                                                className="text-[12px] uppercase tracking-widest text-white/70 drop-shadow-[1px_1px_0_#000] flex items-center mt-1" 
+                                                style={{ fontFamily: '"VT323", monospace' }}
+                                            >
+                                                <PlayCircle size={10} className="mr-1.5 text-white" /> Start Game
+                                            </span>
+                                        </div>
+                                        
+                                        {/* Botón de flecha estilo bloque de Minecraft */}
+                                        <div className="relative z-10 w-10 h-10 bg-[#C6C6C6] border-2 border-black flex items-center justify-center shadow-[inset_-2px_-2px_0px_0px_#555,_inset_2px_2px_0px_0px_#FFF] text-[#202020] group-hover:bg-green-500 transition-colors duration-200 shrink-0">
+                                            <ChevronRight size={18} className="text-black" />
                                         </div>
                                     </button>
                                 );
