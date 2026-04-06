@@ -11754,33 +11754,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           </div>
         </div>
       )}
-      {/* 🔴 OVERLAY: DEMO A PANTALLA COMPLETA (VISOR INTERNO) */}
-      {fullScreenDemo && (
-        <div className="fixed inset-0 z-[999999] bg-black animate-in slide-in-from-bottom-full duration-300 flex flex-col">
-           
-           {/* HEADER DE NAVEGACIÓN PARA CERRAR EL DEMO */}
-           <div className="bg-[#050505] border-b border-white/10 px-4 py-4 flex items-center justify-between z-10 shadow-md">
-               <div className="flex items-center gap-2 text-white">
-                  <BauliaLogo className="h-6 w-auto" forceWhite={true} />
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest border-l border-white/20 pl-2 ml-1">Demo en Vivo</span>
-               </div>
-               <button 
-                 type="button"
-                 onClick={() => setFullScreenDemo(null)} 
-                 className="bg-white/10 hover:bg-rose-500 text-white px-5 py-2.5 rounded-full font-bold text-[10px] uppercase tracking-widest transition-colors flex items-center border border-white/10 shadow-sm"
-               >
-                  <X size={14} className="mr-1.5" /> Volver a Baulia
-               </button>
-           </div>
 
-           {/* IFRAME DE LA INVITACIÓN */}
-           <iframe 
-             src={fullScreenDemo} 
-             className="w-full flex-1 border-0 bg-white" 
-             title="Demo a Pantalla Completa"
-           />
-        </div>
-      )}
     </div>
   );
 };
