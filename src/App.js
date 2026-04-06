@@ -10989,18 +10989,18 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 );
                             }
 
-                            // 🎮 3. ESTILOS: INVITACIÓN MINECRAFT (Textura de tierra, pasto y pixel font)
+                            // 🎮 3. ESTILOS: INVITACIÓN MINECRAFT (Redondeado pero Pixelado)
                             if (demo.id === 'tematicas') {
                                 return (
                                     <button 
                                         key={demo.id}
                                         type="button"
                                         onClick={() => setFullScreenDemo(demo.url)}
-                                        // 🔴 Fondo Tierra de Minecraft + Borde Negro
-                                        className="w-full bg-[#5d4037] border-4 border-black py-3.5 px-6 shadow-[inset_-4px_-4px_0px_0px_rgba(0,0,0,0.5),_inset_4px_4px_0px_0px_rgba(255,255,255,0.5)] active:translate-y-1 active:shadow-[inset_4px_4px_0px_0px_rgba(0,0,0,0.5),_inset_-4px_-4px_0px_0px_rgba(255,255,255,0.5)] transition-all relative overflow-hidden group flex items-center justify-between text-left"
+                                        // 🔴 CAMBIO AQUÍ: Agregamos rounded-[2rem] y overflow-hidden
+                                        className="w-full bg-[#5d4037] border-4 border-black py-3.5 px-6 rounded-[2rem] shadow-[inset_-4px_-4px_0px_0px_rgba(0,0,0,0.5),_inset_4px_4px_0px_0px_rgba(255,255,255,0.5)] active:translate-y-1 active:shadow-[inset_4px_4px_0px_0px_rgba(0,0,0,0.5),_inset_-4px_-4px_0px_0px_rgba(255,255,255,0.5)] transition-all relative overflow-hidden group flex items-center justify-between text-left"
                                         style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%233e2723\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'%3E%3Cpath d=\'M0 0h40v40H0V0zm20 20h20v20H20V20zM0 20h20v20H0V20zM20 0h20v20H20V0z\'/%3E%3C/g%3E%3C/svg%3E")' }}
                                     >
-                                        {/* Franja de Pasto en la parte superior */}
+                                        {/* Franja de Pasto (overflow-hidden se encarga de redondear las esquinas superiores) */}
                                         <div className="absolute top-0 left-0 w-full h-4 bg-[#388e3c] border-b-4 border-[#1b5e20] pointer-events-none"></div>
 
                                         <div className="flex flex-col items-start relative z-10 pt-2">
@@ -11024,7 +11024,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                             </span>
                                         </div>
                                         
-                                        {/* Botón de flecha estilo bloque de Minecraft */}
                                         <div className="relative z-10 w-10 h-10 bg-[#C6C6C6] border-2 border-black flex items-center justify-center shadow-[inset_-2px_-2px_0px_0px_#555,_inset_2px_2px_0px_0px_#FFF] text-[#202020] group-hover:bg-green-500 transition-colors duration-200 shrink-0">
                                             <ChevronRight size={18} className="text-black" />
                                         </div>
