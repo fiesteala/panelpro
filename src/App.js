@@ -10901,6 +10901,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 0% { transform: translate(-60px, var(--y-offset)) scale(var(--scale)) rotate(var(--rot)); }
                                 100% { transform: translate(350px, var(--y-offset)) scale(var(--scale)) rotate(var(--rot)); }
                             }
+                            @keyframes floatItemMini {
+                                0% { transform: translateY(10px) translateX(0px) rotate(0deg) scale(0.8); opacity: 0; }
+                                20% { opacity: 1; }
+                                50% { transform: translateY(-20px) translateX(10px) rotate(10deg) scale(1); }
+                                80% { opacity: 1; }
+                                100% { transform: translateY(-50px) translateX(-10px) rotate(-10deg) scale(1.1); opacity: 0; }
+                            }
                         `}</style>
 
                         {Object.values(demos).map(demo => {
@@ -10946,7 +10953,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 );
                             }
 
-                            // 💎 2. ESTILOS: INVITACIÓN DE CUMPLEAÑOS
+                            // 💎 2. ESTILOS: INVITACIÓN DE CUMPLEAÑOS (Clara, Con Flor Gigante y Cut-off)
                             if (demo.id === 'cumple_formal') {
                                 return (
                                     <button 
@@ -11070,6 +11077,55 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         
                                         <div className="relative z-10 w-10 h-10 rounded-full bg-white flex items-center justify-center border border-[#D4AF37]/30 shadow-sm text-[#333333] group-hover:bg-[#D4AF37]/10 group-hover:border-[#D4AF37] transition-colors duration-500 shrink-0">
                                             <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300 text-[#D4AF37]" />
+                                        </div>
+                                    </button>
+                                );
+                            }
+                            
+                            // 🍼 5. ESTILOS: INVITACIÓN BABY SHOWER (Blush, Dusty Rose, Monograma TE)
+                            if (demo.id === 'baby_shower') {
+                                return (
+                                    <button 
+                                        key={demo.id}
+                                        type="button"
+                                        onClick={() => setFullScreenDemo(demo.url)}
+                                        className="w-full bg-[#FFF0F2] border border-[#C5A059]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_30px_rgba(197,160,89,0.15)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
+                                    >
+                                        <div className="absolute -top-8 -right-8 w-28 h-28 bg-[#D8A7B1]/20 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -bottom-8 left-8 w-20 h-20 bg-[#F7E7CE]/30 blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        
+                                        {/* 🍼 CHUPONES Y SONAJAS FLOTANTES */}
+                                        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 group-hover:opacity-70 transition-opacity duration-700">
+                                            <div className="absolute left-[15%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 12s linear infinite', animationDelay: '0s' }}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><circle cx="12" cy="7" r="5" /><circle cx="12" cy="7" r="1" fill="currentColor" /><circle cx="10" cy="5.5" r="0.5" fill="currentColor" /><circle cx="14" cy="5.5" r="0.5" fill="currentColor" /><circle cx="10" cy="8.5" r="0.5" fill="currentColor" /><circle cx="14" cy="8.5" r="0.5" fill="currentColor" /><path d="M12 12v6" /><circle cx="12" cy="20" r="2" /><path d="M9 13c1.5-1 4.5-1 6 0" /></svg>
+                                            </div>
+                                            <div className="absolute left-[45%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 15s linear infinite', animationDelay: '3s' }}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><path d="M9 10c0-3 1.5-5 3-5s3 2 3 5" /><rect x="5" y="10" width="14" height="4" rx="2" /><path d="M10 14v2h4v-2" /><circle cx="12" cy="18" r="3" /></svg>
+                                            </div>
+                                            <div className="absolute left-[75%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 10s linear infinite', animationDelay: '6s' }}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><circle cx="12" cy="7" r="5" /><circle cx="12" cy="7" r="1" fill="currentColor" /><circle cx="10" cy="5.5" r="0.5" fill="currentColor" /><circle cx="14" cy="5.5" r="0.5" fill="currentColor" /><circle cx="10" cy="8.5" r="0.5" fill="currentColor" /><circle cx="14" cy="8.5" r="0.5" fill="currentColor" /><path d="M12 12v6" /><circle cx="12" cy="20" r="2" /><path d="M9 13c1.5-1 4.5-1 6 0" /></svg>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col items-start relative z-10">
+                                            {/* Monograma de fondo en Great Vibes */}
+                                            <div className="absolute -left-2 -top-5 opacity-[0.07] pointer-events-none text-[#C5A059]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '4rem', lineHeight: '1' }}>
+                                                TE
+                                            </div>
+                                            
+                                            <span className="text-[8px] tracking-[0.4em] text-[#D8A7B1] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>
+                                                Baby Shower de
+                                            </span>
+                                            <span className="text-2xl text-[#111827] font-light tracking-wide group-hover:text-[#D8A7B1] transition-colors duration-300" style={{ fontFamily: '"Great Vibes", cursive' }}>
+                                                Tania Estefania
+                                            </span>
+                                            <span className="text-[8px] uppercase tracking-widest text-[#4B5563] font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}>
+                                                <PlayCircle size={10} className="mr-1.5 text-[#C5A059]" /> Toca para abrir
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="relative z-10 w-10 h-10 rounded-full bg-white/70 backdrop-blur-sm flex items-center justify-center border border-[#C5A059]/30 shadow-sm text-[#4B5563] group-hover:bg-[#D8A7B1] group-hover:border-[#D8A7B1] group-hover:text-white transition-colors duration-500 shrink-0">
+                                            <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
                                         </div>
                                     </button>
                                 );

@@ -10,7 +10,7 @@
     <meta property="og:title" content="Pase VIP - Tania Estefania" />
     <meta property="og:description" content="Abre tu invitación y confirma tu asistencia." />
     <!-- REGLA ESTRICTA: Enlace absoluto público -->
-    <meta property="og:image" content="https://tusitio.com/demos/baby-shower/cover.jpg" />
+    <meta property="og:image" content="https://tusitio.com/demos/baby_shower/cover.jpg" />
     <meta property="og:url" content="https://baulia.com" />
     <meta property="og:type" content="website" />
 
@@ -402,7 +402,7 @@ END:VCALENDAR`;
                     {/* Audio Oculto con Ruta Actualizada */}
                     <audio 
                         ref={audioRef} 
-                        src="/demos/baby-shower/cancion.mp3" 
+                        src="/demos/baby_shower/cancion.mp3" 
                         loop 
                         preload="auto"
                     ></audio>
@@ -419,7 +419,7 @@ END:VCALENDAR`;
                         style={{ opacity: Math.max(0, 1 - scrollY / 600) }}
                     >
                         <img 
-                            src="/demos/baby-shower/portada.png" 
+                            src="/demos/baby_shower/portada.png" 
                             alt="Portada Baby Shower" 
                             className="absolute inset-0 w-full h-full object-cover object-center"
                         />
@@ -595,14 +595,14 @@ END:VCALENDAR`;
                         <section className="w-full py-24">
                             <FadeInSection>
                                 <div className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden shadow-[0_20px_50px_rgba(216,167,177,0.3)]">
-                                    {/* Rutas actualizadas a /demos/baby-shower/... */}
+                                    {/* Rutas actualizadas a /demos/baby_shower/... */}
                                     {[
-                                        "/demos/baby-shower/foto1.jpg",
-                                        "/demos/baby-shower/foto2.jpg",
-                                        "/demos/baby-shower/foto3.jpg",
-                                        "/demos/baby-shower/foto4.jpg",
-                                        "/demos/baby-shower/foto5.jpg",
-                                        "/demos/baby-shower/foto6.jpg"
+                                        "/demos/baby_shower/foto1.jpg",
+                                        "/demos/baby_shower/foto2.jpg",
+                                        "/demos/baby_shower/foto3.jpg",
+                                        "/demos/baby_shower/foto4.jpg",
+                                        "/demos/baby_shower/foto5.jpg",
+                                        "/demos/baby_shower/foto6.jpg"
                                     ].map((src, idx) => (
                                         <div key={idx} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentGalleryIdx ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
                                             <img src={src} alt={`Momento ${idx + 1}`} className={`w-full h-full object-cover filter sepia-[0.2] transition-transform duration-[6000ms] ease-out ${idx === currentGalleryIdx ? 'scale-110' : 'scale-100'}`} />
