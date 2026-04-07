@@ -10,7 +10,7 @@
     <meta property="og:title" content="Pase VIP - Tania Estefania" />
     <meta property="og:description" content="Abre tu invitación y confirma tu asistencia." />
     <!-- REGLA ESTRICTA: Enlace absoluto público -->
-    <meta property="og:image" content="https://tusitio.com/baby-shower/cover.jpg" />
+    <meta property="og:image" content="https://tusitio.com/demos/baby-shower/cover.jpg" />
     <meta property="og:url" content="https://baulia.com" />
     <meta property="og:type" content="website" />
 
@@ -399,10 +399,10 @@ END:VCALENDAR`;
             return (
                 <main className="relative w-full min-h-screen bg-blush selection:bg-dustyrose selection:text-white font-sans overflow-x-hidden">
                     
-                    {/* Audio Oculto */}
+                    {/* Audio Oculto con Ruta Actualizada */}
                     <audio 
                         ref={audioRef} 
-                        src="/baby-shower/cancion.mp3" 
+                        src="/demos/baby-shower/cancion.mp3" 
                         loop 
                         preload="auto"
                     ></audio>
@@ -418,9 +418,6 @@ END:VCALENDAR`;
                         className="absolute top-0 left-0 w-full h-[120vh] z-0 pointer-events-none transition-opacity duration-75"
                         style={{ opacity: Math.max(0, 1 - scrollY / 600) }}
                     >
-                        {/* Actualizado a <img> nativo con clases object-cover
-                            Esto es idéntico a backgroundImage pero previene errores de carga en algunos servidores 
-                        */}
                         <img 
                             src="/demos/baby-shower/portada.png" 
                             alt="Portada Baby Shower" 
@@ -442,11 +439,19 @@ END:VCALENDAR`;
                                 {language === 'es' ? 'EN' : 'ES'}
                             </button>
 
+                            {/* === MONOGRAMA MÓVIL (Top Absoluto bajo cámara/notch) === */}
+                            {/* Visible solo en celulares (md:hidden). Se posiciona en top-16 (64px) para librar la Dynamic Island */}
+                            <div className="absolute top-16 left-1/2 -translate-x-1/2 md:hidden w-20 h-20 rounded-full border-[0.5px] border-gold flex items-center justify-center bg-white/70 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.8)] z-40">
+                                <span className="font-cursive text-3xl text-gold mt-2">TE</span>
+                            </div>
+
                             <div className="flex flex-col items-center z-20 relative w-full max-w-lg">
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[120%] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.7)_0%,rgba(255,255,255,0.4)_45%,transparent_75%)] blur-lg -z-10 pointer-events-none"></div>
 
-                                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-[0.5px] border-gold flex items-center justify-center mb-6 bg-white/70 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.8)]">
-                                    <span className="font-cursive text-3xl md:text-4xl text-gold mt-2">TE</span>
+                                {/* === MONOGRAMA ESCRITORIO === */}
+                                {/* Oculto en móvil, visible en md:flex. Mantiene su posición original arriba de los textos */}
+                                <div className="hidden md:flex w-24 h-24 rounded-full border-[0.5px] border-gold items-center justify-center mb-6 bg-white/70 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.8)]">
+                                    <span className="font-cursive text-4xl text-gold mt-2">TE</span>
                                 </div>
 
                                 <p className="font-sans text-xs md:text-sm tracking-[0.3em] uppercase text-gray-700 mb-3 drop-shadow-[0_0_8px_rgba(255,255,255,1)] font-bold">
@@ -590,13 +595,14 @@ END:VCALENDAR`;
                         <section className="w-full py-24">
                             <FadeInSection>
                                 <div className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden shadow-[0_20px_50px_rgba(216,167,177,0.3)]">
+                                    {/* Rutas actualizadas a /demos/baby-shower/... */}
                                     {[
-                                        "/baby-shower/foto1.jpg",
-                                        "/baby-shower/foto2.jpg",
-                                        "/baby-shower/foto3.jpg",
-                                        "/baby-shower/foto4.jpg",
-                                        "/baby-shower/foto5.jpg",
-                                        "/baby-shower/foto6.jpg"
+                                        "/demos/baby-shower/foto1.jpg",
+                                        "/demos/baby-shower/foto2.jpg",
+                                        "/demos/baby-shower/foto3.jpg",
+                                        "/demos/baby-shower/foto4.jpg",
+                                        "/demos/baby-shower/foto5.jpg",
+                                        "/demos/baby-shower/foto6.jpg"
                                     ].map((src, idx) => (
                                         <div key={idx} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentGalleryIdx ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
                                             <img src={src} alt={`Momento ${idx + 1}`} className={`w-full h-full object-cover filter sepia-[0.2] transition-transform duration-[6000ms] ease-out ${idx === currentGalleryIdx ? 'scale-110' : 'scale-100'}`} />
