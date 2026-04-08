@@ -408,19 +408,14 @@ END:VCALENDAR`;
                                 {language === 'es' ? 'EN' : 'ES'}
                             </button>
 
-                            {/* === MONOGRAMA MÓVIL NEÓN ROSE GOLD === */}
-                            <div className="absolute top-16 left-1/2 -translate-x-1/2 md:hidden w-20 h-20 rounded-full border border-rosegold/60 flex items-center justify-center bg-darkrose/40 backdrop-blur-md shadow-[0_0_20px_rgba(232,165,152,0.4),inset_0_0_10px_rgba(232,165,152,0.2)] z-40">
-                                <span className="font-cursive text-3xl text-rosegold mt-2 drop-shadow-[0_0_10px_rgba(232,165,152,0.8)]">V</span>
+                            {/* === MONOGRAMA UNIFICADO (MÓVIL Y ESCRITORIO ARRIBA) === */}
+                            <div className="absolute top-16 md:top-12 left-1/2 -translate-x-1/2 w-20 h-20 md:w-24 md:h-24 rounded-full border border-rosegold/60 flex items-center justify-center bg-darkrose/40 backdrop-blur-md shadow-[0_0_20px_rgba(232,165,152,0.4),inset_0_0_10px_rgba(232,165,152,0.2)] md:shadow-[0_0_25px_rgba(232,165,152,0.4),inset_0_0_15px_rgba(232,165,152,0.2)] z-40">
+                                <span className="font-cursive text-3xl md:text-4xl text-rosegold mt-2 drop-shadow-[0_0_10px_rgba(232,165,152,0.8)]">V</span>
                             </div>
 
                             <div className="flex flex-col items-center z-20 relative w-full max-w-lg">
                                 {/* Halo de luz cálida detrás de las letras */}
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[120%] bg-[radial-gradient(circle_at_center,rgba(232,165,152,0.15)_0%,rgba(18,8,10,0.6)_45%,transparent_75%)] blur-lg -z-10 pointer-events-none"></div>
-
-                                {/* === MONOGRAMA ESCRITORIO NEÓN ROSE GOLD === */}
-                                <div className="hidden md:flex w-24 h-24 rounded-full border border-rosegold/60 items-center justify-center mb-6 bg-darkrose/40 backdrop-blur-md shadow-[0_0_25px_rgba(232,165,152,0.4),inset_0_0_15px_rgba(232,165,152,0.2)]">
-                                    <span className="font-cursive text-4xl text-rosegold mt-2 drop-shadow-[0_0_10px_rgba(232,165,152,0.8)]">V</span>
-                                </div>
 
                                 <p className="font-sans text-xs md:text-sm tracking-[0.4em] uppercase text-champagne mb-3 drop-shadow-[0_0_8px_rgba(232,165,152,0.5)] font-medium">
                                     {language === 'es' ? 'Mis XV Años' : 'My Sweet 15'}
@@ -446,11 +441,12 @@ END:VCALENDAR`;
                                 </div>
 
                                 {guestName && (
-                                    <div className="glass-panel px-8 py-5 rounded-2xl animate-[fadeInUp_1s_ease-out] border-rosegold/30">
+                                    <div className="glass-panel px-8 py-5 rounded-2xl animate-[fadeInUp_1s_ease-out] border-rosegold/30 w-full">
                                         <p className="font-sans text-[10px] tracking-[0.2em] text-rosegold uppercase mb-1 drop-shadow-sm">
                                             {language === 'es' ? 'Pase VIP Para' : 'VIP Pass For'}
                                         </p>
-                                        <p className="font-serif text-2xl md:text-3xl text-white font-medium">
+                                        {/* Ajustado tamaño y se agregó break-words para evitar desbordamientos en nombres largos */}
+                                        <p className="font-serif text-xl md:text-2xl text-white font-medium break-words px-2">
                                             {guestName}
                                         </p>
                                     </div>
@@ -600,15 +596,14 @@ END:VCALENDAR`;
                                 </div>
 
                                 <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 md:gap-10 px-[10vw] pb-20 pt-10 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] items-center">
+                                    {/* Reducido a 6 fotos para un equilibrio visual perfecto */}
                                     {[
                                         "/demos/xv/foto1.jpg",
                                         "/demos/xv/foto2.jpg",
                                         "/demos/xv/foto3.jpg",
                                         "/demos/xv/foto4.jpg",
                                         "/demos/xv/foto5.jpg",
-                                        "/demos/xv/foto6.jpg",
-                                        "/demos/xv/foto7.jpg",
-                                        "/demos/xv/foto8.jpg"
+                                        "/demos/xv/foto6.jpg"
                                     ].map((src, idx) => {
                                         const rotations = ['-rotate-3', 'rotate-2', '-rotate-2', 'rotate-3', '-rotate-4', 'rotate-4'];
                                         const rot = rotations[idx % rotations.length];
