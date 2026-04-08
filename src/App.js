@@ -11054,9 +11054,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                             <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 15s linear infinite', animationDelay: '-10s', '--y-offset': '60px', '--scale': '0.8', '--rot': '5deg' }}>
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg>
                                             </div>
-                                            <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 22s linear infinite', animationDelay: '-12s', '--y-offset': '15px', '--scale': '0.6', '--rot': '-10deg' }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="14" r="4.5" /><circle cx="12" cy="8" r="3.5" /><circle cx="8.5" cy="5.5" r="1.5" /><circle cx="15.5" cy="5.5" r="1.5" /><circle cx="6.5" cy="13" r="1.5" /><circle cx="17.5" cy="13" r="1.5" /><circle cx="9.5" cy="18" r="1.5" /><circle cx="14.5" cy="18" r="1.5" /><path d="M11.5 9.5h1" strokeWidth="1.2" strokeLinecap="round" /></svg>
-                                            </div>
                                         </div>
 
                                         <div className="flex flex-col items-start relative z-10">
@@ -11081,7 +11078,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                     </button>
                                 );
                             }
-                            
+
                             // 🍼 5. ESTILOS: INVITACIÓN BABY SHOWER (Blush, Dusty Rose, Monograma TE)
                             if (demo.id === 'baby_shower') {
                                 return (
