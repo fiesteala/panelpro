@@ -11,7 +11,7 @@
     <meta property="og:description" content="Abre tu invitación y acompáñame a celebrar esta noche mágica." />
     <!-- REGLA ESTRICTA: Enlace absoluto público -->
     <!-- Aquí cambia la URL de la miniatura de WhatsApp por favor -->
-    <meta property="og:image" content="https://baulia.com/xv/demos/cover.jpg" />
+    <meta property="og:image" content="https://baulia.com/demos/xv/cover.jpg" />
     <meta property="og:url" content="https://baulia.com" />
     <meta property="og:type" content="website" />
 
@@ -393,15 +393,15 @@ END:VCALENDAR`;
                             alt="Portada XV Años Rose Gold" 
                             className="absolute inset-0 w-full h-full object-cover object-center"
                         />
-                        {/* DEGRADADO MODIFICADO: Transparente arriba para revelar rostro/vestido, oscuro abajo para leer textos */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-darkrose/20 to-darkrose"></div>
+                        {/* DEGRADADO RESTAURADO PARA EL BRILLO Y EFECTO RESPLANDOR */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-darkrose/50 via-darkrose/70 to-darkrose"></div>
                     </div>
 
                     {/* CONTENIDO PRINCIPAL SCROLLABLE (Z-20) */}
                     <div className="relative z-20 w-full flex flex-col items-center">
                         
                         {/* === SECCIÓN 1: PORTADA HERO === */}
-                        {/* MODIFICADO: pt-[65vh] y pb-12 para empujar los textos hacia el fondo y liberar el centro */}
+                        {/* pt-[65vh] y pb-12 para empujar los textos hacia el fondo y liberar el centro */}
                         <section className="relative w-full min-h-screen flex flex-col justify-end items-center px-6 pb-12 pt-[65vh] text-center z-20">
                             
                             <button 
@@ -661,13 +661,13 @@ END:VCALENDAR`;
                         </section>
 
                         {/* === SECCIÓN 8: PAUSA CINEMÁTICA / AGRADECIMIENTO === */}
-                        <section className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center my-12 shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-y border-rosegold/20">
+                        <section className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden my-12 shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-y border-rosegold/20">
                             
                             {/* ✨ MAGIA PARALLAX PARA iPHONE (Sin blur, 100% fluido) ✨ */}
                             <div className="absolute inset-0 w-full h-full [clip-path:inset(0)] z-0 pointer-events-none">
                                 <div 
                                     className="fixed inset-0 w-full h-full bg-cover bg-center filter brightness-[0.4] contrast-125 sepia-[0.2]"
-                                    style={{ backgroundImage: "url('/demos/xv/portada.jpg')" }}
+                                    style={{ backgroundImage: "url('/demos/xv/parallax.jpg')" }}
                                 ></div>
                             </div>
                             
@@ -811,10 +811,10 @@ END:VCALENDAR`;
                         
                     </div>
 
-                    {/* Reproductor de Música Minimalista */}
+                    {/* Reproductor de Música Minimalista (Lado Derecho) */}
                     <button 
                         onClick={toggleMusic}
-                        className="fixed bottom-6 right-6 md:bottom-10 md:right-10 w-12 h-12 rounded-full glass-panel flex items-center justify-center cursor-pointer hover:bg-rosegold/10 transition-all duration-300 z-[9990] shadow-[0_0_20px_rgba(232,165,152,0.3)] border border-rosegold/40"
+                        className="fixed bottom-6 right-6 md:bottom-10 md:right-10 w-12 h-12 rounded-full glass-panel flex items-center justify-center cursor-pointer hover:bg-white/60 transition-all duration-300 z-[9990] shadow-lg border border-gold/30"
                         aria-label="Toggle Music"
                     >
                         <div className={`flex items-end justify-center space-x-1 h-4 w-4 ${isPlaying ? 'playing' : ''}`}>
@@ -824,41 +824,46 @@ END:VCALENDAR`;
                         </div>
                     </button>
 
-                    {/* === BOTÓN FLOTANTE INTELIGENTE DE COMPRA === */}
+                    {/* === BOTÓN FLOTANTE INTELIGENTE DE COMPRA (CRÍTICO) === */}
                     <button
                         onClick={() => {
                             if (window !== window.parent) {
+                                // Estamos dentro de un iframe (Ej. Creador de Baulia)
                                 window.parent.postMessage('open_checkout', '*');
                             } else {
+                                // Es un link directo (Visualización externa)
                                 window.location.href = 'https://baulia.com/#planes';
                             }
                         }}
-                        className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] px-6 py-3 bg-gradient-to-r from-rosegold to-copper text-darkrose font-bold font-sans text-xs md:text-sm tracking-widest uppercase rounded-full shadow-[0_10px_30px_rgba(232,165,152,0.4)] hover:scale-105 transition-transform duration-300 flex items-center gap-2 whitespace-nowrap"
+                        className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white font-sans text-xs md:text-sm tracking-widest uppercase rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.4)] border border-gray-700/50 hover:scale-105 transition-transform duration-300 flex items-center gap-2 whitespace-nowrap"
                     >
                         <span className="text-sm">✨</span> Adquirir esta tecnología
                     </button>
 
-                    {/* === MODAL DE RSVP === */}
+                    {/* === MODAL DE RSVP (FORMULARIO Y SUCCESS DEMO) === */}
                     {isModalOpen && (
                         <div className="fixed inset-0 z-[10000] flex items-center justify-center px-4">
+                            {/* Backdrop desenfocado */}
                             <div 
-                                className="absolute inset-0 bg-darkrose/80 backdrop-blur-md transition-opacity" 
+                                className="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity" 
                                 onClick={() => setIsModalOpen(false)}
                             ></div>
 
-                            <div className="relative w-full max-w-md glass-panel p-8 md:p-12 rounded-[40px] shadow-[0_0_50px_rgba(232,165,152,0.2)] bg-wine/90 animate-[fadeInUp_0.3s_ease-out] text-center border border-rosegold/30">
+                            {/* Contenido del Modal (Glassmorphism) */}
+                            <div className="relative w-full max-w-md glass-panel p-8 md:p-12 rounded-[40px] shadow-2xl bg-white/90 animate-[fadeInUp_0.3s_ease-out] text-center border-[0.5px] border-white">
                                 
+                                {/* Botón Cerrar (X) */}
                                 <button 
                                     onClick={() => setIsModalOpen(false)}
-                                    className="absolute top-6 right-6 text-rosegold hover:text-white transition-colors bg-white/5 rounded-full p-2"
+                                    className="absolute top-6 right-6 text-gray-400 hover:text-gray-800 transition-colors bg-white/50 rounded-full p-2"
                                 >
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                 </button>
 
-                                <h2 className="font-cursive text-4xl md:text-5xl text-white mb-4 mt-2 drop-shadow-[0_0_8px_rgba(232,165,152,0.5)]">
+                                <h2 className="font-cursive text-4xl md:text-5xl text-gray-800 mb-4 mt-2">
                                     {language === 'es' ? 'Reserva tu lugar' : 'Reserve your spot'}
                                 </h2>
-                                <div className="w-12 h-[1px] bg-rosegold/50 mx-auto mb-8 shadow-[0_0_10px_rgba(232,165,152,1)]"></div>
+                                <div className="w-12 h-[1px] bg-gold/50 mx-auto mb-8"></div>
 
                                 {demoFormStatus === 'form' ? (
                                     <form 
@@ -869,49 +874,50 @@ END:VCALENDAR`;
                                         className="flex flex-col gap-5 w-full mx-auto"
                                     >
                                         <div className="flex flex-col text-left">
-                                            <label className="font-sans text-[10px] tracking-widest uppercase text-rosegold mb-2 ml-4">Nombre y Apellido</label>
+                                            <label className="font-sans text-[10px] tracking-widest uppercase text-dustyrose mb-2 ml-4">Nombre y Apellido</label>
                                             <input 
                                                 required 
                                                 type="text" 
                                                 placeholder="Ej. Ana García" 
-                                                className="w-full bg-darkrose/50 border border-rosegold/30 rounded-full px-6 py-4 font-serif text-lg text-white focus:outline-none focus:ring-2 focus:ring-rosegold/50 transition-shadow shadow-inner placeholder:text-gray-500" 
+                                                className="w-full bg-white/60 border border-gold/30 rounded-full px-6 py-4 font-serif text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-gold/40 transition-shadow shadow-inner placeholder:text-gray-400" 
                                             />
                                         </div>
                                         <div className="flex flex-col text-left relative">
-                                            <label className="font-sans text-[10px] tracking-widest uppercase text-rosegold mb-2 ml-4">Pases a confirmar</label>
-                                            <select className="w-full bg-darkrose/50 border border-rosegold/30 rounded-full px-6 py-4 font-serif text-lg text-white focus:outline-none focus:ring-2 focus:ring-rosegold/50 transition-shadow shadow-inner appearance-none cursor-pointer pr-12">
-                                                <option className="bg-darkrose">1 Pase</option>
-                                                <option className="bg-darkrose">2 Pases</option>
-                                                <option className="bg-darkrose">3 Pases</option>
+                                            <label className="font-sans text-[10px] tracking-widest uppercase text-dustyrose mb-2 ml-4">Pases a confirmar</label>
+                                            <select className="w-full bg-white/60 border border-gold/30 rounded-full px-6 py-4 font-serif text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-gold/40 transition-shadow shadow-inner appearance-none cursor-pointer pr-12">
+                                                <option>1 Pase</option>
+                                                <option>2 Pases</option>
+                                                <option>3 Pases</option>
                                             </select>
-                                            <div className="absolute right-6 top-[3.3rem] pointer-events-none text-rosegold">
+                                            {/* Icono flecha nativo de diseño cerrado */}
+                                            <div className="absolute right-6 top-[3.3rem] pointer-events-none text-gold">
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><polyline points="6 9 12 15 18 9"></polyline></svg>
                                             </div>
                                         </div>
                                         <button 
                                             type="submit" 
-                                            className="mt-4 w-full py-4 rounded-full bg-gradient-to-r from-rosegold to-copper text-darkrose font-bold font-sans text-xs tracking-widest uppercase hover:scale-105 transition-all duration-500 shadow-[0_8px_25px_rgba(232,165,152,0.4)]"
+                                            className="mt-4 w-full py-4 rounded-full bg-gray-800 text-white font-sans text-xs tracking-widest uppercase hover:bg-gold transition-colors duration-500 shadow-[0_8px_25px_rgba(0,0,0,0.2)]"
                                         >
                                             Generar Pase QR
                                         </button>
                                     </form>
                                 ) : (
                                     <div className="flex flex-col items-center animate-[fadeInUp_0.5s_ease-out] py-4">
-                                        <div className="w-20 h-20 rounded-full bg-rosegold/10 border border-rosegold/50 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(232,165,152,0.4)]">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10 drop-shadow-[0_0_8px_rgba(232,165,152,0.8)]">
+                                        <div className="w-20 h-20 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(74,222,128,0.2)]">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10">
                                                 <polyline points="20 6 9 17 4 12"></polyline>
                                             </svg>
                                         </div>
-                                        <p className="font-serif text-2xl md:text-3xl text-white mb-4 leading-relaxed font-medium">
+                                        <p className="font-serif text-2xl md:text-3xl text-gray-800 mb-4 leading-relaxed font-medium">
                                             ¡Excelente!
                                         </p>
-                                        <p className="font-sans text-sm text-gray-300 max-w-xs leading-relaxed mb-8">
+                                        <p className="font-sans text-sm text-gray-500 max-w-xs leading-relaxed mb-8">
                                             En una versión real, esto le generaría un código QR único a tu invitado. <br/><br/>
-                                            <strong className="text-rosegold font-semibold tracking-wide block mt-2 drop-shadow-[0_0_5px_rgba(232,165,152,0.5)]">¡Crea tu propio evento en Baulia para desbloquear esta función!</strong>
+                                            <strong className="text-gold font-semibold tracking-wide block mt-2">¡Crea tu propio evento en Baulia para desbloquear esta función!</strong>
                                         </p>
                                         <button 
                                             onClick={() => setIsModalOpen(false)} 
-                                            className="px-8 py-3 border border-rosegold/30 rounded-full text-rosegold font-sans text-[10px] tracking-widest uppercase hover:bg-rosegold/10 transition-all duration-300"
+                                            className="px-8 py-3 bg-gray-100 rounded-full text-gray-600 font-sans text-[10px] tracking-widest uppercase hover:bg-gray-200 transition-all duration-300"
                                         >
                                             Cerrar
                                         </button>
@@ -929,14 +935,14 @@ END:VCALENDAR`;
         root.render(<App />);
     </script>
     
-    <!-- Protección Anti-Robo de Código HTML Nativo -->
+    <!-- Protección Anti-Robo de Código HTML Nativo (Bloqueo de atajos F12, Ctrl+U) -->
     <script>
         document.onkeydown = function(e) {
-            if (e.keyCode == 123) return false; 
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; 
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false; 
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; 
-            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; 
+            if (e.keyCode == 123) return false; // F12
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Ctrl+Shift+I
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false; // Ctrl+Shift+C
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; // Ctrl+Shift+J
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U
         }
     </script>
 </body>
