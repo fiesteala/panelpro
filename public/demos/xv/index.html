@@ -387,20 +387,22 @@ END:VCALENDAR`;
                         className="absolute top-0 left-0 w-full h-[120vh] z-0 pointer-events-none transition-opacity duration-75"
                         style={{ opacity: Math.max(0, 1 - scrollY / 600) }}
                     >
-                        {/* Imagen de fondo principal - Cargará la foto local de su vestido */}
+                        {/* Imagen de fondo principal */}
                         <img 
                             src="/demos/xv/portada.jpg" 
                             alt="Portada XV Años Rose Gold" 
                             className="absolute inset-0 w-full h-full object-cover object-center"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-b from-darkrose/50 via-darkrose/70 to-darkrose"></div>
+                        {/* DEGRADADO MODIFICADO: Transparente arriba para revelar rostro/vestido, oscuro abajo para leer textos */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-darkrose/20 to-darkrose"></div>
                     </div>
 
                     {/* CONTENIDO PRINCIPAL SCROLLABLE (Z-20) */}
                     <div className="relative z-20 w-full flex flex-col items-center">
                         
                         {/* === SECCIÓN 1: PORTADA HERO === */}
-                        <section className="relative w-full min-h-screen flex flex-col justify-end items-center px-6 pb-20 pt-[45vh] text-center z-20">
+                        {/* MODIFICADO: pt-[65vh] y pb-12 para empujar los textos hacia el fondo y liberar el centro */}
+                        <section className="relative w-full min-h-screen flex flex-col justify-end items-center px-6 pb-12 pt-[65vh] text-center z-20">
                             
                             <button 
                                 onClick={toggleLanguage}
@@ -659,32 +661,38 @@ END:VCALENDAR`;
                         </section>
 
                         {/* === SECCIÓN 8: PAUSA CINEMÁTICA / AGRADECIMIENTO === */}
-                        <section className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden my-12 shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-y border-rosegold/20">
-                            <div 
-                                className="absolute inset-0 bg-cover bg-center bg-fixed filter brightness-[0.4] contrast-125 sepia-[0.2]"
-                                style={{ backgroundImage: "url('/demos/xv/portada.jpg')" }}
-                            ></div>
+                        <section className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center my-12 shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-y border-rosegold/20">
                             
-                            <div className="absolute inset-0 bg-gradient-to-b from-darkrose/80 via-transparent to-darkrose/80 pointer-events-none"></div>
+                            {/* ✨ MAGIA PARALLAX PARA iPHONE (Sin blur, 100% fluido) ✨ */}
+                            <div className="absolute inset-0 w-full h-full [clip-path:inset(0)] z-0 pointer-events-none">
+                                <div 
+                                    className="fixed inset-0 w-full h-full bg-cover bg-center filter brightness-[0.4] contrast-125 sepia-[0.2]"
+                                    style={{ backgroundImage: "url('/demos/xv/portada.jpg')" }}
+                                ></div>
+                            </div>
+                            
+                            <div className="absolute inset-0 bg-gradient-to-b from-darkrose/80 via-transparent to-darkrose/80 pointer-events-none z-0"></div>
 
-                            <FadeInSection>
-                                <div className="relative z-10 text-center px-6 max-w-2xl mx-auto">
-                                    <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full border-[0.5px] border-rosegold/50 bg-white/5 backdrop-blur-sm shadow-[0_0_20px_rgba(232,165,152,0.2)]">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.2" className="w-8 h-8 drop-shadow-[0_0_8px_rgba(232,165,152,0.8)]">
-                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                                        </svg>
+                            <div className="relative z-10 w-full">
+                                <FadeInSection>
+                                    <div className="text-center px-6 max-w-2xl mx-auto">
+                                        <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full border-[0.5px] border-rosegold/50 bg-white/5 backdrop-blur-sm shadow-[0_0_20px_rgba(232,165,152,0.2)]">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.2" className="w-8 h-8 drop-shadow-[0_0_8px_rgba(232,165,152,0.8)]">
+                                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                            </svg>
+                                        </div>
+                                        <h2 className="font-cursive text-5xl md:text-7xl text-white mb-6 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+                                            {language === 'es' ? 'A mi Familia y Amigos' : 'To my Family and Friends'}
+                                        </h2>
+                                        <p className="font-serif text-xl md:text-2xl text-champagne italic leading-relaxed drop-shadow-sm font-light">
+                                            {language === 'es'
+                                                ? '"Gracias por ser parte de mi historia. Los momentos más hermosos de la vida cobran verdadero sentido cuando los compartimos con quienes amamos."'
+                                                : '"Thank you for being part of my story. The most beautiful moments in life truly make sense when shared with those we love."'}
+                                        </p>
+                                        <div className="w-12 h-[1px] bg-rosegold/50 mx-auto mt-10 shadow-[0_0_8px_rgba(232,165,152,0.8)]"></div>
                                     </div>
-                                    <h2 className="font-cursive text-5xl md:text-7xl text-white mb-6 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
-                                        {language === 'es' ? 'A mi Familia y Amigos' : 'To my Family and Friends'}
-                                    </h2>
-                                    <p className="font-serif text-xl md:text-2xl text-champagne italic leading-relaxed drop-shadow-sm font-light">
-                                        {language === 'es'
-                                            ? '"Gracias por ser parte de mi historia. Los momentos más hermosos de la vida cobran verdadero sentido cuando los compartimos con quienes amamos."'
-                                            : '"Thank you for being part of my story. The most beautiful moments in life truly make sense when shared with those we love."'}
-                                    </p>
-                                    <div className="w-12 h-[1px] bg-rosegold/50 mx-auto mt-10 shadow-[0_0_8px_rgba(232,165,152,0.8)]"></div>
-                                </div>
-                            </FadeInSection>
+                                </FadeInSection>
+                            </div>
                         </section>
 
                         {/* === SECCIÓN 9: LLUVIA DE SOBRES === */}
