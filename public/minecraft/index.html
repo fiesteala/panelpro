@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invitación Minecraft - DEMO Baulia</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        .font-pixel { font-family: 'VT323', monospace; }
+        .minecraft-btn {
+            box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.5), inset 4px 4px 0px 0px rgba(255,255,255,0.5);
+            image-rendering: pixelated;
+        }
+        .minecraft-btn:active {
+            box-shadow: inset 4px 4px 0px 0px rgba(0,0,0,0.5), inset -4px -4px 0px 0px rgba(255,255,255,0.5);
+            transform: translateY(2px);
+        }
+        .minecraft-panel {
+            background-color: #C6C6C6;
+            border: 4px solid #000;
+            box-shadow: inset -4px -4px 0px 0px #555, inset 4px 4px 0px 0px #FFF;
+            color: #202020;
+        }
+        .dirt-texture {
+            background-color: #5d4037;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%233e2723' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M0 0h40v40H0V0zm20 20h20v20H20V20zM0 20h20v20H0V20zM20 0h20v20H20V0z'/%3E%3C/g%3E%3C/svg%3E");
+        }
+        .grass-top { background-color: #388e3c; border-bottom: 4px solid #1b5e20; }
+        .crack-1 { clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%); background: rgba(0,0,0,0.1); }
+        .crack-2 { clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%); background: rgba(0,0,0,0.2); }
+        .crack-3 { clip-path: polygon(40% 0%, 60% 0%, 100% 40%, 100% 60%, 60% 100%, 40% 100%, 0% 60%, 0% 40%); background: rgba(0,0,0,0.3); }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        @keyframes pulse-glow { 0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); } 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); } }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-pulse-glow { animation: pulse-glow 2s infinite; }
+        .animate-fadeIn { animation: fadeIn 1s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .cloud { width: 100px; height: 40px; background: rgba(255, 255, 255, 0.8); position: absolute; opacity: 0.8; box-shadow: 20px 10px 0 0 rgba(255, 255, 255, 0.8); }
+        .cloud::after { content: ''; position: absolute; width: 40px; height: 40px; top: -20px; left: 20px; background: rgba(255, 255, 255, 0.8); }
+        @keyframes moveClouds { 0% { transform: translateX(-150px); } 100% { transform: translateX(110vw); } }
+        .animate-cloud { animation: moveClouds 20s linear infinite; }
+        .animate-cloud-slow { animation: moveClouds 35s linear infinite; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const Icon = ({ path, className, size = 24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{path}</svg>);
+        const MapPin = (props) => <Icon {...props} path={<><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></>} />;
+        const Calendar = (props) => <Icon {...props} path={<><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></>} />;
+        const Clock = (props) => <Icon {...props} path={<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>} />;
+        const X = (props) => <Icon {...props} path={<><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>} />;
+        const Volume2 = (props) => <Icon {...props} path={<><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></>} />;
+        const VolumeX = (props) => <Icon {...props} path={<><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" x2="17" y1="9" y2="15"/><line x1="17" x2="23" y1="9" y2="15"/></>} />;
+        const Gift = (props) => <Icon {...props} path={<><polyline points="20 12 20 22 4 22 4 12"/><rect width="20" height="5" x="2" y="7"/><line x1="12" x2="12" y1="22" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></>} />;
+        const CheckSquare = (props) => <Icon {...props} path={<><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></>} />;
+
+        function App() {
+            const [hasStarted, setHasStarted] = useState(false);
+            const [gameState, setGameState] = useState('start');
+            const [blockHealth, setBlockHealth] = useState(5);
+            const [particles, setParticles] = useState([]);
+            const [showGifts, setShowGifts] = useState(false);
+            const [showRSVPDemo, setShowRSVPDemo] = useState(false);
+            const [demoFormStatus, setDemoFormStatus] = useState('form'); // 🔴 ESTADO DEL MODO DEMO
+            const [showMapOptions, setShowMapOptions] = useState(false); 
+            const [timeLeft, setTimeLeft] = useState({});
+            const [isMuted, setIsMuted] = useState(false);
+            const audioRef = useRef(null);
+
+            // 🔴 PROTECCIÓN ANTI-ROBO (REACT)
+            useEffect(() => {
+                const preventAction = (e) => e.preventDefault();
+                document.addEventListener('contextmenu', preventAction);
+                document.addEventListener('selectstart', preventAction);
+                document.addEventListener('dragstart', preventAction);
+                
+                return () => {
+                    document.removeEventListener('contextmenu', preventAction);
+                    document.removeEventListener('selectstart', preventAction);
+                    document.removeEventListener('dragstart', preventAction);
+                };
+            }, []);
+
+            const partyData = {
+                name: "SANTIAGO",
+                age: "10",
+                date: "24 de Octubre",
+                dateISO: "2026-10-24T16:00:00", 
+                time: "16:00 - 20:00",
+                location: "Pizza Planet, Calle Falsa 123",
+                giftInfo: {
+                    message: "El mejor regalo es tu presencia, pero si quieres obsequiarme algo:",
+                    envelope: "Lluvia de Sobres (Efectivo)"
+                }
+            };
+
+            useEffect(() => {
+                const calculateTimeLeft = () => {
+                const difference = +new Date(partyData.dateISO) - +new Date();
+                let tLeft = {};
+                if (difference > 0) {
+                    tLeft = {
+                    DÍAS: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                    HRS: Math.floor((difference / (1000 * 60 * 60)) % 24),
+                    MIN: Math.floor((difference / 1000 / 60) % 60),
+                    SEG: Math.floor((difference / 1000) % 60),
+                    };
+                }
+                return tLeft;
+                };
+                setTimeLeft(calculateTimeLeft());
+                const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
+                return () => clearInterval(timer);
+            }, []);
+
+            const playHitSound = () => {
+                if (isMuted) return;
+                try {
+                  const AudioContext = window.AudioContext || window.webkitAudioContext;
+                  if (!AudioContext) return;
+                  const ctx = new AudioContext();
+                  const osc = ctx.createOscillator();
+                  const gain = ctx.createGain();
+                  osc.type = 'square';
+                  osc.frequency.setValueAtTime(150, ctx.currentTime);
+                  osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.1);
+                  gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                  gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                  osc.connect(gain);
+                  gain.connect(ctx.destination);
+                  osc.start();
+                  osc.stop(ctx.currentTime + 0.1);
+                } catch (e) {}
+            };
+
+            const handleStartGame = () => {
+                setHasStarted(true);
+                if (audioRef.current) {
+                  audioRef.current.volume = 0.5;
+                  audioRef.current.play().catch(e => console.warn(e));
+                }
+            };
+
+            const toggleMute = (e) => {
+                e.stopPropagation();
+                if (audioRef.current) {
+                  const newMutedState = !isMuted;
+                  audioRef.current.muted = newMutedState;
+                  setIsMuted(newMutedState);
+                  if (!newMutedState) audioRef.current.play().catch(e => {});
+                }
+            };
+
+            const handleMineBlock = (e) => {
+                if (blockHealth <= 0) return;
+                playHitSound();
+                if (navigator.vibrate) navigator.vibrate(50);
+                const rect = e.target.getBoundingClientRect();
+                spawnParticles(e.clientX - rect.left, e.clientY - rect.top);
+                const newHealth = blockHealth - 1;
+                setBlockHealth(newHealth);
+                if (newHealth <= 0) {
+                  setTimeout(() => setGameState('open'), 500);
+                } else {
+                  setGameState('mining');
+                  setTimeout(() => setGameState('start'), 100);
+                }
+            };
+
+            const spawnParticles = (x, y) => {
+                const newParticles = [];
+                for (let i = 0; i < 5; i++) {
+                  newParticles.push({
+                      id: Date.now() + i,
+                      x: x + (Math.random() - 0.5) * 40, y: y + (Math.random() - 0.5) * 40,
+                      vx: (Math.random() - 0.5) * 10, vy: (Math.random() - 0.5) * 10 - 5,
+                  });
+                }
+                setParticles(prev => [...prev, ...newParticles]);
+                setTimeout(() => setParticles(prev => prev.slice(5)), 1000);
+            };
+
+            // 🔴 HANDLERS DEL RSVP INTERACTIVO
+            const handleRSVPSubmit = (e) => {
+                e.preventDefault();
+                setDemoFormStatus('success');
+            };
+
+            const closeRSVPModal = () => {
+                setShowRSVPDemo(false);
+                setTimeout(() => setDemoFormStatus('form'), 300); // Reseteamos al cerrar
+            };
+
+            return (
+                <div className="min-h-screen font-pixel overflow-hidden relative selection:bg-green-500 selection:text-black">
+                
+                {/* 🔴 BOTÓN FLOTANTE DE COMPRA (INTELIGENTE E INTEGRADO) */}
+                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] pointer-events-none px-4 w-full flex justify-center">
+                  <button 
+                    onClick={() => { 
+                      if (window !== window.parent) { 
+                        window.parent.postMessage('open_checkout', '*'); 
+                      } else { 
+                        window.location.href = 'https://baulia.com/#planes'; 
+                      } 
+                    }} 
+                    className="pointer-events-auto minecraft-btn bg-[#8B8B8B] text-white px-6 py-3 border-2 border-black animate-pulse-glow hover:bg-[#9E9E9E] active:translate-y-1 text-xl md:text-2xl font-bold whitespace-nowrap shadow-[0_10px_25px_rgba(0,0,0,0.8)]"
+                  >
+                    ✨ Adquirir esta tecnología
+                  </button>
+                </div>
+
+                <audio ref={audioRef} id="musica" loop preload="auto">
+                    <source src="https://github.com/fiesteala/minecraft/raw/refs/heads/main/Minecraft.mp3" type="audio/mpeg" />
+                </audio>
+
+                <div className="absolute inset-0 bg-blue-400 z-0 overflow-hidden pointer-events-none">
+                    <div className="cloud animate-cloud" style={{top: '10%', left: '-10%'}}></div>
+                    <div className="cloud animate-cloud-slow" style={{top: '25%', left: '-20%', animationDelay: '5s', transform: 'scale(0.8)'}}></div>
+                    <div className="cloud animate-cloud" style={{top: '15%', left: '-10%', animationDelay: '12s', transform: 'scale(1.2)'}}></div>
+                    <div className="absolute bottom-0 w-full h-1/3 bg-green-600 border-t-8 border-green-800"></div>
+                </div>
+
+                {!hasStarted && (
+                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <h1 className="text-5xl text-center mb-8 text-white drop-shadow-[4px_4px_0_#000]">MINECRAFT<br/>PARTY</h1>
+                    <button onClick={handleStartGame} className="minecraft-btn bg-green-600 text-white text-3xl px-8 py-4 border-2 border-white animate-pulse-glow hover:bg-green-500 active:translate-y-1">
+                        ENTRAR AL MUNDO
+                    </button>
+                    </div>
+                )}
+
+                {hasStarted && (
+                    <>
+                    <button onClick={toggleMute} className="absolute top-4 right-4 z-40 p-2 bg-black/50 hover:bg-black/70 rounded border-2 border-white/50 text-white transition-colors">
+                        {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+                    </button>
+
+                    {gameState !== 'open' ? (
+                        <div className="relative z-10 flex flex-col items-center justify-center h-screen p-4">
+                        <h1 className="text-4xl md:text-6xl text-center mb-8 text-white drop-shadow-[4px_4px_0_rgba(0,0,0,0.8)] animate-float">
+                            CUMPLEAÑOS DE<br/>
+                            <span id="festejado" className="text-yellow-400">{partyData.name}</span>
+                        </h1>
+                        <div className="relative cursor-pointer select-none" onClick={handleMineBlock}>
+                            <div className={`w-40 h-40 relative transform transition-transform duration-100 ${gameState === 'mining' ? 'scale-95' : 'scale-100'}`}>
+                            <div className="w-full h-full dirt-texture border-4 border-black box-border relative">
+                                <div className="absolute top-0 left-0 w-full h-1/3 grass-top"></div>
+                                {blockHealth < 5 && blockHealth > 3 && <div className="absolute inset-0 crack-1"></div>}
+                                {blockHealth <= 3 && blockHealth > 1 && <div className="absolute inset-0 crack-2"></div>}
+                                {blockHealth <= 1 && <div className="absolute inset-0 crack-3"></div>}
+                            </div>
+                            </div>
+                            {particles.map(p => (
+                            <div key={p.id} className="absolute w-2 h-2 bg-yellow-900 pointer-events-none" style={{ left: 0, top: 0, transform: `translate(${p.x}px, ${p.y}px)` }} />
+                            ))}
+                        </div>
+                        <p className="mt-8 text-2xl text-center bg-black/50 p-2 rounded text-white animate-pulse">
+                            {blockHealth > 0 ? "¡TOCA EL BLOQUE!" : "¡ABRIENDO!"}
+                        </p>
+                        <div className="mt-4 w-64 h-6 bg-gray-800 border-2 border-white rounded-full overflow-hidden">
+                            <div className="h-full bg-green-500 transition-all duration-200" style={{ width: `${(1 - blockHealth/5) * 100}%` }}></div>
+                        </div>
+                        </div>
+                    ) : (
+                        <div className="relative z-10 min-h-screen w-full flex flex-col items-center justify-center p-4 animate-fadeIn overflow-y-auto custom-scrollbar">
+                           
+                           <div className="w-full flex flex-col items-center justify-center my-auto py-12">
+                               
+                               <div className="minecraft-panel p-6 w-full max-w-md relative animate-float mx-auto shrink-0 mt-8">
+                            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
+                                <div className="w-24 h-24 bg-green-500 border-4 border-black flex items-center justify-center relative shadow-lg">
+                                    <div className="w-12 h-12 relative">
+                                        <div className="absolute top-2 left-2 w-3 h-3 bg-black"></div><div className="absolute top-2 right-2 w-3 h-3 bg-black"></div>
+                                        <div className="absolute top-5 left-5 w-2 h-4 bg-black"></div>
+                                        <div className="absolute bottom-1 left-3 w-2 h-3 bg-black"></div><div className="absolute bottom-1 right-3 w-2 h-3 bg-black"></div>
+                                        <div className="absolute bottom-3 left-4 w-4 h-2 bg-black"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-10 text-center">
+                            <h2 className="text-3xl font-bold mb-2 leading-none">¡INVITACIÓN!</h2>
+                            <div className="h-1 w-full bg-gray-600 mb-4"></div>
+                            
+                            <p className="text-xl mb-4">Celebra el <span id="edad" className="text-purple-700 font-bold ml-1">NIVEL {partyData.age}</span> de {partyData.name}</p>
+
+                            <div className="bg-black/20 p-2 mb-4 rounded border-2 border-gray-500">
+                                <p className="text-sm text-gray-700 font-bold mb-1">COMIENZA EN:</p>
+                                <div className="flex justify-center gap-2 text-xl font-bold text-gray-800">
+                                {Object.keys(timeLeft).length > 0 ? Object.entries(timeLeft).map(([unit, value]) => (
+                                    <div key={unit} className="flex flex-col items-center w-12">
+                                    <span className="bg-gray-700 text-white w-full rounded">{value < 10 ? `0${value}` : value}</span>
+                                    <span className="text-xs mt-1">{unit}</span>
+                                    </div>
+                                )) : <span>¡ES HOY!</span>}
+                                </div>
+                            </div>
+
+                            <div className="space-y-3 text-left bg-gray-300 p-3 border-2 border-gray-500 mb-4 text-lg">
+                                <div className="flex items-center gap-2"><Calendar className="w-5 h-5 text-blue-600 flex-shrink-0" /><span id="fecha">{partyData.date}</span></div>
+                                <div className="flex items-center gap-2"><Clock className="w-5 h-5 text-blue-600 flex-shrink-0" /><span id="hora">{partyData.time}</span></div>
+                                <div className="flex items-center gap-2"><MapPin className="w-5 h-5 text-red-600 flex-shrink-0" /><span id="ubicacion" className="leading-none">{partyData.location}</span></div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 mb-4">
+                                <button onClick={() => setShowMapOptions(true)} className="minecraft-btn flex items-center justify-center py-2 bg-blue-600 text-white text-lg font-bold hover:bg-blue-500 active:translate-y-1 border-2 border-black">
+                                    <MapPin size={18} className="mr-2"/> MAPA
+                                </button>
+                                <button onClick={() => setShowGifts(true)} className="minecraft-btn flex items-center justify-center py-2 bg-purple-600 text-white text-lg font-bold hover:bg-purple-500 active:translate-y-1 border-2 border-black">
+                                    <Gift size={18} className="mr-2"/> REGALOS
+                                </button>
+                            </div>
+
+                            <button onClick={() => setShowRSVPDemo(true)} className="minecraft-btn mt-2 w-full py-4 bg-green-600 text-white text-2xl font-bold hover:bg-green-500 active:translate-y-1 border-2 border-black flex items-center justify-center animate-pulse-glow">
+                                <CheckSquare className="mr-2" size={24}/> CONFIRMAR ASISTENCIA
+                            </button>
+
+                            </div>
+                        </div>
+
+                        </div>
+
+                        {/* 🔴 FOOTER DE BAULIA ACTUALIZADO */}
+                        <div className="flex flex-col items-center justify-center mt-8 mb-28 gap-6">
+                            
+                            {/* ACCESO AL PANEL DE CONTROL */}
+                            <a 
+                                href="#" 
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    if (window !== window.parent) { 
+                                        window.parent.postMessage('open_panel', '*'); 
+                                    } else { 
+                                        window.location.href = 'https://baulia.com/login'; 
+                                    }
+                                }}
+                                className="text-white/60 hover:text-white text-xl font-bold transition-transform hover:scale-105 active:scale-95 flex items-center gap-2"
+                            >
+                                ⚙️ INGRESO AL PANEL
+                            </a>
+
+                            <div className="flex flex-col items-center justify-center">
+                                <span className="text-white/70 text-sm font-sans mb-1">Tecnología por</span>
+                                <div 
+                                    className="hover:scale-105 transition-transform duration-300 cursor-pointer w-auto h-10" 
+                                    onClick={() => window.parent.location.href = 'https://baulia.com'} 
+                                    dangerouslySetInnerHTML={{ __html: `<svg viewBox="0 0 915 201" fill="none" xmlns="http://www.w3.org/2000/svg" style="height: 100%; width: auto; overflow: visible; display: inline-block;"><style>.baulia-text { fill: #ffffff; transition: fill 0.5s ease; } .baulia-diamond-animator { transform-origin: 100px 100px; transform: rotate(45deg) scale(0.8); transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); } .baulia-diamond-shape { fill: transparent; stroke: #D4AF37; stroke-width: 1.72px; transition: fill 0.5s ease, stroke-width 0.3s ease; } .baulia-b { fill: #D4AF37; transition: all 0.6s ease; transform-origin: 100px 100px; } svg:hover .baulia-diamond-animator { transform: rotate(135deg) scale(0.85); } svg:hover .baulia-diamond-shape { stroke-width: 3px; } svg:hover .baulia-b { transform: scale(1.05); fill: #FDF1A9; }</style><g class="baulia-text"><path d="M265.12,78.58h-.35c0-2.04-.75-3.8-2.24-5.25-1.5-1.46-3.27-2.18-5.31-2.18h-1.42l-.12-1.18h9.44v8.62ZM265.12,143.97v8.62h-9.44l.12-1.18h1.42c2.05,0,3.82-.73,5.31-2.18,1.49-1.46,2.24-3.21,2.24-5.25h.35ZM272.44,69.96v82.62h-7.67v-82.62h7.67ZM279.17,69.96c5.51,0,10.17.83,13.99,2.48,3.82,1.65,6.71,3.95,8.68,6.91,1.97,2.95,2.95,6.39,2.95,10.33,0,3.3-.63,6.2-1.89,8.68-1.26,2.48-2.87,4.49-4.84,6.02-1.97,1.53-4.05,2.62-6.26,3.25,4.17.63,7.77,2.01,10.8,4.13,3.03,2.12,5.35,4.78,6.96,7.97,1.61,3.19,2.42,6.75,2.42,10.68,0,4.41-1.06,8.28-3.19,11.63-2.12,3.35-5.25,5.94-9.38,7.79-4.13,1.85-9.11,2.77-14.93,2.77h-13.1c.08-1.42.12-2.83.12-4.25h12.51c4.09,0,7.55-.73,10.39-2.18,2.83-1.46,5-3.6,6.49-6.43,1.49-2.83,2.24-6.22,2.24-10.15,0-4.41-.85-7.99-2.54-10.74-1.69-2.75-3.88-4.84-6.55-6.26-2.68-1.42-5.57-2.38-8.68-2.89-3.11-.51-6.08-.77-8.91-.77v-1.06c1.81,0,3.82-.2,6.02-.59,2.2-.39,4.33-1.18,6.37-2.36,2.04-1.18,3.74-2.93,5.08-5.25,1.34-2.32,2.01-5.37,2.01-9.15,0-3.54-.65-6.57-1.95-9.09-1.3-2.52-3.23-4.43-5.78-5.72-2.56-1.3-5.72-1.95-9.5-1.95h-10.86c0-.08-.1-.41-.29-1-.2-.59-.49-1.51-.89-2.77h12.51Z"/><path d="M381.98,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM407.36,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.86-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM424,120.36v3.54h-36.95v-3.54h36.95ZM407.36,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM429.31,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95,1.18-1.3,1.34-3.13.47-5.49Z"/><path d="M506.51,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM513.83,69.96v51.94c0,5.67,1.04,10.66,3.13,14.99,2.08,4.33,5.02,7.69,8.79,10.09,3.78,2.4,8.14,3.6,13.1,3.6,5.27,0,9.87-1.14,13.81-3.42,3.93-2.28,7-5.45,9.21-9.5,2.2-4.05,3.31-8.79,3.31-14.22v-53.47h5.55v53.47c0,6.14-1.32,11.51-3.95,16.11-2.64,4.6-6.36,8.2-11.15,10.8-4.8,2.6-10.39,3.9-16.76,3.9s-12.26-1.28-17.17-3.84c-4.92-2.56-8.73-6.14-11.45-10.74-2.71-4.6-4.07-9.97-4.07-16.11v-53.59h7.67ZM521.97,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38ZM538.73,61.58c1.65-1.81,3.31-3.6,4.96-5.37,1.65-1.77,3.32-3.5,5.02-5.19s3.36-3.32,5.02-4.9c.87.94,1.73,1.93,2.6,2.95.87,1.02,1.61,2.12,2.24,3.31-2.12,1.18-4.25,2.36-6.37,3.54-2.12,1.18-4.23,2.3-6.31,3.36-2.09,1.06-4.19,2.11-6.31,3.13l-.83-.83ZM565.53,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM578.86,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38Z"/><path d="M646.97,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM646.97,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM654.29,69.96v82.62h-7.67v-82.62h7.67ZM653.94,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18s-2.22,3.21-2.3,5.25h-.35ZM686.16,148.93v3.66h-32.22v-3.66h32.22ZM693.36,133.46l-6.85,19.12h-19.59l4.25-3.66c4.17,0,7.57-.65,10.21-1.95,2.64-1.3,4.78-3.13,6.43-5.49,1.65-2.36,3.11-5.04,4.37-8.03h1.18Z"/><path d="M758.75,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM758.75,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM766.07,69.96v82.62h-7.67v-82.62h7.67ZM765.72,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18-1.46,1.46-2.22,3.21-2.3,5.25h-.35ZM765.72,143.97h.35c.08,2.05.84,3.8,2.3,5.25,1.46,1.46,3.21,2.18,5.25,2.18h1.53v1.18h-9.44v-8.62Z"/><path d="M846.33,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM871.71,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.87-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM888.35,120.36v3.54h-36.95v-3.54h36.95ZM871.71,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM893.67,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95s1.34-3.13.47-5.49Z"/></g><g class="baulia-diamond-animator"><rect class="baulia-diamond-shape" x=".86" y=".86" width="198.64" height="198.64" transform="translate(0 200.36) rotate(-90)" stroke-miterlimit="10" /></g><path class="baulia-b" d="M116.87,94.54l6.01-.41c6.47,0,11.27,1.21,14.42,3.62,3.14,2.42,4.72,5.83,4.72,10.25s-2.01,9.59-6.01,15.51c-4.01,5.92-9.2,11.3-15.58,16.13h7.79c3.19,0,5.42-.14,6.7-.41,1.27-.27,2-.41,2.19-.41,1.27,0,1.91.68,1.91,2.05s-.91,2.1-2.73,2.19c-7.02,0-13.76-.09-20.23-.27-10.2,6.47-20.23,9.7-30.07,9.7-4.65,0-8.34-.87-11.07-2.6s-4.1-3.48-4.1-5.26.75-3.16,2.25-4.17c1.5-1,3.62-1.5,6.36-1.5,10.66,0,22.59.23,35.81.68,5.47-4.46,9.84-9.64,13.12-15.51,3.28-5.88,4.92-11.18,4.92-15.92,0-7.56-4.06-11.34-12.16-11.34-3.19,0-6.49.5-9.91,1.5-3.42,1-5.47,1.71-6.15,2.12s-1.12.61-1.3.61c-.55,0-.82-.39-.82-1.16s1.18-1.71,3.55-2.8c10.39-5.01,20.54-11.68,30.48-20.02,9.93-8.34,14.9-14.28,14.9-17.83,0-1.64-1.28-2.46-3.83-2.46-10.39.09-24.65,7.88-42.78,23.37-3.65,9.38-9.64,20.91-17.97,34.58-8.34,13.67-17.06,25.9-26.17,36.69-9.11,10.8-15.9,16.19-20.36,16.19-2.73,0-4.1-1.41-4.1-4.24,0-6.47,6.13-17.99,18.38-34.58,12.25-16.58,26.12-31.84,41.61-45.78,2.73-6.65,4.1-11.5,4.1-14.56s-.73-5.47-2.19-7.24c-1.46-1.78-3.6-3.08-6.42-3.9-4.46-1.18-9.18-1.78-14.14-1.78s-8.77.12-11.41.34c-2.64.23-5.86.68-9.64,1.37-3.78.68-6.86,1.87-9.22,3.55-2.37,1.69-3.55,3.83-3.55,6.42s1.27,4.6,3.83,6.01c2.55,1.41,5.67,2.39,9.36,2.94s7.36,1.14,11,1.78c3.64.64,6.74,1.89,9.29,3.76,2.55,1.87,3.83,4.49,3.83,7.86,0,.91-.2,1.37-.61,1.37s-.73-.14-.96-.41c-.23-.27-.62-.82-1.16-1.64-.82-1.18-2.03-2.1-3.62-2.73-1.59-.64-4.06-1.25-7.38-1.84-3.33-.59-6.47-1.23-9.43-1.91-2.96-.68-5.94-1.57-8.95-2.66-3.01-1.09-5.42-2.64-7.24-4.65-1.82-2-2.73-4.35-2.73-7.04s1.14-5.08,3.42-7.17c2.28-2.1,5.28-3.74,9.02-4.92,7.65-2.28,15.63-3.42,23.92-3.42,21.5,0,32.25,5.65,32.25,16.95,0,1-.23,2.51-.68,4.51,18.4-14.85,33.35-22.28,44.83-22.28,5.1,0,7.65,1.55,7.65,4.65,0,4.46-4.67,10.8-14.01,19-9.34,8.2-18.98,14.58-28.9,19.13ZM44.17,163.69c2.64,0,9.73-8.45,21.25-25.35,11.52-16.9,20.75-32.64,27.68-47.22-13.67,13.03-25.76,26.58-36.29,40.66-10.52,14.08-15.78,23.66-15.78,28.77,0,2.09,1.05,3.14,3.14,3.14ZM111,142.64l-24.74-.55c-7.02,0-10.52,1.05-10.52,3.14,0,1.18,1.18,2.3,3.55,3.35,2.37,1.05,5.1,1.57,8.2,1.57,8.11,0,15.94-2.5,23.51-7.52Z"/></svg>`}} 
+                                />
+                            </div>
+                        </div>
+                        </div>
+                    )}
+
+                    {/* 🔴 FAKE RSVP / MODAL DE VENTAS (MODO DEMO INTERACTIVO) */}
+                    {showRSVPDemo && (
+                        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 backdrop-blur-xl p-4">
+                            <div className="minecraft-panel w-full max-w-sm p-6 relative">
+                                <button onClick={closeRSVPModal} className="absolute top-2 right-2 text-gray-700 hover:text-red-600 z-10">
+                                    <X size={24} />
+                                </button>
+                                
+                                <div className="text-center mb-6">
+                                    <h3 className="text-3xl font-bold text-red-600 mb-2 drop-shadow-md">MODO DE PRUEBA</h3>
+                                    <p className="text-sm font-sans font-medium text-gray-800 bg-yellow-300 p-2 rounded border-2 border-yellow-600 leading-snug">
+                                        En una invitación real, tus invitados confirmarán asistencia aquí.
+                                    </p>
+                                </div>
+
+                                {demoFormStatus === 'form' ? (
+                                    <form onSubmit={handleRSVPSubmit} className="space-y-4 relative">
+                                        <div className="text-left">
+                                            <label className="block text-xl font-bold mb-1">Nombre y Apellido</label>
+                                            <input type="text" required placeholder="Ej. Steve" className="w-full bg-white border-4 border-gray-500 p-2 font-sans text-lg text-black focus:outline-none focus:border-green-600" />
+                                        </div>
+                                        <div className="text-left">
+                                            <label className="block text-xl font-bold mb-1">Pases a confirmar</label>
+                                            <select className="w-full bg-white border-4 border-gray-500 p-2 font-sans text-lg text-black focus:outline-none focus:border-green-600">
+                                                <option>1 Pase</option>
+                                                <option>2 Pases</option>
+                                                <option>3 Pases</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" className="minecraft-btn w-full py-3 mt-4 bg-green-600 text-white text-xl font-bold border-2 border-black flex justify-center items-center hover:bg-green-500 active:translate-y-1">
+                                            GENERAR PASE QR
+                                        </button>
+                                    </form>
+                                ) : (
+                                    <div className="animate-fadeIn bg-white p-4 border-4 border-green-600 rounded text-center">
+                                        <div className="flex justify-center mb-2">
+                                            <div className="bg-green-100 rounded-full p-2">
+                                                <CheckSquare size={40} className="text-green-600" />
+                                            </div>
+                                        </div>
+                                        <h4 className="text-2xl font-bold text-green-700 mb-2">¡Excelente!</h4>
+                                        <p className="text-base font-sans font-medium text-gray-800 leading-snug">
+                                            En una versión real, esto le generaría un código QR único a tu invitado. ¡Crea tu propio evento en Baulia para desbloquear esta función!
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    </>
+                )}
+                </div>
+            );
+        }
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+    
+    <!-- 🔴 PROTECCIÓN ANTI-ROBO HTML (Atajos de teclado y F12) -->
+    <script>
+        document.addEventListener('keydown', function(e) {
+            // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
+            if (e.key === 'F12' || 
+               (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+               (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
+    <script>
+  // El "oído" que escucha a la Landing Page
+  window.addEventListener('message', function(event) {
+    if (event.data === 'pause_baulia_audio') {
+      
+      // 1. Apaga cualquier audio o video clásico que esté sonando
+      var medias = document.querySelectorAll('audio, video');
+      medias.forEach(function(media) { 
+        media.pause(); 
+      });
+
+      // 2. Opcional: Si tienes un botón visual de Play/Pausa, descomenta la línea de abajo 
+      // y ponle el ID de tu botón. Así, cuando se pause, el icono cambiará automáticamente a "Play".
+      // document.getElementById('id-de-tu-boton-de-musica').click();
+    }
+  });
+</script>
+</body>
+</html>

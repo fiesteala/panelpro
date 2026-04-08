@@ -10885,7 +10885,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     {/* 🔴 LISTA DE BOTONES CON ADN VISUAL (OPTIMIZADA Y ESBELTA) */}
                     <div className="flex flex-col gap-3 relative z-50">
                         
-                        {/* INYECTAMOS LAS ANIMACIONES */}
+                        {/* INYECTAMOS LAS ANIMACIONES GLOBALES DE LA LISTA */}
                         <style>{`
                             @keyframes petalFallMini {
                                 0% { transform: translateY(-10px) rotate(0deg) scale(0.8); opacity: 0; }
@@ -10912,7 +10912,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
                         {Object.values(demos).map(demo => {
                             
-                            // 💎 1. ESTILOS: INVITACIÓN DE BODA (Clásica e Ivory)
+                            // 💎 1. ESTILOS: INVITACIÓN DE BODA
                             if (demo.id === 'boda') {
                                 return (
                                     <button 
@@ -10922,10 +10922,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         className="w-full bg-[#FDFBF7] border border-[#D4AF37]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_30px_rgba(212,175,55,0.15)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
                                     >
                                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-[0.03]"></div>
-                                        
                                         <div className="absolute -top-8 -right-8 w-28 h-28 bg-[#8DB580]/10 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         <div className="absolute -bottom-8 left-8 w-20 h-20 bg-[#F4AAB9]/10 blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
-                                        
                                         <div className="absolute top-0 left-[20%] w-1.5 h-2.5 bg-[#F4AAB9] opacity-0 pointer-events-none" style={{ animation: 'petalFallMini 4s linear infinite', borderRadius: '50% 0 50% 50%' }}></div>
                                         <div className="absolute top-0 left-[50%] w-2 h-3 bg-[#D4AF37] opacity-0 pointer-events-none" style={{ animation: 'petalFallMini 5s linear infinite 1.5s', borderRadius: '50% 0 50% 50%' }}></div>
                                         <div className="absolute top-0 left-[80%] w-1.5 h-2.5 bg-[#F4AAB9] opacity-0 pointer-events-none" style={{ animation: 'petalFallMini 4.5s linear infinite 2.5s', borderRadius: '50% 0 50% 50%' }}></div>
@@ -10934,12 +10932,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                             <div className="absolute -left-3 -top-3 opacity-5 pointer-events-none" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '3rem', lineHeight: '1' }}>
                                                 I<span style={{ fontFamily: '"Pinyon Script", cursive' }}>&</span>A
                                             </div>
-                                            
                                             <span className="text-[8px] tracking-[0.4em] text-[#8DB580] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>
                                                 Alta Costura
                                             </span>
                                             <span className="text-2xl text-[#2C3531] font-light tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-                                                Bodas de Lujo
+                                                {demo.label}
                                             </span>
                                             <span className="text-[8px] uppercase tracking-widest text-[#2C3531]/50 font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}>
                                                 <PlayCircle size={10} className="mr-1.5 text-[#D4AF37]" /> Toca para abrir
@@ -10953,7 +10950,93 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 );
                             }
 
-                            // 💎 2. ESTILOS: INVITACIÓN DE CUMPLEAÑOS (Clara, Con Flor Gigante y Cut-off)
+                            // 👑 2. ESTILOS: INVITACIÓN XV AÑOS (Dark Rose, Glow y Destellos)
+                            if (demo.id === 'xv') {
+                                return (
+                                    <button 
+                                        key={demo.id}
+                                        type="button"
+                                        onClick={() => setFullScreenDemo(demo.url)}
+                                        className="w-full bg-[#12080a] border border-[#e8a598]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.5)] hover:shadow-[0_15px_30px_rgba(232,165,152,0.15)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
+                                    >
+                                        <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#e8a598]/10 blur-[40px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -bottom-10 left-8 w-24 h-24 bg-[#c27a6e]/10 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        
+                                        {/* ✨ DESTELLOS FLOTANTES ROSE GOLD */}
+                                        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity duration-700">
+                                            <div className="absolute left-[20%]" style={{ animation: 'floatItemMini 10s linear infinite', animationDelay: '0s' }}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" /></svg>
+                                            </div>
+                                            <div className="absolute left-[60%]" style={{ animation: 'floatItemMini 14s linear infinite', animationDelay: '2s' }}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" /></svg>
+                                            </div>
+                                            <div className="absolute left-[80%]" style={{ animation: 'floatItemMini 12s linear infinite', animationDelay: '5s' }}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" /></svg>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col items-start relative z-10">
+                                            <div className="absolute -left-2 -top-5 opacity-[0.05] pointer-events-none text-[#e8a598]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '4rem', lineHeight: '1' }}>
+                                                V
+                                            </div>
+                                            
+                                            <span className="text-[8px] tracking-[0.4em] text-[#e8a598] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>
+                                                Mis XV Años
+                                            </span>
+                                            <span className="text-2xl text-white font-light tracking-wide group-hover:text-[#e8a598] transition-colors duration-300 drop-shadow-[0_0_8px_rgba(232,165,152,0.3)]" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
+                                                {demo.label}
+                                            </span>
+                                            <span className="text-[8px] uppercase tracking-widest text-white/50 font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}>
+                                                <PlayCircle size={10} className="mr-1.5 text-[#e8a598]" /> Toca para abrir
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="relative z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-[#e8a598]/30 shadow-sm text-white group-hover:bg-[#e8a598] group-hover:text-black transition-colors duration-500 shrink-0">
+                                            <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
+                                        </div>
+                                    </button>
+                                );
+                            }
+
+                            // 🍼 3. ESTILOS: INVITACIÓN BABY SHOWER
+                            if (demo.id === 'baby_shower') {
+                                return (
+                                    <button 
+                                        key={demo.id}
+                                        type="button"
+                                        onClick={() => setFullScreenDemo(demo.url)}
+                                        className="w-full bg-[#FFF0F2] border border-[#C5A059]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_30px_rgba(197,160,89,0.15)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
+                                    >
+                                        <div className="absolute -top-8 -right-8 w-28 h-28 bg-[#D8A7B1]/20 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -bottom-8 left-8 w-20 h-20 bg-[#F7E7CE]/30 blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        
+                                        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 group-hover:opacity-70 transition-opacity duration-700">
+                                            <div className="absolute left-[15%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 12s linear infinite', animationDelay: '0s' }}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><circle cx="12" cy="7" r="5" /><circle cx="12" cy="7" r="1" fill="currentColor" /><circle cx="10" cy="5.5" r="0.5" fill="currentColor" /><circle cx="14" cy="5.5" r="0.5" fill="currentColor" /><circle cx="10" cy="8.5" r="0.5" fill="currentColor" /><circle cx="14" cy="8.5" r="0.5" fill="currentColor" /><path d="M12 12v6" /><circle cx="12" cy="20" r="2" /><path d="M9 13c1.5-1 4.5-1 6 0" /></svg>
+                                            </div>
+                                            <div className="absolute left-[45%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 15s linear infinite', animationDelay: '3s' }}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><path d="M9 10c0-3 1.5-5 3-5s3 2 3 5" /><rect x="5" y="10" width="14" height="4" rx="2" /><path d="M10 14v2h4v-2" /><circle cx="12" cy="18" r="3" /></svg>
+                                            </div>
+                                            <div className="absolute left-[75%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 10s linear infinite', animationDelay: '6s' }}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><circle cx="12" cy="7" r="5" /><circle cx="12" cy="7" r="1" fill="currentColor" /><circle cx="10" cy="5.5" r="0.5" fill="currentColor" /><circle cx="14" cy="5.5" r="0.5" fill="currentColor" /><circle cx="10" cy="8.5" r="0.5" fill="currentColor" /><circle cx="14" cy="8.5" r="0.5" fill="currentColor" /><path d="M12 12v6" /><circle cx="12" cy="20" r="2" /><path d="M9 13c1.5-1 4.5-1 6 0" /></svg>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col items-start relative z-10">
+                                            <div className="absolute -left-2 -top-5 opacity-[0.07] pointer-events-none text-[#C5A059]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '4rem', lineHeight: '1' }}>TE</div>
+                                            <span className="text-[8px] tracking-[0.4em] text-[#D8A7B1] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>Baby Shower de</span>
+                                            <span className="text-2xl text-[#111827] font-light tracking-wide group-hover:text-[#D8A7B1] transition-colors duration-300" style={{ fontFamily: '"Great Vibes", cursive' }}>{demo.label}</span>
+                                            <span className="text-[8px] uppercase tracking-widest text-[#4B5563] font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}><PlayCircle size={10} className="mr-1.5 text-[#C5A059]" /> Toca para abrir</span>
+                                        </div>
+                                        
+                                        <div className="relative z-10 w-10 h-10 rounded-full bg-white/70 backdrop-blur-sm flex items-center justify-center border border-[#C5A059]/30 shadow-sm text-[#4B5563] group-hover:bg-[#D8A7B1] group-hover:border-[#D8A7B1] group-hover:text-white transition-colors duration-500 shrink-0">
+                                            <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
+                                        </div>
+                                    </button>
+                                );
+                            }
+
+                            // 💎 4. ESTILOS: INVITACIÓN DE CUMPLEAÑOS
                             if (demo.id === 'cumple_formal') {
                                 return (
                                     <button 
@@ -10978,19 +11061,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         </div>
 
                                         <div className="flex flex-col items-start relative z-10">
-                                            <div className="absolute -left-3 -top-3 opacity-5 pointer-events-none text-[#D4AF37]" style={{ fontFamily: '"Pinyon Script", cursive', fontSize: '3rem', lineHeight: '1' }}>
-                                                30
-                                            </div>
-                                            
-                                            <span className="text-[8px] tracking-[0.4em] text-[#8DB580] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>
-                                                Celebrando la vida
-                                            </span>
-                                            <span className="text-2xl text-[#1a1a1a] font-light tracking-wide group-hover:text-[#F76C82] transition-colors duration-300" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-                                                {demo.label}
-                                            </span>
-                                            <span className="text-[8px] uppercase tracking-widest text-[#2C3531]/60 font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}>
-                                                <PlayCircle size={10} className="mr-1.5 text-[#D4AF37]" /> Toca para abrir
-                                            </span>
+                                            <div className="absolute -left-3 -top-3 opacity-5 pointer-events-none text-[#D4AF37]" style={{ fontFamily: '"Pinyon Script", cursive', fontSize: '3rem', lineHeight: '1' }}>30</div>
+                                            <span className="text-[8px] tracking-[0.4em] text-[#8DB580] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>Celebrando la vida</span>
+                                            <span className="text-2xl text-[#1a1a1a] font-light tracking-wide group-hover:text-[#F76C82] transition-colors duration-300" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
+                                            <span className="text-[8px] uppercase tracking-widest text-[#2C3531]/60 font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}><PlayCircle size={10} className="mr-1.5 text-[#D4AF37]" /> Toca para abrir</span>
                                         </div>
                                         
                                         <div className="relative z-10 w-10 h-10 rounded-full bg-white flex items-center justify-center border border-[#D4AF37]/30 shadow-sm text-[#2A2A2A] group-hover:bg-[#F76C82]/10 group-hover:border-[#F76C82] transition-colors duration-500 shrink-0">
@@ -11000,7 +11074,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 );
                             }
 
-                            // 🎮 3. ESTILOS: INVITACIÓN MINECRAFT 
+                            // 🎮 5. ESTILOS: INVITACIÓN MINECRAFT 
                             if (demo.id === 'tematicas') {
                                 return (
                                     <button 
@@ -11013,15 +11087,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         <div className="absolute top-0 left-0 w-full h-4 bg-[#388e3c] border-b-4 border-[#1b5e20] pointer-events-none"></div>
 
                                         <div className="flex flex-col items-start relative z-10 pt-2">
-                                            <span className="text-[12px] tracking-[0.2em] text-[#388e3c] drop-shadow-[2px_2px_0_#000] uppercase mb-0.5" style={{ fontFamily: '"VT323", monospace' }}>
-                                                Mundo Gamer
-                                            </span>
-                                            <span className="text-3xl text-white drop-shadow-[2px_2px_0_#000] group-hover:text-green-400 transition-colors" style={{ fontFamily: '"VT323", monospace', lineHeight: '0.9' }}>
-                                                {demo.label}
-                                            </span>
-                                            <span className="text-[12px] uppercase tracking-widest text-white/70 drop-shadow-[1px_1px_0_#000] flex items-center mt-1" style={{ fontFamily: '"VT323", monospace' }}>
-                                                <PlayCircle size={10} className="mr-1.5 text-white" /> Start Game
-                                            </span>
+                                            <span className="text-[12px] tracking-[0.2em] text-[#388e3c] drop-shadow-[2px_2px_0_#000] uppercase mb-0.5" style={{ fontFamily: '"VT323", monospace' }}>Mundo Gamer</span>
+                                            <span className="text-3xl text-white drop-shadow-[2px_2px_0_#000] group-hover:text-green-400 transition-colors" style={{ fontFamily: '"VT323", monospace', lineHeight: '0.9' }}>{demo.label}</span>
+                                            <span className="text-[12px] uppercase tracking-widest text-white/70 drop-shadow-[1px_1px_0_#000] flex items-center mt-1" style={{ fontFamily: '"VT323", monospace' }}><PlayCircle size={10} className="mr-1.5 text-white" /> Start Game</span>
                                         </div>
                                         
                                         <div className="relative z-10 w-10 h-10 bg-[#C6C6C6] border-2 border-black flex items-center justify-center shadow-[inset_-2px_-2px_0px_0px_#555,_inset_2px_2px_0px_0px_#FFF] text-[#202020] group-hover:bg-green-500 transition-colors duration-200 shrink-0">
@@ -11031,7 +11099,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 );
                             }
 
-                            // 🕊️ 4. ESTILOS: INVITACIÓN BAUTIZO (Ivory, Nubes y Ositos)
+                            // 🕊️ 6. ESTILOS: INVITACIÓN BAUTIZO
                             if (demo.id === 'bautizo') {
                                 return (
                                     <button 
@@ -11043,7 +11111,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#8A9A86]/10 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         <div className="absolute -bottom-8 left-8 w-24 h-24 bg-[#D4AF37]/10 blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         
-                                        {/* ☁️ OSITOS Y NUBES FLOTANTES */}
                                         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30 group-hover:opacity-60 transition-opacity duration-700">
                                             <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 12s linear infinite', animationDelay: '0s', '--y-offset': '10px', '--scale': '0.9', '--rot': '-5deg' }}>
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg>
@@ -11057,72 +11124,14 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         </div>
 
                                         <div className="flex flex-col items-start relative z-10">
-                                            <div className="absolute -left-2 -top-5 opacity-5 pointer-events-none text-[#D4AF37]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '4rem', lineHeight: '1' }}>
-                                                JA
-                                            </div>
-                                            
-                                            <span className="text-[8px] tracking-[0.4em] text-[#8A9A86] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>
-                                                Con la bendición
-                                            </span>
-                                            <span className="text-2xl text-[#333333] font-light tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-                                                {demo.label}
-                                            </span>
-                                            <span className="text-[8px] uppercase tracking-widest text-[#7A7A7A] font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}>
-                                                <PlayCircle size={10} className="mr-1.5 text-[#D4AF37]" /> Toca para abrir
-                                            </span>
+                                            <div className="absolute -left-2 -top-5 opacity-5 pointer-events-none text-[#D4AF37]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '4rem', lineHeight: '1' }}>JA</div>
+                                            <span className="text-[8px] tracking-[0.4em] text-[#8A9A86] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>Con la bendición</span>
+                                            <span className="text-2xl text-[#333333] font-light tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
+                                            <span className="text-[8px] uppercase tracking-widest text-[#7A7A7A] font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}><PlayCircle size={10} className="mr-1.5 text-[#D4AF37]" /> Toca para abrir</span>
                                         </div>
                                         
                                         <div className="relative z-10 w-10 h-10 rounded-full bg-white flex items-center justify-center border border-[#D4AF37]/30 shadow-sm text-[#333333] group-hover:bg-[#D4AF37]/10 group-hover:border-[#D4AF37] transition-colors duration-500 shrink-0">
                                             <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300 text-[#D4AF37]" />
-                                        </div>
-                                    </button>
-                                );
-                            }
-
-                            // 🍼 5. ESTILOS: INVITACIÓN BABY SHOWER (Blush, Dusty Rose, Monograma TE)
-                            if (demo.id === 'baby_shower') {
-                                return (
-                                    <button 
-                                        key={demo.id}
-                                        type="button"
-                                        onClick={() => setFullScreenDemo(demo.url)}
-                                        className="w-full bg-[#FFF0F2] border border-[#C5A059]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_30px_rgba(197,160,89,0.15)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
-                                    >
-                                        <div className="absolute -top-8 -right-8 w-28 h-28 bg-[#D8A7B1]/20 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
-                                        <div className="absolute -bottom-8 left-8 w-20 h-20 bg-[#F7E7CE]/30 blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
-                                        
-                                        {/* 🍼 CHUPONES Y SONAJAS FLOTANTES */}
-                                        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 group-hover:opacity-70 transition-opacity duration-700">
-                                            <div className="absolute left-[15%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 12s linear infinite', animationDelay: '0s' }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><circle cx="12" cy="7" r="5" /><circle cx="12" cy="7" r="1" fill="currentColor" /><circle cx="10" cy="5.5" r="0.5" fill="currentColor" /><circle cx="14" cy="5.5" r="0.5" fill="currentColor" /><circle cx="10" cy="8.5" r="0.5" fill="currentColor" /><circle cx="14" cy="8.5" r="0.5" fill="currentColor" /><path d="M12 12v6" /><circle cx="12" cy="20" r="2" /><path d="M9 13c1.5-1 4.5-1 6 0" /></svg>
-                                            </div>
-                                            <div className="absolute left-[45%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 15s linear infinite', animationDelay: '3s' }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><path d="M9 10c0-3 1.5-5 3-5s3 2 3 5" /><rect x="5" y="10" width="14" height="4" rx="2" /><path d="M10 14v2h4v-2" /><circle cx="12" cy="18" r="3" /></svg>
-                                            </div>
-                                            <div className="absolute left-[75%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 10s linear infinite', animationDelay: '6s' }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><circle cx="12" cy="7" r="5" /><circle cx="12" cy="7" r="1" fill="currentColor" /><circle cx="10" cy="5.5" r="0.5" fill="currentColor" /><circle cx="14" cy="5.5" r="0.5" fill="currentColor" /><circle cx="10" cy="8.5" r="0.5" fill="currentColor" /><circle cx="14" cy="8.5" r="0.5" fill="currentColor" /><path d="M12 12v6" /><circle cx="12" cy="20" r="2" /><path d="M9 13c1.5-1 4.5-1 6 0" /></svg>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex flex-col items-start relative z-10">
-                                            {/* Monograma de fondo en Great Vibes */}
-                                            <div className="absolute -left-2 -top-5 opacity-[0.07] pointer-events-none text-[#C5A059]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '4rem', lineHeight: '1' }}>
-                                                TE
-                                            </div>
-                                            
-                                            <span className="text-[8px] tracking-[0.4em] text-[#D8A7B1] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>
-                                                Baby Shower de
-                                            </span>
-                                            <span className="text-2xl text-[#111827] font-light tracking-wide group-hover:text-[#D8A7B1] transition-colors duration-300" style={{ fontFamily: '"Great Vibes", cursive' }}>
-                                                Tania Estefania
-                                            </span>
-                                            <span className="text-[8px] uppercase tracking-widest text-[#4B5563] font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}>
-                                                <PlayCircle size={10} className="mr-1.5 text-[#C5A059]" /> Toca para abrir
-                                            </span>
-                                        </div>
-                                        
-                                        <div className="relative z-10 w-10 h-10 rounded-full bg-white/70 backdrop-blur-sm flex items-center justify-center border border-[#C5A059]/30 shadow-sm text-[#4B5563] group-hover:bg-[#D8A7B1] group-hover:border-[#D8A7B1] group-hover:text-white transition-colors duration-500 shrink-0">
-                                            <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
                                         </div>
                                     </button>
                                 );
