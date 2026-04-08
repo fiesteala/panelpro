@@ -409,7 +409,6 @@ END:VCALENDAR`;
                             </button>
 
                             {/* === MONOGRAMA UNIFICADO (MÓVIL Y ESCRITORIO ARRIBA) === */}
-                            {/* Se cambió md:top-12 a md:top-24 para librar el notch de las MacBooks */}
                             <div className="absolute top-16 md:top-24 left-1/2 -translate-x-1/2 w-20 h-20 md:w-24 md:h-24 rounded-full border border-rosegold/60 flex items-center justify-center bg-darkrose/40 backdrop-blur-md shadow-[0_0_20px_rgba(232,165,152,0.4),inset_0_0_10px_rgba(232,165,152,0.2)] md:shadow-[0_0_25px_rgba(232,165,152,0.4),inset_0_0_15px_rgba(232,165,152,0.2)] z-40">
                                 <span className="font-cursive text-3xl md:text-4xl text-rosegold mt-2 drop-shadow-[0_0_10px_rgba(232,165,152,0.8)]">V</span>
                             </div>
@@ -446,7 +445,6 @@ END:VCALENDAR`;
                                         <p className="font-sans text-[10px] tracking-[0.2em] text-rosegold uppercase mb-1 drop-shadow-sm">
                                             {language === 'es' ? 'Pase VIP Para' : 'VIP Pass For'}
                                         </p>
-                                        {/* Ajustado tamaño y se agregó break-words para evitar desbordamientos en nombres largos */}
                                         <p className="font-serif text-xl md:text-2xl text-white font-medium break-words px-2">
                                             {guestName}
                                         </p>
@@ -455,8 +453,35 @@ END:VCALENDAR`;
                             </div>
                         </section>
 
-                        {/* === SECCIÓN 2: CUENTA REGRESIVA === */}
-                        <section className="w-full max-w-5xl px-6 py-32 flex flex-col items-center text-center">
+                        {/* === SECCIÓN 2: PADRES Y PADRINOS === */}
+                        <section className="w-full max-w-4xl px-6 pt-16 pb-24 text-center z-20 relative">
+                            <FadeInSection>
+                                <div className="glass-panel p-10 md:p-16 rounded-[40px] relative overflow-hidden border-rosegold/20">
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-[1px] bg-gradient-to-r from-transparent via-rosegold to-transparent shadow-[0_0_10px_rgba(232,165,152,1)]"></div>
+                                    
+                                    <p className="font-sans text-xs md:text-sm tracking-[0.3em] uppercase text-champagne mb-6 drop-shadow-sm">
+                                        {language === 'es' ? 'En compañía de mis padres' : 'In the company of my parents'}
+                                    </p>
+                                    <h3 className="font-serif text-3xl md:text-4xl text-white mb-8 drop-shadow-sm leading-relaxed">
+                                        Alejandro Mendoza<br/>
+                                        <span className="text-rosegold text-xl font-sans italic mx-4">&amp;</span><br/>
+                                        Carolina Estévez
+                                    </h3>
+
+                                    <div className="w-16 h-[1px] bg-rosegold/30 mx-auto my-10"></div>
+
+                                    <p className="font-sans text-xs md:text-sm tracking-[0.3em] uppercase text-champagne mb-6 drop-shadow-sm">
+                                        {language === 'es' ? 'Y mis padrinos' : 'And my godparents'}
+                                    </p>
+                                    <h3 className="font-serif text-2xl md:text-3xl text-white drop-shadow-sm leading-relaxed">
+                                        Roberto Sánchez <span className="text-rosegold font-sans italic mx-2">&amp;</span> Laura Ruiz
+                                    </h3>
+                                </div>
+                            </FadeInSection>
+                        </section>
+
+                        {/* === SECCIÓN 3: CUENTA REGRESIVA === */}
+                        <section className="w-full max-w-5xl px-6 py-24 flex flex-col items-center text-center">
                             <FadeInSection>
                                 <div className="mb-16">
                                     <p className="font-sans text-xs md:text-sm tracking-[0.4em] uppercase text-champagne mb-4 drop-shadow-sm">
@@ -494,7 +519,7 @@ END:VCALENDAR`;
                             </FadeInSection>
                         </section>
 
-                        {/* === SECCIÓN 3: UBICACIÓN Y RECEPCIÓN === */}
+                        {/* === SECCIÓN 4: UBICACIÓN Y RECEPCIÓN === */}
                         <section className="w-full max-w-5xl px-6 py-24">
                             <FadeInSection>
                                 <div className="glass-panel p-8 md:p-16 rounded-3xl text-center relative overflow-hidden border-rosegold/20">
@@ -532,7 +557,7 @@ END:VCALENDAR`;
                             </FadeInSection>
                         </section>
 
-                        {/* === SECCIÓN 4: ITINERARIO DE GALA === */}
+                        {/* === SECCIÓN 5: ITINERARIO DE GALA === */}
                         <section className="w-full max-w-3xl px-6 py-32">
                             <FadeInSection>
                                 <div className="text-center mb-20">
@@ -562,7 +587,7 @@ END:VCALENDAR`;
                             </FadeInSection>
                         </section>
 
-                        {/* === SECCIÓN 5: DRESS CODE === */}
+                        {/* === SECCIÓN 6: DRESS CODE === */}
                         <section className="w-full max-w-4xl px-6 py-24 text-center">
                             <FadeInSection>
                                 <div className="glass-panel p-12 md:p-20 rounded-[40px] flex flex-col items-center relative overflow-hidden border-rosegold/20">
@@ -583,7 +608,7 @@ END:VCALENDAR`;
                             </FadeInSection>
                         </section>
 
-                        {/* === SECCIÓN 6: GALERÍA "PHOTO BOOTH" ROSE GOLD INTERACTIVA (SLIDER HORIZONTAL) === */}
+                        {/* === SECCIÓN 7: GALERÍA "PHOTO BOOTH" ROSE GOLD INTERACTIVA === */}
                         <section className="w-full max-w-7xl py-24 mx-auto text-center overflow-hidden">
                             <FadeInSection>
                                 <div className="mb-12 px-6">
@@ -597,7 +622,6 @@ END:VCALENDAR`;
                                 </div>
 
                                 <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 md:gap-10 px-[10vw] pb-20 pt-10 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] items-center">
-                                    {/* Reducido a 6 fotos para un equilibrio visual perfecto */}
                                     {[
                                         "/demos/xv/foto1.jpg",
                                         "/demos/xv/foto2.jpg",
@@ -614,7 +638,6 @@ END:VCALENDAR`;
                                                 key={idx} 
                                                 className={`group relative flex-none w-[75vw] sm:w-[45vw] md:w-[25vw] aspect-[4/5] rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 ease-out transform ${rot} hover:rotate-0 hover:scale-105 hover:-translate-y-4 hover:z-30 shadow-[0_10px_30px_rgba(0,0,0,0.8)] border-[3px] border-white/5 hover:border-rosegold hover:shadow-[0_0_40px_rgba(232,165,152,0.7)] snap-center`}
                                             >
-                                                {/* Filtros cálidos para resaltar la luz del atardecer en las fotos */}
                                                 <img 
                                                     src={src} 
                                                     alt={`Momento ${idx + 1}`} 
@@ -634,15 +657,13 @@ END:VCALENDAR`;
                             </FadeInSection>
                         </section>
 
-                        {/* === SECCIÓN INTERMEDIA: PAUSA CINEMÁTICA / AGRADECIMIENTO === */}
+                        {/* === SECCIÓN 8: PAUSA CINEMÁTICA / AGRADECIMIENTO === */}
                         <section className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden my-12 shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-y border-rosegold/20">
-                            {/* Fondo con Parallax (bg-fixed) */}
                             <div 
                                 className="absolute inset-0 bg-cover bg-center bg-fixed filter brightness-[0.4] contrast-125 sepia-[0.2]"
                                 style={{ backgroundImage: "url('/demos/xv/portada.jpg')" }}
                             ></div>
                             
-                            {/* Overlay sutil cálido */}
                             <div className="absolute inset-0 bg-gradient-to-b from-darkrose/80 via-transparent to-darkrose/80 pointer-events-none"></div>
 
                             <FadeInSection>
@@ -665,7 +686,7 @@ END:VCALENDAR`;
                             </FadeInSection>
                         </section>
 
-                        {/* === SECCIÓN 7: LLUVIA DE SOBRES === */}
+                        {/* === SECCIÓN 9: LLUVIA DE SOBRES === */}
                         <section className="w-full max-w-4xl px-6 py-24 text-center">
                             <FadeInSection>
                                 <div className="glass-panel p-10 md:p-16 rounded-[40px] relative overflow-hidden border-rosegold/20">
@@ -715,7 +736,7 @@ END:VCALENDAR`;
                             </FadeInSection>
                         </section>
 
-                        {/* === SECCIÓN 8: MURO SOCIAL === */}
+                        {/* === SECCIÓN 10: MURO SOCIAL === */}
                         <section className="w-full max-w-4xl px-6 py-24 text-center">
                             <FadeInSection>
                                 <h2 className="font-cursive text-5xl md:text-6xl text-white mb-6 drop-shadow-sm">
@@ -749,7 +770,7 @@ END:VCALENDAR`;
                             </FadeInSection>
                         </section>
 
-                        {/* === SECCIÓN 9: BOTÓN RSVP (ABRE MODAL) === */}
+                        {/* === SECCIÓN 11: BOTÓN RSVP === */}
                         <section className="w-full max-w-3xl px-6 py-24 mb-10 text-center">
                             <FadeInSection>
                                 <h2 className="font-cursive text-5xl md:text-6xl text-white mb-6 drop-shadow-sm">
