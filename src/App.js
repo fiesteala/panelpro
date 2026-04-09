@@ -10885,7 +10885,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     {/* 🔴 LISTA DE BOTONES CON ADN VISUAL (OPTIMIZADA Y ESBELTA) */}
                     <div className="flex flex-col gap-3 relative z-50">
                         
-                        {/* INYECTAMOS LAS ANIMACIONES GLOBALES DE LA LISTA */}
+                        {/* INYECTAMOS LAS ANIMACIONES */}
                         <style>{`
                             @keyframes petalFallMini {
                                 0% { transform: translateY(-10px) rotate(0deg) scale(0.8); opacity: 0; }
@@ -10908,6 +10908,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 80% { opacity: 1; }
                                 100% { transform: translateY(-50px) translateX(-10px) rotate(-10deg) scale(1.1); opacity: 0; }
                             }
+                            @keyframes radarPulse {
+                                0% { transform: scale(0.5); opacity: 1; border-width: 2px; }
+                                100% { transform: scale(2.5); opacity: 0; border-width: 0px; }
+                            }
                         `}</style>
 
                         {Object.values(demos).map(demo => {
@@ -10922,8 +10926,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         className="w-full bg-[#FDFBF7] border border-[#D4AF37]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_30px_rgba(212,175,55,0.15)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
                                     >
                                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-[0.03]"></div>
+                                        
                                         <div className="absolute -top-8 -right-8 w-28 h-28 bg-[#8DB580]/10 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         <div className="absolute -bottom-8 left-8 w-20 h-20 bg-[#F4AAB9]/10 blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        
                                         <div className="absolute top-0 left-[20%] w-1.5 h-2.5 bg-[#F4AAB9] opacity-0 pointer-events-none" style={{ animation: 'petalFallMini 4s linear infinite', borderRadius: '50% 0 50% 50%' }}></div>
                                         <div className="absolute top-0 left-[50%] w-2 h-3 bg-[#D4AF37] opacity-0 pointer-events-none" style={{ animation: 'petalFallMini 5s linear infinite 1.5s', borderRadius: '50% 0 50% 50%' }}></div>
                                         <div className="absolute top-0 left-[80%] w-1.5 h-2.5 bg-[#F4AAB9] opacity-0 pointer-events-none" style={{ animation: 'petalFallMini 4.5s linear infinite 2.5s', borderRadius: '50% 0 50% 50%' }}></div>
@@ -10932,15 +10938,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                             <div className="absolute -left-3 -top-3 opacity-5 pointer-events-none" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '3rem', lineHeight: '1' }}>
                                                 I<span style={{ fontFamily: '"Pinyon Script", cursive' }}>&</span>A
                                             </div>
-                                            <span className="text-[8px] tracking-[0.4em] text-[#8DB580] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>
-                                                Alta Costura
-                                            </span>
-                                            <span className="text-2xl text-[#2C3531] font-light tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-                                                {demo.label}
-                                            </span>
-                                            <span className="text-[8px] uppercase tracking-widest text-[#2C3531]/50 font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}>
-                                                <PlayCircle size={10} className="mr-1.5 text-[#D4AF37]" /> Toca para abrir
-                                            </span>
+                                            
+                                            <span className="text-[8px] tracking-[0.4em] text-[#8DB580] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>Alta Costura</span>
+                                            <span className="text-2xl text-[#2C3531] font-light tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
+                                            <span className="text-[8px] uppercase tracking-widest text-[#2C3531]/50 font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}><PlayCircle size={10} className="mr-1.5 text-[#D4AF37]" /> Toca para abrir</span>
                                         </div>
                                         
                                         <div className="relative z-10 w-10 h-10 rounded-full bg-white flex items-center justify-center border border-[#D4AF37]/30 shadow-sm text-[#2C3531] group-hover:bg-[#F4AAB9]/10 group-hover:border-[#F4AAB9] transition-colors duration-500 shrink-0">
@@ -10950,7 +10951,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 );
                             }
 
-                            // 👑 2. ESTILOS: INVITACIÓN XV AÑOS (Dark Rose, Glow y Destellos)
+                            // 👑 2. ESTILOS: INVITACIÓN XV AÑOS
                             if (demo.id === 'xv') {
                                 return (
                                     <button 
@@ -10962,33 +10963,17 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#e8a598]/10 blur-[40px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         <div className="absolute -bottom-10 left-8 w-24 h-24 bg-[#c27a6e]/10 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         
-                                        {/* ✨ DESTELLOS FLOTANTES ROSE GOLD */}
                                         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity duration-700">
-                                            <div className="absolute left-[20%]" style={{ animation: 'floatItemMini 10s linear infinite', animationDelay: '0s' }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" /></svg>
-                                            </div>
-                                            <div className="absolute left-[60%]" style={{ animation: 'floatItemMini 14s linear infinite', animationDelay: '2s' }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" /></svg>
-                                            </div>
-                                            <div className="absolute left-[80%]" style={{ animation: 'floatItemMini 12s linear infinite', animationDelay: '5s' }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" /></svg>
-                                            </div>
+                                            <div className="absolute left-[20%]" style={{ animation: 'floatItemMini 10s linear infinite', animationDelay: '0s' }}><svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" /></svg></div>
+                                            <div className="absolute left-[60%]" style={{ animation: 'floatItemMini 14s linear infinite', animationDelay: '2s' }}><svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" /></svg></div>
+                                            <div className="absolute left-[80%]" style={{ animation: 'floatItemMini 12s linear infinite', animationDelay: '5s' }}><svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" /></svg></div>
                                         </div>
 
                                         <div className="flex flex-col items-start relative z-10">
-                                            <div className="absolute -left-2 -top-5 opacity-[0.05] pointer-events-none text-[#e8a598]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '4rem', lineHeight: '1' }}>
-                                                V
-                                            </div>
-                                            
-                                            <span className="text-[8px] tracking-[0.4em] text-[#e8a598] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>
-                                                Mis XV Años
-                                            </span>
-                                            <span className="text-2xl text-white font-light tracking-wide group-hover:text-[#e8a598] transition-colors duration-300 drop-shadow-[0_0_8px_rgba(232,165,152,0.3)]" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-                                                {demo.label}
-                                            </span>
-                                            <span className="text-[8px] uppercase tracking-widest text-white/50 font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}>
-                                                <PlayCircle size={10} className="mr-1.5 text-[#e8a598]" /> Toca para abrir
-                                            </span>
+                                            <div className="absolute -left-2 -top-5 opacity-[0.05] pointer-events-none text-[#e8a598]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '4rem', lineHeight: '1' }}>V</div>
+                                            <span className="text-[8px] tracking-[0.4em] text-[#e8a598] uppercase mb-0.5 font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>Mis XV Años</span>
+                                            <span className="text-2xl text-white font-light tracking-wide group-hover:text-[#e8a598] transition-colors duration-300 drop-shadow-[0_0_8px_rgba(232,165,152,0.3)]" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
+                                            <span className="text-[8px] uppercase tracking-widest text-white/50 font-bold flex items-center mt-1" style={{ fontFamily: '"Montserrat", sans-serif' }}><PlayCircle size={10} className="mr-1.5 text-[#e8a598]" /> Toca para abrir</span>
                                         </div>
                                         
                                         <div className="relative z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-[#e8a598]/30 shadow-sm text-white group-hover:bg-[#e8a598] group-hover:text-black transition-colors duration-500 shrink-0">
@@ -11011,15 +10996,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         <div className="absolute -bottom-8 left-8 w-20 h-20 bg-[#F7E7CE]/30 blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         
                                         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 group-hover:opacity-70 transition-opacity duration-700">
-                                            <div className="absolute left-[15%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 12s linear infinite', animationDelay: '0s' }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><circle cx="12" cy="7" r="5" /><circle cx="12" cy="7" r="1" fill="currentColor" /><circle cx="10" cy="5.5" r="0.5" fill="currentColor" /><circle cx="14" cy="5.5" r="0.5" fill="currentColor" /><circle cx="10" cy="8.5" r="0.5" fill="currentColor" /><circle cx="14" cy="8.5" r="0.5" fill="currentColor" /><path d="M12 12v6" /><circle cx="12" cy="20" r="2" /><path d="M9 13c1.5-1 4.5-1 6 0" /></svg>
-                                            </div>
-                                            <div className="absolute left-[45%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 15s linear infinite', animationDelay: '3s' }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><path d="M9 10c0-3 1.5-5 3-5s3 2 3 5" /><rect x="5" y="10" width="14" height="4" rx="2" /><path d="M10 14v2h4v-2" /><circle cx="12" cy="18" r="3" /></svg>
-                                            </div>
-                                            <div className="absolute left-[75%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 10s linear infinite', animationDelay: '6s' }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><circle cx="12" cy="7" r="5" /><circle cx="12" cy="7" r="1" fill="currentColor" /><circle cx="10" cy="5.5" r="0.5" fill="currentColor" /><circle cx="14" cy="5.5" r="0.5" fill="currentColor" /><circle cx="10" cy="8.5" r="0.5" fill="currentColor" /><circle cx="14" cy="8.5" r="0.5" fill="currentColor" /><path d="M12 12v6" /><circle cx="12" cy="20" r="2" /><path d="M9 13c1.5-1 4.5-1 6 0" /></svg>
-                                            </div>
+                                            <div className="absolute left-[15%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 12s linear infinite', animationDelay: '0s' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><circle cx="12" cy="7" r="5" /><circle cx="12" cy="7" r="1" fill="currentColor" /><circle cx="10" cy="5.5" r="0.5" fill="currentColor" /><circle cx="14" cy="5.5" r="0.5" fill="currentColor" /><circle cx="10" cy="8.5" r="0.5" fill="currentColor" /><circle cx="14" cy="8.5" r="0.5" fill="currentColor" /><path d="M12 12v6" /><circle cx="12" cy="20" r="2" /><path d="M9 13c1.5-1 4.5-1 6 0" /></svg></div>
+                                            <div className="absolute left-[45%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 15s linear infinite', animationDelay: '3s' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><path d="M9 10c0-3 1.5-5 3-5s3 2 3 5" /><rect x="5" y="10" width="14" height="4" rx="2" /><path d="M10 14v2h4v-2" /><circle cx="12" cy="18" r="3" /></svg></div>
+                                            <div className="absolute left-[75%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 10s linear infinite', animationDelay: '6s' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><circle cx="12" cy="7" r="5" /><circle cx="12" cy="7" r="1" fill="currentColor" /><circle cx="10" cy="5.5" r="0.5" fill="currentColor" /><circle cx="14" cy="5.5" r="0.5" fill="currentColor" /><circle cx="10" cy="8.5" r="0.5" fill="currentColor" /><circle cx="14" cy="8.5" r="0.5" fill="currentColor" /><path d="M12 12v6" /><circle cx="12" cy="20" r="2" /><path d="M9 13c1.5-1 4.5-1 6 0" /></svg></div>
                                         </div>
 
                                         <div className="flex flex-col items-start relative z-10">
@@ -11112,15 +11091,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         <div className="absolute -bottom-8 left-8 w-24 h-24 bg-[#D4AF37]/10 blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         
                                         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30 group-hover:opacity-60 transition-opacity duration-700">
-                                            <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 12s linear infinite', animationDelay: '0s', '--y-offset': '10px', '--scale': '0.9', '--rot': '-5deg' }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg>
-                                            </div>
-                                            <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 18s linear infinite', animationDelay: '-5s', '--y-offset': '35px', '--scale': '0.7', '--rot': '10deg' }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="14" r="4.5" /><circle cx="12" cy="8" r="3.5" /><circle cx="8.5" cy="5.5" r="1.5" /><circle cx="15.5" cy="5.5" r="1.5" /><circle cx="6.5" cy="13" r="1.5" /><circle cx="17.5" cy="13" r="1.5" /><circle cx="9.5" cy="18" r="1.5" /><circle cx="14.5" cy="18" r="1.5" /><path d="M11.5 9.5h1" strokeWidth="1.2" strokeLinecap="round" /></svg>
-                                            </div>
-                                            <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 15s linear infinite', animationDelay: '-10s', '--y-offset': '60px', '--scale': '0.8', '--rot': '5deg' }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg>
-                                            </div>
+                                            <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 12s linear infinite', animationDelay: '0s', '--y-offset': '10px', '--scale': '0.9', '--rot': '-5deg' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg></div>
+                                            <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 18s linear infinite', animationDelay: '-5s', '--y-offset': '35px', '--scale': '0.7', '--rot': '10deg' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="14" r="4.5" /><circle cx="12" cy="8" r="3.5" /><circle cx="8.5" cy="5.5" r="1.5" /><circle cx="15.5" cy="5.5" r="1.5" /><circle cx="6.5" cy="13" r="1.5" /><circle cx="17.5" cy="13" r="1.5" /><circle cx="9.5" cy="18" r="1.5" /><circle cx="14.5" cy="18" r="1.5" /><path d="M11.5 9.5h1" strokeWidth="1.2" strokeLinecap="round" /></svg></div>
+                                            <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 15s linear infinite', animationDelay: '-10s', '--y-offset': '60px', '--scale': '0.8', '--rot': '5deg' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg></div>
                                         </div>
 
                                         <div className="flex flex-col items-start relative z-10">
@@ -11137,7 +11110,48 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 );
                             }
 
-                            // ⚪ ESTILO ESTÁNDAR PARA EL RESTO DE LOS BOTONES
+                            // 🏢 7. ESTILOS: CORPORATIVO / GALAS (Limpio, Azul Telcel y Radar)
+                            if (demo.id === 'corporativo') {
+                                return (
+                                    <button 
+                                        key={demo.id}
+                                        type="button"
+                                        onClick={() => setFullScreenDemo(demo.url)}
+                                        className="w-full bg-gradient-to-br from-[#002855] to-[#001530] border border-[#00B2E3]/20 py-3.5 px-6 rounded-xl shadow-[0_10px_25px_rgba(0,40,85,0.4)] hover:shadow-[0_15px_30px_rgba(0,178,227,0.2)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
+                                    >
+                                        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(#ffffff 1px, transparent 1px)", backgroundSize: "20px 20px" }}></div>
+                                        
+                                        {/* Efecto Radar Corporativo en la esquina */}
+                                        <div className="absolute -bottom-8 -right-8 w-32 h-32 flex items-center justify-center pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity duration-700">
+                                            <div className="absolute w-8 h-8 rounded-full border-2 border-[#00B2E3] opacity-0" style={{ animation: 'radarPulse 3s cubic-bezier(0.16, 1, 0.3, 1) infinite' }}></div>
+                                            <div className="absolute w-8 h-8 rounded-full border-2 border-[#00B2E3] opacity-0" style={{ animation: 'radarPulse 3s cubic-bezier(0.16, 1, 0.3, 1) infinite 1s' }}></div>
+                                            <div className="absolute w-8 h-8 rounded-full border-2 border-[#00B2E3] opacity-0" style={{ animation: 'radarPulse 3s cubic-bezier(0.16, 1, 0.3, 1) infinite 2s' }}></div>
+                                        </div>
+
+                                        <div className="flex flex-col items-start relative z-10">
+                                            <div className="absolute -left-4 -top-2 opacity-5 pointer-events-none text-white">
+                                                <svg viewBox="0 0 140 40" className="w-32 h-32" fill="none" xmlns="http://www.w3.org/2000/svg"><g transform="translate(10, 8)"><circle cx="12" cy="12" r="8" fill="currentColor"/><ellipse cx="12" cy="12" rx="16" ry="4.5" fill="none" stroke="currentColor" strokeWidth="2.5" transform="rotate(-35 12 12)"/><ellipse cx="12" cy="12" rx="16" ry="4.5" fill="none" stroke="currentColor" strokeWidth="2.5" transform="rotate(35 12 12)"/></g></svg>
+                                            </div>
+                                            
+                                            <span className="text-[9px] tracking-widest text-[#00B2E3] uppercase mb-1 font-bold" style={{ fontFamily: '"Inter", sans-serif' }}>
+                                                Eventos Corporativos
+                                            </span>
+                                            <span className="text-xl text-white font-bold tracking-tight group-hover:text-[#00B2E3] transition-colors duration-300" style={{ fontFamily: '"Inter", sans-serif' }}>
+                                                {demo.label}
+                                            </span>
+                                            <span className="text-[8px] uppercase tracking-widest text-gray-400 font-semibold flex items-center mt-1.5" style={{ fontFamily: '"Inter", sans-serif' }}>
+                                                <PlayCircle size={10} className="mr-1.5 text-[#00B2E3]" /> Acceso Exclusivo
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="relative z-10 w-9 h-9 rounded bg-[#00B2E3]/10 flex items-center justify-center border border-[#00B2E3]/30 shadow-sm text-white group-hover:bg-[#00B2E3] group-hover:text-[#002855] transition-colors duration-500 shrink-0">
+                                            <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
+                                        </div>
+                                    </button>
+                                );
+                            }
+
+                            // ⚪ FALLBACK (Por si agregas una categoría sin diseño específico)
                             return (
                                 <button 
                                     key={demo.id}
