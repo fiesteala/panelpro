@@ -164,7 +164,6 @@ END:VCALENDAR`;
             const audioRef = useRef(null);
 
             // 🔴 FASE 1: EXTRACCIÓN VIP INTELIGENTE (SILENCIOSA)
-            // 👇 AQUÍ PUEDES CAMBIAR LA PALABRA SI NO ENCUENTRA EL NOMBRE 👇
             const [guestName, setGuestName] = useState('INVITADO VIP');
             const EVENT_ID = "minecraft-santiago";
 
@@ -428,7 +427,8 @@ END:VCALENDAR`;
                            
                             <div className="w-full flex flex-col items-center justify-center my-auto py-12">
                                
-                                <div className="minecraft-panel p-6 w-full max-w-md relative animate-float mx-auto shrink-0 mt-8 shadow-2xl">
+                                {/* 🔴 CONTENEDOR PRINCIPAL ADAPTATIVO */}
+                                <div className="minecraft-panel p-6 md:p-10 w-full max-w-md md:max-w-4xl relative animate-float mx-auto shrink-0 mt-8 md:mt-16 shadow-2xl">
                                     
                                     <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
                                         <div className="w-24 h-24 bg-green-500 border-4 border-black flex items-center justify-center relative shadow-lg">
@@ -441,123 +441,131 @@ END:VCALENDAR`;
                                         </div>
                                     </div>
 
-                                    <div className="mt-10 text-center">
-                                        {/* 🔴 SALUDO VIP INYECTADO */}
-                                        <p className="text-xl mb-1 text-gray-700 leading-none">¡HOLA {guestName}!</p>
-                                        <h2 className="text-4xl font-bold mb-2 leading-none text-red-600 drop-shadow-[2px_2px_0_#FFF]">¡INVITACIÓN!</h2>
-                                        <div className="h-1 w-full bg-gray-600 mb-4"></div>
+                                    {/* 🔴 GRID ADAPTATIVO: 1 Columna en Móvil, 2 en Escritorio */}
+                                    <div className="mt-10 md:mt-12 text-center md:text-left grid grid-cols-1 md:grid-cols-2 gap-x-10 lg:gap-x-16 gap-y-0 md:gap-y-6 items-stretch">
                                         
-                                        <p className="text-2xl mb-4">Celebra el <span id="edad" className="text-purple-700 font-bold ml-1">NIVEL {partyData.age}</span> de {partyData.name}</p>
+                                        {/* BLOQUE 1: INFORMACIÓN PRINCIPAL (Arriba en móvil, Izquierda en PC) */}
+                                        <div className="w-full flex flex-col order-1">
+                                            <p className="text-xl md:text-2xl mb-1 text-gray-700 leading-none">¡HOLA {guestName}!</p>
+                                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2 leading-none text-red-600 drop-shadow-[2px_2px_0_#FFF]">¡INVITACIÓN!</h2>
+                                            <div className="h-1 w-full bg-gray-600 mb-4 md:mb-6"></div>
+                                            
+                                            <p className="text-2xl md:text-3xl mb-4">Celebra el <span id="edad" className="text-purple-700 font-bold ml-1">NIVEL {partyData.age}</span> de {partyData.name}</p>
 
-                                        {/* CUENTA REGRESIVA */}
-                                        <div className="bg-black/20 p-2 mb-4 rounded border-2 border-gray-500">
-                                            <p className="text-sm text-gray-700 font-bold mb-1">COMIENZA EN:</p>
-                                            <div className="flex justify-center gap-2 text-xl font-bold text-gray-800">
-                                                {Object.keys(timeLeft).length > 0 ? Object.entries(timeLeft).map(([unit, value]) => (
-                                                    <div key={unit} className="flex flex-col items-center w-12">
-                                                        <span className="bg-gray-700 text-white w-full rounded shadow-inner">{value < 10 ? `0${value}` : value}</span>
-                                                        <span className="text-xs mt-1 font-bold">{unit}</span>
-                                                    </div>
-                                                )) : <span>¡ES HOY!</span>}
+                                            {/* CUENTA REGRESIVA */}
+                                            <div className="bg-black/20 p-2 md:p-3 mb-4 rounded border-2 border-gray-500">
+                                                <p className="text-sm md:text-base text-gray-700 font-bold mb-1 md:text-center">COMIENZA EN:</p>
+                                                <div className="flex justify-center gap-2 md:gap-4 text-xl md:text-2xl font-bold text-gray-800">
+                                                    {Object.keys(timeLeft).length > 0 ? Object.entries(timeLeft).map(([unit, value]) => (
+                                                        <div key={unit} className="flex flex-col items-center w-12 md:w-16">
+                                                            <span className="bg-gray-700 text-white w-full rounded shadow-inner py-1 md:py-2 text-center">{value < 10 ? `0${value}` : value}</span>
+                                                            <span className="text-xs md:text-sm mt-1 font-bold">{unit}</span>
+                                                        </div>
+                                                    )) : <span className="py-1 md:py-2">¡ES HOY!</span>}
+                                                </div>
+                                            </div>
+
+                                            {/* DATOS LOGÍSTICOS */}
+                                            <div className="space-y-3 md:space-y-4 text-left bg-gray-300 p-3 md:p-5 border-2 border-gray-500 mb-4 md:mb-0 text-xl md:text-2xl">
+                                                <div className="flex items-center gap-2 md:gap-3"><Calendar className="w-5 h-5 md:w-6 md:h-6 text-blue-600 flex-shrink-0" /><span>{partyData.date}</span></div>
+                                                <div className="flex items-center gap-2 md:gap-3"><Clock className="w-5 h-5 md:w-6 md:h-6 text-blue-600 flex-shrink-0" /><span>{partyData.time}</span></div>
+                                                <div className="flex items-center gap-2 md:gap-3"><MapPin className="w-5 h-5 md:w-6 md:h-6 text-red-600 flex-shrink-0" /><span className="leading-tight">{partyData.location}</span></div>
                                             </div>
                                         </div>
 
-                                        {/* DATOS LOGÍSTICOS */}
-                                        <div className="space-y-3 text-left bg-gray-300 p-3 border-2 border-gray-500 mb-4 text-xl">
-                                            <div className="flex items-center gap-2"><Calendar className="w-5 h-5 text-blue-600 flex-shrink-0" /><span>{partyData.date}</span></div>
-                                            <div className="flex items-center gap-2"><Clock className="w-5 h-5 text-blue-600 flex-shrink-0" /><span>{partyData.time}</span></div>
-                                            <div className="flex items-center gap-2"><MapPin className="w-5 h-5 text-red-600 flex-shrink-0" /><span className="leading-tight">{partyData.location}</span></div>
-                                        </div>
-
-                                        {/* 👇 AQUÍ EMPIEZA LA GALERÍA ESTILO INVENTARIO CON SUS 6 FOTOS 👇 */}
-                                        {/* 🔴 NUEVA SECCIÓN: GALERÍA ESTILO INVENTARIO MINECRAFT (CON SVG NATIVO) */}
-                                        <div className="mb-6 mt-6 w-full">
-                                            <h3 className="text-2xl font-bold mb-2 text-gray-800 drop-shadow-[1px_1px_0_#FFF] text-center">INVENTARIO</h3>
-                                            <div className="bg-[#C6C6C6] p-2 md:p-3 border-4 border-black shadow-[inset_-4px_-4px_0_rgba(0,0,0,0.5),inset_4px_4px_0_rgba(255,255,255,0.8)] w-full max-w-[340px] mx-auto">
-                                                
-                                                {/* Top Panel: Character & Crafting */}
-                                                <div className="flex justify-between items-start mb-3">
-                                                    {/* Left: Armor & Character */}
-                                                    <div className="flex gap-1 md:gap-2">
-                                                        <div className="flex flex-col gap-1">
-                                                            {['helmet', 'chestplate', 'leggings', 'boots'].map((item, i) => (
-                                                                <div key={i} className="w-7 h-7 bg-[#8B8B8B] border-[2px] border-t-[#373737] border-l-[#373737] border-b-[#FFF] border-r-[#FFF] shadow-[inset_2px_2px_4px_rgba(0,0,0,0.4)] p-0.5 flex items-center justify-center">
-                                                                    <MinecraftItem type={item} />
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                        <div className="w-24 h-[124px] bg-black border-[2px] border-t-[#373737] border-l-[#373737] border-b-[#FFF] border-r-[#FFF] flex items-end justify-center overflow-hidden shadow-[inset_2px_2px_8px_rgba(0,0,0,0.8)]">
-                                                            <img 
-                                                                src="https://mc-heads.net/body/Steve/150" 
-                                                                alt="Player" 
-                                                                className="h-[90%] object-contain" 
-                                                                onError={(e) => { 
-                                                                    e.target.onerror = null; 
-                                                                    e.target.src="https://minotar.net/armor/body/Steve/150.png" 
-                                                                }} 
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Right: Crafting */}
-                                                    <div className="flex flex-col items-center pr-1">
-                                                        <span className="text-black text-sm font-bold mb-1 font-sans">Crafting</span>
-                                                        <div className="flex items-center gap-1">
-                                                            <div className="grid grid-cols-2 gap-1">
-                                                                {['diamond', 'emerald', 'gold', 'iron'].map((item, i) => (
-                                                                    <div key={i} className="w-7 h-7 bg-[#8B8B8B] border-[2px] border-t-[#373737] border-l-[#373737] border-b-[#FFF] border-r-[#FFF] shadow-[inset_2px_2px_4px_rgba(0,0,0,0.4)] p-0.5 flex items-center justify-center">
+                                        {/* BLOQUE 2: INVENTARIO (Medio en móvil, Derecha en PC) */}
+                                        <div className="w-full flex flex-col order-2">
+                                            <div className="mb-6 md:mb-0 w-full">
+                                                <h3 className="text-2xl md:text-3xl font-bold mb-2 text-gray-800 drop-shadow-[1px_1px_0_#FFF] text-center md:text-left">INVENTARIO</h3>
+                                                <div className="bg-[#C6C6C6] p-2 md:p-4 border-4 border-black shadow-[inset_-4px_-4px_0_rgba(0,0,0,0.5),inset_4px_4px_0_rgba(255,255,255,0.8)] w-full max-w-[340px] md:max-w-full mx-auto md:mx-0">
+                                                    
+                                                    {/* Top Panel: Character & Crafting */}
+                                                    <div className="flex justify-between items-start mb-3 md:mb-4">
+                                                        {/* Left: Armor & Character */}
+                                                        <div className="flex gap-1 md:gap-3">
+                                                            <div className="flex flex-col gap-1 md:gap-2">
+                                                                {['helmet', 'chestplate', 'leggings', 'boots'].map((item, i) => (
+                                                                    <div key={i} className="w-7 h-7 md:w-9 md:h-9 bg-[#8B8B8B] border-[2px] md:border-[3px] border-t-[#373737] border-l-[#373737] border-b-[#FFF] border-r-[#FFF] shadow-[inset_2px_2px_4px_rgba(0,0,0,0.4)] p-0.5 flex items-center justify-center">
                                                                         <MinecraftItem type={item} />
                                                                     </div>
                                                                 ))}
                                                             </div>
-                                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#8B8B8B" stroke="#373737" strokeWidth="1" className="ml-1"><path d="M4 10h8V6l8 6-8 6v-4H4v-4z" /></svg>
-                                                            <div className="w-10 h-10 bg-[#8B8B8B] border-[2px] border-t-[#373737] border-l-[#373737] border-b-[#FFF] border-r-[#FFF] shadow-[inset_2px_2px_4px_rgba(0,0,0,0.4)] p-1.5 flex items-center justify-center">
-                                                                <MinecraftItem type="sword" />
+                                                            <div className="w-24 h-[124px] md:w-28 md:h-[160px] bg-black border-[2px] md:border-[3px] border-t-[#373737] border-l-[#373737] border-b-[#FFF] border-r-[#FFF] flex items-end justify-center overflow-hidden shadow-[inset_2px_2px_8px_rgba(0,0,0,0.8)]">
+                                                                <img 
+                                                                    src="https://mc-heads.net/body/Steve/150" 
+                                                                    alt="Player" 
+                                                                    className="h-[90%] object-contain" 
+                                                                    onError={(e) => { 
+                                                                        e.target.onerror = null; 
+                                                                        e.target.src="https://minotar.net/armor/body/Steve/150.png" 
+                                                                    }} 
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Right: Crafting */}
+                                                        <div className="flex flex-col items-center pr-1 md:pr-2">
+                                                            <span className="text-black text-sm md:text-base font-bold mb-1 font-sans">Crafting</span>
+                                                            <div className="flex items-center gap-1 md:gap-2">
+                                                                <div className="grid grid-cols-2 gap-1 md:gap-2">
+                                                                    {['diamond', 'emerald', 'gold', 'iron'].map((item, i) => (
+                                                                        <div key={i} className="w-7 h-7 md:w-9 md:h-9 bg-[#8B8B8B] border-[2px] md:border-[3px] border-t-[#373737] border-l-[#373737] border-b-[#FFF] border-r-[#FFF] shadow-[inset_2px_2px_4px_rgba(0,0,0,0.4)] p-0.5 flex items-center justify-center">
+                                                                            <MinecraftItem type={item} />
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="#8B8B8B" stroke="#373737" strokeWidth="1" className="ml-1 w-5 h-5 md:w-6 md:h-6"><path d="M4 10h8V6l8 6-8 6v-4H4v-4z" /></svg>
+                                                                <div className="w-10 h-10 md:w-12 md:h-12 bg-[#8B8B8B] border-[2px] md:border-[3px] border-t-[#373737] border-l-[#373737] border-b-[#FFF] border-r-[#FFF] shadow-[inset_2px_2px_4px_rgba(0,0,0,0.4)] p-1.5 flex items-center justify-center">
+                                                                    <MinecraftItem type="sword" />
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                {/* Bottom Panel: Gallery Slots (Only 6 pictures) */}
-                                                <div className="grid grid-cols-3 gap-2 mt-4">
-                                                    {[1, 2, 3, 4, 5, 6].map((num, idx) => (
-                                                        <div 
-                                                            key={num}
-                                                            onClick={() => setSelectedPhoto(`/demos/infantil/foto${num}.jpg`)}
-                                                            className="aspect-square bg-[#8B8B8B] border-[2px] border-t-[#373737] border-l-[#373737] border-b-[#FFF] border-r-[#FFF] relative group cursor-pointer hover:bg-[#9E9E9E] transition-colors"
-                                                        >
-                                                            <div className="absolute inset-0 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.4)] z-10 pointer-events-none"></div>
-                                                            <img 
-                                                                src={`/demos/infantil/foto${num}.jpg`} 
-                                                                alt={`Captura ${num}`} 
-                                                                className="w-full h-full object-cover p-[2px] relative z-0 filter contrast-110" 
-                                                            />
-                                                            <div className="absolute inset-0 bg-white/0 group-hover:bg-white/30 z-20 pointer-events-none transition-colors"></div>
-                                                        </div>
-                                                    ))}
+                                                    {/* Bottom Panel: Gallery Slots */}
+                                                    <div className="grid grid-cols-3 gap-2 md:gap-3 mt-4 md:mt-6">
+                                                        {[1, 2, 3, 4, 5, 6].map((num, idx) => (
+                                                            <div 
+                                                                key={num}
+                                                                onClick={() => setSelectedPhoto(`/demos/infantil/foto${num}.jpg`)}
+                                                                className="aspect-square bg-[#8B8B8B] border-[2px] md:border-[3px] border-t-[#373737] border-l-[#373737] border-b-[#FFF] border-r-[#FFF] relative group cursor-pointer hover:bg-[#9E9E9E] transition-colors"
+                                                            >
+                                                                <div className="absolute inset-0 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.4)] z-10 pointer-events-none"></div>
+                                                                <img 
+                                                                    src={`/demos/infantil/foto${num}.jpg`} 
+                                                                    alt={`Captura ${num}`} 
+                                                                    className="w-full h-full object-cover p-[2px] md:p-[3px] relative z-0 filter contrast-110" 
+                                                                />
+                                                                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/30 z-20 pointer-events-none transition-colors"></div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* 🔴 BOTONES GPS Y AGENDAR CORREGIDOS (FASE 2) */}
-                                        <div className="grid grid-cols-2 gap-2 mb-2">
-                                            <button onClick={() => handleGPS(partyData.location)} className="minecraft-btn flex items-center justify-center py-2 bg-blue-600 text-white text-lg font-bold hover:bg-blue-500 active:translate-y-1 border-2 border-black">
-                                                <MapPin size={18} className="mr-2"/> MAPA
+                                        {/* BLOQUE 3: MAPA Y CALENDARIO (Abajo-Móvil, Izquierda-Abajo-PC) */}
+                                        <div className="w-full flex flex-col justify-end order-3 mt-0 md:mt-6">
+                                            <div className="grid grid-cols-2 gap-2 md:gap-4 mb-2 md:mb-0">
+                                                <button onClick={() => handleGPS(partyData.location)} className="minecraft-btn flex items-center justify-center py-2 md:py-4 bg-blue-600 text-white text-lg md:text-2xl font-bold hover:bg-blue-500 active:translate-y-1 border-2 md:border-4 border-black">
+                                                    <MapPin size={18} className="mr-2 md:w-6 md:h-6"/> MAPA
+                                                </button>
+                                                <button onClick={handleAddToCalendar} className="minecraft-btn flex items-center justify-center py-2 md:py-4 bg-yellow-500 text-black text-lg md:text-2xl font-bold hover:bg-yellow-400 active:translate-y-1 border-2 md:border-4 border-black">
+                                                    <Calendar size={18} className="mr-2 md:w-6 md:h-6"/> AGENDAR
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* BLOQUE 4: REGALOS Y CONFIRMAR (Abajo-Móvil, Derecha-Abajo-PC) */}
+                                        <div className="w-full flex flex-col justify-end order-4 mt-0 md:mt-6 gap-2 md:gap-4">
+                                            <button onClick={() => setShowGifts(true)} className="minecraft-btn w-full flex items-center justify-center py-2 md:py-4 bg-purple-600 text-white text-lg md:text-2xl font-bold hover:bg-purple-500 active:translate-y-1 border-2 md:border-4 border-black">
+                                                <Gift size={18} className="mr-2 md:w-6 md:h-6"/> LLUVIA DE SOBRES
                                             </button>
-                                            <button onClick={handleAddToCalendar} className="minecraft-btn flex items-center justify-center py-2 bg-yellow-500 text-black text-lg font-bold hover:bg-yellow-400 active:translate-y-1 border-2 border-black">
-                                                <Calendar size={18} className="mr-2"/> AGENDAR
+
+                                            <button onClick={() => setShowRSVPDemo(true)} className="minecraft-btn w-full py-4 md:py-5 bg-green-600 text-white text-2xl md:text-3xl font-bold hover:bg-green-500 active:translate-y-1 border-2 md:border-4 border-black flex items-center justify-center animate-pulse-glow">
+                                                <CheckSquare className="mr-2 md:mr-3 md:w-8 md:h-8" size={24}/> CONFIRMAR
                                             </button>
                                         </div>
-                                        
-                                        {/* 🔴 BOTÓN REGALOS QUE ABRE MODAL */}
-                                        <button onClick={() => setShowGifts(true)} className="minecraft-btn mb-4 w-full flex items-center justify-center py-2 bg-purple-600 text-white text-lg font-bold hover:bg-purple-500 active:translate-y-1 border-2 border-black">
-                                            <Gift size={18} className="mr-2"/> LLUVIA DE SOBRES
-                                        </button>
-
-                                        {/* BOTÓN RSVP */}
-                                        <button onClick={() => setShowRSVPDemo(true)} className="minecraft-btn mt-2 w-full py-4 bg-green-600 text-white text-2xl font-bold hover:bg-green-500 active:translate-y-1 border-2 border-black flex items-center justify-center animate-pulse-glow">
-                                            <CheckSquare className="mr-2" size={24}/> CONFIRMAR
-                                        </button>
 
                                     </div>
                                 </div>
@@ -583,29 +591,29 @@ END:VCALENDAR`;
                     {/* 🔴 FASE 3: MODAL DE LLUVIA DE SOBRES AL ESTILO MINECRAFT */}
                     {showGifts && (
                         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
-                            <div className="minecraft-panel w-full max-w-sm p-6 md:p-8 relative text-center shadow-2xl">
-                                <button onClick={() => setShowGifts(false)} className="absolute top-2 right-2 text-gray-800 hover:text-red-600 transition-colors z-10">
+                            <div className="minecraft-panel w-full max-w-sm md:max-w-md p-6 md:p-10 relative text-center shadow-2xl">
+                                <button onClick={() => setShowGifts(false)} className="absolute top-2 right-2 md:top-4 md:right-4 text-gray-800 hover:text-red-600 transition-colors z-10">
                                     <X size={28} />
                                 </button>
                                 
                                 <div className="flex justify-center mb-4">
-                                    <Gift size={48} className="text-purple-600" />
+                                    <Gift size={48} className="text-purple-600 md:w-16 md:h-16" />
                                 </div>
-                                <h3 className="text-3xl font-bold mb-4 drop-shadow-[2px_2px_0_#FFF]">LLUVIA DE SOBRES</h3>
-                                <p className="text-xl leading-tight mb-6">El mejor regalo es tu presencia. Si deseas tener un detalle:</p>
+                                <h3 className="text-3xl md:text-4xl font-bold mb-4 drop-shadow-[2px_2px_0_#FFF]">LLUVIA DE SOBRES</h3>
+                                <p className="text-xl md:text-2xl leading-tight mb-6">El mejor regalo es tu presencia. Si deseas tener un detalle:</p>
                                 
-                                <div className="bg-gray-300 border-4 border-gray-600 p-4 mb-6 text-left text-xl shadow-inner">
+                                <div className="bg-gray-300 border-4 border-gray-600 p-4 md:p-6 mb-6 text-left text-xl md:text-2xl shadow-inner">
                                     <p className="mb-2"><strong className="text-gray-800">Banco:</strong> BBVA</p>
-                                    <p className="mb-2"><strong className="text-gray-800">Cuenta:</strong><br/><span className="text-2xl font-bold tracking-widest text-purple-700">1234 5678 9012 3456</span></p>
+                                    <p className="mb-2"><strong className="text-gray-800">Cuenta:</strong><br/><span className="text-2xl md:text-3xl font-bold tracking-widest text-purple-700">1234 5678 9012 3456</span></p>
                                     <p><strong className="text-gray-800">A nombre de:</strong> Papás de Santiago</p>
                                 </div>
                                 
                                 <button 
                                     onClick={() => handleCopy('1234567890123456')} 
-                                    className={`minecraft-btn w-full py-4 text-white text-2xl font-bold border-2 border-black flex justify-center items-center active:translate-y-1 transition-colors
+                                    className={`minecraft-btn w-full py-4 md:py-5 text-white text-2xl md:text-3xl font-bold border-2 md:border-4 border-black flex justify-center items-center active:translate-y-1 transition-colors
                                         ${copied ? 'bg-green-600 hover:bg-green-500' : 'bg-purple-600 hover:bg-purple-500'}`}
                                 >
-                                    {copied ? <span className="flex items-center"><CheckSquare size={24} className="mr-2"/> ¡COPIADO!</span> : "COPIAR CLABE"}
+                                    {copied ? <span className="flex items-center"><CheckSquare size={24} className="mr-2 md:w-8 md:h-8"/> ¡COPIADO!</span> : "COPIAR CLABE"}
                                 </button>
                             </div>
                         </div>
@@ -614,14 +622,14 @@ END:VCALENDAR`;
                     {/* 🔴 FAKE RSVP / MODAL DE VENTAS (MODO DEMO INTERACTIVO) */}
                     {showRSVPDemo && (
                         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
-                            <div className="minecraft-panel w-full max-w-sm p-6 relative shadow-2xl">
-                                <button onClick={closeRSVPModal} className="absolute top-2 right-2 text-gray-800 hover:text-red-600 z-10">
+                            <div className="minecraft-panel w-full max-w-sm md:max-w-md p-6 md:p-10 relative shadow-2xl">
+                                <button onClick={closeRSVPModal} className="absolute top-2 right-2 md:top-4 md:right-4 text-gray-800 hover:text-red-600 z-10">
                                     <X size={28} />
                                 </button>
                                 
-                                <div className="text-center mb-6">
-                                    <h3 className="text-3xl font-bold text-red-600 mb-2 drop-shadow-[2px_2px_0_#FFF]">MODO DE PRUEBA</h3>
-                                    <p className="text-lg font-sans font-bold text-gray-800 bg-yellow-400 p-2 border-4 border-yellow-600 leading-snug shadow-sm">
+                                <div className="text-center mb-6 md:mb-8">
+                                    <h3 className="text-3xl md:text-4xl font-bold text-red-600 mb-2 drop-shadow-[2px_2px_0_#FFF]">MODO DE PRUEBA</h3>
+                                    <p className="text-lg md:text-xl font-sans font-bold text-gray-800 bg-yellow-400 p-2 md:p-3 border-4 border-yellow-600 leading-snug shadow-sm">
                                         Tus invitados confirmarán asistencia aquí.
                                     </p>
                                 </div>
@@ -629,30 +637,30 @@ END:VCALENDAR`;
                                 {demoFormStatus === 'form' ? (
                                     <form onSubmit={handleRSVPSubmit} className="space-y-4 relative">
                                         <div className="text-left">
-                                            <label className="block text-2xl font-bold mb-1">Nombre y Apellido</label>
-                                            <input type="text" required placeholder="Ej. Steve" className="w-full bg-white border-4 border-gray-500 p-3 font-sans text-lg text-black focus:outline-none focus:border-green-600 shadow-inner" />
+                                            <label className="block text-2xl md:text-3xl font-bold mb-1">Nombre y Apellido</label>
+                                            <input type="text" required placeholder="Ej. Steve" className="w-full bg-white border-4 border-gray-500 p-3 md:p-4 font-sans text-lg md:text-xl text-black focus:outline-none focus:border-green-600 shadow-inner" />
                                         </div>
                                         <div className="text-left">
-                                            <label className="block text-2xl font-bold mb-1">Pases a confirmar</label>
-                                            <select className="w-full bg-white border-4 border-gray-500 p-3 font-sans text-lg text-black focus:outline-none focus:border-green-600 shadow-inner cursor-pointer appearance-none">
+                                            <label className="block text-2xl md:text-3xl font-bold mb-1">Pases a confirmar</label>
+                                            <select className="w-full bg-white border-4 border-gray-500 p-3 md:p-4 font-sans text-lg md:text-xl text-black focus:outline-none focus:border-green-600 shadow-inner cursor-pointer appearance-none">
                                                 <option>1 Pase</option>
                                                 <option>2 Pases</option>
                                                 <option>3 Pases</option>
                                             </select>
                                         </div>
-                                        <button type="submit" className="minecraft-btn w-full py-4 mt-6 bg-green-600 text-white text-2xl font-bold border-2 border-black flex justify-center items-center hover:bg-green-500 active:translate-y-1">
+                                        <button type="submit" className="minecraft-btn w-full py-4 md:py-5 mt-6 md:mt-8 bg-green-600 text-white text-2xl md:text-3xl font-bold border-2 md:border-4 border-black flex justify-center items-center hover:bg-green-500 active:translate-y-1">
                                             GENERAR PASE QR
                                         </button>
                                     </form>
                                 ) : (
-                                    <div className="animate-fadeIn bg-white p-6 border-4 border-green-600 text-center shadow-inner">
+                                    <div className="animate-fadeIn bg-white p-6 md:p-8 border-4 border-green-600 text-center shadow-inner">
                                         <div className="flex justify-center mb-4">
-                                            <div className="bg-green-100 border-4 border-green-600 p-3">
-                                                <CheckSquare size={48} className="text-green-600" />
+                                            <div className="bg-green-100 border-4 border-green-600 p-3 md:p-4">
+                                                <CheckSquare size={48} className="text-green-600 md:w-16 md:h-16" />
                                             </div>
                                         </div>
-                                        <h4 className="text-3xl font-bold text-green-700 mb-4 drop-shadow-sm">¡Excelente!</h4>
-                                        <p className="text-xl font-sans font-bold text-gray-800 leading-snug">
+                                        <h4 className="text-3xl md:text-4xl font-bold text-green-700 mb-4 drop-shadow-sm">¡Excelente!</h4>
+                                        <p className="text-xl md:text-2xl font-sans font-bold text-gray-800 leading-snug">
                                             Esto generaría un código QR único a tu invitado. <br/><br/><span className="text-green-700">¡Crea tu evento en Baulia para desbloquearlo!</span>
                                         </p>
                                     </div>
@@ -669,16 +677,16 @@ END:VCALENDAR`;
                             >
                                 <div className="relative max-w-2xl w-full minecraft-panel p-2 shadow-2xl animate-float">
                                     <button 
-                                        className="absolute -top-4 -right-4 md:-top-5 md:-right-5 bg-red-600 text-white border-[3px] border-black w-10 h-10 md:w-12 md:h-12 flex items-center justify-center font-bold text-xl hover:bg-red-500 z-10 minecraft-btn"
+                                        className="absolute -top-4 -right-4 md:-top-5 md:-right-5 bg-red-600 text-white border-[3px] md:border-4 border-black w-10 h-10 md:w-14 md:h-14 flex items-center justify-center font-bold text-xl md:text-3xl hover:bg-red-500 z-10 minecraft-btn"
                                         onClick={(e) => { e.stopPropagation(); setSelectedPhoto(null); }}
                                     >
                                         X
                                     </button>
-                                    <div className="border-4 border-[#373737] bg-black">
+                                    <div className="border-4 md:border-[6px] border-[#373737] bg-black">
                                         <img 
                                             src={selectedPhoto} 
                                             alt="Vista ampliada" 
-                                            className="w-full h-auto max-h-[70vh] object-contain"
+                                            className="w-full h-auto max-h-[70vh] md:max-h-[80vh] object-contain"
                                             onClick={(e) => e.stopPropagation()} 
                                         />
                                     </div>
