@@ -163,15 +163,6 @@
             }
             .animate-neon-flicker { animation: neon-flicker 4s infinite alternate; }
 
-            /* Masonry Estilos Reparados */
-            .gallery-masonry {
-                column-count: 2;
-                column-gap: 1rem;
-                width: 100%;
-            }
-            @media (min-width: 768px) { .gallery-masonry { column-count: 3; } }
-            @media (min-width: 1024px) { .gallery-masonry { column-count: 4; } }
-            
             .hide-scrollbar::-webkit-scrollbar { display: none; }
             .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -235,10 +226,25 @@
             const [uploadStatus, setUploadStatus] = useState('');
             const [uploadProgress, setUploadProgress] = useState(0);
             const [lightboxImg, setLightboxImg] = useState(null);
+            
+            // Estado para el cálculo dinámico de columnas (Layout Flexbox Garantizado)
+            const [masonryCols, setMasonryCols] = useState(2);
 
             const audioRef = useRef(null);
             const bgParallaxRef = useRef(null);
             const dbRef = useRef(null);
+
+            // Escuchar el tamaño de la ventana para recalcular las columnas
+            useEffect(() => {
+                const handleResize = () => {
+                    if (window.innerWidth >= 1024) setMasonryCols(4);
+                    else if (window.innerWidth >= 768) setMasonryCols(3);
+                    else setMasonryCols(2);
+                };
+                handleResize(); // Ejecutar al inicio
+                window.addEventListener('resize', handleResize);
+                return () => window.removeEventListener('resize', handleResize);
+            }, []);
 
             // Inicializar Firebase
             useEffect(() => {
@@ -392,6 +398,12 @@
                 return url;
             };
 
+            // --- LÓGICA DE DISTRIBUCIÓN DE COLUMNAS (MASONRY INFALIBLE) ---
+            const columnsData = Array.from({ length: masonryCols }, () => []);
+            images.forEach((img, index) => {
+                columnsData[index % masonryCols].push(img);
+            });
+
             return (
                 <div className="relative w-full h-full overflow-hidden">
                     <audio ref={audioRef} src="/keily-estefania/cancion.mp3" loop preload="auto"></audio>
@@ -538,7 +550,7 @@
                                     </div>
                                 </div>
 
-                                {/* GALERÍA MASONRY DE FOTOS */}
+                                {/* GALERÍA MASONRY DE FOTOS (FLEXBOX INFALIBLE) */}
                                 <div className="w-full mt-12 z-10 relative">
                                     <div className="flex flex-col items-center mb-10">
                                         <h3 className="font-cyber text-3xl md:text-4xl text-neonPink text-glow-pink uppercase tracking-widest text-center">
@@ -548,45 +560,48 @@
                                     </div>
 
                                     {images.length > 0 ? (
-                                        <div className="gallery-masonry">
-                                            {images.map((img) => {
-                                                const isVideo = img.resource_type === 'video' || (img.url && img.url.match(/\.(mp4|mov|webm)$/i));
-                                                return (
-                                                <div 
-                                                    key={img.id} 
-                                                    className="break-inside-avoid inline-block w-full mb-4 md:mb-5 relative group rounded-xl overflow-hidden glass-panel border border-white/10 hover:border-neonPink transition-all duration-500 cursor-pointer shadow-lg min-h-[100px] bg-[#0a0514]/50"
-                                                    onClick={() => setLightboxImg(img)}
-                                                    style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
-                                                >
-                                                    {isVideo ? (
-                                                        <video 
-                                                            src={img.url.replace('/upload/', '/upload/w_600,q_auto,f_auto/')} 
-                                                            className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700 block"
-                                                            autoPlay loop muted playsInline
-                                                        />
-                                                    ) : (
-                                                        <img 
-                                                            src={getThumbnailUrl(img.url)} 
-                                                            alt="Recuerdo K-Pop" 
-                                                            className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700 block" 
-                                                            loading="lazy"
-                                                        />
-                                                    )}
-                                                    
-                                                    {isVideo && (
-                                                        <div className="absolute top-3 right-3 bg-cyberDark/60 p-2 rounded-full backdrop-blur-sm border border-skyBlue/50 text-skyBlue shadow-[0_0_10px_rgba(0,229,255,0.5)] z-10 pointer-events-none">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                                        </div>
-                                                    )}
+                                        <div className="flex w-full gap-3 md:gap-4 items-start">
+                                            {columnsData.map((colImages, colIndex) => (
+                                                <div key={colIndex} className="flex flex-col gap-3 md:gap-4 w-full flex-1">
+                                                    {colImages.map((img) => {
+                                                        const isVideo = img.resource_type === 'video' || (img.url && img.url.match(/\.(mp4|mov|webm)$/i));
+                                                        return (
+                                                            <div 
+                                                                key={img.id} 
+                                                                className="relative group rounded-xl overflow-hidden glass-panel border border-white/10 hover:border-neonPink transition-all duration-500 cursor-pointer shadow-lg bg-[#0a0514]/50"
+                                                                onClick={() => setLightboxImg(img)}
+                                                            >
+                                                                {isVideo ? (
+                                                                    <video 
+                                                                        src={img.url.replace('/upload/', '/upload/w_600,q_auto,f_auto/')} 
+                                                                        className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700 block"
+                                                                        autoPlay loop muted playsInline
+                                                                    />
+                                                                ) : (
+                                                                    <img 
+                                                                        src={getThumbnailUrl(img.url)} 
+                                                                        alt="Recuerdo K-Pop" 
+                                                                        className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700 block" 
+                                                                        loading="lazy"
+                                                                    />
+                                                                )}
+                                                                
+                                                                {isVideo && (
+                                                                    <div className="absolute top-3 right-3 bg-cyberDark/60 p-2 rounded-full backdrop-blur-sm border border-skyBlue/50 text-skyBlue shadow-[0_0_10px_rgba(0,229,255,0.5)] z-10 pointer-events-none">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                                                    </div>
+                                                                )}
 
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-cyberDark/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex items-end justify-center pb-4 z-20">
-                                                        <span className="font-cyber text-xs text-white tracking-widest uppercase bg-neonPink/80 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20">
-                                                            Ampliar Visión
-                                                        </span>
-                                                    </div>
+                                                                <div className="absolute inset-0 bg-gradient-to-t from-cyberDark/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex items-end justify-center pb-4 z-20">
+                                                                    <span className="font-cyber text-xs text-white tracking-widest uppercase bg-neonPink/80 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20">
+                                                                        Ampliar Visión
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
-                                                );
-                                            })}
+                                            ))}
                                         </div>
                                     ) : (
                                         <div className="glass-panel p-10 rounded-2xl text-center border-dashed border-2 border-white/20 max-w-2xl mx-auto">
