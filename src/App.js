@@ -1897,6 +1897,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                               <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-1 py-3 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-500 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center border border-indigo-200 dark:border-amber-500/20 transition-colors shadow-sm">
                                 <Edit2 size={16} className="mr-1.5"/> Editar
                               </button>
+                              <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="flex-1 py-3 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center border border-rose-200 dark:border-rose-500/20 transition-colors shadow-sm hover:bg-rose-100 dark:hover:bg-rose-500/20">
+                                <Trash2 size={16} className="mr-1.5"/> Eliminar
+                              </button>
                             </>
                           ) : null}
                         </div>
@@ -1958,6 +1961,40 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           </div>
         </div>
       )}
+
+      {/* 🔴 MODAL DE ELIMINAR INVITADO */}
+      {deleteModal && (
+        <div className="fixed inset-0 z-[300] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-rose-500/20 animate-in zoom-in-95 duration-200 transition-colors text-center p-8">
+            
+            <div className="w-20 h-20 bg-rose-50 dark:bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <Trash2 size={32} />
+            </div>
+            
+            <h3 className="font-editorial font-bold text-2xl text-slate-900 dark:text-white mb-2">¿Eliminar Invitado?</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-8 font-light leading-relaxed">
+              Estás a punto de eliminar a <strong className="text-slate-800 dark:text-slate-200">{deleteModal.name}</strong>. Sus pases y códigos QR quedarán invalidados. Esta acción no se puede deshacer.
+            </p>
+            
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setDeleteModal(null)} 
+                className="flex-1 py-3.5 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={executeDeleteGuest} 
+                className="flex-1 py-3.5 bg-rose-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-rose-600 transition-colors shadow-md shadow-rose-500/20"
+              >
+                Sí, Eliminar
+              </button>
+            </div>
+            
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
