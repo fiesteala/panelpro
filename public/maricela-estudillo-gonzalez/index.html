@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Maricela - Mis 50 Años | Invitación</title>
     
+    <!-- Meta etiquetas de Open Graph para vista previa en WhatsApp y redes sociales -->
+    <meta property="og:title" content="¡Mis 50 Primaveras! - Maricela 🌸">
+    <meta property="og:description" content="¡Hola! ✨ Con mucha emoción y gratitud me preparo para celebrar mis 50 primaveras. 🌸 Llegar a esta hermosa etapa rodeada de las personas que más aprecio es mi mayor regalo, por eso me haría muy feliz que me acompañaras a festejar la vida y crear recuerdos inolvidables. 🎉 Aquí te comparto mi invitación con todos los detalles (lugar, fecha y para que me confirmes tu asistencia): 👇">
+    <meta property="og:image" content="/maricela-estudillo-gonzalez/portada.jpg">
+    <meta property="og:type" content="website">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
@@ -176,7 +182,7 @@
             };
 
             const handleWhatsAppRSVP = () => {
-                const message = `¡Hola! Confirmo mi asistencia para los 50 años de Maricela. Soy ${guestName || 'un invitado'}.`;
+                const message = `¡Hola! Confirmo mi asistencia para los 50 años de Maricela.`;
                 const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
                 window.open(url, '_blank');
             };
