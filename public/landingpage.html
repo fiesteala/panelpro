@@ -1399,7 +1399,7 @@ Codigo de invitacion keyli
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="bg-cyberDark text-white font-body selection:bg-neonPurple selection:text-white overflow-hidden h-screen w-screen">
+<body class="bg-cyberDark text-white font-body selection:bg-neonPurple selection:text-white bg-black">
     
     <div id="baulia-splash">
         <div class="splash-loader"></div>
@@ -1632,18 +1632,20 @@ END:VCALENDAR`;
             };
 
             return (
-                <div className="relative w-full h-full overflow-hidden">
-                    <audio ref={audioRef} src="/keily-estefania/cancion.mp3" loop preload="auto"></audio>
-                    
-                    <div className="fixed inset-0 z-0 overflow-hidden bg-cyberDark pointer-events-none">
-                        <div ref={bgParallaxRef} className="absolute inset-0 w-full h-full origin-center transition-transform duration-100 ease-out will-change-transform">
-                            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80 animate-breathe" style={{ backgroundImage: `url('/keily-estefania/kpopsfondo.svg')` }}></div>
-                            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 animate-breathe mix-blend-screen saturate-200 blur-[6px]" style={{ backgroundImage: `url('/keily-estefania/kpopsfondo.svg')` }}></div>
-                        </div>
-                        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0514]/40 via-[#0a0514]/70 to-[#0a0514] z-0"></div>
-                    </div>
+    <div className="relative w-full min-h-screen min-h-[100dvh] overflow-x-clip">
+        <audio ref={audioRef} src="/keily-estefania/cancion.mp3" loop preload="auto"></audio>
+        
+        <div className="fixed inset-0 z-0 overflow-hidden bg-cyberDark pointer-events-none">
+            <div ref={bgParallaxRef} className="absolute inset-0 w-full h-full origin-center transition-transform duration-100 ease-out will-change-transform">
+                <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80 animate-breathe" style={{ backgroundImage: `url('/keily-estefania/kpopsfondo.svg')` }}></div>
+                {/* Capa de fondo optimizada para GPU */}
+                <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40 animate-breathe blur-[2px] transform-gpu translate-z-0" style={{ backgroundImage: `url('/keily-estefania/kpopsfondo.svg')` }}></div>
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0a0514]/40 via-[#0a0514]/70 to-[#0a0514] z-0"></div>
+        </div>
 
-                    <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden" onScroll={handleScroll}>
+        {/* Cambiamos h-full overflow-y-auto por scroll fluido nativo */}
+        <div className="relative z-10 w-full min-h-screen overflow-x-clip" onScroll={handleScroll}>
                         {currentView === 'hero' && (
                             <main className="relative flex flex-col items-center min-h-[100dvh] px-6 text-center animate-fade-in overflow-hidden">
                                 
@@ -2303,18 +2305,18 @@ END:VCALENDAR`;
             };
 
             return (
-                <div className="relative w-full h-full overflow-hidden">
-                    <audio ref={audioRef} src="/keily-estefania/cancion.mp3" loop preload="auto"></audio>
+    <div className="relative w-full min-h-screen min-h-[100dvh] overflow-x-clip">
+        <audio ref={audioRef} src="/keily-estefania/cancion.mp3" loop preload="auto"></audio>
                     
                     <div className="fixed inset-0 z-0 overflow-hidden bg-cyberDark pointer-events-none">
                         <div ref={bgParallaxRef} className="absolute inset-0 w-full h-full origin-center transition-transform duration-100 ease-out will-change-transform">
                             <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80 animate-breathe" style={{ backgroundImage: `url('/keily-estefania/kpopsfondo.svg')` }}></div>
-                            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 animate-breathe mix-blend-screen saturate-200 blur-[6px]" style={{ backgroundImage: `url('/keily-estefania/kpopsfondo.svg')` }}></div>
+                            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40 animate-breathe blur-[2px] transform-gpu translate-z-0" style={{ backgroundImage: `url('/keily-estefania/kpopsfondo.svg')` }}></div>
                         </div>
                         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0514]/40 via-[#0a0514]/70 to-[#0a0514] z-0"></div>
                     </div>
 
-                    <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden" onScroll={handleScroll}>
+                    <div className="relative z-10 w-full min-h-screen overflow-x-clip" onScroll={handleScroll}>
                         {currentView === 'hero' && (
                             <main className="relative flex flex-col items-center min-h-[100dvh] px-6 text-center animate-fade-in overflow-hidden">
                                 
