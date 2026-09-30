@@ -14397,7 +14397,8 @@ export default function App() {
   // 🔴 MAGIA DE RUTAS: DETECTAR SI ES BAULIA.COM O PANEL.BAULIA.COM
   const hostname = window.location.hostname;
   const pathname = window.location.pathname.replace(/^\/+/g, '').replace(/\/+$/, '').replace('index.html', '');
-  const isPanel = hostname.startsWith('panel.') || hostname.includes('localhost');
+  const isLocalIP = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
+  const isPanel = hostname.startsWith('panel.') || hostname.includes('localhost') || isLocalIP;
 
   // ==========================================
   // 1. REGLA DE ORO: TODOS LOS ESTADOS (HOOKS) PRIMERO
@@ -14417,8 +14418,20 @@ export default function App() {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     setSystemIsDark(mediaQuery.matches);
     const handleChange = (e) => setSystemIsDark(e.matches);
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    
+    try {
+      mediaQuery.addEventListener('change', handleChange);
+    } catch (e) {
+      mediaQuery.addListener(handleChange);
+    }
+    
+    return () => {
+      try {
+        mediaQuery.removeEventListener('change', handleChange);
+      } catch (e) {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
   }, []);
 
   const isDarkMode = themeSetting === 'dark' || (themeSetting === 'auto' && systemIsDark);
