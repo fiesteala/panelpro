@@ -10434,7 +10434,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white transition-colors duration-700 overflow-x-hidden relative">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white transition-colors duration-700 overflow-clip relative">
       
       {/* INCRUSTACIÓN DE LAS REVISTAS */}
       {showAnatomy && <AnatomyOverlay onClose={() => setShowAnatomy(false)} />}
@@ -10626,7 +10626,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       <div className={`${showAnatomy ? 'hidden' : 'block'}`}>
         
         {/* LUCES DE AMBIENTE SUTILES */}
-        <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 dark:bg-amber-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
+        <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 dark:bg-amber-600/10  hidden md:block blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
         <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-500/5 dark:bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
 
       {/* NAVEGACIÓN FLOTANTE (RESPONSIVA) */}
