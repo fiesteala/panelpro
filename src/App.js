@@ -11981,7 +11981,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
       {/* 🔴 OVERLAY: DEMO A PANTALLA COMPLETA (VISOR INTERNO MÓVIL) */}
       {fullScreenDemo && (
-        <div className="fixed inset-0 z-[999999] bg-black animate-in slide-in-from-bottom-full duration-300 flex flex-col">
+        <div className="fixed inset-0 z-[999999] bg-black flex flex-col h-[100dvh] overscroll-none touch-none">
            
            {/* HEADER PARA CERRAR EL DEMO */}
            <div className="bg-[#050505] border-b border-white/10 px-4 py-4 flex items-center justify-between z-10 shadow-md">
