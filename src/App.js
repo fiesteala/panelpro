@@ -10545,9 +10545,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             <Lock size={28} />
                           </div>
                           <div className="text-right">
-                            <span className="bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">VIP / FÍSICO</span>
-                            <p className="font-black text-3xl text-white leading-none">$1,490</p>
-                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">MXN / Licencia</p>
+                            <span className="bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">VIP / PARA IMPRIMIR</span>
+                            <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">$1,490</p>
+                            <p className="font-black text-3xl text-white leading-none">$745</p>
+                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">MXN / Pago Único</p>
                           </div>
                         </div>
                         
@@ -11667,7 +11668,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </div>
               <h2 className="text-5xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white mb-6 tracking-tight leading-tight transition-colors duration-700">
                 Baulia Black Label.<br/>
-                <span className="italic text-amber-500 pr-1">Pases VIP Impresos.</span>
+                <span className="italic text-amber-500 pr-1">Plantillas VIP.</span>
               </h2>
               <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl font-light leading-relaxed max-w-xl mx-auto transition-colors duration-700">
                 Eleva la exclusividad de tu evento de ultra-lujo. Genera e imprime tus propios brazaletes Tyvek físicos con QR encriptado, inconfundibles y blindados.
@@ -11690,7 +11691,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 
                 <div className="mt-10 relative z-10">
                    <button onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: '1490.00' }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-900 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(245,158,11,0.3)]">
-                      <Printer size={18} className="mr-3 text-slate-900/70" /> Comprar Licencia Física ($1,490)
+                      <Printer size={18} className="mr-3 text-slate-900/70" /> Comprar Generador VIP ($1,490)
                    </button>
                 </div>
               </RevealSection>
