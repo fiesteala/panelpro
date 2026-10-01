@@ -10354,10 +10354,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   }, []);
 
   const planes = [
-    { id: 'basico', nombre: 'Básico', precio: '990', desc: 'Invitación, RSVP simple y GPS.', icon: <Smartphone size={24}/> },
-    { id: 'plata', nombre: 'Plata', precio: '1,490', desc: 'Suma Mesa de Regalos e Itinerario.', icon: <Wallet size={24}/> },
-    { id: 'oro', nombre: 'Oro', precio: '1,990', desc: 'Panel Maestro, Control QR y Mesas.', icon: <ShieldCheck size={24}/>, popular: true },
-    { id: 'diamante', nombre: 'Diamante', precio: '2,990', desc: 'La Suite Definitiva. Incluye Muro Social y Black Label.', icon: <Gem size={24}/> }
+    { id: 'basico', nombre: 'Básico', precio: '495', precioOriginal: '990', desc: 'Invitación, RSVP simple y GPS.', icon: <Smartphone size={24}/> },
+    { id: 'plata', nombre: 'Plata', precio: '745', precioOriginal: '1,490', desc: 'Suma Mesa de Regalos e Itinerario.', icon: <Wallet size={24}/> },
+    { id: 'oro', nombre: 'Oro', precio: '995', precioOriginal: '1,990', desc: 'Panel Maestro, Control QR y Mesas.', icon: <ShieldCheck size={24}/>, popular: true },
+    { id: 'diamante', nombre: 'Diamante', precio: '1,495', precioOriginal: '2,990', desc: 'La Suite Definitiva. Incluye Muro Social y Black Label.', icon: <Gem size={24}/> }
   ];
 
   // 🔴 DEMOS CON ADN VISUAL (blob1 y blob2)
@@ -10490,6 +10490,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">{plan.desc}</p>
                           </div>
                           <div className="text-right shrink-0">
+                            <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">${plan.precioOriginal}</p>
                             <p className="font-black text-xl text-slate-900 dark:text-white">${plan.precio}</p>
                             <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">MXN</p>
                           </div>
@@ -11764,10 +11765,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         {/* TARJETAS DE PLANES (Solo SaaS) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start mb-20 relative z-10">
           {[
-            { n: 'Básico', p: '990', d: 'La elegancia indispensable para anunciar tu evento.', f: ['Invitación interactiva', 'Confirmación Simple (RSVP)', 'Cuenta regresiva Adaptativas', 'Logística GPS'] },
-            { n: 'Plata', p: '1,490', d: 'Recupera tu inversión con regalos en efectivo.', f: ['Todo lo del Básico', 'Mesa de Regalos / Efectivo', 'Itinerario y Dress Code', 'Agregar a Calendario'] },
-            { n: 'Oro', p: '1,990', d: 'Cero colados. Seguridad y control absoluto.', f: ['Todo lo del Plata', 'RSVP Blindado (Pases)', 'App Escáner para Hostess', 'Bóveda Financiera (Gastos)'], d2: true },
-            { n: 'Diamante', p: '2,990', d: 'La suite definitiva. Control espacial, pantallas y pulseras.', f: ['Todo lo del Oro', 'Acomodo de mesas virtual 2D', 'Baulia Social Wall (Proyección)', 'Baulia Black Label (Pulseras VIP)'], d1: true }
+            { n: 'Básico', p: '495', pAnt: '990', d: 'La elegancia indispensable para anunciar tu evento.', f: ['Invitación interactiva', 'Confirmación Simple (RSVP)', 'Cuenta regresiva Adaptativas', 'Logística GPS'] },
+            { n: 'Plata', p: '745', pAnt: '1,490', d: 'Recupera tu inversión con regalos en efectivo.', f: ['Todo lo del Básico', 'Mesa de Regalos / Efectivo', 'Itinerario y Dress Code', 'Agregar a Calendario'] },
+            { n: 'Oro', p: '995', pAnt: '1,990', d: 'Cero colados. Seguridad y control absoluto.', f: ['Todo lo del Plata', 'RSVP Blindado (Pases)', 'App Escáner para Hostess', 'Bóveda Financiera (Gastos)'], d2: true },
+            { n: 'Diamante', p: '1,495', pAnt: '2,990', d: 'La suite definitiva. Control espacial, pantallas y pulseras.', f: ['Todo lo del Oro', 'Acomodo de mesas virtual 2D', 'Baulia Social Wall (Proyección)', 'Baulia Black Label (Pulseras VIP)'], d1: true }
           ].map((plan, idx) => (
             <RevealSection key={idx} delay={idx * 100} className={`relative flex-1 ${plan.d2 ? 'lg:-translate-y-4' : ''}`}>
                {plan.d2 && <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md whitespace-nowrap z-20">El Estándar</div>}
@@ -11781,8 +11782,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   <div className="relative z-10 mb-8 flex-1">
                      <h3 className="text-2xl font-editorial font-bold text-slate-900 mb-2">{plan.n}</h3>
                      <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">{plan.d}</p>
-                     <div className="text-4xl font-light text-slate-900 mb-8 relative">
-                        <span className="font-editorial text-transparent bg-clip-text bg-gradient-to-tr from-slate-900 to-slate-700 dark:from-white dark:to-slate-100">${plan.p}</span> <span className="text-sm text-slate-400 font-normal">MXN</span>
+                     <div className="text-4xl font-light text-slate-900 mb-8 relative flex items-baseline">
+                        <span className="text-xl text-rose-500 line-through font-bold mr-3">${plan.pAnt}</span>
+                        <span className="font-editorial text-transparent bg-clip-text bg-gradient-to-tr from-slate-900 to-slate-700 dark:from-white dark:to-slate-100">${plan.p}</span> <span className="text-sm text-slate-400 font-normal ml-2">MXN</span>
                      </div>
                      <ul className="space-y-4 text-sm text-slate-600 relative">
                         {plan.f.map((feat, fIdx) => (
