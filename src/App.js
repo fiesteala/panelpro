@@ -436,7 +436,7 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
       {/* 🟢 MAGIA AQUÍ: SI ES SOCIAL WALL, MOSTRAMOS LA CONSOLA VIP. SI NO, LAS GRÁFICAS NORMALES */}
       {plan === 'social_wall' ? (
         <div className="bg-slate-900 dark:bg-[#0a0a0a] rounded-3xl p-8 sm:p-12 text-center text-white border border-slate-800 dark:border-white/10 shadow-2xl relative overflow-hidden transition-colors mt-6">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] h-full bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] h-full bg-indigo-500/10  hidden md:block  hidden md:block blur-[100px] rounded-full pointer-events-none"></div>
           
           <Sparkles size={64} className="mx-auto mb-6 text-amber-500 animate-pulse"/>
           <h2 className="text-3xl sm:text-5xl font-black mb-4 tracking-tight">Tu Muro Social está listo</h2>
@@ -8497,7 +8497,7 @@ const GuestCameraView = ({ eventId }) => {
           #qr-reader-login canvas { display: none !important; }
         `}</style>
         <ToastOverlay />
-        <div className="absolute top-0 w-full h-64 bg-pink-600/10 blur-[100px] rounded-full pointer-events-none"></div>
+        <div className="absolute top-0 w-full h-64 bg-pink-600/10  hidden md:block  hidden md:block blur-[100px] rounded-full pointer-events-none"></div>
         <div className={`w-full max-w-sm ${tBgCard} border ${tBorder} backdrop-blur-xl rounded-3xl shadow-2xl p-8 text-center z-10 flex flex-col`}>
           <h1 className={`text-2xl font-black ${tTextMain} mb-2 tracking-tight`}>Red Privada</h1>
           <p className={`${tTextSub} text-xs mb-6`}>Apunta a la pulsera para ingresar a la fiesta.</p>
@@ -8538,7 +8538,7 @@ const GuestCameraView = ({ eventId }) => {
     return (
       <div className={`min-h-screen ${tBgBase} flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans`}>
         <ToastOverlay />
-        <div className="absolute top-0 w-full h-64 bg-indigo-600/10 blur-[100px] rounded-full pointer-events-none"></div>
+        <div className="absolute top-0 w-full h-64 bg-indigo-600/10  hidden md:block  hidden md:block blur-[100px] rounded-full pointer-events-none"></div>
         <div className={`w-full max-w-sm ${tBgCard} border ${tBorder} backdrop-blur-xl rounded-3xl shadow-2xl p-8 text-center z-10 flex flex-col animate-in zoom-in-95 duration-500`}>
           <div className="w-16 h-16 bg-indigo-500/20 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-indigo-500/30">
              <Users size={32} />
@@ -9204,7 +9204,7 @@ const GuestProyectorView = ({ eventId }) => {
       >
         
         <div className="absolute inset-0 z-0">
-           <img src={imageUrl} className="w-full h-full object-cover blur-[100px] opacity-50 transform scale-110 transition-all duration-1000" />
+           <img src={imageUrl} className="w-full h-full object-cover  hidden md:block  hidden md:block blur-[100px] opacity-50 transform scale-110 transition-all duration-1000" />
            <div className={`absolute inset-0 bg-gradient-to-t ${tAmbilight} transition-colors duration-1000`}></div>
         </div>
 
@@ -10626,8 +10626,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       <div className={`${showAnatomy ? 'hidden' : 'block'}`}>
         
         {/* LUCES DE AMBIENTE SUTILES */}
-        <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 dark:bg-amber-600/10  hidden md:block blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
-        <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-500/5 dark:bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
+        <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 dark:bg-amber-600/10  hidden md:block  hidden md:block  hidden md:block blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
+        <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-500/5 dark:bg-indigo-600/10  hidden md:block  hidden md:block blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
 
       {/* NAVEGACIÓN FLOTANTE (RESPONSIVA) */}
       <nav className="fixed w-full z-50 top-0 pt-4 md:pt-6 px-4 md:px-8 pointer-events-none">
@@ -10777,7 +10777,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
       {/* SHOWROOM INTERACTIVO */}
       <section id="showroom" className="py-24 bg-slate-50 dark:bg-[#050505] relative z-10 border-y border-slate-200 dark:border-white/5 transition-colors duration-700 overflow-hidden flex items-center">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber-500/5 dark:bg-amber-600/10 blur-[150px] rounded-full pointer-events-none"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber-500/5 dark:bg-amber-600/10  hidden md:block  hidden md:block blur-[150px] rounded-full pointer-events-none"></div>
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 w-full flex flex-col items-center">
 
@@ -10844,7 +10844,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     <div className="w-7/12 xl:w-2/3 relative flex items-center justify-end z-20">
                         <div className="relative w-full max-w-[850px] aspect-[16/10] translate-x-[15%]">
                             
-                            <div className={`absolute top-0 right-0 w-[90%] h-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-700 ${activeDevice === 'mac' ? 'scale-[1.02] z-30' : 'scale-100 z-10 opacity-70 blur-[1px]'}`}>
+                            <div className={`absolute top-0 right-0 w-[90%] h-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-700 ${activeDevice === 'mac' ? 'scale-[1.02] z-30' : 'scale-100 z-10 opacity-70  hidden md:block  hidden md:block blur-[1px]'}`}>
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-6 bg-black rounded-b-2xl z-30"></div>
                                 <div className="w-full h-full bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
                                     <iframe 
@@ -10856,7 +10856,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                     ></iframe>
                                     
                                     {activeDevice !== 'mac' && (
-                                      <div onClick={() => switchFocus('mac')} className="absolute inset-0 z-20 bg-black/10 backdrop-blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
+                                      <div onClick={() => switchFocus('mac')} className="absolute inset-0 z-20 bg-black/10 backdrop- hidden md:block  hidden md:block blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
                                          <div className="bg-slate-900/90 text-white text-xs font-bold px-6 py-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl flex items-center transform scale-95 group-hover:scale-100">
                                             <PlayCircle size={18} className="mr-2 text-amber-500"/> Haz clic para explorar en Mac
                                          </div>
@@ -10868,7 +10868,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                 </div>
                             </div>
 
-                            <div className={`absolute bottom-[0%] left-[0%] transition-all duration-700 ease-out origin-bottom ${activeDevice === 'iphone' ? 'z-40 scale-[1.05]' : 'z-20 scale-95 opacity-80 blur-[1px]'}`}>
+                            <div className={`absolute bottom-[0%] left-[0%] transition-all duration-700 ease-out origin-bottom ${activeDevice === 'iphone' ? 'z-40 scale-[1.05]' : 'z-20 scale-95 opacity-80  hidden md:block  hidden md:block blur-[1px]'}`}>
                                 <div style={{ width: '220px', height: '458px' }} className="relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0">
                                     <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-[30%] h-[16px] bg-black rounded-full z-30 flex justify-end items-center pr-1.5">
                                       <div className="w-1.5 h-1.5 rounded-full bg-slate-800/80 mr-1"></div>
@@ -10890,7 +10890,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                       ></iframe>
 
                                       {activeDevice !== 'iphone' && (
-                                        <div onClick={() => switchFocus('iphone')} className="absolute inset-0 z-20 bg-black/10 backdrop-blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
+                                        <div onClick={() => switchFocus('iphone')} className="absolute inset-0 z-20 bg-black/10 backdrop- hidden md:block  hidden md:block blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
                                            <div className="bg-slate-900/90 text-white text-[10px] font-bold px-4 py-3 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl text-center flex flex-col items-center transform scale-95 group-hover:scale-100">
                                               <Smartphone size={24} className="mb-1 text-amber-500"/>
                                               Tocar para usar<br/>en Móvil
@@ -10964,8 +10964,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                     >
                                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-[0.03]"></div>
                                         
-                                        <div className="absolute -top-8 -right-8 w-28 h-28 bg-[#8DB580]/10 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
-                                        <div className="absolute -bottom-8 left-8 w-20 h-20 bg-[#F4AAB9]/10 blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -top-8 -right-8 w-28 h-28 bg-[#8DB580]/10  hidden md:block  hidden md:block blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -bottom-8 left-8 w-20 h-20 bg-[#F4AAB9]/10  hidden md:block  hidden md:block blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         
                                         <div className="absolute top-0 left-[20%] w-1.5 h-2.5 bg-[#F4AAB9] opacity-0 pointer-events-none" style={{ animation: 'petalFallMini 4s linear infinite', borderRadius: '50% 0 50% 50%' }}></div>
                                         <div className="absolute top-0 left-[50%] w-2 h-3 bg-[#D4AF37] opacity-0 pointer-events-none" style={{ animation: 'petalFallMini 5s linear infinite 1.5s', borderRadius: '50% 0 50% 50%' }}></div>
@@ -10997,8 +10997,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         onClick={() => setFullScreenDemo(demo.url)}
                                         className="w-full bg-[#12080a] border border-[#e8a598]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.5)] hover:shadow-[0_15px_30px_rgba(232,165,152,0.15)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
                                     >
-                                        <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#e8a598]/10 blur-[40px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
-                                        <div className="absolute -bottom-10 left-8 w-24 h-24 bg-[#c27a6e]/10 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#e8a598]/10  hidden md:block  hidden md:block blur-[40px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -bottom-10 left-8 w-24 h-24 bg-[#c27a6e]/10  hidden md:block  hidden md:block blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         
                                         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity duration-700">
                                             <div className="absolute left-[20%]" style={{ animation: 'floatItemMini 10s linear infinite', animationDelay: '0s' }}><svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" /></svg></div>
@@ -11029,8 +11029,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         onClick={() => setFullScreenDemo(demo.url)}
                                         className="w-full bg-[#FFF0F2] border border-[#C5A059]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_30px_rgba(197,160,89,0.15)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
                                     >
-                                        <div className="absolute -top-8 -right-8 w-28 h-28 bg-[#D8A7B1]/20 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
-                                        <div className="absolute -bottom-8 left-8 w-20 h-20 bg-[#F7E7CE]/30 blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -top-8 -right-8 w-28 h-28 bg-[#D8A7B1]/20  hidden md:block  hidden md:block blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -bottom-8 left-8 w-20 h-20 bg-[#F7E7CE]/30  hidden md:block  hidden md:block blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         
                                         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 group-hover:opacity-70 transition-opacity duration-700">
                                             <div className="absolute left-[15%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 12s linear infinite', animationDelay: '0s' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><circle cx="12" cy="7" r="5" /><circle cx="12" cy="7" r="1" fill="currentColor" /><circle cx="10" cy="5.5" r="0.5" fill="currentColor" /><circle cx="14" cy="5.5" r="0.5" fill="currentColor" /><circle cx="10" cy="8.5" r="0.5" fill="currentColor" /><circle cx="14" cy="8.5" r="0.5" fill="currentColor" /><path d="M12 12v6" /><circle cx="12" cy="20" r="2" /><path d="M9 13c1.5-1 4.5-1 6 0" /></svg></div>
@@ -11061,8 +11061,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         onClick={() => setFullScreenDemo(demo.url)}
                                         className="w-full bg-[#FDFBF7] border border-[#D4AF37]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.05)] hover:shadow-[0_15px_30px_rgba(212,175,55,0.15)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
                                     >
-                                        <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#F76C82]/10 blur-[40px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
-                                        <div className="absolute -bottom-10 left-8 w-24 h-24 bg-[#FFD166]/10 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#F76C82]/10  hidden md:block  hidden md:block blur-[40px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -bottom-10 left-8 w-24 h-24 bg-[#FFD166]/10  hidden md:block  hidden md:block blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         
                                         <div className="absolute -bottom-16 -right-20 pointer-events-none opacity-60 z-0 group-hover:scale-110 transition-transform duration-1000 delay-100" style={{ animation: 'floatMini 6s ease-in-out infinite' }}>
                                             <svg viewBox="0 0 200 200" className="w-64 h-64" xmlns="http://www.w3.org/2000/svg">
@@ -11124,8 +11124,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                                         onClick={() => setFullScreenDemo(demo.url)}
                                         className="w-full bg-[#FAF9F6] border border-[#D4AF37]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_30px_rgba(212,175,55,0.15)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left"
                                     >
-                                        <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#8A9A86]/10 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
-                                        <div className="absolute -bottom-8 left-8 w-24 h-24 bg-[#D4AF37]/10 blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#8A9A86]/10  hidden md:block  hidden md:block blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
+                                        <div className="absolute -bottom-8 left-8 w-24 h-24 bg-[#D4AF37]/10  hidden md:block  hidden md:block blur-[25px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
                                         
                                         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30 group-hover:opacity-60 transition-opacity duration-700">
                                             <div className="absolute top-0 left-0 w-10 h-10 text-[#D4AF37]" style={{ animation: 'floatCloudMini 12s linear infinite', animationDelay: '0s', '--y-offset': '10px', '--scale': '0.9', '--rot': '-5deg' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg></div>
@@ -11396,7 +11396,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </div>
 
             <div className="lg:w-1/2 w-full relative perspective-[1000px]">
-              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 dark:from-indigo-500/20 to-amber-500/10 dark:to-amber-500/20 blur-[120px] rounded-full pointer-events-none transition-colors"></div>
+              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 dark:from-indigo-500/20 to-amber-500/10 dark:to-amber-500/20  hidden md:block  hidden md:block blur-[120px] rounded-full pointer-events-none transition-colors"></div>
               
               <div className="bg-white/50 dark:bg-black/50 p-2 md:p-4 rounded-[2rem] border border-slate-200/50 dark:border-white/10 shadow-2xl dark:shadow-[0_30px_80px_rgba(0,0,0,0.8)] relative z-10 transform md:rotate-y-[-5deg] md:rotate-x-[2deg] hover:rotate-y-0 hover:rotate-x-0 transition-all duration-1000 backdrop-blur-xl">
                 
@@ -11519,7 +11519,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       <section id="planners" className="py-24 relative z-10 overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
           <RevealSection className="bg-slate-900 dark:bg-[#0a0a0a] rounded-[3rem] p-10 md:p-20 border border-slate-800 dark:border-white/10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between shadow-2xl transition-colors duration-700">
-             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/5 dark:bg-white/5 rounded-full blur-[100px] pointer-events-none transition-colors duration-700"></div>
+             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/5 dark:bg-white/5 rounded-full  hidden md:block  hidden md:block blur-[100px] pointer-events-none transition-colors duration-700"></div>
              
              <div className="md:w-1/2 relative z-10 mb-12 md:mb-0">
                <span className="text-slate-400 font-bold tracking-widest uppercase text-xs mb-4 block">Alianza B2B</span>
@@ -11555,7 +11555,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       {/* 🔴 NUEVA SECCIÓN: SOCIAL WALL (Atmósfera de Fiesta) */}
       {/* ========================================== */}
       <section id="muro-social" className="py-24 bg-indigo-50 dark:bg-[#080808] relative overflow-hidden transition-colors duration-700 border-t border-indigo-200 dark:border-white/5">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-indigo-500/10 blur-[150px] rounded-full pointer-events-none transition-colors duration-700"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-indigo-500/10  hidden md:block  hidden md:block blur-[150px] rounded-full pointer-events-none transition-colors duration-700"></div>
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 flex flex-col items-center">
             
@@ -11653,7 +11653,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       {/* 🔴 NUEVA SECCIÓN: BLACK LABEL (Lujo Físico) */}
       {/* ========================================== */}
       <section id="black-label" className="py-24 bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white relative overflow-hidden transition-colors duration-700 border-t border-slate-200 dark:border-white/5">
-         <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[60vw] h-[60vw] bg-amber-500/5 blur-[150px] rounded-full pointer-events-none transition-colors duration-700"></div>
+         <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[60vw] h-[60vw] bg-amber-500/5  hidden md:block  hidden md:block blur-[150px] rounded-full pointer-events-none transition-colors duration-700"></div>
 
          <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 flex flex-col items-center">
             
@@ -13690,8 +13690,8 @@ const LoginScreen = () => {
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
       {/* Luces de fondo estilo Champagne */}
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-amber-500/10 blur-[120px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-indigo-500/10 blur-[150px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-amber-500/10  hidden md:block  hidden md:block blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-indigo-500/10  hidden md:block  hidden md:block blur-[150px] rounded-full pointer-events-none"></div>
       
       <div className="bg-slate-900/80 backdrop-blur-xl p-10 rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.6)] w-full max-w-md relative z-10 border border-slate-800">
         <div className="flex flex-col items-center mb-8">
@@ -13919,8 +13919,8 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
         </div>
       )}
 
-      <div className="absolute top-[-10%] left-[-5%] w-[50vw] h-[50vw] bg-amber-500/15 dark:bg-amber-600/20 blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
-      <div className="absolute bottom-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-indigo-500/10 dark:bg-indigo-600/15 blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
+      <div className="absolute top-[-10%] left-[-5%] w-[50vw] h-[50vw] bg-amber-500/15 dark:bg-amber-600/20  hidden md:block  hidden md:block blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
+      <div className="absolute bottom-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-indigo-500/10 dark:bg-indigo-600/15  hidden md:block  hidden md:block blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
       
       <div className="fixed top-4 right-4 z-[999] hidden sm:flex flex-col space-y-2 pointer-events-none">
         {notifications.map(notif => (
@@ -14306,7 +14306,7 @@ const ShowcaseSimulatorView = () => {
            <div className="relative w-full max-w-[850px] translate-x-[5%] xl:translate-x-[15%]">
                
                {/* --- MACBOOK DE FONDO CON CRISTAL INTELIGENTE --- */}
-               <div className={`relative w-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-700 ${activeDevice === 'mac' ? 'scale-[1.02] z-30' : 'scale-100 z-10 opacity-70 blur-[1px]'}`}>
+               <div className={`relative w-full bg-black rounded-t-3xl border-[8px] border-slate-800 shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-700 ${activeDevice === 'mac' ? 'scale-[1.02] z-30' : 'scale-100 z-10 opacity-70  hidden md:block  hidden md:block blur-[1px]'}`}>
                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-6 bg-black rounded-b-2xl z-30"></div>
                    <div className="w-full aspect-[16/10] bg-[#111] relative overflow-hidden rounded-t-xl border border-white/5 transition-colors">
                        <iframe 
@@ -14319,7 +14319,7 @@ const ShowcaseSimulatorView = () => {
                        
                        {/* CRISTAL INTELIGENTE MAC */}
                        {activeDevice !== 'mac' && (
-                         <div onClick={() => switchFocus('mac')} className="absolute inset-0 z-20 bg-black/10 backdrop-blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
+                         <div onClick={() => switchFocus('mac')} className="absolute inset-0 z-20 bg-black/10 backdrop- hidden md:block  hidden md:block blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
                             <div className="bg-slate-900/90 text-white text-xs font-bold px-6 py-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl flex items-center transform scale-95 group-hover:scale-100">
                                <PlayCircle size={18} className="mr-2 text-amber-500"/> Haz clic para explorar en Mac
                             </div>
@@ -14332,7 +14332,7 @@ const ShowcaseSimulatorView = () => {
                </div>
 
                {/* --- IPHONE AL FRENTE CON CRISTAL INTELIGENTE --- */}
-               <div className={`absolute bottom-[-0%] left-[-5%] xl:left-[-15%] transition-all duration-700 ease-out origin-bottom ${activeDevice === 'iphone' ? 'z-40 scale-[1.05]' : 'z-20 scale-95 opacity-80 blur-[1px]'}`}>
+               <div className={`absolute bottom-[-0%] left-[-5%] xl:left-[-15%] transition-all duration-700 ease-out origin-bottom ${activeDevice === 'iphone' ? 'z-40 scale-[1.05]' : 'z-20 scale-95 opacity-80  hidden md:block  hidden md:block blur-[1px]'}`}>
                    <div style={{ width: '220px', height: '458px' }} className="relative bg-black rounded-[2.5rem] border-[8px] border-slate-800 shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden flex-shrink-0 mx-auto">
                        
                        {/* Isla Dinámica */}
@@ -14357,7 +14357,7 @@ const ShowcaseSimulatorView = () => {
 
                          {/* CRISTAL INTELIGENTE IPHONE */}
                          {activeDevice !== 'iphone' && (
-                           <div onClick={() => switchFocus('iphone')} className="absolute inset-0 z-20 bg-black/10 backdrop-blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
+                           <div onClick={() => switchFocus('iphone')} className="absolute inset-0 z-20 bg-black/10 backdrop- hidden md:block  hidden md:block blur-[2px] cursor-pointer flex items-center justify-center group transition-all duration-500">
                               <div className="bg-slate-900/90 text-white text-[10px] font-bold px-4 py-3 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity border border-white/20 shadow-2xl text-center flex flex-col items-center transform scale-95 group-hover:scale-100">
                                  <Smartphone size={24} className="mb-1 text-amber-500"/>
                                  Tocar para usar<br/>en Móvil
@@ -14585,7 +14585,7 @@ export default function App() {
   // 🟢 4. ZONA SEGURA (PANEL DE CLIENTES/ADMIN)
   if (isCheckingAuth) return (
     <div className="h-screen w-screen bg-[#050505] flex flex-col items-center justify-center text-white relative overflow-hidden">
-       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/10  hidden md:block  hidden md:block blur-[100px] rounded-full pointer-events-none"></div>
        <BauliaLogo className="h-12 md:h-16 w-auto mb-8 opacity-90 relative z-10" forceWhite={true} />
        <div className="flex items-center gap-3 text-amber-500/80 uppercase tracking-[0.3em] text-[10px] font-black relative z-10">
          <RefreshCw size={14} className="animate-spin" /> Accediendo a Bóveda VIP...
