@@ -11775,26 +11775,28 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                {plan.d2 && <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md whitespace-nowrap z-20">El Estándar</div>}
                {plan.d1 && <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-bl-lg whitespace-nowrap z-20"><Gem size={10} className="mr-1 inline"/> Suite Todo Incluido</div>}
 
-               <div className={`h-full bg-white rounded-3xl p-8 border ${plan.d2 ? 'border-2 border-amber-500 shadow-amber-500/10' : plan.d1 ? 'border-indigo-500/30' : 'border-slate-200'} flex flex-col justify-between group overflow-hidden relative shadow-lg`}>
+               <div className={`h-full bg-white dark:bg-[#0a0a0a] rounded-3xl p-8 border ${plan.d2 ? 'border-2 border-amber-500 dark:border-amber-500 shadow-amber-500/10' : plan.d1 ? 'border-indigo-500/30 dark:border-indigo-500/30' : 'border-slate-200 dark:border-white/10'} flex flex-col justify-between group overflow-hidden relative shadow-lg transition-colors`}>
                   
-                  {plan.d1 && <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-500/5 blur-3xl rounded-full pointer-events-none transition-colors duration-700"></div>}
-                  {plan.d2 && <div className="absoluteInset=0 opacity=10 bg=[linear-gradient(45deg,_transparent_70%,_#f59e0b_100%)] rounded-3xl transition-opacity group-hover:opacity-20"></div>}
+                  {plan.d1 && <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none transition-colors duration-700"></div>}
+                  {plan.d2 && <div className="absolute inset-0 opacity-10 bg-[linear-gradient(45deg,_transparent_70%,_#f59e0b_100%)] rounded-3xl transition-opacity group-hover:opacity-20"></div>}
 
                   <div className="relative z-10 mb-8 flex-1">
-                     <h3 className="text-2xl font-editorial font-bold text-slate-900 mb-2">{plan.n}</h3>
-                     <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">{plan.d}</p>
-                     <div className="text-4xl font-light text-slate-900 mb-8 relative flex items-baseline">
+                     <h3 className="text-2xl font-editorial font-bold text-slate-900 dark:text-white mb-2 transition-colors">{plan.n}</h3>
+                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium leading-relaxed transition-colors">{plan.d}</p>
+                     
+                     <div className="text-4xl font-light text-slate-900 dark:text-white mb-8 relative flex items-baseline transition-colors">
                         <span className="text-xl text-rose-500 line-through font-bold mr-3">${plan.pAnt}</span>
                         <span className="font-editorial text-transparent bg-clip-text bg-gradient-to-tr from-slate-900 to-slate-700 dark:from-white dark:to-slate-100">${plan.p}</span> <span className="text-sm text-slate-400 font-normal ml-2">MXN</span>
                      </div>
-                     <ul className="space-y-4 text-sm text-slate-600 relative">
+
+                     <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-300 relative transition-colors">
                         {plan.f.map((feat, fIdx) => (
-                           <li key={fIdx} className="flex items-start"><Check size={16} className={`text-amber-500 mr-2.5 shrink-0 mt-0.5`} /> <span>{feat}</span></li>
+                           <li key={fIdx} className="flex items-start"><Check size={16} className="text-amber-500 mr-2.5 shrink-0 mt-0.5" /> <span>{feat}</span></li>
                         ))}
                      </ul>
                   </div>
                   
-                  <button onClick={() => { setPlanSeleccionado({ plan: plan.n, precio: `${plan.p}.00` }); setCheckoutModal('pago'); }} className={`w-full py-4 rounded-full ${plan.d2 ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white' : plan.d1 ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-white'} font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-lg mt-auto relative z-10`}>
+                  <button onClick={() => { setPlanSeleccionado({ plan: plan.n, precio: `${plan.p}.00` }); setCheckoutModal('pago'); }} className={`w-full py-4 rounded-full ${plan.d2 ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white' : plan.d1 ? 'bg-indigo-600 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'} font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-lg mt-auto relative z-10`}>
                      Reservar mi Bóveda {plan.n}
                   </button>
                </div>
