@@ -21,6 +21,7 @@ import {
 // 🔴 AQUÍ CONECTAMOS TU NUEVO MÓDULO EXCLUSIVO:
 import GestorPulserasView from './views/GestorPulserasView';
 import MonitorRecepcionView from './views/MonitorRecepcionView';
+import CatalogoMuestrasView from './views/CatalogoMuestrasView';
 
 // 🔴 CONEXIÓN A STRIPE (Reemplaza con tu clave Publicable de Stripe)
 const stripePromise = loadStripe('pk_test_51TBrAV3BmYGrtpk6QnQvZhounbmZAF7Ea107Fh734agWXri2z9N91BpgFKWeqBfiBq3ePLbFoTro0Z2fC0Qs5lnA00vL7mha3m');
@@ -14546,6 +14547,11 @@ export default function App() {
   // 3. ENRUTAMIENTO (AHORA SÍ, YA PODEMOS REDIRIGIR)
   // ==========================================
 
+  // 🔴 MODO PORTAFOLIO: Interceptamos la palabra "showroom"
+  if (pathname === 'showroom') {
+    return <CatalogoMuestrasView />;
+  }
+  
   // Si entra a baulia.com/boda-ana-y-luis
   if (!isPanel && pathname && !eventIdParam) {
      eventIdParam = pathname;
