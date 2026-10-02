@@ -18,7 +18,7 @@ const CatalogoMuestrasView = () => {
     tematicas: { id: 'tematicas', label: 'Fiestas Temáticas', url: '/demos/infantil/index.html', desc: 'Llevamos cualquier concepto al máximo nivel con inmersión total.', blob1: 'bg-emerald-400', blob2: 'bg-yellow-400' }, 
     bautizo: { id: 'bautizo', label: 'Bautizos', url: '/demos/bautizo/index.html', desc: 'Tonos pastel y diseños angelicales para momentos íntimos en familia.', blob1: 'bg-blue-100', blob2: 'bg-amber-100' },
     corporativo: { id: 'corporativo', label: 'Galas y Eventos', url: '/demos/corporativo/index.html', desc: 'Convenciones, conciertos y lanzamientos de marca con logística blindada.', blob1: 'bg-slate-700', blob2: 'bg-indigo-400' },
-    keyli: { id: 'keyli', label: 'K-Pop Cyberpunk', url: '/demos/kpop/index.html', desc: 'Un ejemplo de cómo transformamos ideas en universos inmersivos y vibrantes.', blob1: 'bg-fuchsia-600', blob2: 'bg-cyan-400' }
+    keyli: { id: 'keyli', label: 'K-Pop Cyberpunk', url: '/demos/key-pop/index.html', desc: 'Un ejemplo de cómo transformamos ideas en universos inmersivos y vibrantes.', blob1: 'bg-fuchsia-600', blob2: 'bg-cyan-400' }
   };
   const currentDemo = demos[activeCategory];
 
@@ -131,7 +131,7 @@ const CatalogoMuestrasView = () => {
                 </div>
             ) : (
                 // ==========================================
-                // --- VERSIÓN MÓVIL (Altura Estilizada a 90px) ---
+                // --- VERSIÓN MÓVIL (Altura Estilizada a 90px con ANIMACIONES RESTAURADAS) ---
                 // ==========================================
                 <div className="w-full flex flex-col gap-4 px-2 max-w-md mx-auto animate-in fade-in duration-500">
                     
@@ -144,7 +144,7 @@ const CatalogoMuestrasView = () => {
                     </div>
                     
                     <div className="flex flex-col gap-3 relative z-50 pb-10">
-                        {/* ESTILOS Y ANIMACIONES CSS NATIVAS */}
+                        {/* ESTILOS Y ANIMACIONES CSS NATIVAS RESTAURADAS */}
                         <style>{`
                             @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
                             @keyframes petalFallMini { 0% { transform: translateY(-10px) rotate(0deg) scale(0.8); opacity: 0; } 20% { opacity: 0.6; } 80% { opacity: 0.6; } 100% { transform: translateY(80px) rotate(360deg) scale(1); opacity: 0; } }
@@ -154,7 +154,7 @@ const CatalogoMuestrasView = () => {
                             @keyframes radarPulse { 0% { transform: scale(0.5); opacity: 1; border-width: 2px; } 100% { transform: scale(2.5); opacity: 0; border-width: 0px; } }
                         `}</style>
 
-                        {/* TODOS LOS BOTONES TIENEN EXACTAMENTE h-[90px] y rounded-[1.5rem] PARA SIMETRÍA SLIM */}
+                        {/* TODOS LOS BOTONES TIENEN EXACTAMENTE h-[90px] y rounded-[1.5rem] */}
                         {Object.values(demos).map(demo => {
                             
                             // 💎 BODA
@@ -166,10 +166,11 @@ const CatalogoMuestrasView = () => {
                                         <div className="absolute bottom-0 left-0 w-16 h-16 bg-[#F4AAB9]/10 blur-[20px] rounded-full"></div>
                                         <div className="absolute top-0 left-[20%] w-1.5 h-2.5 bg-[#F4AAB9] opacity-0 pointer-events-none" style={{ animation: 'petalFallMini 4s linear infinite', borderRadius: '50% 0 50% 50%' }}></div>
                                         
-                                        <div className="flex flex-col items-start justify-center h-full relative z-10 mt-1">
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10 pt-1">
                                             <div className="absolute -left-2 -top-2 opacity-5 pointer-events-none" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '2.5rem', lineHeight: '1' }}>I<span style={{ fontFamily: '"Pinyon Script", cursive' }}>&</span>A</div>
                                             <span className="text-[7px] tracking-[0.3em] text-[#8DB580] uppercase mb-0.5 font-bold">Alta Costura</span>
-                                            <span className="text-xl text-[#2C3531] font-light tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300 leading-none" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
+                                            <span className="text-xl text-[#2C3531] font-light tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300 leading-none mb-1" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
+                                            <span className="text-[7px] uppercase tracking-widest text-[#2C3531]/50 font-bold flex items-center"><PlayCircle size={10} className="mr-1 text-[#D4AF37]" /> Toca para abrir</span>
                                         </div>
                                         
                                         <div className="relative z-10 w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[#D4AF37]/30 shadow-sm text-[#2C3531] group-hover:bg-[#F4AAB9]/10 transition-colors duration-300 shrink-0">
@@ -185,10 +186,18 @@ const CatalogoMuestrasView = () => {
                                     <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[90px] bg-[#12080a] border border-[#e8a598]/30 px-5 rounded-[1.5rem] shadow-[0_5px_15px_rgba(0,0,0,0.5)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group flex items-center justify-between text-left">
                                         <div className="absolute -top-5 -right-5 w-24 h-24 bg-[#e8a598]/10 blur-[25px] rounded-full"></div>
                                         
-                                        <div className="flex flex-col items-start justify-center h-full relative z-10 mt-1">
+                                        {/* DIAMANTES Y ESTRELLAS RESTAURADOS */}
+                                        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity duration-700">
+                                            <div className="absolute left-[20%]" style={{ animation: 'floatItemMini 10s linear infinite', animationDelay: '0s' }}><svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" /></svg></div>
+                                            <div className="absolute left-[60%]" style={{ animation: 'floatItemMini 14s linear infinite', animationDelay: '2s' }}><svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" /></svg></div>
+                                            <div className="absolute left-[80%]" style={{ animation: 'floatItemMini 12s linear infinite', animationDelay: '5s' }}><svg viewBox="0 0 24 24" fill="none" stroke="#e8a598" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-2 h-2"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" /></svg></div>
+                                        </div>
+
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10 pt-1">
                                             <div className="absolute -left-2 -top-2 opacity-[0.05] pointer-events-none text-[#e8a598]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '2.5rem', lineHeight: '1' }}>V</div>
                                             <span className="text-[7px] tracking-[0.3em] text-[#e8a598] uppercase mb-0.5 font-bold">Mis XV Años</span>
-                                            <span className="text-xl text-white font-light tracking-wide group-hover:text-[#e8a598] transition-colors duration-300 leading-none" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
+                                            <span className="text-xl text-white font-light tracking-wide group-hover:text-[#e8a598] transition-colors duration-300 leading-none mb-1" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
+                                            <span className="text-[7px] uppercase tracking-widest text-white/50 font-bold flex items-center"><PlayCircle size={10} className="mr-1 text-[#e8a598]" /> Toca para abrir</span>
                                         </div>
                                         
                                         <div className="relative z-10 w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-[#e8a598]/30 shadow-sm text-white group-hover:bg-[#e8a598] group-hover:text-black transition-colors duration-300 shrink-0">
@@ -204,10 +213,18 @@ const CatalogoMuestrasView = () => {
                                     <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[90px] bg-[#FFF0F2] border border-[#C5A059]/30 px-5 rounded-[1.5rem] shadow-[0_5px_15px_rgba(0,0,0,0.04)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group flex items-center justify-between text-left">
                                         <div className="absolute top-0 right-0 w-20 h-20 bg-[#D8A7B1]/20 blur-[20px] rounded-full"></div>
                                         
-                                        <div className="flex flex-col items-start justify-center h-full relative z-10 mt-1">
+                                        {/* CHUPONES Y BIBERONES RESTAURADOS */}
+                                        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 group-hover:opacity-70 transition-opacity duration-700">
+                                            <div className="absolute left-[15%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 12s linear infinite', animationDelay: '0s' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><circle cx="12" cy="7" r="5" /><circle cx="12" cy="7" r="1" fill="currentColor" /><circle cx="10" cy="5.5" r="0.5" fill="currentColor" /><circle cx="14" cy="5.5" r="0.5" fill="currentColor" /><circle cx="10" cy="8.5" r="0.5" fill="currentColor" /><circle cx="14" cy="8.5" r="0.5" fill="currentColor" /><path d="M12 12v6" /><circle cx="12" cy="20" r="2" /><path d="M9 13c1.5-1 4.5-1 6 0" /></svg></div>
+                                            <div className="absolute left-[45%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 15s linear infinite', animationDelay: '3s' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M9 10c0-3 1.5-5 3-5s3 2 3 5" /><rect x="5" y="10" width="14" height="4" rx="2" /><path d="M10 14v2h4v-2" /><circle cx="12" cy="18" r="3" /></svg></div>
+                                            <div className="absolute left-[75%] text-[#D8A7B1]" style={{ animation: 'floatItemMini 10s linear infinite', animationDelay: '6s' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><circle cx="12" cy="7" r="5" /><circle cx="12" cy="7" r="1" fill="currentColor" /><circle cx="10" cy="5.5" r="0.5" fill="currentColor" /><circle cx="14" cy="5.5" r="0.5" fill="currentColor" /><circle cx="10" cy="8.5" r="0.5" fill="currentColor" /><circle cx="14" cy="8.5" r="0.5" fill="currentColor" /><path d="M12 12v6" /><circle cx="12" cy="20" r="2" /><path d="M9 13c1.5-1 4.5-1 6 0" /></svg></div>
+                                        </div>
+
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10 pt-1">
                                             <div className="absolute -left-1 -top-3 opacity-[0.07] pointer-events-none text-[#C5A059]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '3rem', lineHeight: '1' }}>TE</div>
                                             <span className="text-[7px] tracking-[0.3em] text-[#D8A7B1] uppercase mb-0.5 font-bold">Baby Shower de</span>
-                                            <span className="text-xl text-[#111827] font-light tracking-wide group-hover:text-[#D8A7B1] transition-colors duration-300 leading-none" style={{ fontFamily: '"Great Vibes", cursive' }}>{demo.label}</span>
+                                            <span className="text-xl text-[#111827] font-light tracking-wide group-hover:text-[#D8A7B1] transition-colors duration-300 leading-none mb-1" style={{ fontFamily: '"Great Vibes", cursive' }}>{demo.label}</span>
+                                            <span className="text-[7px] uppercase tracking-widest text-[#4B5563] font-bold flex items-center"><PlayCircle size={10} className="mr-1 text-[#C5A059]" /> Toca para abrir</span>
                                         </div>
                                         
                                         <div className="relative z-10 w-8 h-8 rounded-full bg-white/70 backdrop-blur-sm flex items-center justify-center border border-[#C5A059]/30 shadow-sm text-[#4B5563] group-hover:bg-[#D8A7B1] group-hover:text-white transition-colors duration-300 shrink-0">
@@ -223,10 +240,24 @@ const CatalogoMuestrasView = () => {
                                     <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[90px] bg-[#FDFBF7] border border-[#D4AF37]/30 px-5 rounded-[1.5rem] shadow-[0_5px_15px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group flex items-center justify-between text-left">
                                         <div className="absolute top-0 right-0 w-24 h-24 bg-[#F76C82]/10 blur-[25px] rounded-full"></div>
                                         
-                                        <div className="flex flex-col items-start justify-center h-full relative z-10 mt-1">
+                                        {/* CÍRCULOS Y FLORES RESTAURADOS */}
+                                        <div className="absolute -bottom-16 -right-6 pointer-events-none opacity-60 z-0 group-hover:scale-110 transition-transform duration-1000 delay-100" style={{ animation: 'floatMini 6s ease-in-out infinite' }}>
+                                            <svg viewBox="0 0 200 200" className="w-40 h-40" xmlns="http://www.w3.org/2000/svg">
+                                                <g transform="scale(0.8) translate(20, 20)">
+                                                    <path d="M 40 100 C 10 70, 20 20, 80 10 C 80 60, 60 90, 40 100 Z" fill="#8DB580" opacity="0.8"/>
+                                                    <path d="M 100 40 C 70 10, 20 20, 10 80 C 60 80, 90 60, 100 40 Z" fill="#A3C697" opacity="0.9"/>
+                                                    <circle cx="120" cy="70" r="30" fill="#FFD166" />
+                                                    <circle cx="70" cy="120" r="35" fill="#F76C82" />
+                                                    <path d="M 90 90 Q 100 100, 110 90" stroke="#D4AF37" strokeWidth="2" fill="none"/>
+                                                </g>
+                                            </svg>
+                                        </div>
+
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10 pt-1">
                                             <div className="absolute -left-1 -top-2 opacity-5 pointer-events-none text-[#D4AF37]" style={{ fontFamily: '"Pinyon Script", cursive', fontSize: '2.5rem', lineHeight: '1' }}>30</div>
                                             <span className="text-[7px] tracking-[0.3em] text-[#8DB580] uppercase mb-0.5 font-bold">Celebrando la vida</span>
-                                            <span className="text-xl text-[#1a1a1a] font-light tracking-wide group-hover:text-[#F76C82] transition-colors duration-300 leading-none" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
+                                            <span className="text-xl text-[#1a1a1a] font-light tracking-wide group-hover:text-[#F76C82] transition-colors duration-300 leading-none mb-1" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
+                                            <span className="text-[7px] uppercase tracking-widest text-[#2C3531]/60 font-bold flex items-center"><PlayCircle size={10} className="mr-1 text-[#D4AF37]" /> Toca para abrir</span>
                                         </div>
                                         
                                         <div className="relative z-10 w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[#D4AF37]/30 shadow-sm text-[#2A2A2A] transition-colors duration-300 shrink-0">
@@ -244,7 +275,8 @@ const CatalogoMuestrasView = () => {
 
                                         <div className="flex flex-col items-start justify-center h-full relative z-10 pt-2">
                                             <span className="text-[10px] tracking-[0.2em] text-[#388e3c] drop-shadow-[2px_2px_0_#000] uppercase mb-0.5" style={{ fontFamily: '"VT323", monospace' }}>Mundo Gamer</span>
-                                            <span className="text-2xl text-white drop-shadow-[2px_2px_0_#000] group-hover:text-green-400 transition-colors leading-none" style={{ fontFamily: '"VT323", monospace' }}>{demo.label}</span>
+                                            <span className="text-2xl text-white drop-shadow-[2px_2px_0_#000] group-hover:text-green-400 transition-colors leading-none mb-1" style={{ fontFamily: '"VT323", monospace' }}>{demo.label}</span>
+                                            <span className="text-[7px] uppercase tracking-widest text-white/70 drop-shadow-[1px_1px_0_#000] flex items-center"><PlayCircle size={10} className="mr-1 text-white" /> Start Game</span>
                                         </div>
                                         
                                         <div className="relative z-10 w-8 h-8 bg-[#C6C6C6] border-2 border-black flex items-center justify-center text-[#202020] group-hover:bg-green-500 transition-colors duration-200 shrink-0">
@@ -260,10 +292,18 @@ const CatalogoMuestrasView = () => {
                                     <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[90px] bg-[#FAF9F6] border border-[#D4AF37]/30 px-5 rounded-[1.5rem] shadow-[0_5px_15px_rgba(0,0,0,0.04)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group flex items-center justify-between text-left">
                                         <div className="absolute top-0 right-0 w-24 h-24 bg-[#8A9A86]/10 blur-[20px] rounded-full"></div>
                                         
-                                        <div className="flex flex-col items-start justify-center h-full relative z-10 mt-1">
+                                        {/* NUBES Y BURBUJAS RESTAURADAS */}
+                                        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30 group-hover:opacity-60 transition-opacity duration-700">
+                                            <div className="absolute top-0 left-0 w-8 h-8 text-[#D4AF37]" style={{ animation: 'floatCloudMini 12s linear infinite', animationDelay: '0s', '--y-offset': '10px', '--scale': '0.9', '--rot': '-5deg' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg></div>
+                                            <div className="absolute top-0 left-0 w-8 h-8 text-[#D4AF37]" style={{ animation: 'floatCloudMini 18s linear infinite', animationDelay: '-5s', '--y-offset': '35px', '--scale': '0.7', '--rot': '10deg' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="14" r="4.5" /><circle cx="12" cy="8" r="3.5" /><circle cx="8.5" cy="5.5" r="1.5" /><circle cx="15.5" cy="5.5" r="1.5" /><circle cx="6.5" cy="13" r="1.5" /><circle cx="17.5" cy="13" r="1.5" /><circle cx="9.5" cy="18" r="1.5" /><circle cx="14.5" cy="18" r="1.5" /><path d="M11.5 9.5h1" strokeWidth="1.2" strokeLinecap="round" /></svg></div>
+                                            <div className="absolute top-0 left-0 w-8 h-8 text-[#D4AF37]" style={{ animation: 'floatCloudMini 15s linear infinite', animationDelay: '-10s', '--y-offset': '60px', '--scale': '0.8', '--rot': '5deg' }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg></div>
+                                        </div>
+
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10 pt-1">
                                             <div className="absolute -left-1 -top-3 opacity-5 pointer-events-none text-[#D4AF37]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '3rem', lineHeight: '1' }}>JA</div>
                                             <span className="text-[7px] tracking-[0.3em] text-[#8A9A86] uppercase mb-0.5 font-bold">Con la bendición</span>
-                                            <span className="text-xl text-[#333333] font-light tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300 leading-none" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
+                                            <span className="text-xl text-[#333333] font-light tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300 leading-none mb-1" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
+                                            <span className="text-[7px] uppercase tracking-widest text-[#7A7A7A] font-bold flex items-center"><PlayCircle size={10} className="mr-1 text-[#D4AF37]" /> Toca para abrir</span>
                                         </div>
                                         
                                         <div className="relative z-10 w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[#D4AF37]/30 shadow-sm text-[#333333] transition-colors duration-300 shrink-0">
@@ -279,9 +319,10 @@ const CatalogoMuestrasView = () => {
                                     <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[90px] bg-gradient-to-br from-[#002855] to-[#001530] border border-[#00B2E3]/20 px-5 rounded-[1.5rem] shadow-[0_5px_15px_rgba(0,40,85,0.4)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group flex items-center justify-between text-left">
                                         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(#ffffff 1px, transparent 1px)", backgroundSize: "20px 20px" }}></div>
                                         
-                                        <div className="flex flex-col items-start justify-center h-full relative z-10 mt-1">
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10 pt-1">
                                             <span className="text-[8px] tracking-widest text-[#00B2E3] uppercase mb-0.5 font-bold">Eventos Corporativos</span>
-                                            <span className="text-lg text-white font-bold tracking-tight group-hover:text-[#00B2E3] transition-colors duration-300 leading-none">{demo.label}</span>
+                                            <span className="text-lg text-white font-bold tracking-tight group-hover:text-[#00B2E3] transition-colors duration-300 leading-none mb-1">{demo.label}</span>
+                                            <span className="text-[7px] uppercase tracking-widest text-gray-400 font-semibold flex items-center"><PlayCircle size={10} className="mr-1 text-[#00B2E3]" /> Acceso Exclusivo</span>
                                         </div>
                                         
                                         <div className="relative z-10 w-8 h-8 rounded-full bg-[#00B2E3]/10 flex items-center justify-center border border-[#00B2E3]/30 shadow-sm text-white group-hover:bg-[#00B2E3] group-hover:text-[#002855] transition-colors duration-300 shrink-0">
@@ -300,9 +341,10 @@ const CatalogoMuestrasView = () => {
                                         
                                         <div className="absolute inset-0 opacity-10 group-hover:opacity-30 transition-opacity duration-500 bg-[url('/keily-estefania/kpoplogo.svg')] bg-no-repeat bg-[center_right_-20px] bg-[length:100px] mix-blend-screen pointer-events-none"></div>
 
-                                        <div className="flex flex-col items-start justify-center h-full relative z-10 mt-1">
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10 pt-1">
                                             <span className="text-[7px] tracking-[0.3em] text-[#00e5ff] uppercase mb-1 font-bold drop-shadow-[0_0_5px_rgba(0,229,255,0.8)]" style={{ fontFamily: '"Orbitron", sans-serif' }}>Diseño Especial</span>
-                                            <span className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00e5ff] to-[#ff2e93] drop-shadow-[0_0_8px_rgba(255,46,147,0.5)] transition-all duration-300 leading-none" style={{ fontFamily: '"Orbitron", sans-serif', letterSpacing: '1px' }}>{demo.label}</span>
+                                            <span className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00e5ff] to-[#ff2e93] drop-shadow-[0_0_8px_rgba(255,46,147,0.5)] transition-all duration-300 leading-none mb-1.5" style={{ fontFamily: '"Orbitron", sans-serif', letterSpacing: '1px' }}>{demo.label}</span>
+                                            <span className="text-[7px] uppercase tracking-widest text-white/80 font-bold flex items-center"><PlayCircle size={10} className="mr-1 text-[#00e5ff]" /> Toca para abrir</span>
                                         </div>
                                         
                                         <div className="relative z-10 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center border border-[#00e5ff]/50 shadow-[0_0_10px_rgba(0,229,255,0.3)] text-white group-hover:bg-[#ff2e93] group-hover:border-[#ff2e93] transition-all duration-300 shrink-0">
