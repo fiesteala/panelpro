@@ -10,7 +10,7 @@ const CatalogoMuestrasView = () => {
   const iphoneIframeRef = useRef(null);
   const [activeDevice, setActiveDevice] = useState('iphone'); 
 
-  // 🔴 LOS MISMOS DEMOS Y DISEÑOS DE TU PÁGINA OFICIAL
+  // 🔴 DEMOS CON LA RUTA SEGURA DE K-POP
   const demos = {
     boda: { id: 'boda', label: 'Bodas de Lujo', url: '/demos/boda/index.html', desc: 'Elegancia clásica y paletas sobrias. El estándar de alta costura nupcial.', blob1: 'bg-[#D4AF37]', blob2: 'bg-[#FDFBF7]' },
     xv: { id: 'xv', label: 'XV Años Glamour', url: '/demos/xv/index.html', desc: 'Luces neón y energía vibrante para la mejor noche de tu vida.', blob1: 'bg-fuchsia-500', blob2: 'bg-cyan-400' },
@@ -19,8 +19,8 @@ const CatalogoMuestrasView = () => {
     tematicas: { id: 'tematicas', label: 'Fiestas Temáticas', url: '/demos/infantil/index.html', desc: 'Llevamos cualquier concepto al máximo nivel con inmersión total.', blob1: 'bg-emerald-400', blob2: 'bg-yellow-400' }, 
     bautizo: { id: 'bautizo', label: 'Bautizos', url: '/demos/bautizo/index.html', desc: 'Tonos pastel y diseños angelicales para momentos íntimos en familia.', blob1: 'bg-blue-100', blob2: 'bg-amber-100' },
     corporativo: { id: 'corporativo', label: 'Galas y Eventos', url: '/demos/corporativo/index.html', desc: 'Convenciones, conciertos y lanzamientos de marca con logística blindada.', blob1: 'bg-slate-700', blob2: 'bg-indigo-400' },
-    // Agregamos a Keyli como muestra especial de diseño personalizado
-    keyli: { id: 'keyli', label: 'Diseño Especial K-Pop', url: '/keily-estefania', desc: 'Un ejemplo de cómo transformamos ideas en universos inmersivos.', blob1: 'bg-fuchsia-600', blob2: 'bg-cyan-400' }
+    // 🔴 Ahora apunta a la copia segura que crearás en public/demos/kpop/
+    keyli: { id: 'keyli', label: 'K-Pop Cyberpunk', url: '/demos/kpop/index.html', desc: 'Un ejemplo de cómo transformamos ideas en universos inmersivos y vibrantes.', blob1: 'bg-fuchsia-600', blob2: 'bg-cyan-400' }
   };
   const currentDemo = demos[activeCategory];
 
@@ -32,7 +32,6 @@ const CatalogoMuestrasView = () => {
     setActiveDevice(device);
     const inactiveRef = device === 'mac' ? iphoneIframeRef : macIframeRef;
     if (inactiveRef.current && inactiveRef.current.contentWindow) {
-      // Intentamos pausar el audio si es posible
       try { inactiveRef.current.contentWindow.postMessage('pause_baulia_audio', '*'); } catch (e) {}
     }
   };
@@ -161,7 +160,7 @@ const CatalogoMuestrasView = () => {
                 </div>
             ) : (
                 // ==========================================
-                // --- VERSIÓN MÓVIL (Botonera Oficial) ---
+                // --- VERSIÓN MÓVIL (Botonera Oficial - Geometría Perfecta) ---
                 // ==========================================
                 <div className="w-full flex flex-col gap-6 px-2 max-w-md mx-auto animate-in fade-in duration-500">
                     
@@ -174,8 +173,9 @@ const CatalogoMuestrasView = () => {
                     </div>
                     
                     <div className="flex flex-col gap-3 relative z-50">
-                        {/* ESTILOS Y ANIMACIONES CSS NATIVAS (Copiadas exactas) */}
+                        {/* ESTILOS Y ANIMACIONES CSS NATIVAS */}
                         <style>{`
+                            @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
                             @keyframes petalFallMini { 0% { transform: translateY(-10px) rotate(0deg) scale(0.8); opacity: 0; } 20% { opacity: 0.6; } 80% { opacity: 0.6; } 100% { transform: translateY(80px) rotate(360deg) scale(1); opacity: 0; } }
                             @keyframes floatMini { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
                             @keyframes floatCloudMini { 0% { transform: translate(-60px, var(--y-offset)) scale(var(--scale)) rotate(var(--rot)); } 100% { transform: translate(350px, var(--y-offset)) scale(var(--scale)) rotate(var(--rot)); } }
@@ -183,16 +183,19 @@ const CatalogoMuestrasView = () => {
                             @keyframes radarPulse { 0% { transform: scale(0.5); opacity: 1; border-width: 2px; } 100% { transform: scale(2.5); opacity: 0; border-width: 0px; } }
                         `}</style>
 
+                        {/* TODOS LOS BOTONES TIENEN EXACTAMENTE h-[130px] y rounded-[2rem] PARA SIMETRÍA PERFECTA */}
                         {Object.values(demos).map(demo => {
+                            
+                            // 💎 BODA
                             if (demo.id === 'boda') {
                                 return (
-                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full bg-[#FDFBF7] border border-[#D4AF37]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left">
+                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[130px] bg-[#FDFBF7] border border-[#D4AF37]/30 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left">
                                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-[0.03]"></div>
                                         <div className="absolute -top-8 -right-8 w-28 h-28 bg-[#8DB580]/10 blur-[30px] rounded-full"></div>
                                         <div className="absolute -bottom-8 left-8 w-20 h-20 bg-[#F4AAB9]/10 blur-[25px] rounded-full"></div>
                                         <div className="absolute top-0 left-[20%] w-1.5 h-2.5 bg-[#F4AAB9] opacity-0 pointer-events-none" style={{ animation: 'petalFallMini 4s linear infinite', borderRadius: '50% 0 50% 50%' }}></div>
                                         
-                                        <div className="flex flex-col items-start relative z-10">
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10">
                                             <div className="absolute -left-3 -top-3 opacity-5 pointer-events-none" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '3rem', lineHeight: '1' }}>I<span style={{ fontFamily: '"Pinyon Script", cursive' }}>&</span>A</div>
                                             <span className="text-[8px] tracking-[0.4em] text-[#8DB580] uppercase mb-0.5 font-bold">Alta Costura</span>
                                             <span className="text-2xl text-[#2C3531] font-light tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
@@ -206,12 +209,13 @@ const CatalogoMuestrasView = () => {
                                 );
                             }
 
+                            // 👑 XV AÑOS
                             if (demo.id === 'xv') {
                                 return (
-                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full bg-[#12080a] border border-[#e8a598]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.5)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left">
+                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[130px] bg-[#12080a] border border-[#e8a598]/30 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.5)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left">
                                         <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#e8a598]/10 blur-[40px] rounded-full"></div>
                                         
-                                        <div className="flex flex-col items-start relative z-10">
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10">
                                             <div className="absolute -left-2 -top-5 opacity-[0.05] pointer-events-none text-[#e8a598]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '4rem', lineHeight: '1' }}>V</div>
                                             <span className="text-[8px] tracking-[0.4em] text-[#e8a598] uppercase mb-0.5 font-bold">Mis XV Años</span>
                                             <span className="text-2xl text-white font-light tracking-wide group-hover:text-[#e8a598] transition-colors duration-300" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
@@ -225,12 +229,13 @@ const CatalogoMuestrasView = () => {
                                 );
                             }
 
+                            // 🍼 BABY SHOWER
                             if (demo.id === 'baby_shower') {
                                 return (
-                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full bg-[#FFF0F2] border border-[#C5A059]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left">
+                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[130px] bg-[#FFF0F2] border border-[#C5A059]/30 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left">
                                         <div className="absolute -top-8 -right-8 w-28 h-28 bg-[#D8A7B1]/20 blur-[30px] rounded-full"></div>
                                         
-                                        <div className="flex flex-col items-start relative z-10">
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10">
                                             <div className="absolute -left-2 -top-5 opacity-[0.07] pointer-events-none text-[#C5A059]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '4rem', lineHeight: '1' }}>TE</div>
                                             <span className="text-[8px] tracking-[0.4em] text-[#D8A7B1] uppercase mb-0.5 font-bold">Baby Shower de</span>
                                             <span className="text-2xl text-[#111827] font-light tracking-wide group-hover:text-[#D8A7B1] transition-colors duration-300" style={{ fontFamily: '"Great Vibes", cursive' }}>{demo.label}</span>
@@ -244,12 +249,13 @@ const CatalogoMuestrasView = () => {
                                 );
                             }
 
+                            // 💎 CUMPLEAÑOS FORMAL
                             if (demo.id === 'cumple_formal') {
                                 return (
-                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full bg-[#FDFBF7] border border-[#D4AF37]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left">
+                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[130px] bg-[#FDFBF7] border border-[#D4AF37]/30 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left">
                                         <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#F76C82]/10 blur-[40px] rounded-full"></div>
                                         
-                                        <div className="flex flex-col items-start relative z-10">
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10">
                                             <div className="absolute -left-3 -top-3 opacity-5 pointer-events-none text-[#D4AF37]" style={{ fontFamily: '"Pinyon Script", cursive', fontSize: '3rem', lineHeight: '1' }}>30</div>
                                             <span className="text-[8px] tracking-[0.4em] text-[#8DB580] uppercase mb-0.5 font-bold">Celebrando la vida</span>
                                             <span className="text-2xl text-[#1a1a1a] font-light tracking-wide group-hover:text-[#F76C82] transition-colors duration-300" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
@@ -263,12 +269,13 @@ const CatalogoMuestrasView = () => {
                                 );
                             }
 
+                            // 🎮 TEMÁTICAS (GAMER)
                             if (demo.id === 'tematicas') {
                                 return (
-                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full bg-[#5d4037] border-4 border-black py-3.5 px-6 rounded-[2rem] transition-all relative overflow-hidden group flex items-center justify-between text-left" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%233e2723\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'%3E%3Cpath d=\'M0 0h40v40H0V0zm20 20h20v20H20V20zM0 20h20v20H0V20zM20 0h20v20H20V0z\'/%3E%3C/g%3E%3C/svg%3E")' }}>
+                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[130px] bg-[#5d4037] border-4 border-black px-6 rounded-[2rem] transition-all relative overflow-hidden group flex items-center justify-between text-left" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%233e2723\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'%3E%3Cpath d=\'M0 0h40v40H0V0zm20 20h20v20H20V20zM0 20h20v20H0V20zM20 0h20v20H20V0z\'/%3E%3C/g%3E%3C/svg%3E")' }}>
                                         <div className="absolute top-0 left-0 w-full h-4 bg-[#388e3c] border-b-4 border-[#1b5e20] pointer-events-none"></div>
 
-                                        <div className="flex flex-col items-start relative z-10 pt-2">
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10">
                                             <span className="text-[12px] tracking-[0.2em] text-[#388e3c] drop-shadow-[2px_2px_0_#000] uppercase mb-0.5" style={{ fontFamily: '"VT323", monospace' }}>Mundo Gamer</span>
                                             <span className="text-3xl text-white drop-shadow-[2px_2px_0_#000] group-hover:text-green-400 transition-colors" style={{ fontFamily: '"VT323", monospace', lineHeight: '0.9' }}>{demo.label}</span>
                                             <span className="text-[12px] uppercase tracking-widest text-white/70 drop-shadow-[1px_1px_0_#000] flex items-center mt-1"><PlayCircle size={10} className="mr-1.5 text-white" /> Start Game</span>
@@ -281,12 +288,13 @@ const CatalogoMuestrasView = () => {
                                 );
                             }
 
+                            // 🕊️ BAUTIZO
                             if (demo.id === 'bautizo') {
                                 return (
-                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full bg-[#FAF9F6] border border-[#D4AF37]/30 py-3.5 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left">
+                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[130px] bg-[#FAF9F6] border border-[#D4AF37]/30 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left">
                                         <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#8A9A86]/10 blur-[30px] rounded-full"></div>
                                         
-                                        <div className="flex flex-col items-start relative z-10">
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10">
                                             <div className="absolute -left-2 -top-5 opacity-5 pointer-events-none text-[#D4AF37]" style={{ fontFamily: '"Great Vibes", cursive', fontSize: '4rem', lineHeight: '1' }}>JA</div>
                                             <span className="text-[8px] tracking-[0.4em] text-[#8A9A86] uppercase mb-0.5 font-bold">Con la bendición</span>
                                             <span className="text-2xl text-[#333333] font-light tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300" style={{ fontFamily: '"Cormorant Garamond", serif' }}>{demo.label}</span>
@@ -300,12 +308,13 @@ const CatalogoMuestrasView = () => {
                                 );
                             }
 
+                            // 🏢 CORPORATIVO (Ya con bordes redondeados a 2rem)
                             if (demo.id === 'corporativo') {
                                 return (
-                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full bg-gradient-to-br from-[#002855] to-[#001530] border border-[#00B2E3]/20 py-3.5 px-6 rounded-xl shadow-[0_10px_25px_rgba(0,40,85,0.4)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left">
+                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[130px] bg-gradient-to-br from-[#002855] to-[#001530] border border-[#00B2E3]/20 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(0,40,85,0.4)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left">
                                         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(#ffffff 1px, transparent 1px)", backgroundSize: "20px 20px" }}></div>
                                         
-                                        <div className="flex flex-col items-start relative z-10">
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10">
                                             <div className="absolute -left-4 -top-2 opacity-5 pointer-events-none text-white">
                                                 <svg viewBox="0 0 140 40" className="w-32 h-32" fill="none" xmlns="http://www.w3.org/2000/svg"><g transform="translate(10, 8)"><circle cx="12" cy="12" r="8" fill="currentColor"/><ellipse cx="12" cy="12" rx="16" ry="4.5" fill="none" stroke="currentColor" strokeWidth="2.5" transform="rotate(-35 12 12)"/><ellipse cx="12" cy="12" rx="16" ry="4.5" fill="none" stroke="currentColor" strokeWidth="2.5" transform="rotate(35 12 12)"/></g></svg>
                                             </div>
@@ -315,30 +324,48 @@ const CatalogoMuestrasView = () => {
                                             <span className="text-[8px] uppercase tracking-widest text-gray-400 font-semibold flex items-center mt-1.5"><PlayCircle size={10} className="mr-1.5 text-[#00B2E3]" /> Acceso Exclusivo</span>
                                         </div>
                                         
-                                        <div className="relative z-10 w-9 h-9 rounded bg-[#00B2E3]/10 flex items-center justify-center border border-[#00B2E3]/30 shadow-sm text-white group-hover:bg-[#00B2E3] group-hover:text-[#002855] transition-colors duration-500 shrink-0">
-                                            <ChevronRight size={16} />
+                                        <div className="relative z-10 w-10 h-10 rounded-full bg-[#00B2E3]/10 flex items-center justify-center border border-[#00B2E3]/30 shadow-sm text-white group-hover:bg-[#00B2E3] group-hover:text-[#002855] transition-colors duration-500 shrink-0">
+                                            <ChevronRight size={18} />
                                         </div>
                                     </button>
                                 );
                             }
 
-                            // ⚪ ESTILO GENÉRICO (Fallback y Keyli)
+                            // 🎧 KEYLI K-POP CYBERPUNK (Diseño Nuevo Neón)
+                            if (demo.id === 'keyli') {
+                                return (
+                                    <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[130px] bg-[#0a0514] border border-[#ff2e93]/40 px-6 rounded-[2rem] shadow-[0_10px_25px_rgba(255,46,147,0.15)] hover:shadow-[0_15px_30px_rgba(255,46,147,0.3)] hover:-translate-y-0.5 transition-all duration-500 relative overflow-hidden group flex items-center justify-between text-left">
+                                        <div className="absolute -top-10 -right-8 w-32 h-32 bg-[#00e5ff]/20 blur-[40px] rounded-full"></div>
+                                        <div className="absolute -bottom-10 left-8 w-24 h-24 bg-[#ff2e93]/20 blur-[30px] rounded-full"></div>
+                                        
+                                        {/* Marca de agua estilo logo KPOP */}
+                                        <div className="absolute inset-0 opacity-10 group-hover:opacity-30 transition-opacity duration-500 bg-[url('/keily-estefania/kpoplogo.svg')] bg-no-repeat bg-[center_right_-20px] bg-[length:140px] mix-blend-screen pointer-events-none"></div>
+
+                                        <div className="flex flex-col items-start justify-center h-full relative z-10">
+                                            <span className="text-[9px] tracking-[0.3em] text-[#00e5ff] uppercase mb-1 font-bold drop-shadow-[0_0_5px_rgba(0,229,255,0.8)]" style={{ fontFamily: '"Orbitron", sans-serif' }}>Diseño Especial</span>
+                                            <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00e5ff] to-[#ff2e93] drop-shadow-[0_0_8px_rgba(255,46,147,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(255,46,147,0.8)] transition-all duration-300" style={{ fontFamily: '"Orbitron", sans-serif', letterSpacing: '2px' }}>{demo.label}</span>
+                                            <span className="text-[8px] uppercase tracking-widest text-white/80 font-bold flex items-center mt-1.5"><PlayCircle size={10} className="mr-1.5 text-[#00e5ff]" /> Toca para abrir</span>
+                                        </div>
+                                        
+                                        <div className="relative z-10 w-10 h-10 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center border border-[#00e5ff]/50 shadow-[0_0_10px_rgba(0,229,255,0.3)] text-white group-hover:bg-[#ff2e93] group-hover:border-[#ff2e93] group-hover:text-white transition-all duration-500 shrink-0">
+                                            <ChevronRight size={18} />
+                                        </div>
+                                    </button>
+                                );
+                            }
+
+                            // ⚪ FALLBACK ESTÁNDAR
                             return (
-                                <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 py-3.5 px-6 rounded-[2rem] shadow-sm hover:shadow-md transition-all relative overflow-hidden group flex items-center justify-between text-left">
+                                <button key={demo.id} type="button" onClick={() => setFullScreenDemo(demo.url)} className="w-full h-[130px] bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 px-6 rounded-[2rem] shadow-sm hover:shadow-md transition-all relative overflow-hidden group flex items-center justify-between text-left">
                                     <div className={`absolute -top-6 -right-2 w-20 h-20 rounded-full opacity-40 mix-blend-multiply dark:mix-blend-screen transition-transform duration-500 group-hover:scale-150 ${demo.blob1 || 'bg-amber-500'}`}></div>
-                                    <div className={`absolute -bottom-4 right-12 w-14 h-14 rounded-full opacity-40 mix-blend-multiply dark:mix-blend-screen transition-transform duration-500 group-hover:scale-150 ${demo.blob2 || 'bg-indigo-500'}`}></div>
                                     
-                                    <div className="flex flex-col items-start relative z-10">
-                                        <span className="font-bold text-base text-slate-900 dark:text-white drop-shadow-sm mb-0.5">
-                                            {demo.label}
-                                        </span>
-                                        <span className="text-[8px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold flex items-center mt-0.5">
-                                            <PlayCircle size={10} className="mr-1.5" /> Toca para abrir
-                                        </span>
+                                    <div className="flex flex-col items-start justify-center h-full relative z-10">
+                                        <span className="font-bold text-base text-slate-900 dark:text-white drop-shadow-sm mb-0.5">{demo.label}</span>
+                                        <span className="text-[8px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold flex items-center mt-0.5"><PlayCircle size={10} className="mr-1.5" /> Toca para abrir</span>
                                     </div>
                                     
-                                    <div className="relative z-10 w-9 h-9 rounded-full bg-white/50 dark:bg-black/20 backdrop-blur-md flex items-center justify-center border border-white/50 dark:border-white/10 shadow-sm text-slate-700 dark:text-white group-hover:translate-x-0.5 transition-transform shrink-0">
-                                        <ChevronRight size={16} />
+                                    <div className="relative z-10 w-10 h-10 rounded-full bg-white/50 dark:bg-black/20 backdrop-blur-md flex items-center justify-center border border-white/50 dark:border-white/10 shadow-sm text-slate-700 dark:text-white transition-transform shrink-0">
+                                        <ChevronRight size={18} />
                                     </div>
                                 </button>
                             );
@@ -346,7 +373,6 @@ const CatalogoMuestrasView = () => {
                     </div>
                 </div>
             )}
-
         </div>
       </section>
 
@@ -362,7 +388,6 @@ const CatalogoMuestrasView = () => {
                   <X size={14} className="mr-1.5" /> Volver
                </button>
            </div>
-
            <iframe src={fullScreenDemo} className="w-full flex-1 border-0 bg-white" title="Demo a Pantalla Completa" />
         </div>
       )}
