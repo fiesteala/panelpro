@@ -12433,18 +12433,29 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     }
   };
 
-  const handleSendWhatsApp = () => {
-    if (clientPhone.length < 10) { setDialog({ isOpen: true, type: 'alert', title: 'Información Incompleta', message: 'Ingresa un número de 10 dígitos.' }); return; }
-    const domain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://panel.baulia.com'; 
-    const tipoTexto = successData.role === 'planner' ? 'Agencia / Organizador' : successData.tipoEvento;
-    
-    let mensaje = `✨ ¡Hola ${successData.nombres}! `;
-    if (successData.plan === 'basico' || successData.plan === 'plata') {
-      mensaje += `Tu invitación digital está casi lista. Podrás verla pronto en este enlace:\n🔗 ${successData.urlInvitacion || 'Enlace pendiente'}`;
-    } else {
-      mensaje += `Tu Panel de Control Premium para tu ${tipoTexto} está listo.\n\nAccede a tu plataforma privada aquí:\n🔗 ${domain}\n\n👤 Usuario: ${successData.email}\n🔑 Contraseña: ${successData.password}\n🆔 ID de Bóveda: ${successData.eventId}\n\n¡Guarda estos accesos, te servirán para gestionar todos los detalles!`;
+  const contactarCliente = async (lic) => {
+    let phone = lic.telefono || '';
+    if (!phone) {
+      phone = prompt(`No tenemos el WhatsApp de ${lic.nombres}. Ingresa el número a 10 dígitos para contactarlo:`);
+      if (!phone) return;
     }
-    window.open(`https://wa.me/${clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    
+    let msg = '';
+    let nuevoStatus = lic.status;
+    const nombreEmpleado = auth.currentUser?.displayName || "tu asesor";
+
+    if (lic.status === 'nuevo') {
+      msg = `¡Hola *${lic.nombres}*, bienvenidos a Baulia!\n\nSoy ${nombreEmpleado} y seré la persona encargada de apoyarles con su Bóveda. Ya hemos enviado sus credenciales de acceso a su correo electrónico.\n\nPor este medio estaré a sus órdenes para cualquier duda o ayuda que requieran con la configuración de su evento. ¡Estamos muy emocionados de acompañarlos! ✨`;
+      nuevoStatus = 'en_proceso'; // Cambia el semáforo a amarillo
+    } else {
+      msg = `¡Hola *${lic.nombres}*! Te escribo de Baulia para dar seguimiento a tu bóveda...`;
+    }
+
+    window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+
+    if (nuevoStatus !== lic.status) {
+      await updateDoc(doc(db, "usuarios", lic.id), { status: nuevoStatus });
+    }
   };
 
   const toggleStatus = (lic) => {
@@ -12806,6 +12817,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                               <td className="px-5 py-4 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
                               <td className="px-5 py-4 text-right">
                                   <div className="flex items-center justify-end space-x-2">
+                                    <button onClick={() => contactarCliente(lic)} title="Contactar por WhatsApp" className="p-2 rounded-lg text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-transparent dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors">
+                                      <MessageCircle size={16} />
+                                    </button>
                                     <button onClick={() => { 
                                         setEditingLic({...lic, originalPlan: lic.plan, isQrEnabled: lic.isQrEnabled !== false, isPassCountEnabled: lic.isPassCountEnabled !== false}); 
                                         setIsEditModalOpen(true); 
@@ -13030,16 +13044,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     <p className="mb-3"><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Usuario:</span> <b className="text-slate-800 dark:text-white transition-colors">{successData.email}</b></p>
                     <p><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Contraseña:</span> <b className="text-slate-800 dark:text-white font-mono text-base transition-colors">{successData.password}</b></p>
                   </div>
-                  <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 p-5 rounded-2xl mb-6 shadow-sm transition-colors">
-                    <label className="block text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-3 text-left flex items-center transition-colors"><MessageCircle size={14} className="mr-1.5"/> Enviar accesos por WhatsApp</label>
-                    <div className="flex space-x-2 mb-4">
-                      <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold p-3 rounded-xl flex items-center justify-center border border-transparent dark:border-emerald-500/30 transition-colors">+52</span>
-                      <input type="tel" placeholder="10 dígitos del cliente..." value={clientPhone} onChange={e => setClientPhone(e.target.value)} className="w-full p-3 bg-white dark:bg-[#111] border border-emerald-200 dark:border-emerald-500/30 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-800 dark:text-white transition-colors" />
-                    </div>
-                    <button onClick={handleSendWhatsApp} className="w-full py-4 bg-emerald-500 text-white dark:text-slate-900 rounded-xl font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all active:scale-95 flex items-center justify-center">
-                      <Send size={18} className="mr-2" /> Enviar Mensaje
-                    </button>
-                  </div>
+                
                   <button onClick={() => setIsModalOpen(false)} className="w-full py-4 text-slate-500 dark:text-slate-400 font-bold hover:text-slate-800 dark:hover:text-white transition-colors">Cerrar Ventana</button>
                 </div>
               )}
