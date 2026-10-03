@@ -1339,18 +1339,27 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       linkPersonalizado = `${baseDomain}/${ID_DEL_EVENTO}?u=${parentGuest.id}`;
     }
     
-    let msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nPor favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia*:\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
-    if (passCountEnabled) {
-      msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
+    let msg = '';
+    let nuevoStatus = parentGuest.status;
+
+    if (parentGuest.status === 'nuevo') {
+      const nombreEmpleado = auth.currentUser?.displayName || "tu asesor"; 
+      msg = `¡Hola *${parentGuest.name}*, bienvenidos a Baulia!\n\nSoy ${nombreEmpleado} y seré la persona encargada de apoyarles con su Bóveda. Ya hemos enviado sus credenciales de acceso a su correo electrónico.\n\nPor este medio estaré a sus órdenes para cualquier duda o ayuda que requieran con la configuración de su evento. ¡Estamos muy emocionados de acompañarlos! ✨`;
+      nuevoStatus = 'en_proceso'; 
+    } else {
+      msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nPor favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia*:\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
+      if (passCountEnabled) {
+        msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
+      }
+      nuevoStatus = parentGuest.status === 'por_invitar' ? 'pendiente' : parentGuest.status;
     }
 
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
 
-    const nuevoStatus = parentGuest.status === 'por_invitar' ? 'pendiente' : parentGuest.status;
     const updatedGuest = { ...parentGuest, sent: true, status: nuevoStatus };
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", parentGuest.id), updatedGuest);
     
-    if (addNotification) addNotification('Enviado', `Se abrió WhatsApp para ${parentGuest.name}.`, 'success');
+    if (addNotification) addNotification('Contactado', `Se abrió WhatsApp para ${parentGuest.name} y se actualizó el estatus.`, 'success');
   };
 
   const handleSaveGuest = async (e) => {
@@ -1828,8 +1837,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     
                     <td className="px-4 py-3 text-center">
                       {row.isMain || !qrEnabled ? (
-                        <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'ingreso' ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : row.parentGuest.status === 'confirmado' ? 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-white/10 dark:text-slate-300 dark:border-white/20' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
-                          {row.parentGuest.status === 'ingreso' ? `En el evento` : (row.parentGuest.status ? row.parentGuest.status.replace('_', ' ') : 'Pendiente')}
+                        <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'nuevo' ? 'bg-rose-500 text-white border-rose-600 animate-pulse shadow-md' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-400 text-amber-900 border-amber-500 shadow-md' : row.parentGuest.status === 'ingreso' ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : row.parentGuest.status === 'confirmado' ? 'bg-emerald-500 text-white border-emerald-600 dark:bg-emerald-600 dark:border-emerald-700' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-white/10 dark:text-slate-300 dark:border-white/20' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
+                          {row.parentGuest.status === 'ingreso' ? `En el evento` : row.parentGuest.status === 'nuevo' ? '¡NUEVO!' : (row.parentGuest.status ? row.parentGuest.status.replace('_', ' ') : 'Pendiente')}
                         </span>
                       ) : !row.isMissing ? (
                         <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.entered ? 'bg-emerald-500 text-white shadow-md border-emerald-600 dark:border-emerald-400' : 'bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
@@ -1879,8 +1888,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                       
                       <div className="flex flex-col items-end gap-2.5 shrink-0">
                         {row.isMain || !qrEnabled ? (
-                          <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'confirmado' ? 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' : 'bg-slate-100 text-slate-500'}`}>
-                            {row.parentGuest.status.replace('_', ' ')}
+                          <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'nuevo' ? 'bg-rose-500 text-white border-rose-600 animate-pulse shadow-md' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-400 text-amber-900 border-amber-500 shadow-md' : row.parentGuest.status === 'confirmado' ? 'bg-emerald-500 text-white border-emerald-600 dark:bg-emerald-600 dark:border-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                            {row.parentGuest.status === 'nuevo' ? '¡NUEVO!' : row.parentGuest.status.replace('_', ' ')}
                           </span>
                         ) : null}
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-slate-400 dark:text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-indigo-500 dark:text-amber-500' : ''}`}><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -9329,6 +9338,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [fecha, setFecha] = useState('');
+  const [telefono, setTelefono] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -9365,6 +9375,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
           nombre: nombre,
           email: email,
           fecha: fecha
+          telefono: telefono
         })
       });
 
@@ -9425,6 +9436,10 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Fecha del Evento</label>
               <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium [color-scheme:light] dark:[color-scheme:dark]" />
             </div>
+          </div>
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Teléfono (WhatsApp)</label>
+            <input type="tel" required value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="Ej. 5512345678" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
           </div>
         </div>
 
@@ -12373,7 +12388,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       const isQrChecked = editingLic.isQrEnabled !== false; 
       const isPassChecked = editingLic.isPassCountEnabled !== false;
 
-      await updateDoc(doc(db, "usuarios", editingLic.id), { 
+      // 🔴 FASE 3: Si se pegó la URL y estaba en proceso o nuevo, cambia a activo (Verde)
+      let updateData = { 
         urlInvitacion: safeUrl, 
         plan: editingLic.plan, 
         nombres: safeNombre, 
@@ -12382,7 +12398,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         isPassCountEnabled: isPassChecked,
         fechaEvento: editingLic.fechaEvento || '',
         horaEvento: editingLic.horaEvento || '18:00'
-      });
+      };
+
+      if (safeUrl !== "" && (editingLic.status === 'en_proceso' || editingLic.status === 'nuevo')) {
+          updateData.status = 'activo';
+      }
+
+      await updateDoc(doc(db, "usuarios", editingLic.id), updateData);
 
       try {
         await updateDoc(doc(db, "eventos", editingLic.eventId), {
