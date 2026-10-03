@@ -9374,7 +9374,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
           precio: planSeleccionado.precio,
           nombre: nombre,
           email: email,
-          fecha: fecha
+          fecha: fecha,
           telefono: telefono
         })
       });
