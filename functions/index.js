@@ -2,7 +2,6 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { Resend } = require("resend");
 
-const stripe = require("stripe")("sk_test_51TBrAV3BmYGrtpk6CaPVIyuSxJzcMyGEW8RZ5GwkTAwzLkNM06rijsWSN7NPihF1dvaSiTd6IF7r9SYQZZReRiDp00EYUGqzqO"); 
 const cors = require("cors")({ origin: true });
 const resend = new Resend("re_gs7VfBsA_nXDzjE181fhzFWD2TCCAcwCm");
 
@@ -11,10 +10,12 @@ admin.initializeApp();
 exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     try {
+      const stripe = require("stripe")(process.env.STRIPE_SECRET);
+
       const { paymentMethodId, plan, precio, nombre, email, fecha, telefono } = req.body;
       const cleanEmail = email.trim().toLowerCase();
 
-      const precioLimpio = parseInt(precio.replace(/,/g, ''));
+      const precioLimpio = parseInt(precio.toString().replace(/,/g, ''));
       
       const paymentIntent = await stripe.paymentIntents.create({
         amount: precioLimpio * 100, 
