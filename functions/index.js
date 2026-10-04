@@ -56,7 +56,7 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
         tipoEvento: 'boda', 
         eventId: eventId,
         nombres: nombre,
-        fecha: fecha || '',
+        fechaEvento: fecha || '',
         telefono: telefono || '',
         status: 'nuevo',
         creadoPor: 'Stripe (Web Automático)',
@@ -88,6 +88,26 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
       });
 
       res.status(200).send({ success: true, eventId: eventId, mensaje: "Cobro exitoso" });
+    } catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+});
+exports.enviarCorreoManual = functions.https.onRequest((req, res) => {
+  const cors = require("cors")({ origin: true });
+  cors(req, res, async () => {
+    try {
+      const { email, password, nombre } = req.body;
+      const { Resend } = require("resend");
+      const resend = new Resend("re_gs7VfBsA_nXDzjE181fhzFWD2TCCAcwCm");
+      
+      await resend.emails.send({
+        from: "Baulia <hola@baulia.com>",
+        to: email,
+        subject: "¡Tus accesos de Baulia están listos!",
+        html: `<div style="font-family: sans-serif; text-align: center; padding: 20px;"><h2>¡Bienvenido a Baulia, ${nombre}!</h2><p>Tu asesor ha creado y configurado tu Centro de Operaciones.</p><div style="background-color: #f8fafc; padding: 15px; border-radius: 10px; margin: 20px 0;"><p><b>Usuario:</b> ${email}</p><p><b>Contraseña temporal:</b> ${password}</p></div><p>Inicia sesión en panel.baulia.com</p></div>`
+      });
+      res.status(200).send({ success: true });
     } catch (error) {
       res.status(500).send({ error: error.message });
     }

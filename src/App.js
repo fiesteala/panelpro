@@ -12354,9 +12354,19 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         cliente: formData.nombres
       });
 
+      if (!esClienteRecurrente) {
+          try {
+            await fetch("https://us-central1-panel-de-control-intelig-db278.cloudfunctions.net/enviarCorreoManual", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: newEmail, password: newPassword, nombre: formData.nombres })
+            });
+          } catch(e) { console.error("Error al pedir envío de correo", e); }
+      }
+
       setSuccessData({ email: newEmail, password: newPassword, eventId: newEventId, nombres: formData.nombres, plan: formData.plan, tipoEvento: eventoSeleccionado.label, role: formData.role, urlInvitacion: formData.urlInvitacion, esRecurrente: esClienteRecurrente });
       setClientPhone('');
-      setDialog({ isOpen: true, type: 'alert', title: 'Nueva Licencia Creada', message: `La bóveda para ${formData.nombres} está lista con datos de ejemplo.` });
+      setDialog({ isOpen: true, type: 'alert', title: 'Nueva Licencia Creada', message: `La bóveda para ${formData.nombres} está lista y sus credenciales fueron enviadas a su correo automáticamente.` });
     } catch (error) {
       setDialog({ isOpen: true, type: 'alert', title: 'Error del Sistema', message: `Ocurrió un error al crear la licencia: ${error.message}` });
     }
