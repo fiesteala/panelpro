@@ -1,58 +1,94 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-// Reemplaza 'sk_test_...' por tu Clave Secreta real de Stripe
-const stripe = require("stripe")("sk_test_51UMEr4PWwjjZi7vXtofwjzBd3omGGoCLGHEyeZhTDUcW0uE3HN9adfQ25zY5ZQMlab5n9JbcZlEB4aOJtvp8EzoY00irHu6OF7"); 
+const { Resend } = require("resend");
+
+const stripe = require("stripe")("sk_test_51TBrAV3BmYGrtpk6CaPVIyuSxJzcMyGEW8RZ5GwkTAwzLkNM06rijsWSN7NPihF1dvaSiTd6IF7r9SYQZZReRiDp00EYUGqzqO"); 
+const cors = require("cors")({ origin: true });
+const resend = new Resend("re_gs7VfBsA_nXDzjE181fhzFWD2TCCAcwCm");
 
 admin.initializeApp();
-const db = admin.firestore();
 
-// La llave maestra que me acabas de dar
-const endpointSecret = "whsec_anu7t852lXgGflE932zgxEzaD49ydk8Z";
-
-exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
-  const sig = req.headers["stripe-signature"];
-  let event;
-
-  try {
-    // Verificamos que la notificación es 100% real y viene de Stripe
-    event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
-  } catch (err) {
-    console.error("⚠️ Alerta de seguridad o error:", err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  // Si el pago entró con éxito a tu cuenta de Stripe
-  if (event.type === "payment_intent.succeeded") {
-    const paymentIntent = event.data.object;
-    
-    // Extraemos el correo del cliente que acaba de pagar
-    const emailCliente = paymentIntent.receipt_email || "cliente_nuevo@baulia.com"; 
-
-    // Extraemos los metadatos (donde Stripe debe mandarte fecha y teléfono)
-    const metadatos = paymentIntent.metadata || {};
-    const nombreCliente = metadatos.nombre || "Cliente Nuevo";
-    const fechaEvento = metadatos.fecha || "";
-    const telefonoCliente = metadatos.telefono || "";
-
+exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
     try {
-      // 🔴 MAGIA: Creamos su bóveda automáticamente en tu base de datos
-      await db.collection("usuarios").add({
-        email: emailCliente.toLowerCase(),
-        role: "admin",
-        plan: "Oro", // Asignamos un plan base
-        eventId: "evento-" + Math.floor(Math.random() * 100000),
-        nombres: nombreCliente,
-        fecha: fechaEvento,
-        telefono: telefonoCliente,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        status: "nuevo" // 🔴 FASE 1: Nace en rojo
-      });
-      console.log("✅ Bóveda creada con éxito para:", emailCliente);
-    } catch (error) {
-      console.error("❌ Error creando la cuenta:", error);
-    }
-  }
+      const { paymentMethodId, plan, precio, nombre, email, fecha, telefono } = req.body;
+      const cleanEmail = email.trim().toLowerCase();
 
-  // Le decimos a Stripe que recibimos el pago y procesamos la entrega
-  res.json({ received: true });
+      const precioLimpio = parseInt(precio.replace(/,/g, ''));
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: precioLimpio * 100, 
+        currency: "mxn",
+        payment_method: paymentMethodId,
+        confirm: true,
+        automatic_payment_methods: { enabled: true, allow_redirects: 'never' }
+      });
+
+      const slug = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      const eventId = slug + '-' + Math.random().toString(36).slice(-4);
+
+      let passwordTemporal = Math.random().toString(36).slice(-8) + "Baulia!";
+      let esRecurrente = false;
+
+      try {
+        await admin.auth().createUser({ email: cleanEmail, password: passwordTemporal, displayName: nombre });
+      } catch (authError) {
+        if (authError.code === 'auth/email-already-exists' || authError.code === 'auth/email-already-in-use') {
+          esRecurrente = true;
+          passwordTemporal = "Tu contraseña actual de Baulia";
+        } else throw authError;
+      }
+
+      let planLimpio = 'oro';
+      if (plan.toLowerCase().includes('diamante')) planLimpio = 'diamante';
+      if (plan.toLowerCase().includes('plata') || plan.toLowerCase().includes('firma')) planLimpio = 'plata';
+      if (plan.toLowerCase().includes('basico') || plan.toLowerCase().includes('esencial')) planLimpio = 'basico';
+      if (plan.toLowerCase().includes('social_wall')) planLimpio = 'social_wall'; 
+      if (plan.toLowerCase().includes('security_kit')) planLimpio = 'security_kit'; 
+
+      const roleAsignado = plan.toLowerCase().includes('planner') ? 'planner' : 'cliente';
+
+      await admin.firestore().collection("usuarios").doc(eventId).set({
+        email: cleanEmail,
+        role: roleAsignado,
+        plan: planLimpio,
+        tipoEvento: 'boda', 
+        eventId: eventId,
+        nombres: nombre,
+        fecha: fecha || '',
+        telefono: telefono || '',
+        status: 'nuevo',
+        creadoPor: 'Stripe (Web Automático)',
+        referenciaPago: `Stripe: ${paymentIntent.id}`,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        isQrEnabled: planLimpio !== 'social_wall', 
+        isPassCountEnabled: planLimpio !== 'social_wall'
+      });
+
+      await admin.firestore().collection("eventos").doc(eventId).set({
+        presupuestoTotal: 150000,
+        nombres: nombre,
+        fecha: fecha || '',
+        plan: planLimpio,
+        tipoEvento: 'boda',
+        isQrEnabled: planLimpio !== 'social_wall',
+        isPassCountEnabled: planLimpio !== 'social_wall'
+      });
+
+      const mesAnioActual = new Date().toISOString().slice(0, 7);
+      await admin.firestore().collection("ventas").doc(eventId).set({
+        fecha: admin.firestore.FieldValue.serverTimestamp(),
+        mesAnio: mesAnioActual,
+        monto: precioLimpio,
+        plan: planLimpio,
+        vendedor: 'Stripe (Web Automático)',
+        referencia: `Stripe: ${paymentIntent.id}`,
+        cliente: nombre
+      });
+
+      res.status(200).send({ success: true, eventId: eventId, mensaje: "Cobro exitoso" });
+    } catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+  });
 });

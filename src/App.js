@@ -1339,27 +1339,18 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       linkPersonalizado = `${baseDomain}/${ID_DEL_EVENTO}?u=${parentGuest.id}`;
     }
     
-    let msg = '';
-    let nuevoStatus = parentGuest.status;
-
-    if (parentGuest.status === 'nuevo') {
-      const nombreEmpleado = auth.currentUser?.displayName || "tu asesor"; 
-      msg = `¡Hola *${parentGuest.name}*, bienvenidos a Baulia!\n\nSoy ${nombreEmpleado} y seré la persona encargada de apoyarles con su Bóveda. Ya hemos enviado sus credenciales de acceso a su correo electrónico.\n\nPor este medio estaré a sus órdenes para cualquier duda o ayuda que requieran con la configuración de su evento. ¡Estamos muy emocionados de acompañarlos! ✨`;
-      nuevoStatus = 'en_proceso'; 
-    } else {
-      msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nPor favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia*:\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
-      if (passCountEnabled) {
-        msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
-      }
-      nuevoStatus = parentGuest.status === 'por_invitar' ? 'pendiente' : parentGuest.status;
+    let msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nPor favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia*:\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
+    if (passCountEnabled) {
+      msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
     }
 
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
 
+    const nuevoStatus = parentGuest.status === 'por_invitar' ? 'pendiente' : parentGuest.status;
     const updatedGuest = { ...parentGuest, sent: true, status: nuevoStatus };
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", parentGuest.id), updatedGuest);
     
-    if (addNotification) addNotification('Contactado', `Se abrió WhatsApp para ${parentGuest.name} y se actualizó el estatus.`, 'success');
+    if (addNotification) addNotification('Enviado', `Se abrió WhatsApp para ${parentGuest.name}.`, 'success');
   };
 
   const handleSaveGuest = async (e) => {
@@ -12332,12 +12323,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
       await setDoc(doc(db, "usuarios", newEventId), { 
         email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, 
-        nombres: formData.nombres, status: 'activo', urlInvitacion: formData.urlInvitacion, creadoPor: authData.email, 
+        nombres: formData.nombres, status: 'nuevo', urlInvitacion: formData.urlInvitacion, creadoPor: authData.email, 
         referenciaPago: formData.referenciaPago, createdAt: serverTimestamp(),
         isQrEnabled: formData.isQrEnabled, 
         isPassCountEnabled: formData.isPassCountEnabled,
         fechaEvento: formData.fechaEvento, 
-        horaEvento: formData.horaEvento
+        horaEvento: formData.horaEvento,
+        telefono: formData.telefono
       });
 
       await setDoc(doc(db, "eventos", newEventId), { 
@@ -12814,7 +12806,11 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                   <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">Pendiente de subir</span>
                                 )}
                               </td>
-                              <td className="px-5 py-4 text-center"><div className={`w-2.5 h-2.5 rounded-full mx-auto ${estaSuspendido ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} title={estaSuspendido ? 'Suspendido' : 'Activo'}></div></td>
+                              <td className="px-5 py-4 text-center">
+                                <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border shadow-sm ${lic.status === 'nuevo' ? 'bg-rose-500 text-white border-rose-600 animate-pulse' : lic.status === 'en_proceso' ? 'bg-amber-400 text-amber-900 border-amber-500' : lic.status === 'activo' ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-slate-200 text-slate-600 border-slate-300'}`}>
+                                  {lic.status === 'nuevo' ? '¡NUEVO!' : lic.status ? lic.status.replace('_', ' ') : 'Pendiente'}
+                                </span>
+                              </td>
                               <td className="px-5 py-4 text-right">
                                   <div className="flex items-center justify-end space-x-2">
                                     <button onClick={() => contactarCliente(lic)} title="Contactar por WhatsApp" className="p-2 rounded-lg text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-transparent dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors">
@@ -12973,6 +12969,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     <div>
                       <label className="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Mail size={12} className="mr-1.5" /> Correo de Acceso</label>
                       <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-800 dark:text-white text-sm transition-colors" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Phone size={12} className="mr-1.5" /> Teléfono (WhatsApp)</label>
+                      <input type="tel" required value={formData.telefono} onChange={e => setFormData({...formData, telefono: e.target.value})} placeholder="10 dígitos del cliente..." className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-800 dark:text-white text-sm transition-colors" />
                     </div>
                     
                     <div>
