@@ -9441,7 +9441,16 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
              
              <div className="relative z-10">
                {/* Aquí está el PaymentElement que dibuja las pestañas */}
-               <PaymentElement options={{ layout: "tabs" }} />
+               <PaymentElement 
+                options={{ 
+                  layout: "tabs",
+                  fields: {
+                    billingDetails: {
+                      address: 'never' // 🟢 ESTO ELIMINA EL CAMPO "PAÍS" PARA QUE EL BOTÓN QUEPA PERFECTO
+                    }
+                  }
+                }} 
+              />
              </div>
            </div>
            {errorTexto && <p className="text-rose-500 text-xs mt-3 ml-1 font-bold">{errorTexto}</p>}
@@ -10570,14 +10579,15 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   
                   <div className="p-6 overflow-y-auto flex-1 custom-scrollbar bg-slate-50 dark:bg-transparent">
                     <Elements 
-                      stripe={stripePromise}
-                      options={{
-                        mode: 'payment',
-                        amount: planSeleccionado ? parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100 : 1000,
-                        currency: 'mxn',
-                        appearance: { theme: 'night', variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171' } }
-                      }}
-                    >
+                        stripe={stripePromise}
+                        options={{
+                          mode: 'payment',
+                          paymentMethodTypes: ['card', 'oxxo', 'customer_balance'], // 🟢 ESTO FUERZA LAS PESTAÑAS
+                          amount: planSeleccionado ? parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100 : 1000,
+                          currency: 'mxn',
+                          appearance: { theme: 'night', variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171' } }
+                        }}
+                      >
                       <CheckoutForm 
                         planSeleccionado={planSeleccionado} 
                         onSuccess={handlePaymentSuccess} 
@@ -14277,7 +14287,8 @@ const ShowcaseSimulatorView = () => {
                     stripe={stripePromise}
                     options={{
                       mode: 'payment',
-                      amount: parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100,
+                      paymentMethodTypes: ['card', 'oxxo', 'customer_balance'], // 🟢 ESTO FUERZA LAS PESTAÑAS
+                      amount: planSeleccionado ? parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100 : 1000,
                       currency: 'mxn',
                       appearance: { theme: 'night', variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171' } }
                     }}
