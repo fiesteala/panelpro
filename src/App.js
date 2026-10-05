@@ -22,6 +22,7 @@ import {
 import GestorPulserasView from './views/GestorPulserasView';
 import MonitorRecepcionView from './views/MonitorRecepcionView';
 import CatalogoMuestrasView from './views/CatalogoMuestrasView';
+import GestorPreciosView from './views/GestorPreciosView';
 
 // 🔴 CONEXIÓN A STRIPE (Reemplaza con tu clave Publicable de Stripe)
 const stripePromise = loadStripe('pk_test_51UMEr4PWwjjZi7vXKyrFJvN8p0C5ogOczmQCubvEkcJvlDKHAtOvGWEUc0DALOLGVRn7X9jgtprdA5RF2WyIBA1m00SHD58u7y');
@@ -12665,6 +12666,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                 <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
                   <Star size={16}/> Reseñas
                 </button>
+                <button onClick={() => setAdminTab('precios')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'precios' ? 'bg-rose-500 text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
+                  <DollarSign size={16}/> Precios
+                </button>
               </>
             )}
           </div>
@@ -13026,6 +13030,12 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           </div>
         )}
 
+        {/* 🔴 NUEVA VISTA: PRECIOS Y PROMOS */}
+        {adminTab === 'precios' && isSuperAdmin && (
+          <div className="animate-in fade-in transition-colors mt-6">
+            <GestorPreciosView />
+          </div>
+        )}
         {/* MODAL CREAR LICENCIA */}
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
@@ -14005,6 +14015,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
 
     switch(activeTab) {
       case 'licencias': return isSuperAdminMode && typeof SuperAdminView !== 'undefined' ? <SuperAdminView onImpersonate={(cliente) => { setImpersonating(cliente); setActiveTab('dashboard'); }} authData={authData} /> : null;
+      case 'precios': return isSuperAdminMode && typeof GestorPreciosView !== 'undefined' ? <GestorPreciosView /> : null;
       case 'dashboard': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof DashboardView !== 'undefined' ? <DashboardView authData={authData} guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null;      
       
       case 'invitados': 
