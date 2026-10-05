@@ -14322,7 +14322,6 @@ const ShowcaseSimulatorView = () => {
                     stripe={stripePromise}
                     options={{
                       mode: 'payment',
-                      paymentMethodTypes: ['card', 'oxxo', 'customer_balance'],
                       amount: planSeleccionado ? parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100 : 1000,
                       currency: 'mxn',
                       appearance: { 
