@@ -10382,8 +10382,18 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [planSeleccionado, setPlanSeleccionado] = useState(null);
   const [moneda, setMoneda] = useState('MXN');
 
-  // 🔴 1. ESTADO DE LA BASE DE DATOS
-  const [preciosDB, setPreciosDB] = useState(null);
+  // 🔴 1. ESTADO DE LA BASE DE DATOS (Con precios de respaldo)
+  const [preciosDB, setPreciosDB] = useState({
+    promocion: { activa: false, porcentaje: 50, productos: {} },
+    preciosBase: {
+      basico: { MXN: 990, USD: 59 },
+      plata: { MXN: 1490, USD: 79 },
+      oro: { MXN: 1990, USD: 99 },
+      diamante: { MXN: 2990, USD: 159 },
+      social_wall: { MXN: 1490, USD: 79 },
+      black_label: { MXN: 1490, USD: 79 }
+    }
+  });
 
   // 🔴 2. ESCUCHADOR EN TIEMPO REAL AL PANEL
   useEffect(() => {
