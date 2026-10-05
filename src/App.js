@@ -24,7 +24,7 @@ import MonitorRecepcionView from './views/MonitorRecepcionView';
 import CatalogoMuestrasView from './views/CatalogoMuestrasView';
 
 // 🔴 CONEXIÓN A STRIPE (Reemplaza con tu clave Publicable de Stripe)
-const stripePromise = loadStripe('pk_test_51TBrAV3BmYGrtpk6QnQvZhounbmZAF7Ea107Fh734agWXri2z9N91BpgFKWeqBfiBq3ePLbFoTro0Z2fC0Qs5lnA00vL7mha3m');
+const stripePromise = loadStripe('pk_test_51UMEr4PWwjjZi7vXKyrFJvN8p0C5ogOczmQCubvEkcJvlDKHAtOvGWEUc0DALOLGVRn7X9jgtprdA5RF2WyIBA1m00SHD58u7y');
 
 // Función Helper para Exportar a CSV
 const exportToCSV = (filename, rows) => {

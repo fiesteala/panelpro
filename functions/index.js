@@ -335,7 +335,7 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 });
 
 // ==============================================================
-// 🔴 GENERADOR DE INTENTOS DE PAGO (Para React)
+// 🔴 GENERADOR DE INTENTOS DE PAGO (100% Automático)
 // ==============================================================
 exports.crearIntentoAsincrono = functions.https.onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
@@ -350,26 +350,33 @@ exports.crearIntentoAsincrono = functions.https.onRequest(async (req, res) => {
     const { precio, plan, nombre, email, fecha, telefono, pais } = req.body;
     const precioLimpio = parseInt(precio.toString().replace(/,/g, ''));
 
-    // 🔴 1. EL PASE VIP: Registramos al cliente en Stripe para que suelte OXXO y SPEI
     let customerId;
     const clientesExistentes = await stripe.customers.list({ email: email, limit: 1 });
     
     if (clientesExistentes.data.length > 0) {
       customerId = clientesExistentes.data[0].id;
     } else {
-      const nuevoCliente = await stripe.customers.create({ name: nombre, email: email, phone: telefono });
+      const nuevoCliente = await stripe.customers.create({ 
+        name: nombre, 
+        email: email, 
+        phone: telefono,
+        // CLAVE: Asignar el país desde la creación del cliente
+        address: { country: 'MX' } 
+      });
       customerId = nuevoCliente.id;
     }
 
-    // 🔴 2. PAGO 100% AUTOMÁTICO (Stripe decidirá mostrar OXXO al ver que hay un Cliente)
     const paymentIntent = await stripe.paymentIntents.create({
       amount: precioLimpio * 100,
       currency: "mxn",
-      customer: customerId, // Le pasamos el cliente que creamos arriba
+      customer: customerId,
       automatic_payment_methods: { enabled: true },
-      // Configuración que exige Stripe para que las transferencias SPEI funcionen
+      // Dejamos esto para que SPEI funcione sin problema
       payment_method_options: {
-        customer_balance: { funding_type: 'bank_transfer', bank_transfer: { type: 'mx_bank_transfer' } }
+        customer_balance: {
+          funding_type: 'bank_transfer',
+          bank_transfer: { type: 'mx_bank_transfer' }
+        }
       },
       metadata: { plan, nombre, email, fecha, telefono, pais }
     });
