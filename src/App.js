@@ -9355,7 +9355,6 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // Mapeamos el nombre comercial al ID interno del plan si es necesario
           plan: planSeleccionado.plan === 'Black Label' ? 'security_kit' : 
                 planSeleccionado.plan === 'Social Wall' ? 'social_wall' : 
                 planSeleccionado.plan.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""), 
@@ -9374,21 +9373,14 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         throw new Error(data.error || "No se pudo generar la autorización del servidor.");
       }
 
-      // 3. Confirmamos el pago (Tarjeta, Oxxo o SPEI) con la autorización
+      // 3. Confirmamos el pago (Tarjeta, Oxxo o SPEI) con la autorización limpia
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         clientSecret,
         confirmParams: {
           return_url: `${window.location.origin}/`, 
           payment_method_data: { 
-            billing_details: { 
-              name: nombre, 
-              email: email, 
-              phone: telefonoCompleto,
-              // 🔴 AQUÍ ESTÁ LA SOLUCIÓN DEFINITIVA AL ERROR: 
-              // Le mandamos a Stripe y a OXXO el país de forma invisible
-              address: { country: 'MX' } 
-            } 
+            billing_details: { name: nombre, email: email, phone: telefonoCompleto } 
           }
         },
         redirect: 'if_required' 
@@ -9398,7 +9390,6 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         setErrorTexto(error.message);
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
         if (window.fbq) {
-          // Limpiamos las comas del precio (ej. "1,990" -> "1990") para que Facebook lo entienda
           const precioLimpio = planSeleccionado.precio.toString().replace(/,/g, '');
           window.fbq('track', 'Purchase', {
             value: Number(precioLimpio),
@@ -9417,7 +9408,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full animate-in fade-in duration-500">
-      <div className="space-y-6 mb-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+      <div className="space-y-6 mb-6 flex-1 pr-2">
         
         {/* Resumen de compra VIP */}
         <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 to-white dark:from-amber-500/10 dark:to-[#111] border border-amber-200 dark:border-amber-500/30 rounded-2xl p-6 shadow-sm shrink-0">
@@ -9434,26 +9425,26 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
            </div>
         </div>
 
-        {/* Formulario de Datos (Adaptativo Día/Noche) */}
+        {/* Formulario de Datos */}
         <div className="space-y-4 shrink-0">
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Nombre de los Festejados</label>
-            <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Carlos & María" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
+            <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Carlos & María" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Correo Electrónico</label>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
             </div>
             <div>
               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Fecha del Evento</label>
-              <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium [color-scheme:light] dark:[color-scheme:dark]" />
+              <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium [color-scheme:light] dark:[color-scheme:dark]" />
             </div>
           </div>
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Teléfono (WhatsApp)</label>
             <div className="flex gap-2">
-              <select value={lada} onChange={(e) => setLada(e.target.value)} className="w-24 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-2 py-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm font-bold text-center appearance-none cursor-pointer">
+              <select value={lada} onChange={(e) => setLada(e.target.value)} className="w-24 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-2 py-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm font-bold text-center appearance-none cursor-pointer">
                 <option value="+52">🇲🇽 +52</option>
                 <option value="+1">🇺🇸 +1</option>
                 <option value="+34">🇪🇸 +34</option>
@@ -9462,24 +9453,22 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
                 <option value="+56">🇨🇱 +56</option>
                 <option value="+51">🇵🇪 +51</option>
               </select>
-              <input type="tel" required value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="Ej. 5512345678" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
+              <input type="tel" required value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="Ej. 5512345678" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
             </div>
           </div>
         </div>
 
-        {/* NUEVO: Módulo Universal de Pago (Tarjeta, Oxxo, SPEI) */}
+        {/* Módulo Universal de Pago Libre */}
         <div className="mt-8 shrink-0 pb-4">
            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1 flex items-center"><Lock size={12} className="mr-1.5 text-emerald-500"/> Información Bancaria Segura</label>
            
-           <div className="relative p-5 bg-slate-900 dark:bg-[#050505] border border-slate-800 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden group min-h-[250px]">
+           <div className="relative p-5 bg-slate-900 dark:bg-[#050505] border border-slate-800 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden group min-h-[300px]">
              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
              
              <div className="relative z-10">
-               <PaymentElement options={{ 
-                 layout: "tabs",
-                 fields: { billingDetails: { address: 'never' } }
-               }}/>
+               {/* 🟢 Le quitamos todos los candados de espacio para que Stripe cobre como debe */}
+               <PaymentElement options={{ layout: "tabs" }}/>
              </div>
            </div>
            {errorTexto && <p className="text-rose-500 text-xs mt-3 ml-1 flex items-center font-bold bg-rose-50 dark:bg-rose-500/10 p-2 rounded-lg border border-rose-200 dark:border-rose-500/20"><AlertCircle size={14} className="mr-1.5 flex-shrink-0"/> {errorTexto}</p>}
@@ -10482,166 +10471,174 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </a>
       )}
 
-      {/* 🔴 MODAL CHECKOUT CENTRALIZADO */}
-      {checkoutModal && (
+      {/* 🔴 MODAL 1: SELECTOR DE NIVELES (El catálogo original) */}
+      {checkoutModal === 'selector' && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className={`bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full ${checkoutModal === 'selector' ? 'max-w-4xl' : 'max-w-md'} overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 flex flex-col max-h-[90vh] transition-all duration-300`}>
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-4xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 flex flex-col max-h-[90vh] transition-all duration-300">
             
-            {checkoutModal === 'selector' ? (
-              <div className="p-8 flex flex-col h-full">
-                <div className="flex justify-between items-center mb-6 shrink-0">
-                  <div>
-                    <h3 className="font-editorial text-3xl font-bold text-slate-900 dark:text-white mb-1">Selecciona tu Nivel</h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-xs">Elige la bóveda o el servicio independiente que necesites.</p>
-                  </div>
-                  <button onClick={() => setCheckoutModal(null)} className="p-2 text-slate-400 hover:text-rose-500 bg-slate-100 dark:bg-white/5 rounded-full transition-colors"><X size={20}/></button>
+            <div className="p-8 flex flex-col h-full">
+              <div className="flex justify-between items-center mb-6 shrink-0">
+                <div>
+                  <h3 className="font-editorial text-3xl font-bold text-slate-900 dark:text-white mb-1">Selecciona tu Nivel</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">Elige la bóveda o el servicio independiente que necesites.</p>
                 </div>
+                <button onClick={() => setCheckoutModal(null)} className="p-2 text-slate-400 hover:text-rose-500 bg-slate-100 dark:bg-white/5 rounded-full transition-colors"><X size={20}/></button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[70vh] custom-scrollbar pr-2 pb-4">
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[70vh] custom-scrollbar pr-2 pb-4">
+                {/* COLUMNA 1: PLANES COMPLETOS */}
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5 pb-2 mb-4">Ecosistema Completo (SaaS)</h4>
+                  {planes.map(plan => (
+                    <button 
+                      key={plan.id}
+                      onClick={() => { setPlanSeleccionado({ plan: plan.nombre, precio: plan.precio }); setCheckoutModal('pago'); }}
+                      className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 group relative overflow-hidden ${plan.popular ? 'border-amber-500/50 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/10' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] hover:border-indigo-300 dark:hover:border-white/30 hover:bg-slate-100 dark:hover:bg-white/5'}`}
+                    >
+                      {plan.popular && <div className="absolute top-0 right-0 bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg">El Estándar</div>}
+                      
+                      {/* ETIQUETA DIAMANTE PODEROSA */}
+                      {plan.id === 'diamante' && <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg flex items-center"><Gem size={10} className="mr-1"/> Suite Todo Incluido</div>}
+
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-inner ${plan.popular ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500' : plan.id === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white'}`}>
+                          {plan.icon}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-0.5">{plan.nombre}</h4>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">{plan.desc}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">${plan.precioOriginal}</p>
+                          <p className="font-black text-xl text-slate-900 dark:text-white">${plan.precio}</p>
+                          <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">MXN</p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* COLUMNA 2: PRODUCTOS INDEPENDIENTES */}
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5 pb-2 mb-4">Experiencias y Complementos</h4>
                   
-                  {/* COLUMNA 1: PLANES COMPLETOS */}
-                  <div className="space-y-4">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5 pb-2 mb-4">Ecosistema Completo (SaaS)</h4>
-                    {planes.map(plan => (
-                      <button 
-                        key={plan.id}
-                        onClick={() => { setPlanSeleccionado({ plan: plan.nombre, precio: plan.precio }); setCheckoutModal('pago'); }}
-                        className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 group relative overflow-hidden ${plan.popular ? 'border-amber-500/50 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/10' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] hover:border-indigo-300 dark:hover:border-white/30 hover:bg-slate-100 dark:hover:bg-white/5'}`}
-                      >
-                        {plan.popular && <div className="absolute top-0 right-0 bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg">El Estándar</div>}
-                        
-                        {/* ETIQUETA DIAMANTE PODEROSA */}
-                        {plan.id === 'diamante' && <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg flex items-center"><Gem size={10} className="mr-1"/> Suite Todo Incluido</div>}
-
-                        <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-inner ${plan.popular ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500' : plan.id === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white'}`}>
-                            {plan.icon}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-0.5">{plan.nombre}</h4>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">{plan.desc}</p>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">${plan.precioOriginal}</p>
-                            <p className="font-black text-xl text-slate-900 dark:text-white">${plan.precio}</p>
-                            <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">MXN</p>
-                          </div>
+                  {/* SOCIAL WALL CARD */}
+                  <button 
+                    onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: '1490.00' }); setCheckoutModal('pago'); }}
+                    className="w-full text-left p-6 rounded-3xl border-2 border-indigo-500/30 dark:border-indigo-500/50 bg-indigo-50 dark:bg-[#111] hover:bg-indigo-100 dark:hover:bg-[#151515] hover:border-indigo-500 transition-all duration-300 group relative overflow-hidden"
+                  >
+                    <div className="absolute -right-6 -top-6 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-indigo-500/40 transition-colors"></div>
+                    <div className="flex flex-col gap-4 relative z-10">
+                      <div className="flex justify-between items-start">
+                        <div className="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                          <Camera size={28} />
                         </div>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* COLUMNA 2: PRODUCTOS INDEPENDIENTES */}
-                  <div className="space-y-4">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5 pb-2 mb-4">Experiencias y Complementos</h4>
-                    
-                    {/* SOCIAL WALL CARD */}
-                    <button 
-                      onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: '1490.00' }); setCheckoutModal('pago'); }}
-                      className="w-full text-left p-6 rounded-3xl border-2 border-indigo-500/30 dark:border-indigo-500/50 bg-indigo-50 dark:bg-[#111] hover:bg-indigo-100 dark:hover:bg-[#151515] hover:border-indigo-500 transition-all duration-300 group relative overflow-hidden"
-                    >
-                      <div className="absolute -right-6 -top-6 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-indigo-500/40 transition-colors"></div>
-                      <div className="flex flex-col gap-4 relative z-10">
-                        <div className="flex justify-between items-start">
-                          <div className="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                            <Camera size={28} />
-                          </div>
-                          <div className="text-right">
-                            <span className="bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">MÁS VENDIDO</span>
-                            <p className="font-black text-3xl text-slate-900 dark:text-white leading-none">$1,490</p>
-                            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">MXN / Pago Único</p>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-editorial font-bold text-2xl text-slate-900 dark:text-white mb-2">Baulia Social Wall</h4>
-                          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-                            Convierte las pantallas de tu salón en una <b>experiencia inmersiva en vivo</b> donde las fotos de tus invitados vuelan directamente al proyector.
-                          </p>
-                          <div className="bg-white/50 dark:bg-black/30 border border-indigo-200 dark:border-indigo-500/20 p-2 rounded-lg text-[9px] font-bold text-indigo-700 dark:text-indigo-400 flex items-center">
-                             <Gem size={12} className="mr-1.5"/> INCLUIDO SIN COSTO EN PLAN DIAMANTE
-                          </div>
+                        <div className="text-right">
+                          <span className="bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">MÁS VENDIDO</span>
+                          <p className="font-black text-3xl text-slate-900 dark:text-white leading-none">$1,490</p>
+                          <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">MXN / Pago Único</p>
                         </div>
                       </div>
-                    </button>
-
-                    {/* BLACK LABEL CARD */}
-                    <button 
-                      onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: '1490.00' }); setCheckoutModal('pago'); }}
-                      className="w-full text-left p-6 rounded-3xl border-2 border-[#1a1a1a] dark:border-white/10 bg-[#050505] hover:border-amber-500/50 transition-all duration-300 group relative overflow-hidden"
-                    >
-                      <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-amber-500/40 transition-colors"></div>
-                      <div className="flex flex-col gap-4 relative z-10">
-                        <div className="flex justify-between items-start">
-                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-600 to-yellow-400 text-slate-900 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.5)] group-hover:scale-110 transition-transform">
-                            <Lock size={28} />
-                          </div>
-                          <div className="text-right">
-                            <span className="bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">VIP / PARA IMPRIMIR</span>
-                            <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">$1,490</p>
-                            <p className="font-black text-3xl text-white leading-none">$745</p>
-                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">MXN / Pago Único</p>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-editorial font-bold text-2xl text-white mb-2">Baulia Black Label</h4>
-                          <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                            El lujo del control físico. Gestor de producción para brazaletes VIP y <b>Monitor en Tiempo Real</b> de la puerta para el anfitrión.
-                          </p>
-                          <div className="bg-amber-500/10 border border-amber-500/20 p-2 rounded-lg text-[9px] font-bold text-amber-500 flex items-center">
-                             <Gem size={12} className="mr-1.5"/> INCLUIDO SIN COSTO EN PLAN DIAMANTE
-                          </div>
+                      
+                      <div>
+                        <h4 className="font-editorial font-bold text-2xl text-slate-900 dark:text-white mb-2">Baulia Social Wall</h4>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                          Convierte las pantallas de tu salón en una <b>experiencia inmersiva en vivo</b> donde las fotos de tus invitados vuelan directamente al proyector.
+                        </p>
+                        <div className="bg-white/50 dark:bg-black/30 border border-indigo-200 dark:border-indigo-500/20 p-2 rounded-lg text-[9px] font-bold text-indigo-700 dark:text-indigo-400 flex items-center">
+                           <Gem size={12} className="mr-1.5"/> INCLUIDO SIN COSTO EN PLAN DIAMANTE
                         </div>
                       </div>
-                    </button>
+                    </div>
+                  </button>
 
-                  </div>
+                  {/* BLACK LABEL CARD */}
+                  <button 
+                    onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: '1490.00' }); setCheckoutModal('pago'); }}
+                    className="w-full text-left p-6 rounded-3xl border-2 border-[#1a1a1a] dark:border-white/10 bg-[#050505] hover:border-amber-500/50 transition-all duration-300 group relative overflow-hidden"
+                  >
+                    <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-amber-500/40 transition-colors"></div>
+                    <div className="flex flex-col gap-4 relative z-10">
+                      <div className="flex justify-between items-start">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-600 to-yellow-400 text-slate-900 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.5)] group-hover:scale-110 transition-transform">
+                          <Lock size={28} />
+                        </div>
+                        <div className="text-right">
+                          <span className="bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">VIP / PARA IMPRIMIR</span>
+                          <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">$1,490</p>
+                          <p className="font-black text-3xl text-white leading-none">$745</p>
+                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">MXN / Pago Único</p>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-editorial font-bold text-2xl text-white mb-2">Baulia Black Label</h4>
+                        <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                          El lujo del control físico. Gestor de producción para brazaletes VIP y <b>Monitor en Tiempo Real</b> de la puerta para el anfitrión.
+                        </p>
+                        <div className="bg-amber-500/10 border border-amber-500/20 p-2 rounded-lg text-[9px] font-bold text-amber-500 flex items-center">
+                           <Gem size={12} className="mr-1.5"/> INCLUIDO SIN COSTO EN PLAN DIAMANTE
+                        </div>
+                      </div>
+                    </div>
+                  </button>
 
                 </div>
               </div>
-            ) : (
-              <>
-                {/* COLUMNA DERECHA: Pasarela Fija */}
-                <div className="w-full lg:w-96 flex flex-col shrink-0 h-[85vh] max-h-[800px] border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-white/5 relative z-10 transition-colors">
-                  <div className="p-5 border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex items-center justify-between shrink-0 transition-colors">
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-amber-500 mb-0.5">Pasarela Segura</p>
-                      <h3 className="text-sm font-bold text-slate-800 dark:text-white flex items-center"><ShieldCheck size={16} className="mr-1.5 text-emerald-500"/> Pago Protegido</h3>
-                    </div>
-                  </div>
-                  
-                  <div className="p-6 overflow-y-auto flex-1 custom-scrollbar bg-slate-50 dark:bg-transparent">
-                    <Elements 
-                      stripe={stripePromise}
-                      options={{
-                        mode: 'payment',
-                        paymentMethodTypes: ['card', 'oxxo', 'customer_balance'],
-                        amount: planSeleccionado ? parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100 : 1000,
-                        currency: 'mxn',
-                        appearance: { 
-                          theme: 'night', 
-                          variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171' },
-                          rules: {
-                            '.Tab': { padding: '8px', fontSize: '11px' },
-                            '.TabLabel': { fontWeight: 'bold' }
-                          }
-                        }
-                      }}
-                    >
-                      <CheckoutForm 
-                        planSeleccionado={planSeleccionado} 
-                        onSuccess={handlePaymentSuccess} 
-                        onCancel={() => setCheckoutModal('selector')} 
-                      />
-                    </Elements>
-                  </div>
-                </div>
-              </>
-            )}
+            </div>
           </div>
         </div>
       )}
+
+      {/* 🔴 MODAL 2: PANTALLA COMPLETA DE PAGO (APPLE / NETFLIX STYLE) */}
+      {checkoutModal === 'pago' && planSeleccionado && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex justify-center items-start sm:items-center overflow-y-auto custom-scrollbar">
+          <div className="w-full max-w-3xl bg-white dark:bg-[#0a0a0a] min-h-screen sm:min-h-0 sm:h-auto sm:max-h-[95vh] sm:rounded-[2rem] shadow-2xl flex flex-col border border-transparent dark:border-white/10 my-0 sm:my-8 animate-in slide-in-from-bottom-10 duration-500 overflow-hidden">
+            
+            {/* Barra superior del Modal */}
+            <div className="p-5 md:p-6 border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex items-center justify-between shrink-0">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-amber-500 mb-0.5">Checkout Oficial</p>
+                <h3 className="text-lg md:text-xl font-editorial font-bold text-slate-800 dark:text-white flex items-center"><ShieldCheck size={20} className="mr-2 text-emerald-500"/> Baulia Secure Pay</h3>
+              </div>
+              <button onClick={() => setCheckoutModal('selector')} className="p-2 md:p-3 bg-white dark:bg-white/10 rounded-full hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-500/20 dark:hover:text-rose-400 transition-colors text-slate-500 shadow-sm border border-slate-200 dark:border-transparent">
+                <X size={20}/>
+              </button>
+            </div>
+            
+            {/* Contenedor espacioso con Scroll Libre */}
+            <div className="p-6 md:p-10 overflow-y-auto flex-1 custom-scrollbar relative">
+              <Elements 
+                stripe={stripePromise}
+                options={{
+                  mode: 'payment',
+                  paymentMethodTypes: ['card', 'oxxo', 'customer_balance'],
+                  amount: parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100,
+                  currency: 'mxn',
+                  appearance: { 
+                    theme: 'night', 
+                    variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171', fontFamily: '"Montserrat", sans-serif' },
+                    rules: {
+                      '.Tab': { padding: '12px', fontSize: '14px' },
+                      '.TabLabel': { fontWeight: 'bold' }
+                    }
+                  }
+                }}
+              >
+                <CheckoutForm 
+                  planSeleccionado={planSeleccionado} 
+                  onSuccess={handlePaymentSuccess} 
+                  onCancel={() => setCheckoutModal('selector')} 
+                />
+              </Elements>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
 
       {/* 🔴 MODAL ÉXITO PAGO */}
       {checkoutSuccess && (
