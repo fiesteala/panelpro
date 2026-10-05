@@ -10393,29 +10393,43 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     return () => unsub();
   }, []);
 
-  // 🔴 3. CALCULADORA DE DESCUENTOS AUTOMÁTICA
-  const calcularPrecio = (productoId) => {
-    if (!preciosDB) return { final: '...', original: null, tienePromo: false, raw: 0 };
+  // 🔴 3. CONSTRUCTOR DE PRECIOS COMPATIBLE CON TU CHECKOUT
+  const obtenerPrecio = (productoId) => {
+    if (!preciosDB) return { precios: { MXN: '...', USD: '...' }, preciosOriginales: { MXN: null, USD: null }, raw: { MXN: 0, USD: 0 } };
     
-    const precioBase = preciosDB.preciosBase[productoId][moneda];
-    const promoActiva = preciosDB.promocion.activa && preciosDB.promocion.productos[productoId];
-
-    if (promoActiva) {
-      const descuento = Math.round(precioBase * (preciosDB.promocion.porcentaje / 100));
-      const precioFinal = precioBase - descuento;
-      return {
-        final: precioFinal.toLocaleString('en-US'),
-        original: precioBase.toLocaleString('en-US'),
-        tienePromo: true,
-        raw: precioFinal
-      };
-    }
-    return { final: precioBase.toLocaleString('en-US'), original: null, tienePromo: false, raw: precioBase };
+    const res = { precios: {}, preciosOriginales: {}, raw: {} };
+    ['MXN', 'USD'].forEach(m => {
+      const base = preciosDB.preciosBase[productoId]?.[m] || 0;
+      const promoActiva = preciosDB.promocion.activa && preciosDB.promocion.productos[productoId];
+      if (promoActiva) {
+        const desc = Math.round(base * (preciosDB.promocion.porcentaje / 100));
+        res.precios[m] = (base - desc).toLocaleString('en-US');
+        res.preciosOriginales[m] = base.toLocaleString('en-US');
+        res.raw[m] = base - desc;
+      } else {
+        res.precios[m] = base.toLocaleString('en-US');
+        res.preciosOriginales[m] = null;
+        res.raw[m] = base;
+      }
+    });
+    return res;
   };
 
-  // Pre-calculamos complementos para uso general
-  const pSocialWall = calcularPrecio('social_wall');
-  const pBlackLabel = calcularPrecio('black_label');
+  // 🔴 4. RESTAURAMOS TU ARREGLO "planes" EXACTO PARA QUE EL CHECKOUT NO FALLE
+  const planes = [
+    { id: 'basico', nombre: 'Básico', ...obtenerPrecio('basico'), desc: 'La elegancia indispensable para anunciar tu evento.', icon: <Smartphone size={24}/>, f: ['Invitación interactiva', 'Confirmación Simple (RSVP)', 'Cuenta regresiva Adaptativas', 'Logística GPS'] },
+    { id: 'plata', nombre: 'Plata', ...obtenerPrecio('plata'), desc: 'Recupera tu inversión con regalos en efectivo.', icon: <Wallet size={24}/>, f: ['Todo lo del Básico', 'Mesa de Regalos / Efectivo', 'Itinerario y Dress Code', 'Agregar a Calendario'] },
+    { id: 'oro', nombre: 'Oro', ...obtenerPrecio('oro'), desc: 'Cero colados. Seguridad y control absoluto.', icon: <ShieldCheck size={24}/>, popular: true, d2: true, f: ['Todo lo del Plata', 'RSVP Blindado (Pases)', 'App Escáner para Hostess', 'Bóveda Financiera (Gastos)'] },
+    { id: 'diamante', nombre: 'Diamante', ...obtenerPrecio('diamante'), desc: 'La suite definitiva. Control espacial, pantallas y pulseras.', icon: <Gem size={24}/>, d1: true, f: ['Todo lo del Oro', 'Acomodo de mesas virtual 2D', 'Baulia Social Wall (Proyección)', 'Baulia Black Label (Pulseras VIP)'] }
+  ];
+
+  const pSocialWall = obtenerPrecio('social_wall');
+  const pBlackLabel = obtenerPrecio('black_label');
+
+  // 👇 DE AQUÍ PARA ABAJO, TODO SE QUEDA EXACTAMENTE IGUAL 👇
+  useEffect(() => {
+    setActiveDevice('iphone');
+  }, [activeCategory]);
 
   useEffect(() => {
     setActiveDevice('iphone');
@@ -11890,13 +11904,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
         {/* TARJETAS DE PLANES (Solo SaaS) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start mb-20 relative z-10">
-          {[
-            { id: 'basico', nombre: 'Básico', desc: 'La elegancia indispensable para anunciar tu evento.', f: ['Invitación interactiva', 'Confirmación Simple (RSVP)', 'Cuenta regresiva Adaptativas', 'Logística GPS'] },
-            { id: 'plata', nombre: 'Plata', desc: 'Recupera tu inversión con regalos en efectivo.', f: ['Todo lo del Básico', 'Mesa de Regalos / Efectivo', 'Itinerario y Dress Code', 'Agregar a Calendario'] },
-            { id: 'oro', nombre: 'Oro', desc: 'Cero colados. Seguridad y control absoluto.', d2: true, f: ['Todo lo del Plata', 'RSVP Blindado (Pases)', 'App Escáner para Hostess', 'Bóveda Financiera (Gastos)'] },
-            { id: 'diamante', nombre: 'Diamante', desc: 'La suite definitiva. Control espacial, pantallas y pulseras.', d1: true, f: ['Todo lo del Oro', 'Acomodo de mesas virtual 2D', 'Baulia Social Wall (Proyección)', 'Baulia Black Label (Pulseras VIP)'] }
-          ].map((plan, idx) => {
-            const precio = calcularPrecio(plan.id);
+          {planes.map((plan, idx) => {
+            const tienePromo = plan.preciosOriginales[moneda] !== null;
             
             return (
             <RevealSection key={idx} delay={idx * 100} className={`relative flex-1 ${plan.d2 ? 'lg:-translate-y-4' : ''}`}>
@@ -11912,10 +11921,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                      <h3 className="text-2xl font-editorial font-bold text-slate-900 dark:text-white mb-2 transition-colors">{plan.nombre}</h3>
                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium leading-relaxed transition-colors">{plan.desc}</p>
                      
-                     {/* 🔴 EL PRECIO DINÁMICO LEÍDO DESDE FIREBASE */}
+                     {/* 🔴 EL PRECIO DINÁMICO LEÍDO DESDE LA NUBE */}
                      <div className="text-4xl font-light text-slate-900 dark:text-white mb-8 relative flex items-baseline transition-colors">
-                        {precio.tienePromo && <span className="text-xl text-rose-500 line-through font-bold mr-3">${precio.original}</span>}
-                        <span className="font-editorial text-transparent bg-clip-text bg-gradient-to-tr from-slate-900 to-slate-700 dark:from-white dark:to-slate-100">${precio.final}</span> 
+                        {tienePromo && <span className="text-xl text-rose-500 line-through font-bold mr-3">${plan.preciosOriginales[moneda]}</span>}
+                        <span className="font-editorial text-transparent bg-clip-text bg-gradient-to-tr from-slate-900 to-slate-700 dark:from-white dark:to-slate-100">${plan.precios[moneda]}</span> 
                         <span className="text-sm text-slate-400 font-normal ml-2">{moneda}</span>
                      </div>
 
@@ -11926,7 +11935,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                      </ul>
                   </div>
                   
-                  <button onClick={() => { setPlanSeleccionado({ plan: plan.nombre, precio: precio.raw, moneda: moneda }); setCheckoutModal('pago'); }} className={`w-full py-4 rounded-full ${plan.d2 ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white' : plan.d1 ? 'bg-indigo-600 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'} font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-lg mt-auto relative z-10`}>
+                  <button onClick={() => { setPlanSeleccionado({ plan: plan.nombre, precio: plan.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} className={`w-full py-4 rounded-full ${plan.d2 ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white' : plan.d1 ? 'bg-indigo-600 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'} font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-lg mt-auto relative z-10`}>
                      Reservar mi Bóveda {plan.nombre}
                   </button>
                </div>
