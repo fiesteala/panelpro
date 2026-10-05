@@ -9319,62 +9319,38 @@ const GuestProyectorView = ({ eventId }) => {
 // ==========================================
 // --- COMPONENTE: FORMULARIO DE PAGO STRIPE (DISEÑO ALTA COSTURA) ---
 // ==========================================
-const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
+const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel, clientSecret }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [errorTexto, setErrorTexto] = useState(null);
 
-  // Datos del cliente
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [fecha, setFecha] = useState('');
+  const [lada, setLada] = useState('+52');
+  const [telefono, setTelefono] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!stripe || !elements) return;
+    setLoading(true); setErrorTexto(null);
 
-    setLoading(true);
-    setErrorTexto(null);
+    const telefonoCompleto = `${lada} ${telefono}`;
 
-    // 1. Validamos que los datos estén bien escritos
     const { error: submitError } = await elements.submit();
     if (submitError) {
       setErrorTexto(submitError.message);
-      setLoading(false);
-      return;
+      setLoading(false); return;
     }
 
     try {
-      // 2. Pedimos el permiso a tu servidor para cobrar
-      const respuesta = await fetch("https://us-central1-panel-de-control-intelig-db278.cloudfunctions.net/crearIntentoAsincrono", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          plan: planSeleccionado.plan === 'Black Label' ? 'security_kit' : 
-                planSeleccionado.plan === 'Social Wall' ? 'social_wall' : 
-                planSeleccionado.plan.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""), 
-          precio: planSeleccionado.precio,
-          nombre: nombre,
-          email: email,
-          fecha: fecha
-        })
-      });
-      
-      const data = await respuesta.json();
-      const clientSecret = data.clientSecret;
-
-      if (!clientSecret) {
-        throw new Error("No se pudo generar el cobro.");
-      }
-
-      // 3. Confirmamos el pago (Tarjeta, Oxxo o SPEI)
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         clientSecret,
         confirmParams: {
           return_url: `${window.location.origin}/`, 
-          payment_method_data: { billing_details: { name: nombre, email: email } }
+          payment_method_data: { billing_details: { name: nombre, email, phone: telefonoCompleto } }
         },
         redirect: 'if_required' 
       });
@@ -9382,14 +9358,11 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
       if (error) {
         setErrorTexto(error.message);
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-        if (window.fbq) {
-          const precioLimpio = planSeleccionado.precio.toString().replace(/,/g, '');
-          window.fbq('track', 'Purchase', { value: Number(precioLimpio), currency: 'MXN', content_name: `Plan ${planSeleccionado.plan}` });
-        }
+        if (window.fbq) window.fbq('track', 'Purchase', { value: Number(planSeleccionado.precio.replace(/,/g, '')), currency: 'MXN' });
         onSuccess({ success: true }, planSeleccionado);
       }
     } catch (err) {
-      setErrorTexto("Fallo de comunicación con la base de Baulia.");
+      setErrorTexto("Ocurrió un error al procesar el pago.");
     }
     setLoading(false);
   };
@@ -9397,9 +9370,8 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full animate-in fade-in duration-500">
       <div className="space-y-6 mb-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-        
-        {/* Resumen de compra VIP */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 to-white dark:from-amber-500/10 dark:to-[#111] border border-amber-200 dark:border-amber-500/30 rounded-2xl p-6 shadow-sm">
+        {/* Resumen */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 to-white dark:from-amber-500/10 dark:to-[#111] border border-amber-200 dark:border-amber-500/30 rounded-2xl p-6 shadow-sm shrink-0">
            <div className="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/20 blur-2xl rounded-full pointer-events-none"></div>
            <div className="flex justify-between items-center relative z-10">
              <div>
@@ -9413,53 +9385,58 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
            </div>
         </div>
 
-        {/* Formulario de Datos */}
-        <div className="space-y-4">
+        {/* Datos del Cliente */}
+        <div className="space-y-4 shrink-0">
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Nombre de los Festejados</label>
-            <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Carlos & María" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium" />
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Festejados</label>
+            <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium" placeholder="Ej. Carlos & María" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Correo Electrónico</label>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium" />
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Correo</label>
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium" placeholder="tu@correo.com" />
             </div>
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Fecha del Evento</label>
-              <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium [color-scheme:light] dark:[color-scheme:dark]" />
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Fecha Evento</label>
+              <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium [color-scheme:light] dark:[color-scheme:dark]" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">WhatsApp</label>
+            <div className="flex gap-2">
+              <select value={lada} onChange={(e) => setLada(e.target.value)} className="w-24 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-2 py-3 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-bold text-center appearance-none cursor-pointer">
+                <option value="+52">🇲🇽 +52</option>
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+34">🇪🇸 +34</option>
+                <option value="+57">🇨🇴 +57</option>
+                <option value="+54">🇦🇷 +54</option>
+                <option value="+56">🇨🇱 +56</option>
+                <option value="+51">🇵🇪 +51</option>
+              </select>
+              <input type="tel" required value={telefono} onChange={(e) => setTelefono(e.target.value)} className="flex-1 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium" placeholder="10 dígitos" />
             </div>
           </div>
         </div>
 
-        {/* MÓDULO UNIVERSAL STRIPE (Tarjeta, Oxxo, SPEI) */}
-        <div className="mt-8">
-           <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1 flex items-center">Información Bancaria Segura</label>
-           
-           <div className="relative p-5 bg-slate-900 dark:bg-[#050505] border border-slate-800 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden group">
+        {/* MÓDULO UNIVERSAL STRIPE */}
+        <div className="mt-6 shrink-0 pb-4">
+           <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1 flex items-center">Pago Seguro</label>
+           <div className="relative p-4 bg-slate-900 dark:bg-[#050505] border border-slate-800 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden group min-h-[250px]">
              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
-             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
-             
              <div className="relative z-10">
-               {/* Aquí está el PaymentElement que dibuja las pestañas */}
-               <PaymentElement 
-                options={{ 
-                  layout: "tabs",
-                  fields: {
-                    billingDetails: {
-                      address: 'never' // 🟢 ESTO ELIMINA EL CAMPO "PAÍS" PARA QUE EL BOTÓN QUEPA PERFECTO
-                    }
-                  }
-                }} 
-              />
+               <PaymentElement options={{ 
+                 layout: "tabs",
+                 fields: { billingDetails: { address: 'never' } } // Oculta el país para ahorrar espacio
+               }}/>
              </div>
            </div>
            {errorTexto && <p className="text-rose-500 text-xs mt-3 ml-1 font-bold">{errorTexto}</p>}
         </div>
       </div>
 
-      <div className="pt-5 border-t border-slate-100 dark:border-white/5 mt-auto shrink-0">
-        <button type="submit" disabled={!stripe || loading} className="w-full py-4 sm:py-5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-black rounded-xl text-xs sm:text-sm uppercase tracking-widest shadow-[0_10px_25px_rgba(245,158,11,0.4)] transition-all flex justify-center items-center">
-          {loading ? <span>Cifrando Transacción...</span> : <span>Pagar ${planSeleccionado.precio} MXN</span>}
+      <div className="pt-4 border-t border-slate-100 dark:border-white/5 mt-auto shrink-0 bg-white dark:bg-[#0a0a0a]">
+        <button type="submit" disabled={!stripe || !elements || loading} className="w-full py-4 sm:py-5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-black rounded-xl text-xs sm:text-sm uppercase tracking-widest shadow-[0_10px_25px_rgba(245,158,11,0.4)] transition-all flex justify-center items-center">
+          {loading ? <span>Procesando...</span> : <span>Pagar ${planSeleccionado.precio} MXN</span>}
         </button>
       </div>
     </form>
@@ -10569,7 +10546,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             ) : (
               <>
                 {/* COLUMNA DERECHA: Pasarela Fija */}
-                <div className="w-full lg:w-96 flex flex-col shrink-0 h-[600px] lg:h-auto border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-white/5 relative z-10 transition-colors">
+                <div className="w-full lg:w-96 flex flex-col shrink-0 h-[85vh] max-h-[800px] border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-white/5 relative z-10 transition-colors">
                   <div className="p-5 border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex items-center justify-between shrink-0 transition-colors">
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-amber-500 mb-0.5">Pasarela Segura</p>
@@ -10579,15 +10556,22 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   
                   <div className="p-6 overflow-y-auto flex-1 custom-scrollbar bg-slate-50 dark:bg-transparent">
                     <Elements 
-                        stripe={stripePromise}
-                        options={{
-                          mode: 'payment',
-                          paymentMethodTypes: ['card', 'oxxo', 'customer_balance'], // 🟢 ESTO FUERZA LAS PESTAÑAS
-                          amount: planSeleccionado ? parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100 : 1000,
-                          currency: 'mxn',
-                          appearance: { theme: 'night', variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171' } }
-                        }}
-                      >
+                      stripe={stripePromise}
+                      options={{
+                        mode: 'payment',
+                        paymentMethodTypes: ['card', 'oxxo', 'customer_balance'],
+                        amount: planSeleccionado ? parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100 : 1000,
+                        currency: 'mxn',
+                        appearance: { 
+                          theme: 'night', 
+                          variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171' },
+                          rules: {
+                            '.Tab': { padding: '8px', fontSize: '11px' },
+                            '.TabLabel': { fontWeight: 'bold' }
+                          }
+                        }
+                      }}
+                    >
                       <CheckoutForm 
                         planSeleccionado={planSeleccionado} 
                         onSuccess={handlePaymentSuccess} 
@@ -14287,10 +14271,17 @@ const ShowcaseSimulatorView = () => {
                     stripe={stripePromise}
                     options={{
                       mode: 'payment',
-                      paymentMethodTypes: ['card', 'oxxo', 'customer_balance'], // 🟢 ESTO FUERZA LAS PESTAÑAS
+                      paymentMethodTypes: ['card', 'oxxo', 'customer_balance'],
                       amount: planSeleccionado ? parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100 : 1000,
                       currency: 'mxn',
-                      appearance: { theme: 'night', variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171' } }
+                      appearance: { 
+                        theme: 'night', 
+                        variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171' },
+                        rules: {
+                          '.Tab': { padding: '8px', fontSize: '11px' },
+                          '.TabLabel': { fontWeight: 'bold' }
+                        }
+                      }
                     }}
                   >
                     <CheckoutForm 
