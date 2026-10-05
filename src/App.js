@@ -9492,21 +9492,40 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         </form>
       ) : (
         <div className="mt-2 flex-1">
-          <Elements stripe={stripePromise} options={{ 
-            clientSecret, 
-            appearance: { 
-              theme: 'night', 
-              variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171', fontFamily: '"Montserrat", sans-serif' },
-              rules: { '.Tab': { padding: '12px', fontSize: '14px' }, '.TabLabel': { fontWeight: 'bold' } }
-            } 
-          }}>
-            <StripeCaja 
-              planSeleccionado={planSeleccionado} 
-              datosCliente={{ nombre, email, telefono: `${lada} ${telefono}`, pais }} 
-              onSuccess={onSuccess} 
-              onVolver={() => setClientSecret(null)} 
-            />
-          </Elements>
+          {/* 1. Detectamos el modo oscuro dinámicamente */}
+          {(() => {
+            const esModoOscuro = document.documentElement.classList.contains('dark') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            
+            return (
+              <Elements stripe={stripePromise} options={{ 
+                clientSecret, 
+                appearance: { 
+                  // Cambiamos entre 'night' y 'stripe' (el tema claro oficial)
+                  theme: esModoOscuro ? 'night' : 'stripe', 
+                  variables: { 
+                    colorPrimary: '#fbbf24', 
+                    // Alternamos el color de fondo
+                    colorBackground: esModoOscuro ? '#050505' : '#ffffff', 
+                    // Alternamos el color del texto
+                    colorText: esModoOscuro ? '#ffffff' : '#0f172a', 
+                    colorDanger: '#f87171', 
+                    fontFamily: '"Montserrat", sans-serif' 
+                  },
+                  rules: { 
+                    '.Tab': { padding: '12px', fontSize: '14px' }, 
+                    '.TabLabel': { fontWeight: 'bold' } 
+                  }
+                } 
+              }}>
+                <StripeCaja 
+                  planSeleccionado={planSeleccionado} 
+                  datosCliente={{ nombre, email, telefono: `${lada} ${telefono}`, pais }} 
+                  onSuccess={onSuccess} 
+                  onVolver={() => setClientSecret(null)} 
+                />
+              </Elements>
+            );
+          })()}
         </div>
       )}
     </div>

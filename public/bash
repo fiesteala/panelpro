@@ -1,3 +1,3 @@
 git add .
-git commit -m "oxxo spei"
+git commit -m "modo oscuro solucionado stripe"
 git push origin main

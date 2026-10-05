@@ -249,9 +249,13 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 
     // Solo procesamos si el pago trae datos de Baulia
     if (metadatos && metadatos.email && metadatos.nombre) {
-      const { plan, precio, nombre, email, fecha, telefono } = metadatos;
+      
+      // 🔴 1. Quitamos 'precio' de esta lista porque no viene en la metadata
+      const { plan, nombre, email, fecha, telefono } = metadatos; 
       const cleanEmail = email.trim().toLowerCase();
-      const precioLimpio = parseInt(precio.toString().replace(/,/g, ''));
+      
+      // 🔴 2. SOLUCIÓN: Tomamos el precio exacto directamente del cobro real de Stripe
+      const precioLimpio = paymentIntent.amount / 100;
       
       const slug = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
       const eventId = slug + '-' + Math.random().toString(36).slice(-4);
