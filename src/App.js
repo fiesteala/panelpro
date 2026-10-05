@@ -10621,7 +10621,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   
                   {/* SOCIAL WALL CARD */}
                   <button 
-                    onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: moneda === 'MXN' ? '1490' : '79', moneda: moneda }); setCheckoutModal('pago'); }}
+                    onClick={() => { setPlanSeleccionado({ plan: 'Muro Social', precio: pSocialWall.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }}
                     className="w-full text-left p-6 rounded-3xl border-2 border-indigo-500/30 dark:border-indigo-500/50 bg-indigo-50 dark:bg-[#111] hover:bg-indigo-100 dark:hover:bg-[#151515] hover:border-indigo-500 transition-all duration-300 group relative overflow-hidden"
                   >
                     <div className="absolute -right-6 -top-6 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-indigo-500/40 transition-colors"></div>
@@ -10632,7 +10632,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
                         <div className="text-right">
                           <span className="bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">MÁS VENDIDO</span>
-                          <p className="font-black text-3xl text-slate-900 dark:text-white leading-none">${moneda === 'MXN' ? '1,490' : '79'}</p>
+                          {pSocialWall.preciosOriginales[moneda] !== null && <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">${pSocialWall.preciosOriginales[moneda]}</p>}
+                          <p className="font-black text-3xl text-slate-900 dark:text-white leading-none">${pSocialWall.precios[moneda]}</p>
                           <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">{moneda} / Pago Único</p>
                         </div>
                       </div>
@@ -10651,7 +10652,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
                   {/* BLACK LABEL CARD */}
                   <button 
-                    onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: moneda === 'MXN' ? '745' : '39', moneda: moneda }); setCheckoutModal('pago'); }}
+                    onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: pBlackLabel.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }}
                     className="w-full text-left p-6 rounded-3xl border-2 border-[#1a1a1a] dark:border-white/10 bg-[#050505] hover:border-amber-500/50 transition-all duration-300 group relative overflow-hidden"
                   >
                     <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-amber-500/40 transition-colors"></div>
@@ -10662,8 +10663,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
                         <div className="text-right">
                           <span className="bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">VIP / PARA IMPRIMIR</span>
-                          <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">${moneda === 'MXN' ? '1,490' : '79'}</p>
-                          <p className="font-black text-3xl text-white leading-none">${moneda === 'MXN' ? '745' : '39'}</p>
+                          {pBlackLabel.preciosOriginales[moneda] !== null && <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">${pBlackLabel.preciosOriginales[moneda]}</p>}
+                          <p className="font-black text-3xl text-white leading-none">${pBlackLabel.precios[moneda]}</p>
                           <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{moneda} / Pago Único</p>
                         </div>
                       </div>
