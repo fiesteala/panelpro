@@ -10393,29 +10393,37 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     return () => unsub();
   }, []);
 
-  // 🔴 3. CONSTRUCTOR DE PRECIOS COMPATIBLE CON TU CHECKOUT
+  // 🔴 3. CONSTRUCTOR DE PRECIOS BLINDADO (Evita pantalla azul)
   const obtenerPrecio = (productoId) => {
-    if (!preciosDB) return { precios: { MXN: '...', USD: '...' }, preciosOriginales: { MXN: null, USD: null }, raw: { MXN: 0, USD: 0 } };
+    // Si Firebase aún no carga, devolvemos valores seguros
+    if (!preciosDB || !preciosDB.preciosBase) {
+      return { precios: { MXN: '...', USD: '...' }, preciosOriginales: { MXN: null, USD: null }, raw: { MXN: '0', USD: '0' } };
+    }
     
     const res = { precios: {}, preciosOriginales: {}, raw: {} };
     ['MXN', 'USD'].forEach(m => {
-      const base = preciosDB.preciosBase[productoId]?.[m] || 0;
-      const promoActiva = preciosDB.promocion.activa && preciosDB.promocion.productos[productoId];
+      const base = Number(preciosDB.preciosBase[productoId]?.[m]) || 0;
+      const promoActiva = preciosDB.promocion?.activa && preciosDB.promocion?.productos?.[productoId];
+      
       if (promoActiva) {
-        const desc = Math.round(base * (preciosDB.promocion.porcentaje / 100));
-        res.precios[m] = (base - desc).toLocaleString('en-US');
+        const porcentaje = Number(preciosDB.promocion?.porcentaje) || 0;
+        const desc = Math.round(base * (porcentaje / 100));
+        const final = base - desc;
+        res.precios[m] = final.toLocaleString('en-US');
         res.preciosOriginales[m] = base.toLocaleString('en-US');
-        res.raw[m] = base - desc;
+        // 🔴 Convertimos a TEXTO (.toString) para que el Checkout no crashee
+        res.raw[m] = final.toString(); 
       } else {
         res.precios[m] = base.toLocaleString('en-US');
         res.preciosOriginales[m] = null;
-        res.raw[m] = base;
+        // 🔴 Convertimos a TEXTO (.toString) para que el Checkout no crashee
+        res.raw[m] = base.toString(); 
       }
     });
     return res;
   };
 
-  // 🔴 4. RESTAURAMOS TU ARREGLO "planes" EXACTO PARA QUE EL CHECKOUT NO FALLE
+  // 🔴 4. RESTAURAMOS TU ARREGLO "planes" EXACTO PARA QUE LOS BOTONES FUNCIONEN
   const planes = [
     { id: 'basico', nombre: 'Básico', ...obtenerPrecio('basico'), desc: 'La elegancia indispensable para anunciar tu evento.', icon: <Smartphone size={24}/>, f: ['Invitación interactiva', 'Confirmación Simple (RSVP)', 'Cuenta regresiva Adaptativas', 'Logística GPS'] },
     { id: 'plata', nombre: 'Plata', ...obtenerPrecio('plata'), desc: 'Recupera tu inversión con regalos en efectivo.', icon: <Wallet size={24}/>, f: ['Todo lo del Básico', 'Mesa de Regalos / Efectivo', 'Itinerario y Dress Code', 'Agregar a Calendario'] },
