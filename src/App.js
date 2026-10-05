@@ -10377,6 +10377,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const iphoneIframeRef = useRef(null);
   const [activeDevice, setActiveDevice] = useState('iphone'); 
   const [planSeleccionado, setPlanSeleccionado] = useState(null);
+  const [moneda, setMoneda] = useState('MXN');
 
   useEffect(() => {
     setActiveDevice('iphone');
@@ -10420,10 +10421,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   }, []);
 
   const planes = [
-    { id: 'basico', nombre: 'Básico', precio: '495', precioOriginal: '990', desc: 'Invitación, RSVP simple y GPS.', icon: <Smartphone size={24}/> },
-    { id: 'plata', nombre: 'Plata', precio: '745', precioOriginal: '1,490', desc: 'Suma Mesa de Regalos e Itinerario.', icon: <Wallet size={24}/> },
-    { id: 'oro', nombre: 'Oro', precio: '995', precioOriginal: '1,990', desc: 'Panel Maestro, Control QR y Mesas.', icon: <ShieldCheck size={24}/>, popular: true },
-    { id: 'diamante', nombre: 'Diamante', precio: '1,495', precioOriginal: '2,990', desc: 'La Suite Definitiva. Incluye Muro Social y Black Label.', icon: <Gem size={24}/> }
+    { id: 'basico', nombre: 'Básico', precios: { MXN: '495', USD: '29' }, preciosOriginales: { MXN: '990', USD: '59' }, desc: 'Invitación, RSVP simple y GPS.', icon: <Smartphone size={24}/> },
+    { id: 'plata', nombre: 'Plata', precios: { MXN: '745', USD: '39' }, preciosOriginales: { MXN: '1,490', USD: '79' }, desc: 'Suma Mesa de Regalos e Itinerario.', icon: <Wallet size={24}/> },
+    { id: 'oro', nombre: 'Oro', precios: { MXN: '995', USD: '49' }, preciosOriginales: { MXN: '1,990', USD: '99' }, desc: 'Panel Maestro, Control QR y Mesas.', icon: <ShieldCheck size={24}/>, popular: true },
+    { id: 'diamante', nombre: 'Diamante', precios: { MXN: '1,495', USD: '79' }, preciosOriginales: { MXN: '2,990', USD: '159' }, desc: 'La Suite Definitiva. Incluye Muro Social y Black Label.', icon: <Gem size={24}/> }
   ];
 
   // 🔴 DEMOS CON ADN VISUAL (blob1 y blob2)
@@ -10527,6 +10528,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   <h3 className="font-editorial text-3xl font-bold text-slate-900 dark:text-white mb-1">Selecciona tu Nivel</h3>
                   <p className="text-slate-500 dark:text-slate-400 text-xs">Elige la bóveda o el servicio independiente que necesites.</p>
                 </div>
+                
+                {/* 🔴 NUEVO: SELECTOR DE MONEDA EN EL MODAL */}
+                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 p-1.5 rounded-full border border-slate-200 dark:border-white/10 ml-4 mr-2">
+                  <button onClick={() => setMoneda('MXN')} className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${moneda === 'MXN' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>MXN</button>
+                  <button onClick={() => setMoneda('USD')} className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${moneda === 'USD' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>USD</button>
+                </div>
+
                 <button onClick={() => setCheckoutModal(null)} className="p-2 text-slate-400 hover:text-rose-500 bg-slate-100 dark:bg-white/5 rounded-full transition-colors"><X size={20}/></button>
               </div>
               
@@ -10538,12 +10546,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   {planes.map(plan => (
                     <button 
                       key={plan.id}
-                      onClick={() => { setPlanSeleccionado({ plan: plan.nombre, precio: plan.precio }); setCheckoutModal('pago'); }}
+                      onClick={() => { setPlanSeleccionado({ plan: plan.nombre, precio: plan.precios[moneda], moneda: moneda }); setCheckoutModal('pago'); }}
                       className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 group relative overflow-hidden ${plan.popular ? 'border-amber-500/50 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/10' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] hover:border-indigo-300 dark:hover:border-white/30 hover:bg-slate-100 dark:hover:bg-white/5'}`}
                     >
                       {plan.popular && <div className="absolute top-0 right-0 bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg">El Estándar</div>}
-                      
-                      {/* ETIQUETA DIAMANTE PODEROSA */}
                       {plan.id === 'diamante' && <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg flex items-center"><Gem size={10} className="mr-1"/> Suite Todo Incluido</div>}
 
                       <div className="flex items-center gap-4">
@@ -10555,9 +10561,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                           <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">{plan.desc}</p>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">${plan.precioOriginal}</p>
-                          <p className="font-black text-xl text-slate-900 dark:text-white">${plan.precio}</p>
-                          <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">MXN</p>
+                          <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">${plan.preciosOriginales[moneda]}</p>
+                          <p className="font-black text-xl text-slate-900 dark:text-white">${plan.precios[moneda]}</p>
+                          <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">{moneda}</p>
                         </div>
                       </div>
                     </button>
@@ -10570,7 +10576,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   
                   {/* SOCIAL WALL CARD */}
                   <button 
-                    onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: '1490.00' }); setCheckoutModal('pago'); }}
+                    onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: moneda === 'MXN' ? '1490' : '79', moneda: moneda }); setCheckoutModal('pago'); }}
                     className="w-full text-left p-6 rounded-3xl border-2 border-indigo-500/30 dark:border-indigo-500/50 bg-indigo-50 dark:bg-[#111] hover:bg-indigo-100 dark:hover:bg-[#151515] hover:border-indigo-500 transition-all duration-300 group relative overflow-hidden"
                   >
                     <div className="absolute -right-6 -top-6 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-indigo-500/40 transition-colors"></div>
@@ -10581,8 +10587,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
                         <div className="text-right">
                           <span className="bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">MÁS VENDIDO</span>
-                          <p className="font-black text-3xl text-slate-900 dark:text-white leading-none">$1,490</p>
-                          <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">MXN / Pago Único</p>
+                          <p className="font-black text-3xl text-slate-900 dark:text-white leading-none">${moneda === 'MXN' ? '1,490' : '79'}</p>
+                          <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">{moneda} / Pago Único</p>
                         </div>
                       </div>
                       
@@ -10600,7 +10606,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
                   {/* BLACK LABEL CARD */}
                   <button 
-                    onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: '1490.00' }); setCheckoutModal('pago'); }}
+                    onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: moneda === 'MXN' ? '745' : '39', moneda: moneda }); setCheckoutModal('pago'); }}
                     className="w-full text-left p-6 rounded-3xl border-2 border-[#1a1a1a] dark:border-white/10 bg-[#050505] hover:border-amber-500/50 transition-all duration-300 group relative overflow-hidden"
                   >
                     <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-amber-500/40 transition-colors"></div>
@@ -10611,9 +10617,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </div>
                         <div className="text-right">
                           <span className="bg-amber-500 text-slate-900 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm mb-2 inline-block">VIP / PARA IMPRIMIR</span>
-                          <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">$1,490</p>
-                          <p className="font-black text-3xl text-white leading-none">$745</p>
-                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">MXN / Pago Único</p>
+                          <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">${moneda === 'MXN' ? '1,490' : '79'}</p>
+                          <p className="font-black text-3xl text-white leading-none">${moneda === 'MXN' ? '745' : '39'}</p>
+                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{moneda} / Pago Único</p>
                         </div>
                       </div>
                       
@@ -11830,22 +11836,34 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-sm md:text-base transition-colors mb-8 font-light leading-relaxed">
             Compara la anatomía de cada bóveda de software. Cero mensualidades, un solo pago único y control absoluto hasta el último baile. Solo aceptamos 50 eventos al mes para garantizar la excelencia concierge.
           </p>
+          
+          {/* 🔴 NUEVO: INTERRUPTOR DE MONEDA ESTÉTICO */}
+          <div className="flex justify-center items-center gap-4 relative z-10 mt-8">
+             <span className={`text-xs font-black uppercase tracking-widest transition-colors ${moneda === 'MXN' ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>🇲🇽 MXN</span>
+             <button 
+                onClick={() => setMoneda(m => m === 'MXN' ? 'USD' : 'MXN')} 
+                className="w-16 h-8 bg-slate-200 dark:bg-white/10 rounded-full relative transition-colors border border-slate-300 dark:border-white/20 flex items-center shadow-inner"
+             >
+                <div className={`absolute w-6 h-6 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 shadow-md transition-all duration-300 ${moneda === 'USD' ? 'left-[34px]' : 'left-1'}`}></div>
+             </button>
+             <span className={`text-xs font-black uppercase tracking-widest transition-colors ${moneda === 'USD' ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>🇺🇸 USD</span>
+          </div>
         </RevealSection>
 
         {/* TARJETAS DE PLANES (Solo SaaS) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start mb-20 relative z-10">
           {[
-            { n: 'Básico', p: '495', pAnt: '990', d: 'La elegancia indispensable para anunciar tu evento.', f: ['Invitación interactiva', 'Confirmación Simple (RSVP)', 'Cuenta regresiva Adaptativas', 'Logística GPS'] },
-            { n: 'Plata', p: '745', pAnt: '1,490', d: 'Recupera tu inversión con regalos en efectivo.', f: ['Todo lo del Básico', 'Mesa de Regalos / Efectivo', 'Itinerario y Dress Code', 'Agregar a Calendario'] },
-            { n: 'Oro', p: '995', pAnt: '1,990', d: 'Cero colados. Seguridad y control absoluto.', f: ['Todo lo del Plata', 'RSVP Blindado (Pases)', 'App Escáner para Hostess', 'Bóveda Financiera (Gastos)'], d2: true },
-            { n: 'Diamante', p: '1,495', pAnt: '2,990', d: 'La suite definitiva. Control espacial, pantallas y pulseras.', f: ['Todo lo del Oro', 'Acomodo de mesas virtual 2D', 'Baulia Social Wall (Proyección)', 'Baulia Black Label (Pulseras VIP)'], d1: true }
+            { n: 'Básico', precios: { MXN: '495', USD: '29' }, pAnt: { MXN: '990', USD: '59' }, d: 'La elegancia indispensable para anunciar tu evento.', f: ['Invitación interactiva', 'Confirmación Simple (RSVP)', 'Cuenta regresiva Adaptativas', 'Logística GPS'] },
+            { n: 'Plata', precios: { MXN: '745', USD: '39' }, pAnt: { MXN: '1,490', USD: '79' }, d: 'Recupera tu inversión con regalos en efectivo.', f: ['Todo lo del Básico', 'Mesa de Regalos / Efectivo', 'Itinerario y Dress Code', 'Agregar a Calendario'] },
+            { n: 'Oro', precios: { MXN: '995', USD: '49' }, pAnt: { MXN: '1,990', USD: '99' }, d: 'Cero colados. Seguridad y control absoluto.', f: ['Todo lo del Plata', 'RSVP Blindado (Pases)', 'App Escáner para Hostess', 'Bóveda Financiera (Gastos)'], d2: true },
+            { n: 'Diamante', precios: { MXN: '1,495', USD: '79' }, pAnt: { MXN: '2,990', USD: '159' }, d: 'La suite definitiva. Control espacial, pantallas y pulseras.', f: ['Todo lo del Oro', 'Acomodo de mesas virtual 2D', 'Baulia Social Wall (Proyección)', 'Baulia Black Label (Pulseras VIP)'], d1: true }
           ].map((plan, idx) => (
             <RevealSection key={idx} delay={idx * 100} className={`relative flex-1 ${plan.d2 ? 'lg:-translate-y-4' : ''}`}>
                {plan.d2 && <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md whitespace-nowrap z-20">El Estándar</div>}
                {plan.d1 && <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-bl-lg whitespace-nowrap z-20"><Gem size={10} className="mr-1 inline"/> Suite Todo Incluido</div>}
 
                <div className={`h-full bg-white dark:bg-[#0a0a0a] rounded-3xl p-8 border ${plan.d2 ? 'border-2 border-amber-500 dark:border-amber-500 shadow-amber-500/10' : plan.d1 ? 'border-indigo-500/30 dark:border-indigo-500/30' : 'border-slate-200 dark:border-white/10'} flex flex-col justify-between group overflow-hidden relative shadow-lg transition-colors`}>
-                  
+                 
                   {plan.d1 && <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none transition-colors duration-700"></div>}
                   {plan.d2 && <div className="absolute inset-0 opacity-10 bg-[linear-gradient(45deg,_transparent_70%,_#f59e0b_100%)] rounded-3xl transition-opacity group-hover:opacity-20"></div>}
 
@@ -11854,8 +11872,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium leading-relaxed transition-colors">{plan.d}</p>
                      
                      <div className="text-4xl font-light text-slate-900 dark:text-white mb-8 relative flex items-baseline transition-colors">
-                        <span className="text-xl text-rose-500 line-through font-bold mr-3">${plan.pAnt}</span>
-                        <span className="font-editorial text-transparent bg-clip-text bg-gradient-to-tr from-slate-900 to-slate-700 dark:from-white dark:to-slate-100">${plan.p}</span> <span className="text-sm text-slate-400 font-normal ml-2">MXN</span>
+                        <span className="text-xl text-rose-500 line-through font-bold mr-3">${plan.pAnt[moneda]}</span>
+                        <span className="font-editorial text-transparent bg-clip-text bg-gradient-to-tr from-slate-900 to-slate-700 dark:from-white dark:to-slate-100">${plan.precios[moneda]}</span> <span className="text-sm text-slate-400 font-normal ml-2">{moneda}</span>
                      </div>
 
                      <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-300 relative transition-colors">
@@ -11865,7 +11883,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                      </ul>
                   </div>
                   
-                  <button onClick={() => { setPlanSeleccionado({ plan: plan.n, precio: `${plan.p}.00` }); setCheckoutModal('pago'); }} className={`w-full py-4 rounded-full ${plan.d2 ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white' : plan.d1 ? 'bg-indigo-600 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'} font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-lg mt-auto relative z-10`}>
+                  <button onClick={() => { setPlanSeleccionado({ plan: plan.n, precio: plan.precios[moneda], moneda: moneda }); setCheckoutModal('pago'); }} className={`w-full py-4 rounded-full ${plan.d2 ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white' : plan.d1 ? 'bg-indigo-600 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'} font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-lg mt-auto relative z-10`}>
                      Reservar mi Bóveda {plan.n}
                   </button>
                </div>

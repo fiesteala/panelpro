@@ -365,7 +365,7 @@ exports.crearIntentoAsincrono = functions.https.onRequest(async (req, res) => {
         email: email, 
         phone: telefono,
         // CLAVE: Asignar el país desde la creación del cliente
-        address: { country: 'MX' } 
+        address: { country: pais } 
       });
       customerId = nuevoCliente.id;
     }
