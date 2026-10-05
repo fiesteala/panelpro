@@ -9319,7 +9319,7 @@ const GuestProyectorView = ({ eventId }) => {
 // ==========================================
 // --- COMPONENTE: FORMULARIO DE PAGO STRIPE (DISEÑO ALTA COSTURA) ---
 // ==========================================
-const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel, clientSecret }) => {
+const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -9338,6 +9338,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel, clientSecret }) =
 
     const telefonoCompleto = `${lada} ${telefono}`;
 
+    // 1. Validamos que el formulario de tarjeta/Oxxo esté bien llenado
     const { error: submitError } = await elements.submit();
     if (submitError) {
       setErrorTexto(submitError.message);
@@ -9345,12 +9346,36 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel, clientSecret }) =
     }
 
     try {
+      // 2. 🟢 AQUÍ ESTABA EL ERROR: Faltaba pedirle permiso a Firebase
+      const respuesta = await fetch("https://us-central1-panel-de-control-intelig-db278.cloudfunctions.net/crearIntentoAsincrono", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan: planSeleccionado.plan === 'Black Label' ? 'security_kit' : 
+                planSeleccionado.plan === 'Social Wall' ? 'social_wall' : 
+                planSeleccionado.plan.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""), 
+          precio: planSeleccionado.precio,
+          nombre: nombre,
+          email: email,
+          fecha: fecha,
+          telefono: telefonoCompleto
+        })
+      });
+      
+      const data = await respuesta.json();
+      const clientSecret = data.clientSecret;
+
+      if (!clientSecret) {
+        throw new Error("No se pudo generar la autorización del servidor.");
+      }
+
+      // 3. Confirmamos el pago con Stripe ahora que tenemos el secreto
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         clientSecret,
         confirmParams: {
           return_url: `${window.location.origin}/`, 
-          payment_method_data: { billing_details: { name: nombre, email, phone: telefonoCompleto } }
+          payment_method_data: { billing_details: { name: nombre, email: email, phone: telefonoCompleto } }
         },
         redirect: 'if_required' 
       });
@@ -9358,11 +9383,14 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel, clientSecret }) =
       if (error) {
         setErrorTexto(error.message);
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-        if (window.fbq) window.fbq('track', 'Purchase', { value: Number(planSeleccionado.precio.replace(/,/g, '')), currency: 'MXN' });
+        if (window.fbq) {
+          const precioLimpio = planSeleccionado.precio.toString().replace(/,/g, '');
+          window.fbq('track', 'Purchase', { value: Number(precioLimpio), currency: 'MXN' });
+        }
         onSuccess({ success: true }, planSeleccionado);
       }
     } catch (err) {
-      setErrorTexto("Ocurrió un error al procesar el pago.");
+      setErrorTexto("Error al procesar el pago: " + err.message);
     }
     setLoading(false);
   };
@@ -9426,7 +9454,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel, clientSecret }) =
              <div className="relative z-10">
                <PaymentElement options={{ 
                  layout: "tabs",
-                 fields: { billingDetails: { address: 'never' } } // Oculta el país para ahorrar espacio
+                 fields: { billingDetails: { address: 'never' } }
                }}/>
              </div>
            </div>
