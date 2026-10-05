@@ -9358,7 +9358,7 @@ const StripeCaja = ({ planSeleccionado, datosCliente, onSuccess, onVolver }) => 
          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
          <div className="relative z-10">
-           {/* 🔴 EL SECRETO: Le pasamos los datos del cliente y el país para despertar OXXO */}
+           {/* 🔴 STRIPE INTELIGENTE: Recibe los datos del Paso 1 para activar OXXO o CP */}
            <PaymentElement options={{ 
              layout: "tabs",
              defaultValues: {
@@ -9366,7 +9366,7 @@ const StripeCaja = ({ planSeleccionado, datosCliente, onSuccess, onVolver }) => 
                  name: datosCliente.nombre,
                  email: datosCliente.email,
                  phone: datosCliente.telefono,
-                 address: { country: 'MX' }
+                 address: { country: datosCliente.pais }
                }
              }
            }} />
@@ -9394,6 +9394,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [fecha, setFecha] = useState('');
+  const [pais, setPais] = useState('MX'); // 🔴 NUEVO ESTADO: PAÍS
   const [lada, setLada] = useState('+52');
   const [telefono, setTelefono] = useState('');
 
@@ -9413,7 +9414,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
                 planSeleccionado.plan === 'Social Wall' ? 'social_wall' : 
                 planSeleccionado.plan.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
           precio: planSeleccionado.precio,
-          nombre, email, fecha, telefono: telCompleto
+          nombre, email, fecha, telefono: telCompleto, pais
         })
       });
       const data = await respuesta.json();
@@ -9445,6 +9446,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
             <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Nombre de los Festejados</label>
             <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Carlos & María" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
           </div>
+          
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Correo Electrónico</label>
@@ -9455,13 +9457,29 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
               <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium [color-scheme:light] dark:[color-scheme:dark]" />
             </div>
           </div>
-          <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Teléfono (WhatsApp)</label>
-            <div className="flex gap-2">
-              <select value={lada} onChange={(e) => setLada(e.target.value)} className="w-24 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-2 py-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm font-bold text-center appearance-none cursor-pointer">
-                <option value="+52">🇲🇽 +52</option><option value="+1">🇺🇸 +1</option><option value="+34">🇪🇸 +34</option><option value="+57">🇨🇴 +57</option><option value="+54">🇦🇷 +54</option><option value="+56">🇨🇱 +56</option><option value="+51">🇵🇪 +51</option>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* 🔴 NUEVO SELECTOR DE PAÍS */}
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">País de Facturación</label>
+              <select value={pais} onChange={(e) => setPais(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm font-medium appearance-none cursor-pointer">
+                <option value="MX">🇲🇽 México</option>
+                <option value="US">🇺🇸 Estados Unidos</option>
+                <option value="ES">🇪🇸 España</option>
+                <option value="CO">🇨🇴 Colombia</option>
+                <option value="AR">🇦🇷 Argentina</option>
+                <option value="CL">🇨🇱 Chile</option>
+                <option value="PE">🇵🇪 Perú</option>
               </select>
-              <input type="tel" required value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="Ej. 5512345678" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Teléfono (WhatsApp)</label>
+              <div className="flex gap-2">
+                <select value={lada} onChange={(e) => setLada(e.target.value)} className="w-24 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-2 py-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm font-bold text-center appearance-none cursor-pointer">
+                  <option value="+52">+52</option><option value="+1">+1</option><option value="+34">+34</option><option value="+57">+57</option><option value="+54">+54</option><option value="+56">+56</option><option value="+51">+51</option>
+                </select>
+                <input type="tel" required value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="Ej. 5512345678" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
+              </div>
             </div>
           </div>
 
@@ -9482,7 +9500,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
           }}>
             <StripeCaja 
               planSeleccionado={planSeleccionado} 
-              datosCliente={{ nombre, email, telefono: `${lada} ${telefono}` }} 
+              datosCliente={{ nombre, email, telefono: `${lada} ${telefono}`, pais }} 
               onSuccess={onSuccess} 
               onVolver={() => setClientSecret(null)} 
             />
