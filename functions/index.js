@@ -353,8 +353,7 @@ exports.crearIntentoAsincrono = functions.https.onRequest(async (req, res) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: precioLimpio * 100,
       currency: "mxn",
-      // 🔴 CORRECCIÓN: Le decimos exactamente a Stripe qué métodos aceptar
-      payment_method_types: ["card", "oxxo", "customer_balance"],
+      automatic_payment_methods: { enabled: true }, // 🔴 ESTA ES LA REGLA MODERNA QUE EXIGE STRIPE
       metadata: { plan, nombre, email, fecha, telefono }
     });
 

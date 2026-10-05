@@ -9339,7 +9339,6 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
     setLoading(true);
     setErrorTexto(null);
 
-    // 1. Validamos que el formulario de Stripe esté correctamente llenado
     const { error: submitError } = await elements.submit();
     if (submitError) {
       setErrorTexto(submitError.message);
@@ -9349,7 +9348,6 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
 
     const telefonoCompleto = `${lada} ${telefono}`;
 
-    // 2. 🚀 DISPARAMOS LA PETICIÓN A TU ROBOT EN LA NUBE
     try {
       const respuesta = await fetch("https://us-central1-panel-de-control-intelig-db278.cloudfunctions.net/crearIntentoAsincrono", {
         method: "POST",
@@ -9373,19 +9371,13 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         throw new Error(data.error || "No se pudo generar la autorización del servidor.");
       }
 
-      // 3. Confirmamos el pago combinando los datos de Baulia + Stripe
+      // 🔴 SOLUCIÓN DEL CÓDIGO POSTAL: Solo pasamos el return_url. 
+      // Stripe usará los datos (país y CP) que recopiló de forma nativa sin que los borremos por accidente.
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         clientSecret,
         confirmParams: {
-          return_url: `${window.location.origin}/`, 
-          payment_method_data: { 
-            billing_details: { 
-              name: nombre, 
-              email: email, 
-              phone: telefonoCompleto 
-            } 
-          }
+          return_url: `${window.location.origin}/`
         },
         redirect: 'if_required' 
       });
@@ -9414,7 +9406,6 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
     <form onSubmit={handleSubmit} className="flex flex-col h-full animate-in fade-in duration-500">
       <div className="space-y-6 mb-6 flex-1 pr-2">
         
-        {/* Resumen de compra VIP */}
         <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 to-white dark:from-amber-500/10 dark:to-[#111] border border-amber-200 dark:border-amber-500/30 rounded-2xl p-6 shadow-sm shrink-0">
            <div className="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/20 blur-2xl rounded-full pointer-events-none"></div>
            <div className="flex justify-between items-center relative z-10">
@@ -9429,7 +9420,6 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
            </div>
         </div>
 
-        {/* Formulario de Datos */}
         <div className="space-y-4 shrink-0">
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Nombre de los Festejados</label>
@@ -9462,7 +9452,6 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
           </div>
         </div>
 
-        {/* Módulo Universal de Pago Libre */}
         <div className="mt-8 shrink-0 pb-4">
            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1 flex items-center"><Lock size={12} className="mr-1.5 text-emerald-500"/> Información Bancaria Segura</label>
            
@@ -9471,15 +9460,15 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
              
              <div className="relative z-10">
+               {/* 🔴 PRE-LLENAMOS PARA AHORRAR TIEMPO, PERO SIN OCULTAR NADA */}
                <PaymentElement options={{ 
                  layout: "tabs",
-                 fields: { 
-                   billingDetails: { 
-                     name: 'never', 
-                     email: 'never', 
-                     phone: 'never'
-                     // Al no poner 'address', Stripe pedirá País y CP nativamente por seguridad
-                   } 
+                 defaultValues: {
+                   billingDetails: {
+                     name: nombre,
+                     email: email,
+                     phone: `${lada} ${telefono}`
+                   }
                  }
                }}/>
              </div>
@@ -9488,7 +9477,6 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         </div>
       </div>
 
-      {/* Botón de Pagar */}
       <div className="pt-5 border-t border-slate-100 dark:border-white/5 mt-auto shrink-0 bg-white dark:bg-[#0a0a0a]">
         <button type="submit" disabled={!stripe || loading} className="w-full py-4 sm:py-5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-black rounded-xl text-xs sm:text-sm uppercase tracking-widest shadow-[0_10px_25px_rgba(245,158,11,0.4)] hover:shadow-[0_15px_35px_rgba(245,158,11,0.6)] hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center">
           {loading ? (
@@ -10604,11 +10592,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       )}
 
-      {/* 🔴 PANTALLA COMPLETA DE PAGO (ESTILO NATIVO/APPLE) */}
+      {/* 🔴 MODAL 2: PANTALLA COMPLETA DE PAGO (APPLE / NETFLIX STYLE) */}
       {checkoutModal === 'pago' && planSeleccionado && (
         <div className="fixed inset-0 z-[9999] bg-[#FAFAFA] dark:bg-[#0a0a0a] overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-full duration-500">
           
-          {/* Barra superior fija */}
           <div className="sticky top-0 z-50 bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border-b border-slate-200 dark:border-white/5 shadow-sm">
             <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -10624,18 +10611,20 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </div>
           </div>
           
-          {/* Contenedor centralizado y amplio */}
           <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
             <Elements 
               stripe={stripePromise}
               options={{
                 mode: 'payment',
-                paymentMethodTypes: ['card', 'oxxo', 'customer_balance'],
                 amount: parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100,
                 currency: 'mxn',
                 appearance: { 
                   theme: 'night', 
-                  variables: { colorPrimary: '#fbbf24', colorBackground: '#111111', colorText: '#ffffff', colorDanger: '#f87171' }
+                  variables: { colorPrimary: '#fbbf24', colorBackground: '#111111', colorText: '#ffffff', colorDanger: '#f87171', fontFamily: '"Montserrat", sans-serif' },
+                  rules: {
+                    '.Tab': { padding: '12px', fontSize: '14px' },
+                    '.TabLabel': { fontWeight: 'bold' }
+                  }
                 }
               }}
             >
