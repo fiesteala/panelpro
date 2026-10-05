@@ -33,8 +33,15 @@ const GestorPreciosView = () => {
     setSaving(true);
     try {
       await setDoc(doc(db, 'ajustes_baulia', 'precios_publicos'), config);
-      alert("¡Precios y promociones guardados en la nube!");
-    } catch (error) { alert("Hubo un error al guardar."); }
+      // 🔴 AQUÍ DISPARAMOS TU NOTIFICACIÓN FLOTANTE (CAMPANITA)
+      window.dispatchEvent(new CustomEvent('mostrarNotificacionBaulia', { 
+        detail: { title: 'Ajustes Publicados', message: 'Los precios y promociones ya están en vivo.', type: 'success' } 
+      }));
+    } catch (error) { 
+      window.dispatchEvent(new CustomEvent('mostrarNotificacionBaulia', { 
+        detail: { title: 'Error al Guardar', message: 'Hubo un problema de conexión con la nube.', type: 'danger' } 
+      }));
+    }
     setSaving(false);
   };
 
