@@ -9354,7 +9354,9 @@ const StripeCaja = ({ planSeleccionado, datosCliente, onSuccess, onVolver }) => 
   return (
     <form onSubmit={handlePayment} className="animate-in slide-in-from-bottom-4 fade-in duration-500">
        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1 flex items-center"><Lock size={12} className="mr-1.5 text-emerald-500"/> Información Bancaria Segura</label>
-       <div className="relative p-5 bg-slate-900 dark:bg-[#050505] border border-slate-800 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden group min-h-[250px] mb-6">
+       
+       {/* 🔴 CORRECCIÓN: Fondo blanco de día (bg-white) y súper oscuro de noche (dark:bg-[#050505]) con bordes dinámicos */}
+       <div className="relative p-5 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden group min-h-[250px] mb-6">
          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
          <div className="relative z-10">
