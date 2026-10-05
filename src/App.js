@@ -9319,7 +9319,7 @@ const GuestProyectorView = ({ eventId }) => {
 // ==========================================
 // --- 1. MÓDULO DE STRIPE (Paso 2 del Pago) ---
 // ==========================================
-const StripeCaja = ({ planSeleccionado, onSuccess, onVolver }) => {
+const StripeCaja = ({ planSeleccionado, datosCliente, onSuccess, onVolver }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -9358,8 +9358,18 @@ const StripeCaja = ({ planSeleccionado, onSuccess, onVolver }) => {
          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
          <div className="relative z-10">
-           {/* 🔴 STRIPE 100% NATIVO: Sin ocultar nada, sin forzar países */}
-           <PaymentElement options={{ layout: "tabs" }} />
+           {/* 🔴 EL SECRETO: Le pasamos los datos del cliente y el país para despertar OXXO */}
+           <PaymentElement options={{ 
+             layout: "tabs",
+             defaultValues: {
+               billingDetails: {
+                 name: datosCliente.nombre,
+                 email: datosCliente.email,
+                 phone: datosCliente.telefono,
+                 address: { country: 'MX' }
+               }
+             }
+           }} />
          </div>
        </div>
        
@@ -9415,7 +9425,6 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Resumen de compra VIP */}
       <div className="mb-6 relative overflow-hidden bg-gradient-to-br from-amber-50 to-white dark:from-amber-500/10 dark:to-[#111] border border-amber-200 dark:border-amber-500/30 rounded-2xl p-6 shadow-sm shrink-0">
          <div className="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/20 blur-2xl rounded-full pointer-events-none"></div>
          <div className="flex justify-between items-center relative z-10">
@@ -9471,7 +9480,12 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
               rules: { '.Tab': { padding: '12px', fontSize: '14px' }, '.TabLabel': { fontWeight: 'bold' } }
             } 
           }}>
-            <StripeCaja planSeleccionado={planSeleccionado} onSuccess={onSuccess} onVolver={() => setClientSecret(null)} />
+            <StripeCaja 
+              planSeleccionado={planSeleccionado} 
+              datosCliente={{ nombre, email, telefono: `${lada} ${telefono}` }} 
+              onSuccess={onSuccess} 
+              onVolver={() => setClientSecret(null)} 
+            />
           </Elements>
         </div>
       )}
