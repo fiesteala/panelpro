@@ -9325,6 +9325,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [errorTexto, setErrorTexto] = useState(null);
 
+  // Datos del cliente
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [fecha, setFecha] = useState('');
@@ -9334,23 +9335,27 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!stripe || !elements) return;
-    setLoading(true); setErrorTexto(null);
 
-    const telefonoCompleto = `${lada} ${telefono}`;
+    setLoading(true);
+    setErrorTexto(null);
 
-    // 1. Validamos que el formulario de tarjeta/Oxxo esté bien llenado
+    // 1. Validamos que el formulario de Stripe esté correctamente llenado
     const { error: submitError } = await elements.submit();
     if (submitError) {
       setErrorTexto(submitError.message);
-      setLoading(false); return;
+      setLoading(false);
+      return;
     }
 
+    const telefonoCompleto = `${lada} ${telefono}`;
+
+    // 2. 🚀 DISPARAMOS LA PETICIÓN A TU ROBOT EN LA NUBE
     try {
-      // 2. 🟢 AQUÍ ESTABA EL ERROR: Faltaba pedirle permiso a Firebase
       const respuesta = await fetch("https://us-central1-panel-de-control-intelig-db278.cloudfunctions.net/crearIntentoAsincrono", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          // Mapeamos el nombre comercial al ID interno del plan si es necesario
           plan: planSeleccionado.plan === 'Black Label' ? 'security_kit' : 
                 planSeleccionado.plan === 'Social Wall' ? 'social_wall' : 
                 planSeleccionado.plan.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""), 
@@ -9361,21 +9366,23 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
           telefono: telefonoCompleto
         })
       });
-      
+
       const data = await respuesta.json();
       const clientSecret = data.clientSecret;
 
       if (!clientSecret) {
-        throw new Error("No se pudo generar la autorización del servidor.");
+        throw new Error(data.error || "No se pudo generar la autorización del servidor.");
       }
 
-      // 3. Confirmamos el pago con Stripe ahora que tenemos el secreto
+      // 3. Confirmamos el pago (Tarjeta, Oxxo o SPEI) con la autorización
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         clientSecret,
         confirmParams: {
           return_url: `${window.location.origin}/`, 
-          payment_method_data: { billing_details: { name: nombre, email: email, phone: telefonoCompleto } }
+          payment_method_data: { 
+            billing_details: { name: nombre, email: email, phone: telefonoCompleto } 
+          }
         },
         redirect: 'if_required' 
       });
@@ -9384,13 +9391,19 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         setErrorTexto(error.message);
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
         if (window.fbq) {
+          // Limpiamos las comas del precio (ej. "1,990" -> "1990") para que Facebook lo entienda
           const precioLimpio = planSeleccionado.precio.toString().replace(/,/g, '');
-          window.fbq('track', 'Purchase', { value: Number(precioLimpio), currency: 'MXN' });
+          window.fbq('track', 'Purchase', {
+            value: Number(precioLimpio),
+            currency: 'MXN',
+            content_name: `Plan ${planSeleccionado.plan}`
+          });
         }
         onSuccess({ success: true }, planSeleccionado);
       }
     } catch (err) {
-      setErrorTexto("Error al procesar el pago: " + err.message);
+      setErrorTexto("Fallo de comunicación con la base de Baulia.");
+      console.error(err);
     }
     setLoading(false);
   };
@@ -9398,7 +9411,8 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full animate-in fade-in duration-500">
       <div className="space-y-6 mb-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-        {/* Resumen */}
+        
+        {/* Resumen de compra VIP */}
         <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 to-white dark:from-amber-500/10 dark:to-[#111] border border-amber-200 dark:border-amber-500/30 rounded-2xl p-6 shadow-sm shrink-0">
            <div className="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/20 blur-2xl rounded-full pointer-events-none"></div>
            <div className="flex justify-between items-center relative z-10">
@@ -9413,26 +9427,26 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
            </div>
         </div>
 
-        {/* Datos del Cliente */}
+        {/* Formulario de Datos (Adaptativo Día/Noche) */}
         <div className="space-y-4 shrink-0">
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Festejados</label>
-            <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium" placeholder="Ej. Carlos & María" />
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Nombre de los Festejados</label>
+            <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Carlos & María" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Correo</label>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium" placeholder="tu@correo.com" />
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Correo Electrónico</label>
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
             </div>
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Fecha Evento</label>
-              <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium [color-scheme:light] dark:[color-scheme:dark]" />
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Fecha del Evento</label>
+              <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium [color-scheme:light] dark:[color-scheme:dark]" />
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">WhatsApp</label>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Teléfono (WhatsApp)</label>
             <div className="flex gap-2">
-              <select value={lada} onChange={(e) => setLada(e.target.value)} className="w-24 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-2 py-3 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-bold text-center appearance-none cursor-pointer">
+              <select value={lada} onChange={(e) => setLada(e.target.value)} className="w-24 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-2 py-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm font-bold text-center appearance-none cursor-pointer">
                 <option value="+52">🇲🇽 +52</option>
                 <option value="+1">🇺🇸 +1</option>
                 <option value="+34">🇪🇸 +34</option>
@@ -9441,16 +9455,19 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
                 <option value="+56">🇨🇱 +56</option>
                 <option value="+51">🇵🇪 +51</option>
               </select>
-              <input type="tel" required value={telefono} onChange={(e) => setTelefono(e.target.value)} className="flex-1 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium" placeholder="10 dígitos" />
+              <input type="tel" required value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="Ej. 5512345678" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-amber-500 dark:focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
             </div>
           </div>
         </div>
 
-        {/* MÓDULO UNIVERSAL STRIPE */}
-        <div className="mt-6 shrink-0 pb-4">
-           <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1 flex items-center">Pago Seguro</label>
-           <div className="relative p-4 bg-slate-900 dark:bg-[#050505] border border-slate-800 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden group min-h-[250px]">
+        {/* NUEVO: Módulo Universal de Pago (Tarjeta, Oxxo, SPEI) */}
+        <div className="mt-8 shrink-0 pb-4">
+           <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1 flex items-center"><Lock size={12} className="mr-1.5 text-emerald-500"/> Información Bancaria Segura</label>
+           
+           <div className="relative p-5 bg-slate-900 dark:bg-[#050505] border border-slate-800 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden group min-h-[250px]">
              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
+             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
+             
              <div className="relative z-10">
                <PaymentElement options={{ 
                  layout: "tabs",
@@ -9458,13 +9475,18 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
                }}/>
              </div>
            </div>
-           {errorTexto && <p className="text-rose-500 text-xs mt-3 ml-1 font-bold">{errorTexto}</p>}
+           {errorTexto && <p className="text-rose-500 text-xs mt-3 ml-1 flex items-center font-bold bg-rose-50 dark:bg-rose-500/10 p-2 rounded-lg border border-rose-200 dark:border-rose-500/20"><AlertCircle size={14} className="mr-1.5 flex-shrink-0"/> {errorTexto}</p>}
         </div>
       </div>
 
-      <div className="pt-4 border-t border-slate-100 dark:border-white/5 mt-auto shrink-0 bg-white dark:bg-[#0a0a0a]">
-        <button type="submit" disabled={!stripe || !elements || loading} className="w-full py-4 sm:py-5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-black rounded-xl text-xs sm:text-sm uppercase tracking-widest shadow-[0_10px_25px_rgba(245,158,11,0.4)] transition-all flex justify-center items-center">
-          {loading ? <span>Procesando...</span> : <span>Pagar ${planSeleccionado.precio} MXN</span>}
+      {/* Botón de Pagar */}
+      <div className="pt-5 border-t border-slate-100 dark:border-white/5 mt-auto shrink-0 bg-white dark:bg-[#0a0a0a]">
+        <button type="submit" disabled={!stripe || loading} className="w-full py-4 sm:py-5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-black rounded-xl text-xs sm:text-sm uppercase tracking-widest shadow-[0_10px_25px_rgba(245,158,11,0.4)] hover:shadow-[0_15px_35px_rgba(245,158,11,0.6)] hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center">
+          {loading ? (
+             <span className="flex items-center"><RefreshCw size={18} className="animate-spin mr-2"/> Procesando...</span>
+          ) : (
+             <><ShieldCheck size={18} className="mr-2"/> Pagar ${planSeleccionado.precio} MXN</>
+          )}
         </button>
       </div>
     </form>
