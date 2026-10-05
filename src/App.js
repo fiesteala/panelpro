@@ -9402,7 +9402,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         onSuccess({ success: true }, planSeleccionado);
       }
     } catch (err) {
-      setErrorTexto("Fallo de comunicación con la base de Baulia.");
+      setErrorTexto("Error del servidor: " + err.message);
       console.error(err);
     }
     setLoading(false);

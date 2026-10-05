@@ -335,26 +335,34 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 });
 
 // ==============================================================
-// 🔴 6. GENERADOR DE INTENTOS DE PAGO (Para React)
+// 🔴 GENERADOR DE INTENTOS DE PAGO (Para React)
 // ==============================================================
-exports.crearIntentoAsincrono = functions.https.onRequest((req, res) => {
-  cors(req, res, async () => {
-    try {
-      const stripe = require("stripe")(process.env.STRIPE_SECRET);
-      const { precio, plan, nombre, email, fecha, telefono } = req.body;
-      const precioLimpio = parseInt(precio.toString().replace(/,/g, ''));
+exports.crearIntentoAsincrono = functions.https.onRequest(async (req, res) => {
+  // 1. Damos permisos de acceso para que el navegador no bloquee la petición
+  res.set('Access-Control-Allow-Origin', '*');
+  if (req.method === 'OPTIONS') {
+    res.set('Access-Control-Allow-Methods', 'POST');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(204).send('');
+  }
 
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: precioLimpio * 100,
-        currency: "mxn",
-        automatic_payment_methods: { enabled: true },
-        // 🟢 Aquí empaquetamos los datos secretos para que los lea el Vigilante
-        metadata: { plan, nombre, email, fecha, telefono }
-      });
+  try {
+    const stripe = require("stripe")(process.env.STRIPE_SECRET);
+    const { precio, plan, nombre, email, fecha, telefono } = req.body;
+    
+    // Limpiamos el precio por si trae comas (ej. "1,495" -> 1495)
+    const precioLimpio = parseInt(precio.toString().replace(/,/g, ''));
 
-      res.status(200).send({ clientSecret: paymentIntent.client_secret });
-    } catch (error) {
-      res.status(500).send({ error: error.message });
-    }
-  });
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: precioLimpio * 100, // Stripe funciona en centavos
+      currency: "mxn",
+      automatic_payment_methods: { enabled: true },
+      // Guardamos la info del cliente para que el "Vigilante" la lea al confirmarse el pago
+      metadata: { plan, nombre, email, fecha, telefono }
+    });
+
+    res.status(200).send({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
 });
