@@ -347,14 +347,31 @@ exports.crearIntentoAsincrono = functions.https.onRequest(async (req, res) => {
 
   try {
     const stripe = require("stripe")(process.env.STRIPE_SECRET);
-    const { precio, plan, nombre, email, fecha, telefono } = req.body;
+    const { precio, plan, nombre, email, fecha, telefono, pais } = req.body;
     const precioLimpio = parseInt(precio.toString().replace(/,/g, ''));
 
+    // 🔴 1. EL PASE VIP: Registramos al cliente en Stripe para que suelte OXXO y SPEI
+    let customerId;
+    const clientesExistentes = await stripe.customers.list({ email: email, limit: 1 });
+    
+    if (clientesExistentes.data.length > 0) {
+      customerId = clientesExistentes.data[0].id;
+    } else {
+      const nuevoCliente = await stripe.customers.create({ name: nombre, email: email, phone: telefono });
+      customerId = nuevoCliente.id;
+    }
+
+    // 🔴 2. PAGO 100% AUTOMÁTICO (Stripe decidirá mostrar OXXO al ver que hay un Cliente)
     const paymentIntent = await stripe.paymentIntents.create({
       amount: precioLimpio * 100,
       currency: "mxn",
-      automatic_payment_methods: { enabled: true }, // 🔴 ESTA ES LA REGLA MODERNA QUE EXIGE STRIPE
-      metadata: { plan, nombre, email, fecha, telefono }
+      customer: customerId, // Le pasamos el cliente que creamos arriba
+      automatic_payment_methods: { enabled: true },
+      // Configuración que exige Stripe para que las transferencias SPEI funcionen
+      payment_method_options: {
+        customer_balance: { funding_type: 'bank_transfer', bank_transfer: { type: 'mx_bank_transfer' } }
+      },
+      metadata: { plan, nombre, email, fecha, telefono, pais }
     });
 
     res.status(200).send({ clientSecret: paymentIntent.client_secret });

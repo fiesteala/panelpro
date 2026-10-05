@@ -9358,7 +9358,7 @@ const StripeCaja = ({ planSeleccionado, datosCliente, onSuccess, onVolver }) => 
          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
          <div className="relative z-10">
-           {/* 🔴 STRIPE INTELIGENTE: Recibe los datos del Paso 1 para activar OXXO o CP */}
+           {/* 🔴 STRIPE INTELIGENTE: Recibe tus datos y tu País para saber qué mostrar */}
            <PaymentElement options={{ 
              layout: "tabs",
              defaultValues: {
@@ -9394,7 +9394,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [fecha, setFecha] = useState('');
-  const [pais, setPais] = useState('MX'); // 🔴 NUEVO ESTADO: PAÍS
+  const [pais, setPais] = useState('MX'); // 🔴 TU IDEA: EL PAÍS
   const [lada, setLada] = useState('+52');
   const [telefono, setTelefono] = useState('');
 
@@ -9459,7 +9459,6 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* 🔴 NUEVO SELECTOR DE PAÍS */}
             <div>
               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">País de Facturación</label>
               <select value={pais} onChange={(e) => setPais(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm font-medium appearance-none cursor-pointer">
@@ -9470,6 +9469,9 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
                 <option value="AR">🇦🇷 Argentina</option>
                 <option value="CL">🇨🇱 Chile</option>
                 <option value="PE">🇵🇪 Perú</option>
+                <option value="CA">🇨🇦 Canadá</option>
+                <option value="BR">🇧🇷 Brasil</option>
+                <option value="FR">🇫🇷 Francia</option>
               </select>
             </div>
             <div>
