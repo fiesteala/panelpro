@@ -9381,7 +9381,14 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         confirmParams: {
           return_url: `${window.location.origin}/`, 
           payment_method_data: { 
-            billing_details: { name: nombre, email: email, phone: telefonoCompleto } 
+            billing_details: { 
+              name: nombre, 
+              email: email, 
+              phone: telefonoCompleto,
+              // 🔴 AQUÍ ESTÁ LA SOLUCIÓN DEFINITIVA AL ERROR: 
+              // Le mandamos a Stripe y a OXXO el país de forma invisible
+              address: { country: 'MX' } 
+            } 
           }
         },
         redirect: 'if_required' 
