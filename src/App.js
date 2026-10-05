@@ -10382,6 +10382,41 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [planSeleccionado, setPlanSeleccionado] = useState(null);
   const [moneda, setMoneda] = useState('MXN');
 
+  // 🔴 1. ESTADO DE LA BASE DE DATOS
+  const [preciosDB, setPreciosDB] = useState(null);
+
+  // 🔴 2. ESCUCHADOR EN TIEMPO REAL AL PANEL
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, 'ajustes_baulia', 'precios_publicos'), (docSnap) => {
+      if (docSnap.exists()) setPreciosDB(docSnap.data());
+    });
+    return () => unsub();
+  }, []);
+
+  // 🔴 3. CALCULADORA DE DESCUENTOS AUTOMÁTICA
+  const calcularPrecio = (productoId) => {
+    if (!preciosDB) return { final: '...', original: null, tienePromo: false, raw: 0 };
+    
+    const precioBase = preciosDB.preciosBase[productoId][moneda];
+    const promoActiva = preciosDB.promocion.activa && preciosDB.promocion.productos[productoId];
+
+    if (promoActiva) {
+      const descuento = Math.round(precioBase * (preciosDB.promocion.porcentaje / 100));
+      const precioFinal = precioBase - descuento;
+      return {
+        final: precioFinal.toLocaleString('en-US'),
+        original: precioBase.toLocaleString('en-US'),
+        tienePromo: true,
+        raw: precioFinal
+      };
+    }
+    return { final: precioBase.toLocaleString('en-US'), original: null, tienePromo: false, raw: precioBase };
+  };
+
+  // Pre-calculamos complementos para uso general
+  const pSocialWall = calcularPrecio('social_wall');
+  const pBlackLabel = calcularPrecio('black_label');
+
   useEffect(() => {
     setActiveDevice('iphone');
   }, [activeCategory]);
@@ -10422,13 +10457,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     window.addEventListener('resize', checkDevice);
     return () => window.removeEventListener('resize', checkDevice);
   }, []);
-
-  const planes = [
-    { id: 'basico', nombre: 'Básico', precios: { MXN: '495', USD: '29' }, preciosOriginales: { MXN: '990', USD: '59' }, desc: 'Invitación, RSVP simple y GPS.', icon: <Smartphone size={24}/> },
-    { id: 'plata', nombre: 'Plata', precios: { MXN: '745', USD: '39' }, preciosOriginales: { MXN: '1,490', USD: '79' }, desc: 'Suma Mesa de Regalos e Itinerario.', icon: <Wallet size={24}/> },
-    { id: 'oro', nombre: 'Oro', precios: { MXN: '995', USD: '49' }, preciosOriginales: { MXN: '1,990', USD: '99' }, desc: 'Panel Maestro, Control QR y Mesas.', icon: <ShieldCheck size={24}/>, popular: true },
-    { id: 'diamante', nombre: 'Diamante', precios: { MXN: '1,495', USD: '79' }, preciosOriginales: { MXN: '2,990', USD: '159' }, desc: 'La Suite Definitiva. Incluye Muro Social y Black Label.', icon: <Gem size={24}/> }
-  ];
 
   // 🔴 DEMOS CON ADN VISUAL (blob1 y blob2)
   const demos = {
@@ -11863,11 +11891,14 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         {/* TARJETAS DE PLANES (Solo SaaS) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start mb-20 relative z-10">
           {[
-            { n: 'Básico', precios: { MXN: '495', USD: '29' }, pAnt: { MXN: '990', USD: '59' }, d: 'La elegancia indispensable para anunciar tu evento.', f: ['Invitación interactiva', 'Confirmación Simple (RSVP)', 'Cuenta regresiva Adaptativas', 'Logística GPS'] },
-            { n: 'Plata', precios: { MXN: '745', USD: '39' }, pAnt: { MXN: '1,490', USD: '79' }, d: 'Recupera tu inversión con regalos en efectivo.', f: ['Todo lo del Básico', 'Mesa de Regalos / Efectivo', 'Itinerario y Dress Code', 'Agregar a Calendario'] },
-            { n: 'Oro', precios: { MXN: '995', USD: '49' }, pAnt: { MXN: '1,990', USD: '99' }, d: 'Cero colados. Seguridad y control absoluto.', f: ['Todo lo del Plata', 'RSVP Blindado (Pases)', 'App Escáner para Hostess', 'Bóveda Financiera (Gastos)'], d2: true },
-            { n: 'Diamante', precios: { MXN: '1,495', USD: '79' }, pAnt: { MXN: '2,990', USD: '159' }, d: 'La suite definitiva. Control espacial, pantallas y pulseras.', f: ['Todo lo del Oro', 'Acomodo de mesas virtual 2D', 'Baulia Social Wall (Proyección)', 'Baulia Black Label (Pulseras VIP)'], d1: true }
-          ].map((plan, idx) => (
+            { id: 'basico', nombre: 'Básico', desc: 'La elegancia indispensable para anunciar tu evento.', f: ['Invitación interactiva', 'Confirmación Simple (RSVP)', 'Cuenta regresiva Adaptativas', 'Logística GPS'] },
+            { id: 'plata', nombre: 'Plata', desc: 'Recupera tu inversión con regalos en efectivo.', f: ['Todo lo del Básico', 'Mesa de Regalos / Efectivo', 'Itinerario y Dress Code', 'Agregar a Calendario'] },
+            { id: 'oro', nombre: 'Oro', desc: 'Cero colados. Seguridad y control absoluto.', d2: true, f: ['Todo lo del Plata', 'RSVP Blindado (Pases)', 'App Escáner para Hostess', 'Bóveda Financiera (Gastos)'] },
+            { id: 'diamante', nombre: 'Diamante', desc: 'La suite definitiva. Control espacial, pantallas y pulseras.', d1: true, f: ['Todo lo del Oro', 'Acomodo de mesas virtual 2D', 'Baulia Social Wall (Proyección)', 'Baulia Black Label (Pulseras VIP)'] }
+          ].map((plan, idx) => {
+            const precio = calcularPrecio(plan.id);
+            
+            return (
             <RevealSection key={idx} delay={idx * 100} className={`relative flex-1 ${plan.d2 ? 'lg:-translate-y-4' : ''}`}>
                {plan.d2 && <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md whitespace-nowrap z-20">El Estándar</div>}
                {plan.d1 && <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-bl-lg whitespace-nowrap z-20"><Gem size={10} className="mr-1 inline"/> Suite Todo Incluido</div>}
@@ -11878,12 +11909,14 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   {plan.d2 && <div className="absolute inset-0 opacity-10 bg-[linear-gradient(45deg,_transparent_70%,_#f59e0b_100%)] rounded-3xl transition-opacity group-hover:opacity-20"></div>}
 
                   <div className="relative z-10 mb-8 flex-1">
-                     <h3 className="text-2xl font-editorial font-bold text-slate-900 dark:text-white mb-2 transition-colors">{plan.n}</h3>
-                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium leading-relaxed transition-colors">{plan.d}</p>
+                     <h3 className="text-2xl font-editorial font-bold text-slate-900 dark:text-white mb-2 transition-colors">{plan.nombre}</h3>
+                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium leading-relaxed transition-colors">{plan.desc}</p>
                      
+                     {/* 🔴 EL PRECIO DINÁMICO LEÍDO DESDE FIREBASE */}
                      <div className="text-4xl font-light text-slate-900 dark:text-white mb-8 relative flex items-baseline transition-colors">
-                        <span className="text-xl text-rose-500 line-through font-bold mr-3">${plan.pAnt[moneda]}</span>
-                        <span className="font-editorial text-transparent bg-clip-text bg-gradient-to-tr from-slate-900 to-slate-700 dark:from-white dark:to-slate-100">${plan.precios[moneda]}</span> <span className="text-sm text-slate-400 font-normal ml-2">{moneda}</span>
+                        {precio.tienePromo && <span className="text-xl text-rose-500 line-through font-bold mr-3">${precio.original}</span>}
+                        <span className="font-editorial text-transparent bg-clip-text bg-gradient-to-tr from-slate-900 to-slate-700 dark:from-white dark:to-slate-100">${precio.final}</span> 
+                        <span className="text-sm text-slate-400 font-normal ml-2">{moneda}</span>
                      </div>
 
                      <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-300 relative transition-colors">
@@ -11893,12 +11926,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                      </ul>
                   </div>
                   
-                  <button onClick={() => { setPlanSeleccionado({ plan: plan.n, precio: plan.precios[moneda], moneda: moneda }); setCheckoutModal('pago'); }} className={`w-full py-4 rounded-full ${plan.d2 ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white' : plan.d1 ? 'bg-indigo-600 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'} font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-lg mt-auto relative z-10`}>
-                     Reservar mi Bóveda {plan.n}
+                  <button onClick={() => { setPlanSeleccionado({ plan: plan.nombre, precio: precio.raw, moneda: moneda }); setCheckoutModal('pago'); }} className={`w-full py-4 rounded-full ${plan.d2 ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white' : plan.d1 ? 'bg-indigo-600 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'} font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-lg mt-auto relative z-10`}>
+                     Reservar mi Bóveda {plan.nombre}
                   </button>
                </div>
             </RevealSection>
-          ))}
+          )})}
         </div>
 
         {/* 🔴 TABLA COMPARATIVA ADAPTATIVA (De image_6.png) */}
