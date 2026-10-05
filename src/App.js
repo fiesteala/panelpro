@@ -9373,14 +9373,18 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         throw new Error(data.error || "No se pudo generar la autorización del servidor.");
       }
 
-      // 3. Confirmamos el pago (Tarjeta, Oxxo o SPEI) con la autorización limpia
+      // 3. Confirmamos el pago combinando los datos de Baulia + Stripe
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         clientSecret,
         confirmParams: {
           return_url: `${window.location.origin}/`, 
           payment_method_data: { 
-            billing_details: { name: nombre, email: email, phone: telefonoCompleto } 
+            billing_details: { 
+              name: nombre, 
+              email: email, 
+              phone: telefonoCompleto 
+            } 
           }
         },
         redirect: 'if_required' 
@@ -9467,8 +9471,17 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
              
              <div className="relative z-10">
-               {/* 🟢 Le quitamos todos los candados de espacio para que Stripe cobre como debe */}
-               <PaymentElement options={{ layout: "tabs" }}/>
+               <PaymentElement options={{ 
+                 layout: "tabs",
+                 fields: { 
+                   billingDetails: { 
+                     name: 'never', 
+                     email: 'never', 
+                     phone: 'never'
+                     // Al no poner 'address', Stripe pedirá País y CP nativamente por seguridad
+                   } 
+                 }
+               }}/>
              </div>
            </div>
            {errorTexto && <p className="text-rose-500 text-xs mt-3 ml-1 flex items-center font-bold bg-rose-50 dark:bg-rose-500/10 p-2 rounded-lg border border-rose-200 dark:border-rose-500/20"><AlertCircle size={14} className="mr-1.5 flex-shrink-0"/> {errorTexto}</p>}
