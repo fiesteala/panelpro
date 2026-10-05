@@ -338,7 +338,6 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 // 🔴 GENERADOR DE INTENTOS DE PAGO (Para React)
 // ==============================================================
 exports.crearIntentoAsincrono = functions.https.onRequest(async (req, res) => {
-  // 1. Damos permisos de acceso para que el navegador no bloquee la petición
   res.set('Access-Control-Allow-Origin', '*');
   if (req.method === 'OPTIONS') {
     res.set('Access-Control-Allow-Methods', 'POST');
@@ -349,15 +348,13 @@ exports.crearIntentoAsincrono = functions.https.onRequest(async (req, res) => {
   try {
     const stripe = require("stripe")(process.env.STRIPE_SECRET);
     const { precio, plan, nombre, email, fecha, telefono } = req.body;
-    
-    // Limpiamos el precio por si trae comas (ej. "1,495" -> 1495)
     const precioLimpio = parseInt(precio.toString().replace(/,/g, ''));
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: precioLimpio * 100, // Stripe funciona en centavos
+      amount: precioLimpio * 100,
       currency: "mxn",
-      automatic_payment_methods: { enabled: true },
-      // Guardamos la info del cliente para que el "Vigilante" la lea al confirmarse el pago
+      // 🔴 CORRECCIÓN: Le decimos exactamente a Stripe qué métodos aceptar
+      payment_method_types: ["card", "oxxo", "customer_balance"],
       metadata: { plan, nombre, email, fecha, telefono }
     });
 

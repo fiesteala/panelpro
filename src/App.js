@@ -10604,48 +10604,47 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       )}
 
-      {/* 🔴 MODAL 2: PANTALLA COMPLETA DE PAGO (APPLE / NETFLIX STYLE) */}
+      {/* 🔴 PANTALLA COMPLETA DE PAGO (ESTILO NATIVO/APPLE) */}
       {checkoutModal === 'pago' && planSeleccionado && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex justify-center items-start sm:items-center overflow-y-auto custom-scrollbar">
-          <div className="w-full max-w-3xl bg-white dark:bg-[#0a0a0a] min-h-screen sm:min-h-0 sm:h-auto sm:max-h-[95vh] sm:rounded-[2rem] shadow-2xl flex flex-col border border-transparent dark:border-white/10 my-0 sm:my-8 animate-in slide-in-from-bottom-10 duration-500 overflow-hidden">
-            
-            {/* Barra superior del Modal */}
-            <div className="p-5 md:p-6 border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex items-center justify-between shrink-0">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-amber-500 mb-0.5">Checkout Oficial</p>
-                <h3 className="text-lg md:text-xl font-editorial font-bold text-slate-800 dark:text-white flex items-center"><ShieldCheck size={20} className="mr-2 text-emerald-500"/> Baulia Secure Pay</h3>
+        <div className="fixed inset-0 z-[9999] bg-[#FAFAFA] dark:bg-[#0a0a0a] overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-full duration-500">
+          
+          {/* Barra superior fija */}
+          <div className="sticky top-0 z-50 bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border-b border-slate-200 dark:border-white/5 shadow-sm">
+            <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <ShieldCheck size={24} className="text-emerald-500" />
+                <div>
+                  <h2 className="font-editorial text-xl font-bold text-slate-900 dark:text-white leading-none">Baulia Secure Checkout</h2>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">Transacción Encriptada</p>
+                </div>
               </div>
-              <button onClick={() => setCheckoutModal('selector')} className="p-2 md:p-3 bg-white dark:bg-white/10 rounded-full hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-500/20 dark:hover:text-rose-400 transition-colors text-slate-500 shadow-sm border border-slate-200 dark:border-transparent">
-                <X size={20}/>
+              <button onClick={() => setCheckoutModal('selector')} className="flex items-center text-xs font-bold text-slate-500 hover:text-rose-500 bg-slate-100 dark:bg-white/5 px-4 py-2 rounded-full transition-all">
+                <X size={16} className="mr-1.5"/> Cancelar
               </button>
             </div>
-            
-            {/* Contenedor espacioso con Scroll Libre */}
-            <div className="p-6 md:p-10 overflow-y-auto flex-1 custom-scrollbar relative">
-              <Elements 
-                stripe={stripePromise}
-                options={{
-                  mode: 'payment',
-                  paymentMethodTypes: ['card', 'oxxo', 'customer_balance'],
-                  amount: parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100,
-                  currency: 'mxn',
-                  appearance: { 
-                    theme: 'night', 
-                    variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171', fontFamily: '"Montserrat", sans-serif' },
-                    rules: {
-                      '.Tab': { padding: '12px', fontSize: '14px' },
-                      '.TabLabel': { fontWeight: 'bold' }
-                    }
-                  }
-                }}
-              >
-                <CheckoutForm 
-                  planSeleccionado={planSeleccionado} 
-                  onSuccess={handlePaymentSuccess} 
-                  onCancel={() => setCheckoutModal('selector')} 
-                />
-              </Elements>
-            </div>
+          </div>
+          
+          {/* Contenedor centralizado y amplio */}
+          <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
+            <Elements 
+              stripe={stripePromise}
+              options={{
+                mode: 'payment',
+                paymentMethodTypes: ['card', 'oxxo', 'customer_balance'],
+                amount: parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100,
+                currency: 'mxn',
+                appearance: { 
+                  theme: 'night', 
+                  variables: { colorPrimary: '#fbbf24', colorBackground: '#111111', colorText: '#ffffff', colorDanger: '#f87171' }
+                }
+              }}
+            >
+              <CheckoutForm 
+                planSeleccionado={planSeleccionado} 
+                onSuccess={handlePaymentSuccess} 
+                onCancel={() => setCheckoutModal('selector')} 
+              />
+            </Elements>
           </div>
         </div>
       )}
