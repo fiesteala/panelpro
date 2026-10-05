@@ -9357,7 +9357,7 @@ const StripeCaja = ({ planSeleccionado, datosCliente, onSuccess, onVolver }) => 
        
        {/* 🔴 CORRECCIÓN: Fondo blanco de día (bg-white) y súper oscuro de noche (dark:bg-[#050505]) con bordes dinámicos */}
        <div className="relative p-5 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden group min-h-[250px] mb-6">
-         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
+         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-0 dark:opacity-20 pointer-events-none"></div>
          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
          <div className="relative z-10">
            {/* 🔴 STRIPE INTELIGENTE: Recibe tus datos y tu País para saber qué mostrar */}
