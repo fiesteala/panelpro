@@ -10559,33 +10559,32 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </div>
             ) : (
               <>
-                <div className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 shrink-0">
-                  <div className="flex justify-between items-center mb-1">
-                    <h3 className="font-editorial font-bold text-2xl text-slate-900 dark:text-white">Reservar Compra</h3>
-                    <div className="flex gap-3">
-                      <button onClick={() => setCheckoutModal('selector')} className="text-slate-400 hover:text-indigo-500 dark:hover:text-amber-500 text-[10px] font-bold uppercase tracking-widest transition-colors">Volver</button>
-                      <button onClick={() => setCheckoutModal(null)} className="text-slate-400 hover:text-rose-500 transition-colors"><X size={20}/></button>
+                {/* COLUMNA DERECHA: Pasarela Fija */}
+                <div className="w-full lg:w-96 flex flex-col shrink-0 h-[600px] lg:h-auto border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-white/5 relative z-10 transition-colors">
+                  <div className="p-5 border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex items-center justify-between shrink-0 transition-colors">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-amber-500 mb-0.5">Pasarela Segura</p>
+                      <h3 className="text-sm font-bold text-slate-800 dark:text-white flex items-center"><ShieldCheck size={16} className="mr-1.5 text-emerald-500"/> Pago Protegido</h3>
                     </div>
                   </div>
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold flex items-center"><Lock size={12} className="mr-1 text-emerald-500"/> Transacción Cifrada 256-bit</p>
-                </div>
-                
-                <div className="p-6 overflow-y-auto flex-1 custom-scrollbar bg-slate-50 dark:bg-transparent">
-                  <Elements 
-                    stripe={stripePromise}
-                    options={{
-                      mode: 'payment',
-                      amount: planSeleccionado ? parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100 : 1000,
-                      currency: 'mxn',
-                      appearance: { theme: 'night', variables: { colorPrimary: '#fbbf24' } }
-                    }}
-                  >
-                    <CheckoutForm 
-                      planSeleccionado={planSeleccionado} 
-                      onSuccess={handlePaymentSuccess} 
-                      onCancel={() => setCheckoutModal('selector')} 
-                    />
-                  </Elements>
+                  
+                  <div className="p-6 overflow-y-auto flex-1 custom-scrollbar bg-slate-50 dark:bg-transparent">
+                    <Elements 
+                      stripe={stripePromise}
+                      options={{
+                        mode: 'payment',
+                        amount: planSeleccionado ? parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100 : 1000,
+                        currency: 'mxn',
+                        appearance: { theme: 'night', variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171' } }
+                      }}
+                    >
+                      <CheckoutForm 
+                        planSeleccionado={planSeleccionado} 
+                        onSuccess={handlePaymentSuccess} 
+                        onCancel={() => setCheckoutModal('selector')} 
+                      />
+                    </Elements>
+                  </div>
                 </div>
               </>
             )}
@@ -14259,19 +14258,37 @@ const ShowcaseSimulatorView = () => {
               </div>
             )}
 
-            {checkoutStep === 2 && (
-              <div className="p-8 animate-in slide-in-from-right-8 duration-300 flex-1 overflow-y-auto custom-scrollbar">
-                <div className="flex justify-between items-center mb-4">
-                   <h3 className="font-editorial text-2xl text-white font-bold">Finalizar Compra</h3>
-                   <button onClick={() => setCheckoutStep(1)} className="text-slate-500 hover:text-white text-xs font-bold uppercase tracking-widest">Volver</button>
+            {/* PANTALLA 2: CHECKOUT */}
+            {checkoutStep === 2 && planSeleccionado && (
+              <div className="h-full flex flex-col bg-white dark:bg-[#0a0a0a] animate-in fade-in transition-colors">
+                <div className="p-5 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50 dark:bg-white/5 shrink-0 transition-colors">
+                  <button onClick={() => setCheckoutStep(1)} className="p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors bg-white dark:bg-black/20 rounded-full shadow-sm">
+                    <ArrowRight size={18} style={{ transform: 'rotate(180deg)' }}/>
+                  </button>
+                  <div className="text-center">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-0.5">Paso 2 de 2</p>
+                    <h3 className="text-sm font-bold text-slate-800 dark:text-white">Pago Seguro</h3>
+                  </div>
+                  <div className="w-9"></div>
                 </div>
-                <Elements stripe={stripePromise}>
-                  <CheckoutForm 
-                    planSeleccionado={planSeleccionado} 
-                    onSuccess={handlePaymentSuccess} 
-                    onCancel={() => setCheckoutStep(1)} 
-                  />
-                </Elements>
+                
+                <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                  <Elements 
+                    stripe={stripePromise}
+                    options={{
+                      mode: 'payment',
+                      amount: parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100,
+                      currency: 'mxn',
+                      appearance: { theme: 'night', variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171' } }
+                    }}
+                  >
+                    <CheckoutForm 
+                      planSeleccionado={planSeleccionado} 
+                      onSuccess={handlePaymentSuccess} 
+                      onCancel={() => setCheckoutStep(1)} 
+                    />
+                  </Elements>
+                </div>
               </div>
             )}
 
