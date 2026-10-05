@@ -9325,56 +9325,66 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [errorTexto, setErrorTexto] = useState(null);
 
+  // Datos del cliente
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [fecha, setFecha] = useState('');
-  const [telefono, setTelefono] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!stripe || !elements) return;
-    setLoading(true); setErrorTexto(null);
 
-    // 1. Validamos que el cliente haya llenado bien el formulario de Stripe
+    setLoading(true);
+    setErrorTexto(null);
+
+    // 1. Validamos que los datos estén bien escritos
     const { error: submitError } = await elements.submit();
     if (submitError) {
       setErrorTexto(submitError.message);
-      setLoading(false); return;
+      setLoading(false);
+      return;
     }
 
     try {
-      // 2. Pedimos el sello de seguridad a tu servidor (junto con los datos del evento)
+      // 2. Pedimos el permiso a tu servidor para cobrar
       const respuesta = await fetch("https://us-central1-panel-de-control-intelig-db278.cloudfunctions.net/crearIntentoAsincrono", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          plan: planSeleccionado.plan,
+          plan: planSeleccionado.plan === 'Black Label' ? 'security_kit' : 
+                planSeleccionado.plan === 'Social Wall' ? 'social_wall' : 
+                planSeleccionado.plan.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""), 
           precio: planSeleccionado.precio,
-          nombre, email, fecha, telefono
+          nombre: nombre,
+          email: email,
+          fecha: fecha
         })
       });
-      const { clientSecret, error: backendError } = await respuesta.json();
-      if (backendError) throw new Error(backendError);
+      
+      const data = await respuesta.json();
+      const clientSecret = data.clientSecret;
 
-      // 3. Confirmamos el pago final con Stripe
+      if (!clientSecret) {
+        throw new Error("No se pudo generar el cobro.");
+      }
+
+      // 3. Confirmamos el pago (Tarjeta, Oxxo o SPEI)
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         clientSecret,
         confirmParams: {
-          // Stripe lo mandará a tu página principal si es Oxxo para mostrarle el ticket
           return_url: `${window.location.origin}/`, 
-          payment_method_data: { billing_details: { name: nombre, email, phone: telefono } }
+          payment_method_data: { billing_details: { name: nombre, email: email } }
         },
-        // Esto le dice a Stripe que solo redirija si es estrictamente necesario (ej. Oxxo o SPEI)
         redirect: 'if_required' 
       });
 
       if (error) {
         setErrorTexto(error.message);
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // ¡Pagó con tarjeta en el instante!
         if (window.fbq) {
-           window.fbq('track', 'Purchase', { value: Number(planSeleccionado.precio.replace(/,/g, '')), currency: 'MXN' });
+          const precioLimpio = planSeleccionado.precio.toString().replace(/,/g, '');
+          window.fbq('track', 'Purchase', { value: Number(precioLimpio), currency: 'MXN', content_name: `Plan ${planSeleccionado.plan}` });
         }
         onSuccess({ success: true }, planSeleccionado);
       }
@@ -9387,7 +9397,8 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full animate-in fade-in duration-500">
       <div className="space-y-6 mb-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-        {/* Resumen */}
+        
+        {/* Resumen de compra VIP */}
         <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 to-white dark:from-amber-500/10 dark:to-[#111] border border-amber-200 dark:border-amber-500/30 rounded-2xl p-6 shadow-sm">
            <div className="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/20 blur-2xl rounded-full pointer-events-none"></div>
            <div className="flex justify-between items-center relative z-10">
@@ -9402,48 +9413,44 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
            </div>
         </div>
 
-        {/* Datos del Cliente */}
+        {/* Formulario de Datos */}
         <div className="space-y-4">
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Festejados</label>
-            <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium" />
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Nombre de los Festejados</label>
+            <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Carlos & María" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Correo</label>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium" />
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Correo Electrónico</label>
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium" />
             </div>
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Fecha</label>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Fecha del Evento</label>
               <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium [color-scheme:light] dark:[color-scheme:dark]" />
             </div>
-          </div>
-          <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">WhatsApp</label>
-            <input type="tel" required value={telefono} onChange={(e) => setTelefono(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none shadow-sm font-medium" />
           </div>
         </div>
 
         {/* MÓDULO UNIVERSAL STRIPE (Tarjeta, Oxxo, SPEI) */}
         <div className="mt-8">
-           <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1 flex items-center">Pago Seguro</label>
+           <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1 flex items-center">Información Bancaria Segura</label>
+           
            <div className="relative p-5 bg-slate-900 dark:bg-[#050505] border border-slate-800 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden group">
              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
+             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
+             
              <div className="relative z-10">
-               <PaymentElement options={{
-                 layout: "tabs",
-                 theme: "night",
-                 variables: { colorPrimary: '#fbbf24', colorBackground: '#050505', colorText: '#ffffff', colorDanger: '#f87171', fontFamily: '"Montserrat", sans-serif' }
-               }}/>
+               {/* Aquí está el PaymentElement que dibuja las pestañas */}
+               <PaymentElement options={{ layout: "tabs" }} />
              </div>
            </div>
-           {errorTexto && <p className="text-rose-500 text-xs mt-3 ml-1 flex items-center font-bold bg-rose-50 dark:bg-rose-500/10 p-2 rounded-lg border border-rose-200 dark:border-rose-500/20">{errorTexto}</p>}
+           {errorTexto && <p className="text-rose-500 text-xs mt-3 ml-1 font-bold">{errorTexto}</p>}
         </div>
       </div>
 
       <div className="pt-5 border-t border-slate-100 dark:border-white/5 mt-auto shrink-0">
-        <button type="submit" disabled={!stripe || !elements || loading} className="w-full py-4 sm:py-5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-black rounded-xl text-xs sm:text-sm uppercase tracking-widest shadow-[0_10px_25px_rgba(245,158,11,0.4)] hover:shadow-[0_15px_35px_rgba(245,158,11,0.6)] hover:scale-[1.02] transition-all flex justify-center items-center">
-          {loading ? <span>Procesando...</span> : <span>Proceder al Pago</span>}
+        <button type="submit" disabled={!stripe || loading} className="w-full py-4 sm:py-5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-black rounded-xl text-xs sm:text-sm uppercase tracking-widest shadow-[0_10px_25px_rgba(245,158,11,0.4)] transition-all flex justify-center items-center">
+          {loading ? <span>Cifrando Transacción...</span> : <span>Pagar ${planSeleccionado.precio} MXN</span>}
         </button>
       </div>
     </form>
@@ -10568,7 +10575,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     stripe={stripePromise}
                     options={{
                       mode: 'payment',
-                      amount: parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100,
+                      amount: planSeleccionado ? parseInt(planSeleccionado.precio.toString().replace(/,/g, '')) * 100 : 1000,
                       currency: 'mxn',
                       appearance: { theme: 'night', variables: { colorPrimary: '#fbbf24' } }
                     }}
