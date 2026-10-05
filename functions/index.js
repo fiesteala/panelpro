@@ -4,7 +4,7 @@ const { Resend } = require("resend");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 
 const cors = require("cors")({ origin: true });
-const resend = new Resend("re_3GKzsBjx_5AXZ8SbBPV1Tf3CHoFBuoN9Z");
+const resend = new Resend(process.env.RESEND_KEY);
 
 admin.initializeApp();
 
