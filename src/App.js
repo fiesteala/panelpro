@@ -9344,7 +9344,7 @@ const StripeCaja = ({ planSeleccionado, datosCliente, onSuccess, onVolver }) => 
     } else if (paymentIntent && paymentIntent.status === 'succeeded') {
       if (window.fbq) {
         const precioLimpio = planSeleccionado.precio.toString().replace(/,/g, '');
-        window.fbq('track', 'Purchase', { value: Number(precioLimpio), currency: 'MXN' });
+        window.fbq('track', 'Purchase', { value: Number(precioLimpio), currency: planSeleccionado.moneda || 'MXN' });
       }
       onSuccess({ success: true }, planSeleccionado);
     }
@@ -9382,8 +9382,8 @@ const StripeCaja = ({ planSeleccionado, datosCliente, onSuccess, onVolver }) => 
            Volver
          </button>
          <button type="submit" disabled={!stripe || loading} className="flex-1 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-black rounded-xl text-xs uppercase tracking-widest shadow-[0_10px_25px_rgba(245,158,11,0.4)] transition-all flex justify-center items-center">
-           {loading ? "Procesando..." : `Pagar ${planSeleccionado.precio} MXN`}
-         </button>
+         {loading ? "Procesando..." : `Pagar ${planSeleccionado.precio} ${planSeleccionado.moneda || 'MXN'}`}
+      </button>
        </div>
     </form>
   );
@@ -9416,6 +9416,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
                 planSeleccionado.plan === 'Social Wall' ? 'social_wall' : 
                 planSeleccionado.plan.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
           precio: planSeleccionado.precio,
+          moneda: planSeleccionado.moneda || 'MXN', 
           nombre, email, fecha, telefono: telCompleto, pais
         })
       });
@@ -9437,7 +9438,8 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
            </div>
            <div className="text-right">
              <p className="text-slate-900 dark:text-white font-black text-2xl md:text-3xl">${planSeleccionado.precio.split('.')[0]}</p>
-             <p className="text-slate-500 dark:text-slate-400 text-[9px] uppercase tracking-widest font-bold mt-1">MXN / Pago Único</p>
+             {/* 🔴 CAMBIO VISUAL */}
+             <p className="text-slate-500 dark:text-slate-400 text-[9px] uppercase tracking-widest font-bold mt-1">{planSeleccionado.moneda || 'MXN'} / Pago Único</p>
            </div>
          </div>
       </div>
@@ -10739,6 +10741,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
             {/* CONTROLES DERECHOS */}
             <div className="flex items-center gap-2 md:gap-4">
+              
+              {/* 🔴 NUEVO: SELECTOR GLOBAL DE MONEDA */}
+              <div className="flex items-center bg-slate-100 dark:bg-white/10 p-1 rounded-full shadow-inner border border-slate-200 dark:border-white/5">
+                 <button onClick={() => setMoneda('MXN')} className={`px-2 md:px-3 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all ${moneda === 'MXN' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>MXN</button>
+                 <button onClick={() => setMoneda('USD')} className={`px-2 md:px-3 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all ${moneda === 'USD' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>USD</button>
+              </div>
+
               <button onClick={cycleTheme} className="p-2 text-slate-400 hover:text-amber-600 dark:text-slate-500 dark:hover:text-amber-400 transition-colors" title={`Modo: ${themeSetting.toUpperCase()}`}>
                 {themeSetting === 'auto' ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -11677,8 +11686,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                  </div>
 
                  <div className="mt-10 relative z-10">
-                    <button onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: '1490.00' }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(79,70,229,0.3)]">
-                       <Camera size={18} className="mr-3 text-white/70" /> Comprar Muro Social ($1,490)
+                    <button onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: moneda === 'MXN' ? '1490.00' : '79.00', moneda: moneda }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(79,70,229,0.3)]">
+                       <Camera size={18} className="mr-3 text-white/70" /> Comprar Muro Social (${moneda === 'MXN' ? '1,490' : '79'})
                     </button>
                  </div>
               </RevealSection>
@@ -11765,8 +11774,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 </div>
                 
                 <div className="mt-10 relative z-10">
-                   <button onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: '1490.00' }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-900 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(245,158,11,0.3)]">
-                      <Printer size={18} className="mr-3 text-slate-900/70" /> Comprar Generador VIP ($1,490)
+                   <button onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: moneda === 'MXN' ? '745.00' : '39.00', moneda: moneda }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-900 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(245,158,11,0.3)]">
+                      <Printer size={18} className="mr-3 text-slate-900/70" /> Comprar Generador VIP (${moneda === 'MXN' ? '745' : '39'})
                    </button>
                 </div>
               </RevealSection>

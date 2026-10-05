@@ -351,8 +351,12 @@ exports.crearIntentoAsincrono = functions.https.onRequest(async (req, res) => {
 
   try {
     const stripe = require("stripe")(process.env.STRIPE_SECRET);
-    const { precio, plan, nombre, email, fecha, telefono, pais } = req.body;
+    // 🔴 1. Ahora el servidor recibe la variable 'moneda' desde tu página web
+    const { precio, plan, moneda, nombre, email, fecha, telefono, pais } = req.body;
     const precioLimpio = parseInt(precio.toString().replace(/,/g, ''));
+
+    // 🔴 2. Convertimos a minúsculas (Stripe exige 'usd' o 'mxn')
+    const currencyLower = moneda ? moneda.toLowerCase() : 'mxn';
 
     let customerId;
     const clientesExistentes = await stripe.customers.list({ email: email, limit: 1 });
@@ -364,7 +368,6 @@ exports.crearIntentoAsincrono = functions.https.onRequest(async (req, res) => {
         name: nombre, 
         email: email, 
         phone: telefono,
-        // CLAVE: Asignar el país desde la creación del cliente
         address: { country: pais } 
       });
       customerId = nuevoCliente.id;
@@ -372,16 +375,19 @@ exports.crearIntentoAsincrono = functions.https.onRequest(async (req, res) => {
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: precioLimpio * 100,
-      currency: "mxn",
+      currency: currencyLower, // 🔴 3. Stripe ya cobra en la moneda correcta
       customer: customerId,
       automatic_payment_methods: { enabled: true },
-      // Dejamos esto para que SPEI funcione sin problema
-      payment_method_options: {
-        customer_balance: {
-          funding_type: 'bank_transfer',
-          bank_transfer: { type: 'mx_bank_transfer' }
+      
+      // 🔴 4. REGLA DE ORO: Solo permitimos Transferencia (SPEI/OXXO) si es en Pesos
+      ...(currencyLower === 'mxn' && {
+        payment_method_options: {
+          customer_balance: {
+            funding_type: 'bank_transfer',
+            bank_transfer: { type: 'mx_bank_transfer' }
+          }
         }
-      },
+      }),
       metadata: { plan, nombre, email, fecha, telefono, pais }
     });
 
