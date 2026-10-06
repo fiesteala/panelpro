@@ -12539,7 +12539,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       const isQrChecked = editingLic.isQrEnabled !== false; 
       const isPassChecked = editingLic.isPassCountEnabled !== false;
 
-      // 🔴 FASE 3: Si se pegó la URL y estaba en proceso o nuevo, cambia a activo (Verde)
+      // 🔴 AQUÍ ESTÁ LA SOLUCIÓN: Le decimos al sistema que guarde las variables híbridas
       let updateData = { 
         urlInvitacion: safeUrl, 
         plan: editingLic.plan, 
@@ -12548,15 +12548,19 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         isQrEnabled: isQrChecked,
         isPassCountEnabled: isPassChecked,
         fechaEvento: editingLic.fechaEvento || '',
-        horaEvento: editingLic.horaEvento || '18:00'
+        horaEvento: editingLic.horaEvento || '18:00',
+        hasSocialWall: editingLic.hasSocialWall || false, // GUARDA EL ADD-ON
+        hasBlackLabel: editingLic.hasBlackLabel || false  // GUARDA EL ADD-ON
       };
 
       if (safeUrl !== "" && (editingLic.status === 'en_proceso' || editingLic.status === 'nuevo')) {
           updateData.status = 'activo';
       }
 
+      // 1. Actualiza la base de usuarios
       await updateDoc(doc(db, "usuarios", editingLic.id), updateData);
 
+      // 2. Actualiza la base de eventos
       try {
         await updateDoc(doc(db, "eventos", editingLic.eventId), {
            nombres: safeNombre,
@@ -12565,7 +12569,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
            isQrEnabled: isQrChecked,
            isPassCountEnabled: isPassChecked,
            fecha: editingLic.fechaEvento || '',
-           horaEvento: editingLic.horaEvento || '18:00'
+           horaEvento: editingLic.horaEvento || '18:00',
+           hasSocialWall: editingLic.hasSocialWall || false, // GUARDA EL ADD-ON
+           hasBlackLabel: editingLic.hasBlackLabel || false  // GUARDA EL ADD-ON
         });
       } catch(err) { console.log("Doc evento no listo", err); }
 
