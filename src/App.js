@@ -1625,6 +1625,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
           return (
             <div className="fixed inset-0 z-[9999] bg-slate-200 flex flex-col overflow-hidden animate-in fade-in transition-colors">
+              {/* BOTÓN FLOTANTE DE CIERRE DE EMERGENCIA */}
+              <button onClick={() => setExportViewOpen(false)} className="absolute top-4 right-4 md:top-8 md:right-8 z-[10000] bg-rose-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-[0_10px_25px_rgba(225,29,72,0.5)] hover:bg-rose-600 border-2 border-white transition-transform hover:scale-110">
+                 <X size={24} />
+              </button>
               
               {/* TOOLBAR SUPERIOR DE EDICIÓN CLARO Y ELEGANTE */}
               <div className="h-auto md:h-16 bg-white text-slate-800 px-6 py-3 flex flex-col md:flex-row items-center justify-between shrink-0 border-b border-slate-300 shadow-sm print:hidden gap-4 z-50">
@@ -1756,13 +1760,18 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className={`grid grid-cols-2 md:grid-cols-3 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-4`}>
         <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col transition-colors"><div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Users size={12} className="inline mr-1 text-slate-400 dark:text-slate-500"/> {passCountEnabled ? 'Pases Totales' : 'Invitados Totales'}</div><h3 className="text-2xl font-editorial text-slate-900 dark:text-white">{passCountEnabled ? totalPases : safeGuests.length}</h3></div>
-        {passCountEnabled && <div className="bg-sky-50 dark:bg-sky-500/10 p-4 rounded-2xl border border-sky-200 dark:border-sky-500/20 shadow-sm flex flex-col transition-colors"><div className="text-sky-600 dark:text-sky-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Users size={12} className="inline mr-1"/> Niños</div><h3 className="text-2xl font-editorial text-sky-600 dark:text-sky-400">{totalNinos}</h3></div>}
+        
+        {/* SOLO PREMIUM VE NIÑOS */}
+        {isPremium && passCountEnabled && <div className="bg-sky-50 dark:bg-sky-500/10 p-4 rounded-2xl border border-sky-200 dark:border-sky-500/20 shadow-sm flex flex-col transition-colors"><div className="text-sky-600 dark:text-sky-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Users size={12} className="inline mr-1"/> Niños</div><h3 className="text-2xl font-editorial text-sky-600 dark:text-sky-400">{totalNinos}</h3></div>}
+        
         <div className="bg-amber-50 dark:bg-amber-500/10 p-4 rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex flex-col transition-colors"><div className="text-amber-600 dark:text-amber-500 font-bold text-[9px] uppercase tracking-widest mb-1"><CheckCircle size={12} className="inline mr-1"/> Confirmados</div><h3 className="text-2xl font-editorial text-amber-600 dark:text-amber-500">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3></div>
         <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col transition-colors"><div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Clock size={12} className="inline mr-1"/> Pendientes</div><h3 className="text-2xl font-editorial text-slate-600 dark:text-slate-300">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3></div>
         <div className="bg-rose-50 dark:bg-rose-500/10 p-4 rounded-2xl border border-rose-200 dark:border-rose-500/20 shadow-sm flex flex-col transition-colors"><div className="text-rose-600 dark:text-rose-400 font-bold text-[9px] uppercase tracking-widest mb-1"><X size={12} className="inline mr-1"/> Cancelados</div><h3 className="text-2xl font-editorial text-rose-600 dark:text-rose-400">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3></div>
-        {qrEnabled && <div className="bg-emerald-50 dark:bg-emerald-500/10 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex flex-col transition-colors"><div className="text-emerald-600 dark:text-emerald-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Scan size={12} className="inline mr-1"/> Ingresaron</div><h3 className="text-2xl font-editorial text-emerald-600 dark:text-emerald-400">{totalIngresos}</h3></div>}
+        
+        {/* SOLO PREMIUM VE INGRESARON */}
+        {isPremium && qrEnabled && <div className="bg-emerald-50 dark:bg-emerald-500/10 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex flex-col transition-colors"><div className="text-emerald-600 dark:text-emerald-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Scan size={12} className="inline mr-1"/> Ingresaron</div><h3 className="text-2xl font-editorial text-emerald-600 dark:text-emerald-400">{totalIngresos}</h3></div>}
       </div>
 
       {isWeddingMode && passCountEnabled && (
@@ -1943,10 +1952,15 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre del Titular o Familia</label><input type="text" required value={newGuest.name} onChange={e=>setNewGuest({...newGuest, name: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
                 <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" value={newGuest.phone} onChange={e=>setNewGuest({...newGuest, phone: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" placeholder="10 dígitos" /></div>
                 
+                {/* 🔴 CONTROL DE PASES INTELIGENTE */}
                 {passCountEnabled && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Adultos</label><input type="number" min="1" required value={newGuest.adultPasses} onChange={e=>setNewGuest({...newGuest, adultPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-indigo-600 dark:text-amber-500 font-black text-center transition-colors" /></div>
-                    <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Niños</label><input type="number" min="0" required value={newGuest.childrenPasses} onChange={e=>setNewGuest({...newGuest, childrenPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sky-600 dark:text-sky-400 font-black text-center transition-colors" /></div>
+                  <div className={`grid ${isPremium ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
+                    <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases {isPremium ? 'Adultos' : 'Totales'}</label><input type="number" min="1" required value={newGuest.adultPasses} onChange={e=>setNewGuest({...newGuest, adultPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-indigo-600 dark:text-amber-500 font-black text-center transition-colors" /></div>
+                    
+                    {/* Solo Premium ve la opción de asignar Niños */}
+                    {isPremium && (
+                      <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Niños</label><input type="number" min="0" required value={newGuest.childrenPasses} onChange={e=>setNewGuest({...newGuest, childrenPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sky-600 dark:text-sky-400 font-black text-center transition-colors" /></div>
+                    )}
                   </div>
                 )}
               </div>
