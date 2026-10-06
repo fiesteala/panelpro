@@ -1599,7 +1599,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   {exportCols.pases && passCountEnabled && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest text-center">Pase</th>}
                   {exportCols.estatus && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest text-center">Estatus</th>}
                   {exportCols.telefono && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest">Teléfono</th>}
-                  {exportCols.mesa && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest">Mesa</th>}
+                  {isPremium && exportCols.mesa && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest">Mesa</th>}
                 </tr>
               </thead>
               <tbody>
@@ -1617,7 +1617,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                       {exportCols.pases && passCountEnabled && <td className="py-3 px-2 text-center text-slate-800 font-bold">{row.isMain ? row.passes : '-'}</td>}
                       {exportCols.estatus && <td className="py-3 px-2 text-center text-slate-600 text-[10px] uppercase tracking-widest font-bold">{row.parentGuest.status.replace('_', ' ')}</td>}
                       {exportCols.telefono && <td className="py-3 px-2 text-slate-600 font-mono text-[11px]">{row.isMain ? (row.parentGuest.phone || '-') : ''}</td>}
-                      {exportCols.mesa && <td className="py-3 px-2 text-slate-800 font-bold">{row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : <span className="text-slate-400 font-normal italic">Sin mesa</span>}</td>}
+                      {isPremium && exportCols.mesa && <td className="py-3 px-2 text-slate-800 font-bold">{row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : <span className="text-slate-400 font-normal italic">Sin mesa</span>}</td>}
                     </tr>
                   )
                 })}
@@ -1627,38 +1627,34 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
           return (
             <div className="fixed inset-0 z-[9999] bg-slate-200 flex flex-col overflow-hidden animate-in fade-in transition-colors pt-20 md:pt-24">
-              {/* BOTÓN FLOTANTE DE CIERRE DE EMERGENCIA */}
-              <button onClick={() => setExportViewOpen(false)} className="absolute top-24 right-4 md:top-28 md:right-8 z-[10000] bg-rose-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-[0_10px_25px_rgba(225,29,72,0.5)] hover:bg-rose-600 border-2 border-white transition-transform hover:scale-110">
-                <X size={24} />
-              </button>
               
               {/* TOOLBAR SUPERIOR DE EDICIÓN CLARO Y ELEGANTE */}
-              <div className="h-auto md:h-16 bg-white text-slate-800 px-6 py-3 flex flex-col md:flex-row items-center justify-between shrink-0 border-b border-slate-300 shadow-sm print:hidden gap-4 z-50">
+              <div className="h-auto bg-white text-slate-800 px-4 py-3 flex flex-wrap items-center justify-between shrink-0 border-b border-slate-300 shadow-sm print:hidden gap-4 z-50">
                 
-                <div className="flex items-center space-x-4 w-full md:w-auto">
-                  <button onClick={() => setExportViewOpen(false)} className="px-4 py-2 bg-slate-100 hover:bg-rose-100 hover:text-rose-600 text-slate-600 rounded-lg transition-colors font-bold text-xs flex items-center shadow-sm">
-                    <X size={16} className="mr-2"/> Cerrar Vista Previa
-                  </button>
-                </div>
+                {/* Botón Cerrar Integrado Elegante */}
+                <button onClick={() => setExportViewOpen(false)} className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition-colors font-bold text-xs flex items-center border border-rose-200 shadow-sm">
+                  <X size={16} className="mr-2"/> Cerrar Vista
+                </button>
                 
                 {/* CONTROLES DE COLUMNAS ESTILO PILL */}
-                <div className="flex items-center bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex-wrap justify-center gap-1 shadow-inner">
+                <div className="flex items-center bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex-wrap justify-center gap-1 shadow-inner hidden md:flex">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-2 ml-1">Columnas:</span>
                   <button onClick={() => toggleCol('nombre')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.nombre ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Nombre</button>
                   {passCountEnabled && <button onClick={() => toggleCol('pases')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.pases ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Pases</button>}
                   <button onClick={() => toggleCol('estatus')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.estatus ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Estatus</button>
                   <button onClick={() => toggleCol('telefono')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.telefono ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Teléfono</button>
-                  <button onClick={() => toggleCol('mesa')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.mesa ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Mesa</button>
+                  {isPremium && <button onClick={() => toggleCol('mesa')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.mesa ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Mesa</button>}
                 </div>
 
                 <div className="flex items-center gap-3">
+                  {/* Botón de Separar Lados (Vuelve a la vida) */}
                   {isWeddingMode && (
                     <button onClick={() => setSplitBySide(!splitBySide)} className={`flex items-center px-4 py-2 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm ${splitBySide ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
-                      <Layers size={14} className="mr-2"/> {splitBySide ? 'Agrupado por Lados' : 'Separar Lados'}
+                      <Layers size={14} className="mr-2"/> {splitBySide ? 'Agrupado' : 'Separar Lados'}
                     </button>
                   )}
                   <button onClick={triggerListPdfDownload} disabled={isPreparingListPrint} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold flex items-center shadow-md transition-all disabled:opacity-50">
-                    {isPreparingListPrint ? <RefreshCw size={14} className="mr-2 animate-spin"/> : <Download size={14} className="mr-2"/>} Descargar PDF
+                    {isPreparingListPrint ? <RefreshCw size={14} className="mr-2 animate-spin"/> : <Download size={14} className="mr-2"/>} Descargar
                   </button>
                 </div>
               </div>
@@ -1686,8 +1682,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   <div className="flex gap-10 mb-8 border-b border-slate-200 pb-6 text-slate-800">
                      <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">{passCountEnabled ? 'Total Pases' : 'Invitados Totales'}</span><span className="text-xl font-bold">{passCountEnabled ? totalPases : safeGuests.length}</span></div>
                      <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Confirmados</span><span className="text-xl font-bold">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</span></div>
-                     {qrEnabled && <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Ya Ingresaron</span><span className="text-xl font-bold">{totalIngresos}</span></div>}
-                     <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Mesas Asignadas</span><span className="text-xl font-bold">{totalMesas}</span></div>
+                     {isPremium && qrEnabled && <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Ya Ingresaron</span><span className="text-xl font-bold">{totalIngresos}</span></div>}
+                     {isPremium && <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Mesas Asignadas</span><span className="text-xl font-bold">{totalMesas}</span></div>}
                   </div>
 
                   <main>{renderTableRows(firstPageItems)}</main>
