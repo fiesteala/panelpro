@@ -1297,6 +1297,13 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   const getFlattenedGuests = (guestList) => {
     const flattened = [];
     guestList.forEach(guest => {
+      // 🔴 BARRERA DE TITANIO: Si es Básico/Plata, JAMÁS desglosar acompañantes. Solo 1 fila por familia.
+      if (!isPremium) {
+        flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.passes, isMain: true, isChild: false, pin: null, entered: false });
+        return; // Corta la ejecución aquí para este invitado
+      }
+
+      // 🟢 LÓGICA PREMIUM: Oro y Diamante sí desglosan con QR
       if (!guest.subGuests || guest.subGuests.length === 0 || !qrEnabled) {
         flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.passes, isMain: true, isChild: false, pin: null, entered: false });
       } else {
