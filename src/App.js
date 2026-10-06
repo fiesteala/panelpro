@@ -1732,7 +1732,14 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           {isBodaType && (
             <div className="flex items-center bg-white dark:bg-[#0a0a0a] p-1 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
               <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-2 ml-2">Boda</span>
-              <button onClick={() => setIsWeddingMode(!isWeddingMode)} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+              <button onClick={async () => {
+                const newVal = !isWeddingMode;
+                setIsWeddingMode(newVal);
+                try {
+                  // Importa updateDoc y doc de firebase/firestore arriba si no los tienes
+                  await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' });
+                } catch(e) { console.error(e) }
+              }} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
                 <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
               </button>
             </div>
@@ -1781,7 +1788,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-400 sticky top-0 z-10 transition-colors">
                 <tr>
                   <th className="px-5 py-3 font-bold uppercase tracking-wider text-[10px]">Nombre</th>
-                  {passCountEnabled && <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Tipo</th>}
+                  {isPremium && passCountEnabled && <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Tipo</th>}
                   {passCountEnabled && <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Pases</th>}
                   {isPremium && <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Mesa</th>}
                   {isPremium && qrEnabled && <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">QR Pase</th>}
@@ -1807,10 +1814,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                       </div>
                     </td>
                     
-                    {passCountEnabled && (
-                       <td className="px-3 py-3 text-center">
-                         {row.isMissing ? <span className="text-slate-300 dark:text-slate-600">-</span> : row.isChild ? <span className="text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 px-2 py-0.5 rounded text-[8px] uppercase font-black tracking-widest">Niño</span> : <span className="text-slate-300">-</span>}
-                       </td>
+                    {isPremium && passCountEnabled && (
+                      <td className="px-3 py-3 text-center">
+                        {row.isMissing ? <span className="text-slate-300 dark:text-slate-600">-</span> : row.isChild ? <span className="text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 px-2 py-0.5 rounded text-[8px] uppercase font-black tracking-widest">Niño</span> : <span className="text-slate-300">-</span>}
+                      </td>
                     )}
                     
                     {passCountEnabled && (
