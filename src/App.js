@@ -1626,14 +1626,14 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           );
 
           return (
-            <div className="fixed inset-0 z-[9999] bg-slate-200 flex flex-col overflow-hidden animate-in fade-in transition-colors pt-20 md:pt-24">
+            <div className="fixed inset-0 z-[999999] bg-slate-200 flex flex-col overflow-hidden animate-in fade-in transition-colors pt-24" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh' }}>
               
               {/* TOOLBAR SUPERIOR DE EDICIÓN CLARO Y ELEGANTE */}
               <div className="h-auto bg-white text-slate-800 px-4 py-3 flex flex-wrap items-center justify-between shrink-0 border-b border-slate-300 shadow-sm print:hidden gap-4 z-50">
                 
-                {/* 1. BOTÓN DE CERRAR (¡El escape!) */}
-                <button onClick={() => setExportViewOpen(false)} className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition-colors font-bold text-xs flex items-center border border-rose-200 shadow-sm">
-                  <X size={16} className="mr-2"/> Cerrar Vista
+                {/* BOTÓN CERRAR */}
+                <button onClick={() => setExportViewOpen(false)} className="px-5 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-lg transition-colors font-black text-sm flex items-center shadow-lg border-2 border-rose-300">
+                  <X size={20} className="mr-2"/> CERRAR VISTA
                 </button>
                 
                 {/* 2. CONTROLES DE COLUMNAS ESTILO PILL */}
