@@ -1211,6 +1211,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 // ==========================================
 const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento, userPlan, eventName, urlInvitacion }) => {
   const isBodaType = tipoEvento === 'boda';
+  const isPremium = userPlan === 'oro' || userPlan === 'diamante';
   const [isWeddingMode, setIsWeddingMode] = useState(isBodaType);
   const [expandedMobileRow, setExpandedMobileRow] = useState(null);
   const toggleMobileRow = (id) => setExpandedMobileRow(prev => prev === id ? null : id);
@@ -1341,7 +1342,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     }
     
     let msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nPor favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia*:\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
-    if (passCountEnabled) {
+    if (passCountEnabled && isPremium) {
       msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
     }
 
@@ -1710,9 +1711,11 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
         
         <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
+          {/* El Excel siempre es útil para cualquier plan */}
           <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Exportar Lista</button>
           
-          {qrEnabled && (
+          {/* Las Pulseras son exclusivas de Premium y si tienen QR Activado */}
+          {isPremium && qrEnabled && (
              <button onClick={triggerQRPdfDownload} disabled={isPreparingQRPrint} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors disabled:opacity-50">
                {isPreparingQRPrint ? <RefreshCw size={14} className="mr-1.5 animate-spin"/> : <QrCode size={14} className="mr-1.5 text-indigo-600 dark:text-indigo-400"/>}
                {isPreparingQRPrint ? 'Generando...' : 'Generar Pulseras VIP'}
@@ -1773,8 +1776,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   <th className="px-5 py-3 font-bold uppercase tracking-wider text-[10px]">Nombre</th>
                   {passCountEnabled && <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Tipo</th>}
                   {passCountEnabled && <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Pases</th>}
-                  <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Mesa</th>
-                  {qrEnabled && <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">QR Pase</th>}
+                  {isPremium && <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Mesa</th>}
+                  {isPremium && qrEnabled && <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">QR Pase</th>}
                   <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Estatus</th>
                   <th className="px-5 py-3 font-bold uppercase tracking-wider text-[10px] text-right">Acciones</th>
                 </tr>
@@ -1809,15 +1812,17 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                        </td>
                     )}
 
-                    <td className="px-4 py-3 text-center">
-                      {row.parentGuest.tableId ? (
-                        <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold border border-slate-200 dark:border-white/10 shadow-sm">
-                          {tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId}
-                        </span>
-                      ) : <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">No asignado</span>}
-                    </td>
+                    {isPremium && (
+                      <td className="px-4 py-3 text-center">
+                        {row.parentGuest.tableId ? (
+                          <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold border border-slate-200 dark:border-white/10 shadow-sm">
+                            {tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId}
+                          </span>
+                        ) : <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">No asignado</span>}
+                      </td>
+                    )}
 
-                    {qrEnabled && (
+                    {isPremium && qrEnabled && (
                        <td className="px-3 py-3 text-center">
                          {row.pin && row.parentGuest.status !== 'cancelado' ? (
                            <button onClick={() => setQrModal(row)} className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-white hover:bg-indigo-50 dark:hover:bg-white/10 p-2 rounded-lg transition-colors border border-transparent dark:hover:border-white/10" title="Ver Pase Individual">
@@ -1945,13 +1950,15 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre</label><input type="text" required value={editModal.guest.name} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, name: e.target.value }})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
               <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" value={editModal.guest.phone || ''} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, phone: e.target.value }})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className={`${passCountEnabled ? 'col-span-2' : 'col-span-1'}`}><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Asignar Mesa</label>
-                  <select value={editModal.guest.tableId || ''} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, tableId: e.target.value }})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors">
-                    <option value="">Sin Mesa</option>
-                    {tables?.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                  </select>
-                </div>
+              <div className={`grid ${isPremium ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
+                {isPremium && (
+                  <div className={`${passCountEnabled ? 'col-span-2' : 'col-span-1'}`}><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Asignar Mesa</label>
+                    <select value={editModal.guest.tableId || ''} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, tableId: e.target.value }})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors">
+                      <option value="">Sin Mesa</option>
+                      {tables?.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    </select>
+                  </div>
+                )}
                 <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Estatus</label>
                   <select value={editModal.guest.status} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, status: e.target.value }})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors">
                     <option value="por_invitar">Por Invitar</option><option value="pendiente">Pendiente</option><option value="confirmado">Confirmado</option><option value="cancelado">Canceló</option>
