@@ -1631,12 +1631,12 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               {/* TOOLBAR SUPERIOR DE EDICIÓN CLARO Y ELEGANTE */}
               <div className="h-auto bg-white text-slate-800 px-4 py-3 flex flex-wrap items-center justify-between shrink-0 border-b border-slate-300 shadow-sm print:hidden gap-4 z-50">
                 
-                {/* Botón Cerrar Integrado Elegante */}
+                {/* 1. BOTÓN DE CERRAR (¡El escape!) */}
                 <button onClick={() => setExportViewOpen(false)} className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition-colors font-bold text-xs flex items-center border border-rose-200 shadow-sm">
                   <X size={16} className="mr-2"/> Cerrar Vista
                 </button>
                 
-                {/* CONTROLES DE COLUMNAS ESTILO PILL */}
+                {/* 2. CONTROLES DE COLUMNAS ESTILO PILL */}
                 <div className="flex items-center bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex-wrap justify-center gap-1 shadow-inner hidden md:flex">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-2 ml-1">Columnas:</span>
                   <button onClick={() => toggleCol('nombre')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.nombre ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Nombre</button>
@@ -1646,8 +1646,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   {isPremium && <button onClick={() => toggleCol('mesa')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.mesa ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Mesa</button>}
                 </div>
 
+                {/* 3. BOTONES DERECHOS (Separar lados y Descargar) */}
                 <div className="flex items-center gap-3">
-                  {/* Botón de Separar Lados (Vuelve a la vida) */}
                   {isWeddingMode && (
                     <button onClick={() => setSplitBySide(!splitBySide)} className={`flex items-center px-4 py-2 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm ${splitBySide ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
                       <Layers size={14} className="mr-2"/> {splitBySide ? 'Agrupado' : 'Separar Lados'}
