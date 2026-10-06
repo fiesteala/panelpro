@@ -10614,7 +10614,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                           <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">{plan.desc}</p>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">${plan.preciosOriginales[moneda]}</p>
+                          {plan.preciosOriginales[moneda] !== null && <p className="text-[11px] text-rose-500 font-bold line-through mb-[-4px]">${plan.preciosOriginales[moneda]}</p>}
                           <p className="font-black text-xl text-slate-900 dark:text-white">${plan.precios[moneda]}</p>
                           <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">{moneda}</p>
                         </div>
@@ -11738,8 +11738,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                  </div>
 
                  <div className="mt-10 relative z-10">
-                    <button onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: moneda === 'MXN' ? '1490.00' : '79.00', moneda: moneda }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(79,70,229,0.3)]">
-                       <Camera size={18} className="mr-3 text-white/70" /> Comprar Muro Social (${moneda === 'MXN' ? '1,490' : '79'})
+                    <button onClick={() => { setPlanSeleccionado({ plan: 'Muro Social', precio: pSocialWall.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(79,70,229,0.3)]">
+                       <Camera size={18} className="mr-3 text-white/70" /> Comprar Muro Social (${pSocialWall.precios[moneda]})
                     </button>
                  </div>
               </RevealSection>
@@ -11826,8 +11826,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 </div>
                 
                 <div className="mt-10 relative z-10">
-                   <button onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: moneda === 'MXN' ? '745.00' : '39.00', moneda: moneda }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-900 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(245,158,11,0.3)]">
-                      <Printer size={18} className="mr-3 text-slate-900/70" /> Comprar Generador VIP (${moneda === 'MXN' ? '745' : '39'})
+                   <button onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: pBlackLabel.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-900 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(245,158,11,0.3)]">
+                      <Printer size={18} className="mr-3 text-slate-900/70" /> Comprar Generador VIP (${pBlackLabel.precios[moneda]})
                    </button>
                 </div>
               </RevealSection>
