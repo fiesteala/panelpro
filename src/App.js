@@ -14136,10 +14136,9 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
         }
         return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={currentEventType} userPlan={currentEventPlan} eventName={currentEventName} urlInvitacion={activeEventData?.urlInvitacion} /> : null;      
       
-      case 'escaner': return ['oro', 'diamante', 'security_kit'].includes(userPlan) && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
-      
-      // 🔴 SE CONECTÓ LA PANTALLA DEL MONITOR AQUÍ
-      case 'monitor': return ['security_kit', 'diamante', 'baulia_black_label'].includes(userPlan) && typeof MonitorRecepcionView !== 'undefined' ? <MonitorRecepcionView eventId={eventId} eventName={currentEventName} /> : null; 
+      // 🔴 SE AGREGÓ hasBlackLabel A LOS PERMISOS DE ESCÁNER Y MONITOR
+      case 'escaner': return (['oro', 'diamante', 'security_kit'].includes(userPlan) || hasBlackLabel) && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
+      case 'monitor': return (['security_kit', 'diamante', 'baulia_black_label'].includes(userPlan) || hasBlackLabel) && typeof MonitorRecepcionView !== 'undefined' ? <MonitorRecepcionView eventId={eventId} eventName={currentEventName} /> : null; 
 
       case 'mesas': return ['oro', 'diamante'].includes(userPlan) && typeof MesasView !== 'undefined' ? <MesasView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
       case 'mapa': return userPlan === 'diamante' && typeof MapaView !== 'undefined' ? <MapaView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} globalSearch={globalSearch} elements={mapElements} setElements={setMapElements} /> : null;
@@ -14148,7 +14147,10 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'timing': return ['plata', 'oro', 'diamante'].includes(userPlan) && typeof TimingView !== 'undefined' ? <TimingView timing={timing} setTiming={setTiming} addNotification={addNotification} /> : null;
       case 'presupuesto': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof PresupuestoView !== 'undefined' ? <PresupuestoView authData={authData} gastos={gastos} setGastos={setGastos} proveedores={proveedores} setProveedores={setProveedores} presupuestoTotal={presupuestoTotal} setPresupuestoTotal={setPresupuestoTotal} addNotification={addNotification} /> : null;
       case 'proveedores': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof ProveedoresView !== 'undefined' ? <ProveedoresView proveedores={proveedores} setProveedores={setProveedores} gastos={gastos} setGastos={setGastos} addNotification={addNotification} /> : null;
-      case 'galeria': return ['diamante'].includes(userPlan) && typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} /> : null;
+      
+      // 🔴 SE AGREGÓ hasSocialWall A LOS PERMISOS DE GALERÍA
+      case 'galeria': return (['diamante', 'social_wall'].includes(userPlan) || hasSocialWall) && typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} /> : null;
+      
       case 'invitacion': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof InvitacionView !== 'undefined' ? <InvitacionView guests={guests} urlInvitacion={activeEventData?.urlInvitacion} /> : null; 
       case 'configuracion': return userRole === 'planner' && typeof ConfiguracionMaestraView !== 'undefined' ? <ConfiguracionMaestraView agencyConfig={agencyConfig} addNotification={addNotification} /> : null;
       default: return <div className="p-8 text-center text-slate-500 font-bold">Módulo bloqueado o no disponible en tu plan actual.</div>;
