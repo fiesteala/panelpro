@@ -1405,90 +1405,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     }
   };
 
-  // 🔴 RESTAURADO: GENERADOR DE PULSERAS VIP EXACTAS
-  const triggerQRPdfDownload = async () => {
-    const allIndividualsForQR = safeGuests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').flatMap(g => (g.subGuests || []).map(sg => ({ ...sg, familyName: g.name, familyId: g.id })));
-    if (allIndividualsForQR.length === 0) {
-      if(addNotification) addNotification('Sin Confirmados', 'Nadie ha confirmado asistencia para imprimir pulseras.', 'warning');
-      return;
-    }
-    
-    setIsPreparingQRPrint(true);
-    if(addNotification) addNotification('Preparando Archivo', 'Generando pulseras QR a medida exacta...', 'info');
-
-    setTimeout(async () => {
-      try {
-        const { jsPDF } = await import('jspdf');
-        const html2canvas = (await import('html2canvas')).default;
-        
-        const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
-        const wristbandPages = chunkArray(allIndividualsForQR, 10);
-        
-        const tempContainer = document.createElement('div');
-        tempContainer.style.position = 'absolute';
-        tempContainer.style.left = '-9999px';
-        tempContainer.style.top = '-9999px';
-        document.body.appendChild(tempContainer);
-        
-        const root = ReactDOM.createRoot(tempContainer);
-        
-        const QRPagesToRender = wristbandPages.map((page, pageIdx) => (
-           <div key={pageIdx} className="hidden-qr-pdf-page bg-white relative shrink-0" style={{ width: '250mm', height: '190mm', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflow: 'hidden', padding: 0, margin: 0 }}>
-             {page.map((ind) => {
-               const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
-               const link = `${baseDomain}/?modo=camara&e=${ID_DEL_EVENTO}&u=${ind.id}`;
-               const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`;
-               return (
-                 <div key={ind.id} style={{ width: '250mm', height: '19mm', borderBottom: '1px dashed #cbd5e1', display: 'flex', boxSizing: 'border-box', backgroundColor: 'white', margin: 0 }}>
-                    <div style={{ width: '25mm', height: '100%', backgroundColor: '#f8fafc', borderRight: '1px dashed #94a3b8', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center' }}>
-                      <span style={{ fontSize: '8px', color: '#94a3b8', transform: 'rotate(-90deg)', letterSpacing: '1px', fontWeight: 'bold' }}>PEGAMENTO</span>
-                    </div>
-                    <div style={{ flex: 1, padding: '0 10mm', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                      <div style={{ fontSize: '14px', fontWeight: '900', color: '#0f172a', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{ind.name || 'Invitado (Sin Nombre)'}</div>
-                      <div style={{ fontSize: '10px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>({ind.familyName})</div>
-                    </div>
-                    <div style={{ width: '60mm', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '5mm', gap: '10px' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <span style={{ fontSize: '8px', fontWeight: 'bold', color: '#64748b' }}>CÓDIGO MANUAL</span>
-                        <span style={{ fontSize: '14px', fontWeight: '900', fontFamily: 'monospace', color: '#0f172a', backgroundColor: '#f1f5f9', padding: '2px 4px', borderRadius: '4px' }}>{ind.id}</span>
-                      </div>
-                      <img src={qrUrl} alt="QR" style={{ width: '15mm', height: '15mm', mixBlendMode: 'multiply' }} />
-                    </div>
-                 </div>
-               )
-             })}
-             {Array.from({ length: 10 - page.length }).map((_, i) => (
-                <div key={`empty_${i}`} style={{ width: '250mm', height: '19mm', borderBottom: '1px dashed #e2e8f0', backgroundColor: '#f8fafc', boxSizing: 'border-box', margin: 0 }}></div>
-             ))}
-           </div>
-        ));
-        
-        root.render(<>{QRPagesToRender}</>);
-        
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        const pages = tempContainer.querySelectorAll('.hidden-qr-pdf-page');
-        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [250, 190] });
-        
-        for (let i = 0; i < pages.length; i++) {
-           const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false });
-           const imgData = canvas.toDataURL('image/jpeg', 1.0);
-           if (i > 0) pdf.addPage([250, 190], 'landscape');
-           pdf.addImage(imgData, 'JPEG', 0, 0, 250, 190);
-        }
-        
-        pdf.save(`Pulseras-VIP-${eventName.replace(/\s+/g, '-')}.pdf`);
-        root.unmount();
-        document.body.removeChild(tempContainer);
-        if(addNotification) addNotification('¡Pulseras Listas!', 'El documento se guardó correctamente.', 'success');
-      } catch (error) {
-        console.error(error);
-        if(addNotification) addNotification('Error', 'Fallo al generar el PDF.', 'error');
-      }
-      setIsPreparingQRPrint(false);
-    }, 100);
-  };
-
   const toggleCol = (col) => setExportCols(prev => ({ ...prev, [col]: !prev[col] }));
 
   const triggerListPdfDownload = async () => {
@@ -1724,14 +1640,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
           {/* El Excel siempre es útil para cualquier plan */}
           <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Exportar Lista</button>
-          
-          {/* Las Pulseras son exclusivas de Premium y si tienen QR Activado */}
-          {isPremium && qrEnabled && (
-             <button onClick={triggerQRPdfDownload} disabled={isPreparingQRPrint} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors disabled:opacity-50">
-               {isPreparingQRPrint ? <RefreshCw size={14} className="mr-1.5 animate-spin"/> : <QrCode size={14} className="mr-1.5 text-indigo-600 dark:text-indigo-400"/>}
-               {isPreparingQRPrint ? 'Generando...' : 'Generar Pulseras VIP'}
-             </button>
-          )}
 
           {isBodaType && (
             <div className="flex items-center bg-white dark:bg-[#0a0a0a] p-1 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
