@@ -1,3 +1,3 @@
 git add .
-git commit -m "sidebar y botones addons"
+git commit -m "monitor dinamico"
 git push origin main
