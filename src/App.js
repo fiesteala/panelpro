@@ -10513,10 +10513,10 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const característicasTabla = [
     { n: 'Diseño Inmersivo Alta Costura', b: true, p: true, o: true, d: true, icon: <Palette/>, grupo: 'LA INVITACIÓN' },
     { n: 'Ubicaciones GPS (Mapas)', b: '1', p: '2', o: '3', d: 'Ilimitado', icon: <MapPin/>, grupo: 'LA INVITACIÓN' },
-    { n: 'Recepción de Confirmaciones (RSVP)', b: 'Vía WhatsApp', p: 'Vía WhatsApp', o: 'Bóveda Inteligente', d: 'Bóveda Inteligente', icon: <UserCheck/>, grupo: 'LA INVITACIÓN' },
+    { n: 'Confirmaciones (RSVP)', b: 'Vía WhatsApp', p: 'Vía WhatsApp', o: 'Bóveda Inteligente', d: 'Bóveda Inteligente', icon: <UserCheck/>, grupo: 'LA INVITACIÓN' },
     { n: 'Mesa de Regalos / Efectivo', b: false, p: true, o: true, d: true, icon: <Gift/>, grupo: 'LA INVITACIÓN' },
     
-    { n: 'Panel de Control Privado', b: false, p: false, o: true, d: true, icon: <LayoutDashboard/>, grupo: 'EL PODER DEL SOFTWARE' },
+    { n: 'Panel: Lista de Invitados y Mesas', b: false, p: false, o: true, d: true, icon: <Users/>, grupo: 'EL PODER DEL SOFTWARE' },
     { n: 'Pases QR Intransferibles', b: false, p: false, o: true, d: true, icon: <QrCode/>, grupo: 'EL PODER DEL SOFTWARE' },
     { n: 'App Escáner para Hostess', b: false, p: false, o: true, d: true, icon: <Scan/>, grupo: 'EL PODER DEL SOFTWARE' },
     { n: 'Baulia Social Wall (Proyector)', b: false, p: false, o: false, d: true, icon: <Camera/>, grupo: 'EL PODER DEL SOFTWARE' },
