@@ -181,7 +181,7 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
 }
 
 // ==========================================
-// --- COMPONENTE: MENÚ LATERAL (SIDEBAR DE CRISTAL) ---
+// --- COMPONENTE: MENÚ LATERAL (SIDEBAR) ---
 // ==========================================
 const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPlan, agencyConfig, isDarkMode, hasSocialWall, hasBlackLabel }) => {
   const planLevels = { 'oro': 1, 'diamante': 2 };
@@ -216,6 +216,7 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
       title: 'El Día del Evento', 
       items: [ 
         { id: 'timing', icon: Clock, label: 'El Minuto a Minuto', minLevel: 1, allowedPlans: ['plata', 'oro', 'diamante'] }, 
+        { id: 'pulseras', icon: Ticket, label: 'Taller Black Label', minLevel: 2, allowedPlans: ['diamante', 'security_kit'], extraCondition: hasBlackLabel }, 
         { id: 'escaner', icon: Scan, label: 'Control Puerta (QR)', minLevel: 2, allowedPlans: ['oro', 'diamante', 'security_kit'], extraCondition: hasBlackLabel }, 
         { id: 'monitor', icon: Activity, label: 'Monitor en Vivo', minLevel: 2, allowedPlans: ['diamante', 'security_kit'], extraCondition: hasBlackLabel }, 
         { id: 'galeria', icon: Camera, label: 'Muro Social (Vivo)', minLevel: 1, allowedPlans: ['diamante', 'social_wall'], extraCondition: hasSocialWall } 
@@ -223,24 +224,14 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
     }
   ];
 
-  const themeColors = {
-    indigo: 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]', 
-    rose: 'bg-rose-600 text-white shadow-[0_0_15px_rgba(225,29,72,0.4)]', 
-    emerald: 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(5,150,105,0.4)]', 
-    slate: 'bg-slate-800 dark:bg-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]', 
-    amber: 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)] border border-amber-400/50', 
-    sky: 'bg-sky-500 text-white shadow-[0_0_15px_rgba(14,165,233,0.4)]'
-  };
-
+  const themeColors = { indigo: 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]', rose: 'bg-rose-600 text-white shadow-[0_0_15px_rgba(225,29,72,0.4)]', emerald: 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(5,150,105,0.4)]', slate: 'bg-slate-800 dark:bg-white/20 text-white', amber: 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)] border border-amber-400/50', sky: 'bg-sky-500 text-white' };
   const activeTheme = agencyConfig?.themeColor ? themeColors[agencyConfig.themeColor] : themeColors.amber;
   const agencyName = agencyConfig?.name || 'BAULIA';
 
   return (
     <>
       {isOpen && <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm z-20 xl:hidden" onClick={() => setIsOpen(false)} />}
-      
       <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-white/50 dark:bg-[#050505]/40 backdrop-blur-3xl text-slate-600 dark:text-slate-400 transition-colors duration-700 ease-in-out flex flex-col border-r border-slate-200/50 dark:border-white/10 shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
-        
         <div className="flex items-center justify-between p-6 border-b border-slate-200/50 dark:border-white/10 shrink-0 min-h-[88px] relative overflow-hidden bg-white/30 dark:bg-white/5">
           <div className="relative z-10 w-full flex items-center gap-3">
             {agencyConfig?.logoUrl && userRole !== 'superadmin' ? (
@@ -273,17 +264,11 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
 
           {menuGroups.map((group, gIdx) => {
             const visibleItems = group.items.filter(item => {
-              // 🔴 MAGIA HÍBRIDA: Si tiene el addon encendido, déjalo pasar, sin importar el plan base.
               if (item.extraCondition === true) return true;
-              
-              if (item.allowedPlans) {
-                return item.allowedPlans.includes(userPlan.toLowerCase());
-              }
+              if (item.allowedPlans) return item.allowedPlans.includes(userPlan.toLowerCase());
               return level >= item.minLevel; 
             });
-            
             if (visibleItems.length === 0) return null;
-
             return (
               <div key={gIdx} className="space-y-1">
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-black ml-4 mb-3">{group.title}</p>
@@ -13881,23 +13866,17 @@ const LoginScreen = () => {
 };
 
 // ==========================================
-// --- COMPONENTE: PANEL DE ADMINISTRACIÓN PROTEGIDO ---
+// --- COMPONENTE: PANEL DE ADMINISTRACIÓN ---
 // ==========================================
 const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const { role: originalUserRole, plan: originalUserPlan, eventId: originalEventId, availableEvents } = authData;
-  
-  const switchEvent = (newEventId) => {
-    localStorage.setItem('eventmaster_currentEventId', newEventId);
-    window.location.reload(); 
-  };
-
+  const switchEvent = (newEventId) => { localStorage.setItem('eventmaster_currentEventId', newEventId); window.location.reload(); };
   const [impersonating, setImpersonating] = useState(null);
   
   const eventId = impersonating ? impersonating.id : originalEventId;
   const userRole = impersonating ? impersonating.role : originalUserRole;
   const userPlan = impersonating ? impersonating.plan : originalUserPlan;
 
-  // 🔴 SOLUCIÓN DE LA PANTALLA AZUL: Las variables deben definirse ARRIBA del useEffect
   const isSuperAdminMode = originalUserRole === 'superadmin' && !impersonating;
   const activeEventData = impersonating || authData?.availableEvents?.find(e => e.eventId === eventId) || {};
   const currentEventType = activeEventData.tipoEvento || 'general';
@@ -13916,22 +13895,16 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
     return 'dashboard';
   });
 
-  // 🟢 EL CADENERO AHORA SÍ CONOCE LAS VARIABLES
   useEffect(() => {
     if (userPlan === 'social_wall' && activeTab !== 'galeria') {
       setActiveTab('galeria');
-    } else if (userPlan === 'security_kit' && !['invitados', 'escaner', 'monitor'].includes(activeTab)) {
-      setActiveTab('invitados');
+    } else if (userPlan === 'security_kit' && !['invitados', 'pulseras', 'escaner', 'monitor'].includes(activeTab)) {
+      setActiveTab('invitados'); 
     } else if (!isSingleAppMode && userPlan !== 'security_kit') {
-      if (activeTab === 'galeria' && !['diamante', 'social_wall'].includes(userPlan) && !hasSocialWall) {
-        setActiveTab('dashboard'); 
-      }
-      if (activeTab === 'escaner' && !['oro', 'diamante'].includes(userPlan) && !hasBlackLabel) {
-        setActiveTab('dashboard');
-      }
-      if (activeTab === 'monitor' && !['diamante'].includes(userPlan) && !hasBlackLabel) {
-        setActiveTab('dashboard');
-      }
+      if (activeTab === 'galeria' && !['diamante', 'social_wall'].includes(userPlan) && !hasSocialWall) setActiveTab('dashboard'); 
+      if (activeTab === 'pulseras' && !['diamante'].includes(userPlan) && !hasBlackLabel) setActiveTab('dashboard'); 
+      if (activeTab === 'escaner' && !['oro', 'diamante'].includes(userPlan) && !hasBlackLabel) setActiveTab('dashboard');
+      if (activeTab === 'monitor' && !['diamante'].includes(userPlan) && !hasBlackLabel) setActiveTab('dashboard');
     }
   }, [userPlan, activeTab, isSingleAppMode, hasSocialWall, hasBlackLabel]);
   
@@ -13963,9 +13936,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
     setBellAlerts(prev => [notifObj, ...prev].slice(0, 30));
   }, []);
 
-  const markAsRead = React.useCallback((id) => {
-    setBellAlerts(prev => prev.map(a => a.id === id ? { ...a, isRead: true } : a));
-  }, []);
+  const markAsRead = React.useCallback((id) => setBellAlerts(prev => prev.map(a => a.id === id ? { ...a, isRead: true } : a)), []);
 
   useEffect(() => {
     const handleNotif = (e) => addNotification(e.detail.title, e.detail.message, e.detail.type);
@@ -13977,10 +13948,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
 
   useEffect(() => {
     if (userRole === 'superadmin' && !impersonating) return;
-    
-    if (typeof setGlobalEventId !== 'undefined') {
-        setGlobalEventId(eventId);
-    }
+    if (typeof setGlobalEventId !== 'undefined') setGlobalEventId(eventId);
 
     const unsubConfigMain = onSnapshot(doc(db, "eventos", eventId), (docSnap) => {
       if (docSnap.exists() && docSnap.data().presupuestoTotal !== undefined) {
@@ -13996,24 +13964,6 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
 
     const unsubGuests = onSnapshot(collection(db, "eventos", eventId, "invitados"), (snap) => {
       const newGuests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      if (prevGuestsRef.current.length > 0) {
-         newGuests.forEach(newG => {
-            const oldG = prevGuestsRef.current.find(g => g.id === newG.id);
-            if (oldG) {
-               if ((oldG.status === 'pendiente' || oldG.status === 'por_invitar') && newG.status === 'confirmado') {
-                 addNotification('¡Nueva Confirmación!', `${newG.name} ha confirmado (${newG.passes} lugares).`, 'success', 'invitados');
-               } else if (oldG.status !== 'cancelado' && newG.status === 'cancelado') {
-                 addNotification('Invitación Declinada', `${newG.name} ha liberado sus lugares.`, 'danger', 'invitados');
-               } else if (oldG.status === 'confirmado' && newG.status === 'confirmado' && newG.passes < oldG.passes) {
-                  const dif = oldG.passes - newG.passes;
-                  addNotification('Lugares Liberados', `${newG.name} redujo su grupo y liberó ${dif} lugar(es).`, 'warning', 'invitados');
-               }
-               if (newG.extraRequested > (oldG.extraRequested || 0)) {
-                 addNotification('Pases Extra', `${newG.name} solicita ${newG.extraRequested} pase(s) extra.`, 'warning', 'invitados');
-               }
-            }
-         });
-      }
       prevGuestsRef.current = newGuests;
       setGuests(newGuests);
     });
@@ -14041,14 +13991,13 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'dashboard': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof DashboardView !== 'undefined' ? <DashboardView authData={authData} guests={guests} tables={tables} gastos={gastos} presupuestoTotal={presupuestoTotal} tareas={tareas} setActiveTab={setActiveTab} addNotification={addNotification} /> : null;      
       
       case 'invitados': 
-        if (userPlan === 'security_kit') {
-            return typeof GestorPulserasView !== 'undefined' ? <GestorPulserasView addNotification={addNotification} eventId={eventId} /> : null;
-        }
-        return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={currentEventType} userPlan={currentEventPlan} eventName={currentEventName} urlInvitacion={activeEventData?.urlInvitacion} /> : null;      
+        return ['esencial', 'plata', 'oro', 'diamante', 'security_kit'].includes(userPlan) && typeof InvitadosView !== 'undefined' ? <InvitadosView tables={tables} guests={guests} setGuests={setGuests} addNotification={addNotification} tipoEvento={currentEventType} userPlan={currentEventPlan} eventName={currentEventName} urlInvitacion={activeEventData?.urlInvitacion} /> : null;      
       
+      case 'pulseras': 
+        return (['diamante', 'security_kit'].includes(userPlan) || hasBlackLabel) && typeof GestorPulserasView !== 'undefined' ? <GestorPulserasView addNotification={addNotification} eventId={eventId} /> : null;
+
       case 'escaner': return (['oro', 'diamante', 'security_kit'].includes(userPlan) || hasBlackLabel) && typeof EscanerView !== 'undefined' ? <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={false} addNotification={addNotification} /> : null; 
       case 'monitor': return (['security_kit', 'diamante', 'baulia_black_label'].includes(userPlan) || hasBlackLabel) && typeof MonitorRecepcionView !== 'undefined' ? <MonitorRecepcionView eventId={eventId} eventName={currentEventName} /> : null; 
-
       case 'mesas': return ['oro', 'diamante'].includes(userPlan) && typeof MesasView !== 'undefined' ? <MesasView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} addNotification={addNotification} /> : null; 
       case 'mapa': return userPlan === 'diamante' && typeof MapaView !== 'undefined' ? <MapaView tables={tables} setTables={setTables} guests={guests} setGuests={setGuests} globalSearch={globalSearch} elements={mapElements} setElements={setMapElements} /> : null;
       case 'decoracion': return userPlan === 'diamante' && typeof DecoracionView !== 'undefined' ? <DecoracionView elements={decoElements} setElements={setDecoElements} addNotification={addNotification} /> : null; 
@@ -14056,35 +14005,26 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'timing': return ['plata', 'oro', 'diamante'].includes(userPlan) && typeof TimingView !== 'undefined' ? <TimingView timing={timing} setTiming={setTiming} addNotification={addNotification} /> : null;
       case 'presupuesto': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof PresupuestoView !== 'undefined' ? <PresupuestoView authData={authData} gastos={gastos} setGastos={setGastos} proveedores={proveedores} setProveedores={setProveedores} presupuestoTotal={presupuestoTotal} setPresupuestoTotal={setPresupuestoTotal} addNotification={addNotification} /> : null;
       case 'proveedores': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof ProveedoresView !== 'undefined' ? <ProveedoresView proveedores={proveedores} setProveedores={setProveedores} gastos={gastos} setGastos={setGastos} addNotification={addNotification} /> : null;
-      
       case 'galeria': return (['diamante', 'social_wall'].includes(userPlan) || hasSocialWall) && typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} /> : null;
-      
       case 'invitacion': return ['esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof InvitacionView !== 'undefined' ? <InvitacionView guests={guests} urlInvitacion={activeEventData?.urlInvitacion} /> : null; 
       case 'configuracion': return userRole === 'planner' && typeof ConfiguracionMaestraView !== 'undefined' ? <ConfiguracionMaestraView agencyConfig={agencyConfig} addNotification={addNotification} /> : null;
-      default: return <div className="p-8 text-center text-slate-500 font-bold">Módulo bloqueado o no disponible en tu plan actual.</div>;
+      default: return <div className="p-8 text-center text-slate-500 font-bold">Módulo bloqueado.</div>;
     }
   };
 
   return (
     <div className="flex h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans overflow-hidden text-slate-900 dark:text-slate-200 transition-colors duration-700 selection:bg-amber-500 selection:text-white relative">
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap'); .font-editorial { font-family: 'Playfair Display', serif; }`}</style>
       
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
-        .font-editorial { font-family: 'Playfair Display', serif; }
-      `}</style>
-
       {impersonating && (
         <div className="absolute top-0 left-0 w-full bg-rose-600 text-white z-[9999] py-1.5 px-4 text-center text-xs font-black uppercase tracking-widest shadow-lg flex justify-center items-center">
-          <AlertTriangle size={14} className="mr-2" />
-          Estás en Modo Soporte viendo la bóveda de: {impersonating.nombres || impersonating.nombre}
-          <button onClick={() => { setImpersonating(null); setActiveTab('licencias'); }} className="ml-6 bg-white text-rose-600 px-3 py-0.5 rounded shadow-sm hover:scale-105 transition-transform">
-            Salir y Volver a Admin
-          </button>
+          <AlertTriangle size={14} className="mr-2" /> Estás en Modo Soporte viendo la bóveda de: {impersonating.nombres || impersonating.nombre}
+          <button onClick={() => { setImpersonating(null); setActiveTab('licencias'); }} className="ml-6 bg-white text-rose-600 px-3 py-0.5 rounded shadow-sm hover:scale-105 transition-transform">Salir y Volver a Admin</button>
         </div>
       )}
 
-      <div className="absolute top-[-10%] left-[-5%] w-[50vw] h-[50vw] bg-amber-500/15 dark:bg-amber-600/20  hidden md:block blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
-      <div className="absolute bottom-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-indigo-500/10 dark:bg-indigo-600/15  hidden md:block blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
+      <div className="absolute top-[-10%] left-[-5%] w-[50vw] h-[50vw] bg-amber-500/15 dark:bg-amber-600/20 hidden md:block blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
+      <div className="absolute bottom-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-indigo-500/10 dark:bg-indigo-600/15 hidden md:block blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
       
       <div className="fixed top-4 right-4 z-[999] hidden sm:flex flex-col space-y-2 pointer-events-none">
         {notifications.map(notif => (
@@ -14101,18 +14041,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       </div>
 
       {typeof Sidebar !== 'undefined' && !isSuperAdminMode && !isSingleAppMode && (
-        <Sidebar 
-          isOpen={sidebarOpen} 
-          setIsOpen={setSidebarOpen} 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
-          userRole={userRole} 
-          userPlan={userPlan} 
-          agencyConfig={agencyConfig} 
-          isDarkMode={isDarkMode} 
-          hasSocialWall={hasSocialWall} 
-          hasBlackLabel={hasBlackLabel} 
-        />
+        <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} userPlan={userPlan} agencyConfig={agencyConfig} isDarkMode={isDarkMode} hasSocialWall={hasSocialWall} hasBlackLabel={hasBlackLabel} />
       )}
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
