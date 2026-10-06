@@ -1229,6 +1229,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         const data = docSnap.data();
         setQrEnabled(data.isQrEnabled !== false); 
         setPassCountEnabled(data.isPassCountEnabled !== false);
+        // 🔴 ESTO HACE QUE RECUERDE TU DECISIÓN AL RECARGAR
+        if (data.tipoEvento) setIsWeddingMode(data.tipoEvento === 'boda');
       }
     });
     return () => unsub();
@@ -1624,10 +1626,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           );
 
           return (
-            <div className="fixed inset-0 z-[9999] bg-slate-200 flex flex-col overflow-hidden animate-in fade-in transition-colors">
+            <div className="fixed inset-0 z-[9999] bg-slate-200 flex flex-col overflow-hidden animate-in fade-in transition-colors pt-20 md:pt-24">
               {/* BOTÓN FLOTANTE DE CIERRE DE EMERGENCIA */}
-              <button onClick={() => setExportViewOpen(false)} className="absolute top-4 right-4 md:top-8 md:right-8 z-[10000] bg-rose-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-[0_10px_25px_rgba(225,29,72,0.5)] hover:bg-rose-600 border-2 border-white transition-transform hover:scale-110">
-                 <X size={24} />
+              <button onClick={() => setExportViewOpen(false)} className="absolute top-24 right-4 md:top-28 md:right-8 z-[10000] bg-rose-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-[0_10px_25px_rgba(225,29,72,0.5)] hover:bg-rose-600 border-2 border-white transition-transform hover:scale-110">
+                <X size={24} />
               </button>
               
               {/* TOOLBAR SUPERIOR DE EDICIÓN CLARO Y ELEGANTE */}
