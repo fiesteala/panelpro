@@ -14006,14 +14006,20 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
     if (userPlan === 'social_wall' && activeTab !== 'galeria') {
       setActiveTab('galeria');
     } else if (userPlan === 'security_kit' && !['invitados', 'escaner', 'monitor'].includes(activeTab)) {
-      // 🔴 SE AGREGÓ 'monitor' A LOS PERMISOS DEL BLACK LABEL
       setActiveTab('invitados');
-    } else if (!isSingleAppMode && userPlan !== 'security_kit' && (activeTab === 'galeria' && userPlan !== 'diamante' && userPlan !== 'social_wall')) {
-      setActiveTab('dashboard');
-    } else if (!isSingleAppMode && userPlan !== 'security_kit' && (activeTab === 'escaner' && userPlan !== 'oro' && userPlan !== 'diamante')) {
-      setActiveTab('dashboard');
+    } else if (!isSingleAppMode && userPlan !== 'security_kit') {
+      // 🟢 REGLAS DEL CADENERO ACTUALIZADAS PARA ADD-ONS HÍBRIDOS
+      if (activeTab === 'galeria' && !['diamante', 'social_wall'].includes(userPlan) && !hasSocialWall) {
+        setActiveTab('dashboard'); // Lo regresa solo si no tiene plan válido NI el add-on
+      }
+      if (activeTab === 'escaner' && !['oro', 'diamante'].includes(userPlan) && !hasBlackLabel) {
+        setActiveTab('dashboard');
+      }
+      if (activeTab === 'monitor' && !['diamante'].includes(userPlan) && !hasBlackLabel) {
+        setActiveTab('dashboard');
+      }
     }
-  }, [userPlan, activeTab, isSingleAppMode]);
+  }, [userPlan, activeTab, isSingleAppMode, hasSocialWall, hasBlackLabel]);
   
   const [tareas, setTareas] = useState([]); 
   const [timing, setTiming] = useState([]); 
