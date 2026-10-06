@@ -1,3 +1,3 @@
 git add .
-git commit -m "pdf corregido invitados"
+git commit -m "sidebar y botones addons"
 git push origin main

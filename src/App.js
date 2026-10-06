@@ -183,7 +183,7 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
 // ==========================================
 // --- COMPONENTE: MENÚ LATERAL (SIDEBAR DE CRISTAL) ---
 // ==========================================
-const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPlan, agencyConfig, isDarkMode }) => {
+const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPlan, agencyConfig, isDarkMode, hasSocialWall, hasBlackLabel }) => {
   const planLevels = { 'oro': 1, 'diamante': 2 };
   const level = planLevels[userPlan] || 2; 
 
@@ -216,10 +216,9 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
       title: 'El Día del Evento', 
       items: [ 
         { id: 'timing', icon: Clock, label: 'El Minuto a Minuto', minLevel: 1, allowedPlans: ['plata', 'oro', 'diamante'] }, 
-        { id: 'escaner', icon: Scan, label: 'Control Puerta (QR)', minLevel: 2, allowedPlans: ['oro', 'diamante', 'security_kit'] }, 
-        // 🔴 NUEVO BOTÓN: Monitor en Vivo para Diamante y Black Label (security_kit)
-        { id: 'monitor', icon: Activity, label: 'Monitor en Vivo', minLevel: 2, allowedPlans: ['diamante', 'security_kit'] }, 
-        { id: 'galeria', icon: Camera, label: 'Muro Social (Vivo)', minLevel: 1, allowedPlans: ['diamante', 'social_wall'] } 
+        { id: 'escaner', icon: Scan, label: 'Control Puerta (QR)', minLevel: 2, allowedPlans: ['oro', 'diamante', 'security_kit'], extraCondition: hasBlackLabel }, 
+        { id: 'monitor', icon: Activity, label: 'Monitor en Vivo', minLevel: 2, allowedPlans: ['diamante', 'security_kit'], extraCondition: hasBlackLabel }, 
+        { id: 'galeria', icon: Camera, label: 'Muro Social (Vivo)', minLevel: 1, allowedPlans: ['diamante', 'social_wall'], extraCondition: hasSocialWall } 
       ] 
     }
   ];
@@ -274,6 +273,9 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
 
           {menuGroups.map((group, gIdx) => {
             const visibleItems = group.items.filter(item => {
+              // 🔴 MAGIA HÍBRIDA: Si tiene el addon encendido, déjalo pasar, sin importar el plan base.
+              if (item.extraCondition === true) return true;
+              
               if (item.allowedPlans) {
                 return item.allowedPlans.includes(userPlan.toLowerCase());
               }
@@ -12236,7 +12238,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true });
+  const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true, hasSocialWall: false, hasBlackLabel: false });
   const [editingLic, setEditingLic] = useState(null);
 
   const [isCreating, setIsCreating] = useState(false);
@@ -12472,7 +12474,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         isPassCountEnabled: formData.isPassCountEnabled,
         fechaEvento: formData.fechaEvento, 
         horaEvento: formData.horaEvento,
-        telefono: formData.telefono
+        telefono: formData.telefono,
+        hasSocialWall: formData.hasSocialWall, // ADDON
+        hasBlackLabel: formData.hasBlackLabel  // ADDON
       });
 
       await setDoc(doc(db, "eventos", newEventId), { 
@@ -12483,7 +12487,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           isQrEnabled: formData.isQrEnabled,
           isPassCountEnabled: formData.isPassCountEnabled,
           fecha: formData.fechaEvento, 
-          horaEvento: formData.horaEvento
+          horaEvento: formData.horaEvento,
+          hasSocialWall: formData.hasSocialWall, // ADDON
+          hasBlackLabel: formData.hasBlackLabel  // ADDON
       });
 
       const mesAnioAct = new Date().toISOString().slice(0, 7);
@@ -13148,6 +13154,24 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         <option value="security_kit">Black Label ($1,490)</option>
                       </select>
 
+                      {/* 🔴 NUEVO: ADD-ONS HÍBRIDOS PARA NUEVA LICENCIA */}
+                      {['basico', 'plata', 'oro'].includes(formData.plan) && (
+                        <div className="mt-3 space-y-2 mb-3">
+                          <div className="flex items-center justify-between bg-pink-50/50 dark:bg-pink-900/10 p-2 rounded-lg border border-pink-100 dark:border-pink-800/20">
+                            <span className="text-[9px] font-bold text-pink-700 dark:text-pink-400 uppercase tracking-widest">+ Social Wall (Extra)</span>
+                            <button type="button" onClick={() => setFormData({...formData, hasSocialWall: !formData.hasSocialWall})} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${formData.hasSocialWall ? 'bg-pink-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                              <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${formData.hasSocialWall ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                            </button>
+                          </div>
+                          <div className="flex items-center justify-between bg-slate-900/5 p-2 rounded-lg border border-slate-200 dark:border-white/10">
+                            <span className="text-[9px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">+ Black Label (Extra)</span>
+                            <button type="button" onClick={() => setFormData({...formData, hasBlackLabel: !formData.hasBlackLabel})} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${formData.hasBlackLabel ? 'bg-slate-800' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                              <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${formData.hasBlackLabel ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="grid grid-cols-2 gap-4 mb-3">
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
@@ -13248,6 +13272,24 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       </select>
                     </div>
                   </div>
+
+                  {/* 🔴 NUEVO: ADD-ONS HÍBRIDOS PARA EDITAR LICENCIA */}
+                  {['basico', 'plata', 'oro'].includes(editingLic.plan) && (
+                    <div className="space-y-2 mt-[-10px] mb-2">
+                      <div className="flex items-center justify-between bg-pink-50/50 dark:bg-pink-900/10 p-2 rounded-lg border border-pink-100 dark:border-pink-800/20">
+                        <span className="text-[9px] font-bold text-pink-700 dark:text-pink-400 uppercase tracking-widest">+ Social Wall (Extra)</span>
+                        <button type="button" onClick={() => setEditingLic({...editingLic, hasSocialWall: !editingLic.hasSocialWall})} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${editingLic.hasSocialWall ? 'bg-pink-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                          <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.hasSocialWall ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between bg-slate-900/5 p-2 rounded-lg border border-slate-200 dark:border-white/10">
+                        <span className="text-[9px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">+ Black Label (Extra)</span>
+                        <button type="button" onClick={() => setEditingLic({...editingLic, hasBlackLabel: !editingLic.hasBlackLabel})} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${editingLic.hasBlackLabel ? 'bg-slate-800' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                          <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.hasBlackLabel ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -14067,6 +14109,10 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const currentEventType = activeEventData.tipoEvento || 'general';
   const currentEventPlan = activeEventData.plan || 'diamante';
   const currentEventName = activeEventData.nombres || activeEventData.nombre || 'Evento Baulia';
+  
+  // 🔴 VARIABLES HÍBRIDAS DE ADD-ONS (Le dicen al sistema si el cliente compró extras)
+  const hasSocialWall = activeEventData.hasSocialWall || false;
+  const hasBlackLabel = activeEventData.hasBlackLabel || false;
 
   const renderContent = () => {
     if (userPlan === 'social_wall') {
@@ -14147,7 +14193,9 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
           userRole={userRole} 
           userPlan={userPlan} 
           agencyConfig={agencyConfig} 
-          isDarkMode={isDarkMode} 
+          isDarkMode={isDarkMode}
+          hasSocialWall={hasSocialWall} // 🔴 ADDON
+          hasBlackLabel={hasBlackLabel} // 🔴 ADDON
         />
       )}
       
