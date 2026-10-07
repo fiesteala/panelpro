@@ -7409,7 +7409,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
 };
 
 // ==========================================
-// --- COMPONENTE: GALERÍA EN VIVO (DARK PREMIUM COMPACTO) ---
+// --- COMPONENTE: GALERÍA EN VIVO (DARK PREMIUM COMPACTO - LÓGICA CORREGIDA) ---
 // ==========================================
 const GaleriaView = ({ photos, addNotification, eventoId }) => {
   const [showQR, setShowQR] = useState(false); 
@@ -7432,20 +7432,37 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
   const proyectorLink = `${getCleanBaseUrl()}/?modo=proyector&e=${idReal}`; 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(guestLink)}&margin=10`;
 
+  // 🔴 CORRECCIÓN: Leemos la configuración del Muro directamente de la raíz del evento
   useEffect(() => {
     if (!idReal || idReal === 'demo_id') return;
-    const unsub = onSnapshot(doc(db, "eventos", idReal, "configuracion", "galeria"), (docSnap) => {
-      if (docSnap.exists()) setConfig(docSnap.data());
+    const unsub = onSnapshot(doc(db, "eventos", idReal), (docSnap) => {
+      if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.galeriaConfig) {
+              setConfig(data.galeriaConfig);
+          }
+      }
     });
     return () => unsub();
   }, [idReal]);
 
+  // 🔴 CORRECCIÓN: Guardamos la configuración de forma directa y segura en la raíz
   const updateConfig = async (key, value) => {
     if (!idReal || idReal === 'demo_id') return;
     const newConfig = { ...config, [key]: value };
+    
+    // Actualizamos la pantalla instantáneamente
     setConfig(newConfig);
-    await setDoc(doc(db, "eventos", idReal, "configuracion", "galeria"), newConfig, { merge: true });
-    if(addNotification) addNotification('Ajuste Guardado', 'La configuración se actualizó en vivo.', 'success');
+    
+    try {
+        await updateDoc(doc(db, "eventos", idReal), { 
+            galeriaConfig: newConfig 
+        });
+        if(addNotification) addNotification('Ajuste Guardado', 'La configuración se actualizó en vivo.', 'success');
+    } catch (err) {
+        console.error("Error guardando config del muro:", err);
+        if(addNotification) addNotification('Error', 'No se pudo guardar la configuración.', 'error');
+    }
   };
 
   const handleFrameUpload = async (e) => {
@@ -7550,10 +7567,8 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
   return (
     <div className="h-full flex flex-col space-y-4 pb-6 relative z-10 transition-colors duration-500 max-w-[1200px] mx-auto w-full">
       
-      {/* 💡 PANEL DE CONTROL COMPACTO E INTUITIVO */}
       <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm p-6 shrink-0 transition-colors">
         
-        {/* HEADER Y DESCARGA GENERAL */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 border-b border-slate-100 dark:border-white/5 pb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-amber-500/10 flex items-center justify-center text-indigo-600 dark:text-amber-500">
@@ -7571,10 +7586,8 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
           </button>
         </div>
 
-        {/* 3 BLOQUES COMPACTOS DE ACCIÓN */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           
-          {/* BLOQUE 1: PROYECCIÓN (El Muro Físico) */}
           <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
             <div className="mb-4">
                <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><MonitorPlay size={16} className="text-indigo-500 dark:text-amber-500"/> Proyección y Acceso</h4>
@@ -7590,7 +7603,6 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
             </div>
           </div>
 
-          {/* BLOQUE 2: SEGURIDAD (Privacidad y Filtros) */}
           <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
             <div className="mb-4">
                <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><ShieldCheck size={16} className="text-rose-500"/> Seguridad y Filtros</h4>
@@ -7601,12 +7613,10 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
                </p>
             </div>
             <div className="flex gap-2 items-center">
-               {/* Toggle Publico/Privado Súper Compacto */}
                <div className="flex items-center bg-white dark:bg-[#050505] p-0.5 rounded-md border border-slate-200 dark:border-white/10 shadow-sm shrink-0">
                   <button onClick={() => updateConfig('modoPublico', true)} className={`text-[8px] font-black uppercase tracking-widest px-2 py-1.5 rounded transition-all ${config.modoPublico ? 'bg-emerald-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Público</button>
                   <button onClick={() => updateConfig('modoPublico', false)} className={`text-[8px] font-black uppercase tracking-widest px-2 py-1.5 rounded transition-all ${!config.modoPublico ? 'bg-rose-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Privado</button>
                </div>
-               {/* Toggle Moderador Compacto */}
                <div className="flex items-center bg-white dark:bg-[#050505] px-2 py-1.5 rounded-md border border-slate-200 dark:border-white/10 shadow-sm flex-1 justify-between gap-1">
                   <span className="text-[8px] font-black uppercase text-slate-500 tracking-widest truncate">Moderador</span>
                   <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-7 h-3.5 rounded-full transition-colors shrink-0 ${config.moderacion ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`} title="Activar/Desactivar Moderador">
@@ -7616,19 +7626,16 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
             </div>
           </div>
 
-          {/* BLOQUE 3: DISEÑO (Marco y Hashtag) */}
           <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
             <div className="mb-4">
                <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><Palette size={16} className="text-sky-500"/> Personalización</h4>
                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Agrega un marco a las fotos (PNG transparente) y un hashtag al muro.</p>
             </div>
             <div className="flex gap-2">
-               {/* Input Hashtag */}
                <div className="flex items-center bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-1.5 flex-1 shadow-sm focus-within:border-sky-500 transition-colors">
                  <span className="text-slate-400 font-bold mr-1 text-[10px]">#</span>
                  <input type="text" value={config.hashtag?.replace('#', '') || ''} onChange={(e) => setConfig({...config, hashtag: '#' + e.target.value.replace(/\s+/g, '')})} onBlur={() => updateConfig('hashtag', config.hashtag)} placeholder="Boda" className="bg-transparent text-slate-800 dark:text-white font-bold text-[10px] uppercase outline-none w-full placeholder:text-slate-400"/>
                </div>
-               {/* Boton Marco */}
                <input type="file" accept="image/png" ref={fileInputRef} onChange={handleFrameUpload} className="hidden" />
                <button onClick={() => fileInputRef.current.click()} className="flex items-center justify-center px-3 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-lg text-[9px] uppercase tracking-widest font-bold hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 transition-all shadow-sm shrink-0">
                  <ImageIcon size={14} className="mr-1.5" /> {config.marcoUrl ? 'Cambiar' : 'Marco'}
@@ -7639,7 +7646,6 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
         </div>
       </div>
 
-      {/* GALERÍA DE FOTOS (Espacio Maximizado) */}
       <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl p-6 overflow-y-auto bg-slate-50/50 dark:bg-transparent custom-scrollbar transition-colors">
         {photos.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 min-h-[300px]">
@@ -7725,7 +7731,6 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
         )}
       </div>
 
-      {/* MODAL: VER PUBLICACIÓN DETALLADA */}
       {viewingPost && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
@@ -7773,7 +7778,6 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
         </div>
       )}
 
-      {/* MODAL: PROYECTOR (DJ) */}
       {showProyectorModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-10 relative animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
@@ -7803,7 +7807,6 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
         </div>
       )}
 
-      {/* MODAL: CÓDIGO QR PARA MESAS */}
       {showQR && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl p-10 text-center relative animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
