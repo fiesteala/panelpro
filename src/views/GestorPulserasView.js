@@ -28,7 +28,14 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     const unsubEvent = onSnapshot(doc(db, "eventos", eventId), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        if (data.pulserasConfig) setDesignConfig(data.pulserasConfig);
+        
+        // 🟢 ESCUDO: Si pulserasConfig no existe, cargamos una estructura vacía pero segura
+        if (data.pulserasConfig) {
+          setDesignConfig(data.pulserasConfig);
+        } else {
+          setDesignConfig({ preTitle: '', eventName: data.nombres || '', logoBase64: '' });
+        }
+
         if (data.pulserasStatus === 'enviado' || data.pulserasStatus === 'impreso') setIsLocked(true);
         if (data.fecha) setEventDateStr(data.fecha);
         if (data.direccionEnvioTaller) setShippingInfo(data.direccionEnvioTaller);
