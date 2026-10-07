@@ -201,7 +201,7 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
       title: 'Gestión de Asistentes', 
       items: [ 
         { id: 'invitacion', icon: Smartphone, label: 'Ver Invitación App', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
-        { id: 'invitados', icon: Users, label: 'Lista de Invitados', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante', 'security_kit'] }, 
+        { id: 'invitados', icon: Users, label: 'Lista de Invitados', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
         { id: 'mesas', icon: LayoutGrid, label: 'Gestión de Mesas', minLevel: 2, allowedPlans: ['oro', 'diamante'] } 
       ] 
     },
