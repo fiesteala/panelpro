@@ -17,7 +17,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   
-  // 🔴 NUEVO ESTADO: Información de Envío Estructurada
+  // 🔴 ESTADO: Información de Envío Estructurada
   const [shippingInfo, setShippingInfo] = useState({ 
       recipient: '', country: 'México', state: '', city: '', zipCode: '', address: '', references: '', phoneCode: '+52', phone: '' 
   });
@@ -28,8 +28,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     const unsubEvent = onSnapshot(doc(db, "eventos", eventId), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        
-        // 🟢 ESCUDO: Si pulserasConfig no existe, cargamos una estructura vacía pero segura
         if (data.pulserasConfig) {
           setDesignConfig(data.pulserasConfig);
         } else {
@@ -123,9 +121,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
   const handleRemoveEntry = async (id) => { if (isLocked || !isStandalone) return; try { await deleteDoc(doc(db, "eventos", eventId, "invitados", id)); } catch (error) {} };
 
-  const downloadTemplate = () => { /* Código CSV Omitido para brevedad, sigue intacto en tu archivo real, cópialo de arriba si es necesario */ };
-  const handleFileUpload = (e) => { /* Código CSV Omitido para brevedad, sigue intacto en tu archivo real, cópialo de arriba si es necesario */ };
-
   const executeSendToWorkshop = async () => {
     try {
       await updateDoc(doc(db, "eventos", eventId), { pulserasStatus: 'enviado', fechaEnvioTaller: new Date().toISOString(), direccionEnvioTaller: shippingInfo });
@@ -137,14 +132,12 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
   if (isLoading) return <div className="p-10 text-center text-slate-500">Cargando plataforma...</div>;
 
   const totalPulserasSolicitadas = validWristbandList.reduce((sum, item) => sum + (Number(item.passes) || 0), 0);
-
-  // Validación de que llenen todo el formulario
   const isShippingValid = shippingInfo.recipient && shippingInfo.country && shippingInfo.state && shippingInfo.city && shippingInfo.zipCode && shippingInfo.address && shippingInfo.phone;
 
   return (
     <div className="space-y-6 pb-10 animate-in fade-in duration-500 relative">
       
-      {/* 🔴 NUEVO MODAL DE DATOS DE ENVÍO LOGÍSTICO */}
+      {/* MODAL DE DATOS DE ENVÍO LOGÍSTICO */}
       {confirmModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-all overflow-y-auto">
             <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-xl shadow-2xl p-8 border border-transparent dark:border-white/10 animate-in zoom-in-95 transition-colors my-8">
@@ -163,7 +156,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                 </div>
                 
                 <div className="space-y-4 mb-8 bg-slate-50 dark:bg-[#111] p-5 rounded-2xl border border-slate-100 dark:border-white/5">
-                    
                     <div>
                         <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Quien Recibe (Nombre Completo)</label>
                         <input type="text" required value={shippingInfo.recipient} onChange={e=>setShippingInfo({...shippingInfo, recipient: e.target.value})} placeholder="Ej. Juan Pérez Garza" className="w-full p-3 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sm font-bold text-slate-800 dark:text-white transition-colors" />
@@ -211,7 +203,6 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                             <input type="text" required value={shippingInfo.phone} onChange={e=>setShippingInfo({...shippingInfo, phone: e.target.value})} placeholder="10 dígitos" className="w-full p-3 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sm font-bold text-slate-800 dark:text-white transition-colors" />
                         </div>
                     </div>
-
                 </div>
 
                 <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 p-4 rounded-xl mb-6 flex items-start gap-3">
@@ -247,11 +238,133 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         )}
       </div>
 
-      {/* RESTO DE LA INTERFAZ ORIGINAL INTACTA (Columna 5 y Columna 7) */}
-      {/* ... (Tu código de interfaz sigue exactamente igual aquí) ... */}
-      
-      {/* Solo como recordatorio: El botón de enviar al final ahora llama a confirmModal */}
-      
+      {/* INTERFAZ VISUAL COMPLETA */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* COLUMNA IZQUIERDA: DISEÑO DEL BRAZALETE Y PREVISUALIZACIÓN */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
+            <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center"><Palette size={18} className="mr-2 text-indigo-500"/> Personalización del Brazalete</h3>
+            
+            <form onSubmit={handleSaveDesign} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Pre-título (Ej. Boda de / XV de)</label>
+                <input type="text" disabled={isLocked} value={designConfig.preTitle} onChange={e=>setDesignConfig({...designConfig, preTitle: e.target.value})} placeholder="Ej. Boda" className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-xs outline-none focus:border-indigo-500 font-bold" />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Nombre Principal / Evento</label>
+                <input type="text" disabled={isLocked} value={designConfig.eventName} onChange={e=>setDesignConfig({...designConfig, eventName: e.target.value})} placeholder="Ej. Carlos & Sofia" className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-xs outline-none focus:border-indigo-500 font-bold" />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Logotipo del Evento</label>
+                <div className="flex items-center gap-3">
+                  {designConfig.logoBase64 ? (
+                    <div className="relative w-16 h-16 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10 flex items-center justify-center p-1">
+                      <img src={designConfig.logoBase64} alt="Logo" className="max-h-full max-w-full object-contain" />
+                      {!isLocked && <button type="button" onClick={removeLogo} className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-1 shadow-md"><X size={12}/></button>}
+                    </div>
+                  ) : (
+                    <label className={`flex-1 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl p-3 text-center cursor-pointer hover:border-indigo-500 transition-colors ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      <input type="file" disabled={isLocked} accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                      {isUploadingLogo ? <Loader2 size={18} className="animate-spin mx-auto text-indigo-500"/> : <ImageIcon size={18} className="mx-auto text-slate-400 mb-1"/>}
+                      <span className="text-[10px] font-bold text-slate-500">Subir Logo (PNG/JPG)</span>
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {!isLocked && (
+                <button type="submit" className="w-full py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:scale-[1.02] transition-transform">
+                  Guardar Cambios de Diseño
+                </button>
+              )}
+            </form>
+          </div>
+
+          {/* PREVISIÓN VISUAL DEL BRAZALETE */}
+          <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
+            <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center"><Eye size={18} className="mr-2 text-indigo-500"/> Previsualización Física</h3>
+            <div className="w-full bg-slate-100 dark:bg-[#111] p-6 rounded-2xl border border-slate-200 dark:border-white/5 flex items-center justify-center overflow-x-auto">
+              <div className="w-[320px] h-[55px] bg-white border-2 border-dashed border-slate-300 rounded-lg flex items-center px-3 shadow-md text-black relative shrink-0">
+                <div className="text-[7px] font-black uppercase tracking-widest text-slate-400 rotate-[-90deg] shrink-0">BAULIA.COM</div>
+                <div className="flex-1 flex flex-col items-center justify-center text-center px-2 overflow-hidden">
+                  {designConfig.preTitle && <div className="text-[6px] font-black uppercase tracking-widest">{designConfig.preTitle}</div>}
+                  {designConfig.logoBase64 ? (
+                    <img src={designConfig.logoBase64} alt="Logo" className="max-h-[22px] max-w-[100px] object-contain my-0.5" />
+                  ) : (
+                    <div className="font-firma text-lg leading-none my-0.5">{designConfig.eventName || 'Evento VIP'}</div>
+                  )}
+                  {eventDateStr && <div className="text-[6px] font-bold text-slate-600">{new Date(eventDateStr).toLocaleDateString('es-MX', { timeZone: 'UTC' })}</div>}
+                </div>
+                <div className="w-8 h-8 border border-slate-400 rounded flex items-center justify-center shrink-0 text-[6px] font-mono font-bold text-slate-500">QR</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* COLUMNA DERECHA: LISTA DE ACCESOS Y ENVÍO A TALLER */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center"><Users size={18} className="mr-2 text-indigo-500"/> Lista de Accesos a Producir</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Total de brazaletes en lote: <strong className="text-indigo-600 dark:text-amber-400">{totalPulserasSolicitadas}</strong></p>
+              </div>
+              {!isLocked && (
+                <button onClick={() => setConfirmModal(true)} className="px-5 py-3 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg hover:scale-105 transition-transform flex items-center">
+                  <Send size={16} className="mr-2"/> Enviar al Taller
+                </button>
+              )}
+            </div>
+
+            {/* TABLA DE INVITADOS */}
+            <div className="border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden">
+              <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                <table className="w-full text-left text-xs whitespace-nowrap">
+                  <thead className="bg-slate-50 dark:bg-[#111] text-slate-400 font-bold uppercase tracking-wider sticky top-0 border-b border-slate-200 dark:border-white/10">
+                    <tr>
+                      <th className="px-4 py-3">Invitado Principal / Pase</th>
+                      <th className="px-4 py-3">Tipo</th>
+                      <th className="px-4 py-3 text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                    {flattenedList.length === 0 ? (
+                      <tr><td colSpan="3" className="text-center py-8 text-slate-400">No hay invitados confirmados para producción.</td></tr>
+                    ) : (
+                      flattenedList.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                          <td className="px-4 py-3">
+                            <input 
+                              type="text" 
+                              disabled={isLocked}
+                              value={item.displayName} 
+                              onChange={(e) => handleUpdateNameInline(item.parentGuest.id, item._rowId, e.target.value, item.currentSubGuests)}
+                              className="bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full text-slate-800 dark:text-white font-medium py-0.5" 
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${item.isChild ? 'bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300' : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'}`}>
+                              {item.isChild ? 'Pase Niño' : 'Pase VIP'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-400 font-mono text-[10px]">
+                            ID: {item.pin}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 };
