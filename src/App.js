@@ -12224,8 +12224,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
             idReal: sg.id,
             nombreAImprimir: sg.name || (sg.isChild ? 'Niño' : 'Acompañante'),
             esNino: sg.isChild,
-            // 🔴 EL FIX DE ESCÁNER: El ID individual puro y crudo. 
-            // Con el nuevo CSV, el escáner ahora sí encontrará a la familia.
             qrDataUrl: sg.id 
           });
         });
@@ -12238,7 +12236,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
          config: evento.pulserasConfig || {},
          fechaEvento: evento.fecha,
          listaImpresion: flattened,
-         status: evento.pulserasStatus
+         status: evento.pulserasStatus,
+         direccionEnvioTaller: evento.direccionEnvioTaller // 🔴 OBTENEMOS DATOS DE ENVÍO
       });
     } catch (error) {
       console.error("Error procesando orden:", error);
@@ -12340,6 +12339,84 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     printWindow.document.close();
   };
 
+  // 🔴 NUEVA FUNCIÓN PARA IMPRIMIR LA ETIQUETA DE ENVÍO LOGÍSTICO
+  const handlePrintShippingLabel = (shippingData, eventName) => {
+    if (!shippingData) return;
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    
+    // Si es un pedido antiguo sin campos nuevos, intentamos parcharlo para que no se rompa
+    const recipient = shippingData.recipient || eventName;
+    const address = shippingData.address || 'Sin dirección proporcionada';
+    const zipCode = shippingData.zipCode || '00000';
+    const city = shippingData.city || 'Ciudad Desconocida';
+    const state = shippingData.state || 'Estado Desconocido';
+    const country = shippingData.country || 'MÉXICO';
+    const phone = (shippingData.phoneCode || '+52') + ' ' + (shippingData.phone || '0000000000');
+    const references = shippingData.references || '';
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Etiqueta de Envío - ${eventName}</title>
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 0; margin: 0; background: #fff; color: #000; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+            .label-box { width: 10cm; min-height: 15cm; border: 3px solid #000; padding: 25px; box-sizing: border-box; border-radius: 12px; position: relative; background: #fff;}
+            .priority { font-size: 26px; font-weight: 900; border-bottom: 4px solid #000; padding-bottom: 12px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
+            .section { margin-bottom: 20px; }
+            .title { font-size: 10px; color: #555; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; letter-spacing: 1px; }
+            .big-text { font-size: 20px; font-weight: 900; text-transform: uppercase; margin-bottom: 5px; line-height: 1.1;}
+            .text { font-size: 15px; margin-bottom: 4px; line-height: 1.4; font-weight: 500;}
+            .barcode-area { border: 2px dashed #000; height: 80px; display: flex; align-items: center; justify-content: center; margin-top: 30px; font-size: 12px; font-weight: bold; color: #000; text-align: center; padding: 10px;}
+            .footer { position: absolute; bottom: 25px; left: 25px; right: 25px; border-top: 2px solid #000; padding-top: 15px; font-size: 10px; text-align: center; color: #000; font-weight: bold; line-height: 1.4;}
+          </style>
+        </head>
+        <body>
+          <div class="label-box">
+            <div class="priority">PAQUETE ESTÁNDAR</div>
+            
+            <div class="section">
+              <div class="title">DESTINATARIO:</div>
+              <div class="big-text">${recipient}</div>
+            </div>
+            
+            <div class="section">
+              <div class="title">DIRECCIÓN DE ENTREGA:</div>
+              <div class="text">${address}</div>
+              <div class="text">C.P.: <strong>${zipCode}</strong></div>
+              <div class="text">${city}, ${state}</div>
+              <div class="text" style="font-weight: 900; font-size: 18px; margin-top: 5px;">${country}</div>
+            </div>
+            
+            ${references ? `
+            <div class="section">
+              <div class="title">REFERENCIAS DE ENTREGA:</div>
+              <div class="text" style="font-style: italic; font-size: 13px;">${references}</div>
+            </div>` : ''}
+            
+            <div class="section" style="margin-top: 25px;">
+              <div class="title">CONTACTO MÓVIL (WHATSAPP):</div>
+              <div class="big-text">${phone}</div>
+            </div>
+
+            <div class="barcode-area">
+               ESPACIO RESERVADO PARA<br/>GUÍA DE PAQUETERÍA
+            </div>
+            
+            <div class="footer">
+              REMITENTE:<br/>
+              BAULIA TECHNOLOGIES S.A. DE C.V.<br/>
+              DEPTO. DE PRODUCCIÓN BLACK LABEL
+            </div>
+          </div>
+          <script>
+            setTimeout(() => { window.print(); window.close(); }, 500);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   const handleCreateLicense = async (e) => {
     e.preventDefault();
     setIsCreating(true);
@@ -12435,7 +12512,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       const isQrChecked = editingLic.isQrEnabled !== false; 
       const isPassChecked = editingLic.isPassCountEnabled !== false;
 
-      // 🔴 AQUÍ ESTÁ LA SOLUCIÓN: Le decimos al sistema que guarde las variables híbridas
       let updateData = { 
         urlInvitacion: safeUrl, 
         plan: editingLic.plan, 
@@ -12453,10 +12529,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           updateData.status = 'activo';
       }
 
-      // 1. Actualiza la base de usuarios
       await updateDoc(doc(db, "usuarios", editingLic.id), updateData);
 
-      // 2. Actualiza la base de eventos
       try {
         await updateDoc(doc(db, "eventos", editingLic.eventId), {
            nombres: safeNombre,
@@ -12738,6 +12812,27 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         </div>
 
                         <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
+                            
+                            {/* 🔴 NUEVO BLOQUE DE ENVÍO Y ETIQUETA EN SUPERADMIN */}
+                            {ordenActiva.direccionEnvioTaller ? (
+                              <div className="bg-slate-50 dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 mb-4 flex items-center justify-between">
+                                <div>
+                                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-1 flex items-center"><MapPin size={14} className="mr-1.5 text-indigo-500"/> Datos de Envío Listos</h4>
+                                   <p className="text-sm font-bold text-slate-900 dark:text-white">{ordenActiva.direccionEnvioTaller.recipient}</p>
+                                   <p className="text-xs text-slate-500">{ordenActiva.direccionEnvioTaller.city}, {ordenActiva.direccionEnvioTaller.country}</p>
+                                </div>
+                                <button 
+                                  onClick={() => handlePrintShippingLabel(ordenActiva.direccionEnvioTaller, ordenActiva.nombres)}
+                                  className="px-4 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:scale-105 transition-transform flex items-center">
+                                  <Printer size={16} className="mr-2"/> Imprimir Etiqueta
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="bg-rose-50 dark:bg-rose-500/10 p-4 rounded-xl mb-4 text-xs font-medium text-rose-700 dark:text-rose-400 flex items-center">
+                                 <AlertTriangle size={16} className="mr-2 shrink-0"/> El cliente no proporcionó datos de envío estructurados (orden antigua).
+                              </div>
+                            )}
+
                             <div className="bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/30 p-3 rounded-xl flex items-start gap-2 mb-3">
                                 <Info size={16} className="text-sky-600 dark:text-sky-400 mt-0.5 shrink-0" />
                                 <p className="text-xs text-sky-800 dark:text-sky-200">Al abrir el PDF, asegúrate de configurar tu impresora en tamaño <b>CARTA</b>, orientación <b>HORIZONTAL</b>, y escala <b>100%</b> o "Tamaño Real".</p>
@@ -13132,7 +13227,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     <p className="mb-3"><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Usuario:</span> <b className="text-slate-800 dark:text-white transition-colors">{successData.email}</b></p>
                     <p><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Contraseña:</span> <b className="text-slate-800 dark:text-white font-mono text-base transition-colors">{successData.password}</b></p>
                   </div>
-                
+                  
                   <button onClick={() => setIsModalOpen(false)} className="w-full py-4 text-slate-500 dark:text-slate-400 font-bold hover:text-slate-800 dark:hover:text-white transition-colors">Cerrar Ventana</button>
                 </div>
               )}
