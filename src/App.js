@@ -12237,7 +12237,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
          fechaEvento: evento.fecha,
          listaImpresion: flattened,
          status: evento.pulserasStatus,
-         direccionEnvioTaller: evento.direccionEnvioTaller // 🔴 OBTENEMOS DATOS DE ENVÍO
+         direccionEnvioTaller: evento.direccionEnvioTaller 
       });
     } catch (error) {
       console.error("Error procesando orden:", error);
@@ -12339,12 +12339,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     printWindow.document.close();
   };
 
-  // 🔴 NUEVA FUNCIÓN PARA IMPRIMIR LA ETIQUETA DE ENVÍO LOGÍSTICO
   const handlePrintShippingLabel = (shippingData, eventName) => {
     if (!shippingData) return;
     const printWindow = window.open('', '_blank', 'width=800,height=600');
     
-    // Si es un pedido antiguo sin campos nuevos, intentamos parcharlo para que no se rompa
     const recipient = shippingData.recipient || eventName;
     const address = shippingData.address || 'Sin dirección proporcionada';
     const zipCode = shippingData.zipCode || '00000';
@@ -12439,10 +12437,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         }
       }
 
-      // 🟢 ASEGURAMOS QUE NUNCA SEAN UNDEFINED
-      const safeSocialWall = Boolean(formData.hasSocialWall);
-      const safeBlackLabel = Boolean(formData.hasBlackLabel);
-
       await setDoc(doc(db, "usuarios", newEventId), { 
         email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, 
         nombres: formData.nombres, status: 'nuevo', urlInvitacion: formData.urlInvitacion, creadoPor: authData.email, 
@@ -12452,8 +12446,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         fechaEvento: formData.fechaEvento, 
         horaEvento: formData.horaEvento,
         telefono: formData.telefono,
-        hasSocialWall: safeSocialWall, // 🟢 BLINDADO
-        hasBlackLabel: safeBlackLabel  // 🟢 BLINDADO
+        hasSocialWall: formData.hasSocialWall === true, // 🟢 BLINDADO ESTRICTO
+        hasBlackLabel: formData.hasBlackLabel === true  // 🟢 BLINDADO ESTRICTO
       });
 
       await setDoc(doc(db, "eventos", newEventId), { 
@@ -12465,8 +12459,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           isPassCountEnabled: formData.isPassCountEnabled,
           fecha: formData.fechaEvento, 
           horaEvento: formData.horaEvento,
-          hasSocialWall: safeSocialWall, // 🟢 BLINDADO
-          hasBlackLabel: safeBlackLabel  // 🟢 BLINDADO
+          hasSocialWall: formData.hasSocialWall === true, // 🟢 BLINDADO ESTRICTO
+          hasBlackLabel: formData.hasBlackLabel === true  // 🟢 BLINDADO ESTRICTO
       });
 
       const mesAnioAct = new Date().toISOString().slice(0, 7);
@@ -12525,8 +12519,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         isPassCountEnabled: isPassChecked,
         fechaEvento: editingLic.fechaEvento || '',
         horaEvento: editingLic.horaEvento || '18:00',
-        hasSocialWall: editingLic.hasSocialWall || false, // GUARDA EL ADD-ON
-        hasBlackLabel: editingLic.hasBlackLabel || false  // GUARDA EL ADD-ON
+        hasSocialWall: editingLic.hasSocialWall === true, // 🟢 BLINDADO ESTRICTO
+        hasBlackLabel: editingLic.hasBlackLabel === true  // 🟢 BLINDADO ESTRICTO
       };
 
       if (safeUrl !== "" && (editingLic.status === 'en_proceso' || editingLic.status === 'nuevo')) {
@@ -12544,8 +12538,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
            isPassCountEnabled: isPassChecked,
            fecha: editingLic.fechaEvento || '',
            horaEvento: editingLic.horaEvento || '18:00',
-           hasSocialWall: editingLic.hasSocialWall || false, // GUARDA EL ADD-ON
-           hasBlackLabel: editingLic.hasBlackLabel || false  // GUARDA EL ADD-ON
+           hasSocialWall: editingLic.hasSocialWall === true, // 🟢 BLINDADO ESTRICTO
+           hasBlackLabel: editingLic.hasBlackLabel === true  // 🟢 BLINDADO ESTRICTO
         });
       } catch(err) { console.log("Doc evento no listo", err); }
 
