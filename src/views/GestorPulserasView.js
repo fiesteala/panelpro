@@ -121,10 +121,17 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
   const executeSendToWorkshop = async () => {
     try {
-      await updateDoc(doc(db, "eventos", eventId), { pulserasStatus: 'enviado', fechaEnvioTaller: new Date().toISOString(), direccionEnvioTaller: shippingInfo });
+      await updateDoc(doc(db, "eventos", eventId), { 
+          pulserasStatus: 'enviado', 
+          fechaEnvioTaller: new Date().toISOString(), 
+          direccionEnvioTaller: shippingInfo,
+          pulserasConfig: designConfig // 🟢 SOLUCIÓN: Empaqueta y guarda el diseño y el logo automáticamente al enviar
+      });
       setIsLocked(true);
       if(addNotification) addNotification('¡Orden Enviada!', 'Tus pulseras ya están en producción.', 'success');
-    } catch (error) { if(addNotification) addNotification('Error', 'Fallo de conexión.', 'error'); }
+    } catch (error) { 
+      if(addNotification) addNotification('Error', 'Fallo de conexión.', 'error'); 
+    }
   };
 
   if (isLoading) return <div className="p-10 text-center text-slate-500">Cargando plataforma...</div>;
