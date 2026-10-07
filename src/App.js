@@ -10530,7 +10530,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   
                   {/* SOCIAL WALL CARD */}
                   <button 
-                    onClick={() => { setPlanSeleccionado({ plan: 'Muro Social', precio: pSocialWall.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }}
+                    onClick={() => { setPlanSeleccionado({ plan: 'social_wall', precio: pSocialWall.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }}
                     className="w-full text-left p-6 rounded-3xl border-2 border-indigo-500/30 dark:border-indigo-500/50 bg-indigo-50 dark:bg-[#111] hover:bg-indigo-100 dark:hover:bg-[#151515] hover:border-indigo-500 transition-all duration-300 group relative overflow-hidden"
                   >
                     <div className="absolute -right-6 -top-6 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full pointer-events-none group-hover:bg-indigo-500/40 transition-colors"></div>
@@ -11639,7 +11639,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                  </div>
 
                  <div className="mt-10 relative z-10">
-                    <button onClick={() => { setPlanSeleccionado({ plan: 'Muro Social', precio: pSocialWall.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(79,70,229,0.3)]">
+                    <button onClick={() => { setPlanSeleccionado({ plan: 'social_wall', precio: pSocialWall.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(79,70,229,0.3)]">
                        <Camera size={18} className="mr-3 text-white/70" /> Comprar Muro Social (${pSocialWall.precios[moneda]})
                     </button>
                  </div>
