@@ -12256,6 +12256,25 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
      }
   };
 
+  const desbloquearOrden = async () => {
+     setDialog({ 
+         isOpen: true, 
+         type: 'confirm', 
+         title: 'Desbloquear Bóveda', 
+         message: '¿Estás seguro que deseas regresar este pedido a modo edición? El cliente podrá modificar su diseño y lista, y la orden desaparecerá de esta bandeja hasta que vuelva a enviarla.', 
+         onConfirm: async () => { 
+             setDialog({ ...dialog, isOpen: false }); 
+             try {
+                // Regresamos el estatus a pendiente para que se desbloquee la vista del cliente
+                await updateDoc(doc(db, "eventos", ordenActiva.eventoId), { pulserasStatus: 'pendiente' });
+                setOrdenActiva(null); // Limpiamos la vista porque la orden ya no está en la bandeja
+             } catch (error) {
+                setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'Fallo al desbloquear la orden.' });
+             }
+         } 
+     });
+  };
+
   const generarPDFNativo = () => {
     const printWindow = window.open('', '_blank');
     const evtName = ordenActiva.config.eventName || 'Evento VIP';
@@ -12840,9 +12859,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                             </button>
 
                             {ordenActiva.status !== 'impreso' && (
-                                <button onClick={marcarComoImpreso} className="w-full mt-4 py-4 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs uppercase tracking-widest shadow-sm hover:bg-emerald-100 transition-colors flex items-center justify-center">
-                                    <CheckCircle2 size={18} className="mr-2" /> Marcar como Producido y Despachado
-                                </button>
+                                <div className="flex gap-3 mt-4">
+                                    <button onClick={desbloquearOrden} className="flex-1 py-4 bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-sm hover:bg-rose-100 transition-colors flex items-center justify-center">
+                                        <Edit3 size={16} className="mr-2" /> Revertir a Edición
+                                    </button>
+                                    <button onClick={marcarComoImpreso} className="flex-[2] py-4 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-sm hover:bg-emerald-100 transition-colors flex items-center justify-center">
+                                        <CheckCircle2 size={16} className="mr-2" /> Marcar como Producido y Despachado
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </div>

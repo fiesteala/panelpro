@@ -1,3 +1,3 @@
 git add .
-git commit -m "envio de datos de pulsera corregido"
+git commit -m "boton estatus pendiente pulseras vip"
 git push origin main
