@@ -1,3 +1,3 @@
 git add .
-git commit -m "pantalla blanca en basico"
+git commit -m "barra lateral en basico"
 git push origin main

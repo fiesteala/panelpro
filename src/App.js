@@ -191,17 +191,17 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
     { 
       title: 'Planeación y Finanzas', 
       items: [ 
-        { id: 'dashboard', icon: LayoutDashboard, label: 'Resumen', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
-        { id: 'tareas', icon: CheckSquare, label: 'Checklist', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
-        { id: 'presupuesto', icon: Wallet, label: 'Presupuesto', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
-        { id: 'proveedores', icon: Store, label: 'Proveedores', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] } 
+        { id: 'dashboard', icon: LayoutDashboard, label: 'Resumen', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] }, 
+        { id: 'tareas', icon: CheckSquare, label: 'Checklist', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] }, 
+        { id: 'presupuesto', icon: Wallet, label: 'Presupuesto', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] }, 
+        { id: 'proveedores', icon: Store, label: 'Proveedores', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] } 
       ] 
     },
     { 
       title: 'Gestión de Asistentes', 
       items: [ 
-        { id: 'invitacion', icon: Smartphone, label: 'Ver Invitación App', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
-        { id: 'invitados', icon: Users, label: 'Lista de Invitados', minLevel: 1, allowedPlans: ['esencial', 'plata', 'oro', 'diamante'] }, 
+        { id: 'invitacion', icon: Smartphone, label: 'Ver Invitación App', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] }, 
+        { id: 'invitados', icon: Users, label: 'Lista de Invitados', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] }, 
         { id: 'mesas', icon: LayoutGrid, label: 'Gestión de Mesas', minLevel: 2, allowedPlans: ['oro', 'diamante'] } 
       ] 
     },
@@ -265,7 +265,7 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
           {menuGroups.map((group, gIdx) => {
             const visibleItems = group.items.filter(item => {
               if (item.extraCondition === true) return true;
-              if (item.allowedPlans) return item.allowedPlans.includes(userPlan.toLowerCase());
+              if (item.allowedPlans && userPlan) return item.allowedPlans.includes(userPlan.toLowerCase());
               return level >= item.minLevel; 
             });
             if (visibleItems.length === 0) return null;
