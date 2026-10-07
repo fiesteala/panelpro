@@ -12439,6 +12439,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         }
       }
 
+      // 🟢 ASEGURAMOS QUE NUNCA SEAN UNDEFINED
+      const safeSocialWall = Boolean(formData.hasSocialWall);
+      const safeBlackLabel = Boolean(formData.hasBlackLabel);
+
       await setDoc(doc(db, "usuarios", newEventId), { 
         email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, 
         nombres: formData.nombres, status: 'nuevo', urlInvitacion: formData.urlInvitacion, creadoPor: authData.email, 
@@ -12448,8 +12452,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         fechaEvento: formData.fechaEvento, 
         horaEvento: formData.horaEvento,
         telefono: formData.telefono,
-        hasSocialWall: formData.hasSocialWall, // ADDON
-        hasBlackLabel: formData.hasBlackLabel  // ADDON
+        hasSocialWall: safeSocialWall, // 🟢 BLINDADO
+        hasBlackLabel: safeBlackLabel  // 🟢 BLINDADO
       });
 
       await setDoc(doc(db, "eventos", newEventId), { 
@@ -12461,8 +12465,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           isPassCountEnabled: formData.isPassCountEnabled,
           fecha: formData.fechaEvento, 
           horaEvento: formData.horaEvento,
-          hasSocialWall: formData.hasSocialWall, // ADDON
-          hasBlackLabel: formData.hasBlackLabel  // ADDON
+          hasSocialWall: safeSocialWall, // 🟢 BLINDADO
+          hasBlackLabel: safeBlackLabel  // 🟢 BLINDADO
       });
 
       const mesAnioAct = new Date().toISOString().slice(0, 7);
