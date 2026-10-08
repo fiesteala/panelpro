@@ -1865,7 +1865,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       )}
 
-      {/* 🟢 LA MAGIA DE LA PORTADA DEL PASE DE REGRESO */}
+      {/* 🟢 LA MAGIA DE LA PORTADA DEL PASE (REDISEÑO PREMIUM) */}
       {qrModal && (
         <div className="fixed inset-0 z-[400] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-300 flex flex-col relative max-h-[95vh]">
@@ -1874,31 +1874,23 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
             <div className="px-6 py-4 border-b border-slate-100 dark:bg-white/5 flex justify-between items-center z-10 shrink-0 bg-slate-50">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white tracking-wide">Diseño del Pase</h3>
               <div className="flex gap-2 print:hidden">
-                 {/* BOTÓN PARA SUBIR FOTO */}
                  <label className="cursor-pointer text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors" title="Subir portada">
                     <ImageIcon size={18} />
                     <input type="file" accept="image/*" className="hidden" onChange={(e) => {
-                       if(e.target.files && e.target.files[0]) {
-                          setQrCover(URL.createObjectURL(e.target.files[0]));
-                       }
+                       if(e.target.files && e.target.files[0]) setQrCover(URL.createObjectURL(e.target.files[0]));
                     }}/>
                  </label>
-                 {qrCover && (
-                   <button onClick={() => setQrCover(null)} className="text-rose-500 bg-rose-50 dark:bg-rose-500/10 p-2 rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors" title="Quitar portada"><Trash size={18}/></button>
-                 )}
+                 {qrCover && <button onClick={() => setQrCover(null)} className="text-rose-500 bg-rose-50 dark:bg-rose-500/10 p-2 rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors" title="Quitar portada"><Trash size={18}/></button>}
                  <button onClick={() => setQrModal(null)} className="text-slate-400 hover:text-slate-800 bg-white dark:bg-[#111] p-2 rounded-full shadow-sm border border-slate-200 dark:border-white/10"><X size={18}/></button>
               </div>
             </div>
             
             {/* 🟢 EL LIENZO QUE SE CONVIERTE EN FOTO */}
             <div className="overflow-y-auto custom-scrollbar bg-slate-200 dark:bg-[#050505] p-4 sm:p-6 flex-1 flex justify-center items-center">
-               <div 
-                 id={`qr-container-${qrModal.pin}`} 
-                 className="bg-white relative rounded-2xl overflow-hidden shadow-xl w-full max-w-[300px] mx-auto flex flex-col"
-                 style={{ aspectRatio: '9/16' }}
-               >
-                  {/* ZONA DE LA IMAGEN DE FONDO (Ocupa la mitad superior) */}
-                  <div className="absolute inset-0 w-full h-[65%] bg-slate-50 flex items-center justify-center overflow-hidden">
+               <div id={`qr-container-${qrModal.pin}`} className="bg-white relative rounded-2xl overflow-hidden shadow-xl w-full max-w-[300px] mx-auto flex flex-col" style={{ aspectRatio: '9/16' }}>
+                  
+                  {/* ZONA DE LA IMAGEN DE FONDO (Ocupa el 60% superior) */}
+                  <div className="absolute inset-0 w-full h-[60%] bg-slate-50 flex items-center justify-center overflow-hidden">
                      {qrCover ? (
                         <img src={qrCover} alt="Portada" className="w-full h-full object-cover" crossOrigin="anonymous"/>
                      ) : (
@@ -1909,29 +1901,53 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                      )}
                   </div>
 
-                  {/* EL DEGRADADO QUE SE FUNDE A BLANCO */}
-                  <div className="absolute inset-0 w-full h-full pointer-events-none" 
-                       style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(255,255,255,0.8) 55%, #ffffff 65%, #ffffff 100%)' }}>
-                  </div>
+                  {/* EL DEGRADADO QUE SE FUNDE A BLANCO (Ajustado para dar más espacio a los textos) */}
+                  <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent 20%, rgba(255,255,255,0.9) 45%, #ffffff 55%, #ffffff 100%)' }}></div>
 
                   {/* INFORMACIÓN DEL INVITADO Y QR */}
-                  <div className="relative z-10 flex flex-col h-full justify-end p-6 pb-8 items-center text-center">
-                     <h2 className="text-2xl font-editorial font-black text-slate-900 leading-tight mb-1 truncate w-full">{qrModal.displayName}</h2>
-                     <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-5">Pase Personal • Intransferible</p>
+                  <div className="relative z-10 flex flex-col h-full justify-end px-5 pb-6 items-center text-center">
+                     
+                     {/* 1. MONOGRAMA O LOGO */}
+                     <div className="mb-2 h-12 flex items-center justify-center">
+                        {(currentEvent?.monogramaUrl || currentEvent?.logoUrl || authData?.logoUrl) ? (
+                          <img src={currentEvent?.monogramaUrl || currentEvent?.logoUrl || authData?.logoUrl} alt="Logo Evento" className="max-h-full max-w-[120px] object-contain drop-shadow-md" crossOrigin="anonymous" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full border border-slate-800 flex items-center justify-center text-slate-800 font-editorial font-bold text-xl bg-white/80 backdrop-blur-sm shadow-sm">
+                             {eventName ? eventName.substring(0, 2).toUpperCase() : 'EV'}
+                          </div>
+                        )}
+                     </div>
 
-                     {/* API RÁPIDA DE QR */}
-                     <div className="bg-white p-3 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-slate-100 mb-4">
+                     {/* 2. NOMBRE DEL INVITADO (Corregido para que no se corte) */}
+                     <h2 className="text-2xl font-editorial font-black text-slate-900 leading-normal mb-1 whitespace-normal break-words w-full px-2" style={{ paddingBottom: '2px' }}>
+                        {qrModal.displayName}
+                     </h2>
+
+                     {/* 3. MESA ASIGNADA (Solo si es Premium y tiene mesa) */}
+                     {isPremium && qrModal.parentGuest.tableId && (
+                       <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-3">
+                         {tables?.find(t => String(t.id) === String(qrModal.parentGuest.tableId))?.name || qrModal.parentGuest.tableId}
+                       </p>
+                     )}
+                     {(!isPremium || !qrModal.parentGuest.tableId) && <div className="h-3 mb-3"></div>}
+
+                     {/* 4. CÓDIGO QR */}
+                     <div className="bg-white p-2 rounded-xl shadow-[0_5px_15px_rgba(0,0,0,0.08)] border border-slate-100 mb-3">
                         <img 
                            src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${qrModal.pin}&margin=1`} 
                            alt="QR" 
-                           className="w-40 h-40 object-contain mix-blend-multiply"
+                           className="w-36 h-36 object-contain mix-blend-multiply"
                            crossOrigin="anonymous"
                         />
                      </div>
 
-                     <p className="font-mono text-xs text-slate-600 tracking-[0.2em] bg-slate-50 py-1.5 px-4 rounded-lg border border-slate-200">
-                       PIN: <strong className="text-slate-900">{qrModal.pin.substring(0, 8)}</strong>
+                     {/* 5. PIN */}
+                     <p className="font-mono text-[10px] text-slate-700 tracking-[0.2em] bg-slate-50 py-1.5 px-4 rounded-lg border border-slate-200 mb-2">
+                       PIN: <strong className="text-slate-900 font-bold">{qrModal.pin.substring(0, 8)}</strong>
                      </p>
+
+                     {/* 6. TEXTO INTRANSFERIBLE */}
+                     <p className="text-[8px] uppercase tracking-[0.15em] text-slate-500 font-bold">Pase Personal • Intransferible</p>
                   </div>
                </div>
             </div>
