@@ -1,5 +1,5 @@
 git add .
-git commit -m "logo automatico QR invitadosview"
+git commit -m "impresion de pulseras desde taller corregido"
 git push origin main
 
 .

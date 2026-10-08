@@ -12370,18 +12370,31 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       const listRef = collection(db, "eventos", evento.id, "invitados");
       const listSnap = await getDocs(listRef);
       const invitadosDB = listSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const invitadosVIP = invitadosDB.filter(g => g.isSecurityKit || g.isBlackLabel);
+      
+      // 🟢 CORRECCIÓN: Filtramos a todos los que tengan pases válidos (sin depender de variables viejas)
+      const invitadosVIP = invitadosDB.filter(g => g.status === 'confirmado' || g.status === 'ingreso' || (g.passes && g.passes > 0));
 
       const flattened = [];
       invitadosVIP.forEach(guest => {
-        (guest.subGuests || []).forEach((sg) => {
-          flattened.push({
-            idReal: sg.id,
-            nombreAImprimir: sg.name || (sg.isChild ? 'Niño' : 'Acompañante'),
-            esNino: sg.isChild,
-            qrDataUrl: sg.id 
-          });
-        });
+        // Si tienen la nueva estructura de subInvitados, los usamos
+        if (guest.subGuests && guest.subGuests.length > 0) {
+            guest.subGuests.forEach((sg) => {
+              flattened.push({
+                idReal: sg.id,
+                nombreAImprimir: sg.name || (sg.isChild ? 'Niño' : 'Acompañante'),
+                esNino: sg.isChild,
+                qrDataUrl: sg.id 
+              });
+            });
+        } else {
+            // Si es un invitado antiguo sin subGuests, forzamos la creación del array principal
+            flattened.push({
+                idReal: guest.id,
+                nombreAImprimir: guest.name || 'Invitado VIP',
+                esNino: false,
+                qrDataUrl: guest.id
+            });
+        }
       });
 
       setOrdenActiva({
