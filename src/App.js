@@ -1205,17 +1205,20 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   const [qrEnabled, setQrEnabled] = useState(true);
   const [passCountEnabled, setPassCountEnabled] = useState(true);
   
-  // 🟢 ESTADOS PARA LA PORTADA DEL BOLETO Y EL LOGO INTELIGENTE
+  // 🟢 ESTADOS PARA LA PORTADA, LOGO Y SUBIDAS CLOUDINARY
   const [qrCover, setQrCover] = useState(null);
   const [eventLogo, setEventLogo] = useState(null); 
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [logoError, setLogoError] = useState(false); // Evita que un logo roto borre el estado global
 
   useEffect(() => {
     setIsWeddingMode(tipoEvento === 'boda');
   }, [tipoEvento]);
 
-  // 🟢 EFECTO INTELIGENTE: ESCUCHA LA BÓVEDA EN TIEMPO REAL Y JALA EL LOGO
+  // 🟢 EFECTO INTELIGENTE: ESCUCHA LA BÓVEDA EN TIEMPO REAL
   useEffect(() => {
-    if (typeof ID_DEL_EVENTO === 'undefined') return; // Seguridad extra
+    if (typeof ID_DEL_EVENTO === 'undefined') return;
     const unsub = onSnapshot(doc(db, "eventos", ID_DEL_EVENTO), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -1223,27 +1226,27 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         setPassCountEnabled(data.isPassCountEnabled !== false);
         if (data.tipoEvento) setIsWeddingMode(data.tipoEvento === 'boda');
         
-        // --- LÓGICA DE DETECCIÓN DE LOGO AUTÓNOMA ---
+        // Carga la portada si ya existe en la base de datos
+        if (data.qrCoverUrl) setQrCover(data.qrCoverUrl);
+        else setQrCover(null);
+        
+        // Lógica de Detección de Logo
         if (data.monogramaUrl) {
-           // PRIORIDAD 1: Cliente subió logo manual, o se forzó uno en boveda (Black Label)
            setEventLogo(data.monogramaUrl);
         } else if (data.urlInvitacion) {
-           // PRIORIDAD 2: "Regla de Oro" - Jalar automáticamente de la invitación digital
            const baseUrl = data.urlInvitacion.split('?')[0]; 
            const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl; 
            setEventLogo(`${cleanUrl}/monograma.svg`); 
         } else if (data.logoUrl) {
-           // PRIORIDAD 3: Respaldo de logo general del sistema
            setEventLogo(data.logoUrl);
         } else {
-           // PRIORIDAD 4: No hay nada, forzar paracaídas
            setEventLogo(null);
         }
       }
     });
     return () => unsub();
   }, []);
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroLado, setFiltroLado] = useState('Todos');
 
@@ -1252,6 +1255,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   const [editModal, setEditModal] = useState({ open: false, guest: null });
   const [deleteModal, setDeleteModal] = useState(null);
   const [qrModal, setQrModal] = useState(null); 
+
+  // Resetear el error visual del logo cuando se abre otro QR
+  useEffect(() => { setLogoError(false); }, [qrModal, eventLogo]);
 
   const [exportViewOpen, setExportViewOpen] = useState(false);
   const [exportCols, setExportCols] = useState({ nombre: true, pases: true, estatus: true, telefono: true, mesa: true });
@@ -1269,6 +1275,63 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
   const handleOpenEdit = (guest) => {
     setEditModal({ open: true, guest: { ...guest } });
+  };
+
+  // 🟢 FUNCIONES PARA SUBIR IMÁGENES A LA NUBE Y GUARDARLAS PERMANENTEMENTE
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setIsUploadingCover(true);
+    if (addNotification) addNotification('Subiendo Fondo...', 'Guardando portada en el servidor.', 'info');
+    
+    const formData = new FormData(); 
+    formData.append('file', file); 
+    formData.append('upload_preset', "ml_default"); // Tu preset de Cloudinary
+    
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/duy0mcqsh/image/upload`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.secure_url) {
+         await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { qrCoverUrl: data.secure_url });
+         if (addNotification) addNotification('¡Listo!', 'El fondo del pase se ha guardado para todos.', 'success');
+      }
+    } catch(err) {
+      console.error(err);
+      if (addNotification) addNotification('Error', 'Fallo al subir la imagen.', 'error');
+    }
+    setIsUploadingCover(false);
+    e.target.value = null;
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setIsUploadingLogo(true);
+    if (addNotification) addNotification('Subiendo Logo...', 'Guardando monograma manual.', 'info');
+    
+    const formData = new FormData(); 
+    formData.append('file', file); 
+    formData.append('upload_preset', "ml_default");
+    
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/duy0mcqsh/image/upload`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.secure_url) {
+         // Guarda el monograma en Firebase, esto tiene Prioridad 1 y se usará también en Pulseras
+         await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { monogramaUrl: data.secure_url });
+         if (addNotification) addNotification('¡Listo!', 'Logo actualizado correctamente.', 'success');
+      }
+    } catch(err) {
+      if (addNotification) addNotification('Error', 'Fallo al subir el logo.', 'error');
+    }
+    setIsUploadingLogo(false);
+    e.target.value = null;
+  };
+
+  const handleRemoveCover = async () => {
+    try {
+      await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { qrCoverUrl: null });
+    } catch(e) { console.error(e); }
   };
 
   const totalPases = safeGuests.reduce((sum, g) => sum + (g.passes || 0), 0);
@@ -1885,23 +1948,33 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       )}
 
-      {/* 🟢 LA MAGIA DE LA PORTADA DEL PASE (REDISEÑO PREMIUM BLINDADO) */}
+      {/* 🟢 LA MAGIA DE LA PORTADA DEL PASE (REDISEÑO PREMIUM BLINDADO Y MANUAL) */}
       {qrModal && (
         <div className="fixed inset-0 z-[400] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-300 flex flex-col relative max-h-[95vh]">
             
-            {/* CONTROLES SUPERIORES (Se ocultan al descargar) */}
+            {/* CONTROLES SUPERIORES AVANZADOS */}
             <div className="px-6 py-4 border-b border-slate-100 dark:bg-white/5 flex justify-between items-center z-10 shrink-0 bg-slate-50">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white tracking-wide">Diseño del Pase</h3>
-              <div className="flex gap-2 print:hidden">
-                 <label className="cursor-pointer text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors" title="Subir portada">
-                    <ImageIcon size={18} />
-                    <input type="file" accept="image/*" className="hidden" onChange={(e) => {
-                       if(e.target.files && e.target.files[0]) setQrCover(URL.createObjectURL(e.target.files[0]));
-                    }}/>
+              
+              <div className="flex gap-2 print:hidden items-center">
+                 {/* BOTÓN OVERRIDE LOGO (Manual) */}
+                 <label className="cursor-pointer text-amber-600 bg-amber-50 dark:bg-amber-500/10 px-3 py-1.5 rounded-full hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center shadow-sm border border-amber-200 dark:border-amber-500/20" title="Subir Logo Manual si la liga falla">
+                    {isUploadingLogo ? <RefreshCw size={14} className="animate-spin"/> : <><ImageIcon size={14} className="mr-1"/> Logo</>}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload}/>
                  </label>
-                 {qrCover && <button onClick={() => setQrCover(null)} className="text-rose-500 bg-rose-50 dark:bg-rose-500/10 p-2 rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors" title="Quitar portada"><Trash size={18}/></button>}
-                 <button onClick={() => setQrModal(null)} className="text-slate-400 hover:text-slate-800 bg-white dark:bg-[#111] p-2 rounded-full shadow-sm border border-slate-200 dark:border-white/10"><X size={18}/></button>
+
+                 {/* BOTÓN SUBIR PORTADA */}
+                 <label className="cursor-pointer text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center shadow-sm border border-indigo-200 dark:border-indigo-500/20" title="Subir foto de fondo">
+                    {isUploadingCover ? <RefreshCw size={14} className="animate-spin"/> : <><ImageIcon size={14} className="mr-1"/> Fondo</>}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload}/>
+                 </label>
+                 
+                 {qrCover && <button onClick={handleRemoveCover} className="text-rose-500 bg-rose-50 dark:bg-rose-500/10 p-1.5 rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors shadow-sm" title="Quitar portada"><Trash size={14}/></button>}
+                 
+                 <div className="w-px h-4 bg-slate-300 mx-1"></div>
+                 
+                 <button onClick={() => setQrModal(null)} className="text-slate-400 hover:text-slate-800 bg-white dark:bg-[#111] p-1.5 rounded-full shadow-sm border border-slate-200 dark:border-white/10 transition-colors"><X size={16}/></button>
               </div>
             </div>
             
@@ -1927,18 +2000,15 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   {/* INFORMACIÓN DEL INVITADO Y QR */}
                   <div className="relative z-10 flex flex-col h-full justify-end px-5 pb-6 items-center text-center">
                      
-                     {/* 1. MONOGRAMA O LOGO CONECTADO (CON PARACAÍDAS ANTI-ERRORES) */}
+                     {/* 1. MONOGRAMA O LOGO (CON CONTROL DE ERRORES LIMPIO) */}
                      <div className="mb-2 h-12 flex items-center justify-center">
-                        {eventLogo ? (
+                        {!logoError && eventLogo ? (
                           <img 
-                            src={eventLogo} 
-                            alt="Logo Evento" 
-                            className="max-h-full max-w-[120px] object-contain drop-shadow-md" 
-                            onError={(e) => {
-                                console.log("⚠️ No se pudo cargar el logo desde:", eventLogo);
-                                e.target.style.display = 'none';
-                                setEventLogo(null);
-                            }}
+                             src={eventLogo} 
+                             alt="Logo Evento" 
+                             className="max-h-full max-w-[120px] object-contain drop-shadow-md" 
+                             crossOrigin="anonymous" 
+                             onError={() => setLogoError(true)}
                           />
                         ) : (
                           <div className="w-12 h-12 rounded-full border border-slate-800 flex items-center justify-center text-slate-800 font-editorial font-bold text-xl bg-white/80 backdrop-blur-sm shadow-sm">
