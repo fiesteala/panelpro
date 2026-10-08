@@ -6020,38 +6020,53 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
       accentColor = '#475569';
   }
 
+  // 🟢 EL SALVAVIDAS: Atrapa el ID correcto de tu evento, sin importar si viene del SuperAdmin o del Cliente
+  const EVENT_ID = authData?.eventId || authData?.id;
+
   const handleSaveGasto = async (e) => {
-    e.preventDefault();
-    const nuevoId = Date.now().toString();
-    const nuevoGasto = { id: nuevoId, ...formData, estimado: Number(formData.estimado), pagado: 0, proveedorId: null, historial: [] };
-    await setDoc(doc(db, "eventos", authData.eventId, "gastos", nuevoId), nuevoGasto);
-    setIsFormOpen(false);
-    if (addNotification) addNotification('Éxito', 'Gasto agregado correctamente.', 'success');
+    if (e) e.preventDefault();
+    try {
+      const nuevoId = Date.now().toString();
+      const nuevoGasto = { id: nuevoId, ...formData, estimado: Number(formData.estimado), pagado: 0, proveedorId: null, historial: [] };
+      await setDoc(doc(db, "eventos", EVENT_ID, "gastos", nuevoId), nuevoGasto);
+      setIsFormOpen(false);
+      if (addNotification) addNotification('Éxito', 'Gasto agregado correctamente.', 'success');
+    } catch (error) {
+      console.error("Error al guardar gasto:", error);
+    }
   };
 
   const handleUpdateGasto = async (e) => {
-    e.preventDefault();
-    const gastoActualizado = { ...editGastoModal, estimado: Number(editGastoModal.estimado) };
-    await setDoc(doc(db, "eventos", authData.eventId, "gastos", editGastoModal.id.toString()), gastoActualizado);
-    setEditGastoModal(null);
-    if (addNotification) addNotification('Actualizado', 'Los cambios se han guardado.', 'success');
+    if (e) e.preventDefault();
+    try {
+      const gastoActualizado = { ...editGastoModal, estimado: Number(editGastoModal.estimado) };
+      await setDoc(doc(db, "eventos", EVENT_ID, "gastos", editGastoModal.id.toString()), gastoActualizado);
+      setEditGastoModal(null);
+      if (addNotification) addNotification('Actualizado', 'Los cambios se han guardado.', 'success');
+    } catch (error) {
+      console.error("Error al actualizar gasto:", error);
+    }
   };
 
   const handleAddPayment = async (e) => {
-    e.preventDefault();
-    const { item, monto, fecha, metodo, cuenta, comprobante } = paymentProcess;
-    const montoNum = Number(monto);
-    const nombreArchivo = comprobante ? comprobante.name : null;
-    
-    const gastoActualizado = { 
-      ...item, 
-      pagado: item.pagado + montoNum, 
-      historial: [...(item.historial || []), { id: Date.now(), fecha, monto: montoNum, metodo, cuenta, comprobante: nombreArchivo }] 
-    };
-    
-    await setDoc(doc(db, "eventos", authData.eventId, "gastos", item.id.toString()), gastoActualizado);
-    setPaymentProcess(null);
-    if (addNotification) addNotification('Pago Registrado', `Se abonaron $${montoNum} a ${item.concepto}.`, 'success');
+    if (e) e.preventDefault();
+    try {
+      const { item, monto, fecha, metodo, cuenta, comprobante } = paymentProcess;
+      const montoNum = Number(monto);
+      const nombreArchivo = comprobante ? comprobante.name : null;
+      
+      const gastoActualizado = { 
+        ...item, 
+        pagado: item.pagado + montoNum, 
+        historial: [...(item.historial || []), { id: Date.now(), fecha, monto: montoNum, metodo, cuenta, comprobante: nombreArchivo }] 
+      };
+      
+      await setDoc(doc(db, "eventos", EVENT_ID, "gastos", item.id.toString()), gastoActualizado);
+      setPaymentProcess(null);
+      if (addNotification) addNotification('Pago Registrado', `Se abonaron $${montoNum} a ${item.concepto}.`, 'success');
+    } catch (error) {
+      console.error("Error al registrar pago:", error);
+    }
   };
 
   const initiateDelete = (gasto) => {
@@ -6060,25 +6075,29 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
   };
 
   const executeDelete = async (gasto, refundAmount, keepRemaining) => {
-    const refund = Number(refundAmount); 
-    const lostMoney = gasto.pagado - refund;
-    
-    if (lostMoney > 0 && keepRemaining) {
-      const gastoActualizado = { ...gasto, concepto: `${gasto.concepto} (Cancelado)`, estimado: lostMoney, pagado: lostMoney, proveedorId: null };
-      await setDoc(doc(db, "eventos", authData.eventId, "gastos", gasto.id.toString()), gastoActualizado);
-    } else { 
-      await deleteDoc(doc(db, "eventos", authData.eventId, "gastos", gasto.id.toString())); 
-    }
-    
-    if (gasto.proveedorId && proveedores) { 
-      const prov = proveedores.find(p => p.id === gasto.proveedorId);
-      if (prov) {
-         await setDoc(doc(db, "eventos", authData.eventId, "proveedores", prov.id.toString()), { ...prov, status: 'Descartado', contratado: false, gastoId: null });
+    try {
+      const refund = Number(refundAmount); 
+      const lostMoney = gasto.pagado - refund;
+      
+      if (lostMoney > 0 && keepRemaining) {
+        const gastoActualizado = { ...gasto, concepto: `${gasto.concepto} (Cancelado)`, estimado: lostMoney, pagado: lostMoney, proveedorId: null };
+        await setDoc(doc(db, "eventos", EVENT_ID, "gastos", gasto.id.toString()), gastoActualizado);
+      } else { 
+        await deleteDoc(doc(db, "eventos", EVENT_ID, "gastos", gasto.id.toString())); 
       }
+      
+      if (gasto.proveedorId && proveedores) { 
+        const prov = proveedores.find(p => p.id === gasto.proveedorId);
+        if (prov) {
+           await setDoc(doc(db, "eventos", EVENT_ID, "proveedores", prov.id.toString()), { ...prov, status: 'Descartado', contratado: false, gastoId: null });
+        }
+      }
+      
+      setDeleteProcess(null);
+      if (addNotification) addNotification('Cancelado', 'Servicio cancelado con éxito.', 'warning');
+    } catch (error) {
+      console.error("Error al eliminar gasto:", error);
     }
-    
-    setDeleteProcess(null);
-    if (addNotification) addNotification('Cancelado', 'Servicio cancelado con éxito.', 'warning');
   };
 
   //  EXPORTACIÓN INTELIGENTE A EXCEL (.xls hack para estilos)
@@ -6143,9 +6162,11 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
     setIsEditingBudget(false);
     localStorage.setItem('eventmaster_presupuesto', nuevoValor);
     try {
-      await setDoc(doc(db, "eventos", authData.eventId), { presupuestoTotal: nuevoValor }, { merge: true });
+      await setDoc(doc(db, "eventos", EVENT_ID), { presupuestoTotal: nuevoValor }, { merge: true });
       if(addNotification) addNotification('Presupuesto Guardado', 'Se ha guardado tu presupuesto total en la nube.', 'success');
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error al guardar presupuesto:", error);
+    }
   };
 
   const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
