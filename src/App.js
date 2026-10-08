@@ -5975,7 +5975,7 @@ const TimingView = ({ timing, setTiming, addNotification }) => {
 // ==========================================
 // --- COMPONENTE: PRESUPUESTO (DARK PREMIUM) ---
 // ==========================================
-const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedores, presupuestoTotal, setPresupuestoTotal, addNotification }) => {
+const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, setProveedores, presupuestoTotal, setPresupuestoTotal, addNotification }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({ concepto: '', categoria: 'Lugar', estimado: '', fechaLimite: '' });
   const [paymentProcess, setPaymentProcess] = useState(null);
@@ -5991,8 +5991,8 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
     if (!isEditingBudget) setTempBudget(presupuestoTotal);
   }, [presupuestoTotal, isEditingBudget]);
 
-  // 🟢 LA SOLUCIÓN: Definimos el ID del evento dinámicamente según quién inicie sesión.
-  const EVENT_ID = authData?.eventId || authData?.id || '';
+  // 🟢 EL SALVAVIDAS FINAL: Recibimos el eventId directamente desde tu panel principal
+  const EVENT_ID = eventId || authData?.eventId || authData?.id || '';
 
   const categorias = ['Lugar', 'Música', 'Decoración', 'Recuerdos', 'Comida/Bebida', 'Ropa/Maquillaje', 'Papelería', 'Otros'];
   const coloresCategoria = { 'Lugar':'bg-indigo-500', 'Música':'bg-pink-500', 'Decoración':'bg-emerald-500', 'Comida/Bebida':'bg-amber-500', 'Otros':'bg-slate-500' };
