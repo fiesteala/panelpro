@@ -1205,11 +1205,17 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   const [qrEnabled, setQrEnabled] = useState(true);
   const [passCountEnabled, setPassCountEnabled] = useState(true);
   
-  // 🟢 ESTADO PARA LA IMAGEN DE PORTADA DEL BOLETO
+  // 🟢 ESTADOS PARA LA PORTADA DEL BOLETO Y EL LOGO INTELIGENTE
   const [qrCover, setQrCover] = useState(null);
-  const [eventLogo, setEventLogo] = useState(null); // 🟢 Creamos el espacio para el logo
+  const [eventLogo, setEventLogo] = useState(null); 
 
   useEffect(() => {
+    setIsWeddingMode(tipoEvento === 'boda');
+  }, [tipoEvento]);
+
+  // 🟢 EFECTO INTELIGENTE: ESCUCHA LA BÓVEDA EN TIEMPO REAL Y JALA EL LOGO
+  useEffect(() => {
+    if (typeof ID_DEL_EVENTO === 'undefined') return; // Seguridad extra
     const unsub = onSnapshot(doc(db, "eventos", ID_DEL_EVENTO), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -1217,9 +1223,22 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         setPassCountEnabled(data.isPassCountEnabled !== false);
         if (data.tipoEvento) setIsWeddingMode(data.tipoEvento === 'boda');
         
-        // 🟢 JALAMOS EL LOGO AUTOMÁTICAMENTE DE LAS PULSERAS O EL EVENTO
-        if (data.monogramaUrl) setEventLogo(data.monogramaUrl);
-        else if (data.logoUrl) setEventLogo(data.logoUrl);
+        // --- LÓGICA DE DETECCIÓN DE LOGO AUTÓNOMA ---
+        if (data.monogramaUrl) {
+           // PRIORIDAD 1: Cliente subió logo manual, o se forzó uno en boveda (Black Label)
+           setEventLogo(data.monogramaUrl);
+        } else if (data.urlInvitacion) {
+           // PRIORIDAD 2: "Regla de Oro" - Jalar automáticamente de la invitación digital
+           const baseUrl = data.urlInvitacion.split('?')[0]; 
+           const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl; 
+           setEventLogo(`${cleanUrl}/monograma.svg`); 
+        } else if (data.logoUrl) {
+           // PRIORIDAD 3: Respaldo de logo general del sistema
+           setEventLogo(data.logoUrl);
+        } else {
+           // PRIORIDAD 4: No hay nada, forzar paracaídas
+           setEventLogo(null);
+        }
       }
     });
     return () => unsub();
@@ -1866,7 +1885,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       )}
 
-      {/* 🟢 LA MAGIA DE LA PORTADA DEL PASE (REDISEÑO PREMIUM) */}
+      {/* 🟢 LA MAGIA DE LA PORTADA DEL PASE (REDISEÑO PREMIUM BLINDADO) */}
       {qrModal && (
         <div className="fixed inset-0 z-[400] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-300 flex flex-col relative max-h-[95vh]">
@@ -1890,7 +1909,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
             <div className="overflow-y-auto custom-scrollbar bg-slate-200 dark:bg-[#050505] p-4 sm:p-6 flex-1 flex justify-center items-center">
                <div id={`qr-container-${qrModal.pin}`} className="bg-white relative rounded-2xl overflow-hidden shadow-xl w-full max-w-[300px] mx-auto flex flex-col" style={{ aspectRatio: '9/16' }}>
                   
-                  {/* ZONA DE LA IMAGEN DE FONDO (Ocupa el 60% superior) */}
+                  {/* ZONA DE LA IMAGEN DE FONDO */}
                   <div className="absolute inset-0 w-full h-[60%] bg-slate-50 flex items-center justify-center overflow-hidden">
                      {qrCover ? (
                         <img src={qrCover} alt="Portada" className="w-full h-full object-cover" crossOrigin="anonymous"/>
@@ -1902,16 +1921,26 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                      )}
                   </div>
 
-                  {/* EL DEGRADADO QUE SE FUNDE A BLANCO (Ajustado para dar más espacio a los textos) */}
+                  {/* EL DEGRADADO QUE SE FUNDE A BLANCO */}
                   <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent 20%, rgba(255,255,255,0.9) 45%, #ffffff 55%, #ffffff 100%)' }}></div>
 
                   {/* INFORMACIÓN DEL INVITADO Y QR */}
                   <div className="relative z-10 flex flex-col h-full justify-end px-5 pb-6 items-center text-center">
                      
-                     {/* 1. MONOGRAMA O LOGO CONECTADO */}
+                     {/* 1. MONOGRAMA O LOGO CONECTADO (CON PARACAÍDAS ANTI-ERRORES) */}
                      <div className="mb-2 h-12 flex items-center justify-center">
                         {eventLogo ? (
-                          <img src={eventLogo} alt="Logo Evento" className="max-h-full max-w-[120px] object-contain drop-shadow-md" crossOrigin="anonymous" />
+                          <img 
+                             src={eventLogo} 
+                             alt="Logo Evento" 
+                             className="max-h-full max-w-[120px] object-contain drop-shadow-md" 
+                             crossOrigin="anonymous" 
+                             onError={(e) => {
+                                // Si la imagen no existe en el servidor (404), oculta la foto rota y fuerza el círculo con iniciales
+                                e.target.style.display = 'none';
+                                setEventLogo(null);
+                             }}
+                          />
                         ) : (
                           <div className="w-12 h-12 rounded-full border border-slate-800 flex items-center justify-center text-slate-800 font-editorial font-bold text-xl bg-white/80 backdrop-blur-sm shadow-sm">
                              {eventName ? eventName.substring(0, 2).toUpperCase() : 'EV'}
@@ -1919,12 +1948,12 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                         )}
                      </div>
 
-                     {/* 2. NOMBRE DEL INVITADO (Corregido para que no se corte) */}
+                     {/* 2. NOMBRE DEL INVITADO */}
                      <h2 className="text-2xl font-editorial font-black text-slate-900 leading-normal mb-1 whitespace-normal break-words w-full px-2" style={{ paddingBottom: '2px' }}>
                         {qrModal.displayName}
                      </h2>
 
-                     {/* 3. MESA ASIGNADA (Solo si es Premium y tiene mesa) */}
+                     {/* 3. MESA ASIGNADA */}
                      {isPremium && qrModal.parentGuest.tableId && (
                        <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-3">
                          {tables?.find(t => String(t.id) === String(qrModal.parentGuest.tableId))?.name || qrModal.parentGuest.tableId}

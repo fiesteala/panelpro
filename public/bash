@@ -1,5 +1,5 @@
 git add .
-git commit -m "sreorganizacion QR invitadosview"
+git commit -m "logo automatico QR invitadosview"
 git push origin main
 
 .
