@@ -6495,15 +6495,15 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
               <h3 className="font-bold text-lg text-slate-900 dark:text-white">Nuevo Gasto</h3>
               <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
             </div>
-            <form onSubmit={handleSaveGasto} className="p-6 space-y-5">
-              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Concepto</label><input type="text" required value={formData.concepto} onChange={e=>setFormData({...formData, concepto: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors" placeholder="Ej. Fotografía"/></div>
+            <div className="p-6 space-y-5">
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Concepto</label><input type="text" value={formData.concepto} onChange={e=>setFormData({...formData, concepto: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors" placeholder="Ej. Fotografía"/></div>
               <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Categoría</label><select value={formData.categoria} onChange={e=>setFormData({...formData, categoria: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors">{categorias.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Estimado ($)</label><input type="number" required value={formData.estimado} onChange={e=>setFormData({...formData, estimado: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Estimado ($)</label><input type="number" value={formData.estimado} onChange={e=>setFormData({...formData, estimado: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold transition-colors" /></div>
                 <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Fecha Límite</label><input type="date" value={formData.fechaLimite} onChange={e=>setFormData({...formData, fechaLimite: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-600 dark:text-slate-300 text-sm [color-scheme:light] dark:[color-scheme:dark] transition-colors" /></div>
               </div>
-              <button type="submit" className="w-full p-4 bg-amber-500 text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-6 hover:bg-amber-400 transition-colors shadow-md">Guardar Gasto</button>
-            </form>
+              <button type="button" onClick={handleSaveGasto} disabled={!formData.concepto || !formData.estimado} className="w-full p-4 bg-amber-500 text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-6 hover:bg-amber-400 transition-colors shadow-md disabled:opacity-50">Guardar Gasto</button>
+            </div>
           </div>
         </div>
       )}
@@ -6527,8 +6527,8 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
                  <label htmlFor="keepRemaining" className="text-xs text-slate-600 dark:text-slate-400 cursor-pointer transition-colors">Mantener el dinero perdido como gasto en el presupuesto</label>
               </div>
               <div className="flex space-x-3 pt-4 border-t border-slate-100 dark:border-white/5 transition-colors">
-                <button onClick={() => setDeleteProcess(null)} className="flex-1 p-4 bg-slate-100 dark:bg-white/5 font-bold rounded-xl text-slate-500 uppercase tracking-widest text-[10px] transition-colors">Cancelar</button>
-                <button onClick={() => executeDelete(deleteProcess.item, deleteProcess.refundAmount, deleteProcess.keepRemaining)} className="flex-1 p-4 bg-rose-500 text-white font-black rounded-xl shadow-md hover:bg-rose-600 uppercase tracking-widest text-[10px] transition-colors">Confirmar</button>
+                <button type="button" onClick={() => setDeleteProcess(null)} className="flex-1 p-4 bg-slate-100 dark:bg-white/5 font-bold rounded-xl text-slate-500 uppercase tracking-widest text-[10px] transition-colors">Cancelar</button>
+                <button type="button" onClick={() => executeDelete(deleteProcess.item, deleteProcess.refundAmount, deleteProcess.keepRemaining)} className="flex-1 p-4 bg-rose-500 text-white font-black rounded-xl shadow-md hover:bg-rose-600 uppercase tracking-widest text-[10px] transition-colors">Confirmar</button>
               </div>
             </div>
           </div>
