@@ -5991,6 +5991,9 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
     if (!isEditingBudget) setTempBudget(presupuestoTotal);
   }, [presupuestoTotal, isEditingBudget]);
 
+  // 🟢 LA SOLUCIÓN: Definimos el ID del evento dinámicamente según quién inicie sesión.
+  const EVENT_ID = authData?.eventId || authData?.id || '';
+
   const categorias = ['Lugar', 'Música', 'Decoración', 'Recuerdos', 'Comida/Bebida', 'Ropa/Maquillaje', 'Papelería', 'Otros'];
   const coloresCategoria = { 'Lugar':'bg-indigo-500', 'Música':'bg-pink-500', 'Decoración':'bg-emerald-500', 'Comida/Bebida':'bg-amber-500', 'Otros':'bg-slate-500' };
 
@@ -6002,7 +6005,7 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
 
   const gastosPorCategoria = safeGastos.reduce((acc, g) => { acc[g.categoria] = (acc[g.categoria] || 0) + g.estimado; return acc; }, {});
   
-  // 🔴 ESTILOS DINÁMICOS SEGÚN EL PLAN
+  // ESTILOS DINÁMICOS SEGÚN EL PLAN
   const currentEvent = authData?.availableEvents?.find(e => e.eventId === authData?.eventId);
   const plan = currentEvent?.plan || 'oro';
   const eventName = currentEvent?.nombres || 'Proyecto Baulia';
@@ -6020,41 +6023,58 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
       accentColor = '#475569';
   }
 
-  // 🟢 LA SOLUCIÓN: Definimos el ID del evento dinámicamente según quién inicie sesión.
-  const ID_DEL_EVENTO = authData?.eventId || authData?.id || '';
-
+  // 🟢 FUNCIONES REPARADAS CON MANEJO DE ERRORES
   const handleSaveGasto = async (e) => {
     e.preventDefault();
-    const nuevoId = Date.now().toString();
-    const nuevoGasto = { id: nuevoId, ...formData, estimado: Number(formData.estimado), pagado: 0, proveedorId: null, historial: [] };
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "gastos", nuevoId), nuevoGasto);
-    setIsFormOpen(false);
-    if (addNotification) addNotification('Éxito', 'Gasto agregado correctamente.', 'success');
+    if (!EVENT_ID) {
+      if (addNotification) addNotification('Error', 'No se encontró el ID del evento.', 'error');
+      return;
+    }
+    try {
+      const nuevoId = Date.now().toString();
+      const nuevoGasto = { id: nuevoId, ...formData, estimado: Number(formData.estimado), pagado: 0, proveedorId: null, historial: [] };
+      await setDoc(doc(db, "eventos", EVENT_ID, "gastos", nuevoId), nuevoGasto);
+      setIsFormOpen(false);
+      if (addNotification) addNotification('Éxito', 'Gasto agregado correctamente.', 'success');
+    } catch (error) {
+      console.error(error);
+      if (addNotification) addNotification('Error', 'Hubo un fallo al conectar con la base de datos.', 'error');
+    }
   };
 
   const handleUpdateGasto = async (e) => {
     e.preventDefault();
-    const gastoActualizado = { ...editGastoModal, estimado: Number(editGastoModal.estimado) };
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "gastos", editGastoModal.id.toString()), gastoActualizado);
-    setEditGastoModal(null);
-    if (addNotification) addNotification('Actualizado', 'Los cambios se han guardado.', 'success');
+    try {
+      const gastoActualizado = { ...editGastoModal, estimado: Number(editGastoModal.estimado) };
+      await setDoc(doc(db, "eventos", EVENT_ID, "gastos", editGastoModal.id.toString()), gastoActualizado);
+      setEditGastoModal(null);
+      if (addNotification) addNotification('Actualizado', 'Los cambios se han guardado.', 'success');
+    } catch (error) {
+      console.error(error);
+      if (addNotification) addNotification('Error', 'No se pudieron guardar los cambios.', 'error');
+    }
   };
 
   const handleAddPayment = async (e) => {
     e.preventDefault();
-    const { item, monto, fecha, metodo, cuenta, comprobante } = paymentProcess;
-    const montoNum = Number(monto);
-    const nombreArchivo = comprobante ? comprobante.name : null;
-    
-    const gastoActualizado = { 
-      ...item, 
-      pagado: item.pagado + montoNum, 
-      historial: [...(item.historial || []), { id: Date.now(), fecha, monto: montoNum, metodo, cuenta, comprobante: nombreArchivo }] 
-    };
-    
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "gastos", item.id.toString()), gastoActualizado);
-    setPaymentProcess(null);
-    if (addNotification) addNotification('Pago Registrado', `Se abonaron $${montoNum} a ${item.concepto}.`, 'success');
+    try {
+      const { item, monto, fecha, metodo, cuenta, comprobante } = paymentProcess;
+      const montoNum = Number(monto);
+      const nombreArchivo = comprobante ? comprobante.name : null;
+      
+      const gastoActualizado = { 
+        ...item, 
+        pagado: item.pagado + montoNum, 
+        historial: [...(item.historial || []), { id: Date.now(), fecha, monto: montoNum, metodo, cuenta, comprobante: nombreArchivo }] 
+      };
+      
+      await setDoc(doc(db, "eventos", EVENT_ID, "gastos", item.id.toString()), gastoActualizado);
+      setPaymentProcess(null);
+      if (addNotification) addNotification('Pago Registrado', `Se abonaron $${montoNum} a ${item.concepto}.`, 'success');
+    } catch (error) {
+      console.error(error);
+      if (addNotification) addNotification('Error', 'Fallo al registrar el pago.', 'error');
+    }
   };
 
   const initiateDelete = (gasto) => {
@@ -6063,28 +6083,33 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
   };
 
   const executeDelete = async (gasto, refundAmount, keepRemaining) => {
-    const refund = Number(refundAmount); 
-    const lostMoney = gasto.pagado - refund;
-    
-    if (lostMoney > 0 && keepRemaining) {
-      const gastoActualizado = { ...gasto, concepto: `${gasto.concepto} (Cancelado)`, estimado: lostMoney, pagado: lostMoney, proveedorId: null };
-      await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "gastos", gasto.id.toString()), gastoActualizado);
-    } else { 
-      await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "gastos", gasto.id.toString())); 
-    }
-    
-    if (gasto.proveedorId && proveedores) { 
-      const prov = proveedores.find(p => p.id === gasto.proveedorId);
-      if (prov) {
-         await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "proveedores", prov.id.toString()), { ...prov, status: 'Descartado', contratado: false, gastoId: null });
+    try {
+      const refund = Number(refundAmount); 
+      const lostMoney = gasto.pagado - refund;
+      
+      if (lostMoney > 0 && keepRemaining) {
+        const gastoActualizado = { ...gasto, concepto: `${gasto.concepto} (Cancelado)`, estimado: lostMoney, pagado: lostMoney, proveedorId: null };
+        await setDoc(doc(db, "eventos", EVENT_ID, "gastos", gasto.id.toString()), gastoActualizado);
+      } else { 
+        await deleteDoc(doc(db, "eventos", EVENT_ID, "gastos", gasto.id.toString())); 
       }
+      
+      if (gasto.proveedorId && proveedores) { 
+        const prov = proveedores.find(p => p.id === gasto.proveedorId);
+        if (prov) {
+           await setDoc(doc(db, "eventos", EVENT_ID, "proveedores", prov.id.toString()), { ...prov, status: 'Descartado', contratado: false, gastoId: null });
+        }
+      }
+      
+      setDeleteProcess(null);
+      if (addNotification) addNotification('Cancelado', 'Servicio cancelado con éxito.', 'warning');
+    } catch (error) {
+      console.error(error);
+      if (addNotification) addNotification('Error', 'No se pudo eliminar el gasto.', 'error');
     }
-    
-    setDeleteProcess(null);
-    if (addNotification) addNotification('Cancelado', 'Servicio cancelado con éxito.', 'warning');
   };
 
-  // 🔴 EXPORTACIÓN INTELIGENTE A EXCEL (.xls hack para estilos)
+  // EXPORTACIÓN INTELIGENTE A EXCEL (.xls hack para estilos)
   const exportData = () => {
     if (addNotification) addNotification('Generando Excel', 'Preparando documento financiero corporativo...', 'info');
 
@@ -6146,17 +6171,18 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
     setIsEditingBudget(false);
     localStorage.setItem('eventmaster_presupuesto', nuevoValor);
     try {
-      const ID_DEL_EVENTO = authData?.eventId || authData?.id || '';
-      await setDoc(doc(db, "eventos", ID_DEL_EVENTO), { presupuestoTotal: nuevoValor }, { merge: true });
+      await setDoc(doc(db, "eventos", EVENT_ID), { presupuestoTotal: nuevoValor }, { merge: true });
       if(addNotification) addNotification('Presupuesto Guardado', 'Se ha guardado tu presupuesto total en la nube.', 'success');
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
   const isOverdue = (dateStr, deuda) => { if(!dateStr || deuda <= 0) return false; return new Date(dateStr) < new Date(); };
   const gastosConFecha = safeGastos.filter(g => g.fechaLimite && (g.estimado - g.pagado) > 0).sort((a,b) => new Date(a.fechaLimite) - new Date(b.fechaLimite));
 
-  // 🔴 PDF DIRECTO VIP PARA PRESUPUESTO
+  // PDF DIRECTO VIP PARA PRESUPUESTO
   const triggerPdfDownload = async () => {
     setIsPreparingPrint(true);
     if(addNotification) addNotification('Preparando Documento', 'Generando formato financiero VIP...', 'info');
@@ -6186,7 +6212,6 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
     }, 800);
   };
 
-  // Lógica de paginación para el PDF oculto
   const PAGE_1_LIMIT = 8;
   const PAGE_N_LIMIT = 15;
   const firstPageItems = safeGastos.slice(0, PAGE_1_LIMIT);
@@ -6301,7 +6326,6 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
       {viewMode === 'table' ? (
         <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl overflow-hidden flex flex-col print:hidden transition-colors">
           
-          {/* 🔴 VISTA DE ESCRITORIO (TABLA ORIGINAL INTACTA) */}
           <div className="hidden md:block overflow-y-auto custom-scrollbar">
             <table className="w-full text-left text-sm whitespace-nowrap">
               <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-400 uppercase tracking-widest text-[10px] transition-colors">
@@ -6352,7 +6376,6 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
             </table>
           </div>
 
-          {/* 🔴 VISTA MÓVIL (TARJETAS DINÁMICAS TÁCTILES) */}
           <div className="md:hidden flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-50/50 dark:bg-transparent">
             {safeGastos.map((gasto) => {
               const deuda = gasto.estimado - gasto.pagado;
@@ -6431,7 +6454,7 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
         </div>
       )}
 
-      {/* 🔴 ÁREA INVISIBLE PARA EL RENDER DEL REPORTE EJECUTIVO (ESTILO SUTIL) */}
+      {/* ÁREA INVISIBLE PARA EL RENDER DEL REPORTE EJECUTIVO (ESTILO SUTIL) */}
       <div style={{ position: 'absolute', top: '-10000px', left: '-10000px', zIndex: -9999 }}>
         <div className="hidden-finance-pdf-page bg-white relative shrink-0" style={{ width: '215.9mm', height: '279.4mm', padding: '20mm', boxSizing: 'border-box', overflow: 'hidden', background: gradientStyle }}>
            
@@ -6443,7 +6466,6 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
                 <p className="text-base font-black tracking-[0.2em] uppercase mt-3" style={{ color: accentColor }}>{eventName}</p>
               </div>
               <div className="text-right flex flex-col items-end">
-                {/* 🔴 LOGO FORZADO A OSCURO PARA QUE DESTAQUE EN FONDO BLANCO */}
                 <BauliaLogo className="h-10" forceWhite={false} />
                 <p className="text-[8px] text-slate-400 mt-2 uppercase tracking-[0.3em] font-bold">Tecnología Inteligente</p>
               </div>
@@ -6489,23 +6511,40 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
         ))}
       </div>
 
-      {/* MODALES OMITIDOS EN ESTA RESPUESTA (SE MANTIENEN IGUAL QUE ANTES PARA NO ROMPER NADA, COMO EDITAR, PAGAR Y BORRAR) */}
-      {/* ... */}
-      
-      {/* MODAL DE EDICIÓN RESPONSIVO */}
+      {/* 🟢 MODALES 100% REPARADOS */}
+      {isFormOpen && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex justify-between transition-colors">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white">Nuevo Gasto</h3>
+              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
+            </div>
+            <div className="p-6 space-y-5">
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Concepto</label><input type="text" value={formData.concepto} onChange={e=>setFormData({...formData, concepto: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors" placeholder="Ej. Fotografía"/></div>
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Categoría</label><select value={formData.categoria} onChange={e=>setFormData({...formData, categoria: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors">{categorias.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Estimado ($)</label><input type="number" value={formData.estimado} onChange={e=>setFormData({...formData, estimado: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Fecha Límite</label><input type="date" value={formData.fechaLimite} onChange={e=>setFormData({...formData, fechaLimite: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-600 dark:text-slate-300 text-sm [color-scheme:light] dark:[color-scheme:dark] transition-colors" /></div>
+              </div>
+              <button type="button" onClick={handleSaveGasto} disabled={!formData.concepto || !formData.estimado} className="w-full p-4 bg-amber-500 text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-6 hover:bg-amber-400 transition-colors shadow-md disabled:opacity-50">Guardar Gasto</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {editGastoModal && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
             <div className="px-6 py-5 border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex justify-between transition-colors"><h3 className="font-bold text-lg text-slate-900 dark:text-white">Editar Gasto</h3><button onClick={() => setEditGastoModal(null)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button></div>
-            <form onSubmit={handleUpdateGasto} className="p-6 space-y-5">
-              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Concepto</label><input type="text" required value={editGastoModal.concepto} onChange={e=>setEditGastoModal({...editGastoModal, concepto: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors" /></div>
+            <div className="p-6 space-y-5">
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Concepto</label><input type="text" value={editGastoModal.concepto} onChange={e=>setEditGastoModal({...editGastoModal, concepto: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors" /></div>
               <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Categoría</label><select value={editGastoModal.categoria} onChange={e=>setEditGastoModal({...editGastoModal, categoria: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors">{categorias.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Costo Estimado ($)</label><input type="number" required value={editGastoModal.estimado} onChange={e=>setEditGastoModal({...editGastoModal, estimado: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Costo Estimado ($)</label><input type="number" value={editGastoModal.estimado} onChange={e=>setEditGastoModal({...editGastoModal, estimado: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold transition-colors" /></div>
                 <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Fecha Límite</label><input type="date" value={editGastoModal.fechaLimite || ''} onChange={e=>setEditGastoModal({...editGastoModal, fechaLimite: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-600 dark:text-slate-300 text-sm [color-scheme:light] dark:[color-scheme:dark] transition-colors" /></div>
               </div>
-              <button type="submit" className="w-full p-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-6 hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)]">Guardar Cambios</button>
-            </form>
+              <button type="button" onClick={handleUpdateGasto} className="w-full p-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-6 hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)]">Guardar Cambios</button>
+            </div>
           </div>
         </div>
       )}
@@ -6544,7 +6583,7 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
               <h3 className="font-bold text-sm text-emerald-700 dark:text-emerald-400 flex items-center uppercase tracking-widest"><DollarSign size={16} className="mr-2"/> Registrar Pago</h3>
               <button onClick={() => setPaymentProcess(null)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
             </div>
-            <form onSubmit={handleAddPayment} className="p-6 space-y-5">
+            <div className="p-6 space-y-5">
               <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/5 text-xs text-slate-500 dark:text-slate-400 mb-2 transition-colors">Destino: <b className="text-sm text-slate-800 dark:text-white ml-1 transition-colors">{paymentProcess.item.concepto}</b></div>
               <div className="grid grid-cols-2 gap-4">
                 <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Monto ($)</label><input type="number" required max={paymentProcess.item.estimado - paymentProcess.item.pagado} value={paymentProcess.monto} onChange={e=>setPaymentProcess({...paymentProcess, monto: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl font-black text-xl text-emerald-600 dark:text-emerald-400 focus:border-emerald-500 outline-none bg-slate-50 dark:bg-[#111] transition-colors" placeholder="0.00" /></div>
@@ -6555,13 +6594,38 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
               
               <div className="flex space-x-3 pt-6 border-t border-slate-100 dark:border-white/5 transition-colors">
                 <button type="button" onClick={() => setPaymentProcess(null)} className="flex-1 p-4 bg-slate-100 dark:bg-white/5 font-bold rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
-                <button type="submit" className="flex-1 p-4 bg-emerald-500 text-white dark:text-slate-900 font-black rounded-xl shadow-md dark:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-colors uppercase tracking-widest text-[10px]">Guardar Pago</button>
+                <button type="button" onClick={handleAddPayment} disabled={!paymentProcess.monto} className="flex-1 p-4 bg-emerald-500 text-white dark:text-slate-900 font-black rounded-xl shadow-md dark:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-colors uppercase tracking-widest text-[10px] disabled:opacity-50">Guardar Pago</button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
 
+      {deleteProcess && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] border border-rose-200 dark:border-rose-500/20 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-rose-50 dark:bg-rose-950/30 flex justify-between items-center transition-colors">
+              <h3 className="font-bold text-sm text-rose-700 dark:text-rose-400 flex items-center uppercase tracking-widest"><AlertTriangle size={16} className="mr-2"/> Cancelar Servicio</h3>
+              <button onClick={() => setDeleteProcess(null)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-slate-600 dark:text-slate-300 transition-colors">Este gasto ya tiene <b>{formatMoney(deleteProcess.item.pagado)}</b> abonados. ¿Cuánto dinero te regresó el proveedor?</p>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 transition-colors">Monto Reembolsado ($)</label>
+                <input type="number" max={deleteProcess.item.pagado} value={deleteProcess.refundAmount} onChange={e=>setDeleteProcess({...deleteProcess, refundAmount: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl text-rose-600 font-bold focus:border-rose-500 outline-none bg-slate-50 dark:bg-[#111] transition-colors" placeholder="0.00"/>
+              </div>
+              <div className="flex items-center gap-2 mt-4">
+                 <input type="checkbox" id="keepRemaining" checked={deleteProcess.keepRemaining} onChange={e=>setDeleteProcess({...deleteProcess, keepRemaining: e.target.checked})} className="w-4 h-4 accent-rose-500"/>
+                 <label htmlFor="keepRemaining" className="text-xs text-slate-600 dark:text-slate-400 cursor-pointer transition-colors">Mantener el dinero perdido como gasto en el presupuesto</label>
+              </div>
+              <div className="flex space-x-3 pt-4 border-t border-slate-100 dark:border-white/5 transition-colors">
+                <button type="button" onClick={() => setDeleteProcess(null)} className="flex-1 p-4 bg-slate-100 dark:bg-white/5 font-bold rounded-xl text-slate-500 uppercase tracking-widest text-[10px] transition-colors">Cancelar</button>
+                <button type="button" onClick={() => executeDelete(deleteProcess.item, deleteProcess.refundAmount, deleteProcess.keepRemaining)} className="flex-1 p-4 bg-rose-500 text-white font-black rounded-xl shadow-md hover:bg-rose-600 uppercase tracking-widest text-[10px] transition-colors">Confirmar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
