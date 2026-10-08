@@ -208,7 +208,6 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
     { 
       title: 'Diseño Espacial', 
       items: [ 
-        { id: 'decoracion', icon: Palette, label: 'Visualizador Decor.', minLevel: 2, allowedPlans: ['diamante'] }, 
         { id: 'mapa', icon: MapIcon, label: 'Croquis del Salón', minLevel: 2, allowedPlans: ['diamante'] } 
       ] 
     },
@@ -6025,7 +6024,7 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
     e.preventDefault();
     const nuevoId = Date.now().toString();
     const nuevoGasto = { id: nuevoId, ...formData, estimado: Number(formData.estimado), pagado: 0, proveedorId: null, historial: [] };
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "gastos", nuevoId), nuevoGasto);
+    await setDoc(doc(db, "eventos", authData.eventId, "gastos", nuevoId), nuevoGasto);
     setIsFormOpen(false);
     if (addNotification) addNotification('Éxito', 'Gasto agregado correctamente.', 'success');
   };
@@ -6033,7 +6032,7 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
   const handleUpdateGasto = async (e) => {
     e.preventDefault();
     const gastoActualizado = { ...editGastoModal, estimado: Number(editGastoModal.estimado) };
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "gastos", editGastoModal.id.toString()), gastoActualizado);
+    await setDoc(doc(db, "eventos", authData.eventId, "gastos", editGastoModal.id.toString()), gastoActualizado);
     setEditGastoModal(null);
     if (addNotification) addNotification('Actualizado', 'Los cambios se han guardado.', 'success');
   };
@@ -6050,7 +6049,7 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
       historial: [...(item.historial || []), { id: Date.now(), fecha, monto: montoNum, metodo, cuenta, comprobante: nombreArchivo }] 
     };
     
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "gastos", item.id.toString()), gastoActualizado);
+    await setDoc(doc(db, "eventos", authData.eventId, "gastos", item.id.toString()), gastoActualizado);
     setPaymentProcess(null);
     if (addNotification) addNotification('Pago Registrado', `Se abonaron $${montoNum} a ${item.concepto}.`, 'success');
   };
@@ -6066,15 +6065,15 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
     
     if (lostMoney > 0 && keepRemaining) {
       const gastoActualizado = { ...gasto, concepto: `${gasto.concepto} (Cancelado)`, estimado: lostMoney, pagado: lostMoney, proveedorId: null };
-      await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "gastos", gasto.id.toString()), gastoActualizado);
+      await setDoc(doc(db, "eventos", authData.eventId, "gastos", gasto.id.toString()), gastoActualizado);
     } else { 
-      await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "gastos", gasto.id.toString())); 
+      await deleteDoc(doc(db, "eventos", authData.eventId, "gastos", gasto.id.toString())); 
     }
     
     if (gasto.proveedorId && proveedores) { 
       const prov = proveedores.find(p => p.id === gasto.proveedorId);
       if (prov) {
-         await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "proveedores", prov.id.toString()), { ...prov, status: 'Descartado', contratado: false, gastoId: null });
+         await setDoc(doc(db, "eventos", authData.eventId, "proveedores", prov.id.toString()), { ...prov, status: 'Descartado', contratado: false, gastoId: null });
       }
     }
     
@@ -6082,7 +6081,7 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
     if (addNotification) addNotification('Cancelado', 'Servicio cancelado con éxito.', 'warning');
   };
 
-  // 🔴 EXPORTACIÓN INTELIGENTE A EXCEL (.xls hack para estilos)
+  //  EXPORTACIÓN INTELIGENTE A EXCEL (.xls hack para estilos)
   const exportData = () => {
     if (addNotification) addNotification('Generando Excel', 'Preparando documento financiero corporativo...', 'info');
 
@@ -6144,7 +6143,7 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
     setIsEditingBudget(false);
     localStorage.setItem('eventmaster_presupuesto', nuevoValor);
     try {
-      await setDoc(doc(db, "eventos", ID_DEL_EVENTO), { presupuestoTotal: nuevoValor }, { merge: true });
+      await setDoc(doc(db, "eventos", authData.eventId), { presupuestoTotal: nuevoValor }, { merge: true });
       if(addNotification) addNotification('Presupuesto Guardado', 'Se ha guardado tu presupuesto total en la nube.', 'success');
     } catch (error) {}
   };
@@ -6488,7 +6487,53 @@ const PresupuestoView = ({ authData, gastos, setGastos, proveedores, setProveedo
 
       {/* MODALES OMITIDOS EN ESTA RESPUESTA (SE MANTIENEN IGUAL QUE ANTES PARA NO ROMPER NADA, COMO EDITAR, PAGAR Y BORRAR) */}
       {/* ... */}
-      
+      {/* MODAL DE NUEVO GASTO */}
+      {isFormOpen && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex justify-between transition-colors">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white">Nuevo Gasto</h3>
+              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
+            </div>
+            <form onSubmit={handleSaveGasto} className="p-6 space-y-5">
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Concepto</label><input type="text" required value={formData.concepto} onChange={e=>setFormData({...formData, concepto: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors" placeholder="Ej. Fotografía"/></div>
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Categoría</label><select value={formData.categoria} onChange={e=>setFormData({...formData, categoria: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors">{categorias.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Estimado ($)</label><input type="number" required value={formData.estimado} onChange={e=>setFormData({...formData, estimado: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Fecha Límite</label><input type="date" value={formData.fechaLimite} onChange={e=>setFormData({...formData, fechaLimite: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-600 dark:text-slate-300 text-sm [color-scheme:light] dark:[color-scheme:dark] transition-colors" /></div>
+              </div>
+              <button type="submit" className="w-full p-4 bg-amber-500 text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-6 hover:bg-amber-400 transition-colors shadow-md">Guardar Gasto</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN DE GASTO CON ABONOS */}
+      {deleteProcess && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] border border-rose-200 dark:border-rose-500/20 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-rose-50 dark:bg-rose-950/30 flex justify-between items-center transition-colors">
+              <h3 className="font-bold text-sm text-rose-700 dark:text-rose-400 flex items-center uppercase tracking-widest"><AlertTriangle size={16} className="mr-2"/> Cancelar Servicio</h3>
+              <button onClick={() => setDeleteProcess(null)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-slate-600 dark:text-slate-300 transition-colors">Este gasto ya tiene <b>{formatMoney(deleteProcess.item.pagado)}</b> abonados. ¿Cuánto dinero te regresó el proveedor?</p>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 transition-colors">Monto Reembolsado ($)</label>
+                <input type="number" max={deleteProcess.item.pagado} value={deleteProcess.refundAmount} onChange={e=>setDeleteProcess({...deleteProcess, refundAmount: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl text-rose-600 font-bold focus:border-rose-500 outline-none bg-slate-50 dark:bg-[#111] transition-colors" placeholder="0.00"/>
+              </div>
+              <div className="flex items-center gap-2 mt-4">
+                 <input type="checkbox" id="keepRemaining" checked={deleteProcess.keepRemaining} onChange={e=>setDeleteProcess({...deleteProcess, keepRemaining: e.target.checked})} className="w-4 h-4 accent-rose-500"/>
+                 <label htmlFor="keepRemaining" className="text-xs text-slate-600 dark:text-slate-400 cursor-pointer transition-colors">Mantener el dinero perdido como gasto en el presupuesto</label>
+              </div>
+              <div className="flex space-x-3 pt-4 border-t border-slate-100 dark:border-white/5 transition-colors">
+                <button onClick={() => setDeleteProcess(null)} className="flex-1 p-4 bg-slate-100 dark:bg-white/5 font-bold rounded-xl text-slate-500 uppercase tracking-widest text-[10px] transition-colors">Cancelar</button>
+                <button onClick={() => executeDelete(deleteProcess.item, deleteProcess.refundAmount, deleteProcess.keepRemaining)} className="flex-1 p-4 bg-rose-500 text-white font-black rounded-xl shadow-md hover:bg-rose-600 uppercase tracking-widest text-[10px] transition-colors">Confirmar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* MODAL DE EDICIÓN RESPONSIVO */}
       {editGastoModal && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
