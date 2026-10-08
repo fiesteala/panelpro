@@ -1891,7 +1891,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       )}
 
-      {/* 🔴 MODAL DE ELIMINAR INVITADO */}
+      {/*  MODAL DE ELIMINAR INVITADO */}
       {deleteModal && (
         <div className="fixed inset-0 z-[300] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-rose-500/20 animate-in zoom-in-95 duration-200 transition-colors text-center p-8">
@@ -1920,6 +1920,72 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               </button>
             </div>
             
+          </div>
+        </div>
+      )}
+
+      {/* 🟢 MODAL DE VISUALIZACIÓN Y DESCARGA DE QR INDIVIDUAL */}
+      {qrModal && (
+        <div className="fixed inset-0 z-[400] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-300 transition-colors flex flex-col relative">
+            
+            {/* ENCABEZADO */}
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors">
+              <div>
+                <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-wide leading-none">{qrModal.displayName}</h3>
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mt-1">Pase de Acceso Único</p>
+              </div>
+              <button onClick={() => setQrModal(null)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors bg-white dark:bg-[#111] p-2 rounded-full border border-slate-200 dark:border-white/10 shadow-sm"><X size={18}/></button>
+            </div>
+            
+            {/* CONTENEDOR DEL CÓDIGO QR */}
+            <div className="p-8 flex flex-col items-center bg-slate-100 dark:bg-[#050505] transition-colors" id={`qr-container-${qrModal.pin}`}>
+              <div className="bg-white p-4 rounded-2xl shadow-lg border border-slate-200">
+                 {/*  SE UTILIZA LA ETIQUETA IMG DIRECTA A LA API DE GOOGLE PARA GENERAR EL QR PERFECTO */}
+                 <img 
+                    src={`https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${qrModal.pin}&choe=UTF-8`} 
+                    alt="Código QR de Acceso" 
+                    className="w-48 h-48 md:w-56 md:h-56 object-contain"
+                    crossOrigin="anonymous"
+                 />
+              </div>
+              
+              <div className="mt-6 text-center w-full">
+                 <p className="font-mono text-sm text-slate-600 dark:text-slate-400 tracking-[0.2em] bg-white dark:bg-[#111] py-2 px-4 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm inline-block">
+                   PIN: <strong className="text-slate-900 dark:text-white">{qrModal.pin.substring(0, 8)}</strong>
+                 </p>
+              </div>
+            </div>
+
+            {/* BOTÓN DE DESCARGA */}
+            <div className="p-6 border-t border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a] transition-colors">
+              <button 
+                disabled={isPreparingQRPrint}
+                onClick={async () => {
+                  setIsPreparingQRPrint(true);
+                  if(addNotification) addNotification('Preparando Pase', 'Generando imagen del código QR...', 'info');
+                  try {
+                    const html2canvas = (await import('html2canvas')).default;
+                    const container = document.getElementById(`qr-container-${qrModal.pin}`);
+                    const canvas = await html2canvas(container, { scale: 3, useCORS: true, backgroundColor: '#ffffff', logging: false });
+                    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                    const link = document.createElement('a');
+                    link.download = `Pase-Baulia-${qrModal.displayName.replace(/\s+/g, '-')}.jpg`;
+                    link.href = imgData;
+                    link.click();
+                    if(addNotification) addNotification('Descarga Exitosa', 'El pase se guardó en tu dispositivo.', 'success');
+                  } catch(e) {
+                    console.error(e);
+                    if(addNotification) addNotification('Error', 'Fallo al descargar el código QR.', 'error');
+                  }
+                  setIsPreparingQRPrint(false);
+                }} 
+                className="w-full py-4 bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 dark:hover:bg-indigo-400 transition-colors shadow-md flex items-center justify-center disabled:opacity-50"
+              >
+                {isPreparingQRPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} Descargar Pase
+              </button>
+            </div>
+
           </div>
         </div>
       )}
