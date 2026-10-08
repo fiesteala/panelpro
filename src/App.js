@@ -1208,6 +1208,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   // 🟢 ESTADOS PARA LA PORTADA, LOGO Y SUBIDAS CLOUDINARY
   const [qrCover, setQrCover] = useState(null);
   const [eventLogo, setEventLogo] = useState(null); 
+  const [hasManualLogo, setHasManualLogo] = useState(false); // 🟢 Controla si aparece el basurero
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [logoError, setLogoError] = useState(false); // Evita que un logo roto borre el estado global
@@ -1230,17 +1231,25 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         if (data.qrCoverUrl) setQrCover(data.qrCoverUrl);
         else setQrCover(null);
         
-        // Lógica de Detección de Logo
+        // 🟢 LÓGICA DE DETECCIÓN BLINDADA
         if (data.monogramaUrl) {
+           setHasManualLogo(true);
            setEventLogo(data.monogramaUrl);
-        } else if (data.urlInvitacion) {
-           const baseUrl = data.urlInvitacion.split('?')[0]; 
-           const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl; 
-           setEventLogo(`${cleanUrl}/monograma.svg`); 
-        } else if (data.logoUrl) {
-           setEventLogo(data.logoUrl);
         } else {
-           setEventLogo(null);
+           setHasManualLogo(false);
+           if (data.urlInvitacion) {
+              // Limpia el link y asegura que empiece con https://
+              let baseUrl = data.urlInvitacion.trim().split('?')[0];
+              if (!baseUrl.startsWith('http')) baseUrl = 'https://' + baseUrl;
+              const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl; 
+              
+              // El '?v=' fuerza a Chrome a olvidar el bloqueo del caché anterior
+              setEventLogo(`${cleanUrl}/monograma.svg?v=${Date.now()}`); 
+           } else if (data.logoUrl) {
+              setEventLogo(data.logoUrl);
+           } else {
+              setEventLogo(null);
+           }
         }
       }
     });
@@ -1972,7 +1981,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                         {isUploadingLogo ? <RefreshCw size={14} className="animate-spin"/> : <><ImageIcon size={14} className="mr-1"/> Logo</>}
                         <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload}/>
                      </label>
-                     <button onClick={handleRemoveManualLogo} className="text-rose-500 bg-rose-50 dark:bg-rose-500/10 p-1.5 rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors shadow-sm" title="Quitar logo manual y forzar automático"><Trash size={14}/></button>
+                     {hasManualLogo && (
+                       <button onClick={handleRemoveManualLogo} className="text-rose-500 bg-rose-50 dark:bg-rose-500/10 p-1.5 rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors shadow-sm" title="Quitar logo manual y forzar automático"><Trash size={14}/></button>
+                     )}
                  </div>
 
                  {/* BOTÓN SUBIR PORTADA */}
@@ -2018,8 +2029,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                              src={eventLogo} 
                              alt="Logo Evento" 
                              className="max-h-full max-w-[120px] object-contain drop-shadow-md" 
-                             crossOrigin="anonymous" 
-                             onError={() => setLogoError(true)}
+                             onError={() => {
+                                console.warn("Bloqueo o Caché detectado en:", eventLogo);
+                                setLogoError(true);
+                             }}
                           />
                         ) : (
                           <div className="w-12 h-12 rounded-full border border-slate-800 flex items-center justify-center text-slate-800 font-editorial font-bold text-xl bg-white/80 backdrop-blur-sm shadow-sm">
