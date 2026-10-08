@@ -1334,6 +1334,14 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     } catch(e) { console.error(e); }
   };
 
+  const handleRemoveManualLogo = async () => {
+    try {
+      // Esto borra el logo manual y fuerza al sistema a buscar en la URL de la invitación
+      await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { monogramaUrl: null });
+      if (addNotification) addNotification('Modo Automático', 'Buscando monograma de la invitación...', 'info');
+    } catch(e) { console.error(e); }
+  };
+
   const totalPases = safeGuests.reduce((sum, g) => sum + (g.passes || 0), 0);
   const totalNinos = safeGuests.reduce((sum, g) => sum + (g.childrenPasses || 0), 0);
   const totalConfirmados = safeGuests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').reduce((sum, g) => sum + (g.passes || 0), 0);
@@ -1959,10 +1967,13 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               
               <div className="flex gap-2 print:hidden items-center">
                  {/* BOTÓN OVERRIDE LOGO (Manual) */}
-                 <label className="cursor-pointer text-amber-600 bg-amber-50 dark:bg-amber-500/10 px-3 py-1.5 rounded-full hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center shadow-sm border border-amber-200 dark:border-amber-500/20" title="Subir Logo Manual si la liga falla">
-                    {isUploadingLogo ? <RefreshCw size={14} className="animate-spin"/> : <><ImageIcon size={14} className="mr-1"/> Logo</>}
-                    <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload}/>
-                 </label>
+                 <div className="flex items-center gap-1">
+                     <label className="cursor-pointer text-amber-600 bg-amber-50 dark:bg-amber-500/10 px-3 py-1.5 rounded-full hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center shadow-sm border border-amber-200 dark:border-amber-500/20" title="Subir Logo Manual si la liga falla">
+                        {isUploadingLogo ? <RefreshCw size={14} className="animate-spin"/> : <><ImageIcon size={14} className="mr-1"/> Logo</>}
+                        <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload}/>
+                     </label>
+                     <button onClick={handleRemoveManualLogo} className="text-rose-500 bg-rose-50 dark:bg-rose-500/10 p-1.5 rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors shadow-sm" title="Quitar logo manual y forzar automático"><Trash size={14}/></button>
+                 </div>
 
                  {/* BOTÓN SUBIR PORTADA */}
                  <label className="cursor-pointer text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center shadow-sm border border-indigo-200 dark:border-indigo-500/20" title="Subir foto de fondo">
