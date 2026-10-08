@@ -5987,12 +5987,12 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
   const [isEditingBudget, setIsEditingBudget] = useState(false);
   const [tempBudget, setTempBudget] = useState(presupuestoTotal);
 
+  // 🟢 LA LLAVE MAESTRA: Recibimos el ID directamente desde tu panel principal
+  const EVENT_ID = eventId || authData?.eventId || authData?.id || '';
+
   useEffect(() => {
     if (!isEditingBudget) setTempBudget(presupuestoTotal);
   }, [presupuestoTotal, isEditingBudget]);
-
-  // 🟢 EL SALVAVIDAS FINAL: Recibimos el eventId directamente desde tu panel principal
-  const EVENT_ID = eventId || authData?.eventId || authData?.id || '';
 
   const categorias = ['Lugar', 'Música', 'Decoración', 'Recuerdos', 'Comida/Bebida', 'Ropa/Maquillaje', 'Papelería', 'Otros'];
   const coloresCategoria = { 'Lugar':'bg-indigo-500', 'Música':'bg-pink-500', 'Decoración':'bg-emerald-500', 'Comida/Bebida':'bg-amber-500', 'Otros':'bg-slate-500' };
@@ -6023,9 +6023,9 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
       accentColor = '#475569';
   }
 
-  // 🟢 FUNCIONES REPARADAS CON MANEJO DE ERRORES
+  // 🟢 FUNCIONES REPARADAS CON MANEJO DE ERRORES Y EVENT_ID
   const handleSaveGasto = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!EVENT_ID) {
       if (addNotification) addNotification('Error', 'No se encontró el ID del evento.', 'error');
       return;
@@ -6035,6 +6035,7 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
       const nuevoGasto = { id: nuevoId, ...formData, estimado: Number(formData.estimado), pagado: 0, proveedorId: null, historial: [] };
       await setDoc(doc(db, "eventos", EVENT_ID, "gastos", nuevoId), nuevoGasto);
       setIsFormOpen(false);
+      setFormData({ concepto: '', categoria: 'Lugar', estimado: '', fechaLimite: '' });
       if (addNotification) addNotification('Éxito', 'Gasto agregado correctamente.', 'success');
     } catch (error) {
       console.error(error);
@@ -6043,7 +6044,7 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
   };
 
   const handleUpdateGasto = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     try {
       const gastoActualizado = { ...editGastoModal, estimado: Number(editGastoModal.estimado) };
       await setDoc(doc(db, "eventos", EVENT_ID, "gastos", editGastoModal.id.toString()), gastoActualizado);
@@ -6056,7 +6057,7 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
   };
 
   const handleAddPayment = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     try {
       const { item, monto, fecha, metodo, cuenta, comprobante } = paymentProcess;
       const montoNum = Number(monto);
@@ -6109,7 +6110,6 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
     }
   };
 
-  // EXPORTACIÓN INTELIGENTE A EXCEL (.xls hack para estilos)
   const exportData = () => {
     if (addNotification) addNotification('Generando Excel', 'Preparando documento financiero corporativo...', 'info');
 
@@ -6182,7 +6182,6 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
   const isOverdue = (dateStr, deuda) => { if(!dateStr || deuda <= 0) return false; return new Date(dateStr) < new Date(); };
   const gastosConFecha = safeGastos.filter(g => g.fechaLimite && (g.estimado - g.pagado) > 0).sort((a,b) => new Date(a.fechaLimite) - new Date(b.fechaLimite));
 
-  // PDF DIRECTO VIP PARA PRESUPUESTO
   const triggerPdfDownload = async () => {
     setIsPreparingPrint(true);
     if(addNotification) addNotification('Preparando Documento', 'Generando formato financiero VIP...', 'info');
@@ -6511,7 +6510,6 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
         ))}
       </div>
 
-      {/* 🟢 MODALES 100% REPARADOS */}
       {isFormOpen && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
@@ -14191,7 +14189,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       case 'decoracion': return userPlan === 'diamante' && typeof DecoracionView !== 'undefined' ? <DecoracionView elements={decoElements} setElements={setDecoElements} addNotification={addNotification} /> : null; 
       case 'tareas': return ['basico', 'esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof ChecklistView !== 'undefined' ? <ChecklistView tareas={tareas} addNotification={addNotification} /> : null;
       case 'timing': return ['plata', 'oro', 'diamante'].includes(userPlan) && typeof TimingView !== 'undefined' ? <TimingView timing={timing} setTiming={setTiming} addNotification={addNotification} /> : null;
-      case 'presupuesto': return ['basico', 'esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof PresupuestoView !== 'undefined' ? <PresupuestoView authData={authData} gastos={gastos} setGastos={setGastos} proveedores={proveedores} setProveedores={setProveedores} presupuestoTotal={presupuestoTotal} setPresupuestoTotal={setPresupuestoTotal} addNotification={addNotification} /> : null;
+      case 'presupuesto': return ['basico', 'esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof PresupuestoView !== 'undefined' ? <PresupuestoView eventId={eventId} authData={authData} gastos={gastos} setGastos={setGastos} proveedores={proveedores} setProveedores={setProveedores} presupuestoTotal={presupuestoTotal} setPresupuestoTotal={setPresupuestoTotal} addNotification={addNotification} /> : null;
       case 'proveedores': return ['basico', 'esencial', 'plata', 'oro', 'diamante'].includes(userPlan) && typeof ProveedoresView !== 'undefined' ? <ProveedoresView proveedores={proveedores} setProveedores={setProveedores} gastos={gastos} setGastos={setGastos} addNotification={addNotification} /> : null;
       
       case 'galeria': return (['diamante', 'social_wall'].includes(userPlan) || hasSocialWall) && typeof GaleriaView !== 'undefined' ? <GaleriaView photos={photos} addNotification={addNotification} eventoId={eventId} /> : null;
