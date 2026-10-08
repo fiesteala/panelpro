@@ -28,13 +28,28 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     const unsubEvent = onSnapshot(doc(db, "eventos", eventId), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        if (data.pulserasConfig) setDesignConfig(data.pulserasConfig);
         if (data.pulserasStatus === 'enviado' || data.pulserasStatus === 'impreso') setIsLocked(true);
         if (data.fecha) setEventDateStr(data.fecha);
         if (data.direccionEnvioTaller) setShippingInfo(data.direccionEnvioTaller);
         
         const isSoloKit = data.plan === 'security_kit' || data.plan === 'baulia_black_label';
         setIsStandalone(isSoloKit);
+
+        // Inteligencia para detectar logo en la vista previa de Black Label
+        let autoLogo = '';
+        if (data.urlInvitacion && !isSoloKit) {
+           const cleanUrl = data.urlInvitacion.split('?')[0].replace(/\/$/, '');
+           autoLogo = `${cleanUrl}/monograma.svg`;
+        }
+        
+        if (data.pulserasConfig) {
+           setDesignConfig({ 
+              ...data.pulserasConfig, 
+              logoBase64: data.pulserasConfig.logoBase64 || autoLogo 
+           });
+        } else {
+           setDesignConfig(prev => ({ ...prev, logoBase64: autoLogo }));
+        }
       }
     });
 

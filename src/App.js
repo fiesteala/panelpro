@@ -1931,15 +1931,14 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                      <div className="mb-2 h-12 flex items-center justify-center">
                         {eventLogo ? (
                           <img 
-                             src={eventLogo} 
-                             alt="Logo Evento" 
-                             className="max-h-full max-w-[120px] object-contain drop-shadow-md" 
-                             crossOrigin="anonymous" 
-                             onError={(e) => {
-                                // Si la imagen no existe en el servidor (404), oculta la foto rota y fuerza el círculo con iniciales
+                            src={eventLogo} 
+                            alt="Logo Evento" 
+                            className="max-h-full max-w-[120px] object-contain drop-shadow-md" 
+                            onError={(e) => {
+                                console.log("⚠️ No se pudo cargar el logo desde:", eventLogo);
                                 e.target.style.display = 'none';
                                 setEventLogo(null);
-                             }}
+                            }}
                           />
                         ) : (
                           <div className="w-12 h-12 rounded-full border border-slate-800 flex items-center justify-center text-slate-800 font-editorial font-bold text-xl bg-white/80 backdrop-blur-sm shadow-sm">
