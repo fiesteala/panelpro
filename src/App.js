@@ -1204,6 +1204,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
   const [qrEnabled, setQrEnabled] = useState(true);
   const [passCountEnabled, setPassCountEnabled] = useState(true);
+  
+  // 🟢 ESTADO PARA LA IMAGEN DE PORTADA DEL BOLETO
+  const [qrCover, setQrCover] = useState(null);
 
   useEffect(() => {
     setIsWeddingMode(tipoEvento === 'boda');
@@ -1215,7 +1218,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         const data = docSnap.data();
         setQrEnabled(data.isQrEnabled !== false); 
         setPassCountEnabled(data.isPassCountEnabled !== false);
-        // 🔴 ESTO HACE QUE RECUERDE TU DECISIÓN AL RECARGAR
         if (data.tipoEvento) setIsWeddingMode(data.tipoEvento === 'boda');
       }
     });
@@ -1285,13 +1287,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   const getFlattenedGuests = (guestList) => {
     const flattened = [];
     guestList.forEach(guest => {
-      // 🔴 BARRERA DE TITANIO: Si es Básico/Plata, JAMÁS desglosar acompañantes. Solo 1 fila por familia.
       if (!isPremium) {
         flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.passes, isMain: true, isChild: false, pin: null, entered: false });
-        return; // Corta la ejecución aquí para este invitado
+        return; 
       }
-
-      // 🟢 LÓGICA PREMIUM: Oro y Diamante sí desglosan con QR
       if (!guest.subGuests || guest.subGuests.length === 0 || !qrEnabled) {
         flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.passes, isMain: true, isChild: false, pin: null, entered: false });
       } else {
@@ -1321,12 +1320,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
   const handleSendWhatsApp = async (parentGuest) => {
     const phone = parentGuest.phone ? parentGuest.phone.replace(/\D/g,'') : '';
-    
     if (!phone) {
        if (addNotification) addNotification('Falta Teléfono', `Agrega un número de WhatsApp a ${parentGuest.name} para enviarle la invitación.`, 'warning');
        return;
     }
-    
     let linkPersonalizado = '';
     if (urlInvitacion) {
       const separator = urlInvitacion.includes('?') ? '&' : '?';
@@ -1335,18 +1332,14 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
       linkPersonalizado = `${baseDomain}/${ID_DEL_EVENTO}?u=${parentGuest.id}`;
     }
-    
-    let msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nPor favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia*:\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
+    let msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nPor favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia*:\n\n ${linkPersonalizado}\n\n¡Te esperamos!`;
     if (passCountEnabled && isPremium) {
-      msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n\n🔗 ${linkPersonalizado}\n\n¡Te esperamos!`;
+      msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n\n ${linkPersonalizado}\n\n¡Te esperamos!`;
     }
-
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-
     const nuevoStatus = parentGuest.status === 'por_invitar' ? 'pendiente' : parentGuest.status;
     const updatedGuest = { ...parentGuest, sent: true, status: nuevoStatus };
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", parentGuest.id), updatedGuest);
-    
     if (addNotification) addNotification('Enviado', `Se abrió WhatsApp para ${parentGuest.name}.`, 'success');
   };
 
@@ -1470,7 +1463,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   return (
     <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500">
       
-      {/* 🔴 MODAL VISTA PREVIA PROFESIONAL (ESTILO WORD PURO) */}
+      {/* VISTA PREVIA PROFESIONAL (PDF/EXCEL) */}
       {exportViewOpen && (() => {
           const allList = getFlattenedGuests(invitadosFiltrados);
           let listToRender = [];
@@ -1529,16 +1522,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
           return (
             <div className="fixed inset-0 z-[999999] bg-slate-200 flex flex-col overflow-hidden animate-in fade-in transition-colors pt-24" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh' }}>
-              
-              {/* TOOLBAR SUPERIOR DE EDICIÓN CLARO Y ELEGANTE */}
               <div className="h-auto bg-white text-slate-800 px-4 py-3 flex flex-wrap items-center justify-between shrink-0 border-b border-slate-300 shadow-sm print:hidden gap-4 z-50">
-                
-                {/* BOTÓN CERRAR */}
                 <button onClick={() => setExportViewOpen(false)} className="px-5 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-lg transition-colors font-black text-sm flex items-center shadow-lg border-2 border-rose-300">
                   <X size={20} className="mr-2"/> CERRAR VISTA
                 </button>
-                
-                {/* 2. CONTROLES DE COLUMNAS ESTILO PILL */}
                 <div className="flex items-center bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex-wrap justify-center gap-1 shadow-inner hidden md:flex">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-2 ml-1">Columnas:</span>
                   <button onClick={() => toggleCol('nombre')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.nombre ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Nombre</button>
@@ -1547,8 +1534,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   <button onClick={() => toggleCol('telefono')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.telefono ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Teléfono</button>
                   {isPremium && <button onClick={() => toggleCol('mesa')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.mesa ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Mesa</button>}
                 </div>
-
-                {/* 3. BOTONES DERECHOS (Separar lados y Descargar) */}
                 <div className="flex items-center gap-3">
                   {isWeddingMode && (
                     <button onClick={() => setSplitBySide(!splitBySide)} className={`flex items-center px-4 py-2 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm ${splitBySide ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
@@ -1560,14 +1545,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   </button>
                 </div>
               </div>
-
-              {/* LIENZO DE HOJAS ESTILO WORD */}
               <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8 print:bg-white print:p-0 print:overflow-visible">
-                
-                {/* PÁGINA 1 */}
                 <div className="list-pdf-page bg-white shrink-0 mx-auto shadow-xl relative" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '25mm 20mm', boxSizing: 'border-box', overflow: 'hidden' }}>
-                  
-                  {/* Membrete Estilo Clásico/Word */}
                   <header className="flex justify-between items-start border-b-[3px] border-slate-900 pb-6 mb-6">
                     <div>
                       <h1 className="text-3xl font-editorial font-black text-slate-900 uppercase tracking-widest">Reporte de Asistencia</h1>
@@ -1575,28 +1554,21 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                       <p className="text-sm font-medium text-slate-600">Fecha de emisión: {new Date().toLocaleDateString('es-MX')}</p>
                     </div>
                     <div className="text-right flex flex-col items-end">
-                      <BauliaLogo className="h-8" forceWhite={false} />
                       <p className="text-[8px] text-slate-400 mt-2 tracking-widest uppercase font-bold">Documento Oficial</p>
                     </div>
                   </header>
-                  
-                  {/* Estadísticas Limpias */}
                   <div className="flex gap-10 mb-8 border-b border-slate-200 pb-6 text-slate-800">
                      <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">{passCountEnabled ? 'Total Pases' : 'Invitados Totales'}</span><span className="text-xl font-bold">{passCountEnabled ? totalPases : safeGuests.length}</span></div>
                      <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Confirmados</span><span className="text-xl font-bold">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</span></div>
                      {isPremium && qrEnabled && <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Ya Ingresaron</span><span className="text-xl font-bold">{totalIngresos}</span></div>}
                      {isPremium && <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Mesas Asignadas</span><span className="text-xl font-bold">{totalMesas}</span></div>}
                   </div>
-
                   <main>{renderTableRows(firstPageItems)}</main>
-                  
                   <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[9px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
                     <span>Baulia Technologies • Control de Accesos</span>
                     <span>Página 1 de {1 + extraPages.length}</span>
                   </div>
                 </div>
-
-                {/* PÁGINAS EXTRA */}
                 {extraPages.map((pageRows, pIdx) => (
                   <div key={`extrapage_${pIdx}`} className="list-pdf-page bg-white shrink-0 mx-auto shadow-xl relative" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '25mm 20mm', boxSizing: 'border-box', overflow: 'hidden' }}>
                      <header className="flex justify-between items-center pb-4 mb-6 border-b border-slate-900">
@@ -1622,9 +1594,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
         
         <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
-          {/* El Excel siempre es útil para cualquier plan */}
           <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Exportar Lista</button>
-
           {isBodaType && (
             <div className="flex items-center bg-white dark:bg-[#0a0a0a] p-1 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
               <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-2 ml-2">Boda</span>
@@ -1632,7 +1602,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 const newVal = !isWeddingMode;
                 setIsWeddingMode(newVal);
                 try {
-                  // Importa updateDoc y doc de firebase/firestore arriba si no los tienes
                   await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' });
                 } catch(e) { console.error(e) }
               }} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
@@ -1654,15 +1623,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
       <div className={`grid grid-cols-2 md:grid-cols-3 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-4`}>
         <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col transition-colors"><div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Users size={12} className="inline mr-1 text-slate-400 dark:text-slate-500"/> {passCountEnabled ? 'Pases Totales' : 'Invitados Totales'}</div><h3 className="text-2xl font-editorial text-slate-900 dark:text-white">{passCountEnabled ? totalPases : safeGuests.length}</h3></div>
-        
-        {/* SOLO PREMIUM VE NIÑOS */}
         {isPremium && passCountEnabled && <div className="bg-sky-50 dark:bg-sky-500/10 p-4 rounded-2xl border border-sky-200 dark:border-sky-500/20 shadow-sm flex flex-col transition-colors"><div className="text-sky-600 dark:text-sky-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Users size={12} className="inline mr-1"/> Niños</div><h3 className="text-2xl font-editorial text-sky-600 dark:text-sky-400">{totalNinos}</h3></div>}
-        
         <div className="bg-amber-50 dark:bg-amber-500/10 p-4 rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex flex-col transition-colors"><div className="text-amber-600 dark:text-amber-500 font-bold text-[9px] uppercase tracking-widest mb-1"><CheckCircle size={12} className="inline mr-1"/> Confirmados</div><h3 className="text-2xl font-editorial text-amber-600 dark:text-amber-500">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3></div>
         <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col transition-colors"><div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Clock size={12} className="inline mr-1"/> Pendientes</div><h3 className="text-2xl font-editorial text-slate-600 dark:text-slate-300">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3></div>
         <div className="bg-rose-50 dark:bg-rose-500/10 p-4 rounded-2xl border border-rose-200 dark:border-rose-500/20 shadow-sm flex flex-col transition-colors"><div className="text-rose-600 dark:text-rose-400 font-bold text-[9px] uppercase tracking-widest mb-1"><X size={12} className="inline mr-1"/> Cancelados</div><h3 className="text-2xl font-editorial text-rose-600 dark:text-rose-400">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3></div>
-        
-        {/* SOLO PREMIUM VE INGRESARON */}
         {isPremium && qrEnabled && <div className="bg-emerald-50 dark:bg-emerald-500/10 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex flex-col transition-colors"><div className="text-emerald-600 dark:text-emerald-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Scan size={12} className="inline mr-1"/> Ingresaron</div><h3 className="text-2xl font-editorial text-emerald-600 dark:text-emerald-400">{totalIngresos}</h3></div>}
       </div>
 
@@ -1754,7 +1718,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                         </span>
                       ) : !row.isMissing ? (
                         <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.entered ? 'bg-emerald-500 text-white shadow-md border-emerald-600 dark:border-emerald-400' : 'bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
-                          {row.entered ? '✔ ADENTRO' : 'PENDIENTE'}
+                          {row.entered ? ' ADENTRO' : 'PENDIENTE'}
                         </span>
                       ) : <span className="text-slate-300 dark:text-slate-600">-</span>}
                     </td>
@@ -1785,7 +1749,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
                 return (
                   <div key={`mobile_${row._rowId}`} className={`rounded-2xl transition-all duration-300 overflow-hidden border ${row.isMain ? 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 shadow-sm mt-4' : 'bg-slate-50/60 dark:bg-white/[0.03] border-l-[3px] border-l-indigo-200 dark:border-l-amber-500/40 border-y-transparent border-r-transparent ml-4 rounded-l-none'} ${isCancelado ? 'opacity-60' : ''}`}>
-                    
                     <div onClick={() => toggleMobileRow(row._rowId)} className="p-4 flex justify-between items-center cursor-pointer select-none">
                       <div className="flex-1 min-w-0 pr-3">
                         <div className="flex items-center gap-1.5 mb-1.5">
@@ -1797,7 +1760,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                           <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center truncate max-w-[150px]"><MapPin size={12} className="mr-1 shrink-0 text-indigo-400 dark:text-amber-500"/> <span className="truncate">{tableName}</span></span>
                         </div>
                       </div>
-                      
                       <div className="flex flex-col items-end gap-2.5 shrink-0">
                         {row.isMain || !qrEnabled ? (
                           <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'nuevo' ? 'bg-rose-500 text-white border-rose-600 animate-pulse shadow-md' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-400 text-amber-900 border-amber-500 shadow-md' : row.parentGuest.status === 'confirmado' ? 'bg-emerald-500 text-white border-emerald-600 dark:bg-emerald-600 dark:border-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
@@ -1807,7 +1769,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-slate-400 dark:text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-indigo-500 dark:text-amber-500' : ''}`}><polyline points="6 9 12 15 18 9"></polyline></svg>
                       </div>
                     </div>
-
                     {isExpanded && (
                       <div className="px-4 pb-4 pt-1 border-t border-slate-100 dark:border-white/5 animate-in slide-in-from-top-2 fade-in duration-300">
                         <div className="flex flex-wrap gap-2 mt-3">
@@ -1843,13 +1804,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               <div className="space-y-5">
                 <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre del Titular o Familia</label><input type="text" required value={newGuest.name} onChange={e=>setNewGuest({...newGuest, name: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
                 <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" value={newGuest.phone} onChange={e=>setNewGuest({...newGuest, phone: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" placeholder="10 dígitos" /></div>
-                
-                {/* 🔴 CONTROL DE PASES INTELIGENTE */}
                 {passCountEnabled && (
                   <div className={`grid ${isPremium ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
                     <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases {isPremium ? 'Adultos' : 'Totales'}</label><input type="number" min="1" required value={newGuest.adultPasses} onChange={e=>setNewGuest({...newGuest, adultPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-indigo-600 dark:text-amber-500 font-black text-center transition-colors" /></div>
-                    
-                    {/* Solo Premium ve la opción de asignar Niños */}
                     {isPremium && (
                       <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Niños</label><input type="number" min="0" required value={newGuest.childrenPasses} onChange={e=>setNewGuest({...newGuest, childrenPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sky-600 dark:text-sky-400 font-black text-center transition-colors" /></div>
                     )}
@@ -1869,7 +1826,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
             <form onSubmit={handleSaveEdit} className="p-6 space-y-5">
               <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre</label><input type="text" required value={editModal.guest.name} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, name: e.target.value }})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
               <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" value={editModal.guest.phone || ''} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, phone: e.target.value }})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
-              
               <div className={`grid ${isPremium ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
                 {isPremium && (
                   <div className={`${passCountEnabled ? 'col-span-2' : 'col-span-1'}`}><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Asignar Mesa</label>
@@ -1891,98 +1847,121 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       )}
 
-      {/*  MODAL DE ELIMINAR INVITADO */}
       {deleteModal && (
         <div className="fixed inset-0 z-[300] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-rose-500/20 animate-in zoom-in-95 duration-200 transition-colors text-center p-8">
-            
             <div className="w-20 h-20 bg-rose-50 dark:bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
               <Trash2 size={32} />
             </div>
-            
             <h3 className="font-editorial font-bold text-2xl text-slate-900 dark:text-white mb-2">¿Eliminar Invitado?</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-8 font-light leading-relaxed">
               Estás a punto de eliminar a <strong className="text-slate-800 dark:text-slate-200">{deleteModal.name}</strong>. Sus pases y códigos QR quedarán invalidados. Esta acción no se puede deshacer.
             </p>
-            
             <div className="flex gap-3">
-              <button 
-                onClick={() => setDeleteModal(null)} 
-                className="flex-1 py-3.5 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={executeDeleteGuest} 
-                className="flex-1 py-3.5 bg-rose-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-rose-600 transition-colors shadow-md shadow-rose-500/20"
-              >
-                Sí, Eliminar
-              </button>
+              <button onClick={() => setDeleteModal(null)} className="flex-1 py-3.5 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Cancelar</button>
+              <button onClick={executeDeleteGuest} className="flex-1 py-3.5 bg-rose-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-rose-600 transition-colors shadow-md shadow-rose-500/20">Sí, Eliminar</button>
             </div>
-            
           </div>
         </div>
       )}
 
-      {/* 🟢 MODAL DE VISUALIZACIÓN Y DESCARGA DE QR INDIVIDUAL */}
+      {/* 🟢 LA MAGIA DE LA PORTADA DEL PASE DE REGRESO */}
       {qrModal && (
-        <div className="fixed inset-0 z-[400] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-300 transition-colors flex flex-col relative">
+        <div className="fixed inset-0 z-[400] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-300 flex flex-col relative max-h-[95vh]">
             
-            {/* ENCABEZADO */}
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors">
-              <div>
-                <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-wide leading-none">{qrModal.displayName}</h3>
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mt-1">Pase de Acceso Único</p>
+            {/* CONTROLES SUPERIORES (Se ocultan al descargar) */}
+            <div className="px-6 py-4 border-b border-slate-100 dark:bg-white/5 flex justify-between items-center z-10 shrink-0 bg-slate-50">
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white tracking-wide">Diseño del Pase</h3>
+              <div className="flex gap-2 print:hidden">
+                 {/* BOTÓN PARA SUBIR FOTO */}
+                 <label className="cursor-pointer text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors" title="Subir portada">
+                    <ImageIcon size={18} />
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                       if(e.target.files && e.target.files[0]) {
+                          setQrCover(URL.createObjectURL(e.target.files[0]));
+                       }
+                    }}/>
+                 </label>
+                 {qrCover && (
+                   <button onClick={() => setQrCover(null)} className="text-rose-500 bg-rose-50 dark:bg-rose-500/10 p-2 rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors" title="Quitar portada"><Trash size={18}/></button>
+                 )}
+                 <button onClick={() => setQrModal(null)} className="text-slate-400 hover:text-slate-800 bg-white dark:bg-[#111] p-2 rounded-full shadow-sm border border-slate-200 dark:border-white/10"><X size={18}/></button>
               </div>
-              <button onClick={() => setQrModal(null)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors bg-white dark:bg-[#111] p-2 rounded-full border border-slate-200 dark:border-white/10 shadow-sm"><X size={18}/></button>
             </div>
             
-            {/* CONTENEDOR DEL CÓDIGO QR */}
-            <div className="p-8 flex flex-col items-center bg-slate-100 dark:bg-[#050505] transition-colors" id={`qr-container-${qrModal.pin}`}>
-              <div className="bg-white p-4 rounded-2xl shadow-lg border border-slate-200">
-                 {/*  SE UTILIZA LA ETIQUETA IMG DIRECTA A LA API DE GOOGLE PARA GENERAR EL QR PERFECTO */}
-                 <img 
-                    src={`https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${qrModal.pin}&choe=UTF-8`} 
-                    alt="Código QR de Acceso" 
-                    className="w-48 h-48 md:w-56 md:h-56 object-contain"
-                    crossOrigin="anonymous"
-                 />
-              </div>
-              
-              <div className="mt-6 text-center w-full">
-                 <p className="font-mono text-sm text-slate-600 dark:text-slate-400 tracking-[0.2em] bg-white dark:bg-[#111] py-2 px-4 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm inline-block">
-                   PIN: <strong className="text-slate-900 dark:text-white">{qrModal.pin.substring(0, 8)}</strong>
-                 </p>
-              </div>
+            {/* 🟢 EL LIENZO QUE SE CONVIERTE EN FOTO */}
+            <div className="overflow-y-auto custom-scrollbar bg-slate-200 dark:bg-[#050505] p-4 sm:p-6 flex-1 flex justify-center items-center">
+               <div 
+                 id={`qr-container-${qrModal.pin}`} 
+                 className="bg-white relative rounded-2xl overflow-hidden shadow-xl w-full max-w-[300px] mx-auto flex flex-col"
+                 style={{ aspectRatio: '9/16' }}
+               >
+                  {/* ZONA DE LA IMAGEN DE FONDO (Ocupa la mitad superior) */}
+                  <div className="absolute inset-0 w-full h-[65%] bg-slate-50 flex items-center justify-center overflow-hidden">
+                     {qrCover ? (
+                        <img src={qrCover} alt="Portada" className="w-full h-full object-cover" crossOrigin="anonymous"/>
+                     ) : (
+                        <div className="text-slate-300 flex flex-col items-center">
+                           <ImageIcon size={48} className="opacity-20 mb-2"/>
+                           <span className="text-[10px] uppercase font-bold tracking-widest opacity-40 text-center">Fondo<br/>Transparente</span>
+                        </div>
+                     )}
+                  </div>
+
+                  {/* EL DEGRADADO QUE SE FUNDE A BLANCO */}
+                  <div className="absolute inset-0 w-full h-full pointer-events-none" 
+                       style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(255,255,255,0.8) 55%, #ffffff 65%, #ffffff 100%)' }}>
+                  </div>
+
+                  {/* INFORMACIÓN DEL INVITADO Y QR */}
+                  <div className="relative z-10 flex flex-col h-full justify-end p-6 pb-8 items-center text-center">
+                     <h2 className="text-2xl font-editorial font-black text-slate-900 leading-tight mb-1 truncate w-full">{qrModal.displayName}</h2>
+                     <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-5">Pase Personal • Intransferible</p>
+
+                     {/* API RÁPIDA DE QR */}
+                     <div className="bg-white p-3 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-slate-100 mb-4">
+                        <img 
+                           src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${qrModal.pin}&margin=1`} 
+                           alt="QR" 
+                           className="w-40 h-40 object-contain mix-blend-multiply"
+                           crossOrigin="anonymous"
+                        />
+                     </div>
+
+                     <p className="font-mono text-xs text-slate-600 tracking-[0.2em] bg-slate-50 py-1.5 px-4 rounded-lg border border-slate-200">
+                       PIN: <strong className="text-slate-900">{qrModal.pin.substring(0, 8)}</strong>
+                     </p>
+                  </div>
+               </div>
             </div>
 
             {/* BOTÓN DE DESCARGA */}
-            <div className="p-6 border-t border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a] transition-colors">
+            <div className="p-4 border-t border-slate-100 dark:bg-[#0a0a0a] shrink-0 bg-white">
               <button 
                 disabled={isPreparingQRPrint}
                 onClick={async () => {
                   setIsPreparingQRPrint(true);
-                  if(addNotification) addNotification('Preparando Pase', 'Generando imagen del código QR...', 'info');
+                  if(addNotification) addNotification('Preparando Pase', 'Renderizando en alta calidad...', 'info');
                   try {
                     const html2canvas = (await import('html2canvas')).default;
                     const container = document.getElementById(`qr-container-${qrModal.pin}`);
                     const canvas = await html2canvas(container, { scale: 3, useCORS: true, backgroundColor: '#ffffff', logging: false });
                     const imgData = canvas.toDataURL('image/jpeg', 1.0);
                     const link = document.createElement('a');
-                    link.download = `Pase-Baulia-${qrModal.displayName.replace(/\s+/g, '-')}.jpg`;
+                    link.download = `Pase-${qrModal.displayName.replace(/\s+/g, '-')}.jpg`;
                     link.href = imgData;
                     link.click();
-                    if(addNotification) addNotification('Descarga Exitosa', 'El pase se guardó en tu dispositivo.', 'success');
+                    if(addNotification) addNotification('¡Listo!', 'El pase se descargó a tu equipo.', 'success');
                   } catch(e) {
                     console.error(e);
-                    if(addNotification) addNotification('Error', 'Fallo al descargar el código QR.', 'error');
+                    if(addNotification) addNotification('Error', 'Fallo al descargar.', 'error');
                   }
                   setIsPreparingQRPrint(false);
                 }} 
-                className="w-full py-4 bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 dark:hover:bg-indigo-400 transition-colors shadow-md flex items-center justify-center disabled:opacity-50"
+                className="w-full py-4 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-colors shadow-md flex items-center justify-center disabled:opacity-50"
               >
-                {isPreparingQRPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} Descargar Pase
+                {isPreparingQRPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} Descargar Imagen
               </button>
             </div>
 
