@@ -1207,10 +1207,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   
   // 🟢 ESTADO PARA LA IMAGEN DE PORTADA DEL BOLETO
   const [qrCover, setQrCover] = useState(null);
-
-  useEffect(() => {
-    setIsWeddingMode(tipoEvento === 'boda');
-  }, [tipoEvento]);
+  const [eventLogo, setEventLogo] = useState(null); // 🟢 Creamos el espacio para el logo
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "eventos", ID_DEL_EVENTO), (docSnap) => {
@@ -1219,6 +1216,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         setQrEnabled(data.isQrEnabled !== false); 
         setPassCountEnabled(data.isPassCountEnabled !== false);
         if (data.tipoEvento) setIsWeddingMode(data.tipoEvento === 'boda');
+        
+        // 🟢 JALAMOS EL LOGO AUTOMÁTICAMENTE DE LAS PULSERAS O EL EVENTO
+        if (data.monogramaUrl) setEventLogo(data.monogramaUrl);
+        else if (data.logoUrl) setEventLogo(data.logoUrl);
       }
     });
     return () => unsub();
@@ -1907,10 +1908,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   {/* INFORMACIÓN DEL INVITADO Y QR */}
                   <div className="relative z-10 flex flex-col h-full justify-end px-5 pb-6 items-center text-center">
                      
-                     {/* 1. MONOGRAMA O LOGO */}
+                     {/* 1. MONOGRAMA O LOGO CONECTADO */}
                      <div className="mb-2 h-12 flex items-center justify-center">
-                        {(currentEvent?.monogramaUrl || currentEvent?.logoUrl || authData?.logoUrl) ? (
-                          <img src={currentEvent?.monogramaUrl || currentEvent?.logoUrl || authData?.logoUrl} alt="Logo Evento" className="max-h-full max-w-[120px] object-contain drop-shadow-md" crossOrigin="anonymous" />
+                        {eventLogo ? (
+                          <img src={eventLogo} alt="Logo Evento" className="max-h-full max-w-[120px] object-contain drop-shadow-md" crossOrigin="anonymous" />
                         ) : (
                           <div className="w-12 h-12 rounded-full border border-slate-800 flex items-center justify-center text-slate-800 font-editorial font-bold text-xl bg-white/80 backdrop-blur-sm shadow-sm">
                              {eventName ? eventName.substring(0, 2).toUpperCase() : 'EV'}
