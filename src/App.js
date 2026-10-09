@@ -1800,15 +1800,17 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     )}
                     
                     <td className="px-4 py-3 text-center">
-                      {row.isMain || !qrEnabled ? (
+                      {row.isMissing ? (
+                        <span className="text-slate-300 dark:text-slate-600">-</span>
+                      ) : row.entered && !row.isMain && qrEnabled ? (
+                        <span className="px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border bg-emerald-500 text-white shadow-md border-emerald-600 dark:border-emerald-400">
+                           ADENTRO
+                        </span>
+                      ) : (
                         <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'nuevo' ? 'bg-rose-500 text-white border-rose-600 animate-pulse shadow-md' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-400 text-amber-900 border-amber-500 shadow-md' : row.parentGuest.status === 'ingreso' ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : row.parentGuest.status === 'confirmado' ? 'bg-emerald-500 text-white border-emerald-600 dark:bg-emerald-600 dark:border-emerald-700' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-white/10 dark:text-slate-300 dark:border-white/20' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
-                          {row.parentGuest.status === 'ingreso' ? `En el evento` : row.parentGuest.status === 'nuevo' ? '¡NUEVO!' : (row.parentGuest.status ? row.parentGuest.status.replace('_', ' ') : 'Pendiente')}
+                          {row.parentGuest.status === 'ingreso' ? `EN EL EVENTO` : row.parentGuest.status === 'nuevo' ? '¡NUEVO!' : (row.parentGuest.status ? row.parentGuest.status.replace('_', ' ') : 'PENDIENTE')}
                         </span>
-                      ) : !row.isMissing ? (
-                        <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.entered ? 'bg-emerald-500 text-white shadow-md border-emerald-600 dark:border-emerald-400' : 'bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
-                          {row.entered ? ' ADENTRO' : 'PENDIENTE'}
-                        </span>
-                      ) : <span className="text-slate-300 dark:text-slate-600">-</span>}
+                      )}
                     </td>
                     
                     <td className="px-5 py-3 text-right">
@@ -1849,11 +1851,15 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-2.5 shrink-0">
-                        {row.isMain || !qrEnabled ? (
-                          <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'nuevo' ? 'bg-rose-500 text-white border-rose-600 animate-pulse shadow-md' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-400 text-amber-900 border-amber-500 shadow-md' : row.parentGuest.status === 'confirmado' ? 'bg-emerald-500 text-white border-emerald-600 dark:bg-emerald-600 dark:border-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                            {row.parentGuest.status === 'nuevo' ? '¡NUEVO!' : row.parentGuest.status.replace('_', ' ')}
-                          </span>
-                        ) : null}
+                        {row.isMissing ? null : row.entered && !row.isMain && qrEnabled ? (
+                           <span className="px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border bg-emerald-500 text-white shadow-md border-emerald-600 dark:border-emerald-400">
+                             ADENTRO
+                           </span>
+                        ) : (
+                           <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'nuevo' ? 'bg-rose-500 text-white border-rose-600 animate-pulse shadow-md' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-400 text-amber-900 border-amber-500 shadow-md' : row.parentGuest.status === 'ingreso' ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : row.parentGuest.status === 'confirmado' ? 'bg-emerald-500 text-white border-emerald-600 dark:bg-emerald-600 dark:border-emerald-700' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-white/10 dark:text-slate-300 dark:border-white/20' : 'bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
+                             {row.parentGuest.status === 'ingreso' ? `EN EL EVENTO` : row.parentGuest.status === 'nuevo' ? '¡NUEVO!' : row.parentGuest.status.replace('_', ' ')}
+                           </span>
+                        )}
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-slate-400 dark:text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-indigo-500 dark:text-amber-500' : ''}`}><polyline points="6 9 12 15 18 9"></polyline></svg>
                       </div>
                     </div>
@@ -8901,9 +8907,6 @@ const GuestCameraView = ({ eventId }) => {
                     </button>
                     <button onClick={() => setActivePostComments(foto)} className={`${tTextMain} opacity-80 hover:opacity-100 transition-transform active:scale-75`}>
                       <MessageCircle size={24} />
-                    </button>
-                    <button className={`${tTextMain} opacity-80 hover:opacity-100 transition-transform active:scale-75 ml-auto`}>
-                      <Send size={20} />
                     </button>
                   </div>
                   
