@@ -2045,9 +2045,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                         />
                      </div>
 
-                     {/* 5. PIN */}
-                     <p className="font-mono text-[10px] text-slate-700 tracking-[0.2em] bg-slate-50 py-1.5 px-4 rounded-lg border border-slate-200 mb-2">
-                       PIN: <strong className="text-slate-900 font-bold">{qrModal.pin.substring(0, 8)}</strong>
+                     {/* 5. PIN (Mostrando ID completo para captura manual) */}
+                     <p className="font-mono text-[9px] text-slate-700 tracking-widest bg-slate-50 py-1.5 px-3 rounded-lg border border-slate-200 mb-2">
+                       PIN: <strong className="text-slate-900 font-bold break-all">{qrModal.pin}</strong>
                      </p>
 
                      {/* 6. TEXTO INTRANSFERIBLE */}
