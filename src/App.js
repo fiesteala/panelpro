@@ -8516,17 +8516,22 @@ const GuestCameraView = ({ eventId }) => {
 
   const toggleLike = async (foto) => {
     if (!currentUserName) { showToast("Por favor, ingresa tu nombre para interactuar.", "error"); return; }
+    
+    // Convertir de forma segura para no perder el formato
     let likesArray = Array.isArray(foto.likes) ? [...foto.likes] : [];
     const isLiking = !likesArray.includes(currentUserName);
     
     if (isLiking) {
       likesArray.push(currentUserName);
-      const coverUrl = foto.urls ? foto.urls[0] : foto.url;
-      notifySocial('like_foto', foto.autor || 'Anónimo', foto.id, '', coverUrl);
+      const coverUrl = foto.urls ? foto.urls[0] : (foto.url || '');
+      // El tercer parámetro 'foto.id' es la clave que faltaba enlazar correctamente
+      notifySocial('like_foto', foto.autor || 'Anónimo', String(foto.id), '', coverUrl);
     } else {
       likesArray = likesArray.filter(name => name !== currentUserName);
     }
-    await setDoc(doc(db, "eventos", eventId, "fotos", foto.id), { ...foto, likes: likesArray });
+    
+    // Se guarda forzosamente bajo el ID correcto de la foto
+    await updateDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { likes: likesArray });
   };
 
   const toggleCommentLike = async (foto, isReply = false, commentId, replyId = null) => {
@@ -8535,14 +8540,14 @@ const GuestCameraView = ({ eventId }) => {
     const cIndex = updatedComments.findIndex(c => c.id === commentId);
     if (cIndex === -1) return;
 
-    const coverUrl = foto.urls ? foto.urls[0] : foto.url;
+    const coverUrl = foto.urls ? foto.urls[0] : (foto.url || '');
 
     if (!isReply) {
       let likes = Array.isArray(updatedComments[cIndex].likes) ? updatedComments[cIndex].likes : [];
       const isLiking = !likes.includes(currentUserName);
       if (isLiking) {
         likes.push(currentUserName);
-        notifySocial('like_comment', updatedComments[cIndex].autor || 'Anónimo', foto.id, '', coverUrl);
+        notifySocial('like_comment', updatedComments[cIndex].autor || 'Anónimo', String(foto.id), '', coverUrl);
       } else likes = likes.filter(n => n !== currentUserName);
       updatedComments[cIndex].likes = likes;
     } else {
@@ -8553,12 +8558,12 @@ const GuestCameraView = ({ eventId }) => {
         const isLiking = !likes.includes(currentUserName);
         if (isLiking) {
           likes.push(currentUserName);
-          notifySocial('like_comment', replies[rIndex].autor || 'Anónimo', foto.id, '', coverUrl); 
+          notifySocial('like_comment', replies[rIndex].autor || 'Anónimo', String(foto.id), '', coverUrl); 
         } else likes = likes.filter(n => n !== currentUserName);
         replies[rIndex].likes = likes;
       }
     }
-    await setDoc(doc(db, "eventos", eventId, "fotos", foto.id), { ...foto, comentarios: updatedComments });
+    await updateDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments });
   };
 
   const handleAddComment = async () => {
@@ -8569,23 +8574,26 @@ const GuestCameraView = ({ eventId }) => {
     if (!replyingTo && config?.hashtag && !finalComment.toLowerCase().includes(config.hashtag.toLowerCase())) finalComment += ` ${config.hashtag}`;
 
     let updatedComments = Array.isArray(foto.comentarios) ? [...foto.comentarios] : (foto.comentarios ? Object.values(foto.comentarios) : []);
-    const newObj = { id: Date.now(), autor: currentUserName, avatar: guestAvatar, texto: finalComment, likes: [] };
-    const coverUrl = foto.urls ? foto.urls[0] : foto.url;
+    
+    // Generador de ID robusto para el comentario
+    const newCommentId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+    const newObj = { id: newCommentId, autor: currentUserName, avatar: guestAvatar, texto: finalComment, likes: [] };
+    const coverUrl = foto.urls ? foto.urls[0] : (foto.url || '');
 
     if (replyingTo) {
       const cIndex = updatedComments.findIndex(c => c.id === replyingTo.commentId);
       if (cIndex > -1) {
         let currentReplies = Array.isArray(updatedComments[cIndex].replies) ? updatedComments[cIndex].replies : [];
         updatedComments[cIndex].replies = [...currentReplies, newObj];
-        notifySocial('reply_comment', replyingTo.autor || 'Anónimo', foto.id, finalComment, coverUrl); 
+        notifySocial('reply_comment', replyingTo.autor || 'Anónimo', String(foto.id), finalComment, coverUrl); 
       }
     } else {
       newObj.replies = [];
       updatedComments.push(newObj);
-      notifySocial('comment_foto', foto.autor || 'Anónimo', foto.id, finalComment, coverUrl); 
+      notifySocial('comment_foto', foto.autor || 'Anónimo', String(foto.id), finalComment, coverUrl); 
     }
     
-    await setDoc(doc(db, "eventos", eventId, "fotos", foto.id), { ...foto, comentarios: updatedComments });
+    await updateDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments });
     setCommentText(''); setReplyingTo(null);
   };
 
@@ -8651,7 +8659,7 @@ const GuestCameraView = ({ eventId }) => {
   };
 
   // 🔴 PANTALLA DE ACCESO MODO PRIVADO
-  if (!config?.modoPublico && !authGuest) {
+  if (config && config.modoPublico === false && !authGuest) {
     return (
       <div className={`min-h-screen ${tBgBase} flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans`}>
         <style>{`

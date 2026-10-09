@@ -1,5 +1,5 @@
 git add .
-git commit -m "camara 2 segundos escaner"
+git commit -m "errores muro social corregidos"
 git push origin main
 
 .
