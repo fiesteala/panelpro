@@ -745,6 +745,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 
   const scannerRef = useRef(null);
   const lastScannedCode = useRef(null);
+  const isCooldown = useRef(false); // 🟢 ESCUDO: Bandera de Enfriamiento
   
   const guestsRef = useRef(guests || []);
   useEffect(() => { guestsRef.current = guests || []; }, [guests]);
@@ -781,15 +782,21 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
              }
           },
           (decodedText) => {
+             // 🟢 ESCUDO ACTIVO: Si estamos en pausa, ignoramos la cámara por completo
+             if (isCooldown.current) return;
+
              let code = decodedText;
              try {
                 const parsedUrl = new URL(decodedText);
                 code = parsedUrl.searchParams.get('u') || parsedUrl.searchParams.get('usr') || parsedUrl.searchParams.get('uid') || parsedUrl.searchParams.get('invitado') || code;
              } catch(e) {}
              
-             if (lastScannedCode.current === code) return;
-             lastScannedCode.current = code;
-             setTimeout(() => { lastScannedCode.current = null; }, 3000);
+             // 🟢 ACTIVAMOS LA PAUSA DE 2 SEGUNDOS
+             isCooldown.current = true;
+             setTimeout(() => { 
+                isCooldown.current = false; 
+                lastScannedCode.current = null; // Limpiamos la memoria para que puedan volver a entrar si se equivocaron
+             }, 2000); // 2000 milisegundos = 2 Segundos exactos
 
              if (code && code !== 'null') processEntry(code);
           },
@@ -1157,7 +1164,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           </div>
         </div>
       )}
-{/* 🔴 MODAL DE PROTOCOLO OFFLINE PARA EL STAFF */}
+      {/* 🔴 MODAL DE PROTOCOLO OFFLINE PARA EL STAFF */}
       {showProtocol && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-white/10 flex flex-col relative">

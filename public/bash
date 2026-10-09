@@ -1,5 +1,5 @@
 git add .
-git commit -m "monograma invitados QR eliminado"
+git commit -m "camara 2 segundos escaner"
 git push origin main
 
 .
