@@ -8369,10 +8369,11 @@ const GuestCameraView = ({ eventId }) => {
   }, [config, authGuest]);
 
   const notifySocial = async (tipo, targetUser, fotoId, textoExtra = '', fotoUrl = '') => {
-    if (!targetUser || !currentUserName || targetUser === currentUserName) return; 
+    // 🟢 ELIMINAMOS EL BLOQUEO: Ahora si le das like a tus propias fotos en tus pruebas, SÍ saldrán en el proyector.
+    if (!currentUserName) return; 
     const id = Date.now().toString() + Math.random().toString(36).substring(2);
     await setDoc(doc(db, "eventos", eventId, "actividad_social", id), {
-      id, tipo, actorName: currentUserName, actorAvatar: guestAvatar, targetUser, fotoId: String(fotoId), textoExtra, fotoUrl, timestamp: Date.now()
+      id, tipo, actorName: currentUserName, actorAvatar: guestAvatar, targetUser: targetUser || 'Anónimo', fotoId: String(fotoId), textoExtra, fotoUrl, timestamp: Date.now()
     });
   };
 
@@ -8529,8 +8530,8 @@ const GuestCameraView = ({ eventId }) => {
     } else {
       likesArray = likesArray.filter(name => name !== currentUserName);
     }
-    // Usamos setDoc como en tu código original para evitar errores de importación
-    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { ...foto, likes: likesArray });
+    // 🟢 MAGIA: { merge: true } le dice a Firebase "solo actualiza los likes y no toques nada más" (Evita que Firebase bloquee el guardado).
+    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { likes: likesArray }, { merge: true });
   };
 
   const toggleCommentLike = async (foto, isReply = false, commentId, replyId = null) => {
@@ -8562,7 +8563,7 @@ const GuestCameraView = ({ eventId }) => {
         replies[rIndex].likes = likes;
       }
     }
-    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { ...foto, comentarios: updatedComments });
+    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments }, { merge: true });
   };
 
   const handleAddComment = async () => {
@@ -8589,7 +8590,7 @@ const GuestCameraView = ({ eventId }) => {
       notifySocial('comment_foto', foto.autor || 'Anónimo', String(foto.id), finalComment, coverUrl); 
     }
     
-    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { ...foto, comentarios: updatedComments });
+    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments }, { merge: true });
     setCommentText(''); setReplyingTo(null);
   };
 
