@@ -745,7 +745,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 
   const scannerRef = useRef(null);
   const lastScannedCode = useRef(null);
-  const isCooldown = useRef(false); // 🟢 ESCUDO: Bandera de Enfriamiento
+  const lastScannedTime = useRef(0); // 🟢 MEMORIA DE TIEMPO INTELIGENTE
   
   const guestsRef = useRef(guests || []);
   useEffect(() => { guestsRef.current = guests || []; }, [guests]);
@@ -782,23 +782,26 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
              }
           },
           (decodedText) => {
-             // 🟢 ESCUDO ACTIVO: Si estamos en pausa, ignoramos la cámara por completo
-             if (isCooldown.current) return;
-
              let code = decodedText;
              try {
                 const parsedUrl = new URL(decodedText);
                 code = parsedUrl.searchParams.get('u') || parsedUrl.searchParams.get('usr') || parsedUrl.searchParams.get('uid') || parsedUrl.searchParams.get('invitado') || code;
              } catch(e) {}
              
-             // 🟢 ACTIVAMOS LA PAUSA DE 2 SEGUNDOS
-             isCooldown.current = true;
-             setTimeout(() => { 
-                isCooldown.current = false; 
-                lastScannedCode.current = null; // Limpiamos la memoria para que puedan volver a entrar si se equivocaron
-             }, 2000); // 2000 milisegundos = 2 Segundos exactos
+             if (!code || code === 'null') return;
 
-             if (code && code !== 'null') processEntry(code);
+             const now = Date.now();
+             
+             // 🟢 MAGIA: Si es el MISMO código que escaneamos hace menos de 4 segundos, lo ignoramos para evitar el fantasma.
+             if (lastScannedCode.current === code && (now - lastScannedTime.current < 4000)) {
+                 return;
+             }
+
+             // 🟢 Si es un código NUEVO (el acompañante u otra familia), pasa INMEDIATAMENTE sin demoras.
+             lastScannedCode.current = code;
+             lastScannedTime.current = now;
+
+             processEntry(code);
           },
           (errorMessage) => {}
         ).catch(err => {
