@@ -8354,9 +8354,21 @@ const GuestCameraView = ({ eventId }) => {
   const notifySocial = async (tipo, targetUser, fotoId, textoExtra = '', fotoUrl = '') => {
     if (!currentUserName) return; 
     const id = Date.now().toString() + Math.random().toString(36).substring(2);
-    await setDoc(doc(db, "eventos", eventId, "actividad_social", id), {
-      id, tipo, actorName: currentUserName, actorAvatar: guestAvatar, targetUser: targetUser || 'Anónimo', fotoId: String(fotoId), textoExtra, fotoUrl, timestamp: Date.now()
-    });
+    
+    // 🟢 ESCUDO: Aseguramos que Firebase no reciba valores "undefined"
+    const safeData = {
+      id: id, 
+      tipo: tipo || '', 
+      actorName: currentUserName || 'Anónimo', 
+      actorAvatar: guestAvatar || '', 
+      targetUser: targetUser || 'Anónimo', 
+      fotoId: String(fotoId) || '', 
+      textoExtra: textoExtra || '', 
+      fotoUrl: fotoUrl || '', 
+      timestamp: Date.now()
+    };
+
+    await setDoc(doc(db, "eventos", eventId, "actividad_social", id), safeData);
   };
 
   const handleAvatarSelect = async (e) => {
@@ -8503,7 +8515,8 @@ const GuestCameraView = ({ eventId }) => {
     } else {
       likesArray = likesArray.filter(name => name !== currentUserName);
     }
-    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), cleanObj({ ...foto, likes: likesArray }), { merge: true });
+    // 🟢 QUIRÚRGICO: Solo enviamos el campo "likes". Firebase ya no podrá rechazarlo por otros campos vacíos.
+    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { likes: likesArray }, { merge: true });
   };
 
   const toggleCommentLike = async (foto, isReply = false, commentId, replyId = null) => {
@@ -8535,7 +8548,7 @@ const GuestCameraView = ({ eventId }) => {
         replies[rIndex].likes = likes;
       }
     }
-    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), cleanObj({ ...foto, comentarios: updatedComments }), { merge: true });
+    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments }, { merge: true });
   };
 
   const handleAddComment = async () => {
@@ -8546,7 +8559,7 @@ const GuestCameraView = ({ eventId }) => {
     if (!replyingTo && config?.hashtag && !finalComment.toLowerCase().includes(config.hashtag.toLowerCase())) finalComment += ` ${config.hashtag}`;
 
     let updatedComments = Array.isArray(foto.comentarios) ? [...foto.comentarios] : (foto.comentarios ? Object.values(foto.comentarios) : []);
-    const newObj = { id: Date.now().toString(), autor: currentUserName, avatar: guestAvatar, texto: finalComment, likes: [] };
+    const newObj = { id: Date.now().toString(), autor: currentUserName, avatar: guestAvatar || '', texto: finalComment, likes: [] };
     const coverUrl = foto.urls ? foto.urls[0] : (foto.url || '');
 
     if (replyingTo) {
@@ -8562,7 +8575,7 @@ const GuestCameraView = ({ eventId }) => {
       notifySocial('comment_foto', foto.autor || 'Anónimo', String(foto.id), finalComment, coverUrl); 
     }
     
-    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), cleanObj({ ...foto, comentarios: updatedComments }), { merge: true });
+    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments }, { merge: true });
     setCommentText(''); setReplyingTo(null);
   };
 
@@ -8964,8 +8977,17 @@ const GuestCameraView = ({ eventId }) => {
                    </select>
                  </div>
                  <div className={`flex items-center px-3 py-3 rounded-xl ${tInputBg} border ${tBorder}`}>
-                   <MapPin size={16} className={`mr-2 ${tTextSub}`}/>
-                   <input type="text" placeholder="Añadir ubicación..." value={postDraft.location} onChange={e=>setPostDraft({...postDraft, location: e.target.value})} className={`w-full bg-transparent outline-none text-base sm:text-xs font-bold ${tTextMain}`} />
+                   <button 
+                     onClick={() => {
+                        showToast("Obteniendo ubicación...", "info");
+                        setTimeout(() => setPostDraft({...postDraft, location: "📍 Recepción del Evento"}), 600);
+                     }} 
+                     className={`mr-2 ${tTextSub} hover:text-indigo-500 transition-colors p-1`}
+                     title="Usar ubicación actual"
+                   >
+                     <MapPin size={16} />
+                   </button>
+                   <input type="text" placeholder="Añadir ubicación..." value={postDraft.location || ''} onChange={e=>setPostDraft({...postDraft, location: e.target.value})} className={`w-full bg-transparent outline-none text-base sm:text-xs font-bold ${tTextMain}`} />
                  </div>
                </div>
 
@@ -9137,7 +9159,35 @@ const GuestProyectorView = ({ eventId }) => {
 
   const displayPhotos = config.moderacion ? photos.filter(f => f.status !== 'pending' && f.status !== 'rejected') : photos;
 
-  // 🟢 EL REPRODUCTOR INTELIGENTE (Detecta interacciones nuevas y en vivo)
+  // 🟢 REFERENCIA A LA FOTO ACTUAL EN PANTALLA (Para saber a quién lanzarle corazones en vivo)
+  const currentPhotoIdRef = useRef(null);
+  useEffect(() => {
+    if (displayPhotos[currentIndex]) {
+      currentPhotoIdRef.current = String(displayPhotos[currentIndex].id);
+    }
+  }, [currentIndex, displayPhotos]);
+
+  // 🟢 ESCUCHA SOCIAL: Solo lanza en vivo si la foto está en pantalla
+  useEffect(() => {
+    const timeOnLoad = Date.now(); 
+    const unsubActivity = onSnapshot(collection(db, "eventos", eventId, "actividad_social"), (snap) => {
+      snap.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const data = change.doc.data();
+          if (data.timestamp > timeOnLoad) {
+             // REGLA DEL CARRUSEL SAGRADO: Solo lanza animaciones en vivo si la foto afectada está en pantalla AHORA MISMO.
+             if (String(data.fotoId) === currentPhotoIdRef.current) {
+                 if (data.tipo.includes('like')) triggerHearts(12); 
+                 if (data.tipo.includes('comment')) showLiveComment(data); 
+             }
+          }
+        }
+      });
+    });
+    return () => unsubActivity();
+  }, [eventId]);
+
+  // 🟢 EL REPRODUCTOR INTELIGENTE (Detecta si la foto acumuló cosas mientras estaba escondida)
   useEffect(() => {
     const currentPhoto = displayPhotos[currentIndex];
     if (!currentPhoto || isHallOfFame) return;
@@ -9148,13 +9198,13 @@ const GuestProyectorView = ({ eventId }) => {
 
     const known = knownStats.current[pid] || { likes: 0, comments: [] };
 
-    // 1. ¿Recibió likes nuevos mientras estaba escondida (o en este segundo)?
+    // 1. ¿Recibió likes nuevos mientras estaba escondida?
     if (currentLikesCount > known.likes) {
        const newLikes = currentLikesCount - known.likes;
        setTimeout(() => triggerHearts(Math.min(newLikes * 3, 20)), 500); 
     }
 
-    // 2. ¿Recibió comentarios nuevos?
+    // 2. ¿Recibió comentarios nuevos mientras estaba escondida?
     const knownCommentIds = known.comments.map(c => c.id);
     const newComments = currentCommentsList.filter(c => !knownCommentIds.includes(c.id));
 
@@ -9166,7 +9216,7 @@ const GuestProyectorView = ({ eventId }) => {
        });
     }
 
-    // 3. Actualizamos la memoria
+    // 3. Actualizamos la memoria de la foto
     knownStats.current[pid] = {
        likes: currentLikesCount,
        comments: currentCommentsList
@@ -9174,7 +9224,7 @@ const GuestProyectorView = ({ eventId }) => {
 
   }, [displayPhotos, currentIndex, isHallOfFame]);
 
-  // EL CARRUSEL SAGRADO
+  // EL CARRUSEL SAGRADO (7 Segundos ininterrumpidos)
   useEffect(() => {
     if (displayPhotos.length <= 1 && (!displayPhotos[0]?.urls || displayPhotos[0].urls.length <= 1)) return;
 
@@ -9182,7 +9232,7 @@ const GuestProyectorView = ({ eventId }) => {
     if (!currentPost) return;
 
     const urlsCount = (currentPost.urls || [currentPost.url]).filter(u => u !== undefined).length;
-    const delay = urlsCount > 1 ? 3000 : 7000; // 7 SEGUNDOS INQUEBRANTABLES
+    const delay = urlsCount > 1 ? 3000 : 7000; 
 
     const timer = setTimeout(() => {
       if (isHallOfFame) {
