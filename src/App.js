@@ -8351,159 +8351,31 @@ const GuestCameraView = ({ eventId }) => {
      }
   }, [config, authGuest]);
 
+  // 🟢 1. BLINDAJE DE NOTIFICACIONES (Aislado para que no interrumpa el guardado)
   const notifySocial = async (tipo, targetUser, fotoId, textoExtra = '', fotoUrl = '') => {
-    if (!currentUserName) return; 
-    const id = Date.now().toString() + Math.random().toString(36).substring(2);
-    
-    // 🟢 ESCUDO: Aseguramos que Firebase no reciba valores "undefined"
-    const safeData = {
-      id: id, 
-      tipo: tipo || '', 
-      actorName: currentUserName || 'Anónimo', 
-      actorAvatar: guestAvatar || '', 
-      targetUser: targetUser || 'Anónimo', 
-      fotoId: String(fotoId) || '', 
-      textoExtra: textoExtra || '', 
-      fotoUrl: fotoUrl || '', 
-      timestamp: Date.now()
-    };
-
-    await setDoc(doc(db, "eventos", eventId, "actividad_social", id), safeData);
-  };
-
-  const handleAvatarSelect = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setIsAvatarUploading(true);
-    setShowMenu(false);
     try {
-      const formData = new FormData(); formData.append("file", file); formData.append("upload_preset", uploadPreset);
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: formData });
-      const data = await res.json();
-      if (data.secure_url) {
-        const urlParts = data.secure_url.split('/upload/');
-        const avatarUrl = `${urlParts[0]}/upload/c_thumb,g_face,h_150,w_150,f_auto,q_auto/${urlParts[1]}`;
-        
-        setGuestAvatar(avatarUrl);
-        localStorage.setItem(avatarKey, avatarUrl);
+      if (!currentUserName) return; 
+      const id = Date.now().toString() + Math.random().toString(36).substring(2);
+      
+      const safeData = JSON.parse(JSON.stringify({
+        id: id, 
+        tipo: tipo || '', 
+        actorName: currentUserName || 'Anónimo', 
+        actorAvatar: guestAvatar || '', 
+        targetUser: targetUser || 'Anónimo', 
+        fotoId: String(fotoId) || '', 
+        textoExtra: textoExtra || '', 
+        fotoUrl: fotoUrl || '', 
+        timestamp: Date.now()
+      }));
 
-        if (currentUserName) {
-          const promesasUpdate = feedFotos.map(foto => {
-            let changesMade = false;
-            let updatedFoto = { ...foto };
-            if (updatedFoto.autor === currentUserName && updatedFoto.avatar !== avatarUrl) { updatedFoto.avatar = avatarUrl; changesMade = true; }
-            if (updatedFoto.comentarios) {
-              updatedFoto.comentarios = updatedFoto.comentarios.map(c => {
-                let newC = { ...c };
-                if (newC.autor === currentUserName && newC.avatar !== avatarUrl) { newC.avatar = avatarUrl; changesMade = true; }
-                if (newC.replies) {
-                  newC.replies = newC.replies.map(r => {
-                    if (r.autor === currentUserName && r.avatar !== avatarUrl) { changesMade = true; return { ...r, avatar: avatarUrl }; }
-                    return r;
-                  });
-                }
-                return newC;
-              });
-            }
-            if (changesMade) return setDoc(doc(db, "eventos", eventId, "fotos", foto.id), cleanObj(updatedFoto), { merge: true });
-            return Promise.resolve();
-          });
-          await Promise.all(promesasUpdate);
-        }
-      }
-    } catch (error) { 
-      showToast("Error al subir foto de perfil.", "error"); 
-    } finally { 
-      setIsAvatarUploading(false); 
+      await setDoc(doc(db, "eventos", eventId, "actividad_social", id), safeData);
+    } catch (err) {
+      console.error("Error silenciado en notifySocial:", err);
     }
   };
 
-  const generarReto = () => {
-    const retoAzar = retos[Math.floor(Math.random() * retos.length)];
-    setActiveChallenge(retoAzar);
-  };
-
-  const openChallengeModal = () => {
-    generarReto();
-    setShowChallengeModal(true);
-  };
-
-  const initiatePost = (e) => {
-    const files = Array.from(e.target.files).slice(0, 10);
-    if (files.length === 0) return;
-    const previewUrls = files.map(f => URL.createObjectURL(f));
-    const initialCaption = activeChallenge ? `¡Reto cumplido! 🎲\n${activeChallenge}` : '';
-    setPostDraft({ files, previewUrls, caption: initialCaption, emotion: '', location: '' });
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    setActiveChallenge(null); 
-  };
-
-  const cancelPost = () => {
-    if (postDraft && postDraft.previewUrls) {
-       postDraft.previewUrls.forEach(url => URL.revokeObjectURL(url));
-    }
-    setPostDraft(null);
-  };
-
-  const publishPost = async () => {
-    if (!currentUserName) { showToast("Ingresa tu nombre para publicar.", "error"); return; }
-    setIsUploading(true);
-
-    try {
-      const uploadPromises = postDraft.files.map(async (file) => {
-        const formData = new FormData(); formData.append("file", file); formData.append("upload_preset", uploadPreset);
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: formData });
-        const data = await res.json();
-        if (data.secure_url) {
-          const urlParts = data.secure_url.split('/upload/');
-          return `${urlParts[0]}/upload/c_fill,g_auto,ar_4:5,w_1080,f_auto,q_auto/${urlParts[1]}`;
-        }
-        return null;
-      });
-
-      const uploadedUrls = await Promise.all(uploadPromises);
-      const validUrls = uploadedUrls.filter(url => url !== null);
-      if (validUrls.length === 0) throw new Error("Fallo al procesar fotos.");
-
-      let finalCaption = (postDraft.caption || '').trim();
-      if (config?.hashtag && !finalCaption.toLowerCase().includes(config.hashtag.toLowerCase())) {
-         finalCaption = finalCaption ? `${finalCaption} ${config.hashtag}` : config.hashtag;
-      }
-
-      const nuevaFoto = {
-        id: Date.now().toString(), 
-        urls: validUrls, 
-        autor: currentUserName, 
-        avatar: guestAvatar, 
-        mensaje: finalCaption,
-        emotion: postDraft.emotion || "",
-        location: postDraft.location || "",
-        fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        likes: [], 
-        comentarios: [],
-        status: config?.moderacion ? 'pending' : 'approved'
-      };
-      
-      await setDoc(doc(db, "eventos", eventId, "fotos", nuevaFoto.id), cleanObj(nuevaFoto));
-      
-      if (postDraft && postDraft.previewUrls) {
-         postDraft.previewUrls.forEach(url => URL.revokeObjectURL(url));
-      }
-      setPostDraft(null);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      if(config?.moderacion) showToast("¡Subida! Se mostrará en pantalla en breve.", "info");
-    } catch (error) { 
-      showToast("Hubo un error al intentar publicar.", "error"); 
-      if (postDraft && postDraft.previewUrls) postDraft.previewUrls.forEach(url => URL.revokeObjectURL(url));
-      setPostDraft(null);
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  // 🟢 EL BLINDAJE DE GUARDADO PARA LIKES Y COMENTARIOS
-  // 🟢 EL BLINDAJE REAL: GUARDADO QUIRÚRGICO DE LIKES Y COMENTARIOS
+  // 🟢 2. LIMPIEZA PROFUNDA DE LIKES Y COMENTARIOS
   const toggleLike = async (foto) => {
     try {
       if (!currentUserName) { showToast("Por favor, ingresa tu nombre para interactuar.", "error"); return; }
@@ -8518,8 +8390,9 @@ const GuestCameraView = ({ eventId }) => {
         likesArray = likesArray.filter(name => name !== currentUserName);
       }
       
-      // AHORA SÍ ES QUIRÚRGICO: Solo enviamos la caja de "likes", ignoramos todo el resto de la foto
-      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { likes: likesArray }, { merge: true });
+      // Magia: JSON.parse(JSON.stringify) aniquila cualquier 'undefined' oculto
+      const cleanData = JSON.parse(JSON.stringify({ likes: likesArray }));
+      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), cleanData, { merge: true });
     } catch (error) {
       console.error("Error guardando like:", error);
     }
@@ -8556,8 +8429,8 @@ const GuestCameraView = ({ eventId }) => {
         }
       }
       
-      // AHORA SÍ ES QUIRÚRGICO: Solo enviamos la caja de "comentarios"
-      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments }, { merge: true });
+      const cleanData = JSON.parse(JSON.stringify({ comentarios: updatedComments }));
+      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), cleanData, { merge: true });
     } catch (error) {
       console.error("Error like en comentario:", error);
     }
@@ -8588,12 +8461,12 @@ const GuestCameraView = ({ eventId }) => {
         notifySocial('comment_foto', foto.autor || 'Anónimo', String(foto.id), finalComment, coverUrl); 
       }
       
-      // AHORA SÍ ES QUIRÚRGICO: Solo enviamos la caja de "comentarios"
-      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments }, { merge: true });
+      const cleanData = JSON.parse(JSON.stringify({ comentarios: updatedComments }));
+      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), cleanData, { merge: true });
       setCommentText(''); setReplyingTo(null);
     } catch (error) {
       console.error("Error guardando comentario:", error);
-      showToast("Hubo un error de conexión.", "error");
+      showToast("No pudimos guardar el comentario, intenta de nuevo.", "error");
     }
   };
 
