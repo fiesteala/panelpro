@@ -8516,10 +8516,13 @@ const GuestCameraView = ({ eventId }) => {
         likesArray = likesArray.filter(name => name !== currentUserName);
       }
       
-      const cleanData = JSON.parse(JSON.stringify({ likes: likesArray }));
-      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), cleanData, { merge: true });
+      // 🟢 GUARDAMOS LA FOTO COMPLETA, PERO LIMPIA
+      const updatedPhoto = { ...foto, likes: likesArray };
+      const cleanPhoto = JSON.parse(JSON.stringify(updatedPhoto));
+      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), cleanPhoto);
     } catch (error) {
       console.error("Error guardando like:", error);
+      showToast("Error FB: " + error.message, "error"); // 🔴 REVELADOR DE ERRORES
     }
   };
 
@@ -8554,10 +8557,13 @@ const GuestCameraView = ({ eventId }) => {
         }
       }
       
-      const cleanData = JSON.parse(JSON.stringify({ comentarios: updatedComments }));
-      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), cleanData, { merge: true });
+      // 🟢 GUARDAMOS LA FOTO COMPLETA, PERO LIMPIA
+      const updatedPhoto = { ...foto, comentarios: updatedComments };
+      const cleanPhoto = JSON.parse(JSON.stringify(updatedPhoto));
+      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), cleanPhoto);
     } catch (error) {
       console.error("Error like en comentario:", error);
+      showToast("Error FB: " + error.message, "error"); // 🔴 REVELADOR DE ERRORES
     }
   };
 
@@ -8586,12 +8592,15 @@ const GuestCameraView = ({ eventId }) => {
         notifySocial('comment_foto', foto.autor || 'Anónimo', String(foto.id), finalComment, coverUrl); 
       }
       
-      const cleanData = JSON.parse(JSON.stringify({ comentarios: updatedComments }));
-      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), cleanData, { merge: true });
+      // 🟢 GUARDAMOS LA FOTO COMPLETA, PERO LIMPIA
+      const updatedPhoto = { ...foto, comentarios: updatedComments };
+      const cleanPhoto = JSON.parse(JSON.stringify(updatedPhoto));
+      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), cleanPhoto);
+      
       setCommentText(''); setReplyingTo(null);
     } catch (error) {
       console.error("Error guardando comentario:", error);
-      showToast("No pudimos guardar el comentario, intenta de nuevo.", "error");
+      showToast("Error FB: " + error.message, "error"); // 🔴 REVELADOR DE ERRORES
     }
   };
 
