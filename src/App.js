@@ -8503,80 +8503,98 @@ const GuestCameraView = ({ eventId }) => {
   };
 
   // 🟢 EL BLINDAJE DE GUARDADO PARA LIKES Y COMENTARIOS
+  // 🟢 EL BLINDAJE REAL: GUARDADO QUIRÚRGICO DE LIKES Y COMENTARIOS
   const toggleLike = async (foto) => {
-    if (!currentUserName) { showToast("Por favor, ingresa tu nombre para interactuar.", "error"); return; }
-    let likesArray = Array.isArray(foto.likes) ? [...foto.likes] : [];
-    const isLiking = !likesArray.includes(currentUserName);
-    
-    if (isLiking) {
-      likesArray.push(currentUserName);
-      const coverUrl = foto.urls ? foto.urls[0] : (foto.url || '');
-      notifySocial('like_foto', foto.autor || 'Anónimo', String(foto.id), '', coverUrl);
-    } else {
-      likesArray = likesArray.filter(name => name !== currentUserName);
+    try {
+      if (!currentUserName) { showToast("Por favor, ingresa tu nombre para interactuar.", "error"); return; }
+      let likesArray = Array.isArray(foto.likes) ? [...foto.likes] : [];
+      const isLiking = !likesArray.includes(currentUserName);
+      
+      if (isLiking) {
+        likesArray.push(currentUserName);
+        const coverUrl = foto.urls ? foto.urls[0] : (foto.url || '');
+        notifySocial('like_foto', foto.autor || 'Anónimo', String(foto.id), '', coverUrl);
+      } else {
+        likesArray = likesArray.filter(name => name !== currentUserName);
+      }
+      
+      // AHORA SÍ ES QUIRÚRGICO: Solo enviamos la caja de "likes", ignoramos todo el resto de la foto
+      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { likes: likesArray }, { merge: true });
+    } catch (error) {
+      console.error("Error guardando like:", error);
     }
-    // 🟢 QUIRÚRGICO: Solo enviamos el campo "likes". Firebase ya no podrá rechazarlo por otros campos vacíos.
-    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { likes: likesArray }, { merge: true });
   };
 
   const toggleCommentLike = async (foto, isReply = false, commentId, replyId = null) => {
-    if (!currentUserName) return;
-    let updatedComments = Array.isArray(foto.comentarios) ? [...foto.comentarios] : (foto.comentarios ? Object.values(foto.comentarios) : []);
-    const cIndex = updatedComments.findIndex(c => c.id === commentId);
-    if (cIndex === -1) return;
+    try {
+      if (!currentUserName) return;
+      let updatedComments = Array.isArray(foto.comentarios) ? [...foto.comentarios] : (foto.comentarios ? Object.values(foto.comentarios) : []);
+      const cIndex = updatedComments.findIndex(c => c.id === commentId);
+      if (cIndex === -1) return;
 
-    const coverUrl = foto.urls ? foto.urls[0] : (foto.url || '');
+      const coverUrl = foto.urls ? foto.urls[0] : (foto.url || '');
 
-    if (!isReply) {
-      let likes = Array.isArray(updatedComments[cIndex].likes) ? updatedComments[cIndex].likes : [];
-      const isLiking = !likes.includes(currentUserName);
-      if (isLiking) {
-        likes.push(currentUserName);
-        notifySocial('like_comment', updatedComments[cIndex].autor || 'Anónimo', String(foto.id), '', coverUrl);
-      } else likes = likes.filter(n => n !== currentUserName);
-      updatedComments[cIndex].likes = likes;
-    } else {
-      let replies = Array.isArray(updatedComments[cIndex].replies) ? updatedComments[cIndex].replies : [];
-      const rIndex = replies.findIndex(r => r.id === replyId);
-      if (rIndex > -1) {
-        let likes = Array.isArray(replies[rIndex].likes) ? replies[rIndex].likes : [];
+      if (!isReply) {
+        let likes = Array.isArray(updatedComments[cIndex].likes) ? updatedComments[cIndex].likes : [];
         const isLiking = !likes.includes(currentUserName);
         if (isLiking) {
           likes.push(currentUserName);
-          notifySocial('like_comment', replies[rIndex].autor || 'Anónimo', String(foto.id), '', coverUrl); 
+          notifySocial('like_comment', updatedComments[cIndex].autor || 'Anónimo', String(foto.id), '', coverUrl);
         } else likes = likes.filter(n => n !== currentUserName);
-        replies[rIndex].likes = likes;
+        updatedComments[cIndex].likes = likes;
+      } else {
+        let replies = Array.isArray(updatedComments[cIndex].replies) ? updatedComments[cIndex].replies : [];
+        const rIndex = replies.findIndex(r => r.id === replyId);
+        if (rIndex > -1) {
+          let likes = Array.isArray(replies[rIndex].likes) ? replies[rIndex].likes : [];
+          const isLiking = !likes.includes(currentUserName);
+          if (isLiking) {
+            likes.push(currentUserName);
+            notifySocial('like_comment', replies[rIndex].autor || 'Anónimo', String(foto.id), '', coverUrl); 
+          } else likes = likes.filter(n => n !== currentUserName);
+          replies[rIndex].likes = likes;
+        }
       }
+      
+      // AHORA SÍ ES QUIRÚRGICO: Solo enviamos la caja de "comentarios"
+      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments }, { merge: true });
+    } catch (error) {
+      console.error("Error like en comentario:", error);
     }
-    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments }, { merge: true });
   };
 
   const handleAddComment = async () => {
-    const foto = activePostComments;
-    if (!currentUserName || !commentText.trim() || !foto) return;
+    try {
+      const foto = activePostComments;
+      if (!currentUserName || !commentText.trim() || !foto) return;
 
-    let finalComment = commentText.trim();
-    if (!replyingTo && config?.hashtag && !finalComment.toLowerCase().includes(config.hashtag.toLowerCase())) finalComment += ` ${config.hashtag}`;
+      let finalComment = commentText.trim();
+      if (!replyingTo && config?.hashtag && !finalComment.toLowerCase().includes(config.hashtag.toLowerCase())) finalComment += ` ${config.hashtag}`;
 
-    let updatedComments = Array.isArray(foto.comentarios) ? [...foto.comentarios] : (foto.comentarios ? Object.values(foto.comentarios) : []);
-    const newObj = { id: Date.now().toString(), autor: currentUserName, avatar: guestAvatar || '', texto: finalComment, likes: [] };
-    const coverUrl = foto.urls ? foto.urls[0] : (foto.url || '');
+      let updatedComments = Array.isArray(foto.comentarios) ? [...foto.comentarios] : (foto.comentarios ? Object.values(foto.comentarios) : []);
+      const newObj = { id: Date.now().toString(), autor: currentUserName, avatar: guestAvatar || '', texto: finalComment, likes: [] };
+      const coverUrl = foto.urls ? foto.urls[0] : (foto.url || '');
 
-    if (replyingTo) {
-      const cIndex = updatedComments.findIndex(c => c.id === replyingTo.commentId);
-      if (cIndex > -1) {
-        let currentReplies = Array.isArray(updatedComments[cIndex].replies) ? updatedComments[cIndex].replies : [];
-        updatedComments[cIndex].replies = [...currentReplies, newObj];
-        notifySocial('reply_comment', replyingTo.autor || 'Anónimo', String(foto.id), finalComment, coverUrl); 
+      if (replyingTo) {
+        const cIndex = updatedComments.findIndex(c => c.id === replyingTo.commentId);
+        if (cIndex > -1) {
+          let currentReplies = Array.isArray(updatedComments[cIndex].replies) ? updatedComments[cIndex].replies : [];
+          updatedComments[cIndex].replies = [...currentReplies, newObj];
+          notifySocial('reply_comment', replyingTo.autor || 'Anónimo', String(foto.id), finalComment, coverUrl); 
+        }
+      } else {
+        newObj.replies = [];
+        updatedComments.push(newObj);
+        notifySocial('comment_foto', foto.autor || 'Anónimo', String(foto.id), finalComment, coverUrl); 
       }
-    } else {
-      newObj.replies = [];
-      updatedComments.push(newObj);
-      notifySocial('comment_foto', foto.autor || 'Anónimo', String(foto.id), finalComment, coverUrl); 
+      
+      // AHORA SÍ ES QUIRÚRGICO: Solo enviamos la caja de "comentarios"
+      await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments }, { merge: true });
+      setCommentText(''); setReplyingTo(null);
+    } catch (error) {
+      console.error("Error guardando comentario:", error);
+      showToast("Hubo un error de conexión.", "error");
     }
-    
-    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments }, { merge: true });
-    setCommentText(''); setReplyingTo(null);
   };
 
   const storageKey = `baulia_lastReadSocial_${eventId}_${currentUserName}`;
