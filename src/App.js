@@ -8162,15 +8162,6 @@ const GuestCameraView = ({ eventId }) => {
   useEffect(() => { allGuestsRef.current = allGuests; }, [allGuests]);
   const scannerRef = useRef(null);
 
-  // 🟢 MAGIA ANTI-BLOQUEOS: Limpia cualquier "undefined" que Firebase rechace
-  const cleanObj = (obj) => {
-    const newObj = { ...obj };
-    Object.keys(newObj).forEach(key => {
-      if (newObj[key] === undefined) delete newObj[key];
-    });
-    return newObj;
-  };
-
   const handlePublicLogin = (e) => {
     e.preventDefault();
     const finalName = tempPublicName.trim();
@@ -8287,6 +8278,7 @@ const GuestCameraView = ({ eventId }) => {
     let meta = document.querySelector('meta[name="viewport"]');
     if (!meta) { meta = document.createElement('meta'); meta.name = "viewport"; document.head.appendChild(meta); }
     meta.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0";
+    try { if (typeof setGlobalEventId === 'function') setGlobalEventId(eventId); } catch(e){}
 
     if (!window.Html5QrcodeScanner && !document.getElementById('qr-script')) {
       const script = document.createElement('script');
@@ -8351,7 +8343,7 @@ const GuestCameraView = ({ eventId }) => {
      }
   }, [config, authGuest]);
 
-  // 🟢 1. BLINDAJE DE NOTIFICACIONES (Aislado para que no interrumpa el guardado)
+  // 🟢 1. BLINDAJE DE NOTIFICACIONES
   const notifySocial = async (tipo, targetUser, fotoId, textoExtra = '', fotoUrl = '') => {
     try {
       if (!currentUserName) return; 
@@ -8375,6 +8367,140 @@ const GuestCameraView = ({ eventId }) => {
     }
   };
 
+  const handleAvatarSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setIsAvatarUploading(true);
+    setShowMenu(false);
+    try {
+      const formData = new FormData(); formData.append("file", file); formData.append("upload_preset", uploadPreset);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.secure_url) {
+        const urlParts = data.secure_url.split('/upload/');
+        const avatarUrl = `${urlParts[0]}/upload/c_thumb,g_face,h_150,w_150,f_auto,q_auto/${urlParts[1]}`;
+        
+        setGuestAvatar(avatarUrl);
+        localStorage.setItem(avatarKey, avatarUrl);
+
+        if (currentUserName) {
+          const promesasUpdate = feedFotos.map(foto => {
+            let changesMade = false;
+            let updatedFoto = { ...foto };
+            if (updatedFoto.autor === currentUserName && updatedFoto.avatar !== avatarUrl) { updatedFoto.avatar = avatarUrl; changesMade = true; }
+            if (updatedFoto.comentarios) {
+              updatedFoto.comentarios = updatedFoto.comentarios.map(c => {
+                let newC = { ...c };
+                if (newC.autor === currentUserName && newC.avatar !== avatarUrl) { newC.avatar = avatarUrl; changesMade = true; }
+                if (newC.replies) {
+                  newC.replies = newC.replies.map(r => {
+                    if (r.autor === currentUserName && r.avatar !== avatarUrl) { changesMade = true; return { ...r, avatar: avatarUrl }; }
+                    return r;
+                  });
+                }
+                return newC;
+              });
+            }
+            if (changesMade) {
+               const cleanData = JSON.parse(JSON.stringify(updatedFoto));
+               return setDoc(doc(db, "eventos", eventId, "fotos", foto.id), cleanData, { merge: true });
+            }
+            return Promise.resolve();
+          });
+          await Promise.all(promesasUpdate);
+        }
+      }
+    } catch (error) { 
+      showToast("Error al subir foto de perfil.", "error"); 
+    } finally { 
+      setIsAvatarUploading(false); 
+    }
+  };
+
+  const generarReto = () => {
+    const retoAzar = retos[Math.floor(Math.random() * retos.length)];
+    setActiveChallenge(retoAzar);
+  };
+
+  const openChallengeModal = () => {
+    generarReto();
+    setShowChallengeModal(true);
+  };
+
+  const initiatePost = (e) => {
+    const files = Array.from(e.target.files).slice(0, 10);
+    if (files.length === 0) return;
+    const previewUrls = files.map(f => URL.createObjectURL(f));
+    const initialCaption = activeChallenge ? `¡Reto cumplido! 🎲\n${activeChallenge}` : '';
+    setPostDraft({ files, previewUrls, caption: initialCaption, emotion: '', location: '' });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setActiveChallenge(null); 
+  };
+
+  const cancelPost = () => {
+    if (postDraft && postDraft.previewUrls) {
+       postDraft.previewUrls.forEach(url => URL.revokeObjectURL(url));
+    }
+    setPostDraft(null);
+  };
+
+  const publishPost = async () => {
+    if (!currentUserName) { showToast("Ingresa tu nombre para publicar.", "error"); return; }
+    setIsUploading(true);
+
+    try {
+      const uploadPromises = postDraft.files.map(async (file) => {
+        const formData = new FormData(); formData.append("file", file); formData.append("upload_preset", uploadPreset);
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.secure_url) {
+          const urlParts = data.secure_url.split('/upload/');
+          return `${urlParts[0]}/upload/c_fill,g_auto,ar_4:5,w_1080,f_auto,q_auto/${urlParts[1]}`;
+        }
+        return null;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      const validUrls = uploadedUrls.filter(url => url !== null);
+      if (validUrls.length === 0) throw new Error("Fallo al procesar fotos.");
+
+      let finalCaption = (postDraft.caption || '').trim();
+      if (config?.hashtag && !finalCaption.toLowerCase().includes(config.hashtag.toLowerCase())) {
+         finalCaption = finalCaption ? `${finalCaption} ${config.hashtag}` : config.hashtag;
+      }
+
+      const nuevaFoto = JSON.parse(JSON.stringify({
+        id: Date.now().toString(), 
+        urls: validUrls, 
+        autor: currentUserName, 
+        avatar: guestAvatar || '', 
+        mensaje: finalCaption,
+        emotion: postDraft.emotion || "",
+        location: postDraft.location || "",
+        fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        likes: [], 
+        comentarios: [],
+        status: config?.moderacion ? 'pending' : 'approved'
+      }));
+      
+      await setDoc(doc(db, "eventos", eventId, "fotos", nuevaFoto.id), nuevaFoto);
+      
+      if (postDraft && postDraft.previewUrls) {
+         postDraft.previewUrls.forEach(url => URL.revokeObjectURL(url));
+      }
+      setPostDraft(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      if(config?.moderacion) showToast("¡Subida! Se mostrará en pantalla en breve.", "info");
+    } catch (error) { 
+      showToast("Hubo un error al intentar publicar.", "error"); 
+      if (postDraft && postDraft.previewUrls) postDraft.previewUrls.forEach(url => URL.revokeObjectURL(url));
+      setPostDraft(null);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   // 🟢 2. LIMPIEZA PROFUNDA DE LIKES Y COMENTARIOS
   const toggleLike = async (foto) => {
     try {
@@ -8390,7 +8516,6 @@ const GuestCameraView = ({ eventId }) => {
         likesArray = likesArray.filter(name => name !== currentUserName);
       }
       
-      // Magia: JSON.parse(JSON.stringify) aniquila cualquier 'undefined' oculto
       const cleanData = JSON.parse(JSON.stringify({ likes: likesArray }));
       await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), cleanData, { merge: true });
     } catch (error) {
@@ -8878,7 +9003,7 @@ const GuestCameraView = ({ eventId }) => {
                    >
                      <MapPin size={16} />
                    </button>
-                   <input type="text" placeholder="Añadir ubicación..." value={postDraft.location || ''} onChange={e=>setPostDraft({...postDraft, location: e.target.value})} className={`w-full bg-transparent outline-none text-base sm:text-xs font-bold ${tTextMain}`} />
+                   <input type="text" placeholder="Añadir ubicación..." value={postDraft?.location || ''} onChange={e=>setPostDraft({...postDraft, location: e.target.value})} className={`w-full bg-transparent outline-none text-base sm:text-xs font-bold ${tTextMain}`} />
                  </div>
                </div>
 
