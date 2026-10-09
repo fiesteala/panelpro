@@ -1,5 +1,5 @@
 git add .
-git commit -m "invitados pendeinte a confirmados"
+git commit -m "invitados etiquetas"
 git push origin main
 
 .
