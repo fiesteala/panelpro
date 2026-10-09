@@ -1231,25 +1231,13 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         if (data.qrCoverUrl) setQrCover(data.qrCoverUrl);
         else setQrCover(null);
         
-        // 🟢 LÓGICA DE DETECCIÓN BLINDADA
+        // 🟢 LÓGICA DE LOGO Y PORTADA (ESTRICTAMENTE MANUAL)
         if (data.monogramaUrl) {
            setHasManualLogo(true);
-           setEventLogo(data.monogramaUrl);
+           setEventLogo(data.monogramaUrl); // Si subieron logo a mano, lo mostramos
         } else {
            setHasManualLogo(false);
-           if (data.urlInvitacion) {
-              // Limpia el link y asegura que empiece con https://
-              let baseUrl = data.urlInvitacion.trim().split('?')[0];
-              if (!baseUrl.startsWith('http')) baseUrl = 'https://' + baseUrl;
-              const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl; 
-              
-              // El '?v=' fuerza a Chrome a olvidar el bloqueo del caché anterior
-              setEventLogo(`${cleanUrl}/monograma.svg?v=${Date.now()}`); 
-           } else if (data.logoUrl) {
-              setEventLogo(data.logoUrl);
-           } else {
-              setEventLogo(null);
-           }
+           setEventLogo(null); // Si no hay logo manual, mostramos iniciales elegantes
         }
       }
     });
@@ -1965,7 +1953,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       )}
 
-      {/* 🟢 LA MAGIA DE LA PORTADA DEL PASE (REDISEÑO PREMIUM BLINDADO Y MANUAL) */}
+      {/* 🟢 LA MAGIA DE LA PORTADA DEL PASE (REDISEÑO PREMIUM MANUAL) */}
       {qrModal && (
         <div className="fixed inset-0 z-[400] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-300 flex flex-col relative max-h-[95vh]">
@@ -1977,12 +1965,12 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               <div className="flex gap-2 print:hidden items-center">
                  {/* BOTÓN OVERRIDE LOGO (Manual) */}
                  <div className="flex items-center gap-1">
-                     <label className="cursor-pointer text-amber-600 bg-amber-50 dark:bg-amber-500/10 px-3 py-1.5 rounded-full hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center shadow-sm border border-amber-200 dark:border-amber-500/20" title="Subir Logo Manual si la liga falla">
+                     <label className="cursor-pointer text-amber-600 bg-amber-50 dark:bg-amber-500/10 px-3 py-1.5 rounded-full hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center shadow-sm border border-amber-200 dark:border-amber-500/20" title="Subir Logo Manual">
                         {isUploadingLogo ? <RefreshCw size={14} className="animate-spin"/> : <><ImageIcon size={14} className="mr-1"/> Logo</>}
                         <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload}/>
                      </label>
                      {hasManualLogo && (
-                       <button onClick={handleRemoveManualLogo} className="text-rose-500 bg-rose-50 dark:bg-rose-500/10 p-1.5 rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors shadow-sm" title="Quitar logo manual y forzar automático"><Trash size={14}/></button>
+                       <button onClick={handleRemoveManualLogo} className="text-rose-500 bg-rose-50 dark:bg-rose-500/10 p-1.5 rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors shadow-sm" title="Quitar logo manual"><Trash size={14}/></button>
                      )}
                  </div>
 
@@ -2022,22 +2010,15 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   {/* INFORMACIÓN DEL INVITADO Y QR */}
                   <div className="relative z-10 flex flex-col h-full justify-end px-5 pb-6 items-center text-center">
                      
-                     {/* 1. MONOGRAMA O LOGO (CON CONTROL DE ERRORES LIMPIO) */}
+                     {/* 1. ESPACIO PARA LOGO MANUAL (Vacío por defecto) */}
                      <div className="mb-2 h-12 flex items-center justify-center">
-                        {!logoError && eventLogo ? (
+                        {!logoError && eventLogo && (
                           <img 
                              src={eventLogo} 
                              alt="Logo Evento" 
                              className="max-h-full max-w-[120px] object-contain drop-shadow-md" 
-                             onError={() => {
-                                console.warn("Bloqueo o Caché detectado en:", eventLogo);
-                                setLogoError(true);
-                             }}
+                             onError={() => setLogoError(true)}
                           />
-                        ) : (
-                          <div className="w-12 h-12 rounded-full border border-slate-800 flex items-center justify-center text-slate-800 font-editorial font-bold text-xl bg-white/80 backdrop-blur-sm shadow-sm">
-                             {eventName ? eventName.substring(0, 2).toUpperCase() : 'EV'}
-                          </div>
                         )}
                      </div>
 
