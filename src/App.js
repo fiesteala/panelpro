@@ -774,8 +774,9 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           { facingMode: "environment" }, 
           { 
              fps: 15, 
-             aspectRatio: 1.0, 
+             aspectRatio: 1.0, // 🔴 FUERZA LA PROPORCIÓN CUADRADA
              qrbox: function(width, height) {
+                // 🔴 HACE QUE EL ÁREA DE ESCANEO SEA EL 95% DE LA PANTALLA, IMPOSIBLE FALLAR
                 return { width: width * 0.95, height: height * 0.95 };
              }
           },
@@ -786,12 +787,9 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
                 code = parsedUrl.searchParams.get('u') || parsedUrl.searchParams.get('usr') || parsedUrl.searchParams.get('uid') || parsedUrl.searchParams.get('invitado') || code;
              } catch(e) {}
              
-             // 🟢 MEMORIA ORIGINAL DE VELOCIDAD DE LA LUZ
              if (lastScannedCode.current === code) return;
              lastScannedCode.current = code;
-             
-             // 🟢 PAUSA REDUCIDA A 2 SEGUNDOS EXACTOS (2000 ms)
-             setTimeout(() => { lastScannedCode.current = null; }, 2000);
+             setTimeout(() => { lastScannedCode.current = null; }, 3000);
 
              if (code && code !== 'null') processEntry(code);
           },
@@ -813,26 +811,32 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 
   const processEntry = async (code) => {
     try {
+      // 🔴 1. PREGUNTAMOS A LA BASE DE DATOS EL PLAN Y LA HORA EXACTA
       const eventSnap = await getDoc(doc(db, "eventos", ID_DEL_EVENTO));
       if (eventSnap.exists()) {
         const evData = eventSnap.data();
 
+        // 🔴 2. VALIDACIÓN DE TIEMPO (Solo para Kit de Seguridad)
         if (evData.plan === 'security_kit' && evData.horaEvento && evData.fecha) {
+          // Blindaje: Detectamos si la fecha es de Firebase o es un texto (String)
           const eventDate = evData.fecha.toDate ? evData.fecha.toDate() : new Date(evData.fecha + 'T00:00:00');
           
+          // Ajustamos la hora de inicio
           const [hrs, mins] = evData.horaEvento.split(':');
           eventDate.setHours(hrs, mins);
 
           const now = new Date();
           const diffHours = (now - eventDate) / (1000 * 60 * 60);
 
+          // Si pasaron más de 24 horas desde el inicio del evento, bloqueamos
           if (diffHours > 24) {
             setCardData({ status: 'error', title: 'Licencia Expirada', subtitle: 'El acceso de 24 horas ha terminado.' });
-            return; 
+            return; // Cortamos la función aquí, no escanea nada
           }
         }
       }
 
+      // 🔴 3. CONTINÚA EL ESCANEO NORMAL
       const codeLower = code.trim().toLowerCase();
       let foundParentId = null;
       let targetSubId = null;
@@ -911,6 +915,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     } catch(e){}
   };
 
+  // 🔴 CORRECCIÓN: URL DEL PANEL BAULIA
   const getCleanBaseUrl = () => window.location.hostname.includes('localhost') ? window.location.origin : 'https://panel.baulia.com';
 
   const copyStaffLink = () => {
@@ -1018,6 +1023,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 
       <div className="flex flex-col gap-4 flex-1">
         
+        {/* 🔴 INYECCIÓN CSS PARA FORZAR EL VIDEO CUADRADO AL 100% */}
         <style>{`
           #qr-reader-puerta { width: 100% !important; height: 100% !important; border: none !important; position: absolute !important; inset: 0 !important; }
           #qr-reader-puerta video { object-fit: cover !important; width: 100% !important; height: 100% !important; border-radius: 1.5rem !important; }
@@ -1035,6 +1041,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           ) : (
             <>
                <div id="qr-reader-puerta"></div>
+               {/* Marcos y Laser */}
                <div className="absolute inset-0 border-[30px] border-black/40 pointer-events-none z-10"></div>
                <div className="absolute inset-0 border-2 border-emerald-400 m-[30px] pointer-events-none z-10 opacity-70">
                  <div className="w-full h-0.5 bg-emerald-400 shadow-[0_0_15px_#34d399] absolute top-1/2 -translate-y-1/2 opacity-60 animate-pulse"></div>
@@ -1067,6 +1074,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
               </p>
            </div>
            
+           {/* Iconos de fondo */}
            {cardData.status === 'success' && <CheckCircle size={100} className="absolute -right-4 -bottom-4 text-emerald-500/10 pointer-events-none"/>}
            {cardData.status === 'warning' && <AlertTriangle size={100} className="absolute -right-4 -bottom-4 text-amber-500/10 pointer-events-none"/>}
            {cardData.status === 'error' && <X size={100} className="absolute -right-4 -bottom-4 text-rose-500/10 pointer-events-none"/>}
