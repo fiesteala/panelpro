@@ -8313,8 +8313,11 @@ const GuestCameraView = ({ eventId }) => {
       document.body.appendChild(script);
     }
 
-    const unsubConfig = onSnapshot(doc(db, "eventos", eventId, "configuracion", "galeria"), (docSnap) => {
-      if (docSnap.exists()) setConfig(docSnap.data());
+    const unsubConfig = onSnapshot(doc(db, "eventos", eventId), (docSnap) => {
+      if (docSnap.exists()) {
+         const data = docSnap.data();
+         if (data.galeriaConfig) setConfig(data.galeriaConfig);
+      }
     });
 
     const unsubFotos = onSnapshot(collection(db, "eventos", eventId, "fotos"), (snap) => {
@@ -8516,22 +8519,18 @@ const GuestCameraView = ({ eventId }) => {
 
   const toggleLike = async (foto) => {
     if (!currentUserName) { showToast("Por favor, ingresa tu nombre para interactuar.", "error"); return; }
-    
-    // Convertir de forma segura para no perder el formato
     let likesArray = Array.isArray(foto.likes) ? [...foto.likes] : [];
     const isLiking = !likesArray.includes(currentUserName);
     
     if (isLiking) {
       likesArray.push(currentUserName);
       const coverUrl = foto.urls ? foto.urls[0] : (foto.url || '');
-      // El tercer parámetro 'foto.id' es la clave que faltaba enlazar correctamente
       notifySocial('like_foto', foto.autor || 'Anónimo', String(foto.id), '', coverUrl);
     } else {
       likesArray = likesArray.filter(name => name !== currentUserName);
     }
-    
-    // Se guarda forzosamente bajo el ID correcto de la foto
-    await updateDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { likes: likesArray });
+    // Usamos setDoc como en tu código original para evitar errores de importación
+    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { ...foto, likes: likesArray });
   };
 
   const toggleCommentLike = async (foto, isReply = false, commentId, replyId = null) => {
@@ -8563,7 +8562,7 @@ const GuestCameraView = ({ eventId }) => {
         replies[rIndex].likes = likes;
       }
     }
-    await updateDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments });
+    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { ...foto, comentarios: updatedComments });
   };
 
   const handleAddComment = async () => {
@@ -8574,10 +8573,7 @@ const GuestCameraView = ({ eventId }) => {
     if (!replyingTo && config?.hashtag && !finalComment.toLowerCase().includes(config.hashtag.toLowerCase())) finalComment += ` ${config.hashtag}`;
 
     let updatedComments = Array.isArray(foto.comentarios) ? [...foto.comentarios] : (foto.comentarios ? Object.values(foto.comentarios) : []);
-    
-    // Generador de ID robusto para el comentario
-    const newCommentId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
-    const newObj = { id: newCommentId, autor: currentUserName, avatar: guestAvatar, texto: finalComment, likes: [] };
+    const newObj = { id: Date.now().toString(), autor: currentUserName, avatar: guestAvatar, texto: finalComment, likes: [] };
     const coverUrl = foto.urls ? foto.urls[0] : (foto.url || '');
 
     if (replyingTo) {
@@ -8593,7 +8589,7 @@ const GuestCameraView = ({ eventId }) => {
       notifySocial('comment_foto', foto.autor || 'Anónimo', String(foto.id), finalComment, coverUrl); 
     }
     
-    await updateDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { comentarios: updatedComments });
+    await setDoc(doc(db, "eventos", eventId, "fotos", String(foto.id)), { ...foto, comentarios: updatedComments });
     setCommentText(''); setReplyingTo(null);
   };
 
@@ -9145,8 +9141,11 @@ const GuestProyectorView = ({ eventId }) => {
 
   // 🔴 BLINDAJE: Ahora todas las consultas apuntan directo a eventId
   useEffect(() => {
-    const unsubConfig = onSnapshot(doc(db, "eventos", eventId, "configuracion", "galeria"), (docSnap) => {
-      if (docSnap.exists()) setConfig(docSnap.data());
+    const unsubConfig = onSnapshot(doc(db, "eventos", eventId), (docSnap) => {
+      if (docSnap.exists()) {
+         const data = docSnap.data();
+         if (data.galeriaConfig) setConfig(data.galeriaConfig);
+      }
     });
 
     const unsubFotos = onSnapshot(collection(db, "eventos", eventId, "fotos"), (snap) => {
