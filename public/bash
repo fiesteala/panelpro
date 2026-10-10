@@ -1,5 +1,5 @@
 git add .
-git commit -m "funcion arrastrar mesas"
+git commit -m "interruptor separador"
 git push origin main
 
 .

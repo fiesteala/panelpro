@@ -2599,11 +2599,12 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
    const handleDragStart = (e, guestId) => { 
      e.dataTransfer.effectAllowed = 'move';
      e.dataTransfer.setData('text/plain', String(guestId));
+     e.dataTransfer.setData('guestId', String(guestId)); // Para Chrome/Firefox
      setGuestSeleccionado(null); 
    };
    const handleDrop = (e, targetTableId) => { 
      e.preventDefault(); 
-     const guestId = e.dataTransfer.getData('text/plain');
+     const guestId = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('guestId');
      if(guestId) moverInvitado(guestId, targetTableId); 
    };
    const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
@@ -2827,8 +2828,8 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         </div>
         
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-           {/* 🔴 NUEVO BOTÓN MODO SEPARADOR AQUÍ */}
-           <button onClick={() => setIsSplitMode(!isSplitMode)} className={`flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 rounded-xl text-xs uppercase tracking-widest font-bold transition-all shadow-sm border ${isSplitMode ? 'bg-pink-500 text-white border-pink-600 shadow-[0_0_15px_rgba(236,72,153,0.4)]' : 'bg-white dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5'}`}>
+           {/* 🔴 NUEVO BOTÓN MODO SEPARADOR EN LA BARRA SUPERIOR (OPCIÓN 2) */}
+           <button onClick={() => setIsSplitMode(!isSplitMode)} className={`flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm border ${isSplitMode ? 'bg-amber-500 text-slate-900 border-amber-600 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white dark:bg-[#111] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5'}`}>
               <Users size={16} className="mr-2" /> Modo Separador: {isSplitMode ? 'ON' : 'OFF'}
            </button>
 
@@ -2868,8 +2869,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                 key={g.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, g.id)}
-                // 🔴 USAMOS ONPOINTERDOWN PARA NO ROMPER SAFARI
-                onPointerDown={(e) => { e.stopPropagation(); handleGuestClick(g); }}
+                onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
                 className={`px-3 py-2 lg:p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all shadow-sm w-auto lg:w-full flex-grow-0 ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 border-indigo-700 dark:border-amber-400 text-white dark:text-slate-900 transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'}`}
               >
                 <div className="flex items-center truncate max-w-[140px] lg:max-w-none">
@@ -2942,8 +2942,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                           key={g.id} 
                           draggable
                           onDragStart={(e) => handleDragStart(e, g.id)}
-                          // 🔴 USAMOS ONPOINTERDOWN PARA NO ROMPER SAFARI
-                          onPointerDown={(e) => { e.stopPropagation(); handleGuestClick(g); }}
+                          onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
                           className={`text-[9px] lg:text-[10px] px-2.5 py-1.5 rounded-lg font-bold truncate flex items-center cursor-pointer lg:cursor-grab shadow-sm border transition-colors max-w-full ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-700 dark:border-amber-400' : 'bg-white dark:bg-[#0a0a0a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-indigo-300'}`}
                         >
                           <span className="truncate">{g.name}</span> <span className="ml-1.5 opacity-50 font-black shrink-0">({g.passes})</span>
