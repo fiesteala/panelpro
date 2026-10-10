@@ -1,5 +1,5 @@
 git add .
-git commit -m "invitados etiquetas"
+git commit -m "notificacion pases extra"
 git push origin main
 
 .

@@ -7386,6 +7386,55 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const headerRef = useRef(null); 
   const [showEventSwitcher, setShowEventSwitcher] = useState(false);
+  const [extraPassModal, setExtraPassModal] = useState(null);
+
+  const handleAprobarPases = async () => {
+    try {
+      const guestRef = doc(db, "eventos", ID_DEL_EVENTO, "invitados", extraPassModal.id);
+      const nuevosPases = extraPassModal.passes + extraPassModal.extraRequested;
+      const subGuestsArray = extraPassModal.subGuests || [];
+      const nuevosOriginales = extraPassModal.originalPasses ? extraPassModal.originalPasses + extraPassModal.extraRequested : nuevosPases;
+      
+      const faltantes = nuevosPases - subGuestsArray.length;
+      const nuevosSubGuests = [...subGuestsArray];
+      for (let i=0; i<faltantes; i++) {
+          nuevosSubGuests.push({
+              id: `usr_extra_${Date.now()}_${i}`,
+              name: `Acompañante de ${extraPassModal.name}`,
+              isChild: false,
+              entered: false
+          });
+      }
+
+      await updateDoc(guestRef, { 
+         passes: nuevosPases, 
+         originalPasses: nuevosOriginales,
+         extraRequested: 0,
+         subGuests: nuevosSubGuests
+      });
+      
+      const phone = extraPassModal.phone ? extraPassModal.phone.replace(/\D/g,'') : '';
+      if (phone) {
+          const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
+          const link = `${baseDomain}/${ID_DEL_EVENTO}?u=${extraPassModal.id}`;
+          const msg = `¡Hola *${extraPassModal.name}*! Te confirmamos que hemos aprobado tus pases extra. Ahora tienes *${nuevosPases} lugares* reservados.\n\nPuedes ver tu invitación y pases actualizados aquí:\n${link}`;
+          window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+      }
+      setExtraPassModal(null);
+    } catch(e) {
+      console.error(e);
+    }
+  };
+
+  const handleRechazarPases = async () => {
+    try {
+      const guestRef = doc(db, "eventos", ID_DEL_EVENTO, "invitados", extraPassModal.id);
+      await updateDoc(guestRef, { extraRequested: 0 });
+      setExtraPassModal(null);
+    } catch(e) {
+      console.error(e);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -7544,6 +7593,13 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
                         `} 
                         onClick={(e) => { 
                           e.stopPropagation();
+                          if (alert.id.startsWith('ext_')) {
+                              const guestId = alert.id.replace('ext_', '');
+                              const guest = data?.guests?.find(g => g.id === guestId);
+                              if (guest) setExtraPassModal(guest);
+                              setShowBellMenu(false);
+                              return;
+                          }
                           if(markAsRead && !alert.isDynamic) markAsRead(alert.id); 
                           if(alert.tab) { handleNavigate(alert.tab); } else { setShowBellMenu(false); }
                         }}
@@ -7610,6 +7666,28 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
 
         </div>
       </header>
+
+      {extraPassModal && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-transparent dark:border-white/10">
+            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-500/20 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+              <Users size={32} />
+            </div>
+            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2 font-editorial">Solicitud de Pases Extra</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+              <b>{extraPassModal.name}</b> está solicitando <b>+{extraPassModal.extraRequested}</b> pases adicionales.<br/><br/>Si apruebas, su invitación se actualizará y podrás avisarle por WhatsApp al instante.
+            </p>
+            <div className="flex space-x-3">
+              <button onClick={handleRechazarPases} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors text-[10px] uppercase tracking-widest">
+                Rechazar
+              </button>
+              <button onClick={handleAprobarPases} className="flex-1 py-3.5 bg-amber-500 text-slate-900 rounded-xl font-black shadow-lg hover:bg-amber-400 transition-transform active:scale-95 text-[10px] uppercase tracking-widest">
+                Aprobar Pases
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showEventSwitcher && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
