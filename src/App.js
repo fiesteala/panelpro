@@ -2549,8 +2549,10 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
               });
               const maxHueco = Math.max(...mesasRestantes, 0);
 
-              setAutoAssignConflict({ guest, maxHueco });
-              setSplitAmount(1);
+              const minSplit = Math.max(1, Number(guest.passes) - maxHueco);
+
+              setAutoAssignConflict({ guest, maxHueco, minSplit });
+              setSplitAmount(minSplit);
               
               if (promesas.length > 0) await Promise.all(promesas); // Guarda progreso hasta el choque
               return; // Detenemos el loop
@@ -2760,8 +2762,10 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       // 🔴 AQUÍ APLICAMOS TU IDEA: MODO SEPARADOR ON/OFF
       if ((isSplitMode && pasesDelInvitado > 1) || isFull) {
            if (pasesDelInvitado > 1 && (!isToTable || (Number(table.capacity) - usedChairs) >= 1)) {
-               setGuestSplitPrompt({ guest, targetTableId, table, usedChairs, isFull });
-               setSplitAmount(1); // Por defecto separar 1
+               // Calculamos matemáticamente el mínimo requerido
+               const minSplit = isFull ? Math.max(1, pasesDelInvitado - (Number(table.capacity) - usedChairs)) : 1;
+               setGuestSplitPrompt({ guest, targetTableId, table, usedChairs, isFull, minSplit });
+               setSplitAmount(minSplit); // Por defecto separamos el mínimo
                setGuestSeleccionado(null);
                return;
            } else if (isFull) {
@@ -3265,7 +3269,10 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
             
             {/* CONTROLES PARA ELEGIR CUÁNTOS SEPARAR */}
             <div className="flex items-center justify-center gap-6 mb-6 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/10">
-                <button onClick={() => setSplitAmount(Math.max(1, splitAmount - 1))} className="w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shadow-sm">-</button>
+                <button 
+                  onClick={() => setSplitAmount(Math.max(guestSplitPrompt.minSplit || 1, splitAmount - 1))} 
+                  disabled={splitAmount <= (guestSplitPrompt.minSplit || 1)}
+                  className={`w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 font-bold text-xl transition-colors shadow-sm ${splitAmount <= (guestSplitPrompt.minSplit || 1) ? 'text-slate-300 dark:text-slate-600 opacity-50 cursor-not-allowed' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'}`}>-</button>
                 <span className="text-3xl font-black text-slate-900 dark:text-white">{splitAmount}</span>
                 <button onClick={() => setSplitAmount(Math.min(Number(guestSplitPrompt.guest.passes) - 1, splitAmount + 1))} className="w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shadow-sm">+</button>
             </div>
@@ -3295,7 +3302,10 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
             </p>
             
             <div className="flex items-center justify-center gap-6 mb-6 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/10">
-                <button onClick={() => setSplitAmount(Math.max(1, splitAmount - 1))} className="w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shadow-sm">-</button>
+                <button 
+                  onClick={() => setSplitAmount(Math.max(autoAssignConflict.minSplit || 1, splitAmount - 1))} 
+                  disabled={splitAmount <= (autoAssignConflict.minSplit || 1)}
+                  className={`w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 font-bold text-xl transition-colors shadow-sm ${splitAmount <= (autoAssignConflict.minSplit || 1) ? 'text-slate-300 dark:text-slate-600 opacity-50 cursor-not-allowed' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'}`}>-</button>
                 <span className="text-3xl font-black text-slate-900 dark:text-white">{splitAmount}</span>
                 <button onClick={() => setSplitAmount(Math.min(Number(autoAssignConflict.guest.passes) - 1, splitAmount + 1))} className="w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shadow-sm">+</button>
             </div>
