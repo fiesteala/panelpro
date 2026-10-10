@@ -7400,7 +7400,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
       for (let i=0; i<faltantes; i++) {
           nuevosSubGuests.push({
               id: `usr_extra_${Date.now()}_${i}`,
-              name: `Acompañante de ${extraPassModal.name}`,
+              name: '', // Lo dejamos en blanco para obligar al usuario a rellenarlo
               isChild: false,
               entered: false
           });
@@ -7410,14 +7410,15 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
          passes: nuevosPases, 
          originalPasses: nuevosOriginales,
          extraRequested: 0,
-         subGuests: nuevosSubGuests
+         subGuests: nuevosSubGuests,
+         status: 'pendiente' // Regresamos la invitación a modo edición
       });
       
       const phone = extraPassModal.phone ? extraPassModal.phone.replace(/\D/g,'') : '';
       if (phone) {
           const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
           const link = `${baseDomain}/${ID_DEL_EVENTO}?u=${extraPassModal.id}`;
-          const msg = `¡Hola *${extraPassModal.name}*! Te confirmamos que hemos aprobado tus pases extra. Ahora tienes *${nuevosPases} lugares* reservados.\n\nPuedes ver tu invitación y pases actualizados aquí:\n${link}`;
+          const msg = `¡Hola *${extraPassModal.name}*! Hemos aprobado tus pases extra. Ahora tienes *${nuevosPases} lugares* reservados.\n\nHemos habilitado tu invitación nuevamente para que registres los nombres de tus nuevos acompañantes. Por favor entra aquí y completa tu registro:\n${link}`;
           window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
       }
       setExtraPassModal(null);
