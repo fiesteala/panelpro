@@ -7380,7 +7380,7 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
 // ==========================================
 // --- COMPONENTE: CABECERA INTELIGENTE ---
 // ==========================================
-const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, bellAlerts, setBellAlerts, markAsRead, cycleTheme, themeSetting, authData, switchEvent, isSuperAdminMode, eventName, eventPlan }) => {
+const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, bellAlerts, setBellAlerts, markAsRead, cycleTheme, themeSetting, authData, switchEvent, isSuperAdminMode, eventName, eventPlan, urlInvitacion }) => {
   const [showResults, setShowResults] = useState(false);
   const [showBellMenu, setShowBellMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -7435,10 +7435,6 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
     
     if (phone && phone.length >= 10) {
         let linkPersonalizado = '';
-        // Obtenemos la información del evento actual correctamente desde authData
-        const eventoActual = authData?.availableEvents?.find(e => e.eventId === authData?.eventId);
-        const urlInvitacion = eventoActual?.urlInvitacion;
-        
         if (urlInvitacion) {
           const separator = urlInvitacion.includes('?') ? '&' : '?';
           linkPersonalizado = `${urlInvitacion}${separator}u=${whatsappPromptModal.id}`;
