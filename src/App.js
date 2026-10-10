@@ -14565,7 +14565,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         <div className={`${impersonating ? 'pt-7' : ''} transition-all`}>
-          <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} authData={authData} switchEvent={switchEvent} isSuperAdminMode={isSuperAdminMode} eventName={currentEventName} eventPlan={currentEventPlan} />
+          <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} authData={authData} switchEvent={switchEvent} isSuperAdminMode={isSuperAdminMode} eventName={currentEventName} eventPlan={currentEventPlan} urlInvitacion={activeEventData?.urlInvitacion} />
         </div>
         
         <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-5 lg:p-6 print:p-0 print:overflow-visible custom-scrollbar relative z-10">
