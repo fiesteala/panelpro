@@ -2348,6 +2348,9 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
   const [guestSeleccionado, setGuestSeleccionado] = useState(null);
   const [smartAssign, setSmartAssign] = useState(null);
   const [tableToEdit, setTableToEdit] = useState(null);
+  // 🔴 NUEVOS ESTADOS PARA TU IDEA: MODO SEPARADOR
+  const [isSplitMode, setIsSplitMode] = useState(false);
+  const [splitAmount, setSplitAmount] = useState(1);
   const [guestSplitPrompt, setGuestSplitPrompt] = useState(null);
   const [configActual, setCurrentConfig] = useState({
     tipo: 'redonda', 
@@ -2592,9 +2595,10 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       if(addNotification) addNotification('Mesas Eliminadas', 'Se borraron todas las mesas de la base de datos.', 'warning');
    };
 
+   // 🔴 NUEVA LÓGICA DE ARRASTRE A PRUEBA DE BALAS
    const handleDragStart = (e, guestId) => { 
      e.dataTransfer.effectAllowed = 'move';
-     e.dataTransfer.setData('text/plain', guestId);
+     e.dataTransfer.setData('text/plain', String(guestId));
      setGuestSeleccionado(null); 
    };
    const handleDrop = (e, targetTableId) => { 
@@ -2602,10 +2606,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
      const guestId = e.dataTransfer.getData('text/plain');
      if(guestId) moverInvitado(guestId, targetTableId); 
    };
-   const handleDragOver = (e) => { 
-     e.preventDefault(); 
-     e.dataTransfer.dropEffect = 'move'; 
-   };
+   const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
 
    const moverInvitado = async (guestId, targetTableId) => {
       const guest = safeGuests.find(g => String(g.id) === String(guestId));
@@ -2624,45 +2625,54 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
            table = safeTables.find(t => String(t.id) === String(targetTableId));
            if(!table) return;
            usedChairs = safeGuests.filter(g => String(g.tableId) === String(targetTableId)).reduce((sum, g) => sum + (Number(g.passes) || 1), 0);
-           
-           if (usedChairs + pasesDelInvitado > Number(table.capacity)) {
-               if (pasesDelInvitado > 1 && (Number(table.capacity) - usedChairs) >= 1) {
-                   setGuestSplitPrompt({ guest, targetTableId, table, usedChairs });
-                   setGuestSeleccionado(null);
-                   return;
-               } else {
-                   if(addNotification) addNotification('Mesa Llena', `No hay sillas suficientes en ${table.name}.`, 'warning');
-                   setGuestSeleccionado(null);
-                   return;
-               }
+      }
+
+      const isFull = isToTable && (usedChairs + pasesDelInvitado > Number(table.capacity));
+
+      // 🔴 AQUÍ APLICAMOS TU IDEA: MODO SEPARADOR ON/OFF
+      if ((isSplitMode && pasesDelInvitado > 1) || isFull) {
+           if (pasesDelInvitado > 1 && (!isToTable || (Number(table.capacity) - usedChairs) >= 1)) {
+               setGuestSplitPrompt({ guest, targetTableId, table, usedChairs, isFull });
+               setSplitAmount(1); // Por defecto separar 1
+               setGuestSeleccionado(null);
+               return;
+           } else if (isFull) {
+               if(addNotification) addNotification('Mesa Llena', `No hay sillas suficientes en ${table.name}.`, 'warning');
+               setGuestSeleccionado(null);
+               return;
            }
       }
 
+      // Si no hace falta separar (o el modo está apagado y hay espacio), se mueven todos
       try {
         await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), { ...guest, tableId: targetTableId });
       } catch(e) { console.error(e); }
       setGuestSeleccionado(null);
    };
 
-   const handleSplitChoice = async (mode) => {
+   const handleSplitChoice = async (amount) => {
          const { guest, targetTableId, table, usedChairs } = guestSplitPrompt;
           
-         if (mode === 'one') {
-               if (table && usedChairs + 1 > Number(table.capacity)) {
-                     if(addNotification) addNotification('Mesa Llena', `No hay sillas en ${table.name}.`, 'warning');
-               } else {
-                     const newGuestId = Date.now().toString() + Math.random().toString(36).substring(2,5);
-                     const newGuest = { ...guest, id: newGuestId, name: `${guest.name} (Separado)`, passes: 1, childrenPasses: 0, tableId: targetTableId };
-                     const subG = Array.isArray(guest.subGuests) ? guest.subGuests : [];
-                     const movingSubGuest = subG.length > 0 ? [subG[subG.length - 1]] : [];
-                     const remainingSubGuests = subG.length > 0 ? subG.slice(0, -1) : [];
+         if (amount === 'all') {
+              await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), { ...guest, tableId: targetTableId });
+         } else {
+              // Validamos que el número seleccionado quepa en la mesa
+              if (table && usedChairs + amount > Number(table.capacity)) {
+                  if(addNotification) addNotification('Mesa Llena', `Solo quedan ${Number(table.capacity) - usedChairs} sillas en ${table.name}.`, 'warning');
+              } else {
+                  const newGuestId = Date.now().toString() + Math.random().toString(36).substring(2,5);
+                  const newGuest = { ...guest, id: newGuestId, name: `${guest.name} (Separado)`, passes: amount, childrenPasses: 0, tableId: targetTableId };
+                  
+                  const subG = Array.isArray(guest.subGuests) ? guest.subGuests : [];
+                  const movingSubGuest = subG.length > 0 ? subG.slice(-amount) : [];
+                  const remainingSubGuests = subG.length > 0 ? subG.slice(0, subG.length - amount) : [];
 
-                     newGuest.subGuests = movingSubGuest;
-                     const updatedGuest = { ...guest, passes: Number(guest.passes) - 1, subGuests: remainingSubGuests };
+                  newGuest.subGuests = movingSubGuest;
+                  const updatedGuest = { ...guest, passes: Number(guest.passes) - amount, subGuests: remainingSubGuests };
               
-                     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), updatedGuest);
-                     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(newGuestId)), newGuest);
-               }
+                  await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), updatedGuest);
+                  await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(newGuestId)), newGuest);
+              }
          }
          setGuestSplitPrompt(null);
    };
@@ -2817,6 +2827,11 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         </div>
         
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+           {/* 🔴 NUEVO BOTÓN MODO SEPARADOR AQUÍ */}
+           <button onClick={() => setIsSplitMode(!isSplitMode)} className={`flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 rounded-xl text-xs uppercase tracking-widest font-bold transition-all shadow-sm border ${isSplitMode ? 'bg-pink-500 text-white border-pink-600 shadow-[0_0_15px_rgba(236,72,153,0.4)]' : 'bg-white dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5'}`}>
+              <Users size={16} className="mr-2" /> Modo Separador: {isSplitMode ? 'ON' : 'OFF'}
+           </button>
+
            <button onClick={handleAutoAssign} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-sm font-bold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors shadow-sm">
               <Wand2 size={16} className="mr-2" /> Auto-Acomodar
            </button>
@@ -2853,7 +2868,8 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                 key={g.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, g.id)}
-                onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
+                // 🔴 USAMOS ONPOINTERDOWN PARA NO ROMPER SAFARI
+                onPointerDown={(e) => { e.stopPropagation(); handleGuestClick(g); }}
                 className={`px-3 py-2 lg:p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all shadow-sm w-auto lg:w-full flex-grow-0 ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 border-indigo-700 dark:border-amber-400 text-white dark:text-slate-900 transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'}`}
               >
                 <div className="flex items-center truncate max-w-[140px] lg:max-w-none">
@@ -2883,9 +2899,9 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5">
               {safeTables.map(table => {
-                const assignedGuests = safeGuests.filter(g => g.tableId === table.id);
-                const usedChairs = assignedGuests.reduce((sum, g) => sum + g.passes, 0);
-                const isFull = usedChairs >= table.capacity;
+                const assignedGuests = safeGuests.filter(g => String(g.tableId) === String(table.id));
+                const usedChairs = assignedGuests.reduce((sum, g) => sum + (Number(g.passes) || 1), 0);
+                const isFull = usedChairs >= Number(table.capacity);
 
                 return (
                   <div 
@@ -2926,7 +2942,8 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                           key={g.id} 
                           draggable
                           onDragStart={(e) => handleDragStart(e, g.id)}
-                          onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
+                          // 🔴 USAMOS ONPOINTERDOWN PARA NO ROMPER SAFARI
+                          onPointerDown={(e) => { e.stopPropagation(); handleGuestClick(g); }}
                           className={`text-[9px] lg:text-[10px] px-2.5 py-1.5 rounded-lg font-bold truncate flex items-center cursor-pointer lg:cursor-grab shadow-sm border transition-colors max-w-full ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-700 dark:border-amber-400' : 'bg-white dark:bg-[#0a0a0a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-indigo-300'}`}
                         >
                           <span className="truncate">{g.name}</span> <span className="ml-1.5 opacity-50 font-black shrink-0">({g.passes})</span>
@@ -3099,310 +3116,39 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
           </div>
         </div>
       )}
-    </div>
-  );
-};
 
-const TABLE_TEMPLATES = [
-  { type: 'round_table', name: 'Mesa Redonda', width: 1.5, height: 1.5, capacity: 10, desc: 'Ø 1.5m' },
-  { type: 'square_table', name: 'Mesa Cuadrada', width: 1.5, height: 1.5, capacity: 12, desc: '1.5x1.5m' },
-  { type: 'rect_table', name: 'Tablón', width: 2.44, height: 0.7, capacity: 10, desc: '2.4x0.7m' },
-  { type: 'ovalada', name: 'Mesa Ovalada', width: 3.05, height: 1.22, capacity: 12, desc: '3.0x1.2m' },
-  { type: 'serpentina', name: 'Serpentina', width: 1.8, height: 1.8, capacity: 10, desc: 'Curva' }
-];
+      {/* 🔴 NUEVO MODAL: SEPARAR FAMILIA (Con selector de cantidad) */}
+      {guestSplitPrompt && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden p-8 text-center shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95">
+            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-500/20 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner"><Users size={32} /></div>
+            <h3 className="font-editorial font-bold text-2xl text-slate-900 dark:text-white mb-2">
+              {guestSplitPrompt.isFull ? 'Mesa sin espacio' : 'Separar Familia'}
+            </h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-4 text-sm leading-relaxed">
+              La familia <b>{guestSplitPrompt.guest.name}</b> tiene {guestSplitPrompt.guest.passes} pases.
+              {guestSplitPrompt.isFull ? ` A la ${guestSplitPrompt.table?.name || 'mesa'} solo le quedan ${Number(guestSplitPrompt.table?.capacity || 0) - guestSplitPrompt.usedChairs} sillas libres.` : ''}
+              <br/><br/>¿Cuántos pases deseas separar y mover a esta mesa?
+            </p>
+            
+            {/* CONTROLES PARA ELEGIR CUÁNTOS SEPARAR */}
+            <div className="flex items-center justify-center gap-6 mb-6 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/10">
+                <button onClick={() => setSplitAmount(Math.max(1, splitAmount - 1))} className="w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shadow-sm">-</button>
+                <span className="text-3xl font-black text-slate-900 dark:text-white">{splitAmount}</span>
+                <button onClick={() => setSplitAmount(Math.min(Number(guestSplitPrompt.guest.passes) - 1, splitAmount + 1))} className="w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shadow-sm">+</button>
+            </div>
 
-const STRUCTURAL_CATALOG = [
-  { type: 'dance_floor', name: 'Pista Baile', width: 5, height: 5, shape: 'rounded-none', color: 'border-fuchsia-400 text-fuchsia-900', texture: 'dance', desc: '5x5m' },
-  { type: 'stage', name: 'Escenario', width: 6, height: 3, shape: 'rounded-sm', color: 'border-amber-900 text-amber-50', texture: 'wood', desc: '6x3m' },
-  { type: 'bar', name: 'Barra', width: 3, height: 0.8, shape: 'rounded-sm', color: 'border-zinc-800 text-white', texture: 'marble', desc: '3x0.8m' },
-  { type: 'garden', name: 'Jardín', width: 6, height: 4, shape: 'rounded-xl', color: 'border-green-600 text-green-900', texture: 'grass', desc: 'Área Verde' },
-  { type: 'pool', name: 'Alberca', width: 6, height: 4, shape: 'rounded-lg', color: 'border-cyan-500 text-cyan-900', texture: 'water', desc: 'Piscina' }
-];
-
-const ROOM_AREAS_CATALOG = [
-  { type: 'room_area', shapeType: 'rect', name: 'Área Cuadrada', width: 8, height: 8, isRoomArea: true, mode: 'add' },
-  { type: 'room_area', shapeType: 'ellipse', name: 'Área Circular', width: 8, height: 8, isRoomArea: true, mode: 'add' },
-  { type: 'room_area', shapeType: 'triangle', name: 'Área Triangular', width: 8, height: 8, isRoomArea: true, triangleCorner: 0, mode: 'add' }, 
-  { type: 'room_area', shapeType: 'polygon', name: 'Polígono Libre', width: 8, height: 8, isRoomArea: true, sides: 5, mode: 'add' },
-  // NUEVOS EXTERIORES COMO ÁREAS (Modo Overlay)
-  { type: 'room_area', shapeType: 'rect', name: 'Jardín', width: 10, height: 10, isRoomArea: true, mode: 'overlay', texture: 'grass' },
-  { type: 'room_area', shapeType: 'rect', name: 'Terraza', width: 10, height: 6, isRoomArea: true, mode: 'overlay', texture: 'wood' },
-  { type: 'room_area', shapeType: 'pool', name: 'Alberca', width: 8, height: 4, isRoomArea: true, mode: 'overlay', texture: 'water' }
-];
-
-const getShapeClipPath = (el) => {
-  if (el.shapeType === 'ellipse') return 'ellipse(50% 50% at 50% 50%)';
-  if (el.shapeType === 'triangle') {
-    const c = el.triangleCorner || 0;
-    if (c === 0) return 'polygon(0% 0%, 0% 100%, 100% 100%)'; 
-    if (c === 1) return 'polygon(0% 100%, 100% 100%, 100% 0%)'; 
-    if (c === 2) return 'polygon(0% 0%, 100% 0%, 100% 100%)'; 
-    if (c === 3) return 'polygon(0% 0%, 100% 0%, 0% 100%)'; 
-  }
-  if (el.shapeType === 'polygon') {
-    const sides = el.sides || 5;
-    let pts = [];
-    for(let i=0; i<sides; i++){
-      const angle = (i * 2 * Math.PI / sides) - Math.PI / 2;
-      pts.push(`${(50 + 50 * Math.cos(angle)).toFixed(1)}% ${(50 + 50 * Math.sin(angle)).toFixed(1)}%`);
-    }
-    return `polygon(${pts.join(', ')})`;
-  }
-  return 'none';
-};
-
-const renderSVGShape = (el, scale, minX, minY, props) => {
-  // ---> DIBUJO EXACTO DE LA FORMA DEL LÁPIZ EN SVG <---
-  if (el.shapeType === 'custom_polygon' && el.absPoints) {
-      const pts = el.absPoints.map(p => `${(p.x - minX) * scale},${(p.y - minY) * scale}`).join(' ');
-      // Para trazo libre no aplicamos rotación externa, la rotación ya está en los puntos absolutos
-      return <polygon key={el.id} points={pts} {...props} />;
-  }
-
-  // Cálculo para formas regulares predefinidas (requieren rotación central)
-  const w = el.width * scale;
-  const h = el.height * scale;
-  const x = (el.x - minX) * scale;
-  const y = (el.y - minY) * scale;
-  const tRegular = `rotate(${el.rotation || 0} ${x + w/2} ${y + h/2})`;
-
-  if (el.shapeType === 'ellipse') {
-    return <ellipse key={el.id} cx={x + w/2} cy={y + h/2} rx={w/2} ry={h/2} transform={tRegular} {...props} />;
-  }
-  if (el.shapeType === 'triangle') {
-    let points = '';
-    const corner = el.triangleCorner || 0; 
-    if (corner === 0) points = `${x},${y} ${x},${y + h} ${x + w},${y + h}`; 
-    else if (corner === 1) points = `${x},${y + h} ${x + w},${y + h} ${x + w},${y}`; 
-    else if (corner === 2) points = `${x},${y} ${x + w},${y} ${x + w},${y + h}`; 
-    else if (corner === 3) points = `${x},${y} ${x + w},${y} ${x},${y + h}`; 
-    return <polygon key={el.id} points={points} transform={tRegular} {...props} />;
-  }
-  // Polígonos regulares SVG
-  if (el.sides && el.sides > 2) {
-    const sides = el.sides;
-    const cx = x + w/2; const cy = y + h/2;
-    const rX = w / 2; const rY = h / 2;
-    let points = [];
-    for (let i = 0; i < sides; i++) {
-      const angle = (i * 2 * Math.PI / sides) - Math.PI / 2;
-      points.push(`${cx + rX * Math.cos(angle)},${cy + rY * Math.sin(angle)}`);
-    }
-    return <polygon key={el.id} points={points.join(' ')} transform={tRegular} {...props} />;
-  }
-  
-  // Fallback final: Rectángulo
-  return <rect key={el.id} x={x} y={y} width={w} height={h} transform={tRegular} {...props} />;
-};
-
-const TableWithChairs = ({ tableData, occupancy, scale, tableGuests = [], searchQuery = '' }) => {
-  const cap = tableData.capacity;
-  const chairSize = 0.45 * scale; 
-  const tipo = tableData.tipo || tableData.type;
-  const config = tableData.configDetalle;
-
-  let wMeters = tableData.width || 1.5;
-  let hMeters = tableData.height || 1.5;
-  let widthT_meters = 0.8; 
-
-  if (tipo === 'rect_table' || tipo === 'tablon') { wMeters = 2.44; hMeters = 0.7; } 
-  else if (tipo === 'ovalada') { wMeters = 3.05; hMeters = 1.22; } 
-  else if (tipo === 'serpentina') { 
-    let arcLength = 2.44;
-    if (config?.modeloSerpentina === 'mod1') { arcLength = 1.58; widthT_meters = 0.75; }
-    if (config?.modeloSerpentina === 'mod2') { arcLength = 2.00; widthT_meters = 0.75; }
-    if (config?.modeloSerpentina === 'mod3') { arcLength = 2.10; widthT_meters = 0.75; }
-    if (config?.modeloSerpentina === 'mod4') { arcLength = 2.44; widthT_meters = 0.90; }
-    wMeters = arcLength / (Math.PI / 2); hMeters = wMeters; 
-  } else if (tipo === 'personalizada' || tipo === 'libre') { 
-    wMeters = config?.libreMedidas?.largo || 2.0; hMeters = config?.libreMedidas?.ancho || 1.0; 
-  }
-
-  const tableW = wMeters * scale;
-  const tableH = hMeters * scale;
-  const padding = 0.08 * scale;
-  const chairs = [];
-
-  const seatAssignments = [];
-  if (tableGuests && tableGuests.length > 0) {
-    tableGuests.forEach(g => {
-      for (let p = 0; p < (g.passes || 1); p++) {
-        seatAssignments.push({ guest: g, label: g.name + ((g.passes || 1) > 1 ? ` (Pase ${p + 1})` : '') });
-      }
-    });
-  }
-
-  for (let i = 0; i < cap; i++) {
-    const isOccupied = i < occupancy;
-    let cx = 0, cy = 0, angleDeg = 0;
-
-    if (tipo === 'round_table' || tipo === 'redonda') {
-      angleDeg = i * (360 / cap);
-      const aRad = angleDeg * (Math.PI / 180);
-      const rX = (tableW / 2) + (chairSize / 2) + padding;
-      const rY = (tableH / 2) + (chairSize / 2) + padding;
-      cx = (tableW / 2) + rX * Math.cos(aRad) - (chairSize / 2);
-      cy = (tableH / 2) + rY * Math.sin(aRad) - (chairSize / 2);
-    } else if (tipo === 'ovalada') {
-      const topCap = config ? config.ladosOvalada.top : 4;
-      const botCap = config ? config.ladosOvalada.bottom : 4;
-      const leftCap = config ? config.ladosOvalada.left : Math.floor((cap - topCap - botCap) / 2);
-      const radius = tableH / 2; const straightW = tableW - tableH; 
-      
-      if (i < topCap) {
-        if (topCap === 1) cx = tableW / 2 - chairSize/2;
-        else cx = radius + ((straightW / (topCap - 1)) * i) - chairSize/2;
-        cy = -(chairSize + padding); angleDeg = 270;
-      } else if (i < topCap + botCap) {
-        const idx = i - topCap;
-        if (botCap === 1) cx = tableW / 2 - chairSize/2;
-        else cx = radius + ((straightW / (botCap - 1)) * idx) - chairSize/2;
-        cy = tableH + padding; angleDeg = 90;
-      } else if (i < topCap + botCap + leftCap) {
-        const idx = i - (topCap + botCap);
-        const aRad = (90 + (180 / (leftCap + 1)) * (idx + 1)) * (Math.PI/180);
-        const R = radius + chairSize/2 + padding;
-        cx = radius + R * Math.cos(aRad) - chairSize/2; cy = radius - R * Math.sin(aRad) - chairSize/2;
-        angleDeg = 360 - (90 + (180 / (leftCap + 1)) * (idx + 1)); 
-      } else {
-        const rightCap = cap - (topCap + botCap + leftCap);
-        const idx = i - (topCap + botCap + leftCap);
-        const aRad = (-90 + (180 / (rightCap + 1)) * (idx + 1)) * (Math.PI/180);
-        const R = radius + chairSize/2 + padding;
-        cx = (tableW - radius) + R * Math.cos(aRad) - chairSize/2; cy = radius - R * Math.sin(aRad) - chairSize/2;
-        angleDeg = 360 - (-90 + (180 / (rightCap + 1)) * (idx + 1)); 
-      }
-    } else if (tipo === 'serpentina') {
-      const extCap = config ? config.ladosSerpentina.ext : Math.ceil(cap/2);
-      const intCap = config ? config.ladosSerpentina.int : Math.floor(cap/2) - 2;
-      const izqCap = config ? config.ladosSerpentina.izq : 1;
-      const widthT = widthT_meters * scale;
-      
-      if (i < extCap) {
-         const aRad = ((90 / (extCap + 1)) * (i + 1)) * (Math.PI/180);
-         const R = tableW + chairSize/2 + padding;
-         cx = R * Math.cos(aRad) - chairSize/2; cy = tableW - R * Math.sin(aRad) - chairSize/2;
-         angleDeg = 360 - ((90 / (extCap + 1)) * (i + 1)); 
-      } else if (i < extCap + intCap) {
-         const idx = i - extCap;
-         let aDeg = 45; 
-         if (intCap > 1) aDeg = 15 + (idx * ((90 - 30) / (intCap - 1)));
-         const aRad = aDeg * (Math.PI/180);
-         const R = tableW - widthT - chairSize/2 - padding;
-         cx = R * Math.cos(aRad) - chairSize/2; cy = tableW - R * Math.sin(aRad) - chairSize/2;
-         angleDeg = 180 - aDeg; 
-      } else if (i < extCap + intCap + izqCap) {
-         cx = -(chairSize + padding); cy = (widthT / 2) - chairSize/2; angleDeg = 180; 
-      } else {
-         cx = tableW - (widthT / 2) - chairSize/2; cy = tableW + padding; angleDeg = 90; 
-      }
-    } else if (tipo === 'square_table' || tipo === 'cuadrada') {
-      const topCap = config?.ladosCuadrada?.top ?? Math.ceil(cap / 4);
-      const botCap = config?.ladosCuadrada?.bottom ?? Math.ceil(cap / 4);
-      const leftCap = config?.ladosCuadrada?.left ?? Math.ceil(cap / 4);
-      
-      if (i < topCap) {
-        cx = ((tableW / (topCap || 1)) * (i + 0.5)) - chairSize/2; cy = -(chairSize + padding); angleDeg = 270;
-      } else if (i < topCap + botCap) {
-        cx = ((tableW / (botCap || 1)) * ((i - topCap) + 0.5)) - chairSize/2; cy = tableH + padding; angleDeg = 90;
-      } else if (i < topCap + botCap + leftCap) {
-        cx = -(chairSize + padding); cy = ((tableH / (leftCap || 1)) * ((i - (topCap + botCap)) + 0.5)) - chairSize/2; angleDeg = 180;
-      } else {
-        const rightCap = cap - topCap - botCap - leftCap;
-        cx = tableW + padding; cy = ((tableH / (rightCap || 1)) * ((i - (topCap + botCap + leftCap)) + 0.5)) - chairSize/2; angleDeg = 0;
-      }
-    } else {
-      // Tablón o Libre
-      const topCap = config?.ladosTablon?.top ?? config?.ladosLibre?.top ?? Math.floor((cap - 2) / 2);
-      const botCap = config?.ladosTablon?.bottom ?? config?.ladosLibre?.bottom ?? Math.ceil((cap - 2) / 2);
-      const leftCap = config?.ladosTablon?.left ?? config?.ladosLibre?.left ?? 1;
-      
-      if (i < topCap) {
-        cx = ((tableW / (topCap || 1)) * (i + 0.5)) - chairSize/2; cy = -(chairSize + padding); angleDeg = 270;
-      } else if (i < topCap + botCap) {
-        cx = ((tableW / (botCap || 1)) * ((i - topCap) + 0.5)) - chairSize/2; cy = tableH + padding; angleDeg = 90;
-      } else if (i < topCap + botCap + leftCap) {
-        cx = -(chairSize + padding); cy = ((tableH / (leftCap || 1)) * ((i - (topCap + botCap)) + 0.5)) - chairSize/2; angleDeg = 180;
-      } else {
-        const rightCap = cap - topCap - botCap - leftCap;
-        cx = tableW + padding; cy = ((tableH / (rightCap || 1)) * ((i - (topCap + botCap + leftCap)) + 0.5)) - chairSize/2; angleDeg = 0;
-      }
-    }
-
-    const guestObj = seatAssignments[i];
-    const guestName = guestObj ? guestObj.label : null;
-    const chairGuestId = guestObj ? guestObj.guest.id : null;
-    const totalRotation = angleDeg + (tableData.rotation || 0); 
-    const isMatched = searchQuery && guestName && guestName.toLowerCase().includes(searchQuery.toLowerCase());
-    const isTableMatched = searchQuery && tableData.name && tableData.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const activeSearchClasses = (isMatched || (isTableMatched && isOccupied)) ? 'ring-4 ring-amber-400 ring-offset-2 bg-amber-300 border-amber-600 scale-110 z-50' : (isOccupied ? 'bg-emerald-400 border-emerald-600' : 'bg-slate-100 border-slate-300');
-
-    chairs.push(
-      <div key={i} 
-           draggable={!!chairGuestId}
-           onDragStart={(e) => {
-             if (chairGuestId) {
-               e.dataTransfer.setData('guestId', chairGuestId);
-               e.stopPropagation();
-             }
-           }}
-           className={`group absolute flex items-center justify-center rounded-full border-[1.5px] shadow-sm transition-all duration-300 hover:z-50 ${chairGuestId ? 'cursor-grab pointer-events-auto' : 'pointer-events-none'} ${activeSearchClasses} z-0`} 
-           style={{ left: cx, top: cy, width: chairSize, height: chairSize, transform: `rotate(${angleDeg}deg)` }}>
-         <div className={`absolute w-[45%] h-[115%] right-[-12%] rounded-full shadow-sm transition-colors duration-300 ${isMatched || (isTableMatched && isOccupied) ? 'bg-amber-600' : (isOccupied ? 'bg-emerald-600' : 'bg-slate-300')}`}></div>
-         {isOccupied && guestName && (
-           <div className="absolute hidden group-hover:flex items-center justify-center bg-slate-800/95 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-2xl whitespace-nowrap z-[100] -top-8 pointer-events-none border border-slate-600 animate-in fade-in zoom-in-95 duration-200" style={{ transform: `rotate(-${totalRotation}deg)` }}>
-             {guestName}
-           </div>
-         )}
-      </div>
-    );
-  }
-
-  const matchedNames = [];
-  if (searchQuery) {
-    seatAssignments.forEach(obj => {
-      if (obj.label && obj.label.toLowerCase().includes(searchQuery.toLowerCase()) && !matchedNames.includes(obj.label)) matchedNames.push(obj.label);
-    });
-  }
-
-  let innerContent = null;
-  let shapeClass = 'rounded-sm shadow-lg';
-  let borderClass = 'border-[3px]';
-  let baseColor = 'bg-white border-slate-400 text-slate-800'; 
-
-  if (tipo === 'round_table' || tipo === 'redonda' || tipo === 'ovalada') { shapeClass = 'rounded-[999px] shadow-lg'; } 
-  else if (tipo === 'serpentina') {
-    shapeClass = 'rounded-none'; borderClass = 'border-0'; baseColor = 'bg-transparent text-slate-800'; 
-    const widthT = widthT_meters * scale;
-    const innerR = tableW - widthT;
-    innerContent = (
-      <svg className="absolute inset-0 overflow-visible drop-shadow-md" style={{ zIndex: -1, width: tableW, height: tableW }}>
-         <path d={`M 0 0 A ${tableW} ${tableW} 0 0 1 ${tableW} ${tableW} L ${tableW - widthT} ${tableW} A ${innerR} ${innerR} 0 0 0 0 ${widthT} Z`} fill="#ffffff" stroke="#94a3b8" strokeWidth="3" />
-      </svg>
-    );
-  }
-
-  return (
-    <div style={{ width: tableW, height: tableH }} className="relative pointer-events-none">
-      {chairs}
-      <div className={`absolute inset-0 flex flex-col items-center justify-center z-10 ${shapeClass} ${borderClass} ${baseColor}`}>
-        {innerContent}
-        <div className="z-20 flex items-center justify-center pointer-events-none" style={{ transform: `rotate(-${tableData.rotation || 0}deg)` }}>
-          <span className="font-black text-slate-400/70 select-none drop-shadow-sm" style={{ fontSize: `${Math.max(0.8, tableW * 0.02)}rem` }}>
-            {tableData.name ? tableData.name.replace(/Mesa\s+/i, '').trim() : ''}
-          </span>
-        </div>
-        {matchedNames.length > 0 && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[300]" style={{ transform: `rotate(-${tableData.rotation || 0}deg)` }}>
-            <div className="absolute -top-12 flex flex-col items-center animate-in slide-in-from-bottom-2 duration-300">
-              <div className="bg-slate-900/95 backdrop-blur-md text-amber-400 text-xs font-bold px-4 py-2 rounded-xl shadow-2xl border border-amber-500/40 text-center whitespace-nowrap flex flex-col gap-0.5">
-                {matchedNames.map((n, idx) => <span key={idx}>{n}</span>)}
-              </div>
-              <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-slate-900/95 mt-[-1px]"></div>
+            <div className="flex flex-col space-y-3">
+              <button onClick={() => handleSplitChoice(splitAmount)} className="w-full py-4 bg-amber-500 text-slate-900 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-amber-400 transition-all shadow-md">Separar {splitAmount} Pase(s)</button>
+              {!guestSplitPrompt.isFull && (
+                 <button onClick={() => handleSplitChoice('all')} className="w-full py-4 bg-indigo-600 text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-indigo-700 transition-all shadow-md">Mover a todos juntos ({guestSplitPrompt.guest.passes})</button>
+              )}
+              <button onClick={() => setGuestSplitPrompt(null)} className="w-full py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Cancelar</button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
     </div>
   );
 };
