@@ -2594,20 +2594,22 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
    const handleDragStart = (e, guestId) => { 
      e.dataTransfer.effectAllowed = 'move';
-     e.dataTransfer.setData('text/plain', guestId); // Para Safari
-     e.dataTransfer.setData('guestId', guestId); // Para Chrome/Firefox
+     e.dataTransfer.setData('text/plain', guestId);
      setGuestSeleccionado(null); 
    };
    const handleDrop = (e, targetTableId) => { 
      e.preventDefault(); 
-     const guestId = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('guestId');
+     const guestId = e.dataTransfer.getData('text/plain');
      if(guestId) moverInvitado(guestId, targetTableId); 
    };
-   const handleDragOver = (e) => e.preventDefault();
+   const handleDragOver = (e) => { 
+     e.preventDefault(); 
+     e.dataTransfer.dropEffect = 'move'; 
+   };
 
    const moverInvitado = async (guestId, targetTableId) => {
-      const guest = safeGuests.find(g => g.id === guestId);
-      if (!guest || guest.tableId === targetTableId) {
+      const guest = safeGuests.find(g => String(g.id) === String(guestId));
+      if (!guest || String(guest.tableId) === String(targetTableId)) {
         setGuestSeleccionado(null);
         return;
       }
@@ -2619,44 +2621,47 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       let usedChairs = 0;
         
       if (isToTable) {
-           table = safeTables.find(t => t.id === targetTableId);
-           usedChairs = safeGuests.filter(g => g.tableId === targetTableId).reduce((sum, g) => sum + (Number(g.passes) || 1), 0);
+           table = safeTables.find(t => String(t.id) === String(targetTableId));
+           if(!table) return;
+           usedChairs = safeGuests.filter(g => String(g.tableId) === String(targetTableId)).reduce((sum, g) => sum + (Number(g.passes) || 1), 0);
+           
+           if (usedChairs + pasesDelInvitado > Number(table.capacity)) {
+               if (pasesDelInvitado > 1 && (Number(table.capacity) - usedChairs) >= 1) {
+                   setGuestSplitPrompt({ guest, targetTableId, table, usedChairs });
+                   setGuestSeleccionado(null);
+                   return;
+               } else {
+                   if(addNotification) addNotification('Mesa Llena', `No hay sillas suficientes en ${table.name}.`, 'warning');
+                   setGuestSeleccionado(null);
+                   return;
+               }
+           }
       }
 
-      if (pasesDelInvitado > 1) {
-           setGuestSplitPrompt({ guest, targetTableId, table, usedChairs });
-           setGuestSeleccionado(null);
-           return;
-      }
-
-      if (isToTable && (usedChairs + pasesDelInvitado > table.capacity)) {
-           if(addNotification) addNotification('Mesa Llena', `No hay sillas suficientes en ${table.name}.`, 'warning');
-           setGuestSeleccionado(null);
-           return;
-      }
-    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guestId), { ...guest, tableId: targetTableId });
-    setGuestSeleccionado(null);
+      try {
+        await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), { ...guest, tableId: targetTableId });
+      } catch(e) { console.error(e); }
+      setGuestSeleccionado(null);
    };
 
    const handleSplitChoice = async (mode) => {
          const { guest, targetTableId, table, usedChairs } = guestSplitPrompt;
           
-         if (mode === 'all') {
-               if (table && usedChairs + guest.passes > table.capacity) {
-                     if(addNotification) addNotification('Mesa Llena', `No hay ${guest.passes} sillas en ${table.name}.`, 'warning');
-               } else {
-              await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, tableId: targetTableId });
-               }
-         } else if (mode === 'one') {
-               if (table && usedChairs + 1 > table.capacity) {
+         if (mode === 'one') {
+               if (table && usedChairs + 1 > Number(table.capacity)) {
                      if(addNotification) addNotification('Mesa Llena', `No hay sillas en ${table.name}.`, 'warning');
                } else {
-              const newGuestId = Date.now().toString() + Math.random().toString(36).substring(2,5);
+                     const newGuestId = Date.now().toString() + Math.random().toString(36).substring(2,5);
                      const newGuest = { ...guest, id: newGuestId, name: `${guest.name} (Separado)`, passes: 1, childrenPasses: 0, tableId: targetTableId };
-                     const updatedGuest = { ...guest, passes: guest.passes - 1 };
+                     const subG = Array.isArray(guest.subGuests) ? guest.subGuests : [];
+                     const movingSubGuest = subG.length > 0 ? [subG[subG.length - 1]] : [];
+                     const remainingSubGuests = subG.length > 0 ? subG.slice(0, -1) : [];
+
+                     newGuest.subGuests = movingSubGuest;
+                     const updatedGuest = { ...guest, passes: Number(guest.passes) - 1, subGuests: remainingSubGuests };
               
-              await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), updatedGuest);
-              await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", newGuestId), newGuest);
+                     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), updatedGuest);
+                     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(newGuestId)), newGuest);
                }
          }
          setGuestSplitPrompt(null);
@@ -2848,7 +2853,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                 key={g.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, g.id)}
-                onPointerDown={(e) => { e.stopPropagation(); handleGuestClick(g); }}
+                onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
                 className={`px-3 py-2 lg:p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all shadow-sm w-auto lg:w-full flex-grow-0 ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 border-indigo-700 dark:border-amber-400 text-white dark:text-slate-900 transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'}`}
               >
                 <div className="flex items-center truncate max-w-[140px] lg:max-w-none">
@@ -2920,13 +2925,8 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                         <div 
                           key={g.id} 
                           draggable
-                          onDragStart={(e) => {
-                             e.dataTransfer.effectAllowed = 'move';
-                             e.dataTransfer.setData('text/plain', g.id);
-                             e.dataTransfer.setData('guestId', g.id);
-                             setGuestSeleccionado(null);
-                          }}
-                          onPointerDown={(e) => { e.stopPropagation(); handleGuestClick(g); }}
+                          onDragStart={(e) => handleDragStart(e, g.id)}
+                          onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
                           className={`text-[9px] lg:text-[10px] px-2.5 py-1.5 rounded-lg font-bold truncate flex items-center cursor-pointer lg:cursor-grab shadow-sm border transition-colors max-w-full ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-700 dark:border-amber-400' : 'bg-white dark:bg-[#0a0a0a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-indigo-300'}`}
                         >
                           <span className="truncate">{g.name}</span> <span className="ml-1.5 opacity-50 font-black shrink-0">({g.passes})</span>
