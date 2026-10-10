@@ -1,5 +1,5 @@
 git add .
-git commit -m "juntar familias de nuevo"
+git commit -m "mejora boton separador"
 git push origin main
 
 .

@@ -2901,9 +2901,12 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         </div>
         
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-           {/* 🔴 NUEVO BOTÓN MODO SEPARADOR (DISEÑO CAPTURA 10) */}
-           <button onClick={() => setIsSplitMode(!isSplitMode)} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-white dark:bg-[#111] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 transition-colors shadow-sm group">
-              <Users size={16} className={`mr-2 transition-colors ${isSplitMode ? 'text-rose-500' : 'text-slate-400 group-hover:text-slate-600'}`} /> Modo Separador: <span className={`ml-1 font-black ${isSplitMode ? 'text-rose-500' : 'text-slate-400'}`}>{isSplitMode ? 'ON' : 'OFF'}</span>
+           {/* 🔴 BOTÓN SWITCH MODO SEPARADOR TIPO BODA */}
+           <button onClick={() => setIsSplitMode(!isSplitMode)} className="flex items-center justify-between px-3.5 py-2 bg-white dark:bg-[#111] border-2 border-slate-200 dark:border-white/10 rounded-full transition-colors w-auto min-w-[150px] hover:border-indigo-300 dark:hover:border-amber-500/50 shadow-sm mr-2">
+             <span className="text-[11px] font-black tracking-widest text-slate-600 dark:text-slate-300 uppercase mr-3">Separador</span>
+             <div className={`w-10 h-5.5 rounded-full relative transition-colors border ${isSplitMode ? 'bg-indigo-500 border-indigo-600 dark:bg-amber-500 dark:border-amber-600' : 'bg-slate-200 border-slate-300 dark:bg-slate-700 dark:border-slate-600'}`}>
+               <div className={`absolute top-[1px] left-[1px] w-4.5 h-4.5 bg-white rounded-full transition-transform ${isSplitMode ? 'translate-x-[18px]' : 'translate-x-0'} shadow-sm`}></div>
+             </div>
            </button>
 
            <button onClick={handleAutoAssign} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-sm font-bold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors shadow-sm">
