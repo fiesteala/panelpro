@@ -2607,9 +2607,12 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
    const moverInvitado = async (guestId, targetTableId) => {
       const guest = safeGuests.find(g => g.id === guestId);
-      if (!guest || guest.tableId === targetTableId) return;
+      if (!guest || guest.tableId === targetTableId) {
+        setGuestSeleccionado(null);
+        return;
+      }
 
-      const pasesDelInvitado = Number(guest.passes) || 1; // Nos aseguramos de que sea un número válido
+      const pasesDelInvitado = Number(guest.passes) || 1; 
 
       const isToTable = targetTableId !== null;
       let table = null;
@@ -2622,14 +2625,17 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
       if (pasesDelInvitado > 1) {
            setGuestSplitPrompt({ guest, targetTableId, table, usedChairs });
+           setGuestSeleccionado(null);
            return;
       }
 
       if (isToTable && (usedChairs + pasesDelInvitado > table.capacity)) {
            if(addNotification) addNotification('Mesa Llena', `No hay sillas suficientes en ${table.name}.`, 'warning');
+           setGuestSeleccionado(null);
            return;
       }
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guestId), { ...guest, tableId: targetTableId });
+    setGuestSeleccionado(null);
    };
 
    const handleSplitChoice = async (mode) => {
@@ -2842,7 +2848,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                 key={g.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, g.id)}
-                onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
+                onPointerDown={(e) => { e.stopPropagation(); handleGuestClick(g); }}
                 className={`px-3 py-2 lg:p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all shadow-sm w-auto lg:w-full flex-grow-0 ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 border-indigo-700 dark:border-amber-400 text-white dark:text-slate-900 transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'}`}
               >
                 <div className="flex items-center truncate max-w-[140px] lg:max-w-none">
@@ -2920,7 +2926,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                              e.dataTransfer.setData('guestId', g.id);
                              setGuestSeleccionado(null);
                           }}
-                          onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
+                          onPointerDown={(e) => { e.stopPropagation(); handleGuestClick(g); }}
                           className={`text-[9px] lg:text-[10px] px-2.5 py-1.5 rounded-lg font-bold truncate flex items-center cursor-pointer lg:cursor-grab shadow-sm border transition-colors max-w-full ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-700 dark:border-amber-400' : 'bg-white dark:bg-[#0a0a0a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-indigo-300'}`}
                         >
                           <span className="truncate">{g.name}</span> <span className="ml-1.5 opacity-50 font-black shrink-0">({g.passes})</span>
