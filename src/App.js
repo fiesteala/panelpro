@@ -1336,8 +1336,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
         const msg = `¡Hola *${whatsappPromptModal.name}*! Hemos aprobado tus pases extra. Ahora tienes *${whatsappPromptModal.nuevosPases} lugares* reservados.\n\nHemos habilitado tu invitación nuevamente para que registres los nombres de tus nuevos acompañantes. Por favor entra aquí y completa tu registro:\n${linkPersonalizado}`;
         window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-    } else {
-        alert("⚠️ No se pudo abrir WhatsApp porque este invitado no tiene un número de teléfono válido registrado en la lista.");
     }
     setWhatsappPromptModal(null);
   };
@@ -2198,27 +2196,47 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       )}
 
-      {whatsappPromptModal && (
+      {whatsappPromptModal && (() => {
+        const rawPhone = whatsappPromptModal.phone || '';
+        const phone = String(rawPhone).replace(/\D/g,'');
+        const hasPhone = phone && phone.length >= 10;
+        
+        return (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-transparent dark:border-white/10">
             <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
               <MessageCircle size={32} />
             </div>
             <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2 font-editorial">¡Pases Aprobados!</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-              Se ha habilitado la invitación para <b>{whatsappPromptModal.name}</b>.<br/><br/>¿Deseas enviarle un mensaje por WhatsApp ahora mismo para avisarle que registre a sus acompañantes?
-            </p>
+            
+            {hasPhone ? (
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                Se ha habilitado la invitación para <b>{whatsappPromptModal.name}</b>.<br/><br/>¿Deseas enviarle un mensaje por WhatsApp ahora mismo para avisarle que registre a sus acompañantes?
+              </p>
+            ) : (
+              <div className="mb-6 p-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl text-left">
+                <p className="text-sm text-slate-600 dark:text-slate-300 mb-3 text-center">Se ha habilitado la invitación para <b>{whatsappPromptModal.name}</b>.</p>
+                <div className="flex items-center justify-center">
+                  <AlertTriangle size={14} className="mr-1.5 text-rose-500 shrink-0"/> 
+                  <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest leading-tight">No tiene WhatsApp registrado en la lista</span>
+                </div>
+              </div>
+            )}
+
             <div className="flex space-x-3">
               <button onClick={() => setWhatsappPromptModal(null)} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors text-[10px] uppercase tracking-widest">
                 Cerrar
               </button>
-              <button onClick={handleSendExtraPassWhatsApp} className="flex-1 py-3.5 bg-emerald-500 text-white rounded-xl font-black shadow-lg hover:bg-emerald-600 transition-transform active:scale-95 text-[10px] uppercase tracking-widest flex items-center justify-center">
-                Notificar por WhatsApp
-              </button>
+              {hasPhone && (
+                <button onClick={handleSendExtraPassWhatsApp} className="flex-1 py-3.5 bg-emerald-500 text-white rounded-xl font-black shadow-lg hover:bg-emerald-600 transition-transform active:scale-95 text-[10px] uppercase tracking-widest flex items-center justify-center">
+                  Notificar por WhatsApp
+                </button>
+              )}
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
     </div>
   );
