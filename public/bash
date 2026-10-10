@@ -1,5 +1,5 @@
 git add .
-git commit -m "notificacion pases extra tarjeta grande"
+git commit -m "funcion arrastrar mesas"
 git push origin main
 
 .
