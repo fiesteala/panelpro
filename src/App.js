@@ -2352,6 +2352,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
   const [isSplitMode, setIsSplitMode] = useState(false);
   const [splitAmount, setSplitAmount] = useState(1);
   const [guestSplitPrompt, setGuestSplitPrompt] = useState(null);
+  const [autoAssignConflict, setAutoAssignConflict] = useState(null);
   const [configActual, setCurrentConfig] = useState({
     tipo: 'redonda', 
     capacidadRedonda: 10,
@@ -2494,47 +2495,103 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
          if(addNotification) addNotification('Listo', 'Todos los invitados ya tienen mesa asignada.', 'info');
          return;
       }
-      const unassignedPasses = unassigned.reduce((sum, g) => sum + g.passes, 0);
+      const unassignedPasses = unassigned.reduce((sum, g) => sum + Number(g.passes), 0);
       let availableChairs = 0;
       safeTables.forEach(t => {
-         const assigned = guests.filter(g => g.tableId === t.id);
-         const used = assigned.reduce((sum, g) => sum + g.passes, 0);
-         availableChairs += (t.capacity - used);
+         const assigned = guests.filter(g => String(g.tableId) === String(t.id));
+         const used = assigned.reduce((sum, g) => sum + Number(g.passes), 0);
+         availableChairs += (Number(t.capacity) - used);
       });
 
       if (unassignedPasses > availableChairs) {
          setSmartAssign({ faltantes: unassignedPasses - availableChairs, invitadosPendientes: unassignedPasses });
          return;
       }
-      ejecutarAsignacionLogic(safeTables);
+      ejecutarAsignacionLogic(unassigned);
    };
 
-   const ejecutarAsignacionLogic = async (mesasDisponibles) => {
+   const ejecutarAsignacionLogic = async (invitadosPendientes) => {
       let currentGuests = [...safeGuests];
+      let promesas = [];
       let changesMade = false;
-    let promesas = [];
 
-      currentGuests.forEach(guest => {
-         if (!guest.tableId && guest.status !== 'cancelado') {
-            const availableTable = mesasDisponibles.find(table => {
-               const assignedGuests = currentGuests.filter(g => g.tableId === table.id);
-               const usedChairs = assignedGuests.reduce((sum, g) => sum + g.passes, 0);
-               return (table.capacity - usedChairs) >= guest.passes;
-            });
-            if (availableTable) { 
-          guest.tableId = availableTable.id; 
-          changesMade = true; 
-          promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), guest));
-        }
-         }
-      });
+      // 1. REGLA DE ORO: Familias grandes primero (Ordenamiento Pesado)
+      let invitadosAProcesar = [...invitadosPendientes].sort((a, b) => Number(b.passes) - Number(a.passes));
+
+      for (let i = 0; i < invitadosAProcesar.length; i++) {
+          const guest = invitadosAProcesar[i];
+          const pases = Number(guest.passes);
+
+          // Escanear espacios reales en este milisegundo de ejecución
+          let mesasConEspacio = safeTables.map(t => {
+              const sentados = currentGuests.filter(g => String(g.tableId) === String(t.id));
+              const ocupadas = sentados.reduce((sum, g) => sum + Number(g.passes), 0);
+              return { ...t, libres: Number(t.capacity) - ocupadas };
+          }).filter(t => t.libres >= pases);
+
+          if (mesasConEspacio.length > 0) {
+              // 2. BEST-FIT: Buscar la mesa que deje el hueco más exacto (menor sobrante posible)
+              mesasConEspacio.sort((a, b) => a.libres - b.libres);
+              const bestTable = mesasConEspacio[0];
+
+              const guestIndex = currentGuests.findIndex(g => String(g.id) === String(guest.id));
+              if (guestIndex > -1) {
+                  currentGuests[guestIndex].tableId = bestTable.id;
+                  changesMade = true;
+                  promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), currentGuests[guestIndex]));
+              }
+          } else {
+              // 3. INTERCEPCIÓN (La mesa no alcanza, toca preguntar al humano)
+              const mesasRestantes = safeTables.map(t => {
+                  const sentados = currentGuests.filter(g => String(g.tableId) === String(t.id));
+                  const ocupadas = sentados.reduce((sum, g) => sum + Number(g.passes), 0);
+                  return Number(t.capacity) - ocupadas;
+              });
+              const maxHueco = Math.max(...mesasRestantes, 0);
+
+              setAutoAssignConflict({ guest, maxHueco });
+              setSplitAmount(1);
+              
+              if (promesas.length > 0) await Promise.all(promesas); // Guarda progreso hasta el choque
+              return; // Detenemos el loop
+          }
+      }
 
       if (changesMade) {
-      await Promise.all(promesas);
-         if(addNotification) addNotification('Auto-Acomodo Exitoso', 'Se guardaron las asignaciones en la nube.', 'success');
-      } else {
-         if(addNotification) addNotification('Fragmentación', 'Hay sillas pero están separadas. Acomoda manualmente.', 'warning');
+         await Promise.all(promesas);
+         if(addNotification) addNotification('Auto-Acomodo Exitoso', 'El algoritmo Best-Fit completó el montaje.', 'success');
       }
+   };
+
+   const handleAutoAssignSplit = async (amount) => {
+       const { guest } = autoAssignConflict;
+       
+       const originalId = guest.parentId || guest.id;
+       const newGuestId = `${originalId}_split_${Date.now().toString().slice(-4)}`;
+       const baseName = guest.name.replace(' (Separado)', '');
+       
+       const newGuest = { ...guest, id: newGuestId, parentId: originalId, name: `${baseName} (Separado)`, passes: amount, childrenPasses: 0, tableId: null };
+       
+       const subG = Array.isArray(guest.subGuests) ? guest.subGuests : [];
+       const movingSubGuest = subG.length > 0 ? subG.slice(-amount) : [];
+       const remainingSubGuests = subG.length > 0 ? subG.slice(0, subG.length - amount) : [];
+
+       newGuest.subGuests = movingSubGuest;
+       const updatedGuest = { ...guest, passes: Number(guest.passes) - amount, subGuests: remainingSubGuests };
+
+       try {
+           await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), updatedGuest);
+           await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(newGuestId)), newGuest);
+       } catch(e) { console.error(e); }
+
+       setAutoAssignConflict(null);
+       if(addNotification) addNotification('Familia Dividida', 'Retomando el algoritmo...', 'info');
+       
+       // El sistema retoma el auto-acomodo por sí solo tras 800ms
+       setTimeout(() => {
+           const botonAuto = document.getElementById('btn-autoacomodar');
+           if (botonAuto) botonAuto.click();
+       }, 800);
    };
 
    const generarYAsignarMagico = async (opcion) => {
@@ -2901,15 +2958,15 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         </div>
         
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-           {/* 🔴 BOTÓN SWITCH MODO SEPARADOR TIPO BODA */}
-           <button onClick={() => setIsSplitMode(!isSplitMode)} className="flex items-center justify-between px-3.5 py-2 bg-white dark:bg-[#111] border-2 border-slate-200 dark:border-white/10 rounded-full transition-colors w-auto min-w-[150px] hover:border-indigo-300 dark:hover:border-amber-500/50 shadow-sm mr-2">
-             <span className="text-[11px] font-black tracking-widest text-slate-600 dark:text-slate-300 uppercase mr-3">Separador</span>
-             <div className={`w-10 h-5.5 rounded-full relative transition-colors border ${isSplitMode ? 'bg-indigo-500 border-indigo-600 dark:bg-amber-500 dark:border-amber-600' : 'bg-slate-200 border-slate-300 dark:bg-slate-700 dark:border-slate-600'}`}>
-               <div className={`absolute top-[1px] left-[1px] w-4.5 h-4.5 bg-white rounded-full transition-transform ${isSplitMode ? 'translate-x-[18px]' : 'translate-x-0'} shadow-sm`}></div>
-             </div>
+           {/* 🔴 BOTÓN SWITCH MODO SEPARADOR (TIPO BODA) */}
+           <button onClick={() => setIsSplitMode(!isSplitMode)} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2 bg-white dark:bg-[#111] border-2 border-slate-200 dark:border-white/10 rounded-[2rem] hover:border-indigo-300 dark:hover:border-amber-500/50 transition-colors shadow-sm">
+              <span className="text-[11px] font-black text-slate-600 dark:text-slate-300 tracking-wider mr-3 uppercase">Separador</span>
+              <div className={`w-[42px] h-[24px] rounded-full p-[3px] transition-colors ${isSplitMode ? 'bg-indigo-500 dark:bg-amber-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                 <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${isSplitMode ? 'translate-x-[18px]' : 'translate-x-0'}`}></div>
+              </div>
            </button>
 
-           <button onClick={handleAutoAssign} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-sm font-bold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors shadow-sm">
+           <button id="btn-autoacomodar" onClick={handleAutoAssign} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-sm font-bold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors shadow-sm">
               <Wand2 size={16} className="mr-2" /> Auto-Acomodar
            </button>
            <button onClick={emptyAllTables} className="flex-1 md:flex-none px-4 py-2.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 rounded-xl text-sm font-bold hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors">
@@ -3219,6 +3276,33 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                  <button onClick={() => handleSplitChoice('all')} className="w-full py-4 bg-indigo-600 text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-indigo-700 transition-all shadow-md">Mover a todos juntos ({guestSplitPrompt.guest.passes})</button>
               )}
               <button onClick={() => setGuestSplitPrompt(null)} className="w-full py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔴 NUEVO MODAL: CONFLICTO DE AUTO-ACOMODAR (SÚPER FAMILIAS) */}
+      {autoAssignConflict && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden p-8 text-center shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95">
+            <div className="w-16 h-16 bg-rose-100 dark:bg-rose-500/20 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner"><Users size={32} /></div>
+            <h3 className="font-editorial font-bold text-2xl text-slate-900 dark:text-white mb-2">
+              Límite Excedido
+            </h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-4 text-sm leading-relaxed">
+              La familia <b>{autoAssignConflict.guest.name}</b> necesita {autoAssignConflict.guest.passes} lugares continuos, pero el espacio más grande disponible en las mesas es de {autoAssignConflict.maxHueco} sillas.
+              <br/><br/>¿Cuántos pases deseas separar para continuar?
+            </p>
+            
+            <div className="flex items-center justify-center gap-6 mb-6 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/10">
+                <button onClick={() => setSplitAmount(Math.max(1, splitAmount - 1))} className="w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shadow-sm">-</button>
+                <span className="text-3xl font-black text-slate-900 dark:text-white">{splitAmount}</span>
+                <button onClick={() => setSplitAmount(Math.min(Number(autoAssignConflict.guest.passes) - 1, splitAmount + 1))} className="w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shadow-sm">+</button>
+            </div>
+
+            <div className="flex flex-col space-y-3">
+              <button onClick={() => handleAutoAssignSplit(splitAmount)} className="w-full py-4 bg-indigo-600 text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-indigo-700 transition-all shadow-md">Separar {splitAmount} y Retomar</button>
+              <button onClick={() => setAutoAssignConflict(null)} className="w-full py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Cancelar Auto-Acomodo</button>
             </div>
           </div>
         </div>

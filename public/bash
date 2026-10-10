@@ -1,5 +1,5 @@
 git add .
-git commit -m "mejora boton separador"
+git commit -m "algoritmo acomodo de mesas"
 git push origin main
 
 .
