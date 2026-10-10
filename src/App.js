@@ -7435,7 +7435,9 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
     
     if (phone && phone.length >= 10) {
         let linkPersonalizado = '';
-        const urlInvitacion = data?.guests?.find(g => g.id === whatsappPromptModal.id)?.urlInvitacion || activeEventData?.urlInvitacion; // Intentamos obtener la urlInvitacion
+        // Obtenemos la información del evento actual correctamente desde authData
+        const eventoActual = authData?.availableEvents?.find(e => e.eventId === authData?.eventId);
+        const urlInvitacion = eventoActual?.urlInvitacion;
         
         if (urlInvitacion) {
           const separator = urlInvitacion.includes('?') ? '&' : '?';
