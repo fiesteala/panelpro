@@ -7430,12 +7430,16 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
 
   const handleSendExtraPassWhatsApp = () => {
     if (!whatsappPromptModal) return;
-    const phone = whatsappPromptModal.phone ? whatsappPromptModal.phone.replace(/\D/g,'') : '';
-    if (phone) {
+    const rawPhone = whatsappPromptModal.phone || '';
+    const phone = String(rawPhone).replace(/\D/g,'');
+    
+    if (phone && phone.length >= 10) {
         const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
         const link = `${baseDomain}/${ID_DEL_EVENTO}?u=${whatsappPromptModal.id}`;
         const msg = `¡Hola *${whatsappPromptModal.name}*! Hemos aprobado tus pases extra. Ahora tienes *${whatsappPromptModal.nuevosPases} lugares* reservados.\n\nHemos habilitado tu invitación nuevamente para que registres los nombres de tus nuevos acompañantes. Por favor entra aquí y completa tu registro:\n${link}`;
         window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    } else {
+        alert("⚠️ No se pudo abrir WhatsApp porque este invitado no tiene un número de teléfono válido registrado en la lista.");
     }
     setWhatsappPromptModal(null);
   };
