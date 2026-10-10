@@ -1264,6 +1264,83 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   const [isPreparingQRPrint, setIsPreparingQRPrint] = useState(false);
 
   const safeGuests = guests || [];
+  const [skippedRequests, setSkippedRequests] = useState(new Set());
+  const [whatsappPromptModal, setWhatsappPromptModal] = useState(null);
+  
+  const currentRequest = safeGuests.find(g => g.extraRequested > 0 && !skippedRequests.has(g.id)) || null;
+
+  const handleAprobarPases = async () => {
+    if (!currentRequest) return;
+    try {
+      const guestRef = doc(db, "eventos", ID_DEL_EVENTO, "invitados", currentRequest.id);
+      const nuevosPases = currentRequest.passes + currentRequest.extraRequested;
+      const subGuestsArray = currentRequest.subGuests || [];
+      const nuevosOriginales = currentRequest.originalPasses ? currentRequest.originalPasses + currentRequest.extraRequested : nuevosPases;
+      
+      const faltantes = nuevosPases - subGuestsArray.length;
+      const nuevosSubGuests = [...subGuestsArray];
+      for (let i=0; i<faltantes; i++) {
+          nuevosSubGuests.push({
+              id: `usr_extra_${Date.now()}_${i}`,
+              name: '',
+              isChild: false,
+              entered: false
+          });
+      }
+
+      await updateDoc(guestRef, { 
+         passes: nuevosPases, 
+         originalPasses: nuevosOriginales,
+         extraRequested: 0,
+         subGuests: nuevosSubGuests,
+         status: 'pendiente'
+      });
+      
+      setWhatsappPromptModal({
+        id: currentRequest.id,
+        name: currentRequest.name,
+        phone: currentRequest.phone,
+        nuevosPases: nuevosPases
+      });
+    } catch(e) { console.error(e); }
+  };
+
+  const handleRechazarPases = async () => {
+    if (!currentRequest) return;
+    try {
+      const guestRef = doc(db, "eventos", ID_DEL_EVENTO, "invitados", currentRequest.id);
+      await updateDoc(guestRef, { extraRequested: 0 });
+    } catch(e) { console.error(e); }
+  };
+
+  const handleAtenderDespues = () => {
+    if (!currentRequest) return;
+    setSkippedRequests(prev => new Set(prev).add(currentRequest.id));
+    if(addNotification) addNotification('Pospuesto', 'Podrás revisar esta solicitud más tarde desde la campanita de notificaciones.', 'info');
+  };
+
+  const handleSendExtraPassWhatsApp = () => {
+    if (!whatsappPromptModal) return;
+    const rawPhone = whatsappPromptModal.phone || '';
+    const phone = String(rawPhone).replace(/\D/g,'');
+    
+    if (phone && phone.length >= 10) {
+        let linkPersonalizado = '';
+        if (urlInvitacion) {
+          const separator = urlInvitacion.includes('?') ? '&' : '?';
+          linkPersonalizado = `${urlInvitacion}${separator}u=${whatsappPromptModal.id}`;
+        } else {
+          const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
+          linkPersonalizado = `${baseDomain}/${ID_DEL_EVENTO}?u=${whatsappPromptModal.id}`;
+        }
+
+        const msg = `¡Hola *${whatsappPromptModal.name}*! Hemos aprobado tus pases extra. Ahora tienes *${whatsappPromptModal.nuevosPases} lugares* reservados.\n\nHemos habilitado tu invitación nuevamente para que registres los nombres de tus nuevos acompañantes. Por favor entra aquí y completa tu registro:\n${linkPersonalizado}`;
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    } else {
+        alert("⚠️ No se pudo abrir WhatsApp porque este invitado no tiene un número de teléfono válido registrado en la lista.");
+    }
+    setWhatsappPromptModal(null);
+  };
 
   const handleOpenAdd = (side) => {
     setNewGuest({ name: '', adultPasses: 1, childrenPasses: 0, phone: '', status: 'por_invitar' });
@@ -2091,6 +2168,54 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* 🔴 MODALES DE GESTIÓN DE PASES EXTRA EN COLA (AUTO-POPUP) */}
+      {currentRequest && !whatsappPromptModal && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-transparent dark:border-white/10">
+            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-500/20 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+              <Users size={32} />
+            </div>
+            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2 font-editorial">Solicitud de Pases Extra</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+              La familia <b>{currentRequest.name}</b> está solicitando <b>+{currentRequest.extraRequested}</b> pases adicionales.<br/><br/>Si apruebas, su invitación se actualizará a modo pendiente y podrás avisarle por WhatsApp al instante.
+            </p>
+            <div className="flex space-x-3 mb-4">
+              <button onClick={handleRechazarPases} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors text-[10px] uppercase tracking-widest">
+                Rechazar
+              </button>
+              <button onClick={handleAprobarPases} className="flex-1 py-3.5 bg-amber-500 text-slate-900 rounded-xl font-black shadow-lg hover:bg-amber-400 transition-transform active:scale-95 text-[10px] uppercase tracking-widest">
+                Aprobar Pases
+              </button>
+            </div>
+            <button onClick={handleAtenderDespues} className="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 uppercase tracking-widest transition-colors py-2">
+              Atender después
+            </button>
+          </div>
+        </div>
+      )}
+
+      {whatsappPromptModal && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-transparent dark:border-white/10">
+            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+              <MessageCircle size={32} />
+            </div>
+            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2 font-editorial">¡Pases Aprobados!</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+              Se ha habilitado la invitación para <b>{whatsappPromptModal.name}</b>.<br/><br/>¿Deseas enviarle un mensaje por WhatsApp ahora mismo para avisarle que registre a sus acompañantes?
+            </p>
+            <div className="flex space-x-3">
+              <button onClick={() => setWhatsappPromptModal(null)} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors text-[10px] uppercase tracking-widest">
+                Cerrar
+              </button>
+              <button onClick={handleSendExtraPassWhatsApp} className="flex-1 py-3.5 bg-emerald-500 text-white rounded-xl font-black shadow-lg hover:bg-emerald-600 transition-transform active:scale-95 text-[10px] uppercase tracking-widest flex items-center justify-center">
+                Notificar por WhatsApp
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -7700,9 +7825,9 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
             </div>
             <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2 font-editorial">Solicitud de Pases Extra</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-              <b>{extraPassModal.name}</b> está solicitando <b>+{extraPassModal.extraRequested}</b> pases adicionales.<br/><br/>Si apruebas, su invitación se actualizará y podrás avisarle por WhatsApp al instante.
+              La familia <b>{extraPassModal.name}</b> está solicitando <b>+{extraPassModal.extraRequested}</b> pases adicionales.<br/><br/>Si apruebas, su invitación se actualizará a modo pendiente y podrás avisarle por WhatsApp al instante.
             </p>
-            <div className="flex space-x-3">
+            <div className="flex space-x-3 mb-4">
               <button onClick={handleRechazarPases} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors text-[10px] uppercase tracking-widest">
                 Rechazar
               </button>
@@ -7710,6 +7835,9 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
                 Aprobar Pases
               </button>
             </div>
+            <button onClick={() => setExtraPassModal(null)} className="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 uppercase tracking-widest transition-colors py-2">
+              Atender después (Desde la campanita)
+            </button>
           </div>
         </div>
       )}
