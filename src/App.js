@@ -2568,11 +2568,57 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       setTimeout(() => { ejecutarAsignacionLogic([...safeTables, ...mesasNuevas]); }, 500);
    };
 
+   const procesarVaciadoDeInvitados = async (invitadosAVaciar) => {
+      let promesas = [];
+      let invitadosAProcesar = [...invitadosAVaciar];
+      let familiasPrincipalesActualizadas = {};
+
+      for (const guest of invitadosAProcesar) {
+          const parentId = guest.parentId || (guest.id.includes('_split_') ? guest.id.split('_split_')[0] : null);
+          
+          if (parentId) {
+              // Es una fracción separada. Buscamos a su familia principal.
+              // OJO: La familia principal puede estar en la misma lista a vaciar o ya estar en "No Asignados"
+              let mainFamily = safeGuests.find(g => String(g.id) === String(parentId));
+              
+              if (mainFamily) {
+                  // Acumulamos los pases a la familia principal
+                  const currentPasses = familiasPrincipalesActualizadas[parentId]?.passes || Number(mainFamily.passes);
+                  const currentSubGuests = familiasPrincipalesActualizadas[parentId]?.subGuests || mainFamily.subGuests || [];
+                  
+                  familiasPrincipalesActualizadas[parentId] = {
+                      ...mainFamily,
+                      tableId: null, // Lo mandamos a No Asignados
+                      passes: currentPasses + Number(guest.passes),
+                      subGuests: [...currentSubGuests, ...(guest.subGuests || [])]
+                  };
+                  
+                  // Eliminamos la fracción separada
+                  promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id))));
+              } else {
+                  // Si por alguna razón no existe la familia principal (no debería pasar), solo le quitamos la mesa
+                  promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), { ...guest, tableId: null }));
+              }
+          } else {
+              // Es un invitado normal o una familia principal. Solo le quitamos la mesa, a menos que ya lo hayamos actualizado.
+              if (!familiasPrincipalesActualizadas[guest.id]) {
+                  familiasPrincipalesActualizadas[guest.id] = { ...guest, tableId: null };
+              }
+          }
+      }
+
+      // Guardamos las familias principales actualizadas (y los invitados normales)
+      Object.values(familiasPrincipalesActualizadas).forEach(updatedGuest => {
+          promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(updatedGuest.id)), updatedGuest));
+      });
+
+      await Promise.all(promesas);
+   };
+
    const emptyTable = async (tableId) => {
     const guestsToUpdate = guests.filter(g => g.tableId === tableId);
-    const promesas = guestsToUpdate.map(g => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", g.id), { ...g, tableId: null }));
-    await Promise.all(promesas);
-      if(addNotification) addNotification('Mesa Vaciada', 'Invitados liberados en la nube.', 'info');
+    await procesarVaciadoDeInvitados(guestsToUpdate);
+      if(addNotification) addNotification('Mesa Vaciada', 'Invitados liberados y agrupados.', 'info');
    };
 
    const deleteTable = async (tableId) => {
@@ -2583,8 +2629,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
    const emptyAllTables = async () => {
     const guestsToUpdate = guests.filter(g => g.tableId !== null);
-    const promesas = guestsToUpdate.map(g => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", g.id), { ...g, tableId: null }));
-    await Promise.all(promesas);
+    await procesarVaciadoDeInvitados(guestsToUpdate);
       if(addNotification) addNotification('Todas las mesas vaciadas', 'Cambios guardados.', 'info');
    };
 
@@ -2628,6 +2673,31 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
            usedChairs = safeGuests.filter(g => String(g.tableId) === String(targetTableId)).reduce((sum, g) => sum + (Number(g.passes) || 1), 0);
       }
 
+      // 🔴 LÓGICA DE FUSIÓN (JUNTAR FAMILIAS SEPARADAS)
+      const parentId = guest.parentId || (guest.id.includes('_split_') ? guest.id.split('_split_')[0] : null);
+      if (parentId) {
+          const mainFamily = safeGuests.find(g => String(g.id) === String(parentId));
+          // Verificamos si la familia principal existe y está en el mismo destino (misma mesa o ambos en 'No Asignados')
+          if (mainFamily && String(mainFamily.tableId) === String(targetTableId)) {
+              try {
+                  const nuevosPases = Number(mainFamily.passes) + pasesDelInvitado;
+                  const newSubGuests = [...(mainFamily.subGuests || []), ...(guest.subGuests || [])];
+                  
+                  // Actualizamos a la familia principal
+                  await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(mainFamily.id)), { 
+                      ...mainFamily, 
+                      passes: nuevosPases,
+                      subGuests: newSubGuests
+                  });
+                  // Eliminamos la fracción separada
+                  await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)));
+                  setGuestSeleccionado(null);
+                  if(addNotification) addNotification('Familia Unida', `Se volvió a agrupar a la familia ${mainFamily.name}.`, 'success');
+                  return; // Terminamos aquí porque ya se fusionaron
+              } catch(e) { console.error("Error al fusionar familias:", e); }
+          }
+      }
+
       const isFull = isToTable && (usedChairs + pasesDelInvitado > Number(table.capacity));
 
       // 🔴 AQUÍ APLICAMOS TU IDEA: MODO SEPARADOR ON/OFF
@@ -2661,8 +2731,11 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
               if (table && usedChairs + amount > Number(table.capacity)) {
                   if(addNotification) addNotification('Mesa Llena', `Solo quedan ${Number(table.capacity) - usedChairs} sillas en ${table.name}.`, 'warning');
               } else {
-                  const newGuestId = Date.now().toString() + Math.random().toString(36).substring(2,5);
-                  const newGuest = { ...guest, id: newGuestId, name: `${guest.name} (Separado)`, passes: amount, childrenPasses: 0, tableId: targetTableId };
+                  // Creamos un ID vinculado a la familia original
+                  const originalId = guest.parentId || guest.id;
+                  const newGuestId = `${originalId}_split_${Date.now().toString().slice(-4)}`;
+                  const baseName = guest.name.replace(' (Separado)', ''); // Evitamos "Familia (Separado) (Separado)"
+                  const newGuest = { ...guest, id: newGuestId, parentId: originalId, name: `${baseName} (Separado)`, passes: amount, childrenPasses: 0, tableId: targetTableId };
                   
                   const subG = Array.isArray(guest.subGuests) ? guest.subGuests : [];
                   const movingSubGuest = subG.length > 0 ? subG.slice(-amount) : [];
@@ -2828,9 +2901,9 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         </div>
         
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-           {/* 🔴 NUEVO BOTÓN MODO SEPARADOR EN LA BARRA SUPERIOR (OPCIÓN 2) */}
-           <button onClick={() => setIsSplitMode(!isSplitMode)} className={`flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm border ${isSplitMode ? 'bg-amber-500 text-slate-900 border-amber-600 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white dark:bg-[#111] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5'}`}>
-              <Users size={16} className="mr-2" /> Modo Separador: {isSplitMode ? 'ON' : 'OFF'}
+           {/* 🔴 NUEVO BOTÓN MODO SEPARADOR (DISEÑO CAPTURA 10) */}
+           <button onClick={() => setIsSplitMode(!isSplitMode)} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-white dark:bg-[#111] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 transition-colors shadow-sm group">
+              <Users size={16} className={`mr-2 transition-colors ${isSplitMode ? 'text-rose-500' : 'text-slate-400 group-hover:text-slate-600'}`} /> Modo Separador: <span className={`ml-1 font-black ${isSplitMode ? 'text-rose-500' : 'text-slate-400'}`}>{isSplitMode ? 'ON' : 'OFF'}</span>
            </button>
 
            <button onClick={handleAutoAssign} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-sm font-bold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors shadow-sm">

@@ -1,5 +1,5 @@
 git add .
-git commit -m "interruptor separador"
+git commit -m "juntar familias de nuevo"
 git push origin main
 
 .
