@@ -7434,9 +7434,18 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
     const phone = String(rawPhone).replace(/\D/g,'');
     
     if (phone && phone.length >= 10) {
-        const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
-        const link = `${baseDomain}/${ID_DEL_EVENTO}?u=${whatsappPromptModal.id}`;
-        const msg = `¡Hola *${whatsappPromptModal.name}*! Hemos aprobado tus pases extra. Ahora tienes *${whatsappPromptModal.nuevosPases} lugares* reservados.\n\nHemos habilitado tu invitación nuevamente para que registres los nombres de tus nuevos acompañantes. Por favor entra aquí y completa tu registro:\n${link}`;
+        let linkPersonalizado = '';
+        const urlInvitacion = data?.guests?.find(g => g.id === whatsappPromptModal.id)?.urlInvitacion || activeEventData?.urlInvitacion; // Intentamos obtener la urlInvitacion
+        
+        if (urlInvitacion) {
+          const separator = urlInvitacion.includes('?') ? '&' : '?';
+          linkPersonalizado = `${urlInvitacion}${separator}u=${whatsappPromptModal.id}`;
+        } else {
+          const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
+          linkPersonalizado = `${baseDomain}/${ID_DEL_EVENTO}?u=${whatsappPromptModal.id}`;
+        }
+
+        const msg = `¡Hola *${whatsappPromptModal.name}*! Hemos aprobado tus pases extra. Ahora tienes *${whatsappPromptModal.nuevosPases} lugares* reservados.\n\nHemos habilitado tu invitación nuevamente para que registres los nombres de tus nuevos acompañantes. Por favor entra aquí y completa tu registro:\n${linkPersonalizado}`;
         window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
     } else {
         alert("⚠️ No se pudo abrir WhatsApp porque este invitado no tiene un número de teléfono válido registrado en la lista.");
