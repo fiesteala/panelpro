@@ -7387,6 +7387,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
   const headerRef = useRef(null); 
   const [showEventSwitcher, setShowEventSwitcher] = useState(false);
   const [extraPassModal, setExtraPassModal] = useState(null);
+  const [whatsappPromptModal, setWhatsappPromptModal] = useState(null);
 
   const handleAprobarPases = async () => {
     try {
@@ -7414,17 +7415,29 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
          status: 'pendiente' // Regresamos la invitación a modo edición
       });
       
-      const phone = extraPassModal.phone ? extraPassModal.phone.replace(/\D/g,'') : '';
-      if (phone) {
-          const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
-          const link = `${baseDomain}/${ID_DEL_EVENTO}?u=${extraPassModal.id}`;
-          const msg = `¡Hola *${extraPassModal.name}*! Hemos aprobado tus pases extra. Ahora tienes *${nuevosPases} lugares* reservados.\n\nHemos habilitado tu invitación nuevamente para que registres los nombres de tus nuevos acompañantes. Por favor entra aquí y completa tu registro:\n${link}`;
-          window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-      }
+      // Abrimos el nuevo modal que pregunta si queremos enviar el WhatsApp
+      setWhatsappPromptModal({
+        id: extraPassModal.id,
+        name: extraPassModal.name,
+        phone: extraPassModal.phone,
+        nuevosPases: nuevosPases
+      });
       setExtraPassModal(null);
     } catch(e) {
       console.error(e);
     }
+  };
+
+  const handleSendExtraPassWhatsApp = () => {
+    if (!whatsappPromptModal) return;
+    const phone = whatsappPromptModal.phone ? whatsappPromptModal.phone.replace(/\D/g,'') : '';
+    if (phone) {
+        const baseDomain = window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
+        const link = `${baseDomain}/${ID_DEL_EVENTO}?u=${whatsappPromptModal.id}`;
+        const msg = `¡Hola *${whatsappPromptModal.name}*! Hemos aprobado tus pases extra. Ahora tienes *${whatsappPromptModal.nuevosPases} lugares* reservados.\n\nHemos habilitado tu invitación nuevamente para que registres los nombres de tus nuevos acompañantes. Por favor entra aquí y completa tu registro:\n${link}`;
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+    setWhatsappPromptModal(null);
   };
 
   const handleRechazarPases = async () => {
@@ -7684,6 +7697,28 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
               </button>
               <button onClick={handleAprobarPases} className="flex-1 py-3.5 bg-amber-500 text-slate-900 rounded-xl font-black shadow-lg hover:bg-amber-400 transition-transform active:scale-95 text-[10px] uppercase tracking-widest">
                 Aprobar Pases
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {whatsappPromptModal && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-transparent dark:border-white/10">
+            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+              <MessageCircle size={32} />
+            </div>
+            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2 font-editorial">¡Pases Aprobados!</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+              Se ha habilitado la invitación para <b>{whatsappPromptModal.name}</b>.<br/><br/>¿Deseas enviarle un mensaje por WhatsApp ahora mismo para avisarle que registre a sus acompañantes?
+            </p>
+            <div className="flex space-x-3">
+              <button onClick={() => setWhatsappPromptModal(null)} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors text-[10px] uppercase tracking-widest">
+                Cerrar
+              </button>
+              <button onClick={handleSendExtraPassWhatsApp} className="flex-1 py-3.5 bg-emerald-500 text-white rounded-xl font-black shadow-lg hover:bg-emerald-600 transition-transform active:scale-95 text-[10px] uppercase tracking-widest flex items-center justify-center">
+                Notificar por WhatsApp
               </button>
             </div>
           </div>
