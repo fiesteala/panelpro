@@ -1455,7 +1455,29 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       lista.forEach(g => {
           const isSplit = String(g.id).includes('_split_');
           const parentId = g.parentId || (isSplit ? String(g.id).split('_split_')[0] : String(g.id));
+          // 🔴 NUEVA FUNCIÓN: AGRUPA VISUALMENTE A LOS INVITADOS "SPLIT" CON SU PADRE
+  const agruparInvitadosVisualmente = (lista) => {
+      let familiasAgrupadas = {};
+      let listaFinal = [];
+
+      lista.forEach(g => {
+          const isSplit = String(g.id).includes('_split_');
+          const parentId = g.parentId || (isSplit ? String(g.id).split('_split_')[0] : String(g.id));
           
+          // 🔴 GUARDAMOS LA MESA REAL A LA QUE SE ASIGNÓ ESTA FRACCIÓN
+          const subGuestsConMesa = (g.subGuests || []).map(sg => ({
+              ...sg,
+              assignedTableId: g.tableId
+          }));
+
+          if (!familiasAgrupadas[parentId]) {
+              familiasAgrupadas[parentId] = { ...g, originalId: parentId, isMainBlock: !isSplit, tempPasses: Number(g.passes) || 1, tempSubGuests: subGuestsConMesa };
+          } else {
+              familiasAgrupadas[parentId].tempPasses += (Number(g.passes) || 1);
+              familiasAgrupadas[parentId].tempSubGuests = [...familiasAgrupadas[parentId].tempSubGuests, ...subGuestsConMesa];
+              if (!isSplit) familiasAgrupadas[parentId].isMainBlock = true;
+          }
+      });
           if (!familiasAgrupadas[parentId]) {
               familiasAgrupadas[parentId] = { ...g, originalId: parentId, isMainBlock: !isSplit, tempPasses: Number(g.passes) || 1, tempSubGuests: g.subGuests || [] };
           } else {
@@ -1498,7 +1520,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
             isChild: sg.isChild, 
             pin: sg.id, 
             entered: sg.entered,
-            isEmptyName: !sg.name
+            isEmptyName: !sg.name,
+            assignedTableId: sg.assignedTableId !== undefined ? sg.assignedTableId : guest.tableId
           });
         });
         const faltantes = (guest.passes || 0) - guest.subGuests.length;
@@ -1635,7 +1658,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     html += `</tr>`;
 
     allList.forEach(row => {
-      const mesaName = row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : 'Sin Mesa';
+      const mesaName = row.assignedTableId ? (tables?.find(t => String(t.id) === String(row.assignedTableId))?.name || row.assignedTableId) : 'Sin Mesa';
       html += `<tr>`;
       if(exportCols.nombre) html += `<td>${row.isMain ? '<b>'+row.displayName+'</b>' : row.displayName} ${row.isChild ? '(Niño)' : ''}</td>`;
       if(exportCols.pases && passCountEnabled) html += `<td style="text-align:center;">${row.isMain ? row.passes : ''}</td>`;
@@ -1708,7 +1731,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                       {exportCols.pases && passCountEnabled && <td className="py-3 px-2 text-center text-slate-800 font-bold">{row.isMain ? row.passes : '-'}</td>}
                       {exportCols.estatus && <td className="py-3 px-2 text-center text-slate-600 text-[10px] uppercase tracking-widest font-bold">{row.parentGuest.status.replace('_', ' ')}</td>}
                       {exportCols.telefono && <td className="py-3 px-2 text-slate-600 font-mono text-[11px]">{row.isMain ? (row.parentGuest.phone || '-') : ''}</td>}
-                      {isPremium && exportCols.mesa && <td className="py-3 px-2 text-slate-800 font-bold">{row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : <span className="text-slate-400 font-normal italic">Sin mesa</span>}</td>}
+                      {isPremium && exportCols.mesa && <td className="py-3 px-2 text-slate-800 font-bold">{row.assignedTableId ? (tables?.find(t => String(t.id) === String(row.assignedTableId))?.name || row.assignedTableId) : <span className="text-slate-400 font-normal italic">Sin mesa</span>}</td>}
                     </tr>
                   )
                 })}
@@ -1889,9 +1912,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
                     {isPremium && (
                       <td className="px-4 py-3 text-center">
-                        {row.parentGuest.tableId ? (
+                        {row.assignedTableId ? (
                           <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold border border-slate-200 dark:border-white/10 shadow-sm">
-                            {tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId}
+                            {tables?.find(t => String(t.id) === String(row.assignedTableId))?.name || row.assignedTableId}
                           </span>
                         ) : <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">No asignado</span>}
                       </td>
@@ -1943,7 +1966,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               flattenedList.map((row) => {
                 const isExpanded = expandedMobileRow === row._rowId;
                 const isCancelado = row.parentGuest.status === 'cancelado';
-                const tableName = row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : 'Sin mesa asignada';
+                const tableName = row.assignedTableId ? (tables?.find(t => String(t.id) === String(row.assignedTableId))?.name || row.assignedTableId) : 'Sin mesa asignada';
 
                 return (
                   <div key={`mobile_${row._rowId}`} className={`rounded-2xl transition-all duration-300 overflow-hidden border ${row.isMain ? 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 shadow-sm mt-4' : 'bg-slate-50/60 dark:bg-white/[0.03] border-l-[3px] border-l-indigo-200 dark:border-l-amber-500/40 border-y-transparent border-r-transparent ml-4 rounded-l-none'} ${isCancelado ? 'opacity-60' : ''}`}>
