@@ -709,7 +709,7 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
 // ==========================================
 // --- COMPONENTE: RECEPCIÓN Y ESCÁNER (CÁMARA CUADRADA 100%) ---
 // ==========================================
-const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, simulateSharedMode, addNotification, eventName }) => {
+const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, simulateSharedMode, addNotification }) => {
   const [forceMobile, setForceMobile] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
   
@@ -735,21 +735,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
-
-  // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE (REEMPLAZA AL ANTIGUO SHOWPROTOCOL)
-  const [showTutorial, setShowTutorial] = useState(() => {
-    // Si estamos en "Modo Compartido" (Staff), forzamos a que lo vean, o si no lo han visto nunca
-    if (isSharedMode) return true;
-    const eventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
-    const hasSeen = localStorage.getItem(`baulia_tutorial_qr_${eventId}`);
-    return !hasSeen;
-  });
-
-  const handleCloseTutorial = () => {
-    const eventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
-    localStorage.setItem(`baulia_tutorial_qr_${eventId}`, 'true');
-    setShowTutorial(false);
-  };
+  const [showProtocol, setShowProtocol] = useState(isSharedMode);
 
   const [cardData, setCardData] = useState({ 
     status: 'idle', 
@@ -826,7 +812,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   const processEntry = async (code) => {
     try {
       // 🔴 1. PREGUNTAMOS A LA BASE DE DATOS EL PLAN Y LA HORA EXACTA
-      const eventSnap = await getDoc(doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : ''));
+      const eventSnap = await getDoc(doc(db, "eventos", ID_DEL_EVENTO));
       if (eventSnap.exists()) {
         const evData = eventSnap.data();
 
@@ -868,7 +854,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
         return;
       }
 
-      const docRef = doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : '', "invitados", foundParentId);
+      const docRef = doc(db, "eventos", ID_DEL_EVENTO, "invitados", foundParentId);
       const docSnap = await getDoc(docRef);
       
       if (!docSnap.exists()) {
@@ -916,7 +902,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   const handleManualEntryFromList = async (parentGuest, subGuest) => {
     if (subGuest.entered) return;
     try {
-      const docRef = doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : '', "invitados", parentGuest.id);
+      const docRef = doc(db, "eventos", ID_DEL_EVENTO, "invitados", parentGuest.id);
       const docSnap = await getDoc(docRef);
       if (!docSnap.exists()) return;
       const freshParent = { id: docSnap.id, ...docSnap.data() };
@@ -929,11 +915,11 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     } catch(e){}
   };
 
+  // 🔴 CORRECCIÓN: URL DEL PANEL BAULIA
   const getCleanBaseUrl = () => window.location.hostname.includes('localhost') ? window.location.origin : 'https://panel.baulia.com';
 
   const copyStaffLink = () => {
-    const eventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : '';
-    const url = `${getCleanBaseUrl()}/?modo=puerta&e=${eventId}`;
+    const url = `${getCleanBaseUrl()}/?modo=puerta&e=${ID_DEL_EVENTO}`;
     navigator.clipboard.writeText(url).then(() => {
       if (addNotification) addNotification('¡Copiado!', 'Enlace de Recepción copiado.', 'success');
     }).catch(() => {
@@ -950,8 +936,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   };
 
   const shareStaffLinkWhatsApp = () => {
-    const eventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : '';
-    const url = `${getCleanBaseUrl()}/?modo=puerta&e=${eventId}`;
+    const url = `${getCleanBaseUrl()}/?modo=puerta&e=${ID_DEL_EVENTO}`;
     const msg = `📱 *Recepción EventMaster*\n\nAccede al escáner de puerta aquí:\n${url}`;
     window.open(`https://wa.me/${staffPhone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
   };
@@ -976,11 +961,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
         <div className="h-full flex flex-col items-center justify-center p-6 animate-in fade-in">
            <div className="bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-xl max-w-lg w-full text-center border border-slate-200 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-3 bg-emerald-500"></div>
-              <div className="absolute top-4 right-4">
-                 {/* 🔴 BOTÓN DE AYUDA (TUTORIAL QR) ESCRITORIO */}
-                 <button onClick={() => setShowTutorial(true)} className="flex items-center justify-center w-8 h-8 bg-slate-100 border border-slate-200 text-slate-500 rounded-full text-xs font-black hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 shadow-sm transition-colors" title="Ver Guía de Uso">?</button>
-              </div>
-              <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-emerald-100 mt-2">
+              <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-emerald-100">
                  <Smartphone size={48} />
               </div>
               <h2 className="text-3xl font-black text-slate-800 mb-3 tracking-tight">Escáner Móvil</h2>
@@ -1001,87 +982,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
               
               <button onClick={() => setForceMobile(true)} className="text-[10px] font-bold text-slate-400 hover:text-emerald-600 underline">Forzar vista de escáner aquí en la computadora</button>
            </div>
-           
-           {/* 🔴 MODAL MAGAZINE: GUÍA EDITORIAL (MOSTRADO TAMBIÉN EN DESKTOP) */}
-           {showTutorial && (
-            <div className="fixed inset-0 z-[999999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors text-left">
-              <div className="bg-[#fcfbf9] rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl border border-transparent animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
-                <div className="px-6 sm:px-8 py-5 border-b border-amber-200/50 flex justify-between items-center shrink-0">
-                  <div className="flex items-center gap-3">
-                    <span className="text-amber-500 font-black tracking-[0.2em] text-[10px] uppercase hidden sm:block">Baulia</span>
-                    <span className="font-editorial text-slate-800 italic text-lg">Magazine</span>
-                  </div>
-                  <button onClick={handleCloseTutorial} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 flex items-center transition-colors">
-                    Cerrar <span className="hidden sm:inline ml-1">Edición</span> <X size={14} className="ml-2" />
-                  </button>
-                </div>
-                <div className="p-6 sm:p-10 overflow-y-auto custom-scrollbar flex-1 relative">
-                  <div className="mb-12">
-                    <h1 className="font-black text-5xl sm:text-7xl text-slate-900 tracking-tighter leading-[0.8]">
-                      Protocolo<br /><span className="font-editorial font-normal italic text-amber-500">de entrada.</span>
-                    </h1>
-                    <div className="mt-8 border-l-[3px] border-amber-500 pl-4 animate-in slide-in-from-left-4 duration-700">
-                      <p className="text-sm sm:text-base text-slate-600 font-light leading-relaxed">
-                        Bienvenido a la primera línea de recepción.<br/>
-                        La puerta es la primera gran impresión de <strong className="font-bold text-slate-900 uppercase tracking-wider">{eventName || 'tu evento'}</strong>.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-16">
-                    <div className="space-y-10 sm:space-y-12">
-                      <div>
-                        <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">01. DELEGACIÓN OPERATIVA</p>
-                        <div className="flex items-center gap-3 mb-3">
-                          <Share2 size={24} className="text-indigo-500" />
-                          <h3 className="font-bold text-lg sm:text-xl text-slate-900 tracking-tight">Comparte el acceso</h3>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed mb-4">
-                          Tú no estarás en la puerta recibiendo invitados. Copia el enlace de esta pestaña y envíaselo a tus <i>Hostesses</i> o al equipo de seguridad. Ellos podrán abrir esta herramienta desde sus celulares sin tener que acceder al resto de tu panel de administración.
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">02. VERIFICACIÓN INSTANTÁNEA</p>
-                        <div className="flex items-center gap-3 mb-3">
-                          <ScanLine size={24} className="text-indigo-500" />
-                          <h3 className="font-bold text-lg sm:text-xl text-slate-900 tracking-tight">Escáner Dinámico</h3>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed">
-                          El equipo solo debe apuntar la cámara al código QR del invitado. En milisegundos, la pantalla destellará confirmando el acceso, mostrará a nombre de quién está el pase, su número de mesa y evitará boletos duplicados mediante una alerta.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="space-y-10 sm:space-y-12">
-                      <div>
-                        <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">03. FLEXIBILIDAD (PLAN B)</p>
-                        <div className="flex items-center gap-3 mb-3">
-                          <Search size={24} className="text-indigo-500" />
-                          <h3 className="font-bold text-lg sm:text-xl text-slate-900 tracking-tight">Modo Manual</h3>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed mb-4">
-                          ¿Un invitado se quedó sin pila o no encuentra su pase? No hay problema. Utiliza el buscador manual para encontrar su nombre en la lista. Desde ahí, podrás otorgarle el acceso tocando un solo botón.
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">04. RESILIENCIA TECNOLÓGICA</p>
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="bg-emerald-100 text-emerald-600 p-2 rounded-full"><WifiOff size={16} /></div>
-                          <h3 className="font-bold text-lg sm:text-xl text-slate-900 tracking-tight">Tecnología "Offline"</h3>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed mb-4">
-                          <b>Baulia es a prueba de fallos:</b> El escáner continuará leyendo accesos y registrando horas de entrada aunque se pierda la conexión a internet. En cuanto el dispositivo recupere señal, los datos se sincronizarán mágicamente con tu Monitor En Vivo.
-                        </p>
-                        <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl space-y-2 mt-4">
-                          <p className="text-[10px] font-black uppercase text-amber-600 tracking-widest mb-2">Para el Staff (Reglas de Oro):</p>
-                          <p className="text-xs text-slate-700"><b>1. No cierres esta pestaña.</b> Puedes bloquear la pantalla pero no cierres el navegador.</p>
-                          <p className="text-xs text-slate-700"><b>2. Evita abrir otras Apps.</b> Usar Instagram o la cámara normal consume memoria y podría reiniciar este escáner.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-           )}
         </div>
      );
   }
@@ -1114,17 +1014,11 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           <h2 className="text-2xl font-bold text-slate-800">{isSharedMode ? 'Recepción VIP' : 'Control de Accesos'}</h2>
           <p className="text-slate-500 text-sm mt-1">Escaneo continuo automático.</p>
         </div>
-        <div className="flex items-center gap-2">
-          {/* 🔴 BOTÓN DE AYUDA (TUTORIAL QR) MÓVIL/COMPARTIDO */}
-          <button onClick={() => setShowTutorial(true)} className="p-3 bg-indigo-50 text-indigo-500 rounded-full hover:bg-indigo-100 hover:text-indigo-600 transition-colors shadow-sm" title="Ver Guía de Uso">
-             <span className="font-black">?</span>
+        {!isSharedMode && (
+          <button onClick={() => setShowShareModal(true)} className="p-3 bg-emerald-100 text-emerald-700 rounded-full hover:bg-emerald-200 transition-colors shadow-sm" title="Compartir a Staff">
+            <Link size={20} /> 
           </button>
-          {!isSharedMode && (
-            <button onClick={() => setShowShareModal(true)} className="p-3 bg-emerald-100 text-emerald-700 rounded-full hover:bg-emerald-200 transition-colors shadow-sm" title="Compartir a Staff">
-              <Link size={20} /> 
-            </button>
-          )}
-        </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-4 flex-1">
@@ -1263,83 +1157,33 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           </div>
         </div>
       )}
-
-      {/* 🔴 MODAL MAGAZINE: GUÍA EDITORIAL DE CONTROL DE ACCESO (VISTA CELULAR) */}
-      {showTutorial && (
-        <div className="fixed inset-0 z-[999999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors text-left">
-          <div className="bg-[#fcfbf9] dark:bg-[#0a0a0a] rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
-            <div className="px-6 sm:px-8 py-5 border-b border-amber-200/50 dark:border-white/5 flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-3">
-                <span className="text-amber-500 font-black tracking-[0.2em] text-[10px] uppercase hidden sm:block">Baulia</span>
-                <span className="font-editorial text-slate-800 dark:text-white italic text-lg">Magazine</span>
-              </div>
-              <button onClick={handleCloseTutorial} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center transition-colors">
-                Cerrar <span className="hidden sm:inline ml-1">Edición</span> <X size={14} className="ml-2" />
-              </button>
+      {/* 🔴 MODAL DE PROTOCOLO OFFLINE PARA EL STAFF */}
+      {showProtocol && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-white/10 flex flex-col relative">
+            <div className="bg-amber-500 p-8 text-center text-slate-900 relative overflow-hidden">
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+              <ShieldCheck size={48} className="mx-auto mb-3 opacity-90 relative z-10"/>
+              <h3 className="text-xl font-black uppercase tracking-widest relative z-10">Protocolo de Puerta</h3>
             </div>
-            <div className="p-6 sm:p-10 overflow-y-auto custom-scrollbar flex-1 relative">
-              <div className="mb-12">
-                <h1 className="font-black text-5xl sm:text-7xl text-slate-900 dark:text-white tracking-tighter leading-[0.8]">
-                  Protocolo<br /><span className="font-editorial font-normal italic text-amber-500">de entrada.</span>
-                </h1>
-                <div className="mt-8 border-l-[3px] border-amber-500 pl-4 animate-in slide-in-from-left-4 duration-700">
-                  <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-light leading-relaxed">
-                    Bienvenido a la primera línea de recepción.<br/>
-                    La puerta es la primera gran impresión de <strong className="font-bold text-slate-900 dark:text-white uppercase tracking-wider">{eventName || 'tu evento'}</strong>.
-                  </p>
+            <div className="p-6 sm:p-8 space-y-5 text-slate-600 dark:text-slate-300 text-sm font-medium leading-relaxed">
+              <p>Para garantizar que el escáner funcione a la perfección, <b className="text-slate-900 dark:text-white">incluso si se cae el internet</b> en la locación, sigue estas dos reglas de oro:</p>
+              
+              <div className="bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 p-4 rounded-xl space-y-4 shadow-inner">
+                <div className="flex items-start">
+                  <span className="bg-amber-100 text-amber-600 w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 mr-3 mt-0.5">1</span> 
+                  <p><b>No cierres esta pestaña.</b> Puedes bloquear la pantalla de tu celular y guardarlo, pero no cierres el navegador.</p>
+                </div>
+                <div className="flex items-start">
+                  <span className="bg-amber-100 text-amber-600 w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 mr-3 mt-0.5">2</span> 
+                  <p><b>Evita abrir otras Apps.</b> Usar Instagram o la cámara normal de tu celular consume memoria y podría reiniciar este escáner.</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-16">
-                <div className="space-y-10 sm:space-y-12">
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">01. DELEGACIÓN OPERATIVA</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <Share2 size={24} className="text-indigo-500 dark:text-amber-500" />
-                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">Comparte el acceso</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      Tú no estarás en la puerta recibiendo invitados. Copia el enlace de esta pestaña y envíaselo a tus <i>Hostesses</i> o al equipo de seguridad. Ellos podrán abrir esta herramienta desde sus celulares sin tener que acceder al resto de tu panel de administración.
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">02. VERIFICACIÓN INSTANTÁNEA</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <ScanLine size={24} className="text-indigo-500 dark:text-amber-500" />
-                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">Escáner Dinámico</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
-                      El equipo solo debe apuntar la cámara al código QR del invitado. En milisegundos, la pantalla destellará confirmando el acceso, mostrará a nombre de quién está el pase, su número de mesa y evitará boletos duplicados mediante una alerta.
-                    </p>
-                  </div>
-                </div>
-                <div className="space-y-10 sm:space-y-12">
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">03. FLEXIBILIDAD (PLAN B)</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <Search size={24} className="text-indigo-500 dark:text-amber-500" />
-                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">Modo Manual</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      ¿Un invitado se quedó sin pila o no encuentra su pase? No hay problema. Utiliza el buscador manual para encontrar su nombre en la lista. Desde ahí, podrás otorgarle el acceso tocando un solo botón.
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">04. RESILIENCIA TECNOLÓGICA</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 p-2 rounded-full"><WifiOff size={16} /></div>
-                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">Tecnología "Offline"</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      <b>Baulia es a prueba de fallos:</b> El escáner continuará leyendo accesos y registrando horas de entrada aunque se pierda la conexión a internet. En cuanto el dispositivo recupere señal, los datos se sincronizarán mágicamente con tu Monitor En Vivo.
-                    </p>
-                    <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 p-4 rounded-xl space-y-2 mt-4">
-                      <p className="text-[10px] font-black uppercase text-amber-600 dark:text-amber-500 tracking-widest mb-2">Para el Staff (Reglas de Oro):</p>
-                      <p className="text-xs text-slate-700 dark:text-slate-300"><b>1. No cierres esta pestaña.</b> Puedes bloquear la pantalla pero no cierres el navegador.</p>
-                      <p className="text-xs text-slate-700 dark:text-slate-300"><b>2. Evita abrir otras Apps.</b> Usar Instagram o la cámara normal consume memoria y podría reiniciar este escáner.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            </div>
+            <div className="p-6 pt-0 mt-2">
+              <button onClick={() => setShowProtocol(false)} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-transform shadow-xl">
+                Entendido, Iniciar Escáner
+              </button>
             </div>
           </div>
         </div>
