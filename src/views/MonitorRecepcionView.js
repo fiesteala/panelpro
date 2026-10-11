@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
-import { Activity, Users, CheckCircle, Clock, ShieldCheck, ArrowUpRight, Share2, ScanLine, Search, WifiOff, X } from 'lucide-react';
+import { Activity, Users, CheckCircle, Clock, ShieldCheck, ArrowUpRight } from 'lucide-react';
 import { db } from '../firebase';
 
 // ==========================================
@@ -10,19 +10,6 @@ const MonitorRecepcionView = ({ eventId, eventName }) => {
   const [stats, setStats] = useState({ esperados: 0, ingresados: 0, porcentaje: 0 });
   const [llegadas, setLlegadas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE (CONTROL QR)
-  const [showTutorial, setShowTutorial] = useState(() => {
-    const activeEventId = eventId || (typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test');
-    const hasSeen = localStorage.getItem(`baulia_tutorial_qr_${activeEventId}`);
-    return !hasSeen;
-  });
-
-  const handleCloseTutorial = () => {
-    const activeEventId = eventId || (typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test');
-    localStorage.setItem(`baulia_tutorial_qr_${activeEventId}`, 'true');
-    setShowTutorial(false);
-  };
 
   useEffect(() => {
     if (!eventId) return;
@@ -86,7 +73,7 @@ const MonitorRecepcionView = ({ eventId, eventName }) => {
   }
 
   return (
-    <div className="bg-slate-50 dark:bg-[#050505] p-4 sm:p-8 min-h-screen text-slate-900 dark:text-white font-sans animate-in fade-in transition-colors duration-500 relative">
+    <div className="bg-slate-50 dark:bg-[#050505] p-4 sm:p-8 min-h-screen text-slate-900 dark:text-white font-sans animate-in fade-in transition-colors duration-500">
       {/* CABECERA */}
       <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-8 pb-6 border-b border-slate-200 dark:border-white/10 gap-4 transition-colors">
           <div>
@@ -100,14 +87,9 @@ const MonitorRecepcionView = ({ eventId, eventName }) => {
               <h2 className="text-3xl sm:text-4xl font-editorial font-black text-slate-900 dark:text-white transition-colors">{eventName || 'Monitor de Recepción'}</h2>
               <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Control de aforo Black Label</p>
           </div>
-          <div className="flex items-center gap-3">
-              {/* 🔴 BOTÓN DE AYUDA (TUTORIAL QR) */}
-              <button onClick={() => setShowTutorial(true)} className="flex items-center justify-center w-8 h-8 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 rounded-full text-xs font-black hover:bg-indigo-50 dark:hover:bg-amber-500/10 hover:text-indigo-600 dark:hover:text-amber-500 hover:border-indigo-200 dark:hover:border-amber-500/20 shadow-sm transition-colors" title="Ver Guía de Uso">?</button>
-              
-              <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-4 py-2 rounded-xl flex items-center shadow-sm dark:shadow-lg transition-colors">
-                  <ShieldCheck size={18} className="text-amber-600 dark:text-amber-500 mr-2" />
-                  <span className="text-amber-600 dark:text-amber-500 font-black text-xs uppercase tracking-widest">Protocolo Activo</span>
-              </div>
+          <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-4 py-2 rounded-xl flex items-center shadow-sm dark:shadow-lg transition-colors">
+              <ShieldCheck size={18} className="text-amber-600 dark:text-amber-500 mr-2" />
+              <span className="text-amber-600 dark:text-amber-500 font-black text-xs uppercase tracking-widest">Protocolo Activo</span>
           </div>
       </div>
 
@@ -200,112 +182,6 @@ const MonitorRecepcionView = ({ eventId, eventName }) => {
           </div>
 
       </div>
-
-      {/* 🔴 MODAL MAGAZINE: GUÍA EDITORIAL DE CONTROL DE ACCESO */}
-      {showTutorial && (
-        <div className="fixed inset-0 z-[999999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors">
-          <div className="bg-[#fcfbf9] dark:bg-[#0a0a0a] rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
-            
-            {/* CABECERA EDITORIAL */}
-            <div className="px-6 sm:px-8 py-5 border-b border-amber-200/50 dark:border-white/5 flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-3">
-                <span className="text-amber-500 font-black tracking-[0.2em] text-[10px] uppercase hidden sm:block">Baulia</span>
-                <span className="font-editorial text-slate-800 dark:text-white italic text-lg">Magazine</span>
-              </div>
-              <button onClick={handleCloseTutorial} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center transition-colors">
-                Cerrar <span className="hidden sm:inline ml-1">Edición</span> <X size={14} className="ml-2" />
-              </button>
-            </div>
-
-            {/* CUERPO DEL MAGAZINE */}
-            <div className="p-6 sm:p-10 overflow-y-auto custom-scrollbar flex-1 relative">
-              {/* TÍTULO GIGANTE */}
-              <div className="mb-12">
-                <h1 className="font-black text-5xl sm:text-7xl text-slate-900 dark:text-white tracking-tighter leading-[0.8]">
-                  Protocolo<br />
-                  <span className="font-editorial font-normal italic text-amber-500">de entrada.</span>
-                </h1>
-                
-                {/* MENSAJE DE BIENVENIDA PERSONALIZADO */}
-                <div className="mt-8 border-l-[3px] border-amber-500 pl-4 animate-in slide-in-from-left-4 duration-700">
-                  <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-light leading-relaxed">
-                    Bienvenido a la primera línea de recepción.<br/>
-                    La puerta es la primera gran impresión de <strong className="font-bold text-slate-900 dark:text-white uppercase tracking-wider">{eventName || 'tu evento'}</strong>.
-                  </p>
-                </div>
-              </div>
-
-              {/* GRID DE DOS COLUMNAS ESTILO REVISTA */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-16">
-                
-                {/* COLUMNA IZQUIERDA */}
-                <div className="space-y-10 sm:space-y-12">
-                  
-                  {/* SECCIÓN 1: DELEGAR */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">01. DELEGACIÓN OPERATIVA</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <Share2 size={24} className="text-indigo-500 dark:text-amber-500" />
-                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">Comparte el acceso</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      Tú no estarás en la puerta recibiendo invitados. Dirígete a la pestaña <b>"Control Puerta (QR)"</b>, copia ese enlace y envíaselo a tus <i>Hostesses</i> o al equipo de seguridad. Ellos podrán abrir esa herramienta desde sus celulares sin tener que acceder al resto de tu panel de administración privado.
-                    </p>
-                  </div>
-
-                  {/* SECCIÓN 2: ESCANEO */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">02. VERIFICACIÓN INSTANTÁNEA</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <ScanLine size={24} className="text-indigo-500 dark:text-amber-500" />
-                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">Escáner Dinámico</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
-                      El equipo solo debe apuntar la cámara al código QR del invitado. En milisegundos, la pantalla destellará confirmando el acceso, mostrará a nombre de quién está el pase, su número de mesa y evitará boletos duplicados mediante una alerta de "Pase ya utilizado".
-                    </p>
-                  </div>
-
-                </div>
-
-                {/* COLUMNA DERECHA */}
-                <div className="space-y-10 sm:space-y-12">
-
-                  {/* SECCIÓN 3: BÚSQUEDA MANUAL */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">03. FLEXIBILIDAD (PLAN B)</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <Search size={24} className="text-indigo-500 dark:text-amber-500" />
-                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">Modo Manual</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      ¿Un invitado se quedó sin pila o no encuentra su pase? No hay problema. Utiliza el buscador manual para encontrar su nombre en la lista. Desde ahí, podrás otorgarle el acceso tocando un solo botón, manteniendo la fluidez de la fila intacta.
-                    </p>
-                  </div>
-
-                  {/* SECCIÓN 4: OFFLINE */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">04. RESILIENCIA TECNOLÓGICA</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 p-2 rounded-full">
-                         <WifiOff size={16} />
-                      </div>
-                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">Tecnología "Offline"</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      Los eventos de lujo a veces ocurren en haciendas o jardines con señal celular intermitente. <br/><br/>
-                      <b>Baulia es a prueba de fallos:</b> El escáner continuará leyendo accesos y registrando horas de entrada aunque se pierda la conexión a internet. En cuanto el dispositivo recupere un poco de señal, los datos se sincronizarán mágicamente con tu <b>Monitor En Vivo</b>.
-                    </p>
-                  </div>
-
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-      )}
-
     </div>
   );
 };
