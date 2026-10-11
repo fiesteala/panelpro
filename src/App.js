@@ -2348,11 +2348,11 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
   const [guestSeleccionado, setGuestSeleccionado] = useState(null);
   const [smartAssign, setSmartAssign] = useState(null);
   const [tableToEdit, setTableToEdit] = useState(null);
-  // 🔴 NUEVOS ESTADOS PARA TU IDEA: MODO SEPARADOR
   const [isSplitMode, setIsSplitMode] = useState(false);
   const [splitAmount, setSplitAmount] = useState(1);
   const [guestSplitPrompt, setGuestSplitPrompt] = useState(null);
   const [autoAssignConflict, setAutoAssignConflict] = useState(null);
+  const [guestArrastrado, setGuestArrastrado] = useState(null);
   const [configActual, setCurrentConfig] = useState({
     tipo: 'redonda', 
     capacidadRedonda: 10,
@@ -2446,8 +2446,8 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
    const generarMesas = async () => {
       if (creationMode === 'edit' && tableToEdit) {
          const capacidad = calcularCapacidad(configActual);
-         const assignedGuests = safeGuests.filter(g => g.tableId === tableToEdit.id);
-         const usedChairs = assignedGuests.reduce((sum, g) => sum + g.passes, 0);
+         const assignedGuests = safeGuests.filter(g => String(g.tableId) === String(tableToEdit.id));
+         const usedChairs = assignedGuests.reduce((sum, g) => sum + Number(g.passes), 0);
          if (capacidad < usedChairs) {
               if(addNotification) addNotification('Acción Denegada', `La mesa ya tiene ${usedChairs} personas asignadas. Libera invitados primero.`, 'warning');
               return;
@@ -2515,14 +2515,12 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       let promesas = [];
       let changesMade = false;
 
-      // 1. REGLA DE ORO: Familias grandes primero (Ordenamiento Pesado)
       let invitadosAProcesar = [...invitadosPendientes].sort((a, b) => Number(b.passes) - Number(a.passes));
 
       for (let i = 0; i < invitadosAProcesar.length; i++) {
           const guest = invitadosAProcesar[i];
           const pases = Number(guest.passes);
 
-          // Escanear espacios reales en este milisegundo de ejecución
           let mesasConEspacio = safeTables.map(t => {
               const sentados = currentGuests.filter(g => String(g.tableId) === String(t.id));
               const ocupadas = sentados.reduce((sum, g) => sum + Number(g.passes), 0);
@@ -2530,7 +2528,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
           }).filter(t => t.libres >= pases);
 
           if (mesasConEspacio.length > 0) {
-              // 2. BEST-FIT: Buscar la mesa que deje el hueco más exacto (menor sobrante posible)
               mesasConEspacio.sort((a, b) => a.libres - b.libres);
               const bestTable = mesasConEspacio[0];
 
@@ -2541,39 +2538,35 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                   promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), currentGuests[guestIndex]));
               }
           } else {
-              // 3. INTERCEPCIÓN (La mesa no alcanza, toca preguntar al humano)
               const mesasRestantes = safeTables.map(t => {
                   const sentados = currentGuests.filter(g => String(g.tableId) === String(t.id));
                   const ocupadas = sentados.reduce((sum, g) => sum + Number(g.passes), 0);
                   return Number(t.capacity) - ocupadas;
               });
               const maxHueco = Math.max(...mesasRestantes, 0);
-
               const minSplit = Math.max(1, Number(guest.passes) - maxHueco);
 
               setAutoAssignConflict({ guest, maxHueco, minSplit });
               setSplitAmount(minSplit);
               
-              if (promesas.length > 0) await Promise.all(promesas); // Guarda progreso hasta el choque
-              return; // Detenemos el loop
+              if (promesas.length > 0) await Promise.all(promesas); 
+              return; 
           }
       }
 
       if (changesMade) {
          await Promise.all(promesas);
-         if(addNotification) addNotification('Auto-Acomodo Exitoso', 'El algoritmo Best-Fit completó el montaje.', 'success');
+         if(addNotification) addNotification('Auto-Acomodo Exitoso', 'El algoritmo Baulia completó el montaje inteligente.', 'success');
       }
    };
 
    const handleAutoAssignSplit = async (amount) => {
        const { guest } = autoAssignConflict;
-       
        const originalId = guest.parentId || guest.id;
        const newGuestId = `${originalId}_split_${Date.now().toString().slice(-4)}`;
        const baseName = guest.name.replace(' (Separado)', '');
        
        const newGuest = { ...guest, id: newGuestId, parentId: originalId, name: `${baseName} (Separado)`, passes: amount, childrenPasses: 0, tableId: null };
-       
        const subG = Array.isArray(guest.subGuests) ? guest.subGuests : [];
        const movingSubGuest = subG.length > 0 ? subG.slice(-amount) : [];
        const remainingSubGuests = subG.length > 0 ? subG.slice(0, subG.length - amount) : [];
@@ -2589,7 +2582,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
        setAutoAssignConflict(null);
        if(addNotification) addNotification('Familia Dividida', 'Retomando el algoritmo...', 'info');
        
-       // El sistema retoma el auto-acomodo por sí solo tras 800ms
        setTimeout(() => {
            const botonAuto = document.getElementById('btn-autoacomodar');
            if (botonAuto) botonAuto.click();
@@ -2636,41 +2628,31 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
           const parentId = guest.parentId || (guest.id.includes('_split_') ? guest.id.split('_split_')[0] : null);
           
           if (parentId) {
-              // Es una fracción separada. Buscamos a su familia principal.
-              // OJO: La familia principal puede estar en la misma lista a vaciar o ya estar en "No Asignados"
               let mainFamily = safeGuests.find(g => String(g.id) === String(parentId));
-              
               if (mainFamily) {
-                  // Acumulamos los pases a la familia principal
                   const currentPasses = familiasPrincipalesActualizadas[parentId]?.passes || Number(mainFamily.passes);
                   const currentSubGuests = familiasPrincipalesActualizadas[parentId]?.subGuests || mainFamily.subGuests || [];
                   
                   familiasPrincipalesActualizadas[parentId] = {
                       ...mainFamily,
-                      tableId: null, // Lo mandamos a No Asignados
+                      tableId: null,
                       passes: currentPasses + Number(guest.passes),
                       subGuests: [...currentSubGuests, ...(guest.subGuests || [])]
                   };
-                  
-                  // Eliminamos la fracción separada
                   promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id))));
               } else {
-                  // Si por alguna razón no existe la familia principal (no debería pasar), solo le quitamos la mesa
                   promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), { ...guest, tableId: null }));
               }
           } else {
-              // Es un invitado normal o una familia principal. Solo le quitamos la mesa, a menos que ya lo hayamos actualizado.
               if (!familiasPrincipalesActualizadas[guest.id]) {
                   familiasPrincipalesActualizadas[guest.id] = { ...guest, tableId: null };
               }
           }
       }
 
-      // Guardamos las familias principales actualizadas (y los invitados normales)
       Object.values(familiasPrincipalesActualizadas).forEach(updatedGuest => {
           promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(updatedGuest.id)), updatedGuest));
       });
-
       await Promise.all(promesas);
    };
 
@@ -2703,13 +2685,18 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
    const handleDragStart = (e, guestId) => { 
      e.dataTransfer.effectAllowed = 'move';
      e.dataTransfer.setData('text/plain', String(guestId));
-     e.dataTransfer.setData('guestId', String(guestId)); // Para Chrome/Firefox
-     setGuestSeleccionado(null); 
+     e.dataTransfer.setData('guestId', String(guestId));
+     setGuestSeleccionado(null);
+     setGuestArrastrado(String(guestId)); // 🔴 Luz dorada ON
+   };
+   const handleDragEnd = () => {
+     setGuestArrastrado(null); // 🔴 Luz dorada OFF
    };
    const handleDrop = (e, targetTableId) => { 
      e.preventDefault(); 
      const guestId = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('guestId');
-     if(guestId) moverInvitado(guestId, targetTableId); 
+     if(guestId) moverInvitado(guestId, targetTableId);
+     setGuestArrastrado(null);
    };
    const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
 
@@ -2732,40 +2719,34 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
            usedChairs = safeGuests.filter(g => String(g.tableId) === String(targetTableId)).reduce((sum, g) => sum + (Number(g.passes) || 1), 0);
       }
 
-      // 🔴 LÓGICA DE FUSIÓN (JUNTAR FAMILIAS SEPARADAS)
+      // FUSION DE FAMILIAS
       const parentId = guest.parentId || (guest.id.includes('_split_') ? guest.id.split('_split_')[0] : null);
       if (parentId) {
           const mainFamily = safeGuests.find(g => String(g.id) === String(parentId));
-          // Verificamos si la familia principal existe y está en el mismo destino (misma mesa o ambos en 'No Asignados')
           if (mainFamily && String(mainFamily.tableId) === String(targetTableId)) {
               try {
                   const nuevosPases = Number(mainFamily.passes) + pasesDelInvitado;
                   const newSubGuests = [...(mainFamily.subGuests || []), ...(guest.subGuests || [])];
-                  
-                  // Actualizamos a la familia principal
                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(mainFamily.id)), { 
                       ...mainFamily, 
                       passes: nuevosPases,
                       subGuests: newSubGuests
                   });
-                  // Eliminamos la fracción separada
                   await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)));
                   setGuestSeleccionado(null);
                   if(addNotification) addNotification('Familia Unida', `Se volvió a agrupar a la familia ${mainFamily.name}.`, 'success');
-                  return; // Terminamos aquí porque ya se fusionaron
+                  return; 
               } catch(e) { console.error("Error al fusionar familias:", e); }
           }
       }
 
       const isFull = isToTable && (usedChairs + pasesDelInvitado > Number(table.capacity));
 
-      // 🔴 AQUÍ APLICAMOS TU IDEA: MODO SEPARADOR ON/OFF
       if ((isSplitMode && pasesDelInvitado > 1) || isFull) {
            if (pasesDelInvitado > 1 && (!isToTable || (Number(table.capacity) - usedChairs) >= 1)) {
-               // Calculamos matemáticamente el mínimo requerido
                const minSplit = isFull ? Math.max(1, pasesDelInvitado - (Number(table.capacity) - usedChairs)) : 1;
                setGuestSplitPrompt({ guest, targetTableId, table, usedChairs, isFull, minSplit });
-               setSplitAmount(minSplit); // Por defecto separamos el mínimo
+               setSplitAmount(minSplit); 
                setGuestSeleccionado(null);
                return;
            } else if (isFull) {
@@ -2775,7 +2756,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
            }
       }
 
-      // Si no hace falta separar (o el modo está apagado y hay espacio), se mueven todos
       try {
         await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), { ...guest, tableId: targetTableId });
       } catch(e) { console.error(e); }
@@ -2788,14 +2768,12 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
          if (amount === 'all') {
               await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), { ...guest, tableId: targetTableId });
          } else {
-              // Validamos que el número seleccionado quepa en la mesa
               if (table && usedChairs + amount > Number(table.capacity)) {
                   if(addNotification) addNotification('Mesa Llena', `Solo quedan ${Number(table.capacity) - usedChairs} sillas en ${table.name}.`, 'warning');
               } else {
-                  // Creamos un ID vinculado a la familia original
                   const originalId = guest.parentId || guest.id;
                   const newGuestId = `${originalId}_split_${Date.now().toString().slice(-4)}`;
-                  const baseName = guest.name.replace(' (Separado)', ''); // Evitamos "Familia (Separado) (Separado)"
+                  const baseName = guest.name.replace(' (Separado)', '');
                   const newGuest = { ...guest, id: newGuestId, parentId: originalId, name: `${baseName} (Separado)`, passes: amount, childrenPasses: 0, tableId: targetTableId };
                   
                   const subG = Array.isArray(guest.subGuests) ? guest.subGuests : [];
@@ -2962,7 +2940,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         </div>
         
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-           {/* 🔴 BOTÓN SWITCH MODO SEPARADOR (TIPO BODA) */}
            <button onClick={() => setIsSplitMode(!isSplitMode)} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2 bg-white dark:bg-[#111] border-2 border-slate-200 dark:border-white/10 rounded-[2rem] hover:border-indigo-300 dark:hover:border-amber-500/50 transition-colors shadow-sm">
               <span className="text-[11px] font-black text-slate-600 dark:text-slate-300 tracking-wider mr-3 uppercase">Separador</span>
               <div className={`w-[42px] h-[24px] rounded-full p-[3px] transition-colors ${isSplitMode ? 'bg-indigo-500 dark:bg-amber-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
@@ -2985,10 +2962,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         </div>
       </div>
 
-      {/* 🔴 CONTENEDOR PRINCIPAL: PANELES DE MESAS E INVITADOS */}
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 flex-1 overflow-hidden z-10 relative">
-        
-        {/* PANEL: INVITADOS SIN MESA (Carrusel horizontal en móvil / Columna en PC) */}
         <div 
           className={`w-full lg:w-72 bg-white dark:bg-[#0a0a0a] rounded-2xl lg:rounded-3xl border flex flex-col transition-all duration-300 shadow-sm dark:shadow-2xl ${guestSeleccionado ? 'border-indigo-400 dark:border-amber-500 ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10'} max-h-[30vh] lg:max-h-none shrink-0`}
           onDragOver={handleDragOver}
@@ -3001,30 +2975,33 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
           </div>
           
           <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-4 flex flex-row lg:flex-col gap-2.5 custom-scrollbar bg-slate-50/50 dark:bg-transparent flex-wrap lg:flex-nowrap content-start">
-            {invitadosSinMesa.map(g => (
+            {invitadosSinMesa.map(g => {
+              const isSelected = guestSeleccionado?.id === g.id;
+              const isDragged = guestArrastrado === String(g.id);
+              return (
               <div 
                 key={g.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, g.id)}
-                onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
-                className={`px-3 py-2 lg:p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all shadow-sm w-auto lg:w-full flex-grow-0 ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 border-indigo-700 dark:border-amber-400 text-white dark:text-slate-900 transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'}`}
+                onDragEnd={handleDragEnd}
+                onPointerDown={(e) => { e.stopPropagation(); handleGuestClick(g); }}
+                className={`px-3 py-2 lg:p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all shadow-sm w-auto lg:w-full flex-grow-0 ${isDragged ? 'bg-amber-500 border-amber-600 text-slate-900 transform scale-[1.02] ring-2 ring-amber-400/50 z-50 shadow-xl opacity-90' : (isSelected ? 'bg-indigo-600 dark:bg-indigo-500 border-indigo-700 text-white dark:text-white transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5')}`}
               >
                 <div className="flex items-center truncate max-w-[140px] lg:max-w-none">
-                  <GripVertical size={14} className={`mr-2 hidden lg:block ${guestSeleccionado?.id === g.id ? 'text-white/50 dark:text-slate-900/50' : 'text-slate-400 cursor-grab'}`} />
+                  <GripVertical size={14} className={`mr-2 hidden lg:block ${isDragged || isSelected ? 'text-current opacity-50' : 'text-slate-400 cursor-grab'}`} />
                   <span className="font-bold text-xs lg:text-sm truncate">{g.name}</span>
                 </div>
-                <span className={`text-[9px] lg:text-[10px] font-black px-2 py-1 rounded-md ml-3 ${guestSeleccionado?.id === g.id ? 'bg-white/20 dark:bg-slate-900/20 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5'}`}>
+                <span className={`text-[9px] lg:text-[10px] font-black px-2 py-1 rounded-md ml-3 ${isDragged || isSelected ? 'bg-black/20 text-current' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5'}`}>
                   {g.passes}p
                 </span>
               </div>
-            ))}
+            )})}
             {invitadosSinMesa.length === 0 && (
               <div className="text-center p-4 lg:p-8 text-slate-400 dark:text-slate-500 text-xs lg:text-sm border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl font-medium w-full mt-2">Todos están asignados.</div>
             )}
           </div>
         </div>
 
-        {/* PANEL DERECHO: GRID DE MESAS */}
         <div className="flex-1 overflow-y-auto custom-scrollbar lg:pr-2 pb-6">
           {safeTables.length === 0 ? (
             <div className="text-center py-16 lg:py-20 bg-white dark:bg-[#0a0a0a] rounded-2xl lg:rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10 h-full flex flex-col items-center justify-center transition-colors px-4">
@@ -3039,6 +3016,8 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                 const assignedGuests = safeGuests.filter(g => String(g.tableId) === String(table.id));
                 const usedChairs = assignedGuests.reduce((sum, g) => sum + (Number(g.passes) || 1), 0);
                 const isFull = usedChairs >= Number(table.capacity);
+                const isTableActiveClick = guestSeleccionado && !isFull;
+                const isTableActiveDrag = guestArrastrado && !isFull;
 
                 return (
                   <div 
@@ -3046,7 +3025,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, table.id)}
                     onClick={() => handleTableClick(table.id)}
-                    className={`bg-white dark:bg-[#111] p-4 lg:p-5 rounded-2xl lg:rounded-3xl border shadow-sm flex flex-col relative group transition-all duration-300 ${guestSeleccionado && !isFull ? 'border-indigo-400 dark:border-amber-500 bg-indigo-50/50 dark:bg-amber-500/10 cursor-pointer shadow-md ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10 hover:border-indigo-200 dark:hover:border-white/30'}`}
+                    className={`bg-white dark:bg-[#111] p-4 lg:p-5 rounded-2xl lg:rounded-3xl border shadow-sm flex flex-col relative group transition-all duration-300 ${isTableActiveDrag ? 'border-amber-400 bg-amber-50/30 dark:bg-amber-500/10 cursor-pointer shadow-md ring-2 ring-amber-400/30' : (isTableActiveClick ? 'border-indigo-400 dark:border-indigo-500 bg-indigo-50/50 dark:bg-indigo-500/10 cursor-pointer shadow-md ring-2 ring-indigo-100 dark:ring-indigo-500/20' : 'border-slate-200 dark:border-white/10 hover:border-indigo-200 dark:hover:border-white/30')}`}
                   >
                     <div className="absolute top-3 lg:top-4 right-3 lg:right-4 flex opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity space-x-1.5 z-50">
                        <button onClick={(e) => { e.stopPropagation(); setTableToEdit(table); setCurrentConfig(table.configDetalle || configActual); setCreationMode('edit'); setIsAddModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-indigo-600 dark:text-slate-500 dark:hover:text-white bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors"><Edit2 size={14}/></button>
@@ -3070,21 +3049,25 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                       <div className="flex items-center text-xs font-bold text-slate-700 dark:text-slate-300">
                         <Users size={14} className="mr-2 text-indigo-500 dark:text-amber-500"/> {usedChairs} / {table.capacity}
                       </div>
-                      {isFull ? <span className="text-[8px] lg:text-[9px] bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 px-2 py-1 rounded-md font-black uppercase tracking-widest border border-rose-200 dark:border-rose-500/20">Llena</span> : <span className={`text-[8px] lg:text-[9px] font-bold uppercase tracking-widest ${guestSeleccionado ? 'text-indigo-600 dark:text-amber-500 animate-pulse' : 'text-slate-400'}`}>{guestSeleccionado ? 'Toca para soltar' : 'Sillas libres'}</span>}
+                      {isFull ? <span className="text-[8px] lg:text-[9px] bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 px-2 py-1 rounded-md font-black uppercase tracking-widest border border-rose-200 dark:border-rose-500/20">Llena</span> : <span className={`text-[8px] lg:text-[9px] font-bold uppercase tracking-widest ${guestSeleccionado ? 'text-indigo-600 dark:text-indigo-400 animate-pulse' : (guestArrastrado ? 'text-amber-600 dark:text-amber-500 animate-pulse' : 'text-slate-400')}`}>{guestArrastrado ? 'Suelta aquí' : (guestSeleccionado ? 'Toca para soltar' : 'Sillas libres')}</span>}
                     </div>
 
                     <div className="mt-auto border-t border-slate-100 dark:border-white/5 pt-3 min-h-[60px] flex flex-wrap gap-1.5 content-start transition-colors">
-                      {assignedGuests.map(g => (
+                      {assignedGuests.map(g => {
+                        const isSelected = guestSeleccionado?.id === g.id;
+                        const isDragged = guestArrastrado === String(g.id);
+                        return (
                         <div 
                           key={g.id} 
                           draggable
                           onDragStart={(e) => handleDragStart(e, g.id)}
-                          onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
-                          className={`text-[9px] lg:text-[10px] px-2.5 py-1.5 rounded-lg font-bold truncate flex items-center cursor-pointer lg:cursor-grab shadow-sm border transition-colors max-w-full ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-700 dark:border-amber-400' : 'bg-white dark:bg-[#0a0a0a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-indigo-300'}`}
+                          onDragEnd={handleDragEnd}
+                          onPointerDown={(e) => { e.stopPropagation(); handleGuestClick(g); }}
+                          className={`text-[9px] lg:text-[10px] px-2.5 py-1.5 rounded-lg font-bold truncate flex items-center cursor-pointer lg:cursor-grab shadow-sm border transition-colors max-w-full ${isDragged ? 'bg-amber-500 border-amber-600 text-slate-900 transform scale-[1.02] ring-2 ring-amber-400/50' : (isSelected ? 'bg-indigo-600 dark:bg-indigo-500 border-indigo-700 text-white transform scale-[1.02]' : 'bg-white dark:bg-[#0a0a0a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-indigo-300')}`}
                         >
-                          <span className="truncate">{g.name}</span> <span className="ml-1.5 opacity-50 font-black shrink-0">({g.passes})</span>
+                          <span className="truncate">{g.name}</span> <span className={`ml-1.5 font-black shrink-0 ${isDragged || isSelected ? 'text-current opacity-70' : 'opacity-50'}`}>({g.passes})</span>
                         </div>
-                      ))}
+                      )})}
                       {assignedGuests.length === 0 && <span className="text-[10px] lg:text-xs text-slate-300 dark:text-slate-600 font-medium italic w-full text-center mt-2">Mesa vacía</span>}
                     </div>
                   </div>
