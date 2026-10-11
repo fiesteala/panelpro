@@ -3796,6 +3796,19 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
 // --- COMPONENTE: MAPA Y CROQUIS (2D) ---
 // ==========================================
 const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch = '', elements = [], setElements, eventName }) => {
+  // 🔴 BLINDAJE EXTREMO: Aseguramos que las listas siempre sean arreglos válidos aunque el servidor tarde en responder.
+  const safeTables = Array.isArray(tables) ? tables : [];
+  const safeGuests = Array.isArray(guests) ? guests : [];
+  const safeElements = Array.isArray(elements) ? elements : [];
+  const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
+
+  // 🔴 BLINDAJE EXTREMO: Si los catálogos se borraron accidentalmente en App.js, no crasheará la app.
+  const safeRoomAreasCat = typeof ROOM_AREAS_CATALOG !== 'undefined' ? ROOM_AREAS_CATALOG : [];
+  const safeTableTemplates = typeof TABLE_TEMPLATES !== 'undefined' ? TABLE_TEMPLATES : [];
+  const safeStructuralCat = typeof STRUCTURAL_CATALOG !== 'undefined' ? STRUCTURAL_CATALOG : [];
+  const safeGetShapeClipPath = typeof getShapeClipPath === 'function' ? getShapeClipPath : () => 'none';
+  const safeRenderSVGShape = typeof renderSVGShape === 'function' ? renderSVGShape : () => null;
+
   const [selectedIds, setSelectedIds] = useState([]);
   const [dragging, setDragging] = useState(null); 
   const [selectionBox, setSelectionBox] = useState(null); 
@@ -3814,13 +3827,11 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
 
   // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE
   const [showTutorial, setShowTutorial] = useState(() => {
-    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
     const hasSeen = localStorage.getItem(`baulia_tutorial_mapa_${activeEventId}`);
     return !hasSeen;
   });
 
   const handleCloseTutorial = () => {
-    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
     localStorage.setItem(`baulia_tutorial_mapa_${activeEventId}`, 'true');
     setShowTutorial(false);
   };
@@ -3835,15 +3846,15 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   const [printDragStart, setPrintDragStart] = useState({ x: 0, y: 0 });
   const [isBlueprintPanActive, setIsBlueprintPanActive] = useState(false);
 
-  const placedTables = tables.filter(t => t.x !== undefined && t.x !== null);
-  const availableTables = tables.filter(t => t.x === undefined || t.x === null);
-  const allItems = [...elements, ...placedTables];
+  const placedTables = safeTables.filter(t => t.x !== undefined && t.x !== null);
+  const availableTables = safeTables.filter(t => t.x === undefined || t.x === null);
+  const allItems = [...safeElements, ...placedTables];
   
-  const roomAreas = elements.filter(e => e.isRoomArea);
+  const roomAreas = safeElements.filter(e => e.isRoomArea);
   const addAreas = roomAreas.filter(e => e.mode === 'add');
   const subAreas = roomAreas.filter(e => e.mode === 'subtract');
   const overlayAreas = roomAreas.filter(e => e.mode === 'overlay'); 
-  const physicalStructures = elements.filter(e => !e.isRoomArea);
+  const physicalStructures = safeElements.filter(e => !e.isRoomArea);
   const isMultiSelection = selectedIds.length > 1;
 
   const saveHistory = (currElements, currTables) => {
@@ -3875,7 +3886,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   
   const centerAndFitMap = () => {
     if (vp.w === 0 || vp.h === 0) return;
-    const allItemsForBounds = [...elements, ...placedTables];
+    const allItemsForBounds = [...safeElements, ...placedTables];
     if (allItemsForBounds.length === 0) { setPan({ x: 0, y: 0 }); setScale(30); return; }
 
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -3905,7 +3916,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   useEffect(() => {
     if (showExportModal) {
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      const allItemsForBounds = [...elements, ...placedTables];
+      const allItemsForBounds = [...safeElements, ...placedTables];
       allItemsForBounds.forEach(el => {
         const w = el.width || 2; const h = el.height || 2;
         if (el.x < minX) minX = el.x; if (el.y < minY) minY = el.y;
@@ -3918,7 +3929,6 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       const cx = (minX * scale) + designW / 2; 
       const cy = (minY * scale) + designH / 2;
       
-      // Contenedor A4 Landscape aprox
       const targetW = 900; 
       const targetH = 600; 
       const initialZoom = Math.min(targetW / (designW || 1), targetH / (designH || 1)) * 0.85; 
@@ -3946,17 +3956,17 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       const dropY = ((e.clientY - rect.top) - offsetY) / scale;
       
       const margin = 0.8;
-      const targetTable = tables.find(t => {
+      const targetTable = safeTables.find(t => {
         const tw = t.width || 2; const th = t.height || 2;
         return dropX >= (t.x - margin) && dropX <= (t.x + tw + margin) && dropY >= (t.y - margin) && dropY <= (t.y + th + margin);
       });
 
-      const guest = guests.find(g => g.id === guestId);
+      const guest = safeGuests.find(g => g.id === guestId);
       if (!guest) return;
 
       if (targetTable) {
         if (guest.tableId === targetTable.id) return;
-        const usedChairs = guests.filter(g => g.tableId === targetTable.id).reduce((sum, g) => sum + g.passes, 0);
+        const usedChairs = safeGuests.filter(g => g.tableId === targetTable.id).reduce((sum, g) => sum + g.passes, 0);
         if (guest.passes > 1) {
            setGuestSplitPrompt({ guest, targetTableId: targetTable.id, table: targetTable, usedChairs });
            return;
@@ -3964,13 +3974,13 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
         if (usedChairs + guest.passes > targetTable.capacity) {
            return;
         }
-        setDoc(doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test', "invitados", guestId), { ...guest, tableId: targetTable.id });
+        setDoc(doc(db, "eventos", activeEventId, "invitados", guestId), { ...guest, tableId: targetTable.id });
       } else {
         if (guest.tableId) {
            if (guest.passes > 1) {
                setGuestSplitPrompt({ guest, targetTableId: null, table: null, usedChairs: 0 });
            } else {
-               setDoc(doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test', "invitados", guestId), { ...guest, tableId: null });
+               setDoc(doc(db, "eventos", activeEventId, "invitados", guestId), { ...guest, tableId: null });
            }
         }
       }
@@ -3980,7 +3990,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     if (!isEditMode) return;
     const actionType = e.dataTransfer.getData('actionType');
     if (!actionType) return;
-    saveHistory(elements, tables);
+    saveHistory(safeElements, safeTables);
 
     const payload = JSON.parse(e.dataTransfer.getData('payload'));
     const rect = e.currentTarget.getBoundingClientRect();
@@ -4004,10 +4014,8 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     const finalX = ((e.clientX - rect.left) - offsetX) / scale - (w / 2);
     const finalY = ((e.clientY - rect.top) - offsetY) / scale - (h / 2);
 
-    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
-
     if (actionType === 'existing_table') {
-      const updatedTable = tables.find(t => t.id === payload.id);
+      const updatedTable = safeTables.find(t => t.id === payload.id);
       if(updatedTable) {
           const newT = { ...updatedTable, x: finalX, y: finalY, width: w, height: h };
           setDoc(doc(db, "eventos", activeEventId, "mesas", payload.id), newT);
@@ -4015,7 +4023,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       setSelectedIds([payload.id]);
     } else if (actionType === 'new_table') {
       const newTableId = `mesa_${Date.now()}`;
-      const newTable = { id: newTableId, name: `Mesa ${tables.length + 1}`, type: payload.type, capacity: payload.capacity, width: w, height: h, x: finalX, y: finalY, rotation: 0 };
+      const newTable = { id: newTableId, name: `Mesa ${safeTables.length + 1}`, type: payload.type, capacity: payload.capacity, width: w, height: h, x: finalX, y: finalY, rotation: 0 };
       setDoc(doc(db, "eventos", activeEventId, "mesas", newTableId), newTable);
       setSelectedIds([newTableId]);
     } else if (actionType === 'structure' || actionType === 'room_area') {
@@ -4032,16 +4040,16 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     if (activeTool !== 'select' && activeTool !== 'rotate') return;
     e.stopPropagation(); 
     
-    const el = (isTable ? tables : elements).find(item => item.id === id);
+    const el = (isTable ? safeTables : safeElements).find(item => item.id === id);
     if (!el) return;
-    saveHistory(elements, tables);
+    saveHistory(safeElements, safeTables);
 
     let currentSelection = [...selectedIds];
     if (!currentSelection.includes(id)) {
         if (el.groupId) {
             currentSelection = allItems.filter(x => x.groupId === el.groupId).map(x => x.id);
         } else if (el.isRoomArea && roomGrouped) {
-            currentSelection = elements.filter(x => x.isRoomArea).map(x => x.id);
+            currentSelection = safeElements.filter(x => x.isRoomArea).map(x => x.id);
         } else {
             currentSelection = [id];
         }
@@ -4117,8 +4125,8 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
          return { x: newCx - orig.w/2, y: newCy - orig.h/2, rotation: orig.rotation + deltaAngle };
       };
 
-      setElements(elements.map(el => dragging.origSelection.includes(el.id) ? { ...el, ...updateItem(dragging.groupOriginals[el.id]) } : el));
-      if (setTables) setTables(tables.map(t => dragging.origSelection.includes(t.id) ? { ...t, ...updateItem(dragging.groupOriginals[t.id]) } : t));
+      setElements(safeElements.map(el => dragging.origSelection.includes(el.id) ? { ...el, ...updateItem(dragging.groupOriginals[el.id]) } : el));
+      if (setTables) setTables(safeTables.map(t => dragging.origSelection.includes(t.id) ? { ...t, ...updateItem(dragging.groupOriginals[t.id]) } : t));
       return;
     }
 
@@ -4133,13 +4141,13 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       const myW = dragging.w; const myH = dragging.h;
 
       if (Object.keys(dragging.groupOriginals).length === 1) {
-          const targetList = [...elements.filter(e => e.isRoomArea), ...placedTables];
+          const targetList = [...safeElements.filter(e => e.isRoomArea), ...placedTables];
           targetList.forEach(other => {
             if (dragging.groupOriginals[other.id]) return; 
             
             const isOtherTable = other.capacity !== undefined;
             if (dragging.isTable && isOtherTable) {
-               const t1 = (tables.find(t=>t.id === dragging.id)?.tipo) || (tables.find(t=>t.id === dragging.id)?.type) || '';
+               const t1 = (safeTables.find(t=>t.id === dragging.id)?.tipo) || (safeTables.find(t=>t.id === dragging.id)?.type) || '';
                const t2 = other.tipo || other.type || '';
                const noSnap = ['round_table', 'redonda', 'ovalada'];
                if (noSnap.includes(t1) || noSnap.includes(t2)) return;
@@ -4158,8 +4166,8 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       const finalDx = finalX - dragging.origX;
       const finalDy = finalY - dragging.origY;
       
-      setElements(elements.map(el => dragging.groupOriginals[el.id] ? { ...el, x: dragging.groupOriginals[el.id].x + finalDx, y: dragging.groupOriginals[el.id].y + finalDy } : el));
-      if (setTables) setTables(tables.map(t => dragging.groupOriginals[t.id] ? { ...t, x: dragging.groupOriginals[t.id].x + finalDx, y: dragging.groupOriginals[t.id].y + finalDy } : t));
+      setElements(safeElements.map(el => dragging.groupOriginals[el.id] ? { ...el, x: dragging.groupOriginals[el.id].x + finalDx, y: dragging.groupOriginals[el.id].y + finalDy } : el));
+      if (setTables) setTables(safeTables.map(t => dragging.groupOriginals[t.id] ? { ...t, x: dragging.groupOriginals[t.id].x + finalDx, y: dragging.groupOriginals[t.id].y + finalDy } : t));
     }
   };
 
@@ -4181,12 +4189,10 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
         setSelectionBox(null);
     }
 
-    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
-
     if (dragging && dragging.type === 'move') {
         const promesas = Object.keys(dragging.groupOriginals).map(id => {
             const isTab = dragging.groupOriginals[id].isTable;
-            const item = isTab ? tables.find(t => String(t.id) === String(id)) : elements.find(e => String(e.id) === String(id));
+            const item = isTab ? safeTables.find(t => String(t.id) === String(id)) : safeElements.find(e => String(e.id) === String(id));
             const collectionName = isTab ? "mesas" : "mapa";
             return item ? setDoc(doc(db, "eventos", activeEventId, collectionName, String(id)), item) : Promise.resolve();
         });
@@ -4196,7 +4202,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     if (dragging && dragging.type === 'rotate') {
         const promesas = dragging.origSelection.map(id => {
             const isTab = dragging.groupOriginals[id].isTable;
-            const item = isTab ? tables.find(t => String(t.id) === String(id)) : elements.find(e => String(e.id) === String(id));
+            const item = isTab ? safeTables.find(t => String(t.id) === String(id)) : safeElements.find(e => String(e.id) === String(id));
             const collectionName = isTab ? "mesas" : "mapa";
             return item ? setDoc(doc(db, "eventos", activeEventId, collectionName, String(id)), item) : Promise.resolve();
         });
@@ -4208,20 +4214,19 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   };
 
   const updateElementData = async (id, newData) => {
-    saveHistory(elements, tables);
-    const el = elements.find(e => String(e.id) === String(id));
-    if(el) await setDoc(doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test', "mapa", String(id)), { ...el, ...newData });
+    saveHistory(safeElements, safeTables);
+    const el = safeElements.find(e => String(e.id) === String(id));
+    if(el) await setDoc(doc(db, "eventos", activeEventId, "mapa", String(id)), { ...el, ...newData });
   };
 
   const deleteSelected = async () => {
-    saveHistory(elements, tables);
+    saveHistory(safeElements, safeTables);
     const promesas = [];
-    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
     
     selectedIds.forEach(id => {
-      const isTable = tables.some(t => String(t.id) === String(id));
+      const isTable = safeTables.some(t => String(t.id) === String(id));
       if (isTable) {
-        const t = tables.find(x => String(x.id) === String(id));
+        const t = safeTables.find(x => String(x.id) === String(id));
         promesas.push(setDoc(doc(db, "eventos", activeEventId, "mesas", String(id)), { ...t, x: null, y: null, rotation: 0, groupId: null }));
       } else {
         promesas.push(deleteDoc(doc(db, "eventos", activeEventId, "mapa", String(id))));
@@ -4239,18 +4244,16 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
      });
 
      const promesas = [];
-     const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
-
      if (allHaveSameGroup) {
         const grpId = firstItem.groupId;
-        elements.forEach(e => { if(e.groupId === grpId) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mapa", String(e.id)), {...e, groupId: null})) });
-        tables.forEach(t => { if(t.groupId === grpId) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mesas", String(t.id)), {...t, groupId: null})) });
+        safeElements.forEach(e => { if(e.groupId === grpId) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mapa", String(e.id)), {...e, groupId: null})) });
+        safeTables.forEach(t => { if(t.groupId === grpId) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mesas", String(t.id)), {...t, groupId: null})) });
      } else {
         const newGroupId = 'grp_' + Date.now();
         selectedIds.forEach(id => {
-           const e = elements.find(x => String(x.id) === String(id));
+           const e = safeElements.find(x => String(x.id) === String(id));
            if (e) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mapa", String(id)), {...e, groupId: newGroupId}));
-           const t = tables.find(x => String(x.id) === String(id));
+           const t = safeTables.find(x => String(x.id) === String(id));
            if (t) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mesas", String(id)), {...t, groupId: newGroupId}));
         });
      }
@@ -4259,17 +4262,16 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
 
   const handleSplitChoice = (mode) => {
       const { guest, targetTableId, table, usedChairs } = guestSplitPrompt;
-      const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
 
       if (mode === 'all') {
           if (table && usedChairs + guest.passes > table.capacity) {
-              // Notificación silenciada
+              // Silencioso
           } else {
               setDoc(doc(db, "eventos", activeEventId, "invitados", guest.id), { ...guest, tableId: targetTableId });
           }
       } else if (mode === 'one') {
           if (table && usedChairs + 1 > table.capacity) {
-              // Notificación silenciada
+              // Silencioso
           } else {
               const newGuestId = Date.now().toString() + Math.random().toString(36).substring(2,5);
               const newGuest = { ...guest, id: newGuestId, name: `${guest.name} (Separado)`, passes: 1, childrenPasses: 0, tableId: targetTableId };
@@ -4448,7 +4450,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
         const html2canvas = (await import('html2canvas')).default;
 
         const pages = document.querySelectorAll('.map-pdf-page');
-        const pdf = new jsPDF('l', 'mm', 'letter'); // LANDSCAPE
+        const pdf = new jsPDF('l', 'mm', 'letter');
 
         for (let i = 0; i < pages.length; i++) {
            const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
@@ -4487,20 +4489,18 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
         </div>
         
         <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center py-8 relative gap-8">
-           {/* HOJA TAMAÑO CARTA HORIZONTAL (279.4mm x 215.9mm) */}
            <div className="bg-white shadow-[0_0_40px_rgba(0,0,0,0.5)] relative shrink-0 map-pdf-page flex flex-col" style={{ width: '279.4mm', height: '215.9mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden' }}>
              
              <header className="border-b-4 border-slate-900 pb-2 mb-4 flex justify-between items-end shrink-0">
                 <div>
                   <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Plano y Acomodo</h1>
-                  <p className="text-slate-500 text-sm font-medium">Proyecto: Boda Ana & Luis</p>
+                  <p className="text-slate-500 text-sm font-medium">Proyecto: {eventName || 'Evento'}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs font-bold text-slate-400">Escala Ajustada (Carta Horizontal)</p>
                 </div>
              </header>
 
-             {/* FOTO DEL LIENZO INTERACTIVO SEGURO */}
              <div 
                onPointerDown={handlePrintPointerDown} onPointerMove={handlePrintPointerMove} onPointerUp={handlePrintPointerUp} onPointerLeave={handlePrintPointerUp} onWheel={handlePrintWheel}
                className={`w-full flex-1 bg-[#eef2f6] border-2 border-slate-300 rounded-xl relative overflow-hidden flex shadow-inner ${isBlueprintPanActive ? 'cursor-grab active:cursor-grabbing touch-none ring-4 ring-indigo-300' : ''}`}
@@ -4523,27 +4523,27 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                      <defs>
                        <mask id="printRoomMask">
                          <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                         {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                         {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                         {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+                         {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
                        </mask>
                        <mask id="printOuterWallMask">
                          <rect x="-5000" y="-5000" width="10000" height="10000" fill="white" />
-                         {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                         {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                         {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                         {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
                        </mask>
                        <mask id="printSubWallMask">
                          <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                         {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                         {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                         {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+                         {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
                        </mask>
                      </defs>
                      <g>
                        <rect x="-5000" y="-5000" width="10000" height="10000" fill="#ffffff" mask="url(#printRoomMask)" />
                        <g mask="url(#printOuterWallMask)">
-                         {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+                         {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
                        </g>
                        <g mask="url(#printSubWallMask)">
-                         {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+                         {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
                        </g>
                      </g>
                   </svg>
@@ -4556,7 +4556,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
 
                   {roomAreas.filter(e => e.mode !== 'overlay').map((el) => (
                     <div key={el.id} className="absolute z-20 pointer-events-none" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
-                      <div className="w-full h-full" style={{ clipPath: getShapeClipPath(el) }}>
+                      <div className="w-full h-full" style={{ clipPath: safeGetShapeClipPath(el) }}>
                         {el.customLabel && <span className="absolute inset-0 flex items-center justify-center font-extrabold text-slate-500 opacity-80 uppercase tracking-widest pointer-events-none" style={{ fontSize: `${Math.max(0.6, Math.min(el.width, el.height) * 0.2)}rem` }}>{el.customLabel}</span>}
                       </div>
                     </div>
@@ -4569,10 +4569,10 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                   ))}
 
                   {placedTables.map((el) => {
-                    const occupancy = guests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
+                    const occupancy = safeGuests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
                     return (
                       <div key={el.id} className="absolute flex items-center justify-center select-none pointer-events-none z-40" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
-                        <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={guests.filter(g => g.tableId === el.id)} searchQuery={""} />
+                        {typeof TableWithChairs !== 'undefined' && <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={safeGuests.filter(g => g.tableId === el.id)} searchQuery={""} />}
                       </div>
                     );
                   })}
@@ -4674,28 +4674,28 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                <defs>
                  <mask id="roomMask">
                    <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                   {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                   {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                   {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+                   {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
                  </mask>
                  <mask id="outerWallMask">
                    <rect x="-5000" y="-5000" width="10000" height="10000" fill="white" />
-                   {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                   {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                   {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                   {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
                  </mask>
                  <mask id="subWallMask">
                    <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                   {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                   {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                   {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+                   {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
                  </mask>
                </defs>
 
                <g transform={`translate(${offsetX}, ${offsetY})`}>
                  <rect x="-5000" y="-5000" width="10000" height="10000" fill="#ffffff" mask="url(#roomMask)" />
                  <g mask="url(#outerWallMask)">
-                   {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+                   {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
                  </g>
                  <g mask="url(#subWallMask)">
-                   {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+                   {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
                  </g>
                </g>
 
@@ -4762,7 +4762,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                   <div 
                     onPointerDown={(e) => handlePointerDownObject(e, el.id, false)}
                     className={`w-full h-full cursor-pointer transition-colors duration-300 ${isSelected ? (isSub ? 'bg-rose-500/20 border-2 border-dashed border-rose-600' : 'bg-indigo-500/10 border-2 border-dashed border-indigo-600') : (isSub && canInteract ? 'hover:bg-rose-500/10' : (canInteract ? 'hover:bg-slate-500/5' : ''))}`}
-                    style={{ clipPath: getShapeClipPath(el) }}
+                    style={{ clipPath: safeGetShapeClipPath(el) }}
                   >
                     {el.customLabel && (
                       <span className="absolute inset-0 flex items-center justify-center font-extrabold text-slate-500 opacity-80 uppercase tracking-widest pointer-events-none" style={{ fontSize: `${Math.max(0.6, Math.min(el.width, el.height) * 0.2)}rem` }}>
@@ -4801,9 +4801,8 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
             })}
 
             {placedTables.map((el) => {
-              const isSelected = selectedIds.includes(el.id);
-              const occupancy = guests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
-              const isSearched = globalSearch && guests.some(g => g.tableId === el.id && g.name.toLowerCase().includes(globalSearch.toLowerCase()));
+              const occupancy = safeGuests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
+              const isSearched = globalSearch && safeGuests.some(g => g.tableId === el.id && g.name.toLowerCase().includes(globalSearch.toLowerCase()));
               const canInteract = activeTool === 'select' || activeTool === 'rotate';
 
               return (
@@ -4820,145 +4819,162 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                     zIndex: isSearched ? 9999 : (isSelected ? 50 : 40)
                   }}
                 >
-                  <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={guests.filter(g => g.tableId === el.id)} searchQuery={globalSearch} />
+                  {typeof TableWithChairs !== 'undefined' && <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={safeGuests.filter(g => g.tableId === el.id)} searchQuery={globalSearch} />}
                 </div>
               );
             })}
+
+            <div className="absolute bottom-6 right-6 z-[600] flex flex-col gap-3 pointer-events-none">
+              <div className="bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl border border-slate-200 flex flex-col pointer-events-auto">
+                <button onClick={() => setScale(s => Math.min(200, s + Math.max(2, s * 0.1)))} className="p-2.5 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 rounded-xl transition-colors" title="Acercar">
+                  <Plus size={24}/>
+                </button>
+                <div className="h-px bg-slate-200 mx-2 my-1"></div>
+                <button onClick={() => setScale(s => Math.max(5, s - Math.max(2, s * 0.1)))} className="p-2.5 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 rounded-xl transition-colors" title="Alejar">
+                  <Minus size={24}/>
+                </button>
+              </div>
+              <button onClick={centerAndFitMap} className="bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-2xl border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors pointer-events-auto flex items-center justify-center group" title="Ajustar y Centrar Plano">
+                <Maximize size={24} className="group-hover:scale-110 transition-transform" />
+              </button>
+            </div>
+
           </div>
         </div>
-      </div>
 
-      {/* BARRA DERECHA: EDICIÓN MAESTRA Y CATÁLOGOS */}
-      {isEditMode && (
-        <div className="w-full md:w-[280px] border-t md:border-t-0 md:border-l border-slate-200 bg-slate-50 flex flex-col z-20 max-h-64 md:max-h-full">
-          
-          <div className="p-3 bg-white border-b border-slate-200 shadow-sm shrink-0 flex flex-col gap-1.5">
-             <button onClick={() => { setIsEditMode(false); setSelectedIds([]); centerAndFitMap(); }} className="w-full py-2 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center">
-               <CheckCircle size={14} className="mr-1.5"/> Guardar Diseño
-             </button>
-             <button onClick={() => setShowExportModal(true)} className="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center">
-               <FileDown size={14} className="mr-1.5"/> Descargar PDF
-             </button>
-             {/* 🔴 BOTÓN TUTORIAL MAGAZINE */}
-             <button onClick={() => setShowTutorial(true)} className="w-full py-2 mt-1 bg-slate-100 text-slate-500 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors shadow-sm flex items-center justify-center border border-slate-200">
-               ? Ver Guía del Croquis
-             </button>
-             <div className="flex gap-1.5 mt-1">
-               <button onClick={handleUndo} disabled={history.length === 0} className={`flex-1 py-1.5 rounded-md text-[10px] font-bold flex items-center justify-center transition-colors border ${history.length > 0 ? 'bg-white text-slate-700 hover:bg-slate-50 border-slate-300 shadow-sm' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}><RotateCw size={12} className="mr-1" style={{ transform: 'scaleX(-1)' }}/> Deshacer</button>
-               <button onClick={async () => { 
-                 if(window.confirm('¿Estás seguro de limpiar todo el plano? Esta acción no se puede deshacer.')) { 
-                   saveHistory(elements, tables);
-                   const promesasMapa = elements.map(e => deleteDoc(doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test', "mapa", String(e.id))));
-                   const promesasMesas = placedTables.map(t => setDoc(doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test', "mesas", String(t.id)), { ...t, x: null, y: null, rotation: 0, groupId: null }));
-                   await Promise.all([...promesasMapa, ...promesasMesas]);
-                   setSelectedIds([]); 
-                   setPan({x:0, y:0}); 
-                 } 
-               }} className="flex-1 py-1.5 bg-white border border-rose-200 text-rose-600 rounded-md text-[10px] font-bold hover:bg-rose-50 transition-colors shadow-sm flex items-center justify-center"><Trash2 size={12} className="mr-1"/> Limpiar</button>
-             </div>
-             <button onClick={() => setRoomGrouped(!roomGrouped)} className={`w-full mt-1 py-1.5 rounded-md text-[10px] font-bold flex items-center justify-center transition-colors border shadow-sm ${roomGrouped ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}><Layers size={12} className="mr-1.5"/> {roomGrouped ? 'Desvincular Salón Compuesto' : 'Vincular Salón Compuesto'}</button>
-          </div>
-
-          {renderContextualMenu()}
-
-          <div className="p-3 overflow-y-auto flex-1 hide-scrollbar">
+        {/* BARRA DERECHA: EDICIÓN MAESTRA Y CATÁLOGOS */}
+        {isEditMode && (
+          <div className="w-full md:w-[280px] border-t md:border-t-0 md:border-l border-slate-200 bg-slate-50 flex flex-col z-20 max-h-64 md:max-h-full">
             
-            <h3 className="font-bold text-slate-700 mb-2 text-[10px] uppercase tracking-wider flex items-center">
-              <Spline size={12} className="mr-1.5"/> 1. Áreas y Exteriores
-            </h3>
-            <div className="grid grid-cols-3 gap-1.5 mb-4">
-              {ROOM_AREAS_CATALOG.map((tmpl, idx) => {
-                if (tmpl.shapeType === 'polygon') return null; 
-                return (
-                  <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'room_area')} className="bg-white p-1.5 rounded-lg border border-slate-300 text-center cursor-grab active:cursor-grabbing hover:bg-indigo-50 hover:border-indigo-300 transition-colors shadow-sm">
-                     <div className="h-6 flex items-center justify-center mb-1 text-slate-500">
-                        <div 
-                          className="border border-current bg-slate-100" 
-                          style={{ 
-                            width: '18px', height: '18px',
-                            borderRadius: tmpl.shapeType === 'ellipse' && tmpl.name === 'Área Circular' ? '50%' : tmpl.shapeType === 'ellipse' ? '50%' : '2px',
-                            clipPath: tmpl.shapeType === 'triangle' ? 'polygon(0 0, 0 100%, 100% 100%)' : 'none',
-                            ...(tmpl.mode === 'overlay' ? getTextureStyle(tmpl.texture) : {})
-                          }}
-                        ></div>
-                     </div>
-                     <p className="text-[8px] font-bold text-slate-600 leading-tight">{tmpl.name}</p>
-                  </div>
-                );
-              })}
+            <div className="p-3 bg-white border-b border-slate-200 shadow-sm shrink-0 flex flex-col gap-1.5">
+               <button onClick={() => { setIsEditMode(false); setSelectedIds([]); centerAndFitMap(); }} className="w-full py-2 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center">
+                 <CheckCircle size={14} className="mr-1.5"/> Guardar Diseño
+               </button>
+               <button onClick={() => setShowExportModal(true)} className="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center">
+                 <FileDown size={14} className="mr-1.5"/> Descargar PDF
+               </button>
+               {/* 🔴 BOTÓN TUTORIAL MAGAZINE */}
+               <button onClick={() => setShowTutorial(true)} className="w-full py-2 mt-1 bg-slate-100 text-slate-500 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors shadow-sm flex items-center justify-center border border-slate-200">
+                 ? Ver Guía del Croquis
+               </button>
+               <div className="flex gap-1.5 mt-1">
+                 <button onClick={handleUndo} disabled={history.length === 0} className={`flex-1 py-1.5 rounded-md text-[10px] font-bold flex items-center justify-center transition-colors border ${history.length > 0 ? 'bg-white text-slate-700 hover:bg-slate-50 border-slate-300 shadow-sm' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}><RotateCw size={12} className="mr-1" style={{ transform: 'scaleX(-1)' }}/> Deshacer</button>
+                 <button onClick={async () => { 
+                   if(window.confirm('¿Estás seguro de limpiar todo el plano? Esta acción no se puede deshacer.')) { 
+                     saveHistory(safeElements, safeTables);
+                     const promesasMapa = safeElements.map(e => deleteDoc(doc(db, "eventos", activeEventId, "mapa", String(e.id))));
+                     const promesasMesas = placedTables.map(t => setDoc(doc(db, "eventos", activeEventId, "mesas", String(t.id)), { ...t, x: null, y: null, rotation: 0, groupId: null }));
+                     await Promise.all([...promesasMapa, ...promesasMesas]);
+                     setSelectedIds([]); 
+                     setPan({x:0, y:0}); 
+                   } 
+                 }} className="flex-1 py-1.5 bg-white border border-rose-200 text-rose-600 rounded-md text-[10px] font-bold hover:bg-rose-50 transition-colors shadow-sm flex items-center justify-center"><Trash2 size={12} className="mr-1"/> Limpiar</button>
+               </div>
+               <button onClick={() => setRoomGrouped(!roomGrouped)} className={`w-full mt-1 py-1.5 rounded-md text-[10px] font-bold flex items-center justify-center transition-colors border shadow-sm ${roomGrouped ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}><Layers size={12} className="mr-1.5"/> {roomGrouped ? 'Desvincular Salón Compuesto' : 'Vincular Salón Compuesto'}</button>
             </div>
 
-            <h3 className="font-bold text-indigo-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
-              <Users size={12} className="mr-1.5"/> 2. Mesas Reales ({availableTables.length})
-            </h3>
-            <div className="space-y-1.5 mb-4">
-              {availableTables.map((table) => {
-                const occupancy = guests.filter(g => g.tableId === table.id).reduce((s, g) => s + g.passes, 0);
-                const tType = table.tipo || table.type;
-                let tW = 1.5, tH = 1.5;
-                if (tType === 'rect_table' || tType === 'tablon') { tW = 2.44; tH = 0.7; }
-                else if (tType === 'ovalada') { tW = 3.05; tH = 1.22; }
-                else if (tType === 'serpentina') { tW = 1.8; tH = 1.8; }
-                else if (tType === 'personalizada' || tType === 'libre') { tW = table.configDetalle?.libreMedidas?.largo || 2; tH = table.configDetalle?.libreMedidas?.ancho || 1; }
+            {renderContextualMenu()}
 
-                return (
-                  <div key={table.id} draggable onDragStart={(e) => handleDragStart(e, {id: table.id, width: tW, height: tH}, 'existing_table')} className="bg-white p-1.5 rounded-lg border border-indigo-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-indigo-500 hover:shadow-md transition-all flex items-center">
-                    <div className="w-6 h-6 bg-indigo-50 rounded flex items-center justify-center mr-2 text-indigo-500 flex-shrink-0">
-                      {table.type === 'round_table' || table.tipo === 'redonda' ? <div className="w-3 h-3 rounded-full border-[1.5px] border-current"></div> : <div className="w-3 h-3 rounded-sm border-[1.5px] border-current"></div>}
+            <div className="p-3 overflow-y-auto flex-1 hide-scrollbar">
+              
+              <h3 className="font-bold text-slate-700 mb-2 text-[10px] uppercase tracking-wider flex items-center">
+                <Spline size={12} className="mr-1.5"/> 1. Áreas y Exteriores
+              </h3>
+              <div className="grid grid-cols-3 gap-1.5 mb-4">
+                {safeRoomAreasCat.map((tmpl, idx) => {
+                  if (tmpl.shapeType === 'polygon') return null; 
+                  return (
+                    <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'room_area')} className="bg-white p-1.5 rounded-lg border border-slate-300 text-center cursor-grab active:cursor-grabbing hover:bg-indigo-50 hover:border-indigo-300 transition-colors shadow-sm">
+                       <div className="h-6 flex items-center justify-center mb-1 text-slate-500">
+                          <div 
+                            className="border border-current bg-slate-100" 
+                            style={{ 
+                              width: '18px', height: '18px',
+                              borderRadius: tmpl.shapeType === 'ellipse' && tmpl.name === 'Área Circular' ? '50%' : tmpl.shapeType === 'ellipse' ? '50%' : '2px',
+                              clipPath: tmpl.shapeType === 'triangle' ? 'polygon(0 0, 0 100%, 100% 100%)' : 'none',
+                              ...(tmpl.mode === 'overlay' ? getTextureStyle(tmpl.texture) : {})
+                            }}
+                          ></div>
+                       </div>
+                       <p className="text-[8px] font-bold text-slate-600 leading-tight">{tmpl.name}</p>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-800 truncate">{table.name}</p>
-                      <p className="text-[8px] text-slate-500 uppercase font-semibold">{occupancy}/{table.capacity} Sillas</p>
+                  );
+                })}
+              </div>
+
+              <h3 className="font-bold text-indigo-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
+                <Users size={12} className="mr-1.5"/> 2. Mesas Reales ({availableTables.length})
+              </h3>
+              <div className="space-y-1.5 mb-4">
+                {availableTables.map((table) => {
+                  const occupancy = safeGuests.filter(g => g.tableId === table.id).reduce((s, g) => s + g.passes, 0);
+                  const tType = table.tipo || table.type;
+                  let tW = 1.5, tH = 1.5;
+                  if (tType === 'rect_table' || tType === 'tablon') { tW = 2.44; tH = 0.7; }
+                  else if (tType === 'ovalada') { tW = 3.05; tH = 1.22; }
+                  else if (tType === 'serpentina') { tW = 1.8; tH = 1.8; }
+                  else if (tType === 'personalizada' || tType === 'libre') { tW = table.configDetalle?.libreMedidas?.largo || 2; tH = table.configDetalle?.libreMedidas?.ancho || 1; }
+
+                  return (
+                    <div key={table.id} draggable onDragStart={(e) => handleDragStart(e, {id: table.id, width: tW, height: tH}, 'existing_table')} className="bg-white p-1.5 rounded-lg border border-indigo-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-indigo-500 hover:shadow-md transition-all flex items-center">
+                      <div className="w-6 h-6 bg-indigo-50 rounded flex items-center justify-center mr-2 text-indigo-500 flex-shrink-0">
+                        {table.type === 'round_table' || table.tipo === 'redonda' ? <div className="w-3 h-3 rounded-full border-[1.5px] border-current"></div> : <div className="w-3 h-3 rounded-sm border-[1.5px] border-current"></div>}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-slate-800 truncate">{table.name}</p>
+                        <p className="text-[8px] text-slate-500 uppercase font-semibold">{occupancy}/{table.capacity} Sillas</p>
+                      </div>
+                    </div>
+                  );
+                })}
+                {availableTables.length === 0 && <p className="text-[9px] text-slate-400 italic text-center py-1 bg-white rounded border border-dashed border-slate-300">Todas ubicadas en el plano.</p>}
+              </div>
+
+              <h3 className="font-bold text-emerald-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
+                <Plus size={12} className="mr-1.5"/> 3. Mesas Extra
+              </h3>
+              <div className="grid grid-cols-4 gap-1.5 mb-4">
+                {safeTableTemplates.map((tmpl, idx) => {
+                  let iconEl;
+                  if (tmpl.type === 'round_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-full w-4 h-4"></div>;
+                  else if (tmpl.type === 'square_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-sm w-4 h-4"></div>;
+                  else if (tmpl.type === 'rect_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-sm w-5 h-2.5 mt-1"></div>;
+                  else if (tmpl.type === 'ovalada') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-[10px] w-6 h-2.5 mt-1"></div>;
+                  else if (tmpl.type === 'serpentina') iconEl = (
+                    <svg className="mx-auto mb-1" width="16" height="16" viewBox="0 0 20 20">
+                      <path d="M 2 18 A 16 16 0 0 1 18 2 L 18 7 A 11 11 0 0 0 7 18 Z" fill="none" stroke="#10b981" strokeWidth="1.5" />
+                    </svg>
+                  );
+
+                  return (
+                    <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'new_table')} className="bg-white p-1.5 rounded-lg border border-emerald-200 text-center cursor-grab active:cursor-grabbing hover:bg-emerald-50 transition-colors shadow-sm">
+                       <div className="h-6 flex items-center justify-center">{iconEl}</div>
+                       <p className="text-[8px] font-bold text-slate-600 leading-tight">{tmpl.name}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <h3 className="font-bold text-slate-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
+                <Move size={12} className="mr-1.5"/> 4. Físico
+              </h3>
+              <div className="space-y-1.5">
+                {safeStructuralCat.map((item, idx) => (
+                  <div key={idx} draggable onDragStart={(e) => handleDragStart(e, item, 'structure')} className="bg-white p-1.5 rounded-lg border border-slate-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-slate-400 hover:shadow-md transition-all flex items-center">
+                    <div className="w-8 h-8 rounded flex items-center justify-center mr-2 border border-slate-300 flex-shrink-0 shadow-inner" style={getTextureStyle(item.texture)}></div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800 leading-tight">{item.name}</p>
+                      <p className="text-[8px] text-slate-500 uppercase tracking-wide font-semibold">{item.desc}</p>
                     </div>
                   </div>
-                );
-              })}
-              {availableTables.length === 0 && <p className="text-[9px] text-slate-400 italic text-center py-1 bg-white rounded border border-dashed border-slate-300">Todas ubicadas en el plano.</p>}
+                ))}
+              </div>
+
             </div>
-
-            <h3 className="font-bold text-emerald-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
-              <Plus size={12} className="mr-1.5"/> 3. Mesas Extra
-            </h3>
-            <div className="grid grid-cols-4 gap-1.5 mb-4">
-              {TABLE_TEMPLATES.map((tmpl, idx) => {
-                let iconEl;
-                if (tmpl.type === 'round_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-full w-4 h-4"></div>;
-                else if (tmpl.type === 'square_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-sm w-4 h-4"></div>;
-                else if (tmpl.type === 'rect_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-sm w-5 h-2.5 mt-1"></div>;
-                else if (tmpl.type === 'ovalada') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-[10px] w-6 h-2.5 mt-1"></div>;
-                else if (tmpl.type === 'serpentina') iconEl = (
-                  <svg className="mx-auto mb-1" width="16" height="16" viewBox="0 0 20 20">
-                    <path d="M 2 18 A 16 16 0 0 1 18 2 L 18 7 A 11 11 0 0 0 7 18 Z" fill="none" stroke="#10b981" strokeWidth="1.5" />
-                  </svg>
-                );
-
-                return (
-                  <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'new_table')} className="bg-white p-1.5 rounded-lg border border-emerald-200 text-center cursor-grab active:cursor-grabbing hover:bg-emerald-50 transition-colors shadow-sm">
-                     <div className="h-6 flex items-center justify-center">{iconEl}</div>
-                     <p className="text-[8px] font-bold text-slate-600 leading-tight">{tmpl.name}</p>
-                  </div>
-                );
-              })}
-            </div>
-
-            <h3 className="font-bold text-slate-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
-              <Move size={12} className="mr-1.5"/> 4. Físico
-            </h3>
-            <div className="space-y-1.5">
-              {STRUCTURAL_CATALOG.map((item, idx) => (
-                <div key={idx} draggable onDragStart={(e) => handleDragStart(e, item, 'structure')} className="bg-white p-1.5 rounded-lg border border-slate-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-slate-400 hover:shadow-md transition-all flex items-center">
-                  <div className="w-8 h-8 rounded flex items-center justify-center mr-2 border border-slate-300 flex-shrink-0 shadow-inner" style={getTextureStyle(item.texture)}></div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800 leading-tight">{item.name}</p>
-                    <p className="text-[8px] text-slate-500 uppercase tracking-wide font-semibold">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
           </div>
-        </div>
-      )}
+        )}
+
+      </div>
 
       {/* MODAL: SEPARAR FAMILIA O MOVER GRUPO */}
       {guestSplitPrompt && (
