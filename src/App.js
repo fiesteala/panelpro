@@ -720,6 +720,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   const [showShareModal, setShowShareModal] = useState(false);
   const [staffPhone, setStaffPhone] = useState('');
   const [camError, setCamError] = useState(null);
+  
   // 🔴 ESTADO DEL SEMÁFORO DE CONEXIÓN
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
@@ -736,7 +737,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     };
   }, []);
 
-  // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE (REEMPLAZA AL ANTIGUO SHOWPROTOCOL)
+  // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE
   const [showTutorial, setShowTutorial] = useState(() => {
     // Si estamos en "Modo Compartido" (Staff), forzamos a que lo vean, o si no lo han visto nunca
     if (isSharedMode) return true;
@@ -788,9 +789,8 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           { facingMode: "environment" }, 
           { 
              fps: 15, 
-             aspectRatio: 1.0, // 🔴 FUERZA LA PROPORCIÓN CUADRADA
+             aspectRatio: 1.0,
              qrbox: function(width, height) {
-                // 🔴 HACE QUE EL ÁREA DE ESCANEO SEA EL 95% DE LA PANTALLA, IMPOSIBLE FALLAR
                 return { width: width * 0.95, height: height * 0.95 };
              }
           },
@@ -825,32 +825,25 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 
   const processEntry = async (code) => {
     try {
-      // 🔴 1. PREGUNTAMOS A LA BASE DE DATOS EL PLAN Y LA HORA EXACTA
       const eventSnap = await getDoc(doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : ''));
       if (eventSnap.exists()) {
         const evData = eventSnap.data();
 
-        // 🔴 2. VALIDACIÓN DE TIEMPO (Solo para Kit de Seguridad)
         if (evData.plan === 'security_kit' && evData.horaEvento && evData.fecha) {
-          // Blindaje: Detectamos si la fecha es de Firebase o es un texto (String)
           const eventDate = evData.fecha.toDate ? evData.fecha.toDate() : new Date(evData.fecha + 'T00:00:00');
-          
-          // Ajustamos la hora de inicio
           const [hrs, mins] = evData.horaEvento.split(':');
           eventDate.setHours(hrs, mins);
 
           const now = new Date();
           const diffHours = (now - eventDate) / (1000 * 60 * 60);
 
-          // Si pasaron más de 24 horas desde el inicio del evento, bloqueamos
           if (diffHours > 24) {
             setCardData({ status: 'error', title: 'Licencia Expirada', subtitle: 'El acceso de 24 horas ha terminado.' });
-            return; // Cortamos la función aquí, no escanea nada
+            return;
           }
         }
       }
 
-      // 🔴 3. CONTINÚA EL ESCANEO NORMAL
       const codeLower = code.trim().toLowerCase();
       let foundParentId = null;
       let targetSubId = null;
@@ -1070,7 +1063,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
                         <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed mb-4">
                           <b>Baulia es a prueba de fallos:</b> El escáner continuará leyendo accesos y registrando horas de entrada aunque se pierda la conexión a internet. En cuanto el dispositivo recupere señal, los datos se sincronizarán mágicamente con tu Monitor En Vivo.
                         </p>
-                        <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl space-y-2 mt-4">
+                        <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl space-y-2 mt-4 shadow-inner">
                           <p className="text-[10px] font-black uppercase text-amber-600 tracking-widest mb-2">Para el Staff (Reglas de Oro):</p>
                           <p className="text-xs text-slate-700"><b>1. No cierres esta pestaña.</b> Puedes bloquear la pantalla pero no cierres el navegador.</p>
                           <p className="text-xs text-slate-700"><b>2. Evita abrir otras Apps.</b> Usar Instagram o la cámara normal consume memoria y podría reiniciar este escáner.</p>
@@ -1129,14 +1122,12 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 
       <div className="flex flex-col gap-4 flex-1">
         
-        {/* 🔴 INYECCIÓN CSS PARA FORZAR EL VIDEO CUADRADO AL 100% */}
         <style>{`
           #qr-reader-puerta { width: 100% !important; height: 100% !important; border: none !important; position: absolute !important; inset: 0 !important; }
           #qr-reader-puerta video { object-fit: cover !important; width: 100% !important; height: 100% !important; border-radius: 1.5rem !important; }
           #qr-reader-puerta canvas { display: none !important; }
         `}</style>
 
-        {/* 🔴 ESCÁNER CUADRADO PERFECTO */}
         <div className="w-full max-w-[350px] mx-auto bg-slate-900 rounded-3xl overflow-hidden relative shadow-2xl flex-shrink-0 aspect-square">
           {camError ? (
             <button onClick={() => window.location.reload()} className="absolute inset-0 flex flex-col items-center justify-center text-white bg-slate-800 p-6 text-center z-50">
@@ -1147,7 +1138,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           ) : (
             <>
                <div id="qr-reader-puerta"></div>
-               {/* Marcos y Laser */}
                <div className="absolute inset-0 border-[30px] border-black/40 pointer-events-none z-10"></div>
                <div className="absolute inset-0 border-2 border-emerald-400 m-[30px] pointer-events-none z-10 opacity-70">
                  <div className="w-full h-0.5 bg-emerald-400 shadow-[0_0_15px_#34d399] absolute top-1/2 -translate-y-1/2 opacity-60 animate-pulse"></div>
@@ -1156,7 +1146,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           )}
         </div>
 
-        {/* 🔴 FICHA INTELIGENTE */}
         <div className={`w-full p-6 rounded-3xl shadow-lg border-2 transition-all flex flex-col justify-center min-h-[140px] flex-shrink-0 relative overflow-hidden
             ${cardData.status === 'idle' ? 'bg-white border-slate-200' : ''}
             ${cardData.status === 'success' ? 'bg-emerald-50 border-emerald-400 shadow-emerald-500/20 scale-[1.02]' : ''}
@@ -1180,7 +1169,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
               </p>
            </div>
            
-           {/* Iconos de fondo */}
            {cardData.status === 'success' && <CheckCircle size={100} className="absolute -right-4 -bottom-4 text-emerald-500/10 pointer-events-none"/>}
            {cardData.status === 'warning' && <AlertTriangle size={100} className="absolute -right-4 -bottom-4 text-amber-500/10 pointer-events-none"/>}
            {cardData.status === 'error' && <X size={100} className="absolute -right-4 -bottom-4 text-rose-500/10 pointer-events-none"/>}
@@ -1191,7 +1179,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
         </button>
       </div>
 
-      {/* MODAL DIRECTORIO MANUAL */}
       {isListOpen && (
          <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex flex-col justify-end sm:justify-center sm:p-6 animate-in fade-in duration-200">
              <div className="bg-white w-full sm:max-w-2xl mx-auto sm:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col h-[90vh] sm:h-[80vh] overflow-hidden">
@@ -1264,8 +1251,8 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
         </div>
       )}
 
-      {/* 🔴 MODAL MAGAZINE: GUÍA EDITORIAL DE CONTROL DE ACCESO (VISTA CELULAR) */}
-      {showTutorial && (
+      {/* 🔴 MODAL MAGAZINE: GUÍA EDITORIAL (MOSTRADO EN CELULAR) */}
+      {showTutorial && !showDesktopPlaceholder && (
         <div className="fixed inset-0 z-[999999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors text-left">
           <div className="bg-[#fcfbf9] dark:bg-[#0a0a0a] rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
             <div className="px-6 sm:px-8 py-5 border-b border-amber-200/50 dark:border-white/5 flex justify-between items-center shrink-0">
@@ -1332,7 +1319,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
                       <b>Baulia es a prueba de fallos:</b> El escáner continuará leyendo accesos y registrando horas de entrada aunque se pierda la conexión a internet. En cuanto el dispositivo recupere señal, los datos se sincronizarán mágicamente con tu Monitor En Vivo.
                     </p>
-                    <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 p-4 rounded-xl space-y-2 mt-4">
+                    <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 p-4 rounded-xl space-y-2 mt-4 shadow-inner">
                       <p className="text-[10px] font-black uppercase text-amber-600 dark:text-amber-500 tracking-widest mb-2">Para el Staff (Reglas de Oro):</p>
                       <p className="text-xs text-slate-700 dark:text-slate-300"><b>1. No cierres esta pestaña.</b> Puedes bloquear la pantalla pero no cierres el navegador.</p>
                       <p className="text-xs text-slate-700 dark:text-slate-300"><b>2. Evita abrir otras Apps.</b> Usar Instagram o la cámara normal consume memoria y podría reiniciar este escáner.</p>
