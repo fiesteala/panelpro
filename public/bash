@@ -1,5 +1,5 @@
 git add .
-git commit -m "algoritmo acomodo de mesas"
+git commit -m "invitadosview sin separacion"
 git push origin main
 
 .

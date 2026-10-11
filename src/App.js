@@ -1447,6 +1447,37 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     return (name.includes(term) || status.includes(term) || subGuestsNames.includes(term) || tableName.includes(term) || side.includes(term)) && matchesSide;
   });
 
+  // 🔴 NUEVA FUNCIÓN: AGRUPA VISUALMENTE A LOS INVITADOS "SPLIT" CON SU PADRE
+  const agruparInvitadosVisualmente = (lista) => {
+      let familiasAgrupadas = {};
+      let listaFinal = [];
+
+      lista.forEach(g => {
+          const isSplit = String(g.id).includes('_split_');
+          const parentId = g.parentId || (isSplit ? String(g.id).split('_split_')[0] : String(g.id));
+          
+          if (!familiasAgrupadas[parentId]) {
+              familiasAgrupadas[parentId] = { ...g, originalId: parentId, isMainBlock: !isSplit, tempPasses: Number(g.passes) || 1, tempSubGuests: g.subGuests || [] };
+          } else {
+              familiasAgrupadas[parentId].tempPasses += (Number(g.passes) || 1);
+              familiasAgrupadas[parentId].tempSubGuests = [...familiasAgrupadas[parentId].tempSubGuests, ...(g.subGuests || [])];
+              if (!isSplit) familiasAgrupadas[parentId].isMainBlock = true; // Aseguramos marcar cuál era el bloque original
+          }
+      });
+
+      // Transformar de nuevo a formato de lista, aplicando la suma y filtrando si es necesario
+      Object.values(familiasAgrupadas).forEach(fg => {
+          listaFinal.push({
+              ...fg,
+              id: fg.originalId, // Reasignar ID para que no tenga '_split_'
+              passes: fg.tempPasses,
+              subGuests: fg.tempSubGuests,
+              name: fg.name.replace(' (Separado)', '') // Limpiamos el nombre
+          });
+      });
+      return listaFinal;
+  };
+
   const getFlattenedGuests = (guestList) => {
     const flattened = [];
     guestList.forEach(guest => {
@@ -1479,7 +1510,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     return flattened;
   };
 
-  const flattenedList = getFlattenedGuests(invitadosFiltrados);
+  // 🔴 APLICAMOS LA AGRUPACIÓN ANTES DE RENDERIZAR
+  const listaAgrupada = agruparInvitadosVisualmente(invitadosFiltrados);
+  const flattenedList = getFlattenedGuests(listaAgrupada);
 
   const handleSendWhatsApp = async (parentGuest) => {
     const phone = parentGuest.phone ? parentGuest.phone.replace(/\D/g,'') : '';
