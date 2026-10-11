@@ -2541,7 +2541,6 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
 // ==========================================
 // --- COMPONENTE: GESTIÓN DE MESAS (DARK PREMIUM COMPLETO) ---
 // ==========================================
-// 🔴 MODIFICACIÓN: Agregamos 'eventName' a las props
 const MesasView = ({ tables, setTables, guests, setGuests, addNotification, eventName }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [creationMode, setCreationMode] = useState('iguales'); 
@@ -2556,12 +2555,11 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
   const [autoAssignConflict, setAutoAssignConflict] = useState(null);
   const [guestArrastrado, setGuestArrastrado] = useState(null); 
 
-  // 🔴 NUEVO: ESTADOS PARA EL TUTORIAL MAGAZINE
+  // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE (MESAS)
   const [showTutorial, setShowTutorial] = useState(() => {
-    // Usamos 'test' por si ID_DEL_EVENTO no está definido en este entorno
     const eventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
     const hasSeen = localStorage.getItem(`baulia_tutorial_mesas_${eventId}`);
-    return !hasSeen; // Si no lo ha visto, se abre por defecto
+    return !hasSeen;
   });
 
   const handleCloseTutorial = () => {
@@ -2664,7 +2662,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
       if (creationMode === 'edit' && tableToEdit) {
          const capacidad = calcularCapacidad(configActual);
          const assignedGuests = safeGuests.filter(g => String(g.tableId) === String(tableToEdit.id));
-         const usedChairs = assignedGuests.reduce((sum, g) => sum + Number(g.passes), 0);
+         const usedChairs = assignedGuests.reduce((sum, g) => sum + g.passes, 0);
          if (capacidad < usedChairs) {
               if(addNotification) addNotification('Acción Denegada', `La mesa ya tiene ${usedChairs} personas asignadas. Libera invitados primero.`, 'warning');
               return;
@@ -2901,7 +2899,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
    const handleDragStart = (e, guestId) => { 
      e.dataTransfer.effectAllowed = 'move';
      e.dataTransfer.setData('text/plain', String(guestId));
-     e.dataTransfer.setData('guestId', String(guestId));
+     e.dataTransfer.setData('guestId', String(guestId)); 
      setGuestSeleccionado(null);
      setGuestArrastrado(String(guestId)); 
    };
@@ -3155,6 +3153,9 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
         </div>
         
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+           {/* 🔴 BOTÓN DE AYUDA (TUTORIAL) */}
+           <button onClick={() => setShowTutorial(true)} className="flex items-center justify-center w-8 h-8 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 rounded-full text-xs font-black hover:bg-indigo-50 dark:hover:bg-amber-500/10 hover:text-indigo-600 dark:hover:text-amber-500 hover:border-indigo-200 dark:hover:border-amber-500/20 shadow-sm transition-colors" title="Ver Guía de Uso">?</button>
+           
            {/* 🔴 BOTÓN SWITCH MODO SEPARADOR (TIPO BODA) */}
            <button onClick={() => setIsSplitMode(!isSplitMode)} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2 bg-white dark:bg-[#111] border-2 border-slate-200 dark:border-white/10 rounded-[2rem] hover:border-indigo-300 dark:hover:border-amber-500/50 transition-colors shadow-sm">
               <span className="text-[11px] font-black text-slate-600 dark:text-slate-300 tracking-wider mr-3 uppercase">Separador</span>
@@ -3503,7 +3504,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
               La familia <b>{autoAssignConflict.guest.name}</b> necesita {autoAssignConflict.guest.passes} lugares continuos, pero el espacio más grande disponible en las mesas es de {autoAssignConflict.maxHueco} sillas.
               <br/><br/>¿Cuántos pases deseas separar para continuar?
             </p>
-            
+
             <div className="flex items-center justify-center gap-6 mb-6 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/10">
                 <button 
                   onClick={() => setSplitAmount(Math.max(autoAssignConflict.minSplit || 1, splitAmount - 1))} 
@@ -3609,15 +3610,18 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
                 {/* COLUMNA DERECHA */}
                 <div className="space-y-10 sm:space-y-12">
 
-                  {/* SECCIÓN 4: MODO SEPARADOR */}
+                  {/* SECCIÓN 4: MODO SEPARADOR VISUAL */}
                   <div>
                     <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">04. INGENIERÍA SOCIAL</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-4 rounded-full bg-slate-300 dark:bg-slate-700 relative flex shrink-0">
-                         <div className="w-3 h-3 bg-white rounded-full absolute left-0.5 top-0.5"></div>
+                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">El Switch "Modo Separador"</h3>
+                    
+                    <div className="flex items-center px-3 py-1.5 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-[2rem] w-max mb-3 shadow-sm">
+                      <span className="text-[9px] font-black text-slate-600 dark:text-slate-300 tracking-wider mr-3 uppercase">Separador</span>
+                      <div className="w-[32px] h-[18px] rounded-full p-[2px] bg-indigo-500 dark:bg-amber-500">
+                         <div className="bg-white w-3.5 h-3.5 rounded-full shadow-md transform translate-x-[14px]"></div>
                       </div>
-                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">El Switch "Modo Separador"</h3>
                     </div>
+
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
                       ¿Tienes a una familia de 6 pero quieres que 2 tíos se sienten en la mesa de enfrente con sus amigos? <b>Enciende este interruptor</b>. <br/><br/>
                       Al intentar sentar a la familia, el sistema pausará la acción y te preguntará <i>"¿Cuántos pases deseas separar y mover a esta mesa?"</i>. Al separarlos, Baulia clonará el registro con una etiqueta `(Separado)`.
@@ -3627,20 +3631,29 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
                     </div>
                   </div>
 
-                  {/* SECCIÓN 5: AUTO-ACOMODAR */}
+                  {/* SECCIÓN 5: ASISTENTE INTELIGENTE VISUAL */}
                   <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">05. INTELIGENCIA ARTIFICIAL</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <Wand2 size={24} className="text-emerald-500" />
-                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">Algoritmo Baulia (Auto-Acomodar)</h3>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">05. ASISTENTE INTELIGENTE</p>
+                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">Auto-Acomodar</h3>
+                    
+                    <div className="flex items-center justify-center px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-[10px] font-bold w-max mb-3 shadow-sm">
+                      <Wand2 size={14} className="mr-2" /> Auto-Acomodar
                     </div>
+
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      Basado en el algoritmo matemático "Best-Fit Decreasing", este botón acomoda a todos tus invitados vacíos en segundos.
+                      Te invitamos a usar nuestro asistente para facilitar el acomodo de tus invitados. Con un solo clic, la tecnología de Baulia escaneará tu lista y agrupará a las familias en las mesas disponibles priorizando a los grupos grandes. 
+                      <br/><br/>
+                      Una vez que el sistema genere esta propuesta inicial, tendrás total libertad para hacer los cambios manuales que quieras y personalizar aún más tu evento. Si una familia grande no cabe en ninguna mesa, el sistema te pedirá amablemente que la separes antes de continuar.
                     </p>
-                    <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed space-y-2 list-disc pl-4 marker:text-emerald-500">
-                      <li><b>Familias Grandes Primero:</b> El sistema ordena de mayor a menor para llenar las mesas eficientemente sin fragmentar a las familias.</li>
-                      <li><b>Intercepción Humana:</b> Si encuentra a una familia de 12 pero el hueco máximo disponible en el salón es de 10 sillas, el algoritmo se detendrá y abrirá una ventana para que tú, como humano, decidas cómo romper a esa familia antes de continuar el empaquetado.</li>
-                    </ul>
+                  </div>
+
+                  {/* SECCIÓN 6: SINCRONIZACIÓN PERFECTA */}
+                  <div>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">06. SINCRONIZACIÓN PERFECTA</p>
+                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">Todo está conectado</h3>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
+                      Cualquier cambio que realices en este panel es definitivo y global. El acomodo de las mesas se reflejará automáticamente en la <b>Lista de Invitados</b>. Cada persona mostrará al instante la mesa que le fue asignada aquí, garantizando que el control de puerta y tus reportes estén siempre actualizados sin esfuerzo adicional.
+                    </p>
                   </div>
 
                 </div>
