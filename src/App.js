@@ -720,35 +720,31 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   const [showShareModal, setShowShareModal] = useState(false);
   const [staffPhone, setStaffPhone] = useState('');
   const [camError, setCamError] = useState(null);
-  
-  // 🔴 ESTADO DEL SEMÁFORO DE CONEXIÓN
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
     const handleOffline = () => setIsOffline(true);
-
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
 
-  // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE
+  // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE (CORREGIDO SIN LA VARIABLE FANTASMA)
   const [showTutorial, setShowTutorial] = useState(() => {
     // Si estamos en "Modo Compartido" (Staff), forzamos a que lo vean, o si no lo han visto nunca
     if (isSharedMode) return true;
-    const eventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
-    const hasSeen = localStorage.getItem(`baulia_tutorial_qr_${eventId}`);
+    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
+    const hasSeen = localStorage.getItem(`baulia_tutorial_qr_${activeEventId}`);
     return !hasSeen;
   });
 
   const handleCloseTutorial = () => {
-    const eventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
-    localStorage.setItem(`baulia_tutorial_qr_${eventId}`, 'true');
+    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
+    localStorage.setItem(`baulia_tutorial_qr_${activeEventId}`, 'true');
     setShowTutorial(false);
   };
 
@@ -789,7 +785,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           { facingMode: "environment" }, 
           { 
              fps: 15, 
-             aspectRatio: 1.0,
+             aspectRatio: 1.0, 
              qrbox: function(width, height) {
                 return { width: width * 0.95, height: height * 0.95 };
              }
@@ -839,7 +835,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 
           if (diffHours > 24) {
             setCardData({ status: 'error', title: 'Licencia Expirada', subtitle: 'El acceso de 24 horas ha terminado.' });
-            return;
+            return; 
           }
         }
       }
@@ -1251,7 +1247,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
         </div>
       )}
 
-      {/* 🔴 MODAL MAGAZINE: GUÍA EDITORIAL (MOSTRADO EN CELULAR) */}
+      {/* 🔴 MODAL MAGAZINE: GUÍA EDITORIAL (MOSTRADO EN CELULAR Y MODO COMPARTIDO) */}
       {showTutorial && !showDesktopPlaceholder && (
         <div className="fixed inset-0 z-[999999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors text-left">
           <div className="bg-[#fcfbf9] dark:bg-[#0a0a0a] rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
