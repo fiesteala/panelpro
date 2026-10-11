@@ -2353,6 +2353,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
   const [splitAmount, setSplitAmount] = useState(1);
   const [guestSplitPrompt, setGuestSplitPrompt] = useState(null);
   const [autoAssignConflict, setAutoAssignConflict] = useState(null);
+  const [guestArrastrado, setGuestArrastrado] = useState(null); // Nuevo estado para activar el dorado
   const [configActual, setCurrentConfig] = useState({
     tipo: 'redonda', 
     capacidadRedonda: 10,
@@ -2446,7 +2447,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
    const generarMesas = async () => {
       if (creationMode === 'edit' && tableToEdit) {
          const capacidad = calcularCapacidad(configActual);
-         const assignedGuests = safeGuests.filter(g => g.tableId === tableToEdit.id);
+         const assignedGuests = safeGuests.filter(g => String(g.tableId) === String(tableToEdit.id));
          const usedChairs = assignedGuests.reduce((sum, g) => sum + g.passes, 0);
          if (capacidad < usedChairs) {
               if(addNotification) addNotification('Acción Denegada', `La mesa ya tiene ${usedChairs} personas asignadas. Libera invitados primero.`, 'warning');
@@ -2515,14 +2516,12 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       let promesas = [];
       let changesMade = false;
 
-      // 1. REGLA DE ORO: Familias grandes primero (Ordenamiento Pesado)
       let invitadosAProcesar = [...invitadosPendientes].sort((a, b) => Number(b.passes) - Number(a.passes));
 
       for (let i = 0; i < invitadosAProcesar.length; i++) {
           const guest = invitadosAProcesar[i];
           const pases = Number(guest.passes);
 
-          // Escanear espacios reales en este milisegundo de ejecución
           let mesasConEspacio = safeTables.map(t => {
               const sentados = currentGuests.filter(g => String(g.tableId) === String(t.id));
               const ocupadas = sentados.reduce((sum, g) => sum + Number(g.passes), 0);
@@ -2530,7 +2529,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
           }).filter(t => t.libres >= pases);
 
           if (mesasConEspacio.length > 0) {
-              // 2. BEST-FIT: Buscar la mesa que deje el hueco más exacto (menor sobrante posible)
               mesasConEspacio.sort((a, b) => a.libres - b.libres);
               const bestTable = mesasConEspacio[0];
 
@@ -2541,39 +2539,35 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                   promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), currentGuests[guestIndex]));
               }
           } else {
-              // 3. INTERCEPCIÓN (La mesa no alcanza, toca preguntar al humano)
               const mesasRestantes = safeTables.map(t => {
                   const sentados = currentGuests.filter(g => String(g.tableId) === String(t.id));
                   const ocupadas = sentados.reduce((sum, g) => sum + Number(g.passes), 0);
                   return Number(t.capacity) - ocupadas;
               });
               const maxHueco = Math.max(...mesasRestantes, 0);
-
               const minSplit = Math.max(1, Number(guest.passes) - maxHueco);
 
               setAutoAssignConflict({ guest, maxHueco, minSplit });
               setSplitAmount(minSplit);
               
-              if (promesas.length > 0) await Promise.all(promesas); // Guarda progreso hasta el choque
-              return; // Detenemos el loop
+              if (promesas.length > 0) await Promise.all(promesas); 
+              return; 
           }
       }
 
       if (changesMade) {
          await Promise.all(promesas);
-         if(addNotification) addNotification('Auto-Acomodo Exitoso', 'El algoritmo Best-Fit completó el montaje.', 'success');
+         if(addNotification) addNotification('Auto-Acomodo Exitoso', 'El algoritmo Baulia completó el montaje inteligente.', 'success');
       }
    };
 
    const handleAutoAssignSplit = async (amount) => {
        const { guest } = autoAssignConflict;
-       
        const originalId = guest.parentId || guest.id;
        const newGuestId = `${originalId}_split_${Date.now().toString().slice(-4)}`;
        const baseName = guest.name.replace(' (Separado)', '');
        
        const newGuest = { ...guest, id: newGuestId, parentId: originalId, name: `${baseName} (Separado)`, passes: amount, childrenPasses: 0, tableId: null };
-       
        const subG = Array.isArray(guest.subGuests) ? guest.subGuests : [];
        const movingSubGuest = subG.length > 0 ? subG.slice(-amount) : [];
        const remainingSubGuests = subG.length > 0 ? subG.slice(0, subG.length - amount) : [];
@@ -2589,7 +2583,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
        setAutoAssignConflict(null);
        if(addNotification) addNotification('Familia Dividida', 'Retomando el algoritmo...', 'info');
        
-       // El sistema retoma el auto-acomodo por sí solo tras 800ms
        setTimeout(() => {
            const botonAuto = document.getElementById('btn-autoacomodar');
            if (botonAuto) botonAuto.click();
@@ -2704,12 +2697,17 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
      e.dataTransfer.effectAllowed = 'move';
      e.dataTransfer.setData('text/plain', String(guestId));
      e.dataTransfer.setData('guestId', String(guestId)); // Para Chrome/Firefox
-     setGuestSeleccionado(null); 
+     setGuestSeleccionado(null);
+     setGuestArrastrado(String(guestId)); // Encendemos la luz dorada
+   };
+   const handleDragEnd = () => {
+     setGuestArrastrado(null); // Apagamos si sueltan fuera
    };
    const handleDrop = (e, targetTableId) => { 
      e.preventDefault(); 
      const guestId = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('guestId');
-     if(guestId) moverInvitado(guestId, targetTableId); 
+     if(guestId) moverInvitado(guestId, targetTableId);
+     setGuestArrastrado(null); // Apagamos al soltar en una mesa
    };
    const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
 
@@ -2907,7 +2905,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         const anchoVal = configActual.libreMedidas?.ancho || 1.0;
         const maxLargo = Math.floor(largoVal / 0.5);
         const maxAncho = Math.floor(anchoVal / 0.5);
-        
+
         const lTop = configActual.ladosLibre?.top || 0;
         const lBot = configActual.ladosLibre?.bottom || 0;
         const lLeft = configActual.ladosLibre?.left || 0;
@@ -2987,7 +2985,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
       {/* 🔴 CONTENEDOR PRINCIPAL: PANELES DE MESAS E INVITADOS */}
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 flex-1 overflow-hidden z-10 relative">
-        
+
         {/* PANEL: INVITADOS SIN MESA (Carrusel horizontal en móvil / Columna en PC) */}
         <div 
           className={`w-full lg:w-72 bg-white dark:bg-[#0a0a0a] rounded-2xl lg:rounded-3xl border flex flex-col transition-all duration-300 shadow-sm dark:shadow-2xl ${guestSeleccionado ? 'border-indigo-400 dark:border-amber-500 ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10'} max-h-[30vh] lg:max-h-none shrink-0`}
@@ -2999,25 +2997,29 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
             <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-xs lg:text-sm uppercase tracking-widest"><Users size={16} className="mr-2 text-indigo-500 dark:text-amber-500"/> No Asignados <span className="ml-auto bg-slate-200 dark:bg-white/10 px-2 py-0.5 rounded-md">{invitadosSinMesa.length}</span></h3>
             <p className="text-[9px] lg:text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 font-medium leading-tight">Toca un invitado para seleccionarlo, luego toca la mesa.</p>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-4 flex flex-row lg:flex-col gap-2.5 custom-scrollbar bg-slate-50/50 dark:bg-transparent flex-wrap lg:flex-nowrap content-start">
-            {invitadosSinMesa.map(g => (
+            {invitadosSinMesa.map(g => {
+              const isSelected = guestSeleccionado?.id === g.id;
+              const isDragged = guestArrastrado === String(g.id);
+              return (
               <div 
                 key={g.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, g.id)}
+                onDragEnd={handleDragEnd}
                 onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
-                className={`px-3 py-2 lg:p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all shadow-sm w-auto lg:w-full flex-grow-0 ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 border-indigo-700 dark:border-amber-400 text-white dark:text-slate-900 transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'}`}
+                className={`px-3 py-2 lg:p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all shadow-sm w-auto lg:w-full flex-grow-0 ${isDragged ? 'bg-amber-500 border-amber-600 text-slate-900 transform scale-[1.02] ring-2 ring-amber-400/50 z-50 shadow-xl opacity-90' : (isSelected ? 'bg-indigo-600 dark:bg-indigo-500 border-indigo-700 text-white dark:text-white transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5')}`}
               >
                 <div className="flex items-center truncate max-w-[140px] lg:max-w-none">
-                  <GripVertical size={14} className={`mr-2 hidden lg:block ${guestSeleccionado?.id === g.id ? 'text-white/50 dark:text-slate-900/50' : 'text-slate-400 cursor-grab'}`} />
+                  <GripVertical size={14} className={`mr-2 hidden lg:block ${isDragged || isSelected ? 'text-current opacity-50' : 'text-slate-400 cursor-grab'}`} />
                   <span className="font-bold text-xs lg:text-sm truncate">{g.name}</span>
                 </div>
-                <span className={`text-[9px] lg:text-[10px] font-black px-2 py-1 rounded-md ml-3 ${guestSeleccionado?.id === g.id ? 'bg-white/20 dark:bg-slate-900/20 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5'}`}>
+                <span className={`text-[9px] lg:text-[10px] font-black px-2 py-1 rounded-md ml-3 ${isDragged || isSelected ? 'bg-black/20 text-current' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5'}`}>
                   {g.passes}p
                 </span>
               </div>
-            ))}
+            )})}
             {invitadosSinMesa.length === 0 && (
               <div className="text-center p-4 lg:p-8 text-slate-400 dark:text-slate-500 text-xs lg:text-sm border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl font-medium w-full mt-2">Todos están asignados.</div>
             )}
@@ -3039,6 +3041,8 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                 const assignedGuests = safeGuests.filter(g => String(g.tableId) === String(table.id));
                 const usedChairs = assignedGuests.reduce((sum, g) => sum + (Number(g.passes) || 1), 0);
                 const isFull = usedChairs >= Number(table.capacity);
+                const isTableActiveClick = guestSeleccionado && !isFull;
+                const isTableActiveDrag = guestArrastrado && !isFull;
 
                 return (
                   <div 
@@ -3046,7 +3050,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, table.id)}
                     onClick={() => handleTableClick(table.id)}
-                    className={`bg-white dark:bg-[#111] p-4 lg:p-5 rounded-2xl lg:rounded-3xl border shadow-sm flex flex-col relative group transition-all duration-300 ${guestSeleccionado && !isFull ? 'border-indigo-400 dark:border-amber-500 bg-indigo-50/50 dark:bg-amber-500/10 cursor-pointer shadow-md ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10 hover:border-indigo-200 dark:hover:border-white/30'}`}
+                    className={`bg-white dark:bg-[#111] p-4 lg:p-5 rounded-2xl lg:rounded-3xl border shadow-sm flex flex-col relative group transition-all duration-300 ${isTableActiveDrag ? 'border-amber-400 bg-amber-50/30 dark:bg-amber-500/10 cursor-pointer shadow-md ring-2 ring-amber-400/30' : (isTableActiveClick ? 'border-indigo-400 dark:border-indigo-500 bg-indigo-50/50 dark:bg-indigo-500/10 cursor-pointer shadow-md ring-2 ring-indigo-100 dark:ring-indigo-500/20' : 'border-slate-200 dark:border-white/10 hover:border-indigo-200 dark:hover:border-white/30')}`}
                   >
                     <div className="absolute top-3 lg:top-4 right-3 lg:right-4 flex opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity space-x-1.5 z-50">
                        <button onClick={(e) => { e.stopPropagation(); setTableToEdit(table); setCurrentConfig(table.configDetalle || configActual); setCreationMode('edit'); setIsAddModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-indigo-600 dark:text-slate-500 dark:hover:text-white bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors"><Edit2 size={14}/></button>
@@ -3070,21 +3074,25 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                       <div className="flex items-center text-xs font-bold text-slate-700 dark:text-slate-300">
                         <Users size={14} className="mr-2 text-indigo-500 dark:text-amber-500"/> {usedChairs} / {table.capacity}
                       </div>
-                      {isFull ? <span className="text-[8px] lg:text-[9px] bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 px-2 py-1 rounded-md font-black uppercase tracking-widest border border-rose-200 dark:border-rose-500/20">Llena</span> : <span className={`text-[8px] lg:text-[9px] font-bold uppercase tracking-widest ${guestSeleccionado ? 'text-indigo-600 dark:text-amber-500 animate-pulse' : 'text-slate-400'}`}>{guestSeleccionado ? 'Toca para soltar' : 'Sillas libres'}</span>}
+                      {isFull ? <span className="text-[8px] lg:text-[9px] bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 px-2 py-1 rounded-md font-black uppercase tracking-widest border border-rose-200 dark:border-rose-500/20">Llena</span> : <span className={`text-[8px] lg:text-[9px] font-bold uppercase tracking-widest ${guestSeleccionado ? 'text-indigo-600 dark:text-indigo-400 animate-pulse' : (guestArrastrado ? 'text-amber-600 dark:text-amber-500 animate-pulse' : 'text-slate-400')}`}>{guestArrastrado ? 'Suelta aquí' : (guestSeleccionado ? 'Toca para soltar' : 'Sillas libres')}</span>}
                     </div>
 
                     <div className="mt-auto border-t border-slate-100 dark:border-white/5 pt-3 min-h-[60px] flex flex-wrap gap-1.5 content-start transition-colors">
-                      {assignedGuests.map(g => (
+                      {assignedGuests.map(g => {
+                        const isSelected = guestSeleccionado?.id === g.id;
+                        const isDragged = guestArrastrado === String(g.id);
+                        return (
                         <div 
                           key={g.id} 
                           draggable
                           onDragStart={(e) => handleDragStart(e, g.id)}
+                          onDragEnd={handleDragEnd}
                           onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
-                          className={`text-[9px] lg:text-[10px] px-2.5 py-1.5 rounded-lg font-bold truncate flex items-center cursor-pointer lg:cursor-grab shadow-sm border transition-colors max-w-full ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-700 dark:border-amber-400' : 'bg-white dark:bg-[#0a0a0a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-indigo-300'}`}
+                          className={`text-[9px] lg:text-[10px] px-2.5 py-1.5 rounded-lg font-bold truncate flex items-center cursor-pointer lg:cursor-grab shadow-sm border transition-colors max-w-full ${isDragged ? 'bg-amber-500 border-amber-600 text-slate-900 transform scale-[1.02] ring-2 ring-amber-400/50' : (isSelected ? 'bg-indigo-600 dark:bg-indigo-500 border-indigo-700 text-white transform scale-[1.02]' : 'bg-white dark:bg-[#0a0a0a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-indigo-300')}`}
                         >
-                          <span className="truncate">{g.name}</span> <span className="ml-1.5 opacity-50 font-black shrink-0">({g.passes})</span>
+                          <span className="truncate">{g.name}</span> <span className={`ml-1.5 font-black shrink-0 ${isDragged || isSelected ? 'text-current opacity-70' : 'opacity-50'}`}>({g.passes})</span>
                         </div>
-                      ))}
+                      )})}
                       {assignedGuests.length === 0 && <span className="text-[10px] lg:text-xs text-slate-300 dark:text-slate-600 font-medium italic w-full text-center mt-2">Mesa vacía</span>}
                     </div>
                   </div>
@@ -3107,7 +3115,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
               <h3 className="text-2xl font-editorial font-bold text-white mb-2 relative z-10">Asistente Inteligente</h3>
               <p className="text-indigo-100 dark:text-amber-100 text-sm font-medium relative z-10">Faltan mesas para acomodar a todos.</p>
             </div>
-            
+
             <div className="p-8">
               <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-2xl p-5 mb-6 text-center transition-colors">
                 <p className="text-sm font-bold text-rose-800 dark:text-rose-400">Tienes {smartAssign.faltantes} invitados sin asiento disponible.</p>
@@ -3266,10 +3274,13 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
               {guestSplitPrompt.isFull ? ` A la ${guestSplitPrompt.table?.name || 'mesa'} solo le quedan ${Number(guestSplitPrompt.table?.capacity || 0) - guestSplitPrompt.usedChairs} sillas libres.` : ''}
               <br/><br/>¿Cuántos pases deseas separar y mover a esta mesa?
             </p>
-            
+
             {/* CONTROLES PARA ELEGIR CUÁNTOS SEPARAR */}
             <div className="flex items-center justify-center gap-6 mb-6 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/10">
-                <button onClick={() => setSplitAmount(Math.max(1, splitAmount - 1))} className="w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shadow-sm">-</button>
+                <button 
+                  onClick={() => setSplitAmount(Math.max(guestSplitPrompt.minSplit || 1, splitAmount - 1))} 
+                  disabled={splitAmount <= (guestSplitPrompt.minSplit || 1)}
+                  className={`w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 font-bold text-xl transition-colors shadow-sm ${splitAmount <= (guestSplitPrompt.minSplit || 1) ? 'text-slate-300 dark:text-slate-600 opacity-50 cursor-not-allowed' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'}`}>-</button>
                 <span className="text-3xl font-black text-slate-900 dark:text-white">{splitAmount}</span>
                 <button onClick={() => setSplitAmount(Math.min(Number(guestSplitPrompt.guest.passes) - 1, splitAmount + 1))} className="w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shadow-sm">+</button>
             </div>
@@ -3299,7 +3310,10 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
             </p>
             
             <div className="flex items-center justify-center gap-6 mb-6 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/10">
-                <button onClick={() => setSplitAmount(Math.max(1, splitAmount - 1))} className="w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shadow-sm">-</button>
+                <button 
+                  onClick={() => setSplitAmount(Math.max(autoAssignConflict.minSplit || 1, splitAmount - 1))} 
+                  disabled={splitAmount <= (autoAssignConflict.minSplit || 1)}
+                  className={`w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 font-bold text-xl transition-colors shadow-sm ${splitAmount <= (autoAssignConflict.minSplit || 1) ? 'text-slate-300 dark:text-slate-600 opacity-50 cursor-not-allowed' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'}`}>-</button>
                 <span className="text-3xl font-black text-slate-900 dark:text-white">{splitAmount}</span>
                 <button onClick={() => setSplitAmount(Math.min(Number(autoAssignConflict.guest.passes) - 1, splitAmount + 1))} className="w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shadow-sm">+</button>
             </div>
