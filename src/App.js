@@ -2314,6 +2314,14 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   Anatomía<br />
                   <span className="font-editorial font-normal italic text-amber-500">del control.</span>
                 </h1>
+                
+                {/* 🔴 NUEVO: MENSAJE DE BIENVENIDA PERSONALIZADO */}
+                <div className="mt-8 border-l-[3px] border-amber-500 pl-4 animate-in slide-in-from-left-4 duration-700">
+                  <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-light leading-relaxed">
+                    Bienvenido a tu centro de mando interactivo.<br/>
+                    Disfruta al máximo la planeación de <strong className="font-bold text-slate-900 dark:text-white uppercase tracking-wider">{eventName || 'tu evento'}</strong>.
+                  </p>
+                </div>
               </div>
 
               {/* GRID DE DOS COLUMNAS ESTILO REVISTA */}
