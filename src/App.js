@@ -1455,14 +1455,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       lista.forEach(g => {
           const isSplit = String(g.id).includes('_split_');
           const parentId = g.parentId || (isSplit ? String(g.id).split('_split_')[0] : String(g.id));
-          // 🔴 NUEVA FUNCIÓN: AGRUPA VISUALMENTE A LOS INVITADOS "SPLIT" CON SU PADRE
-  const agruparInvitadosVisualmente = (lista) => {
-      let familiasAgrupadas = {};
-      let listaFinal = [];
-
-      lista.forEach(g => {
-          const isSplit = String(g.id).includes('_split_');
-          const parentId = g.parentId || (isSplit ? String(g.id).split('_split_')[0] : String(g.id));
           
           // 🔴 GUARDAMOS LA MESA REAL A LA QUE SE ASIGNÓ ESTA FRACCIÓN
           const subGuestsConMesa = (g.subGuests || []).map(sg => ({
@@ -1476,14 +1468,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               familiasAgrupadas[parentId].tempPasses += (Number(g.passes) || 1);
               familiasAgrupadas[parentId].tempSubGuests = [...familiasAgrupadas[parentId].tempSubGuests, ...subGuestsConMesa];
               if (!isSplit) familiasAgrupadas[parentId].isMainBlock = true;
-          }
-      });
-          if (!familiasAgrupadas[parentId]) {
-              familiasAgrupadas[parentId] = { ...g, originalId: parentId, isMainBlock: !isSplit, tempPasses: Number(g.passes) || 1, tempSubGuests: g.subGuests || [] };
-          } else {
-              familiasAgrupadas[parentId].tempPasses += (Number(g.passes) || 1);
-              familiasAgrupadas[parentId].tempSubGuests = [...familiasAgrupadas[parentId].tempSubGuests, ...(g.subGuests || [])];
-              if (!isSplit) familiasAgrupadas[parentId].isMainBlock = true; // Aseguramos marcar cuál era el bloque original
           }
       });
 
