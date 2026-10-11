@@ -7,13 +7,13 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 
 import { 
   LayoutDashboard, Users, Map as MapIcon, Wallet, CheckSquare, Store, Clock, Palette, 
-  Smartphone, Menu, Bell, Search as SearchIcon, Search, X, MessageCircle, QrCode, UserPlus, FileText, UploadCloud, 
+  Smartphone, Menu, Bell, Search as SearchIcon, X, MessageCircle, QrCode, UserPlus, FileText, UploadCloud, 
   ExternalLink, Edit2, Edit3, Trash2, AlertTriangle, FileSpreadsheet, CheckCircle, ArrowRight, ChevronRight,
   Download, Link, LogOut, RotateCw, Move, LayoutGrid, Plus, Minus, RefreshCw, Trash, Info, Hand, Spline, Maximize, 
   FlipHorizontal, Hexagon, Type, Layers, ArrowUp, ArrowDown, PaintBucket, Flower2, Trees, Cuboid, Magnet, 
   DollarSign, PieChart, TrendingDown, Upload, Building, Landmark, History, Phone, Mail, Calendar, Eye, EyeOff, MessageSquare, 
   FileSignature, AlertCircle, Star, Image as ImageIcon, CalendarDays, FileDown, 
-  ListTodo, CheckCircle2, Circle, PlayCircle, AlignLeft, MapPin, ShieldCheck, Printer, Scan, ScanLine, Share2, Camera, Navigation as NavigationIcon, Navigation, MoreVertical,
+  ListTodo, CheckCircle2, Circle, PlayCircle, AlignLeft, MapPin, ShieldCheck, Printer, Scan, Camera, Navigation as NavigationIcon, Navigation, MoreVertical,
   Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Key, Power, Quote, Check, Factory,
   Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser, Activity, Gem, UserCheck, BarChart3, Binary, MonitorPlay
 } from 'lucide-react';
@@ -709,7 +709,7 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
 // ==========================================
 // --- COMPONENTE: RECEPCIÓN Y ESCÁNER (CÁMARA CUADRADA 100%) ---
 // ==========================================
-const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, simulateSharedMode, addNotification, eventName }) => {
+const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, simulateSharedMode, addNotification }) => {
   const [forceMobile, setForceMobile] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
   
@@ -720,32 +720,22 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   const [showShareModal, setShowShareModal] = useState(false);
   const [staffPhone, setStaffPhone] = useState('');
   const [camError, setCamError] = useState(null);
+  // 🔴 ESTADO DEL SEMÁFORO DE CONEXIÓN
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
     const handleOffline = () => setIsOffline(true);
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
-
-  // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE
-  const [showTutorial, setShowTutorial] = useState(() => {
-    if (isSharedMode) return true;
-    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
-    const hasSeen = localStorage.getItem(`baulia_tutorial_qr_${activeEventId}`);
-    return !hasSeen;
-  });
-
-  const handleCloseTutorial = () => {
-    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
-    localStorage.setItem(`baulia_tutorial_qr_${activeEventId}`, 'true');
-    setShowTutorial(false);
-  };
+  const [showProtocol, setShowProtocol] = useState(isSharedMode);
 
   const [cardData, setCardData] = useState({ 
     status: 'idle', 
@@ -784,8 +774,9 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           { facingMode: "environment" }, 
           { 
              fps: 15, 
-             aspectRatio: 1.0, 
+             aspectRatio: 1.0, // 🔴 FUERZA LA PROPORCIÓN CUADRADA
              qrbox: function(width, height) {
+                // 🔴 HACE QUE EL ÁREA DE ESCANEO SEA EL 95% DE LA PANTALLA, IMPOSIBLE FALLAR
                 return { width: width * 0.95, height: height * 0.95 };
              }
           },
@@ -820,25 +811,32 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 
   const processEntry = async (code) => {
     try {
-      const eventSnap = await getDoc(doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : ''));
+      // 🔴 1. PREGUNTAMOS A LA BASE DE DATOS EL PLAN Y LA HORA EXACTA
+      const eventSnap = await getDoc(doc(db, "eventos", ID_DEL_EVENTO));
       if (eventSnap.exists()) {
         const evData = eventSnap.data();
 
+        // 🔴 2. VALIDACIÓN DE TIEMPO (Solo para Kit de Seguridad)
         if (evData.plan === 'security_kit' && evData.horaEvento && evData.fecha) {
+          // Blindaje: Detectamos si la fecha es de Firebase o es un texto (String)
           const eventDate = evData.fecha.toDate ? evData.fecha.toDate() : new Date(evData.fecha + 'T00:00:00');
+          
+          // Ajustamos la hora de inicio
           const [hrs, mins] = evData.horaEvento.split(':');
           eventDate.setHours(hrs, mins);
 
           const now = new Date();
           const diffHours = (now - eventDate) / (1000 * 60 * 60);
 
+          // Si pasaron más de 24 horas desde el inicio del evento, bloqueamos
           if (diffHours > 24) {
             setCardData({ status: 'error', title: 'Licencia Expirada', subtitle: 'El acceso de 24 horas ha terminado.' });
-            return; 
+            return; // Cortamos la función aquí, no escanea nada
           }
         }
       }
 
+      // 🔴 3. CONTINÚA EL ESCANEO NORMAL
       const codeLower = code.trim().toLowerCase();
       let foundParentId = null;
       let targetSubId = null;
@@ -856,7 +854,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
         return;
       }
 
-      const docRef = doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : '', "invitados", foundParentId);
+      const docRef = doc(db, "eventos", ID_DEL_EVENTO, "invitados", foundParentId);
       const docSnap = await getDoc(docRef);
       
       if (!docSnap.exists()) {
@@ -904,7 +902,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   const handleManualEntryFromList = async (parentGuest, subGuest) => {
     if (subGuest.entered) return;
     try {
-      const docRef = doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : '', "invitados", parentGuest.id);
+      const docRef = doc(db, "eventos", ID_DEL_EVENTO, "invitados", parentGuest.id);
       const docSnap = await getDoc(docRef);
       if (!docSnap.exists()) return;
       const freshParent = { id: docSnap.id, ...docSnap.data() };
@@ -917,11 +915,11 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     } catch(e){}
   };
 
+  // 🔴 CORRECCIÓN: URL DEL PANEL BAULIA
   const getCleanBaseUrl = () => window.location.hostname.includes('localhost') ? window.location.origin : 'https://panel.baulia.com';
 
   const copyStaffLink = () => {
-    const eventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : '';
-    const url = `${getCleanBaseUrl()}/?modo=puerta&e=${eventId}`;
+    const url = `${getCleanBaseUrl()}/?modo=puerta&e=${ID_DEL_EVENTO}`;
     navigator.clipboard.writeText(url).then(() => {
       if (addNotification) addNotification('¡Copiado!', 'Enlace de Recepción copiado.', 'success');
     }).catch(() => {
@@ -938,8 +936,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   };
 
   const shareStaffLinkWhatsApp = () => {
-    const eventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : '';
-    const url = `${getCleanBaseUrl()}/?modo=puerta&e=${eventId}`;
+    const url = `${getCleanBaseUrl()}/?modo=puerta&e=${ID_DEL_EVENTO}`;
     const msg = `📱 *Recepción EventMaster*\n\nAccede al escáner de puerta aquí:\n${url}`;
     window.open(`https://wa.me/${staffPhone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
   };
@@ -964,11 +961,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
         <div className="h-full flex flex-col items-center justify-center p-6 animate-in fade-in">
            <div className="bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-xl max-w-lg w-full text-center border border-slate-200 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-3 bg-emerald-500"></div>
-              <div className="absolute top-4 right-4">
-                 {/* 🔴 BOTÓN DE AYUDA (TUTORIAL QR) ESCRITORIO */}
-                 <button onClick={() => setShowTutorial(true)} className="flex items-center justify-center w-8 h-8 bg-slate-100 border border-slate-200 text-slate-500 rounded-full text-xs font-black hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 shadow-sm transition-colors" title="Ver Guía de Uso">?</button>
-              </div>
-              <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-emerald-100 mt-2">
+              <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-emerald-100">
                  <Smartphone size={48} />
               </div>
               <h2 className="text-3xl font-black text-slate-800 mb-3 tracking-tight">Escáner Móvil</h2>
@@ -989,87 +982,6 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
               
               <button onClick={() => setForceMobile(true)} className="text-[10px] font-bold text-slate-400 hover:text-emerald-600 underline">Forzar vista de escáner aquí en la computadora</button>
            </div>
-           
-           {/* 🔴 MODAL MAGAZINE COMPACTO: GUÍA EDITORIAL (DESKTOP) */}
-           {showTutorial && (
-            <div className="fixed inset-0 z-[999999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors text-left">
-              <div className="bg-[#fcfbf9] rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl border border-transparent animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
-                <div className="px-6 py-4 border-b border-amber-200/50 flex justify-between items-center shrink-0">
-                  <div className="flex items-center gap-3">
-                    <span className="text-amber-500 font-black tracking-[0.2em] text-[10px] uppercase hidden sm:block">Baulia</span>
-                    <span className="font-editorial text-slate-800 italic text-lg">Magazine</span>
-                  </div>
-                  <button onClick={handleCloseTutorial} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 flex items-center transition-colors">
-                    Cerrar <span className="hidden sm:inline ml-1">Edición</span> <X size={14} className="ml-2" />
-                  </button>
-                </div>
-                <div className="p-5 sm:p-8 overflow-y-auto custom-scrollbar flex-1 relative">
-                  <div className="mb-8">
-                    <h1 className="font-black text-4xl sm:text-6xl text-slate-900 tracking-tighter leading-[0.85]">
-                      Protocolo<br /><span className="font-editorial font-normal italic text-amber-500">de entrada.</span>
-                    </h1>
-                    <div className="mt-6 border-l-[3px] border-amber-500 pl-4 animate-in slide-in-from-left-4 duration-700">
-                      <p className="text-sm text-slate-600 font-light leading-relaxed">
-                        Bienvenido a la primera línea de recepción.<br/>
-                        La puerta es la primera gran impresión de <strong className="font-bold text-slate-900 uppercase tracking-wider">{eventName || 'tu evento'}</strong>.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
-                    <div className="space-y-8">
-                      <div>
-                        <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">01. DELEGACIÓN OPERATIVA</p>
-                        <div className="flex items-center gap-3 mb-2">
-                          <Share2 size={20} className="text-indigo-500" />
-                          <h3 className="font-bold text-lg text-slate-900 tracking-tight">Comparte el acceso</h3>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed mb-4">
-                          Tú no estarás en la puerta recibiendo invitados. Copia el enlace de esta pestaña y envíaselo a tus <i>Hostesses</i> o al equipo de seguridad. Ellos podrán abrir esta herramienta desde sus celulares sin tener que acceder al resto de tu panel.
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">02. VERIFICACIÓN INSTANTÁNEA</p>
-                        <div className="flex items-center gap-3 mb-2">
-                          <ScanLine size={20} className="text-indigo-500" />
-                          <h3 className="font-bold text-lg text-slate-900 tracking-tight">Escáner Dinámico</h3>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed">
-                          El equipo solo debe apuntar la cámara al código QR del invitado. En milisegundos, la pantalla destellará confirmando el acceso, mostrará a nombre de quién está el pase, su número de mesa y evitará boletos duplicados mediante una alerta.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="space-y-8">
-                      <div>
-                        <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">03. FLEXIBILIDAD (PLAN B)</p>
-                        <div className="flex items-center gap-3 mb-2">
-                          <Search size={20} className="text-indigo-500" />
-                          <h3 className="font-bold text-lg text-slate-900 tracking-tight">Modo Manual</h3>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed mb-4">
-                          ¿Un invitado se quedó sin pila o no encuentra su pase? No hay problema. Utiliza el buscador manual para encontrar su nombre en la lista. Desde ahí, podrás otorgarle el acceso tocando un solo botón.
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">04. RESILIENCIA TECNOLÓGICA</p>
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="bg-emerald-100 text-emerald-600 p-1.5 rounded-full"><WifiOff size={14} /></div>
-                          <h3 className="font-bold text-lg text-slate-900 tracking-tight">Tecnología "Offline"</h3>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed mb-3">
-                          <b>Baulia es a prueba de fallos:</b> El escáner continuará leyendo accesos aunque se pierda la conexión a internet. En cuanto recupere señal, los datos se sincronizarán mágicamente con tu Monitor En Vivo.
-                        </p>
-                        <div className="bg-amber-50 border border-amber-100 p-3 rounded-xl space-y-2 mt-3 shadow-inner">
-                          <p className="text-[10px] font-black uppercase text-amber-600 tracking-widest mb-1">Para el Staff (Reglas de Oro):</p>
-                          <p className="text-xs text-slate-700 leading-tight"><b>1. No cierres esta pestaña.</b> Puedes bloquear la pantalla pero no cierres el navegador.</p>
-                          <p className="text-xs text-slate-700 leading-tight"><b>2. Evita abrir otras Apps.</b> Usar la cámara normal consume memoria y podría reiniciar el escáner.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-           )}
         </div>
      );
   }
@@ -1077,6 +989,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   return (
     <div className={`h-full flex flex-col space-y-4 pb-6 ${isSharedMode ? 'max-w-lg mx-auto' : 'max-w-4xl'}`}>
       
+      {/* 🔴 SEMÁFORO DE CONEXIÓN INTELIGENTE */}
       <div className={`p-3 rounded-2xl shadow-lg flex items-center justify-between transition-colors duration-500 animate-in slide-in-from-top-4 mb-2 border ${isOffline ? 'bg-amber-500 border-amber-600' : 'bg-slate-900 border-slate-700'}`}>
         <div className="flex items-center">
           {isOffline ? (
@@ -1101,27 +1014,23 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           <h2 className="text-2xl font-bold text-slate-800">{isSharedMode ? 'Recepción VIP' : 'Control de Accesos'}</h2>
           <p className="text-slate-500 text-sm mt-1">Escaneo continuo automático.</p>
         </div>
-        <div className="flex items-center gap-2">
-          {/* 🔴 BOTÓN DE AYUDA (TUTORIAL QR) MÓVIL/COMPARTIDO */}
-          <button onClick={() => setShowTutorial(true)} className="p-3 bg-indigo-50 text-indigo-500 rounded-full hover:bg-indigo-100 hover:text-indigo-600 transition-colors shadow-sm" title="Ver Guía de Uso">
-             <span className="font-black">?</span>
+        {!isSharedMode && (
+          <button onClick={() => setShowShareModal(true)} className="p-3 bg-emerald-100 text-emerald-700 rounded-full hover:bg-emerald-200 transition-colors shadow-sm" title="Compartir a Staff">
+            <Link size={20} /> 
           </button>
-          {!isSharedMode && (
-            <button onClick={() => setShowShareModal(true)} className="p-3 bg-emerald-100 text-emerald-700 rounded-full hover:bg-emerald-200 transition-colors shadow-sm" title="Compartir a Staff">
-              <Link size={20} /> 
-            </button>
-          )}
-        </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-4 flex-1">
         
+        {/* 🔴 INYECCIÓN CSS PARA FORZAR EL VIDEO CUADRADO AL 100% */}
         <style>{`
           #qr-reader-puerta { width: 100% !important; height: 100% !important; border: none !important; position: absolute !important; inset: 0 !important; }
           #qr-reader-puerta video { object-fit: cover !important; width: 100% !important; height: 100% !important; border-radius: 1.5rem !important; }
           #qr-reader-puerta canvas { display: none !important; }
         `}</style>
 
+        {/* 🔴 ESCÁNER CUADRADO PERFECTO */}
         <div className="w-full max-w-[350px] mx-auto bg-slate-900 rounded-3xl overflow-hidden relative shadow-2xl flex-shrink-0 aspect-square">
           {camError ? (
             <button onClick={() => window.location.reload()} className="absolute inset-0 flex flex-col items-center justify-center text-white bg-slate-800 p-6 text-center z-50">
@@ -1132,6 +1041,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           ) : (
             <>
                <div id="qr-reader-puerta"></div>
+               {/* Marcos y Laser */}
                <div className="absolute inset-0 border-[30px] border-black/40 pointer-events-none z-10"></div>
                <div className="absolute inset-0 border-2 border-emerald-400 m-[30px] pointer-events-none z-10 opacity-70">
                  <div className="w-full h-0.5 bg-emerald-400 shadow-[0_0_15px_#34d399] absolute top-1/2 -translate-y-1/2 opacity-60 animate-pulse"></div>
@@ -1140,6 +1050,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           )}
         </div>
 
+        {/* 🔴 FICHA INTELIGENTE */}
         <div className={`w-full p-6 rounded-3xl shadow-lg border-2 transition-all flex flex-col justify-center min-h-[140px] flex-shrink-0 relative overflow-hidden
             ${cardData.status === 'idle' ? 'bg-white border-slate-200' : ''}
             ${cardData.status === 'success' ? 'bg-emerald-50 border-emerald-400 shadow-emerald-500/20 scale-[1.02]' : ''}
@@ -1163,6 +1074,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
               </p>
            </div>
            
+           {/* Iconos de fondo */}
            {cardData.status === 'success' && <CheckCircle size={100} className="absolute -right-4 -bottom-4 text-emerald-500/10 pointer-events-none"/>}
            {cardData.status === 'warning' && <AlertTriangle size={100} className="absolute -right-4 -bottom-4 text-amber-500/10 pointer-events-none"/>}
            {cardData.status === 'error' && <X size={100} className="absolute -right-4 -bottom-4 text-rose-500/10 pointer-events-none"/>}
@@ -1173,6 +1085,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
         </button>
       </div>
 
+      {/* MODAL DIRECTORIO MANUAL */}
       {isListOpen && (
          <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex flex-col justify-end sm:justify-center sm:p-6 animate-in fade-in duration-200">
              <div className="bg-white w-full sm:max-w-2xl mx-auto sm:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col h-[90vh] sm:h-[80vh] overflow-hidden">
@@ -1244,83 +1157,33 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
           </div>
         </div>
       )}
-
-      {/* 🔴 MODAL MAGAZINE COMPACTO: GUÍA EDITORIAL (CELULAR Y MODO COMPARTIDO) */}
-      {showTutorial && !showDesktopPlaceholder && (
-        <div className="fixed inset-0 z-[999999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors text-left">
-          <div className="bg-[#fcfbf9] dark:bg-[#0a0a0a] rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
-            <div className="px-6 py-4 border-b border-amber-200/50 dark:border-white/5 flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-3">
-                <span className="text-amber-500 font-black tracking-[0.2em] text-[10px] uppercase hidden sm:block">Baulia</span>
-                <span className="font-editorial text-slate-800 dark:text-white italic text-lg">Magazine</span>
-              </div>
-              <button onClick={handleCloseTutorial} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center transition-colors">
-                Cerrar <span className="hidden sm:inline ml-1">Edición</span> <X size={14} className="ml-2" />
-              </button>
+      {/* 🔴 MODAL DE PROTOCOLO OFFLINE PARA EL STAFF */}
+      {showProtocol && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-white/10 flex flex-col relative">
+            <div className="bg-amber-500 p-8 text-center text-slate-900 relative overflow-hidden">
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+              <ShieldCheck size={48} className="mx-auto mb-3 opacity-90 relative z-10"/>
+              <h3 className="text-xl font-black uppercase tracking-widest relative z-10">Protocolo de Puerta</h3>
             </div>
-            <div className="p-5 sm:p-8 overflow-y-auto custom-scrollbar flex-1 relative">
-              <div className="mb-8">
-                <h1 className="font-black text-4xl sm:text-6xl text-slate-900 dark:text-white tracking-tighter leading-[0.85]">
-                  Protocolo<br /><span className="font-editorial font-normal italic text-amber-500">de entrada.</span>
-                </h1>
-                <div className="mt-6 border-l-[3px] border-amber-500 pl-4 animate-in slide-in-from-left-4 duration-700">
-                  <p className="text-sm text-slate-600 dark:text-slate-300 font-light leading-relaxed">
-                    Bienvenido a la primera línea de recepción.<br/>
-                    La puerta es la primera gran impresión de <strong className="font-bold text-slate-900 dark:text-white uppercase tracking-wider">{eventName || 'tu evento'}</strong>.
-                  </p>
+            <div className="p-6 sm:p-8 space-y-5 text-slate-600 dark:text-slate-300 text-sm font-medium leading-relaxed">
+              <p>Para garantizar que el escáner funcione a la perfección, <b className="text-slate-900 dark:text-white">incluso si se cae el internet</b> en la locación, sigue estas dos reglas de oro:</p>
+              
+              <div className="bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 p-4 rounded-xl space-y-4 shadow-inner">
+                <div className="flex items-start">
+                  <span className="bg-amber-100 text-amber-600 w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 mr-3 mt-0.5">1</span> 
+                  <p><b>No cierres esta pestaña.</b> Puedes bloquear la pantalla de tu celular y guardarlo, pero no cierres el navegador.</p>
+                </div>
+                <div className="flex items-start">
+                  <span className="bg-amber-100 text-amber-600 w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 mr-3 mt-0.5">2</span> 
+                  <p><b>Evita abrir otras Apps.</b> Usar Instagram o la cámara normal de tu celular consume memoria y podría reiniciar este escáner.</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
-                <div className="space-y-8">
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">01. DELEGACIÓN OPERATIVA</p>
-                    <div className="flex items-center gap-3 mb-2">
-                      <Share2 size={20} className="text-indigo-500 dark:text-amber-500" />
-                      <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Comparte el acceso</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      Tú no estarás en la puerta recibiendo invitados. Copia el enlace de esta pestaña y envíaselo a tus <i>Hostesses</i> o al equipo de seguridad. Ellos podrán abrir esta herramienta desde sus celulares sin tener que acceder al resto de tu panel.
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">02. VERIFICACIÓN INSTANTÁNEA</p>
-                    <div className="flex items-center gap-3 mb-2">
-                      <ScanLine size={20} className="text-indigo-500 dark:text-amber-500" />
-                      <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Escáner Dinámico</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
-                      El equipo solo debe apuntar la cámara al código QR del invitado. En milisegundos, la pantalla destellará confirmando el acceso, mostrará a nombre de quién está el pase, su número de mesa y evitará boletos duplicados mediante una alerta.
-                    </p>
-                  </div>
-                </div>
-                <div className="space-y-8">
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">03. FLEXIBILIDAD (PLAN B)</p>
-                    <div className="flex items-center gap-3 mb-2">
-                      <Search size={20} className="text-indigo-500 dark:text-amber-500" />
-                      <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Modo Manual</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      ¿Un invitado se quedó sin pila o no encuentra su pase? No hay problema. Utiliza el buscador manual para encontrar su nombre en la lista. Desde ahí, podrás otorgarle el acceso tocando un solo botón.
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">04. RESILIENCIA TECNOLÓGICA</p>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 p-1.5 rounded-full"><WifiOff size={14} /></div>
-                      <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Tecnología "Offline"</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-3">
-                      <b>Baulia es a prueba de fallos:</b> El escáner continuará leyendo accesos aunque se pierda la conexión a internet. En cuanto recupere señal, los datos se sincronizarán mágicamente con tu Monitor En Vivo.
-                    </p>
-                    <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 p-3 rounded-xl space-y-2 mt-3 shadow-inner">
-                      <p className="text-[10px] font-black uppercase text-amber-600 dark:text-amber-500 tracking-widest mb-1">Para el Staff (Reglas de Oro):</p>
-                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-tight"><b>1. No cierres esta pestaña.</b> Puedes bloquear la pantalla pero no cierres el navegador.</p>
-                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-tight"><b>2. Evita abrir otras Apps.</b> Usar la cámara normal consume memoria y podría reiniciar el escáner.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            </div>
+            <div className="p-6 pt-0 mt-2">
+              <button onClick={() => setShowProtocol(false)} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-transform shadow-xl">
+                Entendido, Iniciar Escáner
+              </button>
             </div>
           </div>
         </div>
@@ -1338,16 +1201,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   const [isWeddingMode, setIsWeddingMode] = useState(isBodaType);
   const [expandedMobileRow, setExpandedMobileRow] = useState(null);
   const toggleMobileRow = (id) => setExpandedMobileRow(prev => prev === id ? null : id);
-
-  // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE
-  const [showTutorial, setShowTutorial] = useState(() => {
-    const hasSeen = localStorage.getItem(`baulia_tutorial_invitados_${typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test'}`);
-    return !hasSeen; // Si no lo ha visto, se abre por defecto
-  });
-  const handleCloseTutorial = () => {
-    localStorage.setItem(`baulia_tutorial_invitados_${typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test'}`, 'true');
-    setShowTutorial(false);
-  };
 
   const [qrEnabled, setQrEnabled] = useState(true);
   const [passCountEnabled, setPassCountEnabled] = useState(true);
@@ -1618,13 +1471,14 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           }
       });
 
+      // Transformar de nuevo a formato de lista, aplicando la suma y filtrando si es necesario
       Object.values(familiasAgrupadas).forEach(fg => {
           listaFinal.push({
               ...fg,
-              id: fg.originalId, 
+              id: fg.originalId, // Reasignar ID para que no tenga '_split_'
               passes: fg.tempPasses,
               subGuests: fg.tempSubGuests,
-              name: fg.name.replace(' (Separado)', '') 
+              name: fg.name.replace(' (Separado)', '') // Limpiamos el nombre
           });
       });
       return listaFinal;
@@ -1663,6 +1517,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     return flattened;
   };
 
+  // 🔴 APLICAMOS LA AGRUPACIÓN ANTES DE RENDERIZAR
   const listaAgrupada = agruparInvitadosVisualmente(invitadosFiltrados);
   const flattenedList = getFlattenedGuests(listaAgrupada);
 
@@ -1942,8 +1797,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
         
         <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
-          {/* 🔴 BOTÓN DE AYUDA (TUTORIAL) */}
-          <button onClick={() => setShowTutorial(true)} className="flex items-center justify-center w-8 h-8 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 rounded-full text-xs font-black hover:bg-indigo-50 dark:hover:bg-amber-500/10 hover:text-indigo-600 dark:hover:text-amber-500 hover:border-indigo-200 dark:hover:border-amber-500/20 shadow-sm transition-colors" title="Ver Guía de Uso">?</button>
           <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Exportar Lista</button>
           {isBodaType && (
             <div className="flex items-center bg-white dark:bg-[#0a0a0a] p-1 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
@@ -2425,143 +2278,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         );
       })()}
 
-      {/* 🔴 MODAL MAGAZINE COMPACTO: GUÍA EDITORIAL DE MESAS */}
-      {showTutorial && (
-        <div className="fixed inset-0 z-[999999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors text-left">
-          <div className="bg-[#fcfbf9] dark:bg-[#0a0a0a] rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
-            
-            {/* CABECERA EDITORIAL */}
-            <div className="px-6 py-4 border-b border-amber-200/50 dark:border-white/5 flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-3">
-                <span className="text-amber-500 font-black tracking-[0.2em] text-[10px] uppercase hidden sm:block">Baulia</span>
-                <span className="font-editorial text-slate-800 dark:text-white italic text-lg">Magazine</span>
-              </div>
-              <button onClick={handleCloseTutorial} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center transition-colors">
-                Cerrar <span className="hidden sm:inline ml-1">Edición</span> <X size={14} className="ml-2" />
-              </button>
-            </div>
-
-            {/* CUERPO DEL MAGAZINE */}
-            <div className="p-5 sm:p-8 overflow-y-auto custom-scrollbar flex-1 relative">
-              {/* TÍTULO GIGANTE */}
-              <div className="mb-8">
-                <h1 className="font-black text-4xl sm:text-6xl text-slate-900 dark:text-white tracking-tighter leading-[0.85]">
-                  Arquitectura<br />
-                  <span className="font-editorial font-normal italic text-amber-500">del espacio.</span>
-                </h1>
-                
-                {/* MENSAJE DE BIENVENIDA PERSONALIZADO */}
-                <div className="mt-6 border-l-[3px] border-amber-500 pl-4 animate-in slide-in-from-left-4 duration-700">
-                  <p className="text-sm text-slate-600 dark:text-slate-300 font-light leading-relaxed">
-                    Bienvenido al lienzo de tu distribución espacial.<br/>
-                    Disfruta diseñando el acomodo perfecto para <strong className="font-bold text-slate-900 dark:text-white uppercase tracking-wider">{eventName || 'tu evento'}</strong>.
-                  </p>
-                </div>
-              </div>
-
-              {/* GRID DE DOS COLUMNAS ESTILO REVISTA */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
-                
-                {/* COLUMNA IZQUIERDA */}
-                <div className="space-y-8">
-                  
-                  {/* SECCIÓN 1: CONFIGURACIÓN DE MESAS */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">01. GEOMETRÍA A LA MEDIDA</p>
-                    <div className="flex items-center gap-3 mb-2">
-                      <LayoutGrid size={20} className="text-indigo-500 dark:text-amber-500" />
-                      <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Creación de mesas</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-3">
-                      Al crear mesas, seleccionas la forma física y le dices al sistema cómo se distribuyen las sillas por lado. El algoritmo calculará la <b>capacidad física máxima</b> para prevenir errores operativos.
-                    </p>
-                    <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/5 p-3 rounded-2xl shadow-sm">
-                       <h4 className="font-bold text-[10px] uppercase tracking-widest mb-2 flex items-center text-slate-700 dark:text-slate-300"><Settings2 size={12} className="mr-1.5"/> Modo Libre</h4>
-                       <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                         Define el Largo y Ancho en metros; <b>la regla estricta de Baulia dicta que cada persona requiere 0.5 metros lineales</b>, calculando así el límite exacto para que nadie quede apretado.
-                       </p>
-                    </div>
-                  </div>
-
-                  {/* SECCIÓN 2: MEZCLAS DE MESAS */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">02. ESTÉTICA COLECTIVA</p>
-                    <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight mb-2">Crear Mezclas (Mix & Match)</h3>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
-                      Si tu evento combina diseños (ej. 5 redondas y 4 tablones), usa la pestaña <b>"Crear Mezcla"</b>. Añade tus configuraciones al "carrito" y genéralas todas con un solo clic para ubicarlas en tu Croquis 2D.
-                    </p>
-                  </div>
-                  
-                  {/* SECCIÓN 3: ARRASTRE Y SOLTADO */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">03. KINESIOLOGÍA DE DATOS</p>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="px-2 py-0.5 rounded bg-amber-500 text-slate-900 text-[9px] font-black uppercase tracking-widest ring-2 ring-amber-400/50 shadow-md">Arrastra</div>
-                      <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Experiencia táctil</h3>
-                    </div>
-                    <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed space-y-2 list-disc pl-4 marker:text-indigo-500 dark:marker:text-amber-500">
-                      <li><b>Drag & Drop:</b> En computadoras, arrastra a los invitados. Observa cómo el sistema enciende la mesa destino en <b>color dorado</b> garantizando precisión.</li>
-                      <li><b>Toca y Suelta:</b> En celulares, toca primero al invitado (se tornará azul/dorado) y luego toca la mesa donde lo quieres sentar.</li>
-                    </ul>
-                  </div>
-
-                </div>
-
-                {/* COLUMNA DERECHA */}
-                <div className="space-y-8">
-
-                  {/* SECCIÓN 4: MODO SEPARADOR VISUAL */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">04. INGENIERÍA SOCIAL</p>
-                    <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight mb-3">El Switch "Modo Separador"</h3>
-                    
-                    <div className="flex items-center px-3 py-1.5 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-[2rem] w-max mb-3 shadow-sm">
-                      <span className="text-[9px] font-black text-slate-600 dark:text-slate-300 tracking-wider mr-3 uppercase">Separador</span>
-                      <div className="w-[32px] h-[18px] rounded-full p-[2px] bg-indigo-500 dark:bg-amber-500">
-                         <div className="bg-white w-3.5 h-3.5 rounded-full shadow-md transform translate-x-[14px]"></div>
-                      </div>
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-3">
-                      ¿Quieres separar a una familia en diferentes mesas? <b>Enciende este interruptor</b> y el sistema te preguntará cuántos pases deseas dividir.
-                    </p>
-                    <div className="bg-indigo-50 dark:bg-indigo-500/10 border-l-[3px] border-indigo-500 p-3 rounded-r-xl">
-                      <p className="text-[10px] text-indigo-800 dark:text-indigo-300 font-medium"><b>Reunificación:</b> Si te arrepientes y mueves los pedazos separados de vuelta a la misma mesa, nuestro motor los soldará mágicamente de nuevo.</p>
-                    </div>
-                  </div>
-
-                  {/* SECCIÓN 5: ASISTENTE INTELIGENTE VISUAL */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">05. ASISTENTE INTELIGENTE</p>
-                    <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight mb-3">Auto-Acomodar</h3>
-                    
-                    <div className="flex items-center justify-center px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-[10px] font-bold w-max mb-3 shadow-sm">
-                      <Wand2 size={14} className="mr-2" /> Auto-Acomodar
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
-                      Con un solo clic, la tecnología de Baulia escaneará tu lista y agrupará a las familias en las mesas disponibles priorizando a los grupos grandes. Luego podrás hacer ajustes manuales sobre esa base.
-                    </p>
-                  </div>
-
-                  {/* SECCIÓN 6: SINCRONIZACIÓN PERFECTA */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">06. SINCRONIZACIÓN PERFECTA</p>
-                    <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight mb-2">Todo está conectado</h3>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
-                      El acomodo de las mesas se reflejará automáticamente en la <b>Lista de Invitados</b>. Cada persona mostrará al instante la mesa asignada aquí, garantizando que el control de puerta y tus reportes estén actualizados sin esfuerzo.
-                    </p>
-                  </div>
-
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-      )}
-
     </div>
   );
 };
@@ -2664,7 +2380,7 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
 // ==========================================
 // --- COMPONENTE: GESTIÓN DE MESAS (DARK PREMIUM COMPLETO) ---
 // ==========================================
-const MesasView = ({ tables, setTables, guests, setGuests, addNotification, eventName }) => {
+const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [creationMode, setCreationMode] = useState('iguales'); 
   const [cantidadIguales, setCantidadIguales] = useState(1);
@@ -2672,25 +2388,12 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
   const [guestSeleccionado, setGuestSeleccionado] = useState(null);
   const [smartAssign, setSmartAssign] = useState(null);
   const [tableToEdit, setTableToEdit] = useState(null);
+  // 🔴 NUEVOS ESTADOS PARA TU IDEA: MODO SEPARADOR
   const [isSplitMode, setIsSplitMode] = useState(false);
   const [splitAmount, setSplitAmount] = useState(1);
   const [guestSplitPrompt, setGuestSplitPrompt] = useState(null);
   const [autoAssignConflict, setAutoAssignConflict] = useState(null);
-  const [guestArrastrado, setGuestArrastrado] = useState(null); 
-
-  // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE (MESAS)
-  const [showTutorial, setShowTutorial] = useState(() => {
-    const eventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
-    const hasSeen = localStorage.getItem(`baulia_tutorial_mesas_${eventId}`);
-    return !hasSeen;
-  });
-
-  const handleCloseTutorial = () => {
-    const eventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
-    localStorage.setItem(`baulia_tutorial_mesas_${eventId}`, 'true');
-    setShowTutorial(false);
-  };
-
+  const [guestArrastrado, setGuestArrastrado] = useState(null); // Nuevo estado para activar el dorado
   const [configActual, setCurrentConfig] = useState({
     tipo: 'redonda', 
     capacidadRedonda: 10,
@@ -2964,33 +2667,43 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
 
       for (const guest of invitadosAProcesar) {
           const parentId = guest.parentId || (guest.id.includes('_split_') ? guest.id.split('_split_')[0] : null);
-
+          
           if (parentId) {
+              // Es una fracción separada. Buscamos a su familia principal.
+              // OJO: La familia principal puede estar en la misma lista a vaciar o ya estar en "No Asignados"
               let mainFamily = safeGuests.find(g => String(g.id) === String(parentId));
+              
               if (mainFamily) {
+                  // Acumulamos los pases a la familia principal
                   const currentPasses = familiasPrincipalesActualizadas[parentId]?.passes || Number(mainFamily.passes);
                   const currentSubGuests = familiasPrincipalesActualizadas[parentId]?.subGuests || mainFamily.subGuests || [];
                   
                   familiasPrincipalesActualizadas[parentId] = {
                       ...mainFamily,
-                      tableId: null,
+                      tableId: null, // Lo mandamos a No Asignados
                       passes: currentPasses + Number(guest.passes),
                       subGuests: [...currentSubGuests, ...(guest.subGuests || [])]
                   };
+                  
+                  // Eliminamos la fracción separada
                   promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id))));
               } else {
+                  // Si por alguna razón no existe la familia principal (no debería pasar), solo le quitamos la mesa
                   promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), { ...guest, tableId: null }));
               }
           } else {
+              // Es un invitado normal o una familia principal. Solo le quitamos la mesa, a menos que ya lo hayamos actualizado.
               if (!familiasPrincipalesActualizadas[guest.id]) {
                   familiasPrincipalesActualizadas[guest.id] = { ...guest, tableId: null };
               }
           }
       }
 
+      // Guardamos las familias principales actualizadas (y los invitados normales)
       Object.values(familiasPrincipalesActualizadas).forEach(updatedGuest => {
           promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(updatedGuest.id)), updatedGuest));
       });
+
       await Promise.all(promesas);
    };
 
@@ -3019,21 +2732,22 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
       if(addNotification) addNotification('Mesas Eliminadas', 'Se borraron todas las mesas de la base de datos.', 'warning');
    };
 
+   // 🔴 NUEVA LÓGICA DE ARRASTRE A PRUEBA DE BALAS
    const handleDragStart = (e, guestId) => { 
      e.dataTransfer.effectAllowed = 'move';
      e.dataTransfer.setData('text/plain', String(guestId));
-     e.dataTransfer.setData('guestId', String(guestId)); 
+     e.dataTransfer.setData('guestId', String(guestId)); // Para Chrome/Firefox
      setGuestSeleccionado(null);
-     setGuestArrastrado(String(guestId)); 
+     setGuestArrastrado(String(guestId)); // Encendemos la luz dorada
    };
    const handleDragEnd = () => {
-     setGuestArrastrado(null); 
+     setGuestArrastrado(null); // Apagamos si sueltan fuera
    };
    const handleDrop = (e, targetTableId) => { 
      e.preventDefault(); 
      const guestId = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('guestId');
      if(guestId) moverInvitado(guestId, targetTableId);
-     setGuestArrastrado(null);
+     setGuestArrastrado(null); // Apagamos al soltar en una mesa
    };
    const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
 
@@ -3056,33 +2770,40 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
            usedChairs = safeGuests.filter(g => String(g.tableId) === String(targetTableId)).reduce((sum, g) => sum + (Number(g.passes) || 1), 0);
       }
 
+      // 🔴 LÓGICA DE FUSIÓN (JUNTAR FAMILIAS SEPARADAS)
       const parentId = guest.parentId || (guest.id.includes('_split_') ? guest.id.split('_split_')[0] : null);
       if (parentId) {
           const mainFamily = safeGuests.find(g => String(g.id) === String(parentId));
+          // Verificamos si la familia principal existe y está en el mismo destino (misma mesa o ambos en 'No Asignados')
           if (mainFamily && String(mainFamily.tableId) === String(targetTableId)) {
               try {
                   const nuevosPases = Number(mainFamily.passes) + pasesDelInvitado;
                   const newSubGuests = [...(mainFamily.subGuests || []), ...(guest.subGuests || [])];
+                  
+                  // Actualizamos a la familia principal
                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(mainFamily.id)), { 
                       ...mainFamily, 
                       passes: nuevosPases,
                       subGuests: newSubGuests
                   });
+                  // Eliminamos la fracción separada
                   await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)));
                   setGuestSeleccionado(null);
                   if(addNotification) addNotification('Familia Unida', `Se volvió a agrupar a la familia ${mainFamily.name}.`, 'success');
-                  return; 
+                  return; // Terminamos aquí porque ya se fusionaron
               } catch(e) { console.error("Error al fusionar familias:", e); }
           }
       }
 
       const isFull = isToTable && (usedChairs + pasesDelInvitado > Number(table.capacity));
 
+      // 🔴 AQUÍ APLICAMOS TU IDEA: MODO SEPARADOR ON/OFF
       if ((isSplitMode && pasesDelInvitado > 1) || isFull) {
            if (pasesDelInvitado > 1 && (!isToTable || (Number(table.capacity) - usedChairs) >= 1)) {
+               // Calculamos matemáticamente el mínimo requerido
                const minSplit = isFull ? Math.max(1, pasesDelInvitado - (Number(table.capacity) - usedChairs)) : 1;
                setGuestSplitPrompt({ guest, targetTableId, table, usedChairs, isFull, minSplit });
-               setSplitAmount(minSplit); 
+               setSplitAmount(minSplit); // Por defecto separamos el mínimo
                setGuestSeleccionado(null);
                return;
            } else if (isFull) {
@@ -3092,6 +2813,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
            }
       }
 
+      // Si no hace falta separar (o el modo está apagado y hay espacio), se mueven todos
       try {
         await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), { ...guest, tableId: targetTableId });
       } catch(e) { console.error(e); }
@@ -3100,25 +2822,27 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
 
    const handleSplitChoice = async (amount) => {
          const { guest, targetTableId, table, usedChairs } = guestSplitPrompt;
-
+          
          if (amount === 'all') {
               await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), { ...guest, tableId: targetTableId });
          } else {
+              // Validamos que el número seleccionado quepa en la mesa
               if (table && usedChairs + amount > Number(table.capacity)) {
                   if(addNotification) addNotification('Mesa Llena', `Solo quedan ${Number(table.capacity) - usedChairs} sillas en ${table.name}.`, 'warning');
               } else {
+                  // Creamos un ID vinculado a la familia original
                   const originalId = guest.parentId || guest.id;
                   const newGuestId = `${originalId}_split_${Date.now().toString().slice(-4)}`;
-                  const baseName = guest.name.replace(' (Separado)', ''); 
+                  const baseName = guest.name.replace(' (Separado)', ''); // Evitamos "Familia (Separado) (Separado)"
                   const newGuest = { ...guest, id: newGuestId, parentId: originalId, name: `${baseName} (Separado)`, passes: amount, childrenPasses: 0, tableId: targetTableId };
-
+                  
                   const subG = Array.isArray(guest.subGuests) ? guest.subGuests : [];
                   const movingSubGuest = subG.length > 0 ? subG.slice(-amount) : [];
                   const remainingSubGuests = subG.length > 0 ? subG.slice(0, subG.length - amount) : [];
 
                   newGuest.subGuests = movingSubGuest;
                   const updatedGuest = { ...guest, passes: Number(guest.passes) - amount, subGuests: remainingSubGuests };
-
+              
                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(guest.id)), updatedGuest);
                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(newGuestId)), newGuest);
               }
@@ -3276,9 +3000,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
         </div>
         
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-           {/* 🔴 BOTÓN DE AYUDA (TUTORIAL) */}
-           <button onClick={() => setShowTutorial(true)} className="flex items-center justify-center w-8 h-8 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 rounded-full text-xs font-black hover:bg-indigo-50 dark:hover:bg-amber-500/10 hover:text-indigo-600 dark:hover:text-amber-500 hover:border-indigo-200 dark:hover:border-amber-500/20 shadow-sm transition-colors" title="Ver Guía de Uso">?</button>
-           
            {/* 🔴 BOTÓN SWITCH MODO SEPARADOR (TIPO BODA) */}
            <button onClick={() => setIsSplitMode(!isSplitMode)} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2 bg-white dark:bg-[#111] border-2 border-slate-200 dark:border-white/10 rounded-[2rem] hover:border-indigo-300 dark:hover:border-amber-500/50 transition-colors shadow-sm">
               <span className="text-[11px] font-black text-slate-600 dark:text-slate-300 tracking-wider mr-3 uppercase">Separador</span>
@@ -3495,7 +3216,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
       {isAddModalOpen && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 duration-200 transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-transparent dark:border-white/10 flex flex-col max-h-[90vh] transition-colors">
-
+            
             <div className="px-8 py-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 shrink-0 transition-colors">
               <h3 className="font-bold text-xl text-slate-800 dark:text-white flex items-center tracking-wide"><LayoutGrid size={22} className="mr-2.5 text-indigo-600 dark:text-amber-500"/> Configurar Mesas</h3>
               <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={24}/></button>
@@ -3627,7 +3348,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
               La familia <b>{autoAssignConflict.guest.name}</b> necesita {autoAssignConflict.guest.passes} lugares continuos, pero el espacio más grande disponible en las mesas es de {autoAssignConflict.maxHueco} sillas.
               <br/><br/>¿Cuántos pases deseas separar para continuar?
             </p>
-
+            
             <div className="flex items-center justify-center gap-6 mb-6 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/10">
                 <button 
                   onClick={() => setSplitAmount(Math.max(autoAssignConflict.minSplit || 1, splitAmount - 1))} 
@@ -3645,170 +3366,11 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
         </div>
       )}
 
-      {/* 🔴 MODAL MAGAZINE: GUÍA EDITORIAL DE MESAS */}
-      {showTutorial && (
-        <div className="fixed inset-0 z-[999999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors">
-          <div className="bg-[#fcfbf9] dark:bg-[#0a0a0a] rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
-            
-            {/* CABECERA EDITORIAL */}
-            <div className="px-6 sm:px-8 py-5 border-b border-amber-200/50 dark:border-white/5 flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-3">
-                <span className="text-amber-500 font-black tracking-[0.2em] text-[10px] uppercase hidden sm:block">Baulia</span>
-                <span className="font-editorial text-slate-800 dark:text-white italic text-lg">Magazine</span>
-              </div>
-              <button onClick={handleCloseTutorial} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center transition-colors">
-                Cerrar <span className="hidden sm:inline ml-1">Edición</span> <X size={14} className="ml-2" />
-              </button>
-            </div>
-
-            {/* CUERPO DEL MAGAZINE */}
-            <div className="p-6 sm:p-10 overflow-y-auto custom-scrollbar flex-1 relative">
-              {/* TÍTULO GIGANTE */}
-              <div className="mb-12">
-                <h1 className="font-black text-5xl sm:text-7xl text-slate-900 dark:text-white tracking-tighter leading-[0.8]">
-                  Arquitectura<br />
-                  <span className="font-editorial font-normal italic text-amber-500">del espacio.</span>
-                </h1>
-                
-                {/* MENSAJE DE BIENVENIDA PERSONALIZADO */}
-                <div className="mt-8 border-l-[3px] border-amber-500 pl-4 animate-in slide-in-from-left-4 duration-700">
-                  <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-light leading-relaxed">
-                    Bienvenido al lienzo de tu distribución espacial.<br/>
-                    Disfruta diseñando el acomodo perfecto para <strong className="font-bold text-slate-900 dark:text-white uppercase tracking-wider">{eventName || 'tu evento'}</strong>.
-                  </p>
-                </div>
-              </div>
-
-              {/* GRID DE DOS COLUMNAS ESTILO REVISTA */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-16">
-                
-                {/* COLUMNA IZQUIERDA */}
-                <div className="space-y-10 sm:space-y-12">
-                  
-                  {/* SECCIÓN 1: CONFIGURACIÓN DE MESAS */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">01. GEOMETRÍA A LA MEDIDA</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <LayoutGrid size={24} className="text-indigo-500 dark:text-amber-500" />
-                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">Creación y configuración de mesas</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      Al crear mesas, seleccionas la forma física (Redonda, Cuadrada, Tablón, etc.) y le dices al sistema cómo se distribuyen las sillas por lado. El algoritmo calculará la <b>capacidad física máxima</b> para prevenir errores operativos.
-                    </p>
-                    <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/5 p-4 rounded-2xl shadow-sm">
-                       <h4 className="font-bold text-[10px] uppercase tracking-widest mb-2 flex items-center text-slate-700 dark:text-slate-300"><Settings2 size={12} className="mr-1.5"/> Modo Libre</h4>
-                       <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                         Si rentas tablones de madera rústicos o diseños atípicos, usa el Modo Libre. Define el Largo y Ancho en metros; <b>la regla estricta de Baulia dicta que cada persona requiere 0.5 metros lineales</b>, calculando así el límite exacto para que nadie quede apretado.
-                       </p>
-                    </div>
-                  </div>
-
-                  {/* SECCIÓN 2: MEZCLAS DE MESAS */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">02. ESTÉTICA COLECTIVA</p>
-                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">Crear Mezclas (Mix & Match)</h3>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
-                      Si tu evento no es monótono y combina diseños (ej. 5 mesas redondas, 4 tablones y 2 ovaladas), usa la pestaña <b>"Crear Mezcla"</b>. Añade tus configuraciones al "carrito" y genéralas todas con un solo clic. Una vez creadas aquí, podrás ubicarlas visualmente en la pestaña de <b>Croquis del Salón</b> (Mapa 2D).
-                    </p>
-                  </div>
-                  
-                  {/* SECCIÓN 3: ARRASTRE Y SOLTADO */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">03. KINESIOLOGÍA DE DATOS</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="px-2 py-1 rounded bg-amber-500 text-slate-900 text-[10px] font-black uppercase tracking-widest ring-2 ring-amber-400/50 shadow-md">Arrastra</div>
-                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">Experiencia táctil</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      Tu panel de acomodo tiene dos modalidades de uso sumamente fluidas:
-                    </p>
-                    <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed space-y-2 list-disc pl-4 marker:text-indigo-500 dark:marker:text-amber-500">
-                      <li><b>Drag & Drop:</b> En computadoras, simplemente arrastra a los invitados desde "No Asignados" y suéltalos en la mesa deseada. Observa cómo el sistema enciende la mesa destino en <b>color dorado</b> garantizando que tu cursor está en el lugar correcto.</li>
-                      <li><b>Toca y Suelta:</b> En celulares, toca primero al invitado (se tornará azul/dorado) y luego toca la mesa donde lo quieres sentar.</li>
-                    </ul>
-                  </div>
-
-                </div>
-
-                {/* COLUMNA DERECHA */}
-                <div className="space-y-10 sm:space-y-12">
-
-                  {/* SECCIÓN 4: MODO SEPARADOR VISUAL */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">04. INGENIERÍA SOCIAL</p>
-                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">El Switch "Modo Separador"</h3>
-                    
-                    <div className="flex items-center px-3 py-1.5 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-[2rem] w-max mb-3 shadow-sm">
-                      <span className="text-[9px] font-black text-slate-600 dark:text-slate-300 tracking-wider mr-3 uppercase">Separador</span>
-                      <div className="w-[32px] h-[18px] rounded-full p-[2px] bg-indigo-500 dark:bg-amber-500">
-                         <div className="bg-white w-3.5 h-3.5 rounded-full shadow-md transform translate-x-[14px]"></div>
-                      </div>
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      ¿Tienes a una familia de 6 pero quieres que 2 tíos se sienten en la mesa de enfrente con sus amigos? <b>Enciende este interruptor</b>. <br/><br/>
-                      Al intentar sentar a la familia, el sistema pausará la acción y te preguntará <i>"¿Cuántos pases deseas separar y mover a esta mesa?"</i>. Al separarlos, Baulia clonará el registro con una etiqueta `(Separado)`.
-                    </p>
-                    <div className="bg-indigo-50 dark:bg-indigo-500/10 border-l-[3px] border-indigo-500 p-3 rounded-r-xl">
-                      <p className="text-[11px] text-indigo-800 dark:text-indigo-300 font-medium"><b>Reunificación:</b> Si te arrepientes y mueves los pedazos separados de vuelta a "No Asignados" o a la misma mesa, nuestro motor los soldará mágicamente fusionando a la familia de nuevo en un solo bloque.</p>
-                    </div>
-                  </div>
-
-                  {/* SECCIÓN 5: ASISTENTE INTELIGENTE VISUAL */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">05. ASISTENTE INTELIGENTE</p>
-                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">Auto-Acomodar</h3>
-                    
-                    <div className="flex items-center justify-center px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-[10px] font-bold w-max mb-3 shadow-sm">
-                      <Wand2 size={14} className="mr-2" /> Auto-Acomodar
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      Te invitamos a usar nuestro asistente para facilitar el acomodo de tus invitados. Con un solo clic, la tecnología de Baulia escaneará tu lista y agrupará a las familias en las mesas disponibles priorizando a los grupos grandes. 
-                      <br/><br/>
-                      Una vez que el sistema genere esta propuesta inicial, tendrás total libertad para hacer los cambios manuales que quieras y personalizar aún más tu evento. Si una familia grande no cabe en ninguna mesa, el sistema te pedirá amablemente que la separes antes de continuar.
-                    </p>
-                  </div>
-
-                  {/* SECCIÓN 6: SINCRONIZACIÓN PERFECTA */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">06. SINCRONIZACIÓN PERFECTA</p>
-                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">Todo está conectado</h3>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      Cualquier cambio que realices en este panel es definitivo y global. El acomodo de las mesas se reflejará automáticamente en la <b>Lista de Invitados</b>. Cada persona mostrará al instante la mesa que le fue asignada aquí, garantizando que el control de puerta y tus reportes estén siempre actualizados sin esfuerzo adicional.
-                    </p>
-                  </div>
-
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-      )}
-
     </div>
   );
 };
 
-// ==========================================
-// --- COMPONENTE: MAPA Y CROQUIS (2D) ---
-// ==========================================
-const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch = '', elements = [], setElements, eventName }) => {
-  // 🔴 BLINDAJE EXTREMO: Aseguramos que las listas siempre sean arreglos válidos aunque el servidor tarde en responder.
-  const safeTables = Array.isArray(tables) ? tables : [];
-  const safeGuests = Array.isArray(guests) ? guests : [];
-  const safeElements = Array.isArray(elements) ? elements : [];
-  const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
-
-  // 🔴 BLINDAJE EXTREMO: Si los catálogos se borraron accidentalmente en App.js, no crasheará la app.
-  const safeRoomAreasCat = typeof ROOM_AREAS_CATALOG !== 'undefined' ? ROOM_AREAS_CATALOG : [];
-  const safeTableTemplates = typeof TABLE_TEMPLATES !== 'undefined' ? TABLE_TEMPLATES : [];
-  const safeStructuralCat = typeof STRUCTURAL_CATALOG !== 'undefined' ? STRUCTURAL_CATALOG : [];
-  const safeGetShapeClipPath = typeof getShapeClipPath === 'function' ? getShapeClipPath : () => 'none';
-  const safeRenderSVGShape = typeof renderSVGShape === 'function' ? renderSVGShape : () => null;
-
+const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch = '', elements = [], setElements }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [dragging, setDragging] = useState(null); 
   const [selectionBox, setSelectionBox] = useState(null); 
@@ -3825,17 +3387,6 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   const [isEditMode, setIsEditMode] = useState(false);
   const [guestSplitPrompt, setGuestSplitPrompt] = useState(null); 
 
-  // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE
-  const [showTutorial, setShowTutorial] = useState(() => {
-    const hasSeen = localStorage.getItem(`baulia_tutorial_mapa_${activeEventId}`);
-    return !hasSeen;
-  });
-
-  const handleCloseTutorial = () => {
-    localStorage.setItem(`baulia_tutorial_mapa_${activeEventId}`, 'true');
-    setShowTutorial(false);
-  };
-
   // 🔴 ESTADOS PARA EL MOTOR PDF DEL MAPA
   const [showExportModal, setShowExportModal] = useState(false);
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
@@ -3846,15 +3397,15 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   const [printDragStart, setPrintDragStart] = useState({ x: 0, y: 0 });
   const [isBlueprintPanActive, setIsBlueprintPanActive] = useState(false);
 
-  const placedTables = safeTables.filter(t => t.x !== undefined && t.x !== null);
-  const availableTables = safeTables.filter(t => t.x === undefined || t.x === null);
-  const allItems = [...safeElements, ...placedTables];
+  const placedTables = tables.filter(t => t.x !== undefined && t.x !== null);
+  const availableTables = tables.filter(t => t.x === undefined || t.x === null);
+  const allItems = [...elements, ...placedTables];
   
-  const roomAreas = safeElements.filter(e => e.isRoomArea);
+  const roomAreas = elements.filter(e => e.isRoomArea);
   const addAreas = roomAreas.filter(e => e.mode === 'add');
   const subAreas = roomAreas.filter(e => e.mode === 'subtract');
   const overlayAreas = roomAreas.filter(e => e.mode === 'overlay'); 
-  const physicalStructures = safeElements.filter(e => !e.isRoomArea);
+  const physicalStructures = elements.filter(e => !e.isRoomArea);
   const isMultiSelection = selectedIds.length > 1;
 
   const saveHistory = (currElements, currTables) => {
@@ -3886,7 +3437,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   
   const centerAndFitMap = () => {
     if (vp.w === 0 || vp.h === 0) return;
-    const allItemsForBounds = [...safeElements, ...placedTables];
+    const allItemsForBounds = [...elements, ...placedTables];
     if (allItemsForBounds.length === 0) { setPan({ x: 0, y: 0 }); setScale(30); return; }
 
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -3916,7 +3467,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   useEffect(() => {
     if (showExportModal) {
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      const allItemsForBounds = [...safeElements, ...placedTables];
+      const allItemsForBounds = [...elements, ...placedTables];
       allItemsForBounds.forEach(el => {
         const w = el.width || 2; const h = el.height || 2;
         if (el.x < minX) minX = el.x; if (el.y < minY) minY = el.y;
@@ -3929,6 +3480,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       const cx = (minX * scale) + designW / 2; 
       const cy = (minY * scale) + designH / 2;
       
+      // Contenedor A4 Landscape aprox
       const targetW = 900; 
       const targetH = 600; 
       const initialZoom = Math.min(targetW / (designW || 1), targetH / (designH || 1)) * 0.85; 
@@ -3956,17 +3508,17 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       const dropY = ((e.clientY - rect.top) - offsetY) / scale;
       
       const margin = 0.8;
-      const targetTable = safeTables.find(t => {
+      const targetTable = tables.find(t => {
         const tw = t.width || 2; const th = t.height || 2;
         return dropX >= (t.x - margin) && dropX <= (t.x + tw + margin) && dropY >= (t.y - margin) && dropY <= (t.y + th + margin);
       });
 
-      const guest = safeGuests.find(g => g.id === guestId);
+      const guest = guests.find(g => g.id === guestId);
       if (!guest) return;
 
       if (targetTable) {
         if (guest.tableId === targetTable.id) return;
-        const usedChairs = safeGuests.filter(g => g.tableId === targetTable.id).reduce((sum, g) => sum + g.passes, 0);
+        const usedChairs = guests.filter(g => g.tableId === targetTable.id).reduce((sum, g) => sum + g.passes, 0);
         if (guest.passes > 1) {
            setGuestSplitPrompt({ guest, targetTableId: targetTable.id, table: targetTable, usedChairs });
            return;
@@ -3974,13 +3526,13 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
         if (usedChairs + guest.passes > targetTable.capacity) {
            return;
         }
-        setDoc(doc(db, "eventos", activeEventId, "invitados", guestId), { ...guest, tableId: targetTable.id });
+        setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guestId), { ...guest, tableId: targetTable.id });
       } else {
         if (guest.tableId) {
            if (guest.passes > 1) {
                setGuestSplitPrompt({ guest, targetTableId: null, table: null, usedChairs: 0 });
            } else {
-               setDoc(doc(db, "eventos", activeEventId, "invitados", guestId), { ...guest, tableId: null });
+               setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guestId), { ...guest, tableId: null });
            }
         }
       }
@@ -3990,7 +3542,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     if (!isEditMode) return;
     const actionType = e.dataTransfer.getData('actionType');
     if (!actionType) return;
-    saveHistory(safeElements, safeTables);
+    saveHistory(elements, tables);
 
     const payload = JSON.parse(e.dataTransfer.getData('payload'));
     const rect = e.currentTarget.getBoundingClientRect();
@@ -4015,21 +3567,21 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     const finalY = ((e.clientY - rect.top) - offsetY) / scale - (h / 2);
 
     if (actionType === 'existing_table') {
-      const updatedTable = safeTables.find(t => t.id === payload.id);
+      const updatedTable = tables.find(t => t.id === payload.id);
       if(updatedTable) {
           const newT = { ...updatedTable, x: finalX, y: finalY, width: w, height: h };
-          setDoc(doc(db, "eventos", activeEventId, "mesas", payload.id), newT);
+          setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", payload.id), newT);
       }
       setSelectedIds([payload.id]);
     } else if (actionType === 'new_table') {
       const newTableId = `mesa_${Date.now()}`;
-      const newTable = { id: newTableId, name: `Mesa ${safeTables.length + 1}`, type: payload.type, capacity: payload.capacity, width: w, height: h, x: finalX, y: finalY, rotation: 0 };
-      setDoc(doc(db, "eventos", activeEventId, "mesas", newTableId), newTable);
+      const newTable = { id: newTableId, name: `Mesa ${tables.length + 1}`, type: payload.type, capacity: payload.capacity, width: w, height: h, x: finalX, y: finalY, rotation: 0 };
+      setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", newTableId), newTable);
       setSelectedIds([newTableId]);
     } else if (actionType === 'structure' || actionType === 'room_area') {
       const newElId = `mapa_${Date.now()}`;
       const newEl = { ...payload, id: newElId, x: finalX, y: finalY, rotation: 0, customLabel: '', mode: payload.mode || 'add' };
-      setDoc(doc(db, "eventos", activeEventId, "mapa", newElId), newEl);
+      setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", newElId), newEl);
       setSelectedIds([newElId]);
     }
     setActiveTool('select'); 
@@ -4040,16 +3592,16 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     if (activeTool !== 'select' && activeTool !== 'rotate') return;
     e.stopPropagation(); 
     
-    const el = (isTable ? safeTables : safeElements).find(item => item.id === id);
+    const el = (isTable ? tables : elements).find(item => item.id === id);
     if (!el) return;
-    saveHistory(safeElements, safeTables);
+    saveHistory(elements, tables);
 
     let currentSelection = [...selectedIds];
     if (!currentSelection.includes(id)) {
         if (el.groupId) {
             currentSelection = allItems.filter(x => x.groupId === el.groupId).map(x => x.id);
         } else if (el.isRoomArea && roomGrouped) {
-            currentSelection = safeElements.filter(x => x.isRoomArea).map(x => x.id);
+            currentSelection = elements.filter(x => x.isRoomArea).map(x => x.id);
         } else {
             currentSelection = [id];
         }
@@ -4125,8 +3677,8 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
          return { x: newCx - orig.w/2, y: newCy - orig.h/2, rotation: orig.rotation + deltaAngle };
       };
 
-      setElements(safeElements.map(el => dragging.origSelection.includes(el.id) ? { ...el, ...updateItem(dragging.groupOriginals[el.id]) } : el));
-      if (setTables) setTables(safeTables.map(t => dragging.origSelection.includes(t.id) ? { ...t, ...updateItem(dragging.groupOriginals[t.id]) } : t));
+      setElements(elements.map(el => dragging.origSelection.includes(el.id) ? { ...el, ...updateItem(dragging.groupOriginals[el.id]) } : el));
+      if (setTables) setTables(tables.map(t => dragging.origSelection.includes(t.id) ? { ...t, ...updateItem(dragging.groupOriginals[t.id]) } : t));
       return;
     }
 
@@ -4141,13 +3693,13 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       const myW = dragging.w; const myH = dragging.h;
 
       if (Object.keys(dragging.groupOriginals).length === 1) {
-          const targetList = [...safeElements.filter(e => e.isRoomArea), ...placedTables];
+          const targetList = [...elements.filter(e => e.isRoomArea), ...placedTables];
           targetList.forEach(other => {
             if (dragging.groupOriginals[other.id]) return; 
             
             const isOtherTable = other.capacity !== undefined;
             if (dragging.isTable && isOtherTable) {
-               const t1 = (safeTables.find(t=>t.id === dragging.id)?.tipo) || (safeTables.find(t=>t.id === dragging.id)?.type) || '';
+               const t1 = (tables.find(t=>t.id === dragging.id)?.tipo) || (tables.find(t=>t.id === dragging.id)?.type) || '';
                const t2 = other.tipo || other.type || '';
                const noSnap = ['round_table', 'redonda', 'ovalada'];
                if (noSnap.includes(t1) || noSnap.includes(t2)) return;
@@ -4166,8 +3718,8 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       const finalDx = finalX - dragging.origX;
       const finalDy = finalY - dragging.origY;
       
-      setElements(safeElements.map(el => dragging.groupOriginals[el.id] ? { ...el, x: dragging.groupOriginals[el.id].x + finalDx, y: dragging.groupOriginals[el.id].y + finalDy } : el));
-      if (setTables) setTables(safeTables.map(t => dragging.groupOriginals[t.id] ? { ...t, x: dragging.groupOriginals[t.id].x + finalDx, y: dragging.groupOriginals[t.id].y + finalDy } : t));
+      setElements(elements.map(el => dragging.groupOriginals[el.id] ? { ...el, x: dragging.groupOriginals[el.id].x + finalDx, y: dragging.groupOriginals[el.id].y + finalDy } : el));
+      if (setTables) setTables(tables.map(t => dragging.groupOriginals[t.id] ? { ...t, x: dragging.groupOriginals[t.id].x + finalDx, y: dragging.groupOriginals[t.id].y + finalDy } : t));
     }
   };
 
@@ -4192,9 +3744,9 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     if (dragging && dragging.type === 'move') {
         const promesas = Object.keys(dragging.groupOriginals).map(id => {
             const isTab = dragging.groupOriginals[id].isTable;
-            const item = isTab ? safeTables.find(t => String(t.id) === String(id)) : safeElements.find(e => String(e.id) === String(id));
+            const item = isTab ? tables.find(t => String(t.id) === String(id)) : elements.find(e => String(e.id) === String(id));
             const collectionName = isTab ? "mesas" : "mapa";
-            return item ? setDoc(doc(db, "eventos", activeEventId, collectionName, String(id)), item) : Promise.resolve();
+            return item ? setDoc(doc(db, "eventos", ID_DEL_EVENTO, collectionName, String(id)), item) : Promise.resolve();
         });
         await Promise.all(promesas);
     }
@@ -4202,9 +3754,9 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     if (dragging && dragging.type === 'rotate') {
         const promesas = dragging.origSelection.map(id => {
             const isTab = dragging.groupOriginals[id].isTable;
-            const item = isTab ? safeTables.find(t => String(t.id) === String(id)) : safeElements.find(e => String(e.id) === String(id));
+            const item = isTab ? tables.find(t => String(t.id) === String(id)) : elements.find(e => String(e.id) === String(id));
             const collectionName = isTab ? "mesas" : "mapa";
-            return item ? setDoc(doc(db, "eventos", activeEventId, collectionName, String(id)), item) : Promise.resolve();
+            return item ? setDoc(doc(db, "eventos", ID_DEL_EVENTO, collectionName, String(id)), item) : Promise.resolve();
         });
         await Promise.all(promesas);
     }
@@ -4214,22 +3766,21 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   };
 
   const updateElementData = async (id, newData) => {
-    saveHistory(safeElements, safeTables);
-    const el = safeElements.find(e => String(e.id) === String(id));
-    if(el) await setDoc(doc(db, "eventos", activeEventId, "mapa", String(id)), { ...el, ...newData });
+    saveHistory(elements, tables);
+    const el = elements.find(e => String(e.id) === String(id));
+    if(el) await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", String(id)), { ...el, ...newData });
   };
 
   const deleteSelected = async () => {
-    saveHistory(safeElements, safeTables);
+    saveHistory(elements, tables);
     const promesas = [];
-    
     selectedIds.forEach(id => {
-      const isTable = safeTables.some(t => String(t.id) === String(id));
+      const isTable = tables.some(t => String(t.id) === String(id));
       if (isTable) {
-        const t = safeTables.find(x => String(x.id) === String(id));
-        promesas.push(setDoc(doc(db, "eventos", activeEventId, "mesas", String(id)), { ...t, x: null, y: null, rotation: 0, groupId: null }));
+        const t = tables.find(x => String(x.id) === String(id));
+        promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", String(id)), { ...t, x: null, y: null, rotation: 0, groupId: null }));
       } else {
-        promesas.push(deleteDoc(doc(db, "eventos", activeEventId, "mapa", String(id))));
+        promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", String(id))));
       }
     });
     await Promise.all(promesas);
@@ -4246,15 +3797,15 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
      const promesas = [];
      if (allHaveSameGroup) {
         const grpId = firstItem.groupId;
-        safeElements.forEach(e => { if(e.groupId === grpId) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mapa", String(e.id)), {...e, groupId: null})) });
-        safeTables.forEach(t => { if(t.groupId === grpId) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mesas", String(t.id)), {...t, groupId: null})) });
+        elements.forEach(e => { if(e.groupId === grpId) promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", String(e.id)), {...e, groupId: null})) });
+        tables.forEach(t => { if(t.groupId === grpId) promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", String(t.id)), {...t, groupId: null})) });
      } else {
         const newGroupId = 'grp_' + Date.now();
         selectedIds.forEach(id => {
-           const e = safeElements.find(x => String(x.id) === String(id));
-           if (e) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mapa", String(id)), {...e, groupId: newGroupId}));
-           const t = safeTables.find(x => String(x.id) === String(id));
-           if (t) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mesas", String(id)), {...t, groupId: newGroupId}));
+           const e = elements.find(x => String(x.id) === String(id));
+           if (e) promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", String(id)), {...e, groupId: newGroupId}));
+           const t = tables.find(x => String(x.id) === String(id));
+           if (t) promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", String(id)), {...t, groupId: newGroupId}));
         });
      }
      await Promise.all(promesas);
@@ -4262,22 +3813,21 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
 
   const handleSplitChoice = (mode) => {
       const { guest, targetTableId, table, usedChairs } = guestSplitPrompt;
-
       if (mode === 'all') {
           if (table && usedChairs + guest.passes > table.capacity) {
-              // Silencioso
+              // Notificación silenciada
           } else {
-              setDoc(doc(db, "eventos", activeEventId, "invitados", guest.id), { ...guest, tableId: targetTableId });
+              setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, tableId: targetTableId });
           }
       } else if (mode === 'one') {
           if (table && usedChairs + 1 > table.capacity) {
-              // Silencioso
+              // Notificación silenciada
           } else {
               const newGuestId = Date.now().toString() + Math.random().toString(36).substring(2,5);
               const newGuest = { ...guest, id: newGuestId, name: `${guest.name} (Separado)`, passes: 1, childrenPasses: 0, tableId: targetTableId };
               const updatedGuest = { ...guest, passes: guest.passes - 1 };
-              setDoc(doc(db, "eventos", activeEventId, "invitados", guest.id), updatedGuest);
-              setDoc(doc(db, "eventos", activeEventId, "invitados", newGuestId), newGuest);
+              setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), updatedGuest);
+              setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", newGuestId), newGuest);
           }
       }
       setGuestSplitPrompt(null);
@@ -4450,7 +4000,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
         const html2canvas = (await import('html2canvas')).default;
 
         const pages = document.querySelectorAll('.map-pdf-page');
-        const pdf = new jsPDF('l', 'mm', 'letter');
+        const pdf = new jsPDF('l', 'mm', 'letter'); // LANDSCAPE
 
         for (let i = 0; i < pages.length; i++) {
            const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
@@ -4489,18 +4039,20 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
         </div>
         
         <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center py-8 relative gap-8">
+           {/* HOJA TAMAÑO CARTA HORIZONTAL (279.4mm x 215.9mm) */}
            <div className="bg-white shadow-[0_0_40px_rgba(0,0,0,0.5)] relative shrink-0 map-pdf-page flex flex-col" style={{ width: '279.4mm', height: '215.9mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden' }}>
              
              <header className="border-b-4 border-slate-900 pb-2 mb-4 flex justify-between items-end shrink-0">
                 <div>
                   <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Plano y Acomodo</h1>
-                  <p className="text-slate-500 text-sm font-medium">Proyecto: {eventName || 'Evento'}</p>
+                  <p className="text-slate-500 text-sm font-medium">Proyecto: Boda Ana & Luis</p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs font-bold text-slate-400">Escala Ajustada (Carta Horizontal)</p>
                 </div>
              </header>
 
+             {/* FOTO DEL LIENZO INTERACTIVO SEGURO */}
              <div 
                onPointerDown={handlePrintPointerDown} onPointerMove={handlePrintPointerMove} onPointerUp={handlePrintPointerUp} onPointerLeave={handlePrintPointerUp} onWheel={handlePrintWheel}
                className={`w-full flex-1 bg-[#eef2f6] border-2 border-slate-300 rounded-xl relative overflow-hidden flex shadow-inner ${isBlueprintPanActive ? 'cursor-grab active:cursor-grabbing touch-none ring-4 ring-indigo-300' : ''}`}
@@ -4523,27 +4075,27 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                      <defs>
                        <mask id="printRoomMask">
                          <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                         {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                         {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                         {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+                         {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
                        </mask>
                        <mask id="printOuterWallMask">
                          <rect x="-5000" y="-5000" width="10000" height="10000" fill="white" />
-                         {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                         {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                         {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                         {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
                        </mask>
                        <mask id="printSubWallMask">
                          <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                         {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                         {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                         {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+                         {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
                        </mask>
                      </defs>
                      <g>
                        <rect x="-5000" y="-5000" width="10000" height="10000" fill="#ffffff" mask="url(#printRoomMask)" />
                        <g mask="url(#printOuterWallMask)">
-                         {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+                         {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
                        </g>
                        <g mask="url(#printSubWallMask)">
-                         {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+                         {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
                        </g>
                      </g>
                   </svg>
@@ -4556,7 +4108,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
 
                   {roomAreas.filter(e => e.mode !== 'overlay').map((el) => (
                     <div key={el.id} className="absolute z-20 pointer-events-none" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
-                      <div className="w-full h-full" style={{ clipPath: safeGetShapeClipPath(el) }}>
+                      <div className="w-full h-full" style={{ clipPath: getShapeClipPath(el) }}>
                         {el.customLabel && <span className="absolute inset-0 flex items-center justify-center font-extrabold text-slate-500 opacity-80 uppercase tracking-widest pointer-events-none" style={{ fontSize: `${Math.max(0.6, Math.min(el.width, el.height) * 0.2)}rem` }}>{el.customLabel}</span>}
                       </div>
                     </div>
@@ -4569,10 +4121,10 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                   ))}
 
                   {placedTables.map((el) => {
-                    const occupancy = safeGuests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
+                    const occupancy = guests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
                     return (
                       <div key={el.id} className="absolute flex items-center justify-center select-none pointer-events-none z-40" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
-                        {typeof TableWithChairs !== 'undefined' && <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={safeGuests.filter(g => g.tableId === el.id)} searchQuery={""} />}
+                        <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={guests.filter(g => g.tableId === el.id)} searchQuery={""} />
                       </div>
                     );
                   })}
@@ -4674,28 +4226,28 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                <defs>
                  <mask id="roomMask">
                    <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                   {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                   {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                   {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+                   {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
                  </mask>
                  <mask id="outerWallMask">
                    <rect x="-5000" y="-5000" width="10000" height="10000" fill="white" />
-                   {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                   {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                   {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                   {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
                  </mask>
                  <mask id="subWallMask">
                    <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                   {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                   {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                   {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+                   {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
                  </mask>
                </defs>
 
                <g transform={`translate(${offsetX}, ${offsetY})`}>
                  <rect x="-5000" y="-5000" width="10000" height="10000" fill="#ffffff" mask="url(#roomMask)" />
                  <g mask="url(#outerWallMask)">
-                   {addAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+                   {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
                  </g>
                  <g mask="url(#subWallMask)">
-                   {subAreas.map(el => safeRenderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+                   {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
                  </g>
                </g>
 
@@ -4762,7 +4314,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                   <div 
                     onPointerDown={(e) => handlePointerDownObject(e, el.id, false)}
                     className={`w-full h-full cursor-pointer transition-colors duration-300 ${isSelected ? (isSub ? 'bg-rose-500/20 border-2 border-dashed border-rose-600' : 'bg-indigo-500/10 border-2 border-dashed border-indigo-600') : (isSub && canInteract ? 'hover:bg-rose-500/10' : (canInteract ? 'hover:bg-slate-500/5' : ''))}`}
-                    style={{ clipPath: safeGetShapeClipPath(el) }}
+                    style={{ clipPath: getShapeClipPath(el) }}
                   >
                     {el.customLabel && (
                       <span className="absolute inset-0 flex items-center justify-center font-extrabold text-slate-500 opacity-80 uppercase tracking-widest pointer-events-none" style={{ fontSize: `${Math.max(0.6, Math.min(el.width, el.height) * 0.2)}rem` }}>
@@ -4801,8 +4353,9 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
             })}
 
             {placedTables.map((el) => {
-              const occupancy = safeGuests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
-              const isSearched = globalSearch && safeGuests.some(g => g.tableId === el.id && g.name.toLowerCase().includes(globalSearch.toLowerCase()));
+              const isSelected = selectedIds.includes(el.id);
+              const occupancy = guests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
+              const isSearched = globalSearch && guests.some(g => g.tableId === el.id && g.name.toLowerCase().includes(globalSearch.toLowerCase()));
               const canInteract = activeTool === 'select' || activeTool === 'rotate';
 
               return (
@@ -4819,7 +4372,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                     zIndex: isSearched ? 9999 : (isSelected ? 50 : 40)
                   }}
                 >
-                  {typeof TableWithChairs !== 'undefined' && <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={safeGuests.filter(g => g.tableId === el.id)} searchQuery={globalSearch} />}
+                  <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={guests.filter(g => g.tableId === el.id)} searchQuery={globalSearch} />
                 </div>
               );
             })}
@@ -4850,20 +4403,17 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                <button onClick={() => { setIsEditMode(false); setSelectedIds([]); centerAndFitMap(); }} className="w-full py-2 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center">
                  <CheckCircle size={14} className="mr-1.5"/> Guardar Diseño
                </button>
+               {/* 🔴 BOTÓN EXPORTAR PDF PARA MAPA (CROQUIS) */}
                <button onClick={() => setShowExportModal(true)} className="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center">
                  <FileDown size={14} className="mr-1.5"/> Descargar PDF
-               </button>
-               {/* 🔴 BOTÓN TUTORIAL MAGAZINE */}
-               <button onClick={() => setShowTutorial(true)} className="w-full py-2 mt-1 bg-slate-100 text-slate-500 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors shadow-sm flex items-center justify-center border border-slate-200">
-                 ? Ver Guía del Croquis
                </button>
                <div className="flex gap-1.5 mt-1">
                  <button onClick={handleUndo} disabled={history.length === 0} className={`flex-1 py-1.5 rounded-md text-[10px] font-bold flex items-center justify-center transition-colors border ${history.length > 0 ? 'bg-white text-slate-700 hover:bg-slate-50 border-slate-300 shadow-sm' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}><RotateCw size={12} className="mr-1" style={{ transform: 'scaleX(-1)' }}/> Deshacer</button>
                  <button onClick={async () => { 
                    if(window.confirm('¿Estás seguro de limpiar todo el plano? Esta acción no se puede deshacer.')) { 
-                     saveHistory(safeElements, safeTables);
-                     const promesasMapa = safeElements.map(e => deleteDoc(doc(db, "eventos", activeEventId, "mapa", String(e.id))));
-                     const promesasMesas = placedTables.map(t => setDoc(doc(db, "eventos", activeEventId, "mesas", String(t.id)), { ...t, x: null, y: null, rotation: 0, groupId: null }));
+                     saveHistory(elements, tables);
+                     const promesasMapa = elements.map(e => deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", String(e.id))));
+                     const promesasMesas = placedTables.map(t => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", String(t.id)), { ...t, x: null, y: null, rotation: 0, groupId: null }));
                      await Promise.all([...promesasMapa, ...promesasMesas]);
                      setSelectedIds([]); 
                      setPan({x:0, y:0}); 
@@ -4881,7 +4431,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                 <Spline size={12} className="mr-1.5"/> 1. Áreas y Exteriores
               </h3>
               <div className="grid grid-cols-3 gap-1.5 mb-4">
-                {safeRoomAreasCat.map((tmpl, idx) => {
+                {ROOM_AREAS_CATALOG.map((tmpl, idx) => {
                   if (tmpl.shapeType === 'polygon') return null; 
                   return (
                     <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'room_area')} className="bg-white p-1.5 rounded-lg border border-slate-300 text-center cursor-grab active:cursor-grabbing hover:bg-indigo-50 hover:border-indigo-300 transition-colors shadow-sm">
@@ -4907,7 +4457,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
               </h3>
               <div className="space-y-1.5 mb-4">
                 {availableTables.map((table) => {
-                  const occupancy = safeGuests.filter(g => g.tableId === table.id).reduce((s, g) => s + g.passes, 0);
+                  const occupancy = guests.filter(g => g.tableId === table.id).reduce((s, g) => s + g.passes, 0);
                   const tType = table.tipo || table.type;
                   let tW = 1.5, tH = 1.5;
                   if (tType === 'rect_table' || tType === 'tablon') { tW = 2.44; tH = 0.7; }
@@ -4934,7 +4484,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                 <Plus size={12} className="mr-1.5"/> 3. Mesas Extra
               </h3>
               <div className="grid grid-cols-4 gap-1.5 mb-4">
-                {safeTableTemplates.map((tmpl, idx) => {
+                {TABLE_TEMPLATES.map((tmpl, idx) => {
                   let iconEl;
                   if (tmpl.type === 'round_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-full w-4 h-4"></div>;
                   else if (tmpl.type === 'square_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-sm w-4 h-4"></div>;
@@ -4948,7 +4498,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
 
                   return (
                     <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'new_table')} className="bg-white p-1.5 rounded-lg border border-emerald-200 text-center cursor-grab active:cursor-grabbing hover:bg-emerald-50 transition-colors shadow-sm">
-                       <div className="h-6 flex items-center justify-center">{iconEl}</div>
+                       {iconEl}
                        <p className="text-[8px] font-bold text-slate-600 leading-tight">{tmpl.name}</p>
                     </div>
                   );
@@ -4959,7 +4509,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                 <Move size={12} className="mr-1.5"/> 4. Físico
               </h3>
               <div className="space-y-1.5">
-                {safeStructuralCat.map((item, idx) => (
+                {STRUCTURAL_CATALOG.map((item, idx) => (
                   <div key={idx} draggable onDragStart={(e) => handleDragStart(e, item, 'structure')} className="bg-white p-1.5 rounded-lg border border-slate-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-slate-400 hover:shadow-md transition-all flex items-center">
                     <div className="w-8 h-8 rounded flex items-center justify-center mr-2 border border-slate-300 flex-shrink-0 shadow-inner" style={getTextureStyle(item.texture)}></div>
                     <div>
@@ -4992,99 +4542,117 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
         </div>
       )}
 
-      {/* 🔴 MODAL MAGAZINE COMPACTO: GUÍA EDITORIAL DEL CROQUIS */}
-      {showTutorial && (
-        <div className="fixed inset-0 z-[999999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors text-left">
-          <div className="bg-[#fcfbf9] rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl border border-transparent animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
-            
-            {/* CABECERA EDITORIAL */}
-            <div className="px-6 py-4 border-b border-amber-200/50 flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-3">
-                <span className="text-amber-500 font-black tracking-[0.2em] text-[10px] uppercase hidden sm:block">Baulia</span>
-                <span className="font-editorial text-slate-800 italic text-lg">Magazine</span>
-              </div>
-              <button onClick={handleCloseTutorial} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 flex items-center transition-colors">
-                Cerrar <span className="hidden sm:inline ml-1">Edición</span> <X size={14} className="ml-2" />
-              </button>
-            </div>
-
-            {/* CUERPO DEL MAGAZINE */}
-            <div className="p-5 sm:p-8 overflow-y-auto custom-scrollbar flex-1 relative">
-              {/* TÍTULO GIGANTE */}
-              <div className="mb-8">
-                <h1 className="font-black text-4xl sm:text-6xl text-slate-900 tracking-tighter leading-[0.85]">
-                  Visualización<br />
-                  <span className="font-editorial font-normal italic text-amber-500">espacial.</span>
-                </h1>
-                
-                <div className="mt-6 border-l-[3px] border-amber-500 pl-4 animate-in slide-in-from-left-4 duration-700">
-                  <p className="text-sm text-slate-600 font-light leading-relaxed">
-                    Bienvenido a tu creador de planos en 2D.<br/>
-                    Dibuja el salón, acomoda las mesas y crea un mapa exacto para tus proveedores en <strong className="font-bold text-slate-900 uppercase tracking-wider">{eventName || 'tu evento'}</strong>.
-                  </p>
-                </div>
-              </div>
-
-              {/* GRID DE DOS COLUMNAS */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
-                
-                {/* COLUMNA IZQUIERDA */}
-                <div className="space-y-8">
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">01. EL LIENZO</p>
-                    <div className="flex items-center gap-3 mb-2">
-                      <LayoutGrid size={20} className="text-indigo-500" />
-                      <h3 className="font-bold text-lg text-slate-900 tracking-tight">Construye el salón</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed">
-                      Arrastra las formas desde la pestaña "Áreas y Exteriores" para definir los límites de tu salón. Usa los controles para ajustar los metros exactos de cada pared.
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">02. COLOCACIÓN FÍSICA</p>
-                    <div className="flex items-center gap-3 mb-2">
-                      <Move size={20} className="text-indigo-500" />
-                      <h3 className="font-bold text-lg text-slate-900 tracking-tight">Elementos y Pistas</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed">
-                      Agrega barras de bebidas, escenarios o pistas de baile al centro de tu croquis. Todo se escala de manera matemática para evitar choques el día del evento.
-                    </p>
-                  </div>
-                </div>
-
-                {/* COLUMNA DERECHA */}
-                <div className="space-y-8">
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">03. EXPERIENCIA TÁCTIL</p>
-                    <div className="flex items-center gap-3 mb-2">
-                      <Hand size={20} className="text-indigo-500" />
-                      <h3 className="font-bold text-lg text-slate-900 tracking-tight">Navegación Fluida</h3>
-                    </div>
-                    <ul className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed space-y-2 list-disc pl-4 marker:text-indigo-500">
-                      <li><b>Moverse:</b> Usa el icono de la mano para deslizar el plano.</li>
-                      <li><b>Agrupar:</b> Selecciona varios elementos y toca el icono del "eslabón" para bloquearlos y moverlos juntos.</li>
-                      <li><b>Medir:</b> Usa la cinta métrica para revisar que haya espacio suficiente entre mesas.</li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">04. DESCARGA PROFESIONAL</p>
-                    <div className="flex items-center gap-3 mb-2">
-                      <FileDown size={20} className="text-indigo-500" />
-                      <h3 className="font-bold text-lg text-slate-900 tracking-tight">Exporta a PDF</h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed">
-                      Al terminar tu diseño, toca "Descargar PDF". Se abrirá una ventana de encuadre donde podrás ajustar qué parte del salón quieres incluir en el archivo final para entregarlo a la banquetera.
-                    </p>
-                  </div>
-                </div>
+      {/* 🔴 MODAL: VISTA PREVIA EXPORTACIÓN MAPA (CARTA HORIZONTAL) */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-[120] bg-slate-900/95 flex flex-col overflow-hidden backdrop-blur-sm">
+          <div className="bg-slate-900 text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg border-b border-slate-700 z-10 shrink-0 gap-4">
+            <div className="flex items-center space-x-4 w-full sm:w-auto">
+              <button onClick={() => setShowExportModal(false)} className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X size={24}/></button>
+              <div>
+                <h3 className="font-bold text-sm">Vista Previa de Exportación</h3>
+                <p className="text-[10px] text-slate-400">Ajusta el zoom, bloquea y descarga.</p>
               </div>
             </div>
+            <button onClick={triggerPdfDownload} disabled={isPreparingPrint} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-sm font-bold flex items-center shadow-lg transition-all w-full sm:w-auto justify-center disabled:bg-slate-600">
+              {isPreparingPrint ? <RefreshCw size={18} className="mr-2 animate-spin"/> : <Download size={18} className="mr-2"/>} 
+              {isPreparingPrint ? 'Armando PDF...' : 'Guardar PDF'}
+            </button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center py-8 relative gap-8">
+             <div className="bg-white shadow-[0_0_40px_rgba(0,0,0,0.5)] relative shrink-0 map-pdf-page flex flex-col" style={{ width: '279.4mm', height: '215.9mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden' }}>
+               
+               <header className="border-b-4 border-slate-900 pb-2 mb-4 flex justify-between items-end shrink-0">
+                  <div>
+                    <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Plano y Acomodo</h1>
+                    <p className="text-slate-500 text-sm font-medium">Proyecto: Boda Ana & Luis</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-bold text-slate-400">Escala Ajustada (Carta Horizontal)</p>
+                  </div>
+               </header>
+
+               <div 
+                 onPointerDown={handlePrintPointerDown} onPointerMove={handlePrintPointerMove} onPointerUp={handlePrintPointerUp} onPointerLeave={handlePrintPointerUp} onWheel={handlePrintWheel}
+                 className={`w-full flex-1 bg-[#eef2f6] border-2 border-slate-300 rounded-xl relative overflow-hidden flex shadow-inner ${isBlueprintPanActive ? 'cursor-grab active:cursor-grabbing touch-none ring-4 ring-indigo-300' : ''}`}
+               >
+                  {!isCapturingPdf && (
+                    <div className="absolute top-3 left-3 z-50 flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                      <button onClick={() => setIsBlueprintPanActive(!isBlueprintPanActive)} className={`px-3 py-2 transition-colors rounded-xl font-bold text-[10px] flex items-center shadow-lg border border-slate-700 ${isBlueprintPanActive ? 'bg-indigo-500 text-white' : 'bg-slate-900/90 text-white hover:bg-slate-800'}`}>
+                        <Hand size={14} className="mr-1.5"/> {isBlueprintPanActive ? 'Arrastre Activo (Bloquear para PDF)' : 'Activar Arrastre'}
+                      </button>
+                      <div className="bg-slate-900/90 backdrop-blur text-white rounded-xl shadow-lg flex items-center pointer-events-auto border border-slate-700">
+                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPrintScale(s => Math.max(0.1, s - 0.15)); }} className="p-3 hover:bg-white/20 transition-colors rounded-l-xl active:bg-white/30 touch-manipulation"><Minus size={16} /></button>
+                        <div className="w-px h-5 bg-white/20"></div>
+                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPrintScale(s => Math.min(5, s + 0.15)); }} className="p-3 hover:bg-white/20 transition-colors rounded-r-xl active:bg-white/30 touch-manipulation"><Plus size={16} /></button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ transform: `translate(${printPan.x}px, ${printPan.y}px) scale(${printScale})`, transformOrigin: '0 0', width: '100%', height: '100%' }}>
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" style={{ overflow: 'visible' }}>
+                       <defs>
+                         <mask id="printRoomMask">
+                           <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
+                           {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+                           {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                         </mask>
+                         <mask id="printOuterWallMask">
+                           <rect x="-5000" y="-5000" width="10000" height="10000" fill="white" />
+                           {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                           {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                         </mask>
+                         <mask id="printSubWallMask">
+                           <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
+                           {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+                           {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                         </mask>
+                       </defs>
+                       <g>
+                         <rect x="-5000" y="-5000" width="10000" height="10000" fill="#ffffff" mask="url(#printRoomMask)" />
+                         <g mask="url(#printOuterWallMask)">
+                           {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+                         </g>
+                         <g mask="url(#printSubWallMask)">
+                           {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+                         </g>
+                       </g>
+                    </svg>
+
+                    {overlayAreas.map((el) => (
+                      <div key={el.id} className="absolute flex items-center justify-center select-none pointer-events-none z-0" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)`, ...getTextureStyle(el.texture), boxShadow: el.shapeType === 'pool' ? `inset 0 0 0 ${0.3 * scale}px #94a3b8` : 'none', borderRadius: el.shapeType === 'pool' ? '8px' : '0px' }}>
+                        <span className="font-extrabold text-center drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>{el.customLabel || el.name}</span>
+                      </div>
+                    ))}
+
+                    {roomAreas.filter(e => e.mode !== 'overlay').map((el) => (
+                      <div key={el.id} className="absolute z-20 pointer-events-none" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
+                        <div className="w-full h-full" style={{ clipPath: getShapeClipPath(el) }}>
+                          {el.customLabel && <span className="absolute inset-0 flex items-center justify-center font-extrabold text-slate-500 opacity-80 uppercase tracking-widest pointer-events-none" style={{ fontSize: `${Math.max(0.6, Math.min(el.width, el.height) * 0.2)}rem` }}>{el.customLabel}</span>}
+                        </div>
+                      </div>
+                    ))}
+
+                    {physicalStructures.map((el) => (
+                      <div key={el.id} className={`absolute flex items-center justify-center select-none shadow-md pointer-events-none z-20 ${el.shape} ${el.color} ${el.texture === 'none' ? '' : 'border-[3px]'}`} style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)`, ...getTextureStyle(el.texture) }}>
+                        <span className="font-extrabold text-center drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>{el.customLabel || el.name}</span>
+                      </div>
+                    ))}
+
+                    {placedTables.map((el) => {
+                      const occupancy = guests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
+                      return (
+                        <div key={el.id} className="absolute flex items-center justify-center select-none pointer-events-none z-40" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
+                          <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={guests.filter(g => g.tableId === el.id)} searchQuery={""} />
+                        </div>
+                      );
+                    })}
+                  </div>
+               </div>
+             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 };
