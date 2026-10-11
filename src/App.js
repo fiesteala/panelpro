@@ -2292,94 +2292,135 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
       {/* 🔴 MODAL MAGAZINE: GUÍA EDITORIAL DE INVITADOS */}
       {showTutorial && (
-        <div className="fixed inset-0 z-[999999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-[#fcfbf9] dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-5xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-[999999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors">
+          <div className="bg-[#fcfbf9] dark:bg-[#0a0a0a] rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
             
             {/* CABECERA EDITORIAL */}
-            <div className="px-8 py-5 border-b border-amber-200/50 dark:border-white/5 flex justify-between items-center shrink-0">
+            <div className="px-6 sm:px-8 py-5 border-b border-amber-200/50 dark:border-white/5 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-3">
-                <span className="text-amber-500 font-black tracking-[0.2em] text-[10px] uppercase">Baulia</span>
+                <span className="text-amber-500 font-black tracking-[0.2em] text-[10px] uppercase hidden sm:block">Baulia</span>
                 <span className="font-editorial text-slate-800 dark:text-white italic text-lg">Magazine</span>
               </div>
               <button onClick={handleCloseTutorial} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center transition-colors">
-                Cerrar Edición <X size={14} className="ml-2" />
+                Cerrar <span className="hidden sm:inline ml-1">Edición</span> <X size={14} className="ml-2" />
               </button>
             </div>
 
             {/* CUERPO DEL MAGAZINE */}
-            <div className="p-8 md:p-12 overflow-y-auto custom-scrollbar flex-1 relative">
+            <div className="p-6 sm:p-10 overflow-y-auto custom-scrollbar flex-1 relative">
               {/* TÍTULO GIGANTE */}
-              <div className="mb-16">
-                <h1 className="font-black text-6xl md:text-8xl text-slate-900 dark:text-white tracking-tighter leading-[0.8]">
+              <div className="mb-12">
+                <h1 className="font-black text-5xl sm:text-7xl text-slate-900 dark:text-white tracking-tighter leading-[0.8]">
                   Anatomía<br />
                   <span className="font-editorial font-normal italic text-amber-500">del control.</span>
                 </h1>
               </div>
 
               {/* GRID DE DOS COLUMNAS ESTILO REVISTA */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-16">
                 
                 {/* COLUMNA IZQUIERDA */}
-                <div className="space-y-12">
+                <div className="space-y-10 sm:space-y-12">
                   
-                  {/* SECCIÓN 1 */}
+                  {/* SECCIÓN 1: MODO BODA */}
                   <div>
                     <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">01. EL MODO BODA (PREVENCIÓN)</p>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-6 rounded-full bg-indigo-500 relative flex shrink-0">
-                         <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5"></div>
+                      <div className="w-10 h-5 sm:w-12 sm:h-6 rounded-full bg-indigo-500 relative flex shrink-0">
+                         <div className="w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full absolute right-0.5 top-0.5"></div>
                       </div>
-                      <h3 className="font-bold text-xl text-slate-900 dark:text-white tracking-tight">Decide antes de empezar</h3>
+                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">Decide antes de empezar</h3>
                     </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
                       El interruptor "Modo Boda" en la esquina superior divide a tus invitados entre <b>Novia</b> y <b>Novio</b>. <br/><br/>
                       <strong className="text-rose-500 font-medium">⚠️ Regla de Oro:</strong> Asegúrate de activarlo o desactivarlo <b>antes de agregar a tu primer invitado</b>. Si lo enciendes a la mitad del proceso, los invitados anteriores quedarán sin categoría, causando desórdenes en tus reportes.
                     </p>
                   </div>
 
-                  {/* SECCIÓN 2 */}
+                  {/* SECCIÓN 2: ESTATUS GRAFICO */}
                   <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">02. ESTADO DE ENVÍOS</p>
-                    <h3 className="font-bold text-xl text-slate-900 dark:text-white tracking-tight mb-3">La cromática de comunicación</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      El icono de WhatsApp cambiará de color para indicarte visualmente a quién ya le enviaste su invitación:
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">02. ETIQUETAS DE ESTATUS</p>
+                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">El pulso de tu evento</h3>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-5">
+                      La columna <span className="px-2 py-0.5 bg-slate-100 dark:bg-white/10 rounded font-black text-[9px] tracking-widest uppercase">Estatus</span> cambia automáticamente mediante la interacción de tus invitados con su pase digital:
                     </p>
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center gap-3 bg-white dark:bg-[#111] p-3 rounded-xl border border-slate-200 dark:border-white/5">
-                        <div className="w-8 h-8 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0"><MessageCircle size={14} className="text-slate-400"/></div>
-                        <span className="text-xs text-slate-600 dark:text-slate-300 font-medium"><b>Gris:</b> Aún no se ha enviado el mensaje.</span>
-                      </div>
-                      <div className="flex items-center gap-3 bg-emerald-50/50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center shrink-0"><MessageCircle size={14} className="text-emerald-600 dark:text-emerald-400"/></div>
-                        <span className="text-xs text-emerald-800 dark:text-emerald-300 font-medium"><b>Verde:</b> Mensaje enviado correctamente.</span>
-                      </div>
+                    
+                    <div className="grid grid-cols-1 gap-3">
+                       <div className="flex items-center gap-3">
+                          <span className="w-24 px-2 py-1.5 rounded text-[8px] font-black uppercase tracking-widest text-center bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-slate-300">Por Invitar</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex-1">Recién agregado a la lista.</span>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <span className="w-24 px-2 py-1.5 rounded text-[8px] font-black uppercase tracking-widest text-center bg-slate-100 text-slate-500 border border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10">Pendiente</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex-1">Ya recibió la invitación, no ha decidido.</span>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <span className="w-24 px-2 py-1.5 rounded text-[8px] font-black uppercase tracking-widest text-center bg-emerald-500 text-white shadow-sm">Confirmado</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex-1">Asistencia asegurada mediante su web.</span>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <span className="w-24 px-2 py-1.5 rounded text-[8px] font-black uppercase tracking-widest text-center bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400">Canceló</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex-1">Declinó formalmente la invitación.</span>
+                       </div>
+                       {isPremium && qrEnabled && (
+                       <div className="flex items-center gap-3">
+                          <span className="w-24 px-2 py-1.5 rounded text-[8px] font-black uppercase tracking-widest text-center border bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400">En el Evento</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex-1">Su QR fue escaneado exitosamente en puerta.</span>
+                       </div>
+                       )}
                     </div>
+                  </div>
+
+                  {/* SECCIÓN 3: ESTRUCTURA FAMILIAR */}
+                  <div>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">03. AUTONOMÍA DEL ASISTENTE</p>
+                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">Ellos llenan la lista por ti</h3>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
+                      Tú solo necesitas agregar el nombre del <b>Titular o Familia</b> (Ej. "Familia Robles") y la cantidad de pases. <br/><br/>
+                      Cuando ellos abran su invitación web para confirmar, el sistema les pedirá que registren los nombres exactos de sus acompañantes. En tu lista, el titular aparecerá en <b>negrita</b>, y debajo de él se desplegarán sus acompañantes a medida que se vayan registrando.
+                    </p>
                   </div>
 
                 </div>
 
                 {/* COLUMNA DERECHA */}
-                <div className="space-y-12">
-                  
-                  {/* SECCIÓN 3 */}
+                <div className="space-y-10 sm:space-y-12">
+
+                  {/* SECCIÓN 4: TARJETAS SUPERIORES */}
                   <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">03. PASES Y CÓDIGOS QR</p>
-                    <h3 className="font-bold text-xl text-slate-900 dark:text-white tracking-tight mb-3">Emisión de accesos</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      Baulia genera un código PIN y un QR único por cada asiento confirmado. <br/><br/>
-                      Tus invitados recibirán el suyo automáticamente a través de la invitación digital, pero si tienes adultos mayores o necesitas <b>imprimir el pase físico</b>, puedes tocar el icono <QrCode size={14} className="inline text-indigo-500 mx-1"/> para generar una imagen elegante, personalizable con tu monograma y fondo.
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">04. MÉTRICAS GENERALES</p>
+                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">Leyendo tus indicadores</h3>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
+                      Las tarjetas de la cabecera son el termómetro de tu planeación:
+                    </p>
+                    <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed space-y-2 list-disc pl-4 marker:text-amber-500">
+                      <li><b>Pases Totales:</b> La suma matemática de todos los asientos contemplados.</li>
+                      {isPremium && <li><b>Niños:</b> Muestra cuántos pases infantiles has emitido (etiquetados visualmente en la columna <span className="px-1.5 py-0.5 bg-sky-50 text-sky-600 rounded text-[8px] font-black uppercase tracking-widest mx-1">Niño</span>) para que sepas cuántos menús Kids pedir.</li>}
+                      <li><b>Confirmados:</b> Acompañantes que ya aseguraron su lugar.</li>
+                      <li><b>Pendientes:</b> Lugares en vilo (titulares que no responden o acompañantes sin registrar).</li>
+                      <li><b>Cancelados:</b> Asientos que se liberaron formalmente.</li>
+                    </ul>
+                  </div>
+                  
+                  {/* SECCIÓN 5: GESTIÓN DE MESAS Y WHATSAPP */}
+                  <div>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">05. LA MAGIA DETRÁS</p>
+                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">Automatización y Mesas</h3>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
+                      <b>Envío Inteligente:</b> El icono de WhatsApp <MessageCircle size={12} className="inline text-slate-400"/> se tornará verde oscuro una vez que hayas hecho clic en él para despachar la invitación. <br/><br/>
+                      <b>Distribución de Asientos:</b> Aunque tienes la opción de asignar mesas manualmente desde aquí, <b>te sugerimos utilizar la pestaña "Gestión de Mesas"</b>. Nuestro algoritmo inteligente se encargará de agrupar, separar y acomodar a tus invitados de forma visual, previniendo errores de sobrecupo de manera automática.
                     </p>
                   </div>
 
-                  {/* SECCIÓN 4 */}
+                  {/* SECCIÓN 6: QR */}
+                  {isPremium && qrEnabled && (
                   <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">04. MESAS Y ESTATUS</p>
-                    <h3 className="font-bold text-xl text-slate-900 dark:text-white tracking-tight mb-3">Flujo Operativo Correcto</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
-                      La columna <span className="px-2 py-0.5 bg-slate-100 dark:bg-white/10 rounded font-black text-[9px] tracking-widest uppercase">Estatus</span> cambia automáticamente cuando el invitado entra a su invitación web y da clic en "Confirmar".<br/><br/>
-                      Aunque puedes asignar o editar la mesa de un invitado pulsando el botón <Edit2 size={12} className="inline text-slate-400 mx-1"/> aquí, te recomendamos encarecidamente hacerlo desde la pestaña <b>Gestión de Mesas</b> utilizando el simulador visual "Drag & Drop" para prevenir saturar mesas.
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">06. PASES FÍSICOS</p>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
+                      Si necesitas un pase físico para alguien, toca el icono <QrCode size={14} className="inline text-indigo-500 mx-1"/> para revelar la herramienta de diseño. Podrás colocar una imagen de fondo, subir tu logotipo y descargarlo como un formato VIP de alta resolución.
                     </p>
                   </div>
+                  )}
 
                 </div>
               </div>

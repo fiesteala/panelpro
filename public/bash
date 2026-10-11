@@ -1,5 +1,5 @@
 git add .
-git commit -m "invitadosview sin separacion"
+git commit -m "invitadosview magazine"
 git push origin main
 
 .
