@@ -1,5 +1,5 @@
 git add .
-git commit -m "monitorview magazine bienvenida"
+git commit -m "mapaview pantalla azul"
 git push origin main
 
 .
