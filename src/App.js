@@ -1341,11 +1341,11 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
   // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE
   const [showTutorial, setShowTutorial] = useState(() => {
-    const hasSeen = localStorage.getItem(`baulia_tutorial_invitados_${ID_DEL_EVENTO}`);
+    const hasSeen = localStorage.getItem(`baulia_tutorial_invitados_${typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test'}`);
     return !hasSeen; // Si no lo ha visto, se abre por defecto
   });
   const handleCloseTutorial = () => {
-    localStorage.setItem(`baulia_tutorial_invitados_${ID_DEL_EVENTO}`, 'true');
+    localStorage.setItem(`baulia_tutorial_invitados_${typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test'}`, 'true');
     setShowTutorial(false);
   };
 
@@ -1618,14 +1618,13 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           }
       });
 
-      // Transformar de nuevo a formato de lista, aplicando la suma y filtrando si es necesario
       Object.values(familiasAgrupadas).forEach(fg => {
           listaFinal.push({
               ...fg,
-              id: fg.originalId, // Reasignar ID para que no tenga '_split_'
+              id: fg.originalId, 
               passes: fg.tempPasses,
               subGuests: fg.tempSubGuests,
-              name: fg.name.replace(' (Separado)', '') // Limpiamos el nombre
+              name: fg.name.replace(' (Separado)', '') 
           });
       });
       return listaFinal;
@@ -1664,7 +1663,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     return flattened;
   };
 
-  // 🔴 APLICAMOS LA AGRUPACIÓN ANTES DE RENDERIZAR
   const listaAgrupada = agruparInvitadosVisualmente(invitadosFiltrados);
   const flattenedList = getFlattenedGuests(listaAgrupada);
 
@@ -2427,13 +2425,13 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         );
       })()}
 
-      {/* 🔴 MODAL MAGAZINE: GUÍA EDITORIAL DE INVITADOS */}
+      {/* 🔴 MODAL MAGAZINE COMPACTO: GUÍA EDITORIAL DE MESAS */}
       {showTutorial && (
-        <div className="fixed inset-0 z-[999999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors">
+        <div className="fixed inset-0 z-[999999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors text-left">
           <div className="bg-[#fcfbf9] dark:bg-[#0a0a0a] rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
             
             {/* CABECERA EDITORIAL */}
-            <div className="px-6 sm:px-8 py-5 border-b border-amber-200/50 dark:border-white/5 flex justify-between items-center shrink-0">
+            <div className="px-6 py-4 border-b border-amber-200/50 dark:border-white/5 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-3">
                 <span className="text-amber-500 font-black tracking-[0.2em] text-[10px] uppercase hidden sm:block">Baulia</span>
                 <span className="font-editorial text-slate-800 dark:text-white italic text-lg">Magazine</span>
@@ -2444,128 +2442,116 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
             </div>
 
             {/* CUERPO DEL MAGAZINE */}
-            <div className="p-6 sm:p-10 overflow-y-auto custom-scrollbar flex-1 relative">
+            <div className="p-5 sm:p-8 overflow-y-auto custom-scrollbar flex-1 relative">
               {/* TÍTULO GIGANTE */}
-              <div className="mb-12">
-                <h1 className="font-black text-5xl sm:text-7xl text-slate-900 dark:text-white tracking-tighter leading-[0.8]">
-                  Anatomía<br />
-                  <span className="font-editorial font-normal italic text-amber-500">del control.</span>
+              <div className="mb-8">
+                <h1 className="font-black text-4xl sm:text-6xl text-slate-900 dark:text-white tracking-tighter leading-[0.85]">
+                  Arquitectura<br />
+                  <span className="font-editorial font-normal italic text-amber-500">del espacio.</span>
                 </h1>
                 
-                {/* 🔴 NUEVO: MENSAJE DE BIENVENIDA PERSONALIZADO */}
-                <div className="mt-8 border-l-[3px] border-amber-500 pl-4 animate-in slide-in-from-left-4 duration-700">
-                  <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-light leading-relaxed">
-                    Bienvenido a tu centro de mando interactivo.<br/>
-                    Disfruta al máximo la planeación de <strong className="font-bold text-slate-900 dark:text-white uppercase tracking-wider">{eventName || 'tu evento'}</strong>.
+                {/* MENSAJE DE BIENVENIDA PERSONALIZADO */}
+                <div className="mt-6 border-l-[3px] border-amber-500 pl-4 animate-in slide-in-from-left-4 duration-700">
+                  <p className="text-sm text-slate-600 dark:text-slate-300 font-light leading-relaxed">
+                    Bienvenido al lienzo de tu distribución espacial.<br/>
+                    Disfruta diseñando el acomodo perfecto para <strong className="font-bold text-slate-900 dark:text-white uppercase tracking-wider">{eventName || 'tu evento'}</strong>.
                   </p>
                 </div>
               </div>
 
               {/* GRID DE DOS COLUMNAS ESTILO REVISTA */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-16">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
                 
                 {/* COLUMNA IZQUIERDA */}
-                <div className="space-y-10 sm:space-y-12">
+                <div className="space-y-8">
                   
-                  {/* SECCIÓN 1: MODO BODA */}
+                  {/* SECCIÓN 1: CONFIGURACIÓN DE MESAS */}
                   <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">01. EL MODO BODA (PREVENCIÓN)</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-5 sm:w-12 sm:h-6 rounded-full bg-indigo-500 relative flex shrink-0">
-                         <div className="w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full absolute right-0.5 top-0.5"></div>
-                      </div>
-                      <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">Decide antes de empezar</h3>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">01. GEOMETRÍA A LA MEDIDA</p>
+                    <div className="flex items-center gap-3 mb-2">
+                      <LayoutGrid size={20} className="text-indigo-500 dark:text-amber-500" />
+                      <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Creación de mesas</h3>
                     </div>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-3">
+                      Al crear mesas, seleccionas la forma física y le dices al sistema cómo se distribuyen las sillas por lado. El algoritmo calculará la <b>capacidad física máxima</b> para prevenir errores operativos.
+                    </p>
+                    <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/5 p-3 rounded-2xl shadow-sm">
+                       <h4 className="font-bold text-[10px] uppercase tracking-widest mb-2 flex items-center text-slate-700 dark:text-slate-300"><Settings2 size={12} className="mr-1.5"/> Modo Libre</h4>
+                       <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                         Define el Largo y Ancho en metros; <b>la regla estricta de Baulia dicta que cada persona requiere 0.5 metros lineales</b>, calculando así el límite exacto para que nadie quede apretado.
+                       </p>
+                    </div>
+                  </div>
+
+                  {/* SECCIÓN 2: MEZCLAS DE MESAS */}
+                  <div>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">02. ESTÉTICA COLECTIVA</p>
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight mb-2">Crear Mezclas (Mix & Match)</h3>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
-                      El interruptor "Modo Boda" en la esquina superior divide a tus invitados entre <b>Novia</b> y <b>Novio</b>. <br/><br/>
-                      <strong className="text-rose-500 font-medium">⚠️ Regla de Oro:</strong> Asegúrate de activarlo o desactivarlo <b>antes de agregar a tu primer invitado</b>. Si lo enciendes a la mitad del proceso, los invitados anteriores quedarán sin categoría, causando desórdenes en tus reportes.
+                      Si tu evento combina diseños (ej. 5 redondas y 4 tablones), usa la pestaña <b>"Crear Mezcla"</b>. Añade tus configuraciones al "carrito" y genéralas todas con un solo clic para ubicarlas en tu Croquis 2D.
                     </p>
                   </div>
-
-                  {/* SECCIÓN 2: ESTATUS GRAFICO */}
+                  
+                  {/* SECCIÓN 3: ARRASTRE Y SOLTADO */}
                   <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">02. ETIQUETAS DE ESTATUS</p>
-                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">El pulso de tu evento</h3>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-5">
-                      La columna <span className="px-2 py-0.5 bg-slate-100 dark:bg-white/10 rounded font-black text-[9px] tracking-widest uppercase">Estatus</span> cambia automáticamente mediante la interacción de tus invitados con su pase digital:
-                    </p>
-                    
-                    <div className="grid grid-cols-1 gap-3">
-                       <div className="flex items-center gap-3">
-                          <span className="w-24 px-2 py-1.5 rounded text-[8px] font-black uppercase tracking-widest text-center bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-slate-300">Por Invitar</span>
-                          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex-1">Recién agregado a la lista.</span>
-                       </div>
-                       <div className="flex items-center gap-3">
-                          <span className="w-24 px-2 py-1.5 rounded text-[8px] font-black uppercase tracking-widest text-center bg-slate-100 text-slate-500 border border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10">Pendiente</span>
-                          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex-1">Ya recibió la invitación, no ha decidido.</span>
-                       </div>
-                       <div className="flex items-center gap-3">
-                          <span className="w-24 px-2 py-1.5 rounded text-[8px] font-black uppercase tracking-widest text-center bg-emerald-500 text-white shadow-sm">Confirmado</span>
-                          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex-1">Asistencia asegurada mediante su web.</span>
-                       </div>
-                       <div className="flex items-center gap-3">
-                          <span className="w-24 px-2 py-1.5 rounded text-[8px] font-black uppercase tracking-widest text-center bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400">Canceló</span>
-                          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex-1">Declinó formalmente la invitación.</span>
-                       </div>
-                       {isPremium && qrEnabled && (
-                       <div className="flex items-center gap-3">
-                          <span className="w-24 px-2 py-1.5 rounded text-[8px] font-black uppercase tracking-widest text-center border bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400">En el Evento</span>
-                          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex-1">Su QR fue escaneado exitosamente en puerta.</span>
-                       </div>
-                       )}
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">03. KINESIOLOGÍA DE DATOS</p>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="px-2 py-0.5 rounded bg-amber-500 text-slate-900 text-[9px] font-black uppercase tracking-widest ring-2 ring-amber-400/50 shadow-md">Arrastra</div>
+                      <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Experiencia táctil</h3>
                     </div>
-                  </div>
-
-                  {/* SECCIÓN 3: ESTRUCTURA FAMILIAR */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">03. AUTONOMÍA DEL ASISTENTE</p>
-                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">Ellos llenan la lista por ti</h3>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      Tú solo necesitas agregar el nombre del <b>Titular o Familia</b> (Ej. "Familia Robles") y la cantidad de pases. <br/><br/>
-                      Cuando ellos abran su invitación web para confirmar, el sistema les pedirá que registren los nombres exactos de sus acompañantes. En tu lista, el titular aparecerá en <b>negrita</b>, y debajo de él se desplegarán sus acompañantes a medida que se vayan registrando.
-                    </p>
+                    <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed space-y-2 list-disc pl-4 marker:text-indigo-500 dark:marker:text-amber-500">
+                      <li><b>Drag & Drop:</b> En computadoras, arrastra a los invitados. Observa cómo el sistema enciende la mesa destino en <b>color dorado</b> garantizando precisión.</li>
+                      <li><b>Toca y Suelta:</b> En celulares, toca primero al invitado (se tornará azul/dorado) y luego toca la mesa donde lo quieres sentar.</li>
+                    </ul>
                   </div>
 
                 </div>
 
                 {/* COLUMNA DERECHA */}
-                <div className="space-y-10 sm:space-y-12">
+                <div className="space-y-8">
 
-                  {/* SECCIÓN 4: TARJETAS SUPERIORES */}
+                  {/* SECCIÓN 4: MODO SEPARADOR VISUAL */}
                   <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">04. MÉTRICAS GENERALES</p>
-                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">Leyendo tus indicadores</h3>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      Las tarjetas de la cabecera son el termómetro de tu planeación:
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">04. INGENIERÍA SOCIAL</p>
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight mb-3">El Switch "Modo Separador"</h3>
+                    
+                    <div className="flex items-center px-3 py-1.5 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-[2rem] w-max mb-3 shadow-sm">
+                      <span className="text-[9px] font-black text-slate-600 dark:text-slate-300 tracking-wider mr-3 uppercase">Separador</span>
+                      <div className="w-[32px] h-[18px] rounded-full p-[2px] bg-indigo-500 dark:bg-amber-500">
+                         <div className="bg-white w-3.5 h-3.5 rounded-full shadow-md transform translate-x-[14px]"></div>
+                      </div>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-3">
+                      ¿Quieres separar a una familia en diferentes mesas? <b>Enciende este interruptor</b> y el sistema te preguntará cuántos pases deseas dividir.
                     </p>
-                    <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed space-y-2 list-disc pl-4 marker:text-amber-500">
-                      <li><b>Pases Totales:</b> La suma matemática de todos los asientos contemplados.</li>
-                      {isPremium && <li><b>Niños:</b> Muestra cuántos pases infantiles has emitido (etiquetados visualmente en la columna <span className="px-1.5 py-0.5 bg-sky-50 text-sky-600 rounded text-[8px] font-black uppercase tracking-widest mx-1">Niño</span>) para que sepas cuántos menús Kids pedir.</li>}
-                      <li><b>Confirmados:</b> Acompañantes que ya aseguraron su lugar.</li>
-                      <li><b>Pendientes:</b> Lugares en vilo (titulares que no responden o acompañantes sin registrar).</li>
-                      <li><b>Cancelados:</b> Asientos que se liberaron formalmente.</li>
-                    </ul>
-                  </div>
-                  
-                  {/* SECCIÓN 5: GESTIÓN DE MESAS Y WHATSAPP */}
-                  <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">05. LA MAGIA DETRÁS</p>
-                    <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight mb-3">Automatización y Mesas</h3>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
-                      <b>Envío Inteligente:</b> El icono de WhatsApp <MessageCircle size={12} className="inline text-slate-400"/> se tornará verde oscuro una vez que hayas hecho clic en él para despachar la invitación. <br/><br/>
-                      <b>Distribución de Asientos:</b> Aunque tienes la opción de asignar mesas manualmente desde aquí, <b>te sugerimos utilizar la pestaña "Gestión de Mesas"</b>. Nuestro algoritmo inteligente se encargará de agrupar, separar y acomodar a tus invitados de forma visual, previniendo errores de sobrecupo de manera automática.
-                    </p>
+                    <div className="bg-indigo-50 dark:bg-indigo-500/10 border-l-[3px] border-indigo-500 p-3 rounded-r-xl">
+                      <p className="text-[10px] text-indigo-800 dark:text-indigo-300 font-medium"><b>Reunificación:</b> Si te arrepientes y mueves los pedazos separados de vuelta a la misma mesa, nuestro motor los soldará mágicamente de nuevo.</p>
+                    </div>
                   </div>
 
-                  {/* SECCIÓN 6: QR */}
-                  {isPremium && qrEnabled && (
+                  {/* SECCIÓN 5: ASISTENTE INTELIGENTE VISUAL */}
                   <div>
-                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">06. PASES FÍSICOS</p>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">05. ASISTENTE INTELIGENTE</p>
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight mb-3">Auto-Acomodar</h3>
+                    
+                    <div className="flex items-center justify-center px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-[10px] font-bold w-max mb-3 shadow-sm">
+                      <Wand2 size={14} className="mr-2" /> Auto-Acomodar
+                    </div>
+
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
-                      Si necesitas un pase físico para alguien, toca el icono <QrCode size={14} className="inline text-indigo-500 mx-1"/> para revelar la herramienta de diseño. Podrás colocar una imagen de fondo, subir tu logotipo y descargarlo como un formato VIP de alta resolución.
+                      Con un solo clic, la tecnología de Baulia escaneará tu lista y agrupará a las familias en las mesas disponibles priorizando a los grupos grandes. Luego podrás hacer ajustes manuales sobre esa base.
                     </p>
                   </div>
-                  )}
+
+                  {/* SECCIÓN 6: SINCRONIZACIÓN PERFECTA */}
+                  <div>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">06. SINCRONIZACIÓN PERFECTA</p>
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight mb-2">Todo está conectado</h3>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
+                      El acomodo de las mesas se reflejará automáticamente en la <b>Lista de Invitados</b>. Cada persona mostrará al instante la mesa asignada aquí, garantizando que el control de puerta y tus reportes estén actualizados sin esfuerzo.
+                    </p>
+                  </div>
 
                 </div>
               </div>
