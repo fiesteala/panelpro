@@ -3793,52 +3793,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
 };
 
 // ==========================================
-// --- UTILIDADES DEL MAPA ---
-// ==========================================
-const STRUCTURAL_CATALOG = [
-  { name: 'Pista de Baile', shape: 'rounded-none', color: 'bg-white', texture: 'dance', width: 6, height: 6, isRoomArea: false, customLabel: 'PISTA' },
-  { name: 'Escenario', shape: 'rounded-none', color: 'bg-slate-900', texture: 'none', width: 4, height: 3, isRoomArea: false, customLabel: 'ESCENARIO' },
-  { name: 'Barra de Bebidas', shape: 'rounded-md', color: 'bg-slate-800', texture: 'marble', width: 3, height: 1, isRoomArea: false, customLabel: 'BARRA' },
-  { name: 'Mesa de Postres', shape: 'rounded-md', color: 'bg-rose-100', texture: 'none', width: 2, height: 1, isRoomArea: false, customLabel: 'POSTRES' },
-  { name: 'Baños', shape: 'rounded-xl', color: 'bg-sky-100', texture: 'none', width: 3, height: 3, isRoomArea: false, customLabel: 'WC' },
-  { name: 'Entrada / Recepción', shape: 'rounded-lg', color: 'bg-emerald-100', texture: 'none', width: 2, height: 2, isRoomArea: false, customLabel: 'ACCESO' },
-  { name: 'DJ / Cabina', shape: 'rounded-lg', color: 'bg-indigo-900', texture: 'none', width: 2, height: 1.5, isRoomArea: false, customLabel: 'DJ' },
-  { name: 'Columna', shape: 'rounded-sm', color: 'bg-slate-300', texture: 'none', width: 0.5, height: 0.5, isRoomArea: false, customLabel: '' },
-];
-
-const ROOM_AREAS_CATALOG = [
-  { name: 'Área Cuadrada', shapeType: 'rect', width: 10, height: 10, isRoomArea: true, mode: 'add', texture: 'none' },
-  { name: 'Área Circular', shapeType: 'ellipse', width: 10, height: 10, isRoomArea: true, mode: 'add', texture: 'none' },
-  { name: 'Jardín / Pasto', shapeType: 'rect', width: 10, height: 10, isRoomArea: true, mode: 'overlay', texture: 'grass' },
-  { name: 'Alberca', shapeType: 'pool', width: 6, height: 4, isRoomArea: true, mode: 'overlay', texture: 'water' },
-  { name: 'Piso de Madera', shapeType: 'rect', width: 8, height: 8, isRoomArea: true, mode: 'overlay', texture: 'wood' },
-  { name: 'Tarima', shapeType: 'rect', width: 8, height: 8, isRoomArea: true, mode: 'overlay', texture: 'marble' },
-];
-
-const getShapeClipPath = (el) => {
-  if (el.shapeType === 'ellipse') return 'ellipse(50% 50% at 50% 50%)';
-  if (el.shapeType === 'triangle') return 'polygon(0 0, 0 100%, 100% 100%)';
-  return 'none';
-};
-
-const renderSVGShape = (el, scale, offsetX, offsetY, svgProps) => {
-  const x = el.x * scale + offsetX;
-  const y = el.y * scale + offsetY;
-  const w = el.width * scale;
-  const h = el.height * scale;
-  const transform = `rotate(${el.rotation || 0} ${x + w/2} ${y + h/2})`;
-
-  if (el.shapeType === 'ellipse') {
-    return <ellipse key={el.id} cx={x + w/2} cy={y + h/2} rx={w/2} ry={h/2} transform={transform} {...svgProps} />;
-  } else if (el.shapeType === 'triangle') {
-    const pts = `${x},${y} ${x},${y+h} ${x+w},${y+h}`;
-    return <polygon key={el.id} points={pts} transform={transform} {...svgProps} />;
-  } else {
-    return <rect key={el.id} x={x} y={y} width={w} height={h} transform={transform} {...svgProps} />;
-  }
-};
-
-// ==========================================
 // --- COMPONENTE: MAPA Y CROQUIS (2D) ---
 // ==========================================
 const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch = '', elements = [], setElements, eventName }) => {
@@ -4010,13 +3964,13 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
         if (usedChairs + guest.passes > targetTable.capacity) {
            return;
         }
-        setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guestId), { ...guest, tableId: targetTable.id });
+        setDoc(doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test', "invitados", guestId), { ...guest, tableId: targetTable.id });
       } else {
         if (guest.tableId) {
            if (guest.passes > 1) {
                setGuestSplitPrompt({ guest, targetTableId: null, table: null, usedChairs: 0 });
            } else {
-               setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guestId), { ...guest, tableId: null });
+               setDoc(doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test', "invitados", guestId), { ...guest, tableId: null });
            }
         }
       }
@@ -4050,22 +4004,24 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     const finalX = ((e.clientX - rect.left) - offsetX) / scale - (w / 2);
     const finalY = ((e.clientY - rect.top) - offsetY) / scale - (h / 2);
 
+    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
+
     if (actionType === 'existing_table') {
       const updatedTable = tables.find(t => t.id === payload.id);
       if(updatedTable) {
           const newT = { ...updatedTable, x: finalX, y: finalY, width: w, height: h };
-          setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", payload.id), newT);
+          setDoc(doc(db, "eventos", activeEventId, "mesas", payload.id), newT);
       }
       setSelectedIds([payload.id]);
     } else if (actionType === 'new_table') {
       const newTableId = `mesa_${Date.now()}`;
       const newTable = { id: newTableId, name: `Mesa ${tables.length + 1}`, type: payload.type, capacity: payload.capacity, width: w, height: h, x: finalX, y: finalY, rotation: 0 };
-      setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", newTableId), newTable);
+      setDoc(doc(db, "eventos", activeEventId, "mesas", newTableId), newTable);
       setSelectedIds([newTableId]);
     } else if (actionType === 'structure' || actionType === 'room_area') {
       const newElId = `mapa_${Date.now()}`;
       const newEl = { ...payload, id: newElId, x: finalX, y: finalY, rotation: 0, customLabel: '', mode: payload.mode || 'add' };
-      setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", newElId), newEl);
+      setDoc(doc(db, "eventos", activeEventId, "mapa", newElId), newEl);
       setSelectedIds([newElId]);
     }
     setActiveTool('select'); 
@@ -4225,12 +4181,14 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
         setSelectionBox(null);
     }
 
+    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
+
     if (dragging && dragging.type === 'move') {
         const promesas = Object.keys(dragging.groupOriginals).map(id => {
             const isTab = dragging.groupOriginals[id].isTable;
             const item = isTab ? tables.find(t => String(t.id) === String(id)) : elements.find(e => String(e.id) === String(id));
             const collectionName = isTab ? "mesas" : "mapa";
-            return item ? setDoc(doc(db, "eventos", ID_DEL_EVENTO, collectionName, String(id)), item) : Promise.resolve();
+            return item ? setDoc(doc(db, "eventos", activeEventId, collectionName, String(id)), item) : Promise.resolve();
         });
         await Promise.all(promesas);
     }
@@ -4240,7 +4198,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
             const isTab = dragging.groupOriginals[id].isTable;
             const item = isTab ? tables.find(t => String(t.id) === String(id)) : elements.find(e => String(e.id) === String(id));
             const collectionName = isTab ? "mesas" : "mapa";
-            return item ? setDoc(doc(db, "eventos", ID_DEL_EVENTO, collectionName, String(id)), item) : Promise.resolve();
+            return item ? setDoc(doc(db, "eventos", activeEventId, collectionName, String(id)), item) : Promise.resolve();
         });
         await Promise.all(promesas);
     }
@@ -4252,19 +4210,21 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   const updateElementData = async (id, newData) => {
     saveHistory(elements, tables);
     const el = elements.find(e => String(e.id) === String(id));
-    if(el) await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", String(id)), { ...el, ...newData });
+    if(el) await setDoc(doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test', "mapa", String(id)), { ...el, ...newData });
   };
 
   const deleteSelected = async () => {
     saveHistory(elements, tables);
     const promesas = [];
+    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
+    
     selectedIds.forEach(id => {
       const isTable = tables.some(t => String(t.id) === String(id));
       if (isTable) {
         const t = tables.find(x => String(x.id) === String(id));
-        promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", String(id)), { ...t, x: null, y: null, rotation: 0, groupId: null }));
+        promesas.push(setDoc(doc(db, "eventos", activeEventId, "mesas", String(id)), { ...t, x: null, y: null, rotation: 0, groupId: null }));
       } else {
-        promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", String(id))));
+        promesas.push(deleteDoc(doc(db, "eventos", activeEventId, "mapa", String(id))));
       }
     });
     await Promise.all(promesas);
@@ -4279,17 +4239,19 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
      });
 
      const promesas = [];
+     const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
+
      if (allHaveSameGroup) {
         const grpId = firstItem.groupId;
-        elements.forEach(e => { if(e.groupId === grpId) promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", String(e.id)), {...e, groupId: null})) });
-        tables.forEach(t => { if(t.groupId === grpId) promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", String(t.id)), {...t, groupId: null})) });
+        elements.forEach(e => { if(e.groupId === grpId) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mapa", String(e.id)), {...e, groupId: null})) });
+        tables.forEach(t => { if(t.groupId === grpId) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mesas", String(t.id)), {...t, groupId: null})) });
      } else {
         const newGroupId = 'grp_' + Date.now();
         selectedIds.forEach(id => {
            const e = elements.find(x => String(x.id) === String(id));
-           if (e) promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", String(id)), {...e, groupId: newGroupId}));
+           if (e) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mapa", String(id)), {...e, groupId: newGroupId}));
            const t = tables.find(x => String(x.id) === String(id));
-           if (t) promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", String(id)), {...t, groupId: newGroupId}));
+           if (t) promesas.push(setDoc(doc(db, "eventos", activeEventId, "mesas", String(id)), {...t, groupId: newGroupId}));
         });
      }
      await Promise.all(promesas);
@@ -4297,11 +4259,13 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
 
   const handleSplitChoice = (mode) => {
       const { guest, targetTableId, table, usedChairs } = guestSplitPrompt;
+      const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
+
       if (mode === 'all') {
           if (table && usedChairs + guest.passes > table.capacity) {
               // Notificación silenciada
           } else {
-              setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, tableId: targetTableId });
+              setDoc(doc(db, "eventos", activeEventId, "invitados", guest.id), { ...guest, tableId: targetTableId });
           }
       } else if (mode === 'one') {
           if (table && usedChairs + 1 > table.capacity) {
@@ -4310,8 +4274,8 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
               const newGuestId = Date.now().toString() + Math.random().toString(36).substring(2,5);
               const newGuest = { ...guest, id: newGuestId, name: `${guest.name} (Separado)`, passes: 1, childrenPasses: 0, tableId: targetTableId };
               const updatedGuest = { ...guest, passes: guest.passes - 1 };
-              setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), updatedGuest);
-              setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", newGuestId), newGuest);
+              setDoc(doc(db, "eventos", activeEventId, "invitados", guest.id), updatedGuest);
+              setDoc(doc(db, "eventos", activeEventId, "invitados", newGuestId), newGuest);
           }
       }
       setGuestSplitPrompt(null);
@@ -4860,155 +4824,141 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                 </div>
               );
             })}
+          </div>
+        </div>
+      </div>
 
-            <div className="absolute bottom-6 right-6 z-[600] flex flex-col gap-3 pointer-events-none">
-              <div className="bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl border border-slate-200 flex flex-col pointer-events-auto">
-                <button onClick={() => setScale(s => Math.min(200, s + Math.max(2, s * 0.1)))} className="p-2.5 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 rounded-xl transition-colors" title="Acercar">
-                  <Plus size={24}/>
-                </button>
-                <div className="h-px bg-slate-200 mx-2 my-1"></div>
-                <button onClick={() => setScale(s => Math.max(5, s - Math.max(2, s * 0.1)))} className="p-2.5 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 rounded-xl transition-colors" title="Alejar">
-                  <Minus size={24}/>
-                </button>
-              </div>
-              <button onClick={centerAndFitMap} className="bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-2xl border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors pointer-events-auto flex items-center justify-center group" title="Ajustar y Centrar Plano">
-                <Maximize size={24} className="group-hover:scale-110 transition-transform" />
-              </button>
+      {/* BARRA DERECHA: EDICIÓN MAESTRA Y CATÁLOGOS */}
+      {isEditMode && (
+        <div className="w-full md:w-[280px] border-t md:border-t-0 md:border-l border-slate-200 bg-slate-50 flex flex-col z-20 max-h-64 md:max-h-full">
+          
+          <div className="p-3 bg-white border-b border-slate-200 shadow-sm shrink-0 flex flex-col gap-1.5">
+             <button onClick={() => { setIsEditMode(false); setSelectedIds([]); centerAndFitMap(); }} className="w-full py-2 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center">
+               <CheckCircle size={14} className="mr-1.5"/> Guardar Diseño
+             </button>
+             <button onClick={() => setShowExportModal(true)} className="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center">
+               <FileDown size={14} className="mr-1.5"/> Descargar PDF
+             </button>
+             {/* 🔴 BOTÓN TUTORIAL MAGAZINE */}
+             <button onClick={() => setShowTutorial(true)} className="w-full py-2 mt-1 bg-slate-100 text-slate-500 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors shadow-sm flex items-center justify-center border border-slate-200">
+               ? Ver Guía del Croquis
+             </button>
+             <div className="flex gap-1.5 mt-1">
+               <button onClick={handleUndo} disabled={history.length === 0} className={`flex-1 py-1.5 rounded-md text-[10px] font-bold flex items-center justify-center transition-colors border ${history.length > 0 ? 'bg-white text-slate-700 hover:bg-slate-50 border-slate-300 shadow-sm' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}><RotateCw size={12} className="mr-1" style={{ transform: 'scaleX(-1)' }}/> Deshacer</button>
+               <button onClick={async () => { 
+                 if(window.confirm('¿Estás seguro de limpiar todo el plano? Esta acción no se puede deshacer.')) { 
+                   saveHistory(elements, tables);
+                   const promesasMapa = elements.map(e => deleteDoc(doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test', "mapa", String(e.id))));
+                   const promesasMesas = placedTables.map(t => setDoc(doc(db, "eventos", typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test', "mesas", String(t.id)), { ...t, x: null, y: null, rotation: 0, groupId: null }));
+                   await Promise.all([...promesasMapa, ...promesasMesas]);
+                   setSelectedIds([]); 
+                   setPan({x:0, y:0}); 
+                 } 
+               }} className="flex-1 py-1.5 bg-white border border-rose-200 text-rose-600 rounded-md text-[10px] font-bold hover:bg-rose-50 transition-colors shadow-sm flex items-center justify-center"><Trash2 size={12} className="mr-1"/> Limpiar</button>
+             </div>
+             <button onClick={() => setRoomGrouped(!roomGrouped)} className={`w-full mt-1 py-1.5 rounded-md text-[10px] font-bold flex items-center justify-center transition-colors border shadow-sm ${roomGrouped ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}><Layers size={12} className="mr-1.5"/> {roomGrouped ? 'Desvincular Salón Compuesto' : 'Vincular Salón Compuesto'}</button>
+          </div>
+
+          {renderContextualMenu()}
+
+          <div className="p-3 overflow-y-auto flex-1 hide-scrollbar">
+            
+            <h3 className="font-bold text-slate-700 mb-2 text-[10px] uppercase tracking-wider flex items-center">
+              <Spline size={12} className="mr-1.5"/> 1. Áreas y Exteriores
+            </h3>
+            <div className="grid grid-cols-3 gap-1.5 mb-4">
+              {ROOM_AREAS_CATALOG.map((tmpl, idx) => {
+                if (tmpl.shapeType === 'polygon') return null; 
+                return (
+                  <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'room_area')} className="bg-white p-1.5 rounded-lg border border-slate-300 text-center cursor-grab active:cursor-grabbing hover:bg-indigo-50 hover:border-indigo-300 transition-colors shadow-sm">
+                     <div className="h-6 flex items-center justify-center mb-1 text-slate-500">
+                        <div 
+                          className="border border-current bg-slate-100" 
+                          style={{ 
+                            width: '18px', height: '18px',
+                            borderRadius: tmpl.shapeType === 'ellipse' && tmpl.name === 'Área Circular' ? '50%' : tmpl.shapeType === 'ellipse' ? '50%' : '2px',
+                            clipPath: tmpl.shapeType === 'triangle' ? 'polygon(0 0, 0 100%, 100% 100%)' : 'none',
+                            ...(tmpl.mode === 'overlay' ? getTextureStyle(tmpl.texture) : {})
+                          }}
+                        ></div>
+                     </div>
+                     <p className="text-[8px] font-bold text-slate-600 leading-tight">{tmpl.name}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            <h3 className="font-bold text-indigo-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
+              <Users size={12} className="mr-1.5"/> 2. Mesas Reales ({availableTables.length})
+            </h3>
+            <div className="space-y-1.5 mb-4">
+              {availableTables.map((table) => {
+                const occupancy = guests.filter(g => g.tableId === table.id).reduce((s, g) => s + g.passes, 0);
+                const tType = table.tipo || table.type;
+                let tW = 1.5, tH = 1.5;
+                if (tType === 'rect_table' || tType === 'tablon') { tW = 2.44; tH = 0.7; }
+                else if (tType === 'ovalada') { tW = 3.05; tH = 1.22; }
+                else if (tType === 'serpentina') { tW = 1.8; tH = 1.8; }
+                else if (tType === 'personalizada' || tType === 'libre') { tW = table.configDetalle?.libreMedidas?.largo || 2; tH = table.configDetalle?.libreMedidas?.ancho || 1; }
+
+                return (
+                  <div key={table.id} draggable onDragStart={(e) => handleDragStart(e, {id: table.id, width: tW, height: tH}, 'existing_table')} className="bg-white p-1.5 rounded-lg border border-indigo-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-indigo-500 hover:shadow-md transition-all flex items-center">
+                    <div className="w-6 h-6 bg-indigo-50 rounded flex items-center justify-center mr-2 text-indigo-500 flex-shrink-0">
+                      {table.type === 'round_table' || table.tipo === 'redonda' ? <div className="w-3 h-3 rounded-full border-[1.5px] border-current"></div> : <div className="w-3 h-3 rounded-sm border-[1.5px] border-current"></div>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-800 truncate">{table.name}</p>
+                      <p className="text-[8px] text-slate-500 uppercase font-semibold">{occupancy}/{table.capacity} Sillas</p>
+                    </div>
+                  </div>
+                );
+              })}
+              {availableTables.length === 0 && <p className="text-[9px] text-slate-400 italic text-center py-1 bg-white rounded border border-dashed border-slate-300">Todas ubicadas en el plano.</p>}
+            </div>
+
+            <h3 className="font-bold text-emerald-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
+              <Plus size={12} className="mr-1.5"/> 3. Mesas Extra
+            </h3>
+            <div className="grid grid-cols-4 gap-1.5 mb-4">
+              {TABLE_TEMPLATES.map((tmpl, idx) => {
+                let iconEl;
+                if (tmpl.type === 'round_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-full w-4 h-4"></div>;
+                else if (tmpl.type === 'square_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-sm w-4 h-4"></div>;
+                else if (tmpl.type === 'rect_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-sm w-5 h-2.5 mt-1"></div>;
+                else if (tmpl.type === 'ovalada') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-[10px] w-6 h-2.5 mt-1"></div>;
+                else if (tmpl.type === 'serpentina') iconEl = (
+                  <svg className="mx-auto mb-1" width="16" height="16" viewBox="0 0 20 20">
+                    <path d="M 2 18 A 16 16 0 0 1 18 2 L 18 7 A 11 11 0 0 0 7 18 Z" fill="none" stroke="#10b981" strokeWidth="1.5" />
+                  </svg>
+                );
+
+                return (
+                  <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'new_table')} className="bg-white p-1.5 rounded-lg border border-emerald-200 text-center cursor-grab active:cursor-grabbing hover:bg-emerald-50 transition-colors shadow-sm">
+                     <div className="h-6 flex items-center justify-center">{iconEl}</div>
+                     <p className="text-[8px] font-bold text-slate-600 leading-tight">{tmpl.name}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            <h3 className="font-bold text-slate-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
+              <Move size={12} className="mr-1.5"/> 4. Físico
+            </h3>
+            <div className="space-y-1.5">
+              {STRUCTURAL_CATALOG.map((item, idx) => (
+                <div key={idx} draggable onDragStart={(e) => handleDragStart(e, item, 'structure')} className="bg-white p-1.5 rounded-lg border border-slate-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-slate-400 hover:shadow-md transition-all flex items-center">
+                  <div className="w-8 h-8 rounded flex items-center justify-center mr-2 border border-slate-300 flex-shrink-0 shadow-inner" style={getTextureStyle(item.texture)}></div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-800 leading-tight">{item.name}</p>
+                    <p className="text-[8px] text-slate-500 uppercase tracking-wide font-semibold">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
 
           </div>
         </div>
-
-        {/* BARRA DERECHA: EDICIÓN MAESTRA Y CATÁLOGOS */}
-        {isEditMode && (
-          <div className="w-full md:w-[280px] border-t md:border-t-0 md:border-l border-slate-200 bg-slate-50 flex flex-col z-20 max-h-64 md:max-h-full">
-            
-            <div className="p-3 bg-white border-b border-slate-200 shadow-sm shrink-0 flex flex-col gap-1.5">
-               <button onClick={() => { setIsEditMode(false); setSelectedIds([]); centerAndFitMap(); }} className="w-full py-2 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center">
-                 <CheckCircle size={14} className="mr-1.5"/> Guardar Diseño
-               </button>
-               {/* 🔴 BOTÓN EXPORTAR PDF PARA MAPA (CROQUIS) */}
-               <button onClick={() => setShowExportModal(true)} className="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center">
-                 <FileDown size={14} className="mr-1.5"/> Descargar PDF
-               </button>
-               <div className="flex gap-1.5 mt-1">
-                 <button onClick={handleUndo} disabled={history.length === 0} className={`flex-1 py-1.5 rounded-md text-[10px] font-bold flex items-center justify-center transition-colors border ${history.length > 0 ? 'bg-white text-slate-700 hover:bg-slate-50 border-slate-300 shadow-sm' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}><RotateCw size={12} className="mr-1" style={{ transform: 'scaleX(-1)' }}/> Deshacer</button>
-                 <button onClick={async () => { 
-                   if(window.confirm('¿Estás seguro de limpiar todo el plano? Esta acción no se puede deshacer.')) { 
-                     saveHistory(elements, tables);
-                     const promesasMapa = elements.map(e => deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", String(e.id))));
-                     const promesasMesas = placedTables.map(t => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", String(t.id)), { ...t, x: null, y: null, rotation: 0, groupId: null }));
-                     await Promise.all([...promesasMapa, ...promesasMesas]);
-                     setSelectedIds([]); 
-                     setPan({x:0, y:0}); 
-                   } 
-                 }} className="flex-1 py-1.5 bg-white border border-rose-200 text-rose-600 rounded-md text-[10px] font-bold hover:bg-rose-50 transition-colors shadow-sm flex items-center justify-center"><Trash2 size={12} className="mr-1"/> Limpiar</button>
-               </div>
-               <button onClick={() => setRoomGrouped(!roomGrouped)} className={`w-full mt-1 py-1.5 rounded-md text-[10px] font-bold flex items-center justify-center transition-colors border shadow-sm ${roomGrouped ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}><Layers size={12} className="mr-1.5"/> {roomGrouped ? 'Desvincular Salón Compuesto' : 'Vincular Salón Compuesto'}</button>
-            </div>
-
-            {renderContextualMenu()}
-
-            <div className="p-3 overflow-y-auto flex-1 hide-scrollbar">
-              
-              <h3 className="font-bold text-slate-700 mb-2 text-[10px] uppercase tracking-wider flex items-center">
-                <Spline size={12} className="mr-1.5"/> 1. Áreas y Exteriores
-              </h3>
-              <div className="grid grid-cols-3 gap-1.5 mb-4">
-                {ROOM_AREAS_CATALOG.map((tmpl, idx) => {
-                  if (tmpl.shapeType === 'polygon') return null; 
-                  return (
-                    <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'room_area')} className="bg-white p-1.5 rounded-lg border border-slate-300 text-center cursor-grab active:cursor-grabbing hover:bg-indigo-50 hover:border-indigo-300 transition-colors shadow-sm">
-                       <div className="h-6 flex items-center justify-center mb-1 text-slate-500">
-                          <div 
-                            className="border border-current bg-slate-100" 
-                            style={{ 
-                              width: '18px', height: '18px',
-                              borderRadius: tmpl.shapeType === 'ellipse' && tmpl.name === 'Área Circular' ? '50%' : tmpl.shapeType === 'ellipse' ? '50%' : '2px',
-                              clipPath: tmpl.shapeType === 'triangle' ? 'polygon(0 0, 0 100%, 100% 100%)' : 'none',
-                              ...(tmpl.mode === 'overlay' ? getTextureStyle(tmpl.texture) : {})
-                            }}
-                          ></div>
-                       </div>
-                       <p className="text-[8px] font-bold text-slate-600 leading-tight">{tmpl.name}</p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <h3 className="font-bold text-indigo-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
-                <Users size={12} className="mr-1.5"/> 2. Mesas Reales ({availableTables.length})
-              </h3>
-              <div className="space-y-1.5 mb-4">
-                {availableTables.map((table) => {
-                  const occupancy = guests.filter(g => g.tableId === table.id).reduce((s, g) => s + g.passes, 0);
-                  const tType = table.tipo || table.type;
-                  let tW = 1.5, tH = 1.5;
-                  if (tType === 'rect_table' || tType === 'tablon') { tW = 2.44; tH = 0.7; }
-                  else if (tType === 'ovalada') { tW = 3.05; tH = 1.22; }
-                  else if (tType === 'serpentina') { tW = 1.8; tH = 1.8; }
-                  else if (tType === 'personalizada' || tType === 'libre') { tW = table.configDetalle?.libreMedidas?.largo || 2; tH = table.configDetalle?.libreMedidas?.ancho || 1; }
-
-                  return (
-                    <div key={table.id} draggable onDragStart={(e) => handleDragStart(e, {id: table.id, width: tW, height: tH}, 'existing_table')} className="bg-white p-1.5 rounded-lg border border-indigo-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-indigo-500 hover:shadow-md transition-all flex items-center">
-                      <div className="w-6 h-6 bg-indigo-50 rounded flex items-center justify-center mr-2 text-indigo-500 flex-shrink-0">
-                        {table.type === 'round_table' || table.tipo === 'redonda' ? <div className="w-3 h-3 rounded-full border-[1.5px] border-current"></div> : <div className="w-3 h-3 rounded-sm border-[1.5px] border-current"></div>}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-slate-800 truncate">{table.name}</p>
-                        <p className="text-[8px] text-slate-500 uppercase font-semibold">{occupancy}/{table.capacity} Sillas</p>
-                      </div>
-                    </div>
-                  );
-                })}
-                {availableTables.length === 0 && <p className="text-[9px] text-slate-400 italic text-center py-1 bg-white rounded border border-dashed border-slate-300">Todas ubicadas en el plano.</p>}
-              </div>
-
-              <h3 className="font-bold text-emerald-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
-                <Plus size={12} className="mr-1.5"/> 3. Mesas Extra
-              </h3>
-              <div className="grid grid-cols-4 gap-1.5 mb-4">
-                {TABLE_TEMPLATES.map((tmpl, idx) => {
-                  let iconEl;
-                  if (tmpl.type === 'round_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-full w-4 h-4"></div>;
-                  else if (tmpl.type === 'square_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-sm w-4 h-4"></div>;
-                  else if (tmpl.type === 'rect_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-sm w-5 h-2.5 mt-1"></div>;
-                  else if (tmpl.type === 'ovalada') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-[10px] w-6 h-2.5 mt-1"></div>;
-                  else if (tmpl.type === 'serpentina') iconEl = (
-                    <svg className="mx-auto mb-1" width="16" height="16" viewBox="0 0 20 20">
-                      <path d="M 2 18 A 16 16 0 0 1 18 2 L 18 7 A 11 11 0 0 0 7 18 Z" fill="none" stroke="#10b981" strokeWidth="1.5" />
-                    </svg>
-                  );
-
-                  return (
-                    <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'new_table')} className="bg-white p-1.5 rounded-lg border border-emerald-200 text-center cursor-grab active:cursor-grabbing hover:bg-emerald-50 transition-colors shadow-sm">
-                       {iconEl}
-                       <p className="text-[8px] font-bold text-slate-600 leading-tight">{tmpl.name}</p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <h3 className="font-bold text-slate-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
-                <Move size={12} className="mr-1.5"/> 4. Físico
-              </h3>
-              <div className="space-y-1.5">
-                {STRUCTURAL_CATALOG.map((item, idx) => (
-                  <div key={idx} draggable onDragStart={(e) => handleDragStart(e, item, 'structure')} className="bg-white p-1.5 rounded-lg border border-slate-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-slate-400 hover:shadow-md transition-all flex items-center">
-                    <div className="w-8 h-8 rounded flex items-center justify-center mr-2 border border-slate-300 flex-shrink-0 shadow-inner" style={getTextureStyle(item.texture)}></div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-800 leading-tight">{item.name}</p>
-                      <p className="text-[8px] text-slate-500 uppercase tracking-wide font-semibold">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-            </div>
-          </div>
-        )}
-
-      </div>
+      )}
 
       {/* MODAL: SEPARAR FAMILIA O MOVER GRUPO */}
       {guestSplitPrompt && (
