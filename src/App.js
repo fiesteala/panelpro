@@ -3792,7 +3792,56 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification, even
   );
 };
 
-const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch = '', elements = [], setElements }) => {
+// ==========================================
+// --- UTILIDADES DEL MAPA ---
+// ==========================================
+const STRUCTURAL_CATALOG = [
+  { name: 'Pista de Baile', shape: 'rounded-none', color: 'bg-white', texture: 'dance', width: 6, height: 6, isRoomArea: false, customLabel: 'PISTA' },
+  { name: 'Escenario', shape: 'rounded-none', color: 'bg-slate-900', texture: 'none', width: 4, height: 3, isRoomArea: false, customLabel: 'ESCENARIO' },
+  { name: 'Barra de Bebidas', shape: 'rounded-md', color: 'bg-slate-800', texture: 'marble', width: 3, height: 1, isRoomArea: false, customLabel: 'BARRA' },
+  { name: 'Mesa de Postres', shape: 'rounded-md', color: 'bg-rose-100', texture: 'none', width: 2, height: 1, isRoomArea: false, customLabel: 'POSTRES' },
+  { name: 'Baños', shape: 'rounded-xl', color: 'bg-sky-100', texture: 'none', width: 3, height: 3, isRoomArea: false, customLabel: 'WC' },
+  { name: 'Entrada / Recepción', shape: 'rounded-lg', color: 'bg-emerald-100', texture: 'none', width: 2, height: 2, isRoomArea: false, customLabel: 'ACCESO' },
+  { name: 'DJ / Cabina', shape: 'rounded-lg', color: 'bg-indigo-900', texture: 'none', width: 2, height: 1.5, isRoomArea: false, customLabel: 'DJ' },
+  { name: 'Columna', shape: 'rounded-sm', color: 'bg-slate-300', texture: 'none', width: 0.5, height: 0.5, isRoomArea: false, customLabel: '' },
+];
+
+const ROOM_AREAS_CATALOG = [
+  { name: 'Área Cuadrada', shapeType: 'rect', width: 10, height: 10, isRoomArea: true, mode: 'add', texture: 'none' },
+  { name: 'Área Circular', shapeType: 'ellipse', width: 10, height: 10, isRoomArea: true, mode: 'add', texture: 'none' },
+  { name: 'Jardín / Pasto', shapeType: 'rect', width: 10, height: 10, isRoomArea: true, mode: 'overlay', texture: 'grass' },
+  { name: 'Alberca', shapeType: 'pool', width: 6, height: 4, isRoomArea: true, mode: 'overlay', texture: 'water' },
+  { name: 'Piso de Madera', shapeType: 'rect', width: 8, height: 8, isRoomArea: true, mode: 'overlay', texture: 'wood' },
+  { name: 'Tarima', shapeType: 'rect', width: 8, height: 8, isRoomArea: true, mode: 'overlay', texture: 'marble' },
+];
+
+const getShapeClipPath = (el) => {
+  if (el.shapeType === 'ellipse') return 'ellipse(50% 50% at 50% 50%)';
+  if (el.shapeType === 'triangle') return 'polygon(0 0, 0 100%, 100% 100%)';
+  return 'none';
+};
+
+const renderSVGShape = (el, scale, offsetX, offsetY, svgProps) => {
+  const x = el.x * scale + offsetX;
+  const y = el.y * scale + offsetY;
+  const w = el.width * scale;
+  const h = el.height * scale;
+  const transform = `rotate(${el.rotation || 0} ${x + w/2} ${y + h/2})`;
+
+  if (el.shapeType === 'ellipse') {
+    return <ellipse key={el.id} cx={x + w/2} cy={y + h/2} rx={w/2} ry={h/2} transform={transform} {...svgProps} />;
+  } else if (el.shapeType === 'triangle') {
+    const pts = `${x},${y} ${x},${y+h} ${x+w},${y+h}`;
+    return <polygon key={el.id} points={pts} transform={transform} {...svgProps} />;
+  } else {
+    return <rect key={el.id} x={x} y={y} width={w} height={h} transform={transform} {...svgProps} />;
+  }
+};
+
+// ==========================================
+// --- COMPONENTE: MAPA Y CROQUIS (2D) ---
+// ==========================================
+const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch = '', elements = [], setElements, eventName }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [dragging, setDragging] = useState(null); 
   const [selectionBox, setSelectionBox] = useState(null); 
@@ -3808,6 +3857,19 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   const [roomGrouped, setRoomGrouped] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [guestSplitPrompt, setGuestSplitPrompt] = useState(null); 
+
+  // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE
+  const [showTutorial, setShowTutorial] = useState(() => {
+    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
+    const hasSeen = localStorage.getItem(`baulia_tutorial_mapa_${activeEventId}`);
+    return !hasSeen;
+  });
+
+  const handleCloseTutorial = () => {
+    const activeEventId = typeof ID_DEL_EVENTO !== 'undefined' ? ID_DEL_EVENTO : 'test';
+    localStorage.setItem(`baulia_tutorial_mapa_${activeEventId}`, 'true');
+    setShowTutorial(false);
+  };
 
   // 🔴 ESTADOS PARA EL MOTOR PDF DEL MAPA
   const [showExportModal, setShowExportModal] = useState(false);
@@ -4964,117 +5026,99 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
         </div>
       )}
 
-      {/* 🔴 MODAL: VISTA PREVIA EXPORTACIÓN MAPA (CARTA HORIZONTAL) */}
-      {showExportModal && (
-        <div className="fixed inset-0 z-[120] bg-slate-900/95 flex flex-col overflow-hidden backdrop-blur-sm">
-          <div className="bg-slate-900 text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg border-b border-slate-700 z-10 shrink-0 gap-4">
-            <div className="flex items-center space-x-4 w-full sm:w-auto">
-              <button onClick={() => setShowExportModal(false)} className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X size={24}/></button>
-              <div>
-                <h3 className="font-bold text-sm">Vista Previa de Exportación</h3>
-                <p className="text-[10px] text-slate-400">Ajusta el zoom, bloquea y descarga.</p>
+      {/* 🔴 MODAL MAGAZINE COMPACTO: GUÍA EDITORIAL DEL CROQUIS */}
+      {showTutorial && (
+        <div className="fixed inset-0 z-[999999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in transition-colors text-left">
+          <div className="bg-[#fcfbf9] rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl border border-transparent animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
+            
+            {/* CABECERA EDITORIAL */}
+            <div className="px-6 py-4 border-b border-amber-200/50 flex justify-between items-center shrink-0">
+              <div className="flex items-center gap-3">
+                <span className="text-amber-500 font-black tracking-[0.2em] text-[10px] uppercase hidden sm:block">Baulia</span>
+                <span className="font-editorial text-slate-800 italic text-lg">Magazine</span>
+              </div>
+              <button onClick={handleCloseTutorial} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 flex items-center transition-colors">
+                Cerrar <span className="hidden sm:inline ml-1">Edición</span> <X size={14} className="ml-2" />
+              </button>
+            </div>
+
+            {/* CUERPO DEL MAGAZINE */}
+            <div className="p-5 sm:p-8 overflow-y-auto custom-scrollbar flex-1 relative">
+              {/* TÍTULO GIGANTE */}
+              <div className="mb-8">
+                <h1 className="font-black text-4xl sm:text-6xl text-slate-900 tracking-tighter leading-[0.85]">
+                  Visualización<br />
+                  <span className="font-editorial font-normal italic text-amber-500">espacial.</span>
+                </h1>
+                
+                <div className="mt-6 border-l-[3px] border-amber-500 pl-4 animate-in slide-in-from-left-4 duration-700">
+                  <p className="text-sm text-slate-600 font-light leading-relaxed">
+                    Bienvenido a tu creador de planos en 2D.<br/>
+                    Dibuja el salón, acomoda las mesas y crea un mapa exacto para tus proveedores en <strong className="font-bold text-slate-900 uppercase tracking-wider">{eventName || 'tu evento'}</strong>.
+                  </p>
+                </div>
+              </div>
+
+              {/* GRID DE DOS COLUMNAS */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
+                
+                {/* COLUMNA IZQUIERDA */}
+                <div className="space-y-8">
+                  <div>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">01. EL LIENZO</p>
+                    <div className="flex items-center gap-3 mb-2">
+                      <LayoutGrid size={20} className="text-indigo-500" />
+                      <h3 className="font-bold text-lg text-slate-900 tracking-tight">Construye el salón</h3>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed">
+                      Arrastra las formas desde la pestaña "Áreas y Exteriores" para definir los límites de tu salón. Usa los controles para ajustar los metros exactos de cada pared.
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">02. COLOCACIÓN FÍSICA</p>
+                    <div className="flex items-center gap-3 mb-2">
+                      <Move size={20} className="text-indigo-500" />
+                      <h3 className="font-bold text-lg text-slate-900 tracking-tight">Elementos y Pistas</h3>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed">
+                      Agrega barras de bebidas, escenarios o pistas de baile al centro de tu croquis. Todo se escala de manera matemática para evitar choques el día del evento.
+                    </p>
+                  </div>
+                </div>
+
+                {/* COLUMNA DERECHA */}
+                <div className="space-y-8">
+                  <div>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">03. EXPERIENCIA TÁCTIL</p>
+                    <div className="flex items-center gap-3 mb-2">
+                      <Hand size={20} className="text-indigo-500" />
+                      <h3 className="font-bold text-lg text-slate-900 tracking-tight">Navegación Fluida</h3>
+                    </div>
+                    <ul className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed space-y-2 list-disc pl-4 marker:text-indigo-500">
+                      <li><b>Moverse:</b> Usa el icono de la mano para deslizar el plano.</li>
+                      <li><b>Agrupar:</b> Selecciona varios elementos y toca el icono del "eslabón" para bloquearlos y moverlos juntos.</li>
+                      <li><b>Medir:</b> Usa la cinta métrica para revisar que haya espacio suficiente entre mesas.</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-3 border-b border-amber-200/50 pb-2">04. DESCARGA PROFESIONAL</p>
+                    <div className="flex items-center gap-3 mb-2">
+                      <FileDown size={20} className="text-indigo-500" />
+                      <h3 className="font-bold text-lg text-slate-900 tracking-tight">Exporta a PDF</h3>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed">
+                      Al terminar tu diseño, toca "Descargar PDF". Se abrirá una ventana de encuadre donde podrás ajustar qué parte del salón quieres incluir en el archivo final para entregarlo a la banquetera.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-            <button onClick={triggerPdfDownload} disabled={isPreparingPrint} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-sm font-bold flex items-center shadow-lg transition-all w-full sm:w-auto justify-center disabled:bg-slate-600">
-              {isPreparingPrint ? <RefreshCw size={18} className="mr-2 animate-spin"/> : <Download size={18} className="mr-2"/>} 
-              {isPreparingPrint ? 'Armando PDF...' : 'Guardar PDF'}
-            </button>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center py-8 relative gap-8">
-             <div className="bg-white shadow-[0_0_40px_rgba(0,0,0,0.5)] relative shrink-0 map-pdf-page flex flex-col" style={{ width: '279.4mm', height: '215.9mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden' }}>
-               
-               <header className="border-b-4 border-slate-900 pb-2 mb-4 flex justify-between items-end shrink-0">
-                  <div>
-                    <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Plano y Acomodo</h1>
-                    <p className="text-slate-500 text-sm font-medium">Proyecto: Boda Ana & Luis</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs font-bold text-slate-400">Escala Ajustada (Carta Horizontal)</p>
-                  </div>
-               </header>
-
-               <div 
-                 onPointerDown={handlePrintPointerDown} onPointerMove={handlePrintPointerMove} onPointerUp={handlePrintPointerUp} onPointerLeave={handlePrintPointerUp} onWheel={handlePrintWheel}
-                 className={`w-full flex-1 bg-[#eef2f6] border-2 border-slate-300 rounded-xl relative overflow-hidden flex shadow-inner ${isBlueprintPanActive ? 'cursor-grab active:cursor-grabbing touch-none ring-4 ring-indigo-300' : ''}`}
-               >
-                  {!isCapturingPdf && (
-                    <div className="absolute top-3 left-3 z-50 flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                      <button onClick={() => setIsBlueprintPanActive(!isBlueprintPanActive)} className={`px-3 py-2 transition-colors rounded-xl font-bold text-[10px] flex items-center shadow-lg border border-slate-700 ${isBlueprintPanActive ? 'bg-indigo-500 text-white' : 'bg-slate-900/90 text-white hover:bg-slate-800'}`}>
-                        <Hand size={14} className="mr-1.5"/> {isBlueprintPanActive ? 'Arrastre Activo (Bloquear para PDF)' : 'Activar Arrastre'}
-                      </button>
-                      <div className="bg-slate-900/90 backdrop-blur text-white rounded-xl shadow-lg flex items-center pointer-events-auto border border-slate-700">
-                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPrintScale(s => Math.max(0.1, s - 0.15)); }} className="p-3 hover:bg-white/20 transition-colors rounded-l-xl active:bg-white/30 touch-manipulation"><Minus size={16} /></button>
-                        <div className="w-px h-5 bg-white/20"></div>
-                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPrintScale(s => Math.min(5, s + 0.15)); }} className="p-3 hover:bg-white/20 transition-colors rounded-r-xl active:bg-white/30 touch-manipulation"><Plus size={16} /></button>
-                      </div>
-                    </div>
-                  )}
-
-                  <div style={{ transform: `translate(${printPan.x}px, ${printPan.y}px) scale(${printScale})`, transformOrigin: '0 0', width: '100%', height: '100%' }}>
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" style={{ overflow: 'visible' }}>
-                       <defs>
-                         <mask id="printRoomMask">
-                           <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                           {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                           {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                         </mask>
-                         <mask id="printOuterWallMask">
-                           <rect x="-5000" y="-5000" width="10000" height="10000" fill="white" />
-                           {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                           {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                         </mask>
-                         <mask id="printSubWallMask">
-                           <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                           {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                           {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                         </mask>
-                       </defs>
-                       <g>
-                         <rect x="-5000" y="-5000" width="10000" height="10000" fill="#ffffff" mask="url(#printRoomMask)" />
-                         <g mask="url(#printOuterWallMask)">
-                           {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
-                         </g>
-                         <g mask="url(#printSubWallMask)">
-                           {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
-                         </g>
-                       </g>
-                    </svg>
-
-                    {overlayAreas.map((el) => (
-                      <div key={el.id} className="absolute flex items-center justify-center select-none pointer-events-none z-0" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)`, ...getTextureStyle(el.texture), boxShadow: el.shapeType === 'pool' ? `inset 0 0 0 ${0.3 * scale}px #94a3b8` : 'none', borderRadius: el.shapeType === 'pool' ? '8px' : '0px' }}>
-                        <span className="font-extrabold text-center drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>{el.customLabel || el.name}</span>
-                      </div>
-                    ))}
-
-                    {roomAreas.filter(e => e.mode !== 'overlay').map((el) => (
-                      <div key={el.id} className="absolute z-20 pointer-events-none" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
-                        <div className="w-full h-full" style={{ clipPath: getShapeClipPath(el) }}>
-                          {el.customLabel && <span className="absolute inset-0 flex items-center justify-center font-extrabold text-slate-500 opacity-80 uppercase tracking-widest pointer-events-none" style={{ fontSize: `${Math.max(0.6, Math.min(el.width, el.height) * 0.2)}rem` }}>{el.customLabel}</span>}
-                        </div>
-                      </div>
-                    ))}
-
-                    {physicalStructures.map((el) => (
-                      <div key={el.id} className={`absolute flex items-center justify-center select-none shadow-md pointer-events-none z-20 ${el.shape} ${el.color} ${el.texture === 'none' ? '' : 'border-[3px]'}`} style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)`, ...getTextureStyle(el.texture) }}>
-                        <span className="font-extrabold text-center drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>{el.customLabel || el.name}</span>
-                      </div>
-                    ))}
-
-                    {placedTables.map((el) => {
-                      const occupancy = guests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
-                      return (
-                        <div key={el.id} className="absolute flex items-center justify-center select-none pointer-events-none z-40" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
-                          <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={guests.filter(g => g.tableId === el.id)} searchQuery={""} />
-                        </div>
-                      );
-                    })}
-                  </div>
-               </div>
-             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };
