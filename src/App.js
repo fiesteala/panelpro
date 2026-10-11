@@ -1202,6 +1202,16 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   const [expandedMobileRow, setExpandedMobileRow] = useState(null);
   const toggleMobileRow = (id) => setExpandedMobileRow(prev => prev === id ? null : id);
 
+  // 🔴 ESTADOS PARA EL TUTORIAL MAGAZINE
+  const [showTutorial, setShowTutorial] = useState(() => {
+    const hasSeen = localStorage.getItem(`baulia_tutorial_invitados_${ID_DEL_EVENTO}`);
+    return !hasSeen; // Si no lo ha visto, se abre por defecto
+  });
+  const handleCloseTutorial = () => {
+    localStorage.setItem(`baulia_tutorial_invitados_${ID_DEL_EVENTO}`, 'true');
+    setShowTutorial(false);
+  };
+
   const [qrEnabled, setQrEnabled] = useState(true);
   const [passCountEnabled, setPassCountEnabled] = useState(true);
   
@@ -1797,6 +1807,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
         
         <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
+          {/* 🔴 BOTÓN DE AYUDA (TUTORIAL) */}
+          <button onClick={() => setShowTutorial(true)} className="flex items-center justify-center w-8 h-8 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 rounded-full text-xs font-black hover:bg-indigo-50 dark:hover:bg-amber-500/10 hover:text-indigo-600 dark:hover:text-amber-500 hover:border-indigo-200 dark:hover:border-amber-500/20 shadow-sm transition-colors" title="Ver Guía de Uso">?</button>
           <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Exportar Lista</button>
           {isBodaType && (
             <div className="flex items-center bg-white dark:bg-[#0a0a0a] p-1 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
@@ -2277,6 +2289,106 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
         );
       })()}
+
+      {/* 🔴 MODAL MAGAZINE: GUÍA EDITORIAL DE INVITADOS */}
+      {showTutorial && (
+        <div className="fixed inset-0 z-[999999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-[#fcfbf9] dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-5xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-500 transition-colors flex flex-col max-h-[90vh]">
+            
+            {/* CABECERA EDITORIAL */}
+            <div className="px-8 py-5 border-b border-amber-200/50 dark:border-white/5 flex justify-between items-center shrink-0">
+              <div className="flex items-center gap-3">
+                <span className="text-amber-500 font-black tracking-[0.2em] text-[10px] uppercase">Baulia</span>
+                <span className="font-editorial text-slate-800 dark:text-white italic text-lg">Magazine</span>
+              </div>
+              <button onClick={handleCloseTutorial} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center transition-colors">
+                Cerrar Edición <X size={14} className="ml-2" />
+              </button>
+            </div>
+
+            {/* CUERPO DEL MAGAZINE */}
+            <div className="p-8 md:p-12 overflow-y-auto custom-scrollbar flex-1 relative">
+              {/* TÍTULO GIGANTE */}
+              <div className="mb-16">
+                <h1 className="font-black text-6xl md:text-8xl text-slate-900 dark:text-white tracking-tighter leading-[0.8]">
+                  Anatomía<br />
+                  <span className="font-editorial font-normal italic text-amber-500">del control.</span>
+                </h1>
+              </div>
+
+              {/* GRID DE DOS COLUMNAS ESTILO REVISTA */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
+                
+                {/* COLUMNA IZQUIERDA */}
+                <div className="space-y-12">
+                  
+                  {/* SECCIÓN 1 */}
+                  <div>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">01. EL MODO BODA (PREVENCIÓN)</p>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-6 rounded-full bg-indigo-500 relative flex shrink-0">
+                         <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5"></div>
+                      </div>
+                      <h3 className="font-bold text-xl text-slate-900 dark:text-white tracking-tight">Decide antes de empezar</h3>
+                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
+                      El interruptor "Modo Boda" en la esquina superior divide a tus invitados entre <b>Novia</b> y <b>Novio</b>. <br/><br/>
+                      <strong className="text-rose-500 font-medium">⚠️ Regla de Oro:</strong> Asegúrate de activarlo o desactivarlo <b>antes de agregar a tu primer invitado</b>. Si lo enciendes a la mitad del proceso, los invitados anteriores quedarán sin categoría, causando desórdenes en tus reportes.
+                    </p>
+                  </div>
+
+                  {/* SECCIÓN 2 */}
+                  <div>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">02. ESTADO DE ENVÍOS</p>
+                    <h3 className="font-bold text-xl text-slate-900 dark:text-white tracking-tight mb-3">La cromática de comunicación</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
+                      El icono de WhatsApp cambiará de color para indicarte visualmente a quién ya le enviaste su invitación:
+                    </p>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-3 bg-white dark:bg-[#111] p-3 rounded-xl border border-slate-200 dark:border-white/5">
+                        <div className="w-8 h-8 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0"><MessageCircle size={14} className="text-slate-400"/></div>
+                        <span className="text-xs text-slate-600 dark:text-slate-300 font-medium"><b>Gris:</b> Aún no se ha enviado el mensaje.</span>
+                      </div>
+                      <div className="flex items-center gap-3 bg-emerald-50/50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center shrink-0"><MessageCircle size={14} className="text-emerald-600 dark:text-emerald-400"/></div>
+                        <span className="text-xs text-emerald-800 dark:text-emerald-300 font-medium"><b>Verde:</b> Mensaje enviado correctamente.</span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* COLUMNA DERECHA */}
+                <div className="space-y-12">
+                  
+                  {/* SECCIÓN 3 */}
+                  <div>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">03. PASES Y CÓDIGOS QR</p>
+                    <h3 className="font-bold text-xl text-slate-900 dark:text-white tracking-tight mb-3">Emisión de accesos</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed mb-4">
+                      Baulia genera un código PIN y un QR único por cada asiento confirmado. <br/><br/>
+                      Tus invitados recibirán el suyo automáticamente a través de la invitación digital, pero si tienes adultos mayores o necesitas <b>imprimir el pase físico</b>, puedes tocar el icono <QrCode size={14} className="inline text-indigo-500 mx-1"/> para generar una imagen elegante, personalizable con tu monograma y fondo.
+                    </p>
+                  </div>
+
+                  {/* SECCIÓN 4 */}
+                  <div>
+                    <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest mb-4 border-b border-amber-200/50 pb-2">04. MESAS Y ESTATUS</p>
+                    <h3 className="font-bold text-xl text-slate-900 dark:text-white tracking-tight mb-3">Flujo Operativo Correcto</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
+                      La columna <span className="px-2 py-0.5 bg-slate-100 dark:bg-white/10 rounded font-black text-[9px] tracking-widest uppercase">Estatus</span> cambia automáticamente cuando el invitado entra a su invitación web y da clic en "Confirmar".<br/><br/>
+                      Aunque puedes asignar o editar la mesa de un invitado pulsando el botón <Edit2 size={12} className="inline text-slate-400 mx-1"/> aquí, te recomendamos encarecidamente hacerlo desde la pestaña <b>Gestión de Mesas</b> utilizando el simulador visual "Drag & Drop" para prevenir saturar mesas.
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );
