@@ -2390,7 +2390,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       case 'redonda': return config.capacidadRedonda;
       case 'cuadrada': return config.ladosCuadrada.top + config.ladosCuadrada.right + config.ladosCuadrada.bottom + config.ladosCuadrada.left;
       case 'tablon': return config.ladosTablon.top + config.ladosTablon.bottom + config.ladosTablon.left + config.ladosTablon.right;
-      case 'personalizada': return config.capacidadPersonalizada;
       case 'ovalada': return config.ladosOvalada.top + config.ladosOvalada.bottom + config.ladosOvalada.left + config.ladosOvalada.right;
       case 'serpentina': return config.ladosSerpentina.ext + config.ladosSerpentina.int + config.ladosSerpentina.izq + config.ladosSerpentina.der;
       case 'forma_u': return config.uSillas.extIzq + config.uSillas.intIzq + config.uSillas.extCentro + config.uSillas.intCentro + config.uSillas.extDer + config.uSillas.intDer + config.uSillas.cabeceras;
@@ -2908,7 +2907,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
             </div>
           </div>
         );
-      case 'personalizada':
       case 'libre':
         const largoVal = configActual.libreMedidas?.largo || 2.0;
         const anchoVal = configActual.libreMedidas?.ancho || 1.0;
@@ -3066,7 +3064,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                       <div className="flex-1 min-w-0 pr-24 lg:pr-20">
                         <h4 className="font-bold text-slate-800 dark:text-white text-base lg:text-lg leading-tight truncate">{table.name}</h4>
                         <p className="text-[8px] lg:text-[9px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-widest mt-0.5">
-                           {table.tipo === 'personalizada' ? table.configDetalle?.formaPersonalizada || 'Libre' : table.tipo}
+                           {table.tipo === 'libre' ? 'Diseño Libre' : table.tipo}
                         </p>
                       </div>
                     </div>
@@ -3242,7 +3240,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                   { id: 'tablon', lbl: 'Tablón', icon: <RectangleHorizontal size={24} className="mb-1.5"/>, action: () => setCurrentConfig({...configActual, tipo: 'tablon', ladosTablon: {top:5, bottom:5, left:1, right:1}}) },
                   { id: 'ovalada', lbl: 'Ovalada', icon: <div className={`w-8 h-4 rounded-[50%] border-2 mb-1.5 ${configActual.tipo === 'ovalada' ? 'border-indigo-600 dark:border-amber-400' : 'border-slate-400 dark:border-slate-500'}`}></div>, action: () => setCurrentConfig({...configActual, tipo: 'ovalada', ladosOvalada: {top:4, bottom:4, left:3, right:3}}) },
                   { id: 'serpentina', lbl: 'Curva', icon: <Spline size={24} className="mb-1.5"/>, action: () => setCurrentConfig({...configActual, tipo: 'serpentina', modeloSerpentina: 'mod4', ladosSerpentina: {ext:5, int:2, izq:1, der:1}}) },
-                  { id: 'personalizada', lbl: 'Libre', icon: <Settings2 size={24} className="mb-1.5"/>, action: () => setCurrentConfig({...configActual, tipo: 'personalizada'}) },
+                  { id: 'libre', lbl: 'Libre', icon: <Settings2 size={24} className="mb-1.5"/>, action: () => setCurrentConfig({...configActual, tipo: 'libre'}) },
                 ].map(b => (
                   <button key={b.id} onClick={(e) => { e.preventDefault(); b.action(); }} className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${configActual.tipo === b.id ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-400 shadow-md' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] text-slate-500 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-amber-500/50'}`}>
                     {b.icon}
@@ -3274,7 +3272,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                       <li key={item.id} className="flex items-center justify-between text-xs bg-slate-700/50 dark:bg-black/50 border border-slate-600 dark:border-white/5 p-3 rounded-xl transition-colors">
                         <div className="flex items-center font-medium">
                           <span className="font-black text-indigo-300 dark:text-amber-400 mr-2.5 text-sm">{item.cantidad}x</span> 
-                          <span className="uppercase tracking-wider">{item.config.tipo === 'personalizada' ? item.config.formaPersonalizada : item.config.tipo}</span> 
+                          <span className="uppercase tracking-wider">{item.config.tipo === 'libre' ? 'Diseño Libre' : item.config.tipo}</span> 
                           <span className="text-slate-400 dark:text-slate-500 ml-2 font-bold">({item.config.capacidadCalculada} sillas)</span>
                         </div>
                         <button onClick={() => eliminarDeVariedad(item.id)} className="text-slate-400 hover:text-rose-400 transition-colors p-1"><Trash2 size={16}/></button>
@@ -3416,7 +3414,7 @@ const TableWithChairs = ({ tableData, occupancy, scale, tableGuests = [], search
     if (config?.modeloSerpentina === 'mod3') { arcLength = 2.10; widthT_meters = 0.75; }
     if (config?.modeloSerpentina === 'mod4') { arcLength = 2.44; widthT_meters = 0.90; }
     wMeters = arcLength / (Math.PI / 2); hMeters = wMeters; 
-  } else if (tipo === 'personalizada' || tipo === 'libre') { 
+  } else if (tipo === 'libre') { 
     wMeters = config?.libreMedidas?.largo || 2.0; hMeters = config?.libreMedidas?.ancho || 1.0; 
   }
 

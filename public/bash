@@ -1,5 +1,5 @@
 git add .
-git commit -m "MesasView autoacomodo, switch, Separador y fusion inteligente, Best Fit Decreasing, estados"
+git commit -m "MesasView mesa libre corregida"
 git push origin main
 
 .
