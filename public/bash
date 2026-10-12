@@ -1,5 +1,5 @@
 git add .
-git commit -m "MesasView mesa libre corregida y mapas view dibujo libre"
+git commit -m "mapaview mesas libre diseño correcto"
 git push origin main
 
 .

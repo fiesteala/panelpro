@@ -3303,310 +3303,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
   );
 };
 
-const TABLE_TEMPLATES = [
-  { type: 'round_table', name: 'Mesa Redonda', width: 1.5, height: 1.5, capacity: 10, desc: 'Ø 1.5m' },
-  { type: 'square_table', name: 'Mesa Cuadrada', width: 1.5, height: 1.5, capacity: 12, desc: '1.5x1.5m' },
-  { type: 'rect_table', name: 'Tablón', width: 2.44, height: 0.7, capacity: 10, desc: '2.4x0.7m' },
-  { type: 'ovalada', name: 'Mesa Ovalada', width: 3.05, height: 1.22, capacity: 12, desc: '3.0x1.2m' },
-  { type: 'serpentina', name: 'Serpentina', width: 1.8, height: 1.8, capacity: 10, desc: 'Curva' }
-];
-
-const STRUCTURAL_CATALOG = [
-  { type: 'dance_floor', name: 'Pista Baile', width: 5, height: 5, shape: 'rounded-none', color: 'border-fuchsia-400 text-fuchsia-900', texture: 'dance', desc: '5x5m' },
-  { type: 'stage', name: 'Escenario', width: 6, height: 3, shape: 'rounded-sm', color: 'border-amber-900 text-amber-50', texture: 'wood', desc: '6x3m' },
-  { type: 'bar', name: 'Barra', width: 3, height: 0.8, shape: 'rounded-sm', color: 'border-zinc-800 text-white', texture: 'marble', desc: '3x0.8m' },
-  { type: 'garden', name: 'Jardín', width: 6, height: 4, shape: 'rounded-xl', color: 'border-green-600 text-green-900', texture: 'grass', desc: 'Área Verde' },
-  { type: 'pool', name: 'Alberca', width: 6, height: 4, shape: 'rounded-lg', color: 'border-cyan-500 text-cyan-900', texture: 'water', desc: 'Piscina' }
-];
-
-const ROOM_AREAS_CATALOG = [
-  { type: 'room_area', shapeType: 'rect', name: 'Área Cuadrada', width: 8, height: 8, isRoomArea: true, mode: 'add' },
-  { type: 'room_area', shapeType: 'ellipse', name: 'Área Circular', width: 8, height: 8, isRoomArea: true, mode: 'add' },
-  { type: 'room_area', shapeType: 'triangle', name: 'Área Triangular', width: 8, height: 8, isRoomArea: true, triangleCorner: 0, mode: 'add' }, 
-  { type: 'room_area', shapeType: 'polygon', name: 'Polígono Libre', width: 8, height: 8, isRoomArea: true, sides: 5, mode: 'add' },
-  // NUEVOS EXTERIORES COMO ÁREAS (Modo Overlay)
-  { type: 'room_area', shapeType: 'rect', name: 'Jardín', width: 10, height: 10, isRoomArea: true, mode: 'overlay', texture: 'grass' },
-  { type: 'room_area', shapeType: 'rect', name: 'Terraza', width: 10, height: 6, isRoomArea: true, mode: 'overlay', texture: 'wood' },
-  { type: 'room_area', shapeType: 'pool', name: 'Alberca', width: 8, height: 4, isRoomArea: true, mode: 'overlay', texture: 'water' }
-];
-
-const getShapeClipPath = (el) => {
-  if (el.shapeType === 'ellipse') return 'ellipse(50% 50% at 50% 50%)';
-  if (el.shapeType === 'triangle') {
-    const c = el.triangleCorner || 0;
-    if (c === 0) return 'polygon(0% 0%, 0% 100%, 100% 100%)'; 
-    if (c === 1) return 'polygon(0% 100%, 100% 100%, 100% 0%)'; 
-    if (c === 2) return 'polygon(0% 0%, 100% 0%, 100% 100%)'; 
-    if (c === 3) return 'polygon(0% 0%, 100% 0%, 0% 100%)'; 
-  }
-  if (el.shapeType === 'polygon') {
-    const sides = el.sides || 5;
-    let pts = [];
-    for(let i=0; i<sides; i++){
-      const angle = (i * 2 * Math.PI / sides) - Math.PI / 2;
-      pts.push(`${(50 + 50 * Math.cos(angle)).toFixed(1)}% ${(50 + 50 * Math.sin(angle)).toFixed(1)}%`);
-    }
-    return `polygon(${pts.join(', ')})`;
-  }
-  return 'none';
-};
-
-const renderSVGShape = (el, scale, minX, minY, props) => {
-  // ---> DIBUJO EXACTO DE LA FORMA DEL LÁPIZ EN SVG <---
-  if (el.shapeType === 'custom_polygon' && el.absPoints) {
-      const pts = el.absPoints.map(p => `${(p.x - minX) * scale},${(p.y - minY) * scale}`).join(' ');
-      // Para trazo libre no aplicamos rotación externa, la rotación ya está en los puntos absolutos
-      return <polygon key={el.id} points={pts} {...props} />;
-  }
-
-  // Cálculo para formas regulares predefinidas (requieren rotación central)
-  const w = el.width * scale;
-  const h = el.height * scale;
-  const x = (el.x - minX) * scale;
-  const y = (el.y - minY) * scale;
-  const tRegular = `rotate(${el.rotation || 0} ${x + w/2} ${y + h/2})`;
-
-  if (el.shapeType === 'ellipse') {
-    return <ellipse key={el.id} cx={x + w/2} cy={y + h/2} rx={w/2} ry={h/2} transform={tRegular} {...props} />;
-  }
-  if (el.shapeType === 'triangle') {
-    let points = '';
-    const corner = el.triangleCorner || 0; 
-    if (corner === 0) points = `${x},${y} ${x},${y + h} ${x + w},${y + h}`; 
-    else if (corner === 1) points = `${x},${y + h} ${x + w},${y + h} ${x + w},${y}`; 
-    else if (corner === 2) points = `${x},${y} ${x + w},${y} ${x + w},${y + h}`; 
-    else if (corner === 3) points = `${x},${y} ${x + w},${y} ${x},${y + h}`; 
-    return <polygon key={el.id} points={points} transform={tRegular} {...props} />;
-  }
-  // Polígonos regulares SVG
-  if (el.sides && el.sides > 2) {
-    const sides = el.sides;
-    const cx = x + w/2; const cy = y + h/2;
-    const rX = w / 2; const rY = h / 2;
-    let points = [];
-    for (let i = 0; i < sides; i++) {
-      const angle = (i * 2 * Math.PI / sides) - Math.PI / 2;
-      points.push(`${cx + rX * Math.cos(angle)},${cy + rY * Math.sin(angle)}`);
-    }
-    return <polygon key={el.id} points={points.join(' ')} transform={tRegular} {...props} />;
-  }
-  
-  // Fallback final: Rectángulo
-  return <rect key={el.id} x={x} y={y} width={w} height={h} transform={tRegular} {...props} />;
-};
-
-const TableWithChairs = ({ tableData, occupancy, scale, tableGuests = [], searchQuery = '' }) => {
-  const cap = tableData.capacity;
-  const chairSize = 0.45 * scale; 
-  const tipo = tableData.tipo || tableData.type;
-  const config = tableData.configDetalle;
-
-  let wMeters = tableData.width || 1.5;
-  let hMeters = tableData.height || 1.5;
-  let widthT_meters = 0.8; 
-
-  if (tipo === 'rect_table' || tipo === 'tablon') { wMeters = 2.44; hMeters = 0.7; } 
-  else if (tipo === 'ovalada') { wMeters = 3.05; hMeters = 1.22; } 
-  else if (tipo === 'serpentina') { 
-    let arcLength = 2.44;
-    if (config?.modeloSerpentina === 'mod1') { arcLength = 1.58; widthT_meters = 0.75; }
-    if (config?.modeloSerpentina === 'mod2') { arcLength = 2.00; widthT_meters = 0.75; }
-    if (config?.modeloSerpentina === 'mod3') { arcLength = 2.10; widthT_meters = 0.75; }
-    if (config?.modeloSerpentina === 'mod4') { arcLength = 2.44; widthT_meters = 0.90; }
-    wMeters = arcLength / (Math.PI / 2); hMeters = wMeters; 
-  } else if (tipo === 'personalizada' || tipo === 'libre') { 
-    wMeters = config?.libreMedidas?.largo || 2.0; hMeters = config?.libreMedidas?.ancho || 1.0; 
-  }
-
-  const tableW = wMeters * scale;
-  const tableH = hMeters * scale;
-  const padding = 0.08 * scale;
-  const chairs = [];
-
-  const seatAssignments = [];
-  if (tableGuests && tableGuests.length > 0) {
-    tableGuests.forEach(g => {
-      for (let p = 0; p < (g.passes || 1); p++) {
-        seatAssignments.push({ guest: g, label: g.name + ((g.passes || 1) > 1 ? ` (Pase ${p + 1})` : '') });
-      }
-    });
-  }
-
-  for (let i = 0; i < cap; i++) {
-    const isOccupied = i < occupancy;
-    let cx = 0, cy = 0, angleDeg = 0;
-
-    if (tipo === 'round_table' || tipo === 'redonda') {
-      angleDeg = i * (360 / cap);
-      const aRad = angleDeg * (Math.PI / 180);
-      const rX = (tableW / 2) + (chairSize / 2) + padding;
-      const rY = (tableH / 2) + (chairSize / 2) + padding;
-      cx = (tableW / 2) + rX * Math.cos(aRad) - (chairSize / 2);
-      cy = (tableH / 2) + rY * Math.sin(aRad) - (chairSize / 2);
-    } else if (tipo === 'ovalada') {
-      const topCap = config ? config.ladosOvalada.top : 4;
-      const botCap = config ? config.ladosOvalada.bottom : 4;
-      const leftCap = config ? config.ladosOvalada.left : Math.floor((cap - topCap - botCap) / 2);
-      const radius = tableH / 2; const straightW = tableW - tableH; 
-      
-      if (i < topCap) {
-        if (topCap === 1) cx = tableW / 2 - chairSize/2;
-        else cx = radius + ((straightW / (topCap - 1)) * i) - chairSize/2;
-        cy = -(chairSize + padding); angleDeg = 270;
-      } else if (i < topCap + botCap) {
-        const idx = i - topCap;
-        if (botCap === 1) cx = tableW / 2 - chairSize/2;
-        else cx = radius + ((straightW / (botCap - 1)) * idx) - chairSize/2;
-        cy = tableH + padding; angleDeg = 90;
-      } else if (i < topCap + botCap + leftCap) {
-        const idx = i - (topCap + botCap);
-        const aRad = (90 + (180 / (leftCap + 1)) * (idx + 1)) * (Math.PI/180);
-        const R = radius + chairSize/2 + padding;
-        cx = radius + R * Math.cos(aRad) - chairSize/2; cy = radius - R * Math.sin(aRad) - chairSize/2;
-        angleDeg = 360 - (90 + (180 / (leftCap + 1)) * (idx + 1)); 
-      } else {
-        const rightCap = cap - (topCap + botCap + leftCap);
-        const idx = i - (topCap + botCap + leftCap);
-        const aRad = (-90 + (180 / (rightCap + 1)) * (idx + 1)) * (Math.PI/180);
-        const R = radius + chairSize/2 + padding;
-        cx = (tableW - radius) + R * Math.cos(aRad) - chairSize/2; cy = radius - R * Math.sin(aRad) - chairSize/2;
-        angleDeg = 360 - (-90 + (180 / (rightCap + 1)) * (idx + 1)); 
-      }
-    } else if (tipo === 'serpentina') {
-      const extCap = config ? config.ladosSerpentina.ext : Math.ceil(cap/2);
-      const intCap = config ? config.ladosSerpentina.int : Math.floor(cap/2) - 2;
-      const izqCap = config ? config.ladosSerpentina.izq : 1;
-      const widthT = widthT_meters * scale;
-      
-      if (i < extCap) {
-         const aRad = ((90 / (extCap + 1)) * (i + 1)) * (Math.PI/180);
-         const R = tableW + chairSize/2 + padding;
-         cx = R * Math.cos(aRad) - chairSize/2; cy = tableW - R * Math.sin(aRad) - chairSize/2;
-         angleDeg = 360 - ((90 / (extCap + 1)) * (i + 1)); 
-      } else if (i < extCap + intCap) {
-         const idx = i - extCap;
-         let aDeg = 45; 
-         if (intCap > 1) aDeg = 15 + (idx * ((90 - 30) / (intCap - 1)));
-         const aRad = aDeg * (Math.PI/180);
-         const R = tableW - widthT - chairSize/2 - padding;
-         cx = R * Math.cos(aRad) - chairSize/2; cy = tableW - R * Math.sin(aRad) - chairSize/2;
-         angleDeg = 180 - aDeg; 
-      } else if (i < extCap + intCap + izqCap) {
-         cx = -(chairSize + padding); cy = (widthT / 2) - chairSize/2; angleDeg = 180; 
-      } else {
-         cx = tableW - (widthT / 2) - chairSize/2; cy = tableW + padding; angleDeg = 90; 
-      }
-    } else if (tipo === 'square_table' || tipo === 'cuadrada') {
-      const topCap = config?.ladosCuadrada?.top ?? Math.ceil(cap / 4);
-      const botCap = config?.ladosCuadrada?.bottom ?? Math.ceil(cap / 4);
-      const leftCap = config?.ladosCuadrada?.left ?? Math.ceil(cap / 4);
-      
-      if (i < topCap) {
-        cx = ((tableW / (topCap || 1)) * (i + 0.5)) - chairSize/2; cy = -(chairSize + padding); angleDeg = 270;
-      } else if (i < topCap + botCap) {
-        cx = ((tableW / (botCap || 1)) * ((i - topCap) + 0.5)) - chairSize/2; cy = tableH + padding; angleDeg = 90;
-      } else if (i < topCap + botCap + leftCap) {
-        cx = -(chairSize + padding); cy = ((tableH / (leftCap || 1)) * ((i - (topCap + botCap)) + 0.5)) - chairSize/2; angleDeg = 180;
-      } else {
-        const rightCap = cap - topCap - botCap - leftCap;
-        cx = tableW + padding; cy = ((tableH / (rightCap || 1)) * ((i - (topCap + botCap + leftCap)) + 0.5)) - chairSize/2; angleDeg = 0;
-      }
-    } else {
-      // Tablón o Libre
-      const topCap = config?.ladosTablon?.top ?? config?.ladosLibre?.top ?? Math.floor((cap - 2) / 2);
-      const botCap = config?.ladosTablon?.bottom ?? config?.ladosLibre?.bottom ?? Math.ceil((cap - 2) / 2);
-      const leftCap = config?.ladosTablon?.left ?? config?.ladosLibre?.left ?? 1;
-      
-      if (i < topCap) {
-        cx = ((tableW / (topCap || 1)) * (i + 0.5)) - chairSize/2; cy = -(chairSize + padding); angleDeg = 270;
-      } else if (i < topCap + botCap) {
-        cx = ((tableW / (botCap || 1)) * ((i - topCap) + 0.5)) - chairSize/2; cy = tableH + padding; angleDeg = 90;
-      } else if (i < topCap + botCap + leftCap) {
-        cx = -(chairSize + padding); cy = ((tableH / (leftCap || 1)) * ((i - (topCap + botCap)) + 0.5)) - chairSize/2; angleDeg = 180;
-      } else {
-        const rightCap = cap - topCap - botCap - leftCap;
-        cx = tableW + padding; cy = ((tableH / (rightCap || 1)) * ((i - (topCap + botCap + leftCap)) + 0.5)) - chairSize/2; angleDeg = 0;
-      }
-    }
-
-    const guestObj = seatAssignments[i];
-    const guestName = guestObj ? guestObj.label : null;
-    const chairGuestId = guestObj ? guestObj.guest.id : null;
-    const totalRotation = angleDeg + (tableData.rotation || 0); 
-    const isMatched = searchQuery && guestName && guestName.toLowerCase().includes(searchQuery.toLowerCase());
-    const isTableMatched = searchQuery && tableData.name && tableData.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const activeSearchClasses = (isMatched || (isTableMatched && isOccupied)) ? 'ring-4 ring-amber-400 ring-offset-2 bg-amber-300 border-amber-600 scale-110 z-50' : (isOccupied ? 'bg-emerald-400 border-emerald-600' : 'bg-slate-100 border-slate-300');
-
-    chairs.push(
-      <div key={i} 
-           draggable={!!chairGuestId}
-           onDragStart={(e) => {
-             if (chairGuestId) {
-               e.dataTransfer.setData('guestId', chairGuestId);
-               e.stopPropagation();
-             }
-           }}
-           className={`group absolute flex items-center justify-center rounded-full border-[1.5px] shadow-sm transition-all duration-300 hover:z-50 ${chairGuestId ? 'cursor-grab pointer-events-auto' : 'pointer-events-none'} ${activeSearchClasses} z-0`} 
-           style={{ left: cx, top: cy, width: chairSize, height: chairSize, transform: `rotate(${angleDeg}deg)` }}>
-         <div className={`absolute w-[45%] h-[115%] right-[-12%] rounded-full shadow-sm transition-colors duration-300 ${isMatched || (isTableMatched && isOccupied) ? 'bg-amber-600' : (isOccupied ? 'bg-emerald-600' : 'bg-slate-300')}`}></div>
-         {isOccupied && guestName && (
-           <div className="absolute hidden group-hover:flex items-center justify-center bg-slate-800/95 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-2xl whitespace-nowrap z-[100] -top-8 pointer-events-none border border-slate-600 animate-in fade-in zoom-in-95 duration-200" style={{ transform: `rotate(-${totalRotation}deg)` }}>
-             {guestName}
-           </div>
-         )}
-      </div>
-    );
-  }
-
-  const matchedNames = [];
-  if (searchQuery) {
-    seatAssignments.forEach(obj => {
-      if (obj.label && obj.label.toLowerCase().includes(searchQuery.toLowerCase()) && !matchedNames.includes(obj.label)) matchedNames.push(obj.label);
-    });
-  }
-
-  let innerContent = null;
-  let shapeClass = 'rounded-sm shadow-lg';
-  let borderClass = 'border-[3px]';
-  let baseColor = 'bg-white border-slate-400 text-slate-800'; 
-
-  if (tipo === 'round_table' || tipo === 'redonda' || tipo === 'ovalada') { shapeClass = 'rounded-[999px] shadow-lg'; } 
-  else if (tipo === 'serpentina') {
-    shapeClass = 'rounded-none'; borderClass = 'border-0'; baseColor = 'bg-transparent text-slate-800'; 
-    const widthT = widthT_meters * scale;
-    const innerR = tableW - widthT;
-    innerContent = (
-      <svg className="absolute inset-0 overflow-visible drop-shadow-md" style={{ zIndex: -1, width: tableW, height: tableW }}>
-         <path d={`M 0 0 A ${tableW} ${tableW} 0 0 1 ${tableW} ${tableW} L ${tableW - widthT} ${tableW} A ${innerR} ${innerR} 0 0 0 0 ${widthT} Z`} fill="#ffffff" stroke="#94a3b8" strokeWidth="3" />
-      </svg>
-    );
-  }
-
-  return (
-    <div style={{ width: tableW, height: tableH }} className="relative pointer-events-none">
-      {chairs}
-      <div className={`absolute inset-0 flex flex-col items-center justify-center z-10 ${shapeClass} ${borderClass} ${baseColor}`}>
-        {innerContent}
-        <div className="z-20 flex items-center justify-center pointer-events-none" style={{ transform: `rotate(-${tableData.rotation || 0}deg)` }}>
-          <span className="font-black text-slate-400/70 select-none drop-shadow-sm" style={{ fontSize: `${Math.max(0.8, tableW * 0.02)}rem` }}>
-            {tableData.name ? tableData.name.replace(/Mesa\s+/i, '').trim() : ''}
-          </span>
-        </div>
-        {matchedNames.length > 0 && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[300]" style={{ transform: `rotate(-${tableData.rotation || 0}deg)` }}>
-            <div className="absolute -top-12 flex flex-col items-center animate-in slide-in-from-bottom-2 duration-300">
-              <div className="bg-slate-900/95 backdrop-blur-md text-amber-400 text-xs font-bold px-4 py-2 rounded-xl shadow-2xl border border-amber-500/40 text-center whitespace-nowrap flex flex-col gap-0.5">
-                {matchedNames.map((n, idx) => <span key={idx}>{n}</span>)}
-              </div>
-              <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-slate-900/95 mt-[-1px]"></div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
 const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch = '', elements = [], setElements }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [dragging, setDragging] = useState(null); 
@@ -3622,7 +3318,10 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   const [history, setHistory] = useState([]);
   const [roomGrouped, setRoomGrouped] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
+  
   const [guestSplitPrompt, setGuestSplitPrompt] = useState(null); 
+  const [modoSeparador, setModoSeparador] = useState(false);
+  const [separarCantidad, setSepararCantidad] = useState(1);
 
   // 🔴 ESTADOS PARA EL MOTOR PDF DEL MAPA
   const [showExportModal, setShowExportModal] = useState(false);
@@ -3700,7 +3399,6 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     }
   }, [vp, initialFitDone]);
 
-  // 🔴 AUTO-CENTRAR EL BLUEPRINT DEL CROQUIS AL ABRIRLO
   useEffect(() => {
     if (showExportModal) {
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -3717,7 +3415,6 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       const cx = (minX * scale) + designW / 2; 
       const cy = (minY * scale) + designH / 2;
       
-      // Contenedor A4 Landscape aprox
       const targetW = 900; 
       const targetH = 600; 
       const initialZoom = Math.min(targetW / (designW || 1), targetH / (designH || 1)) * 0.85; 
@@ -3753,26 +3450,47 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       const guest = guests.find(g => g.id === guestId);
       if (!guest) return;
 
-      if (targetTable) {
-        if (guest.tableId === targetTable.id) return;
-        const usedChairs = guests.filter(g => g.tableId === targetTable.id).reduce((sum, g) => sum + g.passes, 0);
-        if (guest.passes > 1) {
-           setGuestSplitPrompt({ guest, targetTableId: targetTable.id, table: targetTable, usedChairs });
-           return;
-        }
-        if (usedChairs + guest.passes > targetTable.capacity) {
-           return;
-        }
-        setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guestId), { ...guest, tableId: targetTable.id });
-      } else {
-        if (guest.tableId) {
-           if (guest.passes > 1) {
-               setGuestSplitPrompt({ guest, targetTableId: null, table: null, usedChairs: 0 });
-           } else {
-               setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guestId), { ...guest, tableId: null });
-           }
-        }
+      const isToTable = targetTable !== undefined;
+      const targetTableId = isToTable ? targetTable.id : null;
+
+      if (guest.tableId === targetTableId) return;
+
+      let usedChairs = 0;
+      if (isToTable) {
+          usedChairs = guests.filter(g => g.tableId === targetTableId).reduce((sum, g) => sum + g.passes, 0);
       }
+
+      const availableChairs = isToTable ? targetTable.capacity - usedChairs : Infinity;
+      const isForcedSplit = isToTable && guest.passes > availableChairs;
+
+      if (isToTable && availableChairs <= 0) return;
+
+      const familyRootId = guest.parentId || guest.id;
+      const siblingFragment = guests.find(g => 
+          g.id !== guest.id && 
+          (g.parentId === familyRootId || g.id === familyRootId) && 
+          (isToTable ? g.tableId === targetTableId : !g.tableId)
+      );
+
+      if (guest.passes > 1 && (isForcedSplit || modoSeparador)) {
+           const maxPlaceable = Math.min(guest.passes - 1, availableChairs);
+           setSepararCantidad(maxPlaceable);
+           setGuestSplitPrompt({ 
+              guest, targetTableId, table: targetTable, usedChairs, availableChairs, 
+              minPlaceable: 1, maxPlaceable, isForced: isForcedSplit, siblingFragment 
+           });
+           return;
+      }
+
+      if (siblingFragment) {
+          const mergedPasses = siblingFragment.passes + guest.passes;
+          const mergedSubGuests = [...(siblingFragment.subGuests || []), ...(guest.subGuests || [])];
+          setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { ...siblingFragment, passes: mergedPasses, subGuests: mergedSubGuests });
+          deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id));
+          return;
+      }
+
+      setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guestId), { ...guest, tableId: targetTableId });
       return;
     }
 
@@ -4008,6 +3726,38 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     if(el) await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", String(id)), { ...el, ...newData });
   };
 
+  const handleTableConfig = async (id, table, category, field, value, max) => {
+    let num = category === 'libreMedidas' ? parseFloat(value) : parseInt(value);
+    if (isNaN(num) || num < 0) num = 0;
+    if (max !== undefined && max !== null && num > max) num = max;
+    
+    let newConfig = { ...table.configDetalle };
+    if (field) {
+      newConfig[category] = { ...newConfig[category], [field]: num };
+    } else {
+      newConfig[category] = num;
+    }
+    
+    let newCap = table.capacity;
+    if (category === 'capacidadRedonda') newCap = num;
+    else if (category === 'ladosTablon') newCap = newConfig.ladosTablon.top + newConfig.ladosTablon.bottom + newConfig.ladosTablon.left + newConfig.ladosTablon.right;
+    else if (category === 'ladosCuadrada') newCap = newConfig.ladosCuadrada.top + newConfig.ladosCuadrada.bottom + newConfig.ladosCuadrada.left + newConfig.ladosCuadrada.right;
+    else if (category === 'ladosOvalada') newCap = newConfig.ladosOvalada.top + newConfig.ladosOvalada.bottom + newConfig.ladosOvalada.left + newConfig.ladosOvalada.right;
+    else if (category === 'ladosSerpentina') newCap = newConfig.ladosSerpentina.ext + newConfig.ladosSerpentina.int + newConfig.ladosSerpentina.izq + newConfig.ladosSerpentina.der;
+    else if (category === 'ladosLibre') newCap = newConfig.ladosLibre.top + newConfig.ladosLibre.bottom + newConfig.ladosLibre.left + newConfig.ladosLibre.right;
+    
+    let newW = table.width;
+    let newH = table.height;
+    if (category === 'libreMedidas') {
+      if (field === 'largo') newW = num;
+      if (field === 'ancho') newH = num;
+    }
+
+    saveHistory(elements, tables);
+    const updatedTable = { ...table, configDetalle: newConfig, capacity: newCap, width: newW, height: newH };
+    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", String(id)), updatedTable);
+  };
+
   const deleteSelected = async () => {
     saveHistory(elements, tables);
     const promesas = [];
@@ -4049,25 +3799,49 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   };
 
   const handleSplitChoice = (mode) => {
-      const { guest, targetTableId, table, usedChairs } = guestSplitPrompt;
+      if (!guestSplitPrompt) return;
+      const promptData = { ...guestSplitPrompt };
+      setGuestSplitPrompt(null);
+      const { guest, targetTableId, table, usedChairs, siblingFragment } = promptData;
+
       if (mode === 'all') {
-          if (table && usedChairs + guest.passes > table.capacity) {
-              // Notificación silenciada
+          if (siblingFragment) {
+              const mergedPasses = siblingFragment.passes + guest.passes;
+              const mergedSubGuests = [...(siblingFragment.subGuests || []), ...(guest.subGuests || [])];
+              setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { ...siblingFragment, passes: mergedPasses, subGuests: mergedSubGuests });
+              deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id));
           } else {
               setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, tableId: targetTableId });
           }
-      } else if (mode === 'one') {
-          if (table && usedChairs + 1 > table.capacity) {
-              // Notificación silenciada
+      } else if (mode === 'split') {
+          const qtyToMove = separarCantidad;
+          const qtyRemaining = guest.passes - qtyToMove;
+
+          const subGuestsOriginal = guest.subGuests || [];
+          const subGuestsToMove = subGuestsOriginal.slice(0, qtyToMove);
+          const subGuestsToKeep = subGuestsOriginal.slice(qtyToMove);
+
+          if (siblingFragment) {
+              const mergedPasses = siblingFragment.passes + qtyToMove;
+              const mergedSubGuests = [...(siblingFragment.subGuests || []), ...subGuestsToMove];
+              setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { ...siblingFragment, passes: mergedPasses, subGuests: mergedSubGuests });
+              setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, passes: qtyRemaining, subGuests: subGuestsToKeep });
           } else {
-              const newGuestId = Date.now().toString() + Math.random().toString(36).substring(2,5);
-              const newGuest = { ...guest, id: newGuestId, name: `${guest.name} (Separado)`, passes: 1, childrenPasses: 0, tableId: targetTableId };
-              const updatedGuest = { ...guest, passes: guest.passes - 1 };
-              setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), updatedGuest);
+              const newGuestId = `sep_${Date.now()}`;
+              const newGuest = { 
+                  ...guest, 
+                  id: newGuestId, 
+                  parentId: guest.parentId || guest.id,
+                  name: guest.name.replace(' (Separado)', ''), 
+                  passes: qtyToMove, 
+                  childrenPasses: 0, 
+                  tableId: targetTableId,
+                  subGuests: subGuestsToMove
+              };
+              setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, passes: qtyRemaining, subGuests: subGuestsToKeep });
               setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", newGuestId), newGuest);
           }
       }
-      setGuestSplitPrompt(null);
   };
 
   const getTextureStyle = (texture) => {
@@ -4112,6 +3886,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     if (['rect_table', 'tablon'].includes(tType)) normType = 'tablon';
     if (tType === 'ovalada') normType = 'ovalada';
     if (tType === 'serpentina') normType = 'serpentina';
+    if (['personalizada', 'libre'].includes(tType)) normType = 'libre';
 
     const config = el.configDetalle || {};
 
@@ -4193,6 +3968,23 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                 </div>
               );
             })()}
+
+            {normType === 'libre' && (
+              <div className="bg-white p-2 rounded-lg border border-indigo-100 shadow-sm mt-2">
+                <div className="text-[9px] font-black text-indigo-800 uppercase tracking-wider mb-2">Medidas Físicas (Metros)</div>
+                <div className="grid grid-cols-2 gap-1.5 mb-3">
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Largo</span><input type="number" step="0.5" min="0.5" value={config.libreMedidas?.largo ?? 2} onChange={e=>handleTableConfig(el.id, el, 'libreMedidas', 'largo', e.target.value)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Ancho</span><input type="number" step="0.5" min="0.5" value={config.libreMedidas?.ancho ?? 1} onChange={e=>handleTableConfig(el.id, el, 'libreMedidas', 'ancho', e.target.value)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
+                </div>
+                <div className="text-[9px] font-black text-indigo-800 uppercase tracking-wider mb-2">Sillas por Lado</div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Arriba</span><input type="number" min="0" value={config.ladosLibre?.top ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'top', e.target.value)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Abajo</span><input type="number" min="0" value={config.ladosLibre?.bottom ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'bottom', e.target.value)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Izquierda</span><input type="number" min="0" value={config.ladosLibre?.left ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'left', e.target.value)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Derecha</span><input type="number" min="0" value={config.ladosLibre?.right ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'right', e.target.value)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -4204,7 +3996,6 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     );
   };
 
-  // 🔴 HANDLERS DEL LIENZO INTERACTIVO DE IMPRESIÓN (PDF)
   const handlePrintWheel = (e) => {
     e.preventDefault(); e.stopPropagation();
     const zoomSensitivity = 0.002;
@@ -4237,7 +4028,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
         const html2canvas = (await import('html2canvas')).default;
 
         const pages = document.querySelectorAll('.map-pdf-page');
-        const pdf = new jsPDF('l', 'mm', 'letter'); // LANDSCAPE
+        const pdf = new jsPDF('l', 'mm', 'letter');
 
         for (let i = 0; i < pages.length; i++) {
            const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
@@ -4255,124 +4046,6 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       setShowExportModal(false);
     }, 500); 
   };
-
-  // 🔴 VISTA DE EXPORTACIÓN PDF (CROQUIS INTERACTIVO)
-  if (showExportModal) {
-    return (
-      <div className="fixed inset-0 z-[120] bg-slate-900/95 flex flex-col overflow-hidden backdrop-blur-sm">
-        
-        <div className="bg-slate-900 text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg border-b border-slate-700 z-10 shrink-0 gap-4">
-          <div className="flex items-center space-x-4 w-full sm:w-auto">
-            <button onClick={() => setShowExportModal(false)} className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X size={24}/></button>
-            <div>
-              <h3 className="font-bold text-sm">Vista Previa de Exportación</h3>
-              <p className="text-[10px] text-slate-400">Ajusta el zoom, encuadra y descarga.</p>
-            </div>
-          </div>
-          <button onClick={triggerPdfDownload} disabled={isPreparingPrint} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-sm font-bold flex items-center shadow-lg transition-all w-full sm:w-auto justify-center disabled:bg-slate-600">
-            {isPreparingPrint ? <RefreshCw size={18} className="mr-2 animate-spin"/> : <Download size={18} className="mr-2"/>} 
-            {isPreparingPrint ? 'Armando PDF...' : 'Guardar PDF'}
-          </button>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center py-8 relative gap-8">
-           {/* HOJA TAMAÑO CARTA HORIZONTAL (279.4mm x 215.9mm) */}
-           <div className="bg-white shadow-[0_0_40px_rgba(0,0,0,0.5)] relative shrink-0 map-pdf-page flex flex-col" style={{ width: '279.4mm', height: '215.9mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden' }}>
-             
-             <header className="border-b-4 border-slate-900 pb-2 mb-4 flex justify-between items-end shrink-0">
-                <div>
-                  <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Plano y Acomodo</h1>
-                  <p className="text-slate-500 text-sm font-medium">Proyecto: Boda Ana & Luis</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-bold text-slate-400">Escala Ajustada (Carta Horizontal)</p>
-                </div>
-             </header>
-
-             {/* FOTO DEL LIENZO INTERACTIVO SEGURO */}
-             <div 
-               onPointerDown={handlePrintPointerDown} onPointerMove={handlePrintPointerMove} onPointerUp={handlePrintPointerUp} onPointerLeave={handlePrintPointerUp} onWheel={handlePrintWheel}
-               className={`w-full flex-1 bg-[#eef2f6] border-2 border-slate-300 rounded-xl relative overflow-hidden flex shadow-inner ${isBlueprintPanActive ? 'cursor-grab active:cursor-grabbing touch-none ring-4 ring-indigo-300' : ''}`}
-             >
-                {!isCapturingPdf && (
-                  <div className="absolute top-3 left-3 z-50 flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                    <button onClick={() => setIsBlueprintPanActive(!isBlueprintPanActive)} className={`px-3 py-2 transition-colors rounded-xl font-bold text-[10px] flex items-center shadow-lg border border-slate-700 ${isBlueprintPanActive ? 'bg-indigo-500 text-white' : 'bg-slate-900/90 text-white hover:bg-slate-800'}`}>
-                      <Hand size={14} className="mr-1.5"/> {isBlueprintPanActive ? 'Arrastre Activo (Bloquear para PDF)' : 'Activar Arrastre'}
-                    </button>
-                    <div className="bg-slate-900/90 backdrop-blur text-white rounded-xl shadow-lg flex items-center pointer-events-auto border border-slate-700">
-                      <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPrintScale(s => Math.max(0.1, s - 0.15)); }} className="p-3 hover:bg-white/20 transition-colors rounded-l-xl active:bg-white/30 touch-manipulation"><Minus size={16} /></button>
-                      <div className="w-px h-5 bg-white/20"></div>
-                      <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPrintScale(s => Math.min(5, s + 0.15)); }} className="p-3 hover:bg-white/20 transition-colors rounded-r-xl active:bg-white/30 touch-manipulation"><Plus size={16} /></button>
-                    </div>
-                  </div>
-                )}
-
-                <div style={{ transform: `translate(${printPan.x}px, ${printPan.y}px) scale(${printScale})`, transformOrigin: '0 0', width: '100%', height: '100%' }}>
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" style={{ overflow: 'visible' }}>
-                     <defs>
-                       <mask id="printRoomMask">
-                         <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                         {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                         {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                       </mask>
-                       <mask id="printOuterWallMask">
-                         <rect x="-5000" y="-5000" width="10000" height="10000" fill="white" />
-                         {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                         {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                       </mask>
-                       <mask id="printSubWallMask">
-                         <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                         {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                         {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                       </mask>
-                     </defs>
-                     <g>
-                       <rect x="-5000" y="-5000" width="10000" height="10000" fill="#ffffff" mask="url(#printRoomMask)" />
-                       <g mask="url(#printOuterWallMask)">
-                         {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
-                       </g>
-                       <g mask="url(#printSubWallMask)">
-                         {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
-                       </g>
-                     </g>
-                  </svg>
-
-                  {overlayAreas.map((el) => (
-                    <div key={el.id} className="absolute flex items-center justify-center select-none pointer-events-none z-0" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)`, ...getTextureStyle(el.texture), boxShadow: el.shapeType === 'pool' ? `inset 0 0 0 ${0.3 * scale}px #94a3b8` : 'none', borderRadius: el.shapeType === 'pool' ? '8px' : '0px' }}>
-                      <span className="font-extrabold text-center drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>{el.customLabel || el.name}</span>
-                    </div>
-                  ))}
-
-                  {roomAreas.filter(e => e.mode !== 'overlay').map((el) => (
-                    <div key={el.id} className="absolute z-20 pointer-events-none" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
-                      <div className="w-full h-full" style={{ clipPath: getShapeClipPath(el) }}>
-                        {el.customLabel && <span className="absolute inset-0 flex items-center justify-center font-extrabold text-slate-500 opacity-80 uppercase tracking-widest pointer-events-none" style={{ fontSize: `${Math.max(0.6, Math.min(el.width, el.height) * 0.2)}rem` }}>{el.customLabel}</span>}
-                      </div>
-                    </div>
-                  ))}
-
-                  {physicalStructures.map((el) => (
-                    <div key={el.id} className={`absolute flex items-center justify-center select-none shadow-md pointer-events-none z-20 ${el.shape} ${el.color} ${el.texture === 'none' ? '' : 'border-[3px]'}`} style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)`, ...getTextureStyle(el.texture) }}>
-                      <span className="font-extrabold text-center drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>{el.customLabel || el.name}</span>
-                    </div>
-                  ))}
-
-                  {placedTables.map((el) => {
-                    const occupancy = guests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
-                    return (
-                      <div key={el.id} className="absolute flex items-center justify-center select-none pointer-events-none z-40" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
-                        <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={guests.filter(g => g.tableId === el.id)} searchQuery={""} />
-                      </div>
-                    );
-                  })}
-                </div>
-             </div>
-
-           </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="h-full flex flex-col space-y-4 pb-6" onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onMouseLeave={handlePointerUp}>
@@ -4632,6 +4305,50 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
           </div>
         </div>
 
+        {/* MODAL INTELIGENTE DE SEPARACIÓN DENTRO DEL CROQUIS */}
+        {guestSplitPrompt && (
+          <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in pointer-events-auto">
+            <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl animate-in zoom-in-95 border border-slate-200">
+              <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4"><Users size={32} /></div>
+              <h3 className="font-bold text-xl text-slate-800 mb-2">Acomodar Grupo</h3>
+              
+              {guestSplitPrompt.isForced ? (
+                  <p className="text-rose-500 mb-4 text-[13px] font-medium leading-relaxed">
+                     Esta mesa es para <b>{guestSplitPrompt.table.capacity} personas</b> y solo quedan <b>{guestSplitPrompt.availableChairs} sillas disponibles</b>. La familia <b>{guestSplitPrompt.guest.name}</b> ({guestSplitPrompt.guest.passes} pases) supera la capacidad.<br/><br/>¿Cuántos deseas acomodar en esta mesa?
+                  </p>
+              ) : (
+                  <p className="text-slate-500 mb-4 text-[13px] leading-relaxed">
+                     <b>{guestSplitPrompt.guest.name}</b> tiene {guestSplitPrompt.guest.passes} pases y hay {guestSplitPrompt.availableChairs} sillas libres en esta mesa.<br/><br/>¿Cuántos deseas acomodar aquí?
+                  </p>
+              )}
+
+              <div className="flex items-center justify-center gap-4 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                  <button 
+                     onClick={() => setSepararCantidad(Math.max(guestSplitPrompt.minPlaceable, separarCantidad - 1))}
+                     disabled={separarCantidad <= guestSplitPrompt.minPlaceable}
+                     className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center font-black text-slate-800 shadow-sm disabled:opacity-30"
+                  >-</button>
+                  <div className="text-3xl font-black text-indigo-600 w-12 text-center">{separarCantidad}</div>
+                  <button 
+                     onClick={() => setSepararCantidad(Math.min(guestSplitPrompt.maxPlaceable, separarCantidad + 1))}
+                     disabled={separarCantidad >= guestSplitPrompt.maxPlaceable}
+                     className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center font-black text-slate-800 shadow-sm disabled:opacity-30"
+                  >+</button>
+              </div>
+
+              <div className="flex flex-col space-y-2">
+                <button onClick={() => handleSplitChoice('split')} className="w-full p-3 bg-indigo-600 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-md transition-transform active:scale-95">Mover {separarCantidad} pase(s)</button>
+                
+                {!guestSplitPrompt.isForced && (
+                   <button onClick={() => handleSplitChoice('all')} className="w-full p-3 bg-slate-100 text-slate-700 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 transition-colors">Mover familia completa ({guestSplitPrompt.guest.passes})</button>
+                )}
+                
+                <button onClick={() => setGuestSplitPrompt(null)} className="w-full p-3 text-slate-400 font-bold hover:text-slate-600 mt-2 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* BARRA DERECHA: EDICIÓN MAESTRA Y CATÁLOGOS */}
         {isEditMode && (
           <div className="w-full md:w-[280px] border-t md:border-t-0 md:border-l border-slate-200 bg-slate-50 flex flex-col z-20 max-h-64 md:max-h-full">
@@ -4640,10 +4357,18 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                <button onClick={() => { setIsEditMode(false); setSelectedIds([]); centerAndFitMap(); }} className="w-full py-2 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center">
                  <CheckCircle size={14} className="mr-1.5"/> Guardar Diseño
                </button>
-               {/* 🔴 BOTÓN EXPORTAR PDF PARA MAPA (CROQUIS) */}
                <button onClick={() => setShowExportModal(true)} className="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center">
                  <FileDown size={14} className="mr-1.5"/> Descargar PDF
                </button>
+               
+               {/* SWITCH MODO SEPARADOR MAPA */}
+               <div className="flex items-center justify-between bg-white p-2 rounded-md border border-slate-200 shadow-sm mt-1 mb-1">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mx-1">Modo Separador</span>
+                  <button onClick={() => setModoSeparador(!modoSeparador)} className={`relative w-8 h-4 rounded-full transition-colors ${modoSeparador ? 'bg-indigo-500' : 'bg-slate-300'}`}>
+                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${modoSeparador ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                  </button>
+               </div>
+               
                <div className="flex gap-1.5 mt-1">
                  <button onClick={handleUndo} disabled={history.length === 0} className={`flex-1 py-1.5 rounded-md text-[10px] font-bold flex items-center justify-center transition-colors border ${history.length > 0 ? 'bg-white text-slate-700 hover:bg-slate-50 border-slate-300 shadow-sm' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}><RotateCw size={12} className="mr-1" style={{ transform: 'scaleX(-1)' }}/> Deshacer</button>
                  <button onClick={async () => { 
@@ -4705,7 +4430,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                   return (
                     <div key={table.id} draggable onDragStart={(e) => handleDragStart(e, {id: table.id, width: tW, height: tH}, 'existing_table')} className="bg-white p-1.5 rounded-lg border border-indigo-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-indigo-500 hover:shadow-md transition-all flex items-center">
                       <div className="w-6 h-6 bg-indigo-50 rounded flex items-center justify-center mr-2 text-indigo-500 flex-shrink-0">
-                        {table.type === 'round_table' || table.tipo === 'redonda' ? <div className="w-3 h-3 rounded-full border-[1.5px] border-current"></div> : <div className="w-3 h-3 rounded-sm border-[1.5px] border-current"></div>}
+                        {table.tipo === 'round_table' || table.tipo === 'redonda' ? <div className="w-3 h-3 rounded-full border-[1.5px] border-current"></div> : <div className="w-3 h-3 rounded-sm border-[1.5px] border-current"></div>}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-slate-800 truncate">{table.name}</p>
@@ -4763,23 +4488,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
 
       </div>
 
-      {/* MODAL: SEPARAR FAMILIA O MOVER GRUPO */}
-      {guestSplitPrompt && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl animate-in zoom-in-95">
-            <div className="w-16 h-16 bg-indigo-100 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4"><Users size={32} /></div>
-            <h3 className="font-bold text-xl text-slate-800 mb-2">Mover Invitado</h3>
-            <p className="text-slate-500 mb-6 text-sm"><b>{guestSplitPrompt.guest.name}</b> tiene {guestSplitPrompt.guest.passes} pases. ¿Deseas mover a toda la familia a la nueva mesa o separar solo 1 pase?</p>
-            <div className="flex flex-col space-y-2">
-              <button onClick={() => handleSplitChoice('all')} className="w-full p-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-sm">Mover toda la familia ({guestSplitPrompt.guest.passes})</button>
-              <button onClick={() => handleSplitChoice('one')} className="w-full p-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors">Separar 1 pase individual</button>
-              <button onClick={() => setGuestSplitPrompt(null)} className="w-full p-3 text-slate-400 font-bold hover:text-slate-600 mt-2 transition-colors">Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 🔴 MODAL: VISTA PREVIA EXPORTACIÓN MAPA (CARTA HORIZONTAL) */}
+      {/* 🔴 VISTA PREVIA EXPORTACIÓN MAPA (CARTA HORIZONTAL) */}
       {showExportModal && (
         <div className="fixed inset-0 z-[120] bg-slate-900/95 flex flex-col overflow-hidden backdrop-blur-sm">
           <div className="bg-slate-900 text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg border-b border-slate-700 z-10 shrink-0 gap-4">
@@ -4802,7 +4511,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                <header className="border-b-4 border-slate-900 pb-2 mb-4 flex justify-between items-end shrink-0">
                   <div>
                     <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Plano y Acomodo</h1>
-                    <p className="text-slate-500 text-sm font-medium">Proyecto: Boda Ana & Luis</p>
+                    <p className="text-slate-500 text-sm font-medium">Proyecto: Proyecto Actual</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs font-bold text-slate-400">Escala Ajustada (Carta Horizontal)</p>
@@ -4890,6 +4599,304 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+const TABLE_TEMPLATES = [
+  { type: 'round_table', name: 'Mesa Redonda', width: 1.5, height: 1.5, capacity: 10, desc: 'Ø 1.5m' },
+  { type: 'square_table', name: 'Mesa Cuadrada', width: 1.5, height: 1.5, capacity: 12, desc: '1.5x1.5m' },
+  { type: 'rect_table', name: 'Tablón', width: 2.44, height: 0.7, capacity: 10, desc: '2.4x0.7m' },
+  { type: 'ovalada', name: 'Mesa Ovalada', width: 3.05, height: 1.22, capacity: 12, desc: '3.0x1.2m' },
+  { type: 'serpentina', name: 'Serpentina', width: 1.8, height: 1.8, capacity: 10, desc: 'Curva' }
+];
+
+const STRUCTURAL_CATALOG = [
+  { type: 'dance_floor', name: 'Pista Baile', width: 5, height: 5, shape: 'rounded-none', color: 'border-fuchsia-400 text-fuchsia-900', texture: 'dance', desc: '5x5m' },
+  { type: 'stage', name: 'Escenario', width: 6, height: 3, shape: 'rounded-sm', color: 'border-amber-900 text-amber-50', texture: 'wood', desc: '6x3m' },
+  { type: 'bar', name: 'Barra', width: 3, height: 0.8, shape: 'rounded-sm', color: 'border-zinc-800 text-white', texture: 'marble', desc: '3x0.8m' },
+  { type: 'garden', name: 'Jardín', width: 6, height: 4, shape: 'rounded-xl', color: 'border-green-600 text-green-900', texture: 'grass', desc: 'Área Verde' },
+  { type: 'pool', name: 'Alberca', width: 6, height: 4, shape: 'rounded-lg', color: 'border-cyan-500 text-cyan-900', texture: 'water', desc: 'Piscina' }
+];
+
+const ROOM_AREAS_CATALOG = [
+  { type: 'room_area', shapeType: 'rect', name: 'Área Cuadrada', width: 8, height: 8, isRoomArea: true, mode: 'add' },
+  { type: 'room_area', shapeType: 'ellipse', name: 'Área Circular', width: 8, height: 8, isRoomArea: true, mode: 'add' },
+  { type: 'room_area', shapeType: 'triangle', name: 'Área Triangular', width: 8, height: 8, isRoomArea: true, triangleCorner: 0, mode: 'add' }, 
+  { type: 'room_area', shapeType: 'polygon', name: 'Polígono Libre', width: 8, height: 8, isRoomArea: true, sides: 5, mode: 'add' },
+  { type: 'room_area', shapeType: 'rect', name: 'Jardín', width: 10, height: 10, isRoomArea: true, mode: 'overlay', texture: 'grass' },
+  { type: 'room_area', shapeType: 'rect', name: 'Terraza', width: 10, height: 6, isRoomArea: true, mode: 'overlay', texture: 'wood' },
+  { type: 'room_area', shapeType: 'pool', name: 'Alberca', width: 8, height: 4, isRoomArea: true, mode: 'overlay', texture: 'water' }
+];
+
+const getShapeClipPath = (el) => {
+  if (el.shapeType === 'ellipse') return 'ellipse(50% 50% at 50% 50%)';
+  if (el.shapeType === 'triangle') {
+    const c = el.triangleCorner || 0;
+    if (c === 0) return 'polygon(0% 0%, 0% 100%, 100% 100%)'; 
+    if (c === 1) return 'polygon(0% 100%, 100% 100%, 100% 0%)'; 
+    if (c === 2) return 'polygon(0% 0%, 100% 0%, 100% 100%)'; 
+    if (c === 3) return 'polygon(0% 0%, 100% 0%, 0% 100%)'; 
+  }
+  if (el.shapeType === 'polygon') {
+    const sides = el.sides || 5;
+    let pts = [];
+    for(let i=0; i<sides; i++){
+      const angle = (i * 2 * Math.PI / sides) - Math.PI / 2;
+      pts.push(`${(50 + 50 * Math.cos(angle)).toFixed(1)}% ${(50 + 50 * Math.sin(angle)).toFixed(1)}%`);
+    }
+    return `polygon(${pts.join(', ')})`;
+  }
+  return 'none';
+};
+
+const renderSVGShape = (el, scale, minX, minY, props) => {
+  if (el.shapeType === 'custom_polygon' && el.absPoints) {
+      const pts = el.absPoints.map(p => `${(p.x - minX) * scale},${(p.y - minY) * scale}`).join(' ');
+      return <polygon key={el.id} points={pts} {...props} />;
+  }
+
+  const w = el.width * scale;
+  const h = el.height * scale;
+  const x = (el.x - minX) * scale;
+  const y = (el.y - minY) * scale;
+  const tRegular = `rotate(${el.rotation || 0} ${x + w/2} ${y + h/2})`;
+
+  if (el.shapeType === 'ellipse') {
+    return <ellipse key={el.id} cx={x + w/2} cy={y + h/2} rx={w/2} ry={h/2} transform={tRegular} {...props} />;
+  }
+  if (el.shapeType === 'triangle') {
+    let points = '';
+    const corner = el.triangleCorner || 0; 
+    if (corner === 0) points = `${x},${y} ${x},${y + h} ${x + w},${y + h}`; 
+    else if (corner === 1) points = `${x},${y + h} ${x + w},${y + h} ${x + w},${y}`; 
+    else if (corner === 2) points = `${x},${y} ${x + w},${y} ${x + w},${y + h}`; 
+    else if (corner === 3) points = `${x},${y} ${x + w},${y} ${x},${y + h}`; 
+    return <polygon key={el.id} points={points} transform={tRegular} {...props} />;
+  }
+  if (el.sides && el.sides > 2) {
+    const sides = el.sides;
+    const cx = x + w/2; const cy = y + h/2;
+    const rX = w / 2; const rY = h / 2;
+    let points = [];
+    for (let i = 0; i < sides; i++) {
+      const angle = (i * 2 * Math.PI / sides) - Math.PI / 2;
+      points.push(`${cx + rX * Math.cos(angle)},${cy + rY * Math.sin(angle)}`);
+    }
+    return <polygon key={el.id} points={points.join(' ')} transform={tRegular} {...props} />;
+  }
+  
+  return <rect key={el.id} x={x} y={y} width={w} height={h} transform={tRegular} {...props} />;
+};
+
+const TableWithChairs = ({ tableData, occupancy, scale, tableGuests = [], searchQuery = '' }) => {
+  const cap = tableData.capacity;
+  const chairSize = 0.45 * scale; 
+  const tipo = tableData.tipo || tableData.type;
+  const config = tableData.configDetalle;
+
+  let wMeters = tableData.width || 1.5;
+  let hMeters = tableData.height || 1.5;
+  let widthT_meters = 0.8; 
+
+  if (tipo === 'rect_table' || tipo === 'tablon') { wMeters = 2.44; hMeters = 0.7; } 
+  else if (tipo === 'ovalada') { wMeters = 3.05; hMeters = 1.22; } 
+  else if (tipo === 'serpentina') { 
+    let arcLength = 2.44;
+    if (config?.modeloSerpentina === 'mod1') { arcLength = 1.58; widthT_meters = 0.75; }
+    if (config?.modeloSerpentina === 'mod2') { arcLength = 2.00; widthT_meters = 0.75; }
+    if (config?.modeloSerpentina === 'mod3') { arcLength = 2.10; widthT_meters = 0.75; }
+    if (config?.modeloSerpentina === 'mod4') { arcLength = 2.44; widthT_meters = 0.90; }
+    wMeters = arcLength / (Math.PI / 2); hMeters = wMeters; 
+  } else if (tipo === 'libre') { 
+    wMeters = config?.libreMedidas?.largo || 2.0; hMeters = config?.libreMedidas?.ancho || 1.0; 
+  }
+
+  const tableW = wMeters * scale;
+  const tableH = hMeters * scale;
+  const padding = 0.08 * scale;
+  const chairs = [];
+
+  const seatAssignments = [];
+  if (tableGuests && tableGuests.length > 0) {
+    tableGuests.forEach(g => {
+      for (let p = 0; p < (g.passes || 1); p++) {
+        seatAssignments.push({ guest: g, label: g.name + ((g.passes || 1) > 1 ? ` (Pase ${p + 1})` : '') });
+      }
+    });
+  }
+
+  for (let i = 0; i < cap; i++) {
+    const isOccupied = i < occupancy;
+    let cx = 0, cy = 0, angleDeg = 0;
+
+    if (tipo === 'round_table' || tipo === 'redonda') {
+      angleDeg = i * (360 / cap);
+      const aRad = angleDeg * (Math.PI / 180);
+      const rX = (tableW / 2) + (chairSize / 2) + padding;
+      const rY = (tableH / 2) + (chairSize / 2) + padding;
+      cx = (tableW / 2) + rX * Math.cos(aRad) - (chairSize / 2);
+      cy = (tableH / 2) + rY * Math.sin(aRad) - (chairSize / 2);
+    } else if (tipo === 'ovalada') {
+      const topCap = config ? config.ladosOvalada.top : 4;
+      const botCap = config ? config.ladosOvalada.bottom : 4;
+      const leftCap = config ? config.ladosOvalada.left : Math.floor((cap - topCap - botCap) / 2);
+      const radius = tableH / 2; const straightW = tableW - tableH; 
+      
+      if (i < topCap) {
+        if (topCap === 1) cx = tableW / 2 - chairSize/2;
+        else cx = radius + ((straightW / (topCap - 1)) * i) - chairSize/2;
+        cy = -(chairSize + padding); angleDeg = 270;
+      } else if (i < topCap + botCap) {
+        const idx = i - topCap;
+        if (botCap === 1) cx = tableW / 2 - chairSize/2;
+        else cx = radius + ((straightW / (botCap - 1)) * idx) - chairSize/2;
+        cy = tableH + padding; angleDeg = 90;
+      } else if (i < topCap + botCap + leftCap) {
+        const idx = i - (topCap + botCap);
+        const aRad = (90 + (180 / (leftCap + 1)) * (idx + 1)) * (Math.PI/180);
+        const R = radius + chairSize/2 + padding;
+        cx = radius + R * Math.cos(aRad) - chairSize/2; cy = radius - R * Math.sin(aRad) - chairSize/2;
+        angleDeg = 360 - (90 + (180 / (leftCap + 1)) * (idx + 1)); 
+      } else {
+        const rightCap = cap - (topCap + botCap + leftCap);
+        const idx = i - (topCap + botCap + leftCap);
+        const aRad = (-90 + (180 / (rightCap + 1)) * (idx + 1)) * (Math.PI/180);
+        const R = radius + chairSize/2 + padding;
+        cx = (tableW - radius) + R * Math.cos(aRad) - chairSize/2; cy = radius - R * Math.sin(aRad) - chairSize/2;
+        angleDeg = 360 - (-90 + (180 / (rightCap + 1)) * (idx + 1)); 
+      }
+    } else if (tipo === 'serpentina') {
+      const extCap = config ? config.ladosSerpentina.ext : Math.ceil(cap/2);
+      const intCap = config ? config.ladosSerpentina.int : Math.floor(cap/2) - 2;
+      const izqCap = config ? config.ladosSerpentina.izq : 1;
+      const widthT = widthT_meters * scale;
+      
+      if (i < extCap) {
+         const aRad = ((90 / (extCap + 1)) * (i + 1)) * (Math.PI/180);
+         const R = tableW + chairSize/2 + padding;
+         cx = R * Math.cos(aRad) - chairSize/2; cy = tableW - R * Math.sin(aRad) - chairSize/2;
+         angleDeg = 360 - ((90 / (extCap + 1)) * (i + 1)); 
+      } else if (i < extCap + intCap) {
+         const idx = i - extCap;
+         let aDeg = 45; 
+         if (intCap > 1) aDeg = 15 + (idx * ((90 - 30) / (intCap - 1)));
+         const aRad = aDeg * (Math.PI/180);
+         const R = tableW - widthT - chairSize/2 - padding;
+         cx = R * Math.cos(aRad) - chairSize/2; cy = tableW - R * Math.sin(aRad) - chairSize/2;
+         angleDeg = 180 - aDeg; 
+      } else if (i < extCap + intCap + izqCap) {
+         cx = -(chairSize + padding); cy = (widthT / 2) - chairSize/2; angleDeg = 180; 
+      } else {
+         cx = tableW - (widthT / 2) - chairSize/2; cy = tableW + padding; angleDeg = 90; 
+      }
+    } else if (tipo === 'square_table' || tipo === 'cuadrada') {
+      const topCap = config?.ladosCuadrada?.top ?? Math.ceil(cap / 4);
+      const botCap = config?.ladosCuadrada?.bottom ?? Math.ceil(cap / 4);
+      const leftCap = config?.ladosCuadrada?.left ?? Math.ceil(cap / 4);
+      
+      if (i < topCap) {
+        cx = ((tableW / (topCap || 1)) * (i + 0.5)) - chairSize/2; cy = -(chairSize + padding); angleDeg = 270;
+      } else if (i < topCap + botCap) {
+        cx = ((tableW / (botCap || 1)) * ((i - topCap) + 0.5)) - chairSize/2; cy = tableH + padding; angleDeg = 90;
+      } else if (i < topCap + botCap + leftCap) {
+        cx = -(chairSize + padding); cy = ((tableH / (leftCap || 1)) * ((i - (topCap + botCap)) + 0.5)) - chairSize/2; angleDeg = 180;
+      } else {
+        const rightCap = cap - topCap - botCap - leftCap;
+        cx = tableW + padding; cy = ((tableH / (rightCap || 1)) * ((i - (topCap + botCap + leftCap)) + 0.5)) - chairSize/2; angleDeg = 0;
+      }
+    } else {
+      // Tablón o Libre
+      const topCap = config?.ladosLibre?.top ?? config?.ladosTablon?.top ?? Math.floor((cap - 2) / 2);
+      const botCap = config?.ladosLibre?.bottom ?? config?.ladosTablon?.bottom ?? Math.ceil((cap - 2) / 2);
+      const leftCap = config?.ladosLibre?.left ?? config?.ladosTablon?.left ?? 1;
+      
+      if (i < topCap) {
+        cx = ((tableW / (topCap || 1)) * (i + 0.5)) - chairSize/2; cy = -(chairSize + padding); angleDeg = 270;
+      } else if (i < topCap + botCap) {
+        cx = ((tableW / (botCap || 1)) * ((i - topCap) + 0.5)) - chairSize/2; cy = tableH + padding; angleDeg = 90;
+      } else if (i < topCap + botCap + leftCap) {
+        cx = -(chairSize + padding); cy = ((tableH / (leftCap || 1)) * ((i - (topCap + botCap)) + 0.5)) - chairSize/2; angleDeg = 180;
+      } else {
+        const rightCap = cap - topCap - botCap - leftCap;
+        cx = tableW + padding; cy = ((tableH / (rightCap || 1)) * ((i - (topCap + botCap + leftCap)) + 0.5)) - chairSize/2; angleDeg = 0;
+      }
+    }
+
+    const guestObj = seatAssignments[i];
+    const guestName = guestObj ? guestObj.label : null;
+    const chairGuestId = guestObj ? guestObj.guest.id : null;
+    const totalRotation = angleDeg + (tableData.rotation || 0); 
+    const isMatched = searchQuery && guestName && guestName.toLowerCase().includes(searchQuery.toLowerCase());
+    const isTableMatched = searchQuery && tableData.name && tableData.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const activeSearchClasses = (isMatched || (isTableMatched && isOccupied)) ? 'ring-4 ring-amber-400 ring-offset-2 bg-amber-300 border-amber-600 scale-110 z-50' : (isOccupied ? 'bg-emerald-400 border-emerald-600' : 'bg-slate-100 border-slate-300');
+
+    chairs.push(
+      <div key={i} 
+           draggable={!!chairGuestId}
+           onDragStart={(e) => {
+             if (chairGuestId) {
+               e.dataTransfer.setData('guestId', chairGuestId);
+               e.stopPropagation();
+             }
+           }}
+           className={`group absolute flex items-center justify-center rounded-full border-[1.5px] shadow-sm transition-all duration-300 hover:z-50 ${chairGuestId ? 'cursor-grab pointer-events-auto' : 'pointer-events-none'} ${activeSearchClasses} z-0`} 
+           style={{ left: cx, top: cy, width: chairSize, height: chairSize, transform: `rotate(${angleDeg}deg)` }}>
+         <div className={`absolute w-[45%] h-[115%] right-[-12%] rounded-full shadow-sm transition-colors duration-300 ${isMatched || (isTableMatched && isOccupied) ? 'bg-amber-600' : (isOccupied ? 'bg-emerald-600' : 'bg-slate-300')}`}></div>
+         {isOccupied && guestName && (
+           <div className="absolute hidden group-hover:flex items-center justify-center bg-slate-800/95 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-2xl whitespace-nowrap z-[100] -top-8 pointer-events-none border border-slate-600 animate-in fade-in zoom-in-95 duration-200" style={{ transform: `rotate(-${totalRotation}deg)` }}>
+             {guestName}
+           </div>
+         )}
+      </div>
+    );
+  }
+
+  const matchedNames = [];
+  if (searchQuery) {
+    seatAssignments.forEach(obj => {
+      if (obj.label && obj.label.toLowerCase().includes(searchQuery.toLowerCase()) && !matchedNames.includes(obj.label)) matchedNames.push(obj.label);
+    });
+  }
+
+  let innerContent = null;
+  let shapeClass = 'rounded-sm shadow-lg';
+  let borderClass = 'border-[3px]';
+  let baseColor = 'bg-white border-slate-400 text-slate-800'; 
+
+  if (tipo === 'round_table' || tipo === 'redonda' || tipo === 'ovalada') { shapeClass = 'rounded-[999px] shadow-lg'; } 
+  else if (tipo === 'serpentina') {
+    shapeClass = 'rounded-none'; borderClass = 'border-0'; baseColor = 'bg-transparent text-slate-800'; 
+    const widthT = widthT_meters * scale;
+    const innerR = tableW - widthT;
+    innerContent = (
+      <svg className="absolute inset-0 overflow-visible drop-shadow-md" style={{ zIndex: -1, width: tableW, height: tableW }}>
+         <path d={`M 0 0 A ${tableW} ${tableW} 0 0 1 ${tableW} ${tableW} L ${tableW - widthT} ${tableW} A ${innerR} ${innerR} 0 0 0 0 ${widthT} Z`} fill="#ffffff" stroke="#94a3b8" strokeWidth="3" />
+      </svg>
+    );
+  }
+
+  return (
+    <div style={{ width: tableW, height: tableH }} className="relative pointer-events-none">
+      {chairs}
+      <div className={`absolute inset-0 flex flex-col items-center justify-center z-10 ${shapeClass} ${borderClass} ${baseColor}`}>
+        {innerContent}
+        <div className="z-20 flex items-center justify-center pointer-events-none" style={{ transform: `rotate(-${tableData.rotation || 0}deg)` }}>
+          <span className="font-black text-slate-400/70 select-none drop-shadow-sm" style={{ fontSize: `${Math.max(0.8, tableW * 0.02)}rem` }}>
+            {tableData.name ? tableData.name.replace(/Mesa\s+/i, '').trim() : ''}
+          </span>
+        </div>
+        {matchedNames.length > 0 && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[300]" style={{ transform: `rotate(-${tableData.rotation || 0}deg)` }}>
+            <div className="absolute -top-12 flex flex-col items-center animate-in slide-in-from-bottom-2 duration-300">
+              <div className="bg-slate-900/95 backdrop-blur-md text-amber-400 text-xs font-bold px-4 py-2 rounded-xl shadow-2xl border border-amber-500/40 text-center whitespace-nowrap flex flex-col gap-0.5">
+                {matchedNames.map((n, idx) => <span key={idx}>{n}</span>)}
+              </div>
+              <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-slate-900/95 mt-[-1px]"></div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
