@@ -3109,7 +3109,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
             
             {guestSplitPrompt.isForced ? (
                 <p className="text-rose-500 mb-4 text-[13px] font-medium leading-relaxed">
-                   Esta mesa es para <b>{guestSplitPrompt.table.capacity} personas</b> y solo quedan <b>{guestSplitPrompt.availableChairs} sillas disponibles</b>. La familia ({guestSplitPrompt.guest.passes} pases) supera la capacidad.<br/><br/>¿Cuántos deseas acomodar en esta mesa?
+                   Esta mesa es para <b>{guestSplitPrompt.table.capacity} personas</b> y solo quedan <b>{guestSplitPrompt.availableChairs} sillas disponibles</b>. La familia <b>{guestSplitPrompt.guest.name}</b> ({guestSplitPrompt.guest.passes} pases) supera la capacidad.<br/><br/>¿Cuántos deseas acomodar en esta mesa?
                 </p>
             ) : (
                 <p className="text-slate-500 dark:text-slate-400 mb-4 text-[13px] leading-relaxed">
