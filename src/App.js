@@ -2651,28 +2651,36 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
           return;
       }
 
+      // Buscamos familiares tanto en mesas como en "No asignados" (targetTableId === null)
       const familyRootId = guest.parentId || guest.id;
-      const siblingFragment = isToTable ? safeGuests.find(g => 
+      const siblingFragment = safeGuests.find(g => 
           g.id !== guest.id && 
           (g.parentId === familyRootId || g.id === familyRootId) && 
           g.tableId === targetTableId
-      ) : null;
+      );
 
       if (guest.passes > 1 && (isForcedSplit || modoSeparador)) {
           const maxPlaceable = Math.min(guest.passes - 1, availableChairs);
           setSepararCantidad(maxPlaceable);
           setGuestSplitPrompt({
               guest, targetTableId, table, usedChairs, availableChairs,
-              minPlaceable: 1, maxPlaceable, isForced: isForcedSplit, siblingFragment
+              minPlaceable: 1, maxPlaceable, isForced: isForcedSplit, siblingFragment,
+              isAutoAssign: false
           });
           return;
       }
 
       if (siblingFragment) {
           const mergedPasses = siblingFragment.passes + guest.passes;
-          await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { ...siblingFragment, passes: mergedPasses });
+          // Unimos los pases QR internos (subGuests) para no perder nada
+          const mergedSubGuests = [...(siblingFragment.subGuests || []), ...(guest.subGuests || [])];
+          await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { 
+              ...siblingFragment, 
+              passes: mergedPasses, 
+              subGuests: mergedSubGuests 
+          });
           await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id));
-          if(addNotification) addNotification('Familias Unidas', `Fragmentos fusionados con éxito.`, 'success');
+          if(addNotification) addNotification('Familias Unidas', `Familia reunida con éxito.`, 'success');
           return;
       }
 
@@ -2685,7 +2693,8 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
          if (mode === 'all') {
                if (siblingFragment) {
                    const mergedPasses = siblingFragment.passes + guest.passes;
-                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { ...siblingFragment, passes: mergedPasses });
+                   const mergedSubGuests = [...(siblingFragment.subGuests || []), ...(guest.subGuests || [])];
+                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { ...siblingFragment, passes: mergedPasses, subGuests: mergedSubGuests });
                    await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id));
                } else {
                    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, tableId: targetTableId });
@@ -2695,23 +2704,30 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
          } else if (mode === 'split') {
                const qtyToMove = separarCantidad;
                const qtyRemaining = guest.passes - qtyToMove;
+               
+               // Dividimos los subGuests equitativamente para no inflar la base de datos
+               const subGuestsOriginal = guest.subGuests || [];
+               const subGuestsToMove = subGuestsOriginal.slice(0, qtyToMove);
+               const subGuestsToKeep = subGuestsOriginal.slice(qtyToMove);
 
                if (siblingFragment) {
                    const mergedPasses = siblingFragment.passes + qtyToMove;
-                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { ...siblingFragment, passes: mergedPasses });
-                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, passes: qtyRemaining });
+                   const mergedSubGuests = [...(siblingFragment.subGuests || []), ...subGuestsToMove];
+                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { ...siblingFragment, passes: mergedPasses, subGuests: mergedSubGuests });
+                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, passes: qtyRemaining, subGuests: subGuestsToKeep });
                } else {
                    const newGuestId = `sep_${Date.now()}`;
                    const newGuest = { 
                        ...guest, 
                        id: newGuestId, 
                        parentId: guest.parentId || guest.id,
-                       name: `${guest.name} (Separado)`, 
+                       name: guest.name.replace(' (Separado)', ''), 
                        passes: qtyToMove, 
                        childrenPasses: 0, 
-                       tableId: targetTableId 
+                       tableId: targetTableId,
+                       subGuests: subGuestsToMove
                    };
-                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, passes: qtyRemaining });
+                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, passes: qtyRemaining, subGuests: subGuestsToKeep });
                    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", newGuestId), newGuest);
                }
                setGuestSplitPrompt(null);
