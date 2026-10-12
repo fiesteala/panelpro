@@ -1,5 +1,5 @@
 git add .
-git commit -m "maquina dl timepo"
+git commit -m "maquina del timepo"
 git push origin main
 
 .
