@@ -1,9 +1,10 @@
 import React, { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { collection, doc, setDoc, onSnapshot, getDocs, query, where, serverTimestamp, deleteDoc, getDoc, addDoc, updateDoc } from 'firebase/firestore';
 import { db, auth, secondaryAuth } from './firebase';
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail, updatePassword } from 'firebase/auth';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'; // 🟢 ÚNICA LÍNEA MODIFICADA
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 import { 
   LayoutDashboard, Users, Map as MapIcon, Wallet, CheckSquare, Store, Clock, Palette, 
@@ -14,7 +15,7 @@ import {
   DollarSign, PieChart, TrendingDown, Upload, Building, Landmark, History, Phone, Mail, Calendar, Eye, EyeOff, MessageSquare, 
   FileSignature, AlertCircle, Star, Image as ImageIcon, CalendarDays, FileDown, 
   ListTodo, CheckCircle2, Circle, PlayCircle, AlignLeft, MapPin, ShieldCheck, Printer, Scan, Camera, Navigation as NavigationIcon, Navigation, MoreVertical,
-  Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, WifiOff, Globe, Key, Power, Quote, Check, Factory,
+  Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, Unlock, WifiOff, Globe, Key, Power, Quote, Check, Factory,
   Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser, Activity, Gem, UserCheck, BarChart3, Binary, MonitorPlay
 } from 'lucide-react';
 
@@ -1432,7 +1433,60 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   const pasesNovio = safeGuests.filter(g => g.side === 'novio').reduce((sum, g) => sum + (g.passes || 0), 0);
   const totalMesas = tables ? tables.length : 0;
 
-  const invitadosFiltrados = safeGuests.filter(g => {
+  // 🟢 MAGIA: Agrupar visualmente a las familias separadas por el Modo Separador
+  const familiasUnificadasMap = new Map();
+  safeGuests.forEach(g => {
+      const rootId = g.parentId || g.id;
+      const tableObj = tables?.find(t => String(t.id) === String(g.tableId));
+      const tName = tableObj ? tableObj.name : g.tableId;
+
+      // Etiquetamos a cada sub-invitado con la mesa exacta a la que pertenece su fragmento
+      const subGuestsWithTable = (g.subGuests || []).map(sg => ({
+          ...sg,
+          specificTableId: g.tableId,
+          specificTableName: tName
+      }));
+
+      if (!familiasUnificadasMap.has(rootId)) {
+          // Buscamos el objeto original para asegurar que los datos del titular (nombre, tel) sean los correctos
+          const rootGuest = safeGuests.find(rg => rg.id === rootId) || g;
+          familiasUnificadasMap.set(rootId, { 
+              ...rootGuest, 
+              tableIds: g.tableId ? [g.tableId] : [], 
+              displayPasses: g.passes,
+              todasMesasNombre: tName ? [tName] : [],
+              mergedSubGuests: subGuestsWithTable
+          });
+      } else {
+          const parent = familiasUnificadasMap.get(rootId);
+          if (g.tableId && !parent.tableIds.includes(g.tableId)) {
+              parent.tableIds.push(g.tableId);
+              if (tName && !parent.todasMesasNombre.includes(tName)) {
+                  parent.todasMesasNombre.push(tName);
+              }
+          }
+          parent.displayPasses += g.passes;
+          parent.mergedSubGuests = [...(parent.mergedSubGuests || []), ...subGuestsWithTable];
+      }
+  });
+
+  // 🟢 ORDEN ESTRICTO: Obligamos a que el sub-invitado titular siempre quede en la posición 0
+  const unifiedGuests = Array.from(familiasUnificadasMap.values()).map(parent => {
+      if (parent.mergedSubGuests && parent.mergedSubGuests.length > 0) {
+          parent.mergedSubGuests.sort((a, b) => {
+              // 1. Prioridad absoluta: El que se llama igual que el titular de la familia
+              if (a.name === parent.name && b.name !== parent.name) return -1;
+              if (b.name === parent.name && a.name !== parent.name) return 1;
+              // 2. Segunda prioridad: Nombres llenos vs Nombres vacíos
+              if (a.name && !b.name) return -1;
+              if (!a.name && b.name) return 1;
+              return 0;
+          });
+      }
+      return parent;
+  });
+
+  const invitadosFiltrados = unifiedGuests.filter(g => {
     const term = searchTerm.toLowerCase();
     const matchesSide = filtroLado === 'Todos' ? true : g.side === filtroLado.toLowerCase();
     if (!term) return matchesSide;
@@ -1440,39 +1494,39 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     const name = (g.name || '').toLowerCase();
     const status = (g.status || '').toLowerCase();
     const side = g.side ? g.side.toLowerCase() : ''; 
-    const subGuestsNames = g.subGuests ? g.subGuests.map(sg => (sg.name || '').toLowerCase()).join(' ') : '';
-    const tableObj = tables?.find(t => String(t.id) === String(g.tableId));
-    const tableName = tableObj ? (tableObj.name || '').toLowerCase() : '';
+    const subGuestsNames = g.mergedSubGuests ? g.mergedSubGuests.map(sg => (sg.name || '').toLowerCase()).join(' ') : '';
+    const mesasNames = g.todasMesasNombre ? g.todasMesasNombre.join(' ').toLowerCase() : '';
 
-    return (name.includes(term) || status.includes(term) || subGuestsNames.includes(term) || tableName.includes(term) || side.includes(term)) && matchesSide;
+    return (name.includes(term) || status.includes(term) || subGuestsNames.includes(term) || mesasNames.includes(term) || side.includes(term)) && matchesSide;
   });
 
   const getFlattenedGuests = (guestList) => {
     const flattened = [];
     guestList.forEach(guest => {
       if (!isPremium) {
-        flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.passes, isMain: true, isChild: false, pin: null, entered: false });
+        flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.displayPasses || guest.passes, isMain: true, isChild: false, pin: null, entered: false, specificTableName: null });
         return; 
       }
-      if (!guest.subGuests || guest.subGuests.length === 0 || !qrEnabled) {
-        flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.passes, isMain: true, isChild: false, pin: null, entered: false });
+      if (!guest.mergedSubGuests || guest.mergedSubGuests.length === 0 || !qrEnabled) {
+        flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.displayPasses || guest.passes, isMain: true, isChild: false, pin: null, entered: false, specificTableName: null });
       } else {
-        guest.subGuests.forEach((sg, idx) => {
+        guest.mergedSubGuests.forEach((sg, idx) => {
           flattened.push({ 
             _rowId: sg.id, 
             parentGuest: guest, 
             displayName: sg.name || (sg.isChild ? 'Niño (Por registrar)' : 'Acompañante (Por registrar)'), 
-            passes: guest.passes, 
+            passes: guest.displayPasses || guest.passes, 
             isMain: idx === 0, 
             isChild: sg.isChild, 
             pin: sg.id, 
             entered: sg.entered,
-            isEmptyName: !sg.name
+            isEmptyName: !sg.name,
+            specificTableName: sg.specificTableName
           });
         });
-        const faltantes = (guest.passes || 0) - guest.subGuests.length;
+        const faltantes = (guest.displayPasses || guest.passes || 0) - guest.mergedSubGuests.length;
         if (faltantes > 0 && (guest.status === 'pendiente' || guest.status === 'por_invitar')) {
-          flattened.push({ _rowId: `${guest.id}_faltantes`, parentGuest: guest, displayName: `Lugares sin confirmar (${faltantes})`, passes: faltantes, isMain: false, isChild: false, pin: null, isMissing: true, entered: false });
+          flattened.push({ _rowId: `${guest.id}_faltantes`, parentGuest: guest, displayName: `Lugares sin confirmar (${faltantes})`, passes: faltantes, isMain: false, isChild: false, pin: null, isMissing: true, entered: false, specificTableName: null });
         }
       }
     });
@@ -1497,7 +1551,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     }
     let msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nPor favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia*:\n\n ${linkPersonalizado}\n\n¡Te esperamos!`;
     if (passCountEnabled && isPremium) {
-      msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.passes} lugares reservados):\n\n ${linkPersonalizado}\n\n¡Te esperamos!`;
+      msg = `¡Hola *${parentGuest.name}*! Tenemos el honor de invitarte a nuestro evento.\n\nTu pase es VIP e intransferible. Por favor entra al siguiente enlace para ver los detalles, la ubicación y *Confirmar tu Asistencia* (tienes ${parentGuest.displayPasses || parentGuest.passes} lugares reservados):\n\n ${linkPersonalizado}\n\n¡Te esperamos!`;
     }
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
     const nuevoStatus = parentGuest.status === 'por_invitar' ? 'pendiente' : parentGuest.status;
@@ -1602,9 +1656,16 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     html += `</tr>`;
 
     allList.forEach(row => {
-      const mesaName = row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : 'Sin Mesa';
+      let mesaName = row.specificTableName || 'Sin Mesa';
+      if (row.isMissing) mesaName = '-';
+          
+      let displayName = row.displayName;
+      if (row.isMain && row.parentGuest.todasMesasNombre?.length > 1) {
+          displayName += ' (Fam. Dividida)';
+      }
+
       html += `<tr>`;
-      if(exportCols.nombre) html += `<td>${row.isMain ? '<b>'+row.displayName+'</b>' : row.displayName} ${row.isChild ? '(Niño)' : ''}</td>`;
+      if(exportCols.nombre) html += `<td>${row.isMain ? '<b>'+displayName+'</b>' : displayName} ${row.isChild ? '(Niño)' : ''}</td>`;
       if(exportCols.pases && passCountEnabled) html += `<td style="text-align:center;">${row.isMain ? row.passes : ''}</td>`;
       if(exportCols.estatus) html += `<td>${row.parentGuest.status.replace('_', ' ').toUpperCase()}</td>`;
       if(exportCols.telefono) html += `<td>${row.isMain ? (row.parentGuest.phone || 'N/A') : ''}</td>`;
@@ -1668,6 +1729,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                       {exportCols.nombre && (
                         <td className="py-3 px-2 text-slate-800">
                           <span className={`${row.isMain ? 'font-bold' : ''}`}>{row.displayName}</span> 
+                          {row.isMain && row.parentGuest.todasMesasNombre?.length > 1 && <span className="ml-1 text-[8px] text-amber-600 uppercase font-bold tracking-widest">(Dividida)</span>}
                           {row.isChild && <span className="ml-2 text-[10px] text-slate-500">(Niño)</span>}
                           {row.isMissing && <span className="ml-2 text-[10px] text-slate-500 italic">(Por registrar)</span>}
                         </td>
@@ -1675,7 +1737,13 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                       {exportCols.pases && passCountEnabled && <td className="py-3 px-2 text-center text-slate-800 font-bold">{row.isMain ? row.passes : '-'}</td>}
                       {exportCols.estatus && <td className="py-3 px-2 text-center text-slate-600 text-[10px] uppercase tracking-widest font-bold">{row.parentGuest.status.replace('_', ' ')}</td>}
                       {exportCols.telefono && <td className="py-3 px-2 text-slate-600 font-mono text-[11px]">{row.isMain ? (row.parentGuest.phone || '-') : ''}</td>}
-                      {isPremium && exportCols.mesa && <td className="py-3 px-2 text-slate-800 font-bold">{row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : <span className="text-slate-400 font-normal italic">Sin mesa</span>}</td>}
+                      {isPremium && exportCols.mesa && <td className="py-3 px-2 text-slate-800 font-bold">
+                        {row.specificTableName ? (
+                            row.specificTableName 
+                        ) : (
+                            <span className="text-slate-400 font-normal italic">{row.isMissing ? '-' : 'Sin mesa'}</span>
+                        )}
+                      </td>}
                     </tr>
                   )
                 })}
@@ -1833,6 +1901,11 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                           <span className={`${row.isMain ? 'font-bold text-slate-800 dark:text-white' : 'font-normal text-slate-600 dark:text-slate-300'} ${row.isMissing || row.isEmptyName ? 'text-amber-500 italic' : ''} ${row.parentGuest.status === 'cancelado' ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>
                             {row.displayName}
                           </span>
+                          {row.isMain && row.parentGuest.todasMesasNombre?.length > 1 && (
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20" title={`Distribuidos en: ${row.parentGuest.todasMesasNombre.join(', ')}`}>
+                              Dividida
+                            </span>
+                          )}
                           {isWeddingMode && !row.isMissing && row.parentGuest.side && row.parentGuest.side !== 'general' && (
                             <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${row.parentGuest.side === 'novia' ? 'bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : 'bg-indigo-100 text-indigo-600 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20'}`}>
                               {row.parentGuest.side}
@@ -1850,17 +1923,21 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     
                     {passCountEnabled && (
                        <td className="px-3 py-3 text-center">
-                          {row.isMain || row.isMissing ? <span className="font-black text-indigo-600 dark:text-amber-500 text-sm">{row.passes}</span> : <span className="text-slate-300 dark:text-slate-600">-</span>}
+                          {row.isMain || row.isMissing ? <span className="font-black text-indigo-600 dark:text-amber-500 text-sm">{row.parentGuest.displayPasses || row.passes}</span> : <span className="text-slate-300 dark:text-slate-600">-</span>}
                        </td>
                     )}
 
                     {isPremium && (
                       <td className="px-4 py-3 text-center">
-                        {row.parentGuest.tableId ? (
-                          <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold border border-slate-200 dark:border-white/10 shadow-sm">
-                            {tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId}
-                          </span>
-                        ) : <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">No asignado</span>}
+                        {row.specificTableName ? (
+                           <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold border border-slate-200 dark:border-white/10 shadow-sm whitespace-nowrap">
+                             {row.specificTableName}
+                           </span>
+                        ) : (
+                           <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">
+                             {row.isMissing ? '-' : 'No asignado'}
+                           </span>
+                        )}
                       </td>
                     )}
 
@@ -1910,7 +1987,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               flattenedList.map((row) => {
                 const isExpanded = expandedMobileRow === row._rowId;
                 const isCancelado = row.parentGuest.status === 'cancelado';
-                const tableName = row.parentGuest.tableId ? (tables?.find(t => String(t.id) === String(row.parentGuest.tableId))?.name || row.parentGuest.tableId) : 'Sin mesa asignada';
+                
+                let tableNameDisplay = row.specificTableName || 'Sin mesa asignada';
+                if (row.isMissing) tableNameDisplay = '-';
 
                 return (
                   <div key={`mobile_${row._rowId}`} className={`rounded-2xl transition-all duration-300 overflow-hidden border ${row.isMain ? 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 shadow-sm mt-4' : 'bg-slate-50/60 dark:bg-white/[0.03] border-l-[3px] border-l-indigo-200 dark:border-l-amber-500/40 border-y-transparent border-r-transparent ml-4 rounded-l-none'} ${isCancelado ? 'opacity-60' : ''}`}>
@@ -1920,9 +1999,14 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                           <span className={`font-bold truncate text-base ${row.isMain ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                             {row.displayName}
                           </span>
+                          {row.isMain && row.parentGuest.todasMesasNombre?.length > 1 && (
+                            <span className="ml-1 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">
+                              Dividida
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-2 text-xs">
-                          <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center truncate max-w-[150px]"><MapPin size={12} className="mr-1 shrink-0 text-indigo-400 dark:text-amber-500"/> <span className="truncate">{tableName}</span></span>
+                          <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center truncate max-w-[150px]"><MapPin size={12} className="mr-1 shrink-0 text-indigo-400 dark:text-amber-500"/> <span className="truncate">{tableNameDisplay}</span></span>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-2.5 shrink-0">
@@ -3320,6 +3404,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   const [isEditMode, setIsEditMode] = useState(false);
   
   const [guestSplitPrompt, setGuestSplitPrompt] = useState(null); 
+  const [confirmDialog, setConfirmDialog] = useState(null);
   const [modoSeparador, setModoSeparador] = useState(false);
   const [separarCantidad, setSepararCantidad] = useState(1);
 
@@ -3360,6 +3445,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   const containerRef = useRef(null);
   const [vp, setVp] = useState({ w: 0, h: 0 });
 
+  // 🟢 Aseguramos que el observador se recargue cuando entramos/salimos del Portal
   useLayoutEffect(() => {
     const observeTarget = containerRef.current;
     if (!observeTarget) return;
@@ -3369,7 +3455,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     });
     resizeObserver.observe(observeTarget);
     return () => resizeObserver.disconnect();
-  }, []);
+  }, [isEditMode]);
   
   const centerAndFitMap = () => {
     if (vp.w === 0 || vp.h === 0) return;
@@ -3552,16 +3638,33 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     saveHistory(elements, tables);
 
     let currentSelection = [...selectedIds];
-    if (!currentSelection.includes(id)) {
-        if (el.groupId) {
-            currentSelection = allItems.filter(x => x.groupId === el.groupId).map(x => x.id);
-        } else if (el.isRoomArea && roomGrouped) {
-            currentSelection = elements.filter(x => x.isRoomArea).map(x => x.id);
+
+    if (e.shiftKey || e.metaKey || e.ctrlKey) {
+        if (currentSelection.includes(id)) {
+            currentSelection = currentSelection.filter(selId => selId !== id);
         } else {
-            currentSelection = [id];
+            if (el.groupId) {
+                const groupIds = allItems.filter(x => x.groupId === el.groupId).map(x => x.id);
+                currentSelection = [...new Set([...currentSelection, ...groupIds])];
+            } else {
+                currentSelection.push(id);
+            }
         }
         setSelectedIds(currentSelection);
+    } else {
+        if (!currentSelection.includes(id)) {
+            if (el.groupId) {
+                currentSelection = allItems.filter(x => x.groupId === el.groupId).map(x => x.id);
+            } else if (el.isRoomArea && roomGrouped) {
+                currentSelection = elements.filter(x => x.isRoomArea).map(x => x.id);
+            } else {
+                currentSelection = [id];
+            }
+            setSelectedIds(currentSelection);
+        }
     }
+    
+    if (currentSelection.length === 0) return;
     
     const targets = allItems.filter(x => currentSelection.includes(x.id));
 
@@ -3732,6 +3835,14 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     if (max !== undefined && max !== null && num > max) num = max;
     
     let newConfig = { ...table.configDetalle };
+    
+    if (category === 'ladosTablon' && !newConfig.ladosTablon) newConfig.ladosTablon = { top: 5, bottom: 5, left: 1, right: 1 };
+    if (category === 'ladosCuadrada' && !newConfig.ladosCuadrada) newConfig.ladosCuadrada = { top: 3, right: 3, bottom: 3, left: 3 };
+    if (category === 'ladosOvalada' && !newConfig.ladosOvalada) newConfig.ladosOvalada = { top: 4, bottom: 4, left: 2, right: 2 };
+    if (category === 'ladosSerpentina' && !newConfig.ladosSerpentina) newConfig.ladosSerpentina = { ext: 5, int: 2, izq: 1, der: 1 };
+    if (category === 'ladosLibre' && !newConfig.ladosLibre) newConfig.ladosLibre = { top: 4, bottom: 4, left: 2, right: 2 };
+    if (category === 'libreMedidas' && !newConfig.libreMedidas) newConfig.libreMedidas = { largo: 2.0, ancho: 1.0 };
+
     if (field) {
       newConfig[category] = { ...newConfig[category], [field]: num };
     } else {
@@ -3753,12 +3864,17 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       if (field === 'ancho') newH = num;
     }
 
-    saveHistory(elements, tables);
     const updatedTable = { ...table, configDetalle: newConfig, capacity: newCap, width: newW, height: newH };
+    
+    if (setTables) {
+      setTables(tables.map(t => String(t.id) === String(id) ? updatedTable : t));
+    }
+
+    saveHistory(elements, tables);
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", String(id)), updatedTable);
   };
 
-  const deleteSelected = async () => {
+  const removeFromMapSelected = async () => {
     saveHistory(elements, tables);
     const promesas = [];
     selectedIds.forEach(id => {
@@ -3772,6 +3888,33 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     });
     await Promise.all(promesas);
     setSelectedIds([]);
+  };
+
+  const permanentlyDeleteSelected = () => {
+    setConfirmDialog({
+      title: '¿Eliminar Elementos?',
+      message: '¿Estás seguro de eliminar permanentemente estos elementos? Si son mesas, los invitados sentados se soltarán en el plano. Esta acción no se puede deshacer.',
+      isDestructive: true,
+      onConfirm: async () => {
+        saveHistory(elements, tables);
+        const promesas = [];
+        selectedIds.forEach(id => {
+          const isTable = tables.some(t => String(t.id) === String(id));
+          if (isTable) {
+            promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", String(id))));
+            const tableGuests = guests.filter(g => String(g.tableId) === String(id));
+            tableGuests.forEach(g => {
+               promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", String(g.id)), { ...g, tableId: null }));
+            });
+          } else {
+            promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", String(id))));
+          }
+        });
+        await Promise.all(promesas);
+        setSelectedIds([]);
+        setConfirmDialog(null);
+      }
+    });
   };
 
   const toggleGroupSelection = async () => {
@@ -3859,15 +4002,28 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     if (selectedIds.length === 0) return null;
 
     if (isMultiSelection) {
+       const firstItem = allItems.find(x => String(x.id) === String(selectedIds[0]));
+       const allHaveSameGroup = firstItem && firstItem.groupId && selectedIds.every(id => {
+           const item = allItems.find(x => String(x.id) === String(id));
+           return item && item.groupId === firstItem.groupId;
+       });
+
        return (
-         <div className="p-4 bg-indigo-600 text-white border-b border-indigo-700 shrink-0 shadow-inner flex flex-col justify-center animate-in slide-in-from-top-2">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-bold flex items-center"><Layers size={16} className="mr-2"/> {selectedIds.length} Seleccionados</span>
-              <button onClick={() => setSelectedIds([])} className="text-indigo-300 hover:text-white"><X size={16}/></button>
+         <div className="p-4 bg-white border-b border-slate-200 shrink-0 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[11px] font-black uppercase tracking-widest text-indigo-900 flex items-center"><Layers size={14} className="mr-1.5"/> {selectedIds.length} Seleccionados</span>
+              <button onClick={() => setSelectedIds([])} className="text-slate-400 hover:text-rose-500 bg-slate-50 p-1.5 rounded-md transition-colors"><X size={14}/></button>
             </div>
             <div className="flex gap-2">
-              <button onClick={toggleGroupSelection} className="flex-1 py-2 bg-indigo-500 hover:bg-indigo-400 rounded-lg text-xs font-bold transition-colors flex items-center justify-center"><Link size={14} className="mr-1.5"/> Agrupar / Desagrupar</button>
-              <button onClick={deleteSelected} className="flex-1 py-2 bg-rose-500 hover:bg-rose-400 rounded-lg text-xs font-bold transition-colors flex items-center justify-center"><Trash2 size={14} className="mr-1.5"/> Borrar Todos</button>
+              <button onClick={toggleGroupSelection} className="flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition-colors flex items-center justify-center border border-indigo-200">
+                <Link size={14} className="mr-1.5"/> {allHaveSameGroup ? 'Desagrupar Elementos' : 'Agrupar Elementos'}
+              </button>
+              <button onClick={removeFromMapSelected} className="flex-1 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold transition-colors flex items-center justify-center border border-slate-200" title="Quitar del plano (Guarda en inventario)">
+                <Move size={14} className="mr-1.5"/> Quitar
+              </button>
+              <button onClick={permanentlyDeleteSelected} className="flex-1 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold transition-colors flex items-center justify-center border border-rose-200" title="Eliminar permanentemente de la Base de Datos">
+                <Trash2 size={14} className="mr-1.5"/> Eliminar
+              </button>
             </div>
          </div>
        );
@@ -3891,68 +4047,71 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     const config = el.configDetalle || {};
 
     return (
-      <div className="p-3 bg-indigo-50/60 border-b border-indigo-100 shrink-0 shadow-inner animate-in slide-in-from-top-2">
-        <div className="flex items-center justify-between mb-3">
+      <div className="p-4 bg-white border-b border-slate-200 shrink-0 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] relative z-10">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
-            <span className="text-[11px] font-bold text-indigo-900 truncate max-w-[130px]">{el.name || el.customLabel || 'Elemento'}</span>
-            <span className="text-[8px] bg-indigo-200 text-indigo-700 px-1.5 py-0.5 rounded ml-2 uppercase font-bold">{isTable ? 'Mesa' : 'Área'}</span>
+            <span className="text-[11px] font-black uppercase tracking-widest text-indigo-900 flex items-center truncate max-w-[150px]"><Settings2 size={14} className="mr-1.5 text-indigo-500"/> {el.name || el.customLabel || 'Propiedades'}</span>
           </div>
-          <button onClick={() => setSelectedIds([])} className="text-indigo-400 hover:text-rose-500"><X size={14}/></button>
+          <button onClick={() => setSelectedIds([])} className="text-slate-400 hover:text-rose-500 bg-slate-50 p-1.5 rounded-md transition-colors"><X size={14}/></button>
         </div>
 
         {el.isRoomArea && (
-          <div className="grid grid-cols-2 gap-1.5 mb-2">
-            <div className="bg-white p-1.5 rounded-lg flex items-center justify-between border border-indigo-100 shadow-sm">
-              <span className="text-[9px] text-slate-500 font-bold uppercase">Ancho</span>
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            <div className="bg-slate-50 p-2 rounded-lg flex items-center justify-between border border-slate-200 shadow-inner">
+              <span className="text-[9px] text-slate-500 font-bold uppercase">Ancho (m)</span>
               <input type="number" step="0.5" value={el.width} onChange={e => updateElementData(el.id, {width: Math.max(0.5, parseFloat(e.target.value) || 0.5)})} className="w-12 text-right bg-transparent text-xs font-black text-indigo-600 outline-none" />
             </div>
-            <div className="bg-white p-1.5 rounded-lg flex items-center justify-between border border-indigo-100 shadow-sm">
-              <span className="text-[9px] text-slate-500 font-bold uppercase">Largo</span>
+            <div className="bg-slate-50 p-2 rounded-lg flex items-center justify-between border border-slate-200 shadow-inner">
+              <span className="text-[9px] text-slate-500 font-bold uppercase">Largo (m)</span>
               <input type="number" step="0.5" value={el.height} onChange={e => updateElementData(el.id, {height: Math.max(0.5, parseFloat(e.target.value) || 0.5)})} className="w-12 text-right bg-transparent text-xs font-black text-indigo-600 outline-none" />
             </div>
             {el.mode !== 'overlay' && (
-              <button onClick={() => updateElementData(el.id, {mode: isSub ? 'add' : 'subtract'})} className={`col-span-2 py-1.5 rounded-lg text-[9px] font-bold transition-colors shadow-sm ${isSub ? 'bg-rose-100 text-rose-700 hover:bg-rose-200' : 'bg-slate-800 text-white hover:bg-slate-900'}`}>
-                 {isSub ? 'Convertir a Piso Fijo' : 'Convertir a Hueco/Perforación'}
+              <button onClick={() => updateElementData(el.id, {mode: isSub ? 'add' : 'subtract'})} className={`col-span-2 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm border ${isSub ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-200' : 'bg-slate-800 text-white hover:bg-slate-900 border-slate-900'}`}>
+                 {isSub ? 'Convertir a Piso Fijo' : 'Convertir a Hueco / Patio'}
               </button>
             )}
           </div>
         )}
 
         {isTable && (
-          <div className="mb-3 space-y-2">
-            <div className="text-[9px] font-black text-indigo-800 uppercase tracking-wider flex items-center"><Settings2 size={12} className="mr-1"/> Configurar Sillas</div>
+          <div className="mb-4 space-y-3">
             
+            <div className="bg-indigo-50 border border-indigo-100 p-2.5 rounded-lg mb-4 flex items-center shadow-inner">
+               <Users size={16} className="text-indigo-600 mr-2 shrink-0"/>
+               <span className="text-[10px] font-black text-indigo-800 uppercase tracking-widest leading-tight">Configurar sillas por lado</span>
+            </div>
+
             {normType === 'redonda' && (
-              <div className="bg-white p-1.5 rounded-lg flex items-center justify-between border border-indigo-100 shadow-sm">
-                <span className="text-[9px] text-slate-500 font-bold uppercase">Capacidad Total</span>
+              <div className="bg-slate-50 p-2 rounded-lg flex items-center justify-between border border-slate-200 shadow-inner">
+                <span className="text-[9px] text-slate-500 font-bold uppercase">Sillas Totales</span>
                 <input type="number" min="1" max="14" value={config.capacidadRedonda || el.capacity} onChange={e => handleTableConfig(el.id, el, 'capacidadRedonda', null, e.target.value, 14)} className="w-12 text-right bg-transparent text-xs font-black text-indigo-600 outline-none" />
               </div>
             )}
             
             {normType === 'tablon' && (
-              <div className="bg-white p-2 rounded-lg border border-indigo-100 shadow-sm grid grid-cols-2 gap-1.5">
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Largo 1</span><input type="number" min="0" value={config.ladosTablon?.top ?? 5} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'top', e.target.value, 5)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Largo 2</span><input type="number" min="0" value={config.ladosTablon?.bottom ?? 5} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'bottom', e.target.value, 5)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Cabecera 1</span><input type="number" min="0" value={config.ladosTablon?.left ?? 1} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'left', e.target.value, 1)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Cabecera 2</span><input type="number" min="0" value={config.ladosTablon?.right ?? 1} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'right', e.target.value, 1)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
+              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-inner grid grid-cols-2 gap-2">
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Largo 1</span><input type="number" min="0" value={config.ladosTablon?.top ?? 5} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'top', e.target.value, 5)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Largo 2</span><input type="number" min="0" value={config.ladosTablon?.bottom ?? 5} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'bottom', e.target.value, 5)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Cabecera 1</span><input type="number" min="0" value={config.ladosTablon?.left ?? 1} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'left', e.target.value, 1)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Cabecera 2</span><input type="number" min="0" value={config.ladosTablon?.right ?? 1} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'right', e.target.value, 1)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
               </div>
             )}
 
             {normType === 'cuadrada' && (
-              <div className="bg-white p-2 rounded-lg border border-indigo-100 shadow-sm grid grid-cols-2 gap-1.5">
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Arriba</span><input type="number" min="0" value={config.ladosCuadrada?.top ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'top', e.target.value, 3)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Abajo</span><input type="number" min="0" value={config.ladosCuadrada?.bottom ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'bottom', e.target.value, 3)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Izquierda</span><input type="number" min="0" value={config.ladosCuadrada?.left ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'left', e.target.value, 3)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Derecha</span><input type="number" min="0" value={config.ladosCuadrada?.right ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'right', e.target.value, 3)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
+              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-inner grid grid-cols-2 gap-2">
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Lado Arriba</span><input type="number" min="0" value={config.ladosCuadrada?.top ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'top', e.target.value, 3)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Lado Abajo</span><input type="number" min="0" value={config.ladosCuadrada?.bottom ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'bottom', e.target.value, 3)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Lado Izq.</span><input type="number" min="0" value={config.ladosCuadrada?.left ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'left', e.target.value, 3)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Lado Der.</span><input type="number" min="0" value={config.ladosCuadrada?.right ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'right', e.target.value, 3)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
               </div>
             )}
 
             {normType === 'ovalada' && (
-              <div className="bg-white p-2 rounded-lg border border-indigo-100 shadow-sm grid grid-cols-2 gap-1.5">
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Lado Recto 1</span><input type="number" min="0" value={config.ladosOvalada?.top ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'top', e.target.value, 4)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Lado Recto 2</span><input type="number" min="0" value={config.ladosOvalada?.bottom ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'bottom', e.target.value, 4)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Curva Izq.</span><input type="number" min="0" value={config.ladosOvalada?.left ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'left', e.target.value, 3)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Curva Der.</span><input type="number" min="0" value={config.ladosOvalada?.right ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'right', e.target.value, 3)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
+              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-inner grid grid-cols-2 gap-2">
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Recto Arriba</span><input type="number" min="0" value={config.ladosOvalada?.top ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'top', e.target.value, 4)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Recto Abajo</span><input type="number" min="0" value={config.ladosOvalada?.bottom ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'bottom', e.target.value, 4)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Curva Izq.</span><input type="number" min="0" value={config.ladosOvalada?.left ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'left', e.target.value, 3)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Curva Der.</span><input type="number" min="0" value={config.ladosOvalada?.right ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'right', e.target.value, 3)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
               </div>
             )}
 
@@ -3960,537 +4119,515 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
               const mod = config.modeloSerpentina || 'mod4';
               const sMax = mod === 'mod1' ? {e:3,i:1,s:1} : mod === 'mod2' ? {e:4,i:1,s:1} : mod === 'mod3' ? {e:4,i:1,s:1} : {e:5,i:2,s:1};
               return (
-                <div className="bg-white p-2 rounded-lg border border-indigo-100 shadow-sm grid grid-cols-2 gap-1.5">
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Arco Exterior</span><input type="number" min="0" value={config.ladosSerpentina?.ext ?? sMax.e} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'ext', e.target.value, sMax.e)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Arco Interior</span><input type="number" min="0" value={config.ladosSerpentina?.int ?? sMax.i} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'int', e.target.value, sMax.i)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Ancho Izq.</span><input type="number" min="0" value={config.ladosSerpentina?.izq ?? sMax.s} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'izq', e.target.value, sMax.s)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Ancho Der.</span><input type="number" min="0" value={config.ladosSerpentina?.der ?? sMax.s} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'der', e.target.value, sMax.s)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
+                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-inner grid grid-cols-2 gap-2">
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Arco Exterior</span><input type="number" min="0" value={config.ladosSerpentina?.ext ?? sMax.e} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'ext', e.target.value, sMax.e)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Arco Interior</span><input type="number" min="0" value={config.ladosSerpentina?.int ?? sMax.i} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'int', e.target.value, sMax.i)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Ancho Izq.</span><input type="number" min="0" value={config.ladosSerpentina?.izq ?? sMax.s} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'izq', e.target.value, sMax.s)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Ancho Der.</span><input type="number" min="0" value={config.ladosSerpentina?.der ?? sMax.s} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'der', e.target.value, sMax.s)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
                 </div>
               );
             })()}
 
             {normType === 'libre' && (
-              <div className="bg-white p-2 rounded-lg border border-indigo-100 shadow-sm mt-2">
-                <div className="text-[9px] font-black text-indigo-800 uppercase tracking-wider mb-2">Medidas Físicas (Metros)</div>
-                <div className="grid grid-cols-2 gap-1.5 mb-3">
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Largo</span><input type="number" step="0.5" min="0.5" value={config.libreMedidas?.largo ?? 2} onChange={e=>handleTableConfig(el.id, el, 'libreMedidas', 'largo', e.target.value)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Ancho</span><input type="number" step="0.5" min="0.5" value={config.libreMedidas?.ancho ?? 1} onChange={e=>handleTableConfig(el.id, el, 'libreMedidas', 'ancho', e.target.value)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
+              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 shadow-inner">
+                <div className="text-[9px] font-black text-indigo-800 uppercase tracking-wider mb-2">Medidas (Metros)</div>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Largo</span><input type="number" step="0.5" min="0.5" value={config.libreMedidas?.largo ?? 2} onChange={e=>handleTableConfig(el.id, el, 'libreMedidas', 'largo', e.target.value)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Ancho</span><input type="number" step="0.5" min="0.5" value={config.libreMedidas?.ancho ?? 1} onChange={e=>handleTableConfig(el.id, el, 'libreMedidas', 'ancho', e.target.value)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
                 </div>
-                <div className="text-[9px] font-black text-indigo-800 uppercase tracking-wider mb-2">Sillas por Lado</div>
-                <div className="grid grid-cols-2 gap-1.5">
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Arriba</span><input type="number" min="0" value={config.ladosLibre?.top ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'top', e.target.value)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Abajo</span><input type="number" min="0" value={config.ladosLibre?.bottom ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'bottom', e.target.value)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Izquierda</span><input type="number" min="0" value={config.ladosLibre?.left ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'left', e.target.value)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-0.5">Derecha</span><input type="number" min="0" value={config.ladosLibre?.right ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'right', e.target.value)} className="w-full text-xs p-1 border rounded bg-slate-50 outline-none text-center font-bold text-indigo-600" /></div>
+                <div className="text-[9px] font-black text-indigo-800 uppercase tracking-wider mb-2">Distribución (Sillas)</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Arriba</span><input type="number" min="0" value={config.ladosLibre?.top ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'top', e.target.value)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Abajo</span><input type="number" min="0" value={config.ladosLibre?.bottom ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'bottom', e.target.value)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Izquierda</span><input type="number" min="0" value={config.ladosLibre?.left ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'left', e.target.value)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Derecha</span><input type="number" min="0" value={config.ladosLibre?.right ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'right', e.target.value)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
                 </div>
               </div>
             )}
           </div>
         )}
 
-        <div className="flex items-center gap-1.5 pt-2 border-t border-indigo-100">
-          <button onClick={() => {setActiveTool('rotate'); setDragging(null);}} className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg flex items-center justify-center transition-colors shadow-sm ${activeTool === 'rotate' ? 'bg-amber-500 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-amber-50'}`} title="Activar Rotación Libre"><RotateCw size={12} className="mr-1"/> Girar</button>
-          <button onClick={deleteSelected} className="flex-1 py-1.5 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg text-[10px] font-bold flex items-center justify-center transition-colors shadow-sm"><Trash2 size={12} className="mr-1"/> {isTable ? "Quitar Mesa" : "Borrar"}</button>
+        <div className="flex items-center gap-2 pt-3 mt-2 border-t border-slate-200">
+          {isTable ? (
+            <>
+              <button onClick={removeFromMapSelected} className="flex-1 py-2.5 bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm" title="Quita la mesa del plano pero la guarda en tu lista">
+                <Move size={12} className="mr-1.5"/> Quitar
+              </button>
+              <button onClick={permanentlyDeleteSelected} className="flex-1 py-2.5 bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm" title="Elimina la mesa permanentemente de la base de datos">
+                <Trash2 size={12} className="mr-1.5"/> Eliminar
+              </button>
+            </>
+          ) : (
+            <button onClick={permanentlyDeleteSelected} className="flex-1 py-2.5 bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 rounded-lg text-[10px] font-bold uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm">
+              <Trash2 size={12} className="mr-1.5"/> Borrar Área
+            </button>
+          )}
         </div>
       </div>
     );
   };
 
-  const handlePrintWheel = (e) => {
-    e.preventDefault(); e.stopPropagation();
-    const zoomSensitivity = 0.002;
-    const delta = -e.deltaY * zoomSensitivity;
-    setPrintScale(s => Math.max(0.1, Math.min(s * (1 + delta), 5)));
-  };
-
-  const handlePrintPointerDown = (e) => {
-    if (!isBlueprintPanActive) return; 
-    e.preventDefault(); 
-    e.stopPropagation();
-    setIsPrintDragging(true);
-    setPrintDragStart({ x: e.clientX - printPan.x, y: e.clientY - printPan.y });
-  };
-
-  const handlePrintPointerMove = (e) => {
-    if (!isPrintDragging) return;
-    setPrintPan({ x: e.clientX - printDragStart.x, y: e.clientY - printDragStart.y });
-  };
-
-  const handlePrintPointerUp = () => setIsPrintDragging(false);
-
-  const triggerPdfDownload = async () => {
-    setIsPreparingPrint(true);
-    setIsCapturingPdf(true);
-
-    setTimeout(async () => {
-      try {
-        const { jsPDF } = await import('jspdf');
-        const html2canvas = (await import('html2canvas')).default;
-
-        const pages = document.querySelectorAll('.map-pdf-page');
-        const pdf = new jsPDF('l', 'mm', 'letter');
-
-        for (let i = 0; i < pages.length; i++) {
-           const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-           const imgData = canvas.toDataURL('image/jpeg', 0.95);
-           if (i > 0) pdf.addPage();
-           pdf.addImage(imgData, 'JPEG', 0, 0, 279.4, 215.9);
-        }
-        
-        pdf.save('Plano-Croquis.pdf');
-      } catch (error) {
-        console.error(error);
-      }
-      setIsCapturingPdf(false);
-      setIsPreparingPrint(false);
-      setShowExportModal(false);
-    }, 500); 
-  };
-
-  return (
-    <div className="h-full flex flex-col space-y-4 pb-6" onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onMouseLeave={handlePointerUp}>
-      
-      <div className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row overflow-hidden relative">
-
-        <div ref={containerRef} className="flex-1 relative overflow-hidden bg-slate-100" onDrop={handleDropOnCanvas} onDragOver={(e) => e.preventDefault()}>
-          
-          {isEditMode && (
-            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/95 backdrop-blur-md border border-slate-200 shadow-2xl rounded-2xl flex flex-col items-center p-2 gap-2 z-[600] animate-in slide-in-from-left-4">
-              <button onClick={() => {setActiveTool('select'); setMeasureLine(null);}} className={`p-3 rounded-xl transition-all ${activeTool === 'select' ? 'bg-indigo-600 text-white shadow-md scale-110' : 'text-slate-500 hover:bg-slate-100 hover:text-indigo-600'}`} title="Seleccionar Libre">
-                <NavigationIcon size={20} className="-rotate-90" />
-              </button>
-              <button onClick={() => {setActiveTool('pan'); setSelectedIds([]); setMeasureLine(null);}} className={`p-3 rounded-xl transition-all ${activeTool === 'pan' ? 'bg-indigo-600 text-white shadow-md scale-110' : 'text-slate-500 hover:bg-slate-100 hover:text-indigo-600'}`} title="Mover Lienzo">
-                <Hand size={20} />
-              </button>
-              <button onClick={() => { if(selectedIds.length>1) toggleGroupSelection(); else setActiveTool('select'); }} className={`p-3 rounded-xl transition-all ${selectedIds.length > 1 ? 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100 ring-2 ring-indigo-200 animate-pulse' : 'text-slate-300 cursor-not-allowed'}`} title="Agrupar Selección">
-                <Link size={20} />
-              </button>
-              <div className="w-8 h-px bg-slate-200 my-1"></div>
-              <button onClick={() => {setActiveTool('measure'); setSelectedIds([]);}} className={`p-3 rounded-xl transition-all ${activeTool === 'measure' ? 'bg-sky-500 text-white shadow-md scale-110' : 'text-slate-500 hover:bg-sky-50 hover:text-sky-600'}`} title="Cinta Métrica">
-                <Spline size={20} />
-              </button>
-              <div className="w-8 h-px bg-slate-200 my-1"></div>
-              <button onClick={() => setActiveTool('rotate')} className={`p-3 rounded-xl transition-all ${activeTool === 'rotate' ? 'bg-amber-500 text-white shadow-md scale-110' : 'text-slate-500 hover:bg-amber-50 hover:text-amber-600'}`} title="Girar Selección">
-                <RotateCw size={20} />
-              </button>
+  // 🟢 COMPONENTE REUTILIZABLE: LIENZO DEL MAPA
+  const canvasContent = (
+    <div ref={containerRef} className="flex-1 relative overflow-hidden bg-slate-100 z-10" onDrop={handleDropOnCanvas} onDragOver={(e) => e.preventDefault()}>
+             
+      {isEditMode && activeTool === 'measure' && (
+          <div className="absolute z-[9999] pointer-events-none transform -translate-x-1/2 -translate-y-[150%]" style={{ left: mousePos.x * scale + offsetX, top: mousePos.y * scale + offsetY }}>
+            <div className="bg-slate-900/80 backdrop-blur text-white text-[10px] font-mono px-2 py-1 rounded-lg shadow-lg flex flex-col items-center leading-tight">
+              <span>X: {mousePos.x.toFixed(1)}</span>
+              <span>Y: {mousePos.y.toFixed(1)}</span>
             </div>
-          )}
-          
-          {!isEditMode && (
-            <div className="absolute top-6 right-6 z-[600] pointer-events-auto animate-in zoom-in duration-300">
-              <button onClick={() => setIsEditMode(true)} className="px-6 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-bold hover:bg-indigo-700 transition-all shadow-xl flex items-center hover:scale-105 border border-indigo-500">
-                <Edit2 size={18} className="mr-2"/> Editar Plano
-              </button>
-            </div>
-          )}
-
-          {isEditMode && activeTool === 'measure' && (
-             <div className="absolute z-[9999] pointer-events-none transform -translate-x-1/2 -translate-y-[150%]" style={{ left: mousePos.x * scale + offsetX, top: mousePos.y * scale + offsetY }}>
-               <div className="bg-slate-900/80 backdrop-blur text-white text-[10px] font-mono px-2 py-1 rounded-lg shadow-lg flex flex-col items-center leading-tight">
-                 <span>X: {mousePos.x.toFixed(1)}</span>
-                 <span>Y: {mousePos.y.toFixed(1)}</span>
-               </div>
-             </div>
-          )}
-
-          {selectionBox && (
-              <div className="absolute border border-indigo-500 bg-indigo-500/20 pointer-events-none z-[9999]"
-                   style={{
-                      left: Math.min(selectionBox.startX, selectionBox.currentX) * scale + offsetX,
-                      top: Math.min(selectionBox.startY, selectionBox.currentY) * scale + offsetY,
-                      width: Math.abs(selectionBox.currentX - selectionBox.startX) * scale,
-                      height: Math.abs(selectionBox.currentY - selectionBox.startY) * scale
-                   }} />
-          )}
-
-          <div 
-            className={`absolute inset-0 z-0 touch-none ${activeTool === 'measure' ? 'cursor-crosshair' : (activeTool === 'pan' ? 'cursor-grab active:cursor-grabbing' : (activeTool === 'rotate' ? 'cursor-alias' : 'cursor-default'))}`}
-            onPointerDown={(e) => {
-              if (e.button === 2) { setMeasureLine(null); return; } 
-              
-              const rect = containerRef.current.getBoundingClientRect();
-              const worldX = ((e.clientX - rect.left) - offsetX) / scale;
-              const worldY = ((e.clientY - rect.top) - offsetY) / scale;
-
-              if (activeTool === 'measure') {
-                if (!measureLine) {
-                   setMeasureLine({ x1: worldX, y1: worldY, x2: worldX, y2: worldY, done: false });
-                } else if (!measureLine.done) {
-                   setMeasureLine({ ...measureLine, done: true }); 
-                } else {
-                   setMeasureLine(null);
-                }
-              } else if (activeTool === 'pan') {
-                setSelectedIds([]);
-                setDragging({ isPanning: true, startX: e.clientX, startY: e.clientY, startPanX: pan.x, startPanY: pan.y });
-              } else if (activeTool === 'select') {
-                setSelectionBox({ startX: worldX, startY: worldY, currentX: worldX, currentY: worldY });
-                setSelectedIds([]);
-              }
-            }}
-            onContextMenu={(e) => { e.preventDefault(); setMeasureLine(null); }}
-          />
-
-          <div className="absolute inset-0 pointer-events-none">
-            <svg className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-xl z-10">
-               <defs>
-                 <mask id="roomMask">
-                   <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                   {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                   {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                 </mask>
-                 <mask id="outerWallMask">
-                   <rect x="-5000" y="-5000" width="10000" height="10000" fill="white" />
-                   {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                   {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                 </mask>
-                 <mask id="subWallMask">
-                   <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                   {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                   {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                 </mask>
-               </defs>
-
-               <g transform={`translate(${offsetX}, ${offsetY})`}>
-                 <rect x="-5000" y="-5000" width="10000" height="10000" fill="#ffffff" mask="url(#roomMask)" />
-                 <g mask="url(#outerWallMask)">
-                   {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
-                 </g>
-                 <g mask="url(#subWallMask)">
-                   {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
-                 </g>
-               </g>
-
-               {measureLine && (() => {
-                 const dx = measureLine.x2 - measureLine.x1; const dy = measureLine.y2 - measureLine.y1;
-                 const length = Math.sqrt(dx*dx + dy*dy);
-                 const p1x = measureLine.x1 * scale; const p1y = measureLine.y1 * scale;
-                 const p2x = measureLine.x2 * scale; const p2y = measureLine.y2 * scale;
-
-                 return (
-                   <g transform={`translate(${offsetX}, ${offsetY})`} className="pointer-events-none z-[9999]">
-                      <line x1={p1x} y1={p1y} x2={p2x} y2={p2y} stroke="#0ea5e9" strokeWidth="3" strokeDasharray="6 4" />
-                      <circle cx={p1x} cy={p1y} r="6" fill="#0ea5e9" stroke="white" strokeWidth="2" />
-                      <circle cx={p2x} cy={p2y} r="6" fill="#0ea5e9" stroke="white" strokeWidth="2" />
-                      <g transform={`translate(${p1x + dx/2}, ${p1y + dy/2 - 12})`}>
-                         <rect x="-35" y="-15" width="70" height="24" rx="6" fill="#0ea5e9" opacity="0.95" />
-                         <text x="0" y="2" fill="white" fontSize="12" fontWeight="bold" textAnchor="middle">{length.toFixed(2)} m</text>
-                      </g>
-                   </g>
-                 );
-               })()}
-            </svg>
-
-            {overlayAreas.map((el) => {
-              const isSelected = selectedIds.includes(el.id);
-              const canInteract = activeTool === 'select' || activeTool === 'rotate';
-              const isPool = el.shapeType === 'pool';
-
-              return (
-                <div
-                  key={el.id}
-                  onPointerDown={(e) => handlePointerDownObject(e, el.id, false)}
-                  className={`absolute flex items-center justify-center select-none shadow-md transition-shadow duration-300 z-0
-                    ${canInteract ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'}
-                    ${isSelected && canInteract ? 'ring-4 ring-rose-500 ring-offset-2 shadow-2xl' : (canInteract ? 'hover:ring-2 hover:ring-indigo-300' : '')}
-                  `}
-                  style={{
-                    width: el.width * scale, height: el.height * scale,
-                    left: el.x * scale + offsetX, top: el.y * scale + offsetY,
-                    transform: `rotate(${el.rotation || 0}deg)`,
-                    ...getTextureStyle(el.texture),
-                    boxShadow: isPool ? `inset 0 0 0 ${0.3 * scale}px #94a3b8` : 'none',
-                    borderRadius: isPool ? '8px' : '0px'
-                  }}
-                >
-                  <span className="font-extrabold text-center pointer-events-none drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>
-                    {el.customLabel || el.name}
-                  </span>
-                </div>
-              );
-            })}
-
-            {roomAreas.filter(e => e.mode !== 'overlay').map((el) => {
-              const isSelected = selectedIds.includes(el.id);
-              const isSub = el.mode === 'subtract';
-              const canInteract = activeTool === 'select' || activeTool === 'rotate';
-              
-              return (
-                <div
-                  key={el.id}
-                  className={`absolute z-20 ${canInteract ? 'pointer-events-auto' : 'pointer-events-none'}`}
-                  style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale + offsetX, top: el.y * scale + offsetY, transform: `rotate(${el.rotation || 0}deg)` }}
-                >
-                  <div 
-                    onPointerDown={(e) => handlePointerDownObject(e, el.id, false)}
-                    className={`w-full h-full cursor-pointer transition-colors duration-300 ${isSelected ? (isSub ? 'bg-rose-500/20 border-2 border-dashed border-rose-600' : 'bg-indigo-500/10 border-2 border-dashed border-indigo-600') : (isSub && canInteract ? 'hover:bg-rose-500/10' : (canInteract ? 'hover:bg-slate-500/5' : ''))}`}
-                    style={{ clipPath: getShapeClipPath(el) }}
-                  >
-                    {el.customLabel && (
-                      <span className="absolute inset-0 flex items-center justify-center font-extrabold text-slate-500 opacity-80 uppercase tracking-widest pointer-events-none" style={{ fontSize: `${Math.max(0.6, Math.min(el.width, el.height) * 0.2)}rem` }}>
-                        {el.customLabel}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-
-            {physicalStructures.map((el) => {
-              const isSelected = selectedIds.includes(el.id);
-              const canInteract = activeTool === 'select' || activeTool === 'rotate';
-              
-              return (
-                <div
-                  key={el.id}
-                  onPointerDown={(e) => handlePointerDownObject(e, el.id, false)}
-                  className={`absolute flex items-center justify-center select-none shadow-md transition-shadow duration-300 ${canInteract ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'}
-                    ${el.shape} ${el.color} ${el.texture === 'none' ? '' : 'border-[3px]'}
-                    ${isSelected && canInteract ? 'ring-4 ring-rose-500 ring-offset-2 z-40 shadow-2xl' : (canInteract ? 'hover:ring-2 hover:ring-indigo-300 z-20' : 'z-20')}
-                  `}
-                  style={{
-                    width: el.width * scale, height: el.height * scale,
-                    left: el.x * scale + offsetX, top: el.y * scale + offsetY,
-                    transform: `rotate(${el.rotation || 0}deg)`,
-                    ...getTextureStyle(el.texture)
-                  }}
-                >
-                  <span className="font-extrabold text-center pointer-events-none drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>
-                    {el.customLabel || el.name}
-                  </span>
-                </div>
-              );
-            })}
-
-            {placedTables.map((el) => {
-              const isSelected = selectedIds.includes(el.id);
-              const occupancy = guests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
-              const isSearched = globalSearch && guests.some(g => g.tableId === el.id && g.name.toLowerCase().includes(globalSearch.toLowerCase()));
-              const canInteract = activeTool === 'select' || activeTool === 'rotate';
-
-              return (
-                <div
-                  key={el.id}
-                  onPointerDown={(e) => handlePointerDownObject(e, el.id, true)}
-                  className={`absolute flex items-center justify-center select-none transition-shadow duration-300 ${canInteract ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'}
-                    ${isSelected && canInteract ? 'ring-4 ring-rose-500 ring-offset-[6px] rounded-full' : (canInteract ? 'hover:ring-2 hover:ring-indigo-400 hover:ring-offset-4 rounded-full' : '')}
-                  `}
-                  style={{
-                    width: el.width * scale, height: el.height * scale,
-                    left: el.x * scale + offsetX, top: el.y * scale + offsetY,
-                    transform: `rotate(${el.rotation || 0}deg)`,
-                    zIndex: isSearched ? 9999 : (isSelected ? 50 : 40)
-                  }}
-                >
-                  <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={guests.filter(g => g.tableId === el.id)} searchQuery={globalSearch} />
-                </div>
-              );
-            })}
-
-            <div className="absolute bottom-6 right-6 z-[600] flex flex-col gap-3 pointer-events-none">
-              <div className="bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl border border-slate-200 flex flex-col pointer-events-auto">
-                <button onClick={() => setScale(s => Math.min(200, s + Math.max(2, s * 0.1)))} className="p-2.5 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 rounded-xl transition-colors" title="Acercar">
-                  <Plus size={24}/>
-                </button>
-                <div className="h-px bg-slate-200 mx-2 my-1"></div>
-                <button onClick={() => setScale(s => Math.max(5, s - Math.max(2, s * 0.1)))} className="p-2.5 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 rounded-xl transition-colors" title="Alejar">
-                  <Minus size={24}/>
-                </button>
-              </div>
-              <button onClick={centerAndFitMap} className="bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-2xl border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors pointer-events-auto flex items-center justify-center group" title="Ajustar y Centrar Plano">
-                <Maximize size={24} className="group-hover:scale-110 transition-transform" />
-              </button>
-            </div>
-
           </div>
+      )}
+
+      {selectionBox && (
+          <div className="absolute border border-indigo-500 bg-indigo-500/20 pointer-events-none z-[9999]"
+               style={{
+                  left: Math.min(selectionBox.startX, selectionBox.currentX) * scale + offsetX,
+                  top: Math.min(selectionBox.startY, selectionBox.currentY) * scale + offsetY,
+                  width: Math.abs(selectionBox.currentX - selectionBox.startX) * scale,
+                  height: Math.abs(selectionBox.currentY - selectionBox.startY) * scale
+               }} />
+      )}
+
+      <div 
+        className={`absolute inset-0 z-0 touch-none ${activeTool === 'measure' ? 'cursor-crosshair' : (activeTool === 'pan' ? 'cursor-grab active:cursor-grabbing' : (activeTool === 'rotate' ? 'cursor-alias' : 'cursor-default'))}`}
+        onPointerDown={(e) => {
+          if (e.button === 2) { setMeasureLine(null); return; } 
+          
+          const rect = containerRef.current.getBoundingClientRect();
+          const worldX = ((e.clientX - rect.left) - offsetX) / scale;
+          const worldY = ((e.clientY - rect.top) - offsetY) / scale;
+
+          if (activeTool === 'measure') {
+            if (!measureLine) {
+               setMeasureLine({ x1: worldX, y1: worldY, x2: worldX, y2: worldY, done: false });
+            } else if (!measureLine.done) {
+               setMeasureLine({ ...measureLine, done: true }); 
+            } else {
+               setMeasureLine(null);
+            }
+          } else if (activeTool === 'pan') {
+            setSelectedIds([]);
+            setDragging({ isPanning: true, startX: e.clientX, startY: e.clientY, startPanX: pan.x, startPanY: pan.y });
+          } else if (activeTool === 'select') {
+            setSelectionBox({ startX: worldX, startY: worldY, currentX: worldX, currentY: worldY });
+            setSelectedIds([]);
+          }
+        }}
+        onContextMenu={(e) => { e.preventDefault(); setMeasureLine(null); }}
+      />
+
+      <div className="absolute inset-0 pointer-events-none">
+        <svg className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-xl z-10">
+           <defs>
+             <mask id="roomMask">
+               <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
+               {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+               {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+             </mask>
+             <mask id="outerWallMask">
+               <rect x="-5000" y="-5000" width="10000" height="10000" fill="white" />
+               {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+               {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+             </mask>
+             <mask id="subWallMask">
+               <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
+               {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+               {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+             </mask>
+           </defs>
+
+           <g transform={`translate(${offsetX}, ${offsetY})`}>
+             <rect x="-5000" y="-5000" width="10000" height="10000" fill="#ffffff" mask="url(#roomMask)" />
+             <g mask="url(#outerWallMask)">
+               {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+             </g>
+             <g mask="url(#subWallMask)">
+               {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+             </g>
+           </g>
+
+           {measureLine && (() => {
+             const dx = measureLine.x2 - measureLine.x1; const dy = measureLine.y2 - measureLine.y1;
+             const length = Math.sqrt(dx*dx + dy*dy);
+             const p1x = measureLine.x1 * scale; const p1y = measureLine.y1 * scale;
+             const p2x = measureLine.x2 * scale; const p2y = measureLine.y2 * scale;
+
+             return (
+               <g transform={`translate(${offsetX}, ${offsetY})`} className="pointer-events-none z-[9999]">
+                  <line x1={p1x} y1={p1y} x2={p2x} y2={p2y} stroke="#0ea5e9" strokeWidth="3" strokeDasharray="6 4" />
+                  <circle cx={p1x} cy={p1y} r="6" fill="#0ea5e9" stroke="white" strokeWidth="2" />
+                  <circle cx={p2x} cy={p2y} r="6" fill="#0ea5e9" stroke="white" strokeWidth="2" />
+                  <g transform={`translate(${p1x + dx/2}, ${p1y + dy/2 - 12})`}>
+                     <rect x="-35" y="-15" width="70" height="24" rx="6" fill="#0ea5e9" opacity="0.95" />
+                     <text x="0" y="2" fill="white" fontSize="12" fontWeight="bold" textAnchor="middle">{length.toFixed(2)} m</text>
+                  </g>
+               </g>
+             );
+           })()}
+        </svg>
+
+        {overlayAreas.map((el) => {
+          const isSelected = selectedIds.includes(el.id);
+          const canInteract = activeTool === 'select' || activeTool === 'rotate';
+          const isPool = el.shapeType === 'pool';
+
+          return (
+            <div
+              key={el.id}
+              onPointerDown={(e) => handlePointerDownObject(e, el.id, false)}
+              className={`absolute flex items-center justify-center select-none shadow-md transition-shadow duration-300 z-0
+                ${canInteract ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'}
+                ${isSelected && canInteract ? 'ring-4 ring-rose-500 ring-offset-2 shadow-2xl' : (canInteract ? 'hover:ring-2 hover:ring-indigo-300' : '')}
+              `}
+              style={{
+                width: el.width * scale, height: el.height * scale,
+                left: el.x * scale + offsetX, top: el.y * scale + offsetY,
+                transform: `rotate(${el.rotation || 0}deg)`,
+                ...getTextureStyle(el.texture),
+                boxShadow: isPool ? `inset 0 0 0 ${0.3 * scale}px #94a3b8` : 'none',
+                borderRadius: isPool ? '8px' : '0px'
+              }}
+            >
+              <span className="font-extrabold text-center pointer-events-none drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>
+                {el.customLabel || el.name}
+              </span>
+            </div>
+          );
+        })}
+
+        {roomAreas.filter(e => e.mode !== 'overlay').map((el) => {
+          const isSelected = selectedIds.includes(el.id);
+          const isSub = el.mode === 'subtract';
+          const canInteract = activeTool === 'select' || activeTool === 'rotate';
+          
+          return (
+            <div
+              key={el.id}
+              className={`absolute z-20 ${canInteract ? 'pointer-events-auto' : 'pointer-events-none'}`}
+              style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale + offsetX, top: el.y * scale + offsetY, transform: `rotate(${el.rotation || 0}deg)` }}
+            >
+              <div 
+                onPointerDown={(e) => handlePointerDownObject(e, el.id, false)}
+                className={`w-full h-full cursor-pointer transition-colors duration-300 ${isSelected ? (isSub ? 'bg-rose-500/20 border-2 border-dashed border-rose-600' : 'bg-indigo-500/10 border-2 border-dashed border-indigo-600') : (isSub && canInteract ? 'hover:bg-rose-500/10' : (canInteract ? 'hover:bg-slate-500/5' : ''))}`}
+                style={{ clipPath: getShapeClipPath(el) }}
+              >
+                {el.customLabel && (
+                  <span className="absolute inset-0 flex items-center justify-center font-extrabold text-slate-500 opacity-80 uppercase tracking-widest pointer-events-none" style={{ fontSize: `${Math.max(0.6, Math.min(el.width, el.height) * 0.2)}rem` }}>
+                    {el.customLabel}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+
+        {physicalStructures.map((el) => {
+          const isSelected = selectedIds.includes(el.id);
+          const canInteract = activeTool === 'select' || activeTool === 'rotate';
+          
+          return (
+            <div
+              key={el.id}
+              onPointerDown={(e) => handlePointerDownObject(e, el.id, false)}
+              className={`absolute flex items-center justify-center select-none shadow-md transition-shadow duration-300 ${canInteract ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'}
+                ${el.shape} ${el.color} ${el.texture === 'none' ? '' : 'border-[3px]'}
+                ${isSelected && canInteract ? 'ring-4 ring-rose-500 ring-offset-2 z-40 shadow-2xl' : (canInteract ? 'hover:ring-2 hover:ring-indigo-300 z-20' : 'z-20')}
+              `}
+              style={{
+                width: el.width * scale, height: el.height * scale,
+                left: el.x * scale + offsetX, top: el.y * scale + offsetY,
+                transform: `rotate(${el.rotation || 0}deg)`,
+                ...getTextureStyle(el.texture)
+              }}
+            >
+              <span className="font-extrabold text-center pointer-events-none drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>
+                {el.customLabel || el.name}
+              </span>
+            </div>
+          );
+        })}
+
+        {placedTables.map((el) => {
+          const isSelected = selectedIds.includes(el.id);
+          const occupancy = guests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
+          const isSearched = globalSearch && guests.some(g => g.tableId === el.id && g.name.toLowerCase().includes(globalSearch.toLowerCase()));
+          const canInteract = activeTool === 'select' || activeTool === 'rotate';
+
+          return (
+            <div
+              key={el.id}
+              onPointerDown={(e) => handlePointerDownObject(e, el.id, true)}
+              className={`absolute flex items-center justify-center select-none transition-shadow duration-300 ${canInteract ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'}
+                ${isSelected && canInteract ? 'ring-4 ring-rose-500 ring-offset-[6px] rounded-full' : (canInteract ? 'hover:ring-2 hover:ring-indigo-400 hover:ring-offset-4 rounded-full' : '')}
+              `}
+              style={{
+                width: el.width * scale, height: el.height * scale,
+                left: el.x * scale + offsetX, top: el.y * scale + offsetY,
+                transform: `rotate(${el.rotation || 0}deg)`,
+                zIndex: isSearched ? 9999 : (isSelected ? 50 : 40)
+              }}
+            >
+              <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={guests.filter(g => g.tableId === el.id)} searchQuery={globalSearch} />
+            </div>
+          );
+        })}
+
+        <div className="absolute bottom-6 right-6 z-[600] flex flex-col gap-3 pointer-events-none">
+          <div className="bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl border border-slate-200 flex flex-col pointer-events-auto">
+            <button onClick={() => setScale(s => Math.min(200, s + Math.max(2, s * 0.1)))} className="p-2.5 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 rounded-xl transition-colors" title="Acercar">
+              <Plus size={24}/>
+            </button>
+            <div className="h-px bg-slate-200 mx-2 my-1"></div>
+            <button onClick={() => setScale(s => Math.max(5, s - Math.max(2, s * 0.1)))} className="p-2.5 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 rounded-xl transition-colors" title="Alejar">
+              <Minus size={24}/>
+            </button>
+          </div>
+          <button onClick={centerAndFitMap} className="bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-2xl border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors pointer-events-auto flex items-center justify-center group" title="Ajustar y Centrar Plano">
+            <Maximize size={24} className="group-hover:scale-110 transition-transform" />
+          </button>
         </div>
 
-        {/* MODAL INTELIGENTE DE SEPARACIÓN DENTRO DEL CROQUIS */}
-        {guestSplitPrompt && (
-          <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in pointer-events-auto">
-            <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl animate-in zoom-in-95 border border-slate-200">
-              <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4"><Users size={32} /></div>
-              <h3 className="font-bold text-xl text-slate-800 mb-2">Acomodar Grupo</h3>
+      </div>
+    </div>
+  );
+
+  // 🟢 VISTA DE LECTURA (NORMAL)
+  if (!isEditMode) {
+    return (
+      <div className="h-full flex flex-col space-y-4 pb-6 relative" onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onMouseLeave={handlePointerUp}>
+        <div className="absolute top-6 right-6 z-[600] pointer-events-auto animate-in zoom-in duration-300">
+          <button onClick={() => setIsEditMode(true)} className="px-6 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-bold hover:bg-indigo-700 transition-all shadow-xl flex items-center hover:scale-105 border border-indigo-500">
+            <Edit2 size={18} className="mr-2"/> Editar Plano
+          </button>
+        </div>
+        <div className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col overflow-hidden relative">
+          {canvasContent}
+        </div>
+      </div>
+    );
+  }
+
+  // 🟢 VISTA DE EDICIÓN EN PANTALLA COMPLETA (PORTAL)
+  return createPortal(
+    <div 
+      className="fixed inset-0 z-[99999] bg-slate-900/80 backdrop-blur-md flex flex-col p-2 md:p-6 animate-in zoom-in-95 duration-200" 
+      onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onMouseLeave={handlePointerUp}
+    >
+      <div className="flex-1 bg-white rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden relative border border-slate-200">
+
+        {/* 1. BARRA SUPERIOR (TOP BAR) - Acciones Globales */}
+        <div className="bg-white border-b border-slate-200 px-4 py-3 flex flex-wrap justify-between items-center z-30 shadow-sm shrink-0 gap-3">
+           <div className="flex items-center gap-2">
+              <button onClick={handleUndo} disabled={history.length === 0} className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center transition-colors border ${history.length > 0 ? 'bg-white text-slate-700 hover:bg-slate-50 border-slate-300 shadow-sm' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}><RotateCw size={14} className="mr-1.5" style={{ transform: 'scaleX(-1)' }}/> Deshacer</button>
               
-              {guestSplitPrompt.isForced ? (
-                  <p className="text-rose-500 mb-4 text-[13px] font-medium leading-relaxed">
-                     Esta mesa es para <b>{guestSplitPrompt.table.capacity} personas</b> y solo quedan <b>{guestSplitPrompt.availableChairs} sillas disponibles</b>. La familia <b>{guestSplitPrompt.guest.name}</b> ({guestSplitPrompt.guest.passes} pases) supera la capacidad.<br/><br/>¿Cuántos deseas acomodar en esta mesa?
-                  </p>
-              ) : (
-                  <p className="text-slate-500 mb-4 text-[13px] leading-relaxed">
-                     <b>{guestSplitPrompt.guest.name}</b> tiene {guestSplitPrompt.guest.passes} pases y hay {guestSplitPrompt.availableChairs} sillas libres en esta mesa.<br/><br/>¿Cuántos deseas acomodar aquí?
-                  </p>
-              )}
-
-              <div className="flex items-center justify-center gap-4 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <button 
-                     onClick={() => setSepararCantidad(Math.max(guestSplitPrompt.minPlaceable, separarCantidad - 1))}
-                     disabled={separarCantidad <= guestSplitPrompt.minPlaceable}
-                     className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center font-black text-slate-800 shadow-sm disabled:opacity-30"
-                  >-</button>
-                  <div className="text-3xl font-black text-indigo-600 w-12 text-center">{separarCantidad}</div>
-                  <button 
-                     onClick={() => setSepararCantidad(Math.min(guestSplitPrompt.maxPlaceable, separarCantidad + 1))}
-                     disabled={separarCantidad >= guestSplitPrompt.maxPlaceable}
-                     className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center font-black text-slate-800 shadow-sm disabled:opacity-30"
-                  >+</button>
-              </div>
-
-              <div className="flex flex-col space-y-2">
-                <button onClick={() => handleSplitChoice('split')} className="w-full p-3 bg-indigo-600 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-md transition-transform active:scale-95">Mover {separarCantidad} pase(s)</button>
-                
-                {!guestSplitPrompt.isForced && (
-                   <button onClick={() => handleSplitChoice('all')} className="w-full p-3 bg-slate-100 text-slate-700 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 transition-colors">Mover familia completa ({guestSplitPrompt.guest.passes})</button>
-                )}
-                
-                <button onClick={() => setGuestSplitPrompt(null)} className="w-full p-3 text-slate-400 font-bold hover:text-slate-600 mt-2 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* BARRA DERECHA: EDICIÓN MAESTRA Y CATÁLOGOS */}
-        {isEditMode && (
-          <div className="w-full md:w-[280px] border-t md:border-t-0 md:border-l border-slate-200 bg-slate-50 flex flex-col z-20 max-h-64 md:max-h-full">
-            
-            <div className="p-3 bg-white border-b border-slate-200 shadow-sm shrink-0 flex flex-col gap-1.5">
-               <button onClick={() => { setIsEditMode(false); setSelectedIds([]); centerAndFitMap(); }} className="w-full py-2 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center">
-                 <CheckCircle size={14} className="mr-1.5"/> Guardar Diseño
-               </button>
-               <button onClick={() => setShowExportModal(true)} className="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center">
-                 <FileDown size={14} className="mr-1.5"/> Descargar PDF
-               </button>
-               
-               {/* SWITCH MODO SEPARADOR MAPA */}
-               <div className="flex items-center justify-between bg-white p-2 rounded-md border border-slate-200 shadow-sm mt-1 mb-1">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mx-1">Modo Separador</span>
-                  <button onClick={() => setModoSeparador(!modoSeparador)} className={`relative w-8 h-4 rounded-full transition-colors ${modoSeparador ? 'bg-indigo-500' : 'bg-slate-300'}`}>
-                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${modoSeparador ? 'translate-x-4' : 'translate-x-0'}`}></div>
-                  </button>
-               </div>
-               
-               <div className="flex gap-1.5 mt-1">
-                 <button onClick={handleUndo} disabled={history.length === 0} className={`flex-1 py-1.5 rounded-md text-[10px] font-bold flex items-center justify-center transition-colors border ${history.length > 0 ? 'bg-white text-slate-700 hover:bg-slate-50 border-slate-300 shadow-sm' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}><RotateCw size={12} className="mr-1" style={{ transform: 'scaleX(-1)' }}/> Deshacer</button>
-                 <button onClick={async () => { 
-                   if(window.confirm('¿Estás seguro de limpiar todo el plano? Esta acción no se puede deshacer.')) { 
+              {/* 🟢 BOTÓN LIMPIAR CON MODAL PERSONALIZADO */}
+              <button onClick={() => { 
+                 setConfirmDialog({
+                   title: 'Limpiar Plano',
+                   message: '¿Estás seguro de limpiar todo el plano? Se vaciarán las mesas pero los invitados no se eliminarán. Esta acción no se puede deshacer.',
+                   isDestructive: true,
+                   onConfirm: async () => {
                      saveHistory(elements, tables);
                      const promesasMapa = elements.map(e => deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "mapa", String(e.id))));
                      const promesasMesas = placedTables.map(t => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", String(t.id)), { ...t, x: null, y: null, rotation: 0, groupId: null }));
                      await Promise.all([...promesasMapa, ...promesasMesas]);
                      setSelectedIds([]); 
-                     setPan({x:0, y:0}); 
-                   } 
-                 }} className="flex-1 py-1.5 bg-white border border-rose-200 text-rose-600 rounded-md text-[10px] font-bold hover:bg-rose-50 transition-colors shadow-sm flex items-center justify-center"><Trash2 size={12} className="mr-1"/> Limpiar</button>
-               </div>
-               <button onClick={() => setRoomGrouped(!roomGrouped)} className={`w-full mt-1 py-1.5 rounded-md text-[10px] font-bold flex items-center justify-center transition-colors border shadow-sm ${roomGrouped ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}><Layers size={12} className="mr-1.5"/> {roomGrouped ? 'Desvincular Salón Compuesto' : 'Vincular Salón Compuesto'}</button>
-            </div>
-
-            {renderContextualMenu()}
-
-            <div className="p-3 overflow-y-auto flex-1 hide-scrollbar">
+                     setPan({x:0, y:0});
+                     setConfirmDialog(null);
+                   }
+                 });
+               }} className="px-3 py-1.5 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-bold flex items-center transition-colors shadow-sm"><Trash2 size={14} className="mr-1.5"/> Limpiar</button>
               
-              <h3 className="font-bold text-slate-700 mb-2 text-[10px] uppercase tracking-wider flex items-center">
-                <Spline size={12} className="mr-1.5"/> 1. Áreas y Exteriores
-              </h3>
-              <div className="grid grid-cols-3 gap-1.5 mb-4">
-                {ROOM_AREAS_CATALOG.map((tmpl, idx) => {
-                  if (tmpl.shapeType === 'polygon') return null; 
-                  return (
-                    <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'room_area')} className="bg-white p-1.5 rounded-lg border border-slate-300 text-center cursor-grab active:cursor-grabbing hover:bg-indigo-50 hover:border-indigo-300 transition-colors shadow-sm">
-                       <div className="h-6 flex items-center justify-center mb-1 text-slate-500">
-                          <div 
-                            className="border border-current bg-slate-100" 
-                            style={{ 
-                              width: '18px', height: '18px',
-                              borderRadius: tmpl.shapeType === 'ellipse' && tmpl.name === 'Área Circular' ? '50%' : tmpl.shapeType === 'ellipse' ? '50%' : '2px',
-                              clipPath: tmpl.shapeType === 'triangle' ? 'polygon(0 0, 0 100%, 100% 100%)' : 'none',
-                              ...(tmpl.mode === 'overlay' ? getTextureStyle(tmpl.texture) : {})
-                            }}
-                          ></div>
-                       </div>
-                       <p className="text-[8px] font-bold text-slate-600 leading-tight">{tmpl.name}</p>
-                    </div>
-                  );
-                })}
+              <div className="hidden md:block w-px h-5 bg-slate-200 mx-1"></div>
+              <button onClick={() => { setRoomGrouped(!roomGrouped); setSelectedIds([]); }} className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center transition-colors border shadow-sm ${roomGrouped ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}>
+                {roomGrouped ? <Lock size={14} className="mr-1.5"/> : <Unlock size={14} className="mr-1.5"/>} 
+                {roomGrouped ? 'Desbloquear Áreas' : 'Bloquear Áreas'}
+              </button>
+           </div>
+
+           <div className="flex items-center gap-3">
+              <div className="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-inner">
+                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mr-3">Modo Separador</span>
+                 <button onClick={() => setModoSeparador(!modoSeparador)} className={`relative w-8 h-4 rounded-full transition-colors ${modoSeparador ? 'bg-indigo-500' : 'bg-slate-300'}`}>
+                   <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${modoSeparador ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                 </button>
               </div>
+              <div className="hidden md:block w-px h-5 bg-slate-200 mx-1"></div>
+              <button onClick={() => setShowExportModal(true)} className="px-3 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center"><FileDown size={14} className="mr-1.5"/> PDF</button>
+              
+              {/* 🟢 BOTÓN GUARDAR Y CERRAR RENOMBRADO */}
+              <button onClick={() => { setIsEditMode(false); setSelectedIds([]); centerAndFitMap(); }} className="px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold hover:bg-emerald-600 transition-colors shadow-md flex items-center"><CheckCircle size={16} className="mr-1.5"/> Guardar y Cerrar</button>
+           </div>
+        </div>
 
-              <h3 className="font-bold text-indigo-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
-                <Users size={12} className="mr-1.5"/> 2. Mesas Reales ({availableTables.length})
-              </h3>
-              <div className="space-y-1.5 mb-4">
-                {availableTables.map((table) => {
-                  const occupancy = guests.filter(g => g.tableId === table.id).reduce((s, g) => s + g.passes, 0);
-                  const tType = table.tipo || table.type;
-                  let tW = 1.5, tH = 1.5;
-                  if (tType === 'rect_table' || tType === 'tablon') { tW = 2.44; tH = 0.7; }
-                  else if (tType === 'ovalada') { tW = 3.05; tH = 1.22; }
-                  else if (tType === 'serpentina') { tW = 1.8; tH = 1.8; }
-                  else if (tType === 'personalizada' || tType === 'libre') { tW = table.configDetalle?.libreMedidas?.largo || 2; tH = table.configDetalle?.libreMedidas?.ancho || 1; }
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
 
-                  return (
-                    <div key={table.id} draggable onDragStart={(e) => handleDragStart(e, {id: table.id, width: tW, height: tH}, 'existing_table')} className="bg-white p-1.5 rounded-lg border border-indigo-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-indigo-500 hover:shadow-md transition-all flex items-center">
-                      <div className="w-6 h-6 bg-indigo-50 rounded flex items-center justify-center mr-2 text-indigo-500 flex-shrink-0">
-                        {table.tipo === 'round_table' || table.tipo === 'redonda' ? <div className="w-3 h-3 rounded-full border-[1.5px] border-current"></div> : <div className="w-3 h-3 rounded-sm border-[1.5px] border-current"></div>}
+           {/* 2. BARRA LATERAL IZQUIERDA (TOOLS) */}
+           <div className="w-full md:w-16 bg-white md:border-r border-b md:border-b-0 border-slate-200 flex md:flex-col items-center justify-center md:justify-start py-2 md:py-4 gap-2 z-20 shrink-0 shadow-[4px_0_15px_-3px_rgba(0,0,0,0.05)] overflow-x-auto">
+              <button onClick={() => {setActiveTool('select'); setMeasureLine(null);}} className={`p-3 md:p-3.5 rounded-xl transition-all ${activeTool === 'select' ? 'bg-indigo-600 text-white shadow-md md:scale-110' : 'text-slate-500 hover:bg-slate-100 hover:text-indigo-600'}`} title="Seleccionar Libre">
+                <NavigationIcon size={20} className="-rotate-90" />
+              </button>
+              <button onClick={() => {setActiveTool('pan'); setSelectedIds([]); setMeasureLine(null);}} className={`p-3 md:p-3.5 rounded-xl transition-all ${activeTool === 'pan' ? 'bg-indigo-600 text-white shadow-md md:scale-110' : 'text-slate-500 hover:bg-slate-100 hover:text-indigo-600'}`} title="Mover Lienzo">
+                <Hand size={20} />
+              </button>
+              <button onClick={() => { if(selectedIds.length>1) toggleGroupSelection(); else setActiveTool('select'); }} className={`p-3 md:p-3.5 rounded-xl transition-all ${selectedIds.length > 1 ? 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100 ring-2 ring-indigo-200 animate-pulse' : 'text-slate-300 cursor-not-allowed'}`} title="Agrupar Selección">
+                <Link size={20} />
+              </button>
+              <div className="hidden md:block w-8 h-px bg-slate-200 my-1"></div>
+              <div className="md:hidden h-8 w-px bg-slate-200 mx-1"></div>
+              <button onClick={() => {setActiveTool('measure'); setSelectedIds([]);}} className={`p-3 md:p-3.5 rounded-xl transition-all ${activeTool === 'measure' ? 'bg-sky-500 text-white shadow-md md:scale-110' : 'text-slate-500 hover:bg-sky-50 hover:text-sky-600'}`} title="Cinta Métrica">
+                <Spline size={20} />
+              </button>
+              <div className="hidden md:block w-8 h-px bg-slate-200 my-1"></div>
+              <div className="md:hidden h-8 w-px bg-slate-200 mx-1"></div>
+              <button onClick={() => setActiveTool('rotate')} className={`p-3 md:p-3.5 rounded-xl transition-all ${activeTool === 'rotate' ? 'bg-amber-500 text-white shadow-md md:scale-110' : 'text-slate-500 hover:bg-amber-50 hover:text-amber-600'}`} title="Girar Selección">
+                <RotateCw size={20} />
+              </button>
+           </div>
+
+           {/* 3. LIENZO CENTRAL */}
+           {canvasContent}
+
+           {/* 4. PANEL LATERAL DERECHO (INSPECTOR Y LIBRERÍA) */}
+           <div className="w-full md:w-[320px] border-l border-slate-200 bg-slate-50 flex flex-col z-20 shrink-0 shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.05)]">
+              
+              {/* Inspector Contextual */}
+              <div className="shrink-0 empty:hidden">
+                 {renderContextualMenu()}
+              </div>
+              
+              {/* Catálogo / Librería */}
+              <div className="p-4 overflow-y-auto flex-1 custom-scrollbar">
+                
+                <h3 className="font-bold text-slate-700 mb-3 text-[10px] uppercase tracking-wider flex items-center">
+                  <Spline size={14} className="mr-2 text-slate-400"/> 1. Áreas y Exteriores
+                </h3>
+                <div className="grid grid-cols-3 gap-2 mb-6">
+                  {ROOM_AREAS_CATALOG.map((tmpl, idx) => {
+                    if (tmpl.shapeType === 'polygon') return null; 
+                    return (
+                      <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'room_area')} className="bg-white p-2 rounded-xl border border-slate-200 text-center cursor-grab active:cursor-grabbing hover:bg-indigo-50 hover:border-indigo-300 transition-colors shadow-sm">
+                         <div className="h-6 flex items-center justify-center mb-1 text-slate-500">
+                            <div 
+                              className="border border-current bg-slate-100" 
+                              style={{ 
+                                width: '20px', height: '20px',
+                                borderRadius: tmpl.shapeType === 'ellipse' && tmpl.name === 'Área Circular' ? '50%' : tmpl.shapeType === 'ellipse' ? '50%' : '3px',
+                                clipPath: tmpl.shapeType === 'triangle' ? 'polygon(0 0, 0 100%, 100% 100%)' : 'none',
+                                ...(tmpl.mode === 'overlay' ? getTextureStyle(tmpl.texture) : {})
+                              }}
+                            ></div>
+                         </div>
+                         <p className="text-[9px] font-bold text-slate-600 leading-tight">{tmpl.name}</p>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-slate-800 truncate">{table.name}</p>
-                        <p className="text-[8px] text-slate-500 uppercase font-semibold">{occupancy}/{table.capacity} Sillas</p>
+                    );
+                  })}
+                </div>
+
+                <h3 className="font-bold text-indigo-700 mb-3 text-[10px] uppercase tracking-wider flex items-center pt-4 border-t border-slate-200">
+                  <Users size={14} className="mr-2 text-indigo-400"/> 2. Mesas Reales ({availableTables.length})
+                </h3>
+                <div className="space-y-2 mb-6">
+                  {availableTables.map((table) => {
+                    const occupancy = guests.filter(g => g.tableId === table.id).reduce((s, g) => s + g.passes, 0);
+                    const tType = table.tipo || table.type;
+                    let tW = 1.5, tH = 1.5;
+                    if (tType === 'rect_table' || tType === 'tablon') { tW = 2.44; tH = 0.7; }
+                    else if (tType === 'ovalada') { tW = 3.05; tH = 1.22; }
+                    else if (tType === 'serpentina') { tW = 1.8; tH = 1.8; }
+                    else if (tType === 'personalizada' || tType === 'libre') { tW = table.configDetalle?.libreMedidas?.largo || 2; tH = table.configDetalle?.libreMedidas?.ancho || 1; }
+
+                    return (
+                      <div key={table.id} draggable onDragStart={(e) => handleDragStart(e, {id: table.id, width: tW, height: tH}, 'existing_table')} className="bg-white p-2 rounded-xl border border-indigo-100 shadow-sm cursor-grab active:cursor-grabbing hover:border-indigo-400 hover:shadow-md transition-all flex items-center">
+                        <div className="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center mr-3 text-indigo-500 flex-shrink-0">
+                          {table.tipo === 'round_table' || table.tipo === 'redonda' ? <div className="w-3.5 h-3.5 rounded-full border-2 border-current"></div> : <div className="w-3.5 h-3.5 rounded-sm border-2 border-current"></div>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-slate-800 truncate">{table.name}</p>
+                          <p className="text-[9px] text-slate-500 uppercase font-bold tracking-widest mt-0.5">{occupancy}/{table.capacity} Sillas</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {availableTables.length === 0 && <p className="text-[10px] text-slate-400 italic text-center py-4 bg-white rounded-xl border border-dashed border-slate-200">Todas ubicadas en el plano.</p>}
+                </div>
+
+                <h3 className="font-bold text-emerald-700 mb-3 text-[10px] uppercase tracking-wider flex items-center pt-4 border-t border-slate-200">
+                  <Plus size={14} className="mr-2 text-emerald-400"/> 3. Mesas Extra
+                </h3>
+                <div className="grid grid-cols-4 gap-2 mb-6">
+                  {TABLE_TEMPLATES.map((tmpl, idx) => {
+                    let iconEl;
+                    if (tmpl.type === 'round_table') iconEl = <div className="mx-auto mb-1 border-2 border-emerald-500 rounded-full w-5 h-5"></div>;
+                    else if (tmpl.type === 'square_table') iconEl = <div className="mx-auto mb-1 border-2 border-emerald-500 rounded-sm w-5 h-5"></div>;
+                    else if (tmpl.type === 'rect_table') iconEl = <div className="mx-auto mb-1 border-2 border-emerald-500 rounded-sm w-6 h-3 mt-1"></div>;
+                    else if (tmpl.type === 'ovalada') iconEl = <div className="mx-auto mb-1 border-2 border-emerald-500 rounded-[10px] w-6 h-3 mt-1"></div>;
+                    else if (tmpl.type === 'serpentina') iconEl = (
+                      <svg className="mx-auto mb-1" width="20" height="20" viewBox="0 0 20 20">
+                        <path d="M 2 18 A 16 16 0 0 1 18 2 L 18 7 A 11 11 0 0 0 7 18 Z" fill="none" stroke="#10b981" strokeWidth="2" />
+                      </svg>
+                    );
+
+                    return (
+                      <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'new_table')} className="bg-white p-2 rounded-xl border border-emerald-100 text-center cursor-grab active:cursor-grabbing hover:bg-emerald-50 transition-colors shadow-sm">
+                         {iconEl}
+                         <p className="text-[9px] font-bold text-slate-600 leading-tight mt-1">{tmpl.name}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <h3 className="font-bold text-slate-700 mb-3 text-[10px] uppercase tracking-wider flex items-center pt-4 border-t border-slate-200">
+                  <Move size={14} className="mr-2 text-slate-400"/> 4. Físico
+                </h3>
+                <div className="space-y-2">
+                  {STRUCTURAL_CATALOG.map((item, idx) => (
+                    <div key={idx} draggable onDragStart={(e) => handleDragStart(e, item, 'structure')} className="bg-white p-2 rounded-xl border border-slate-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-slate-300 hover:shadow-md transition-all flex items-center">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-3 border border-slate-200 flex-shrink-0 shadow-inner" style={getTextureStyle(item.texture)}></div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-800 leading-tight">{item.name}</p>
+                        <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mt-0.5">{item.desc}</p>
                       </div>
                     </div>
-                  );
-                })}
-                {availableTables.length === 0 && <p className="text-[9px] text-slate-400 italic text-center py-1 bg-white rounded border border-dashed border-slate-300">Todas ubicadas en el plano.</p>}
+                  ))}
+                </div>
+
               </div>
+           </div>
 
-              <h3 className="font-bold text-emerald-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
-                <Plus size={12} className="mr-1.5"/> 3. Mesas Extra
-              </h3>
-              <div className="grid grid-cols-4 gap-1.5 mb-4">
-                {TABLE_TEMPLATES.map((tmpl, idx) => {
-                  let iconEl;
-                  if (tmpl.type === 'round_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-full w-4 h-4"></div>;
-                  else if (tmpl.type === 'square_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-sm w-4 h-4"></div>;
-                  else if (tmpl.type === 'rect_table') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-sm w-5 h-2.5 mt-1"></div>;
-                  else if (tmpl.type === 'ovalada') iconEl = <div className="mx-auto mb-1 border-[1.5px] border-emerald-500 rounded-[10px] w-6 h-2.5 mt-1"></div>;
-                  else if (tmpl.type === 'serpentina') iconEl = (
-                    <svg className="mx-auto mb-1" width="16" height="16" viewBox="0 0 20 20">
-                      <path d="M 2 18 A 16 16 0 0 1 18 2 L 18 7 A 11 11 0 0 0 7 18 Z" fill="none" stroke="#10b981" strokeWidth="1.5" />
-                    </svg>
-                  );
-
-                  return (
-                    <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'new_table')} className="bg-white p-1.5 rounded-lg border border-emerald-200 text-center cursor-grab active:cursor-grabbing hover:bg-emerald-50 transition-colors shadow-sm">
-                       {iconEl}
-                       <p className="text-[8px] font-bold text-slate-600 leading-tight">{tmpl.name}</p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <h3 className="font-bold text-slate-700 mb-2 text-[10px] uppercase tracking-wider flex items-center pt-2 border-t border-slate-200">
-                <Move size={12} className="mr-1.5"/> 4. Físico
-              </h3>
-              <div className="space-y-1.5">
-                {STRUCTURAL_CATALOG.map((item, idx) => (
-                  <div key={idx} draggable onDragStart={(e) => handleDragStart(e, item, 'structure')} className="bg-white p-1.5 rounded-lg border border-slate-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-slate-400 hover:shadow-md transition-all flex items-center">
-                    <div className="w-8 h-8 rounded flex items-center justify-center mr-2 border border-slate-300 flex-shrink-0 shadow-inner" style={getTextureStyle(item.texture)}></div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-800 leading-tight">{item.name}</p>
-                      <p className="text-[8px] text-slate-500 uppercase tracking-wide font-semibold">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-            </div>
-          </div>
-        )}
-
+        </div>
       </div>
 
-      {/* 🔴 VISTA PREVIA EXPORTACIÓN MAPA (CARTA HORIZONTAL) */}
+      {/* 🟢 MODALES DENTRO DEL MODO EDICIÓN (POR ENCIMA DEL PORTAL) */}
+      
+      {/* Modal de Confirmación */}
+      {confirmDialog && (
+        <div className="fixed inset-0 z-[100000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in pointer-events-auto">
+          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl animate-in zoom-in-95 border border-slate-200">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${confirmDialog.isDestructive ? 'bg-rose-100 text-rose-600' : 'bg-indigo-100 text-indigo-600'}`}>
+              {confirmDialog.isDestructive ? <Trash2 size={32} /> : <AlertTriangle size={32} />}
+            </div>
+            <h3 className="font-bold text-xl text-slate-800 mb-2">{confirmDialog.title}</h3>
+            <p className="text-slate-500 mb-6 text-[13px] leading-relaxed">
+              {confirmDialog.message}
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDialog(null)} className="flex-1 p-3 bg-slate-100 text-slate-700 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 transition-colors">
+                Cancelar
+              </button>
+              <button onClick={confirmDialog.onConfirm} className={`flex-1 p-3 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-md transition-transform active:scale-95 ${confirmDialog.isDestructive ? 'bg-rose-600 hover:bg-rose-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}>
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Exportación a PDF */}
       {showExportModal && (
-        <div className="fixed inset-0 z-[120] bg-slate-900/95 flex flex-col overflow-hidden backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100000] bg-slate-900/95 flex flex-col overflow-hidden backdrop-blur-sm">
           <div className="bg-slate-900 text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg border-b border-slate-700 z-10 shrink-0 gap-4">
             <div className="flex items-center space-x-4 w-full sm:w-auto">
               <button onClick={() => setShowExportModal(false)} className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X size={24}/></button>
@@ -4509,106 +4646,156 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
              <div className="bg-white shadow-[0_0_40px_rgba(0,0,0,0.5)] relative shrink-0 map-pdf-page flex flex-col" style={{ width: '279.4mm', height: '215.9mm', padding: '15mm', boxSizing: 'border-box', overflow: 'hidden' }}>
                
                <header className="border-b-4 border-slate-900 pb-2 mb-4 flex justify-between items-end shrink-0">
-                  <div>
-                    <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Plano y Acomodo</h1>
-                    <p className="text-slate-500 text-sm font-medium">Proyecto: Proyecto Actual</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs font-bold text-slate-400">Escala Ajustada (Carta Horizontal)</p>
-                  </div>
+                 <div>
+                   <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Plano y Acomodo</h1>
+                   <p className="text-slate-500 text-sm font-medium">Proyecto: Proyecto Actual</p>
+                 </div>
+                 <div className="text-right">
+                   <p className="text-xs font-bold text-slate-400">Escala Ajustada (Carta Horizontal)</p>
+                 </div>
                </header>
 
                <div 
                  onPointerDown={handlePrintPointerDown} onPointerMove={handlePrintPointerMove} onPointerUp={handlePrintPointerUp} onPointerLeave={handlePrintPointerUp} onWheel={handlePrintWheel}
                  className={`w-full flex-1 bg-[#eef2f6] border-2 border-slate-300 rounded-xl relative overflow-hidden flex shadow-inner ${isBlueprintPanActive ? 'cursor-grab active:cursor-grabbing touch-none ring-4 ring-indigo-300' : ''}`}
                >
-                  {!isCapturingPdf && (
-                    <div className="absolute top-3 left-3 z-50 flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                      <button onClick={() => setIsBlueprintPanActive(!isBlueprintPanActive)} className={`px-3 py-2 transition-colors rounded-xl font-bold text-[10px] flex items-center shadow-lg border border-slate-700 ${isBlueprintPanActive ? 'bg-indigo-500 text-white' : 'bg-slate-900/90 text-white hover:bg-slate-800'}`}>
-                        <Hand size={14} className="mr-1.5"/> {isBlueprintPanActive ? 'Arrastre Activo (Bloquear para PDF)' : 'Activar Arrastre'}
-                      </button>
-                      <div className="bg-slate-900/90 backdrop-blur text-white rounded-xl shadow-lg flex items-center pointer-events-auto border border-slate-700">
-                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPrintScale(s => Math.max(0.1, s - 0.15)); }} className="p-3 hover:bg-white/20 transition-colors rounded-l-xl active:bg-white/30 touch-manipulation"><Minus size={16} /></button>
-                        <div className="w-px h-5 bg-white/20"></div>
-                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPrintScale(s => Math.min(5, s + 0.15)); }} className="p-3 hover:bg-white/20 transition-colors rounded-r-xl active:bg-white/30 touch-manipulation"><Plus size={16} /></button>
-                      </div>
-                    </div>
-                  )}
+                 {!isCapturingPdf && (
+                   <div className="absolute top-3 left-3 z-50 flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                     <button onClick={() => setIsBlueprintPanActive(!isBlueprintPanActive)} className={`px-3 py-2 transition-colors rounded-xl font-bold text-[10px] flex items-center shadow-lg border border-slate-700 ${isBlueprintPanActive ? 'bg-indigo-500 text-white' : 'bg-slate-900/90 text-white hover:bg-slate-800'}`}>
+                       <Hand size={14} className="mr-1.5"/> {isBlueprintPanActive ? 'Arrastre Activo (Bloquear para PDF)' : 'Activar Arrastre'}
+                     </button>
+                     <div className="bg-slate-900/90 backdrop-blur text-white rounded-xl shadow-lg flex items-center pointer-events-auto border border-slate-700">
+                       <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPrintScale(s => Math.max(0.1, s - 0.15)); }} className="p-3 hover:bg-white/20 transition-colors rounded-l-xl active:bg-white/30 touch-manipulation"><Minus size={16} /></button>
+                       <div className="w-px h-5 bg-white/20"></div>
+                       <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPrintScale(s => Math.min(5, s + 0.15)); }} className="p-3 hover:bg-white/20 transition-colors rounded-r-xl active:bg-white/30 touch-manipulation"><Plus size={16} /></button>
+                     </div>
+                   </div>
+                 )}
 
-                  <div style={{ transform: `translate(${printPan.x}px, ${printPan.y}px) scale(${printScale})`, transformOrigin: '0 0', width: '100%', height: '100%' }}>
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" style={{ overflow: 'visible' }}>
-                       <defs>
-                         <mask id="printRoomMask">
-                           <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                           {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                           {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                         </mask>
-                         <mask id="printOuterWallMask">
-                           <rect x="-5000" y="-5000" width="10000" height="10000" fill="white" />
-                           {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                           {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                         </mask>
-                         <mask id="printSubWallMask">
-                           <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
-                           {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
-                           {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
-                         </mask>
-                       </defs>
-                       <g>
-                         <rect x="-5000" y="-5000" width="10000" height="10000" fill="#ffffff" mask="url(#printRoomMask)" />
-                         <g mask="url(#printOuterWallMask)">
-                           {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
-                         </g>
-                         <g mask="url(#printSubWallMask)">
-                           {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
-                         </g>
-                       </g>
-                    </svg>
+                 <div style={{ transform: `translate(${printPan.x}px, ${printPan.y}px) scale(${printScale})`, transformOrigin: '0 0', width: '100%', height: '100%' }}>
+                   <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" style={{ overflow: 'visible' }}>
+                      <defs>
+                        <mask id="printRoomMask">
+                          <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
+                          {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+                          {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                        </mask>
+                        <mask id="printOuterWallMask">
+                          <rect x="-5000" y="-5000" width="10000" height="10000" fill="white" />
+                          {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                          {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                        </mask>
+                        <mask id="printSubWallMask">
+                          <rect x="-5000" y="-5000" width="10000" height="10000" fill="black" />
+                          {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'white' }))}
+                          {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { fill: 'black' }))}
+                        </mask>
+                      </defs>
+                      <g>
+                        <rect x="-5000" y="-5000" width="10000" height="10000" fill="#ffffff" mask="url(#printRoomMask)" />
+                        <g mask="url(#printOuterWallMask)">
+                          {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+                        </g>
+                        <g mask="url(#printSubWallMask)">
+                          {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+                        </g>
+                      </g>
+                   </svg>
 
-                    {overlayAreas.map((el) => (
-                      <div key={el.id} className="absolute flex items-center justify-center select-none pointer-events-none z-0" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)`, ...getTextureStyle(el.texture), boxShadow: el.shapeType === 'pool' ? `inset 0 0 0 ${0.3 * scale}px #94a3b8` : 'none', borderRadius: el.shapeType === 'pool' ? '8px' : '0px' }}>
-                        <span className="font-extrabold text-center drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>{el.customLabel || el.name}</span>
-                      </div>
-                    ))}
+                   {overlayAreas.map((el) => (
+                     <div key={el.id} className="absolute flex items-center justify-center select-none pointer-events-none z-0" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)`, ...getTextureStyle(el.texture), boxShadow: el.shapeType === 'pool' ? `inset 0 0 0 ${0.3 * scale}px #94a3b8` : 'none', borderRadius: el.shapeType === 'pool' ? '8px' : '0px' }}>
+                       <span className="font-extrabold text-center drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>{el.customLabel || el.name}</span>
+                     </div>
+                   ))}
 
-                    {roomAreas.filter(e => e.mode !== 'overlay').map((el) => (
-                      <div key={el.id} className="absolute z-20 pointer-events-none" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
-                        <div className="w-full h-full" style={{ clipPath: getShapeClipPath(el) }}>
-                          {el.customLabel && <span className="absolute inset-0 flex items-center justify-center font-extrabold text-slate-500 opacity-80 uppercase tracking-widest pointer-events-none" style={{ fontSize: `${Math.max(0.6, Math.min(el.width, el.height) * 0.2)}rem` }}>{el.customLabel}</span>}
-                        </div>
-                      </div>
-                    ))}
+                   {roomAreas.filter(e => e.mode !== 'overlay').map((el) => (
+                     <div key={el.id} className="absolute z-20 pointer-events-none" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
+                       <div className="w-full h-full" style={{ clipPath: getShapeClipPath(el) }}>
+                         {el.customLabel && <span className="absolute inset-0 flex items-center justify-center font-extrabold text-slate-500 opacity-80 uppercase tracking-widest pointer-events-none" style={{ fontSize: `${Math.max(0.6, Math.min(el.width, el.height) * 0.2)}rem` }}>{el.customLabel}</span>}
+                       </div>
+                     </div>
+                   ))}
 
-                    {physicalStructures.map((el) => (
-                      <div key={el.id} className={`absolute flex items-center justify-center select-none shadow-md pointer-events-none z-20 ${el.shape} ${el.color} ${el.texture === 'none' ? '' : 'border-[3px]'}`} style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)`, ...getTextureStyle(el.texture) }}>
-                        <span className="font-extrabold text-center drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>{el.customLabel || el.name}</span>
-                      </div>
-                    ))}
+                   {physicalStructures.map((el) => (
+                     <div key={el.id} className={`absolute flex items-center justify-center select-none shadow-md pointer-events-none z-20 ${el.shape} ${el.color} ${el.texture === 'none' ? '' : 'border-[3px]'}`} style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)`, ...getTextureStyle(el.texture) }}>
+                       <span className="font-extrabold text-center drop-shadow-md bg-white/40 px-2 py-0.5 rounded backdrop-blur-sm" style={{ fontSize: `${Math.max(0.5, Math.min(el.width, el.height) * 0.25)}rem` }}>{el.customLabel || el.name}</span>
+                     </div>
+                   ))}
 
-                    {placedTables.map((el) => {
-                      const occupancy = guests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
-                      return (
-                        <div key={el.id} className="absolute flex items-center justify-center select-none pointer-events-none z-40" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
-                          <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={guests.filter(g => g.tableId === el.id)} searchQuery={""} />
-                        </div>
-                      );
-                    })}
-                  </div>
+                   {placedTables.map((el) => {
+                     const occupancy = guests.filter(g => g.tableId === el.id).reduce((s, g) => s + g.passes, 0);
+                     return (
+                       <div key={el.id} className="absolute flex items-center justify-center select-none pointer-events-none z-40" style={{ width: el.width * scale, height: el.height * scale, left: el.x * scale, top: el.y * scale, transform: `rotate(${el.rotation || 0}deg)` }}>
+                         <TableWithChairs tableData={el} occupancy={occupancy} scale={scale} tableGuests={guests.filter(g => g.tableId === el.id)} searchQuery={""} />
+                       </div>
+                     );
+                   })}
+                 </div>
                </div>
              </div>
           </div>
         </div>
       )}
-    </div>
+
+      {/* Modal Inteligente de Separación de Invitados */}
+      {guestSplitPrompt && (
+        <div className="fixed inset-0 z-[100000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in pointer-events-auto">
+          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl animate-in zoom-in-95 border border-slate-200">
+            <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4"><Users size={32} /></div>
+            <h3 className="font-bold text-xl text-slate-800 mb-2">Acomodar Grupo</h3>
+            
+            {guestSplitPrompt.isForced ? (
+                <p className="text-rose-500 mb-4 text-[13px] font-medium leading-relaxed">
+                   Esta mesa es para <b>{guestSplitPrompt.table.capacity} personas</b> y solo quedan <b>{guestSplitPrompt.availableChairs} sillas disponibles</b>. La familia <b>{guestSplitPrompt.guest.name}</b> ({guestSplitPrompt.guest.passes} pases) supera la capacidad.<br/><br/>¿Cuántos deseas acomodar en esta mesa?
+                </p>
+            ) : (
+                <p className="text-slate-500 mb-4 text-[13px] leading-relaxed">
+                   <b>{guestSplitPrompt.guest.name}</b> tiene {guestSplitPrompt.guest.passes} pases y hay {guestSplitPrompt.availableChairs} sillas libres en esta mesa.<br/><br/>¿Cuántos deseas acomodar aquí?
+                </p>
+            )}
+
+            <div className="flex items-center justify-center gap-4 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <button 
+                   onClick={() => setSepararCantidad(Math.max(guestSplitPrompt.minPlaceable, separarCantidad - 1))}
+                   disabled={separarCantidad <= guestSplitPrompt.minPlaceable}
+                   className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center font-black text-slate-800 shadow-sm disabled:opacity-30"
+                >-</button>
+                <div className="text-3xl font-black text-indigo-600 w-12 text-center">{separarCantidad}</div>
+                <button 
+                   onClick={() => setSepararCantidad(Math.min(guestSplitPrompt.maxPlaceable, separarCantidad + 1))}
+                   disabled={separarCantidad >= guestSplitPrompt.maxPlaceable}
+                   className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center font-black text-slate-800 shadow-sm disabled:opacity-30"
+                >+</button>
+            </div>
+
+            <div className="flex flex-col space-y-2">
+              <button onClick={() => handleSplitChoice('split')} className="w-full p-3 bg-indigo-600 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-md transition-transform active:scale-95">Mover {separarCantidad} pase(s)</button>
+              
+              {!guestSplitPrompt.isForced && (
+                 <button onClick={() => handleSplitChoice('all')} className="w-full p-3 bg-slate-100 text-slate-700 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 transition-colors">Mover familia completa ({guestSplitPrompt.guest.passes})</button>
+              )}
+              
+              <button onClick={() => setGuestSplitPrompt(null)} className="w-full p-3 text-slate-400 font-bold hover:text-slate-600 mt-2 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>,
+    document.getElementById('root') || document.body // <--- Usamos el contenedor seguro de React
   );
 };
+
+// ==========================================
+// COMPONENTES AUXILIARES PARA MAPAVIEW (DEBEN ESTAR FUERA DE MAPAVIEW PERO EN EL MISMO ARCHIVO)
+// ==========================================
 
 const TABLE_TEMPLATES = [
   { type: 'round_table', name: 'Mesa Redonda', width: 1.5, height: 1.5, capacity: 10, desc: 'Ø 1.5m' },
   { type: 'square_table', name: 'Mesa Cuadrada', width: 1.5, height: 1.5, capacity: 12, desc: '1.5x1.5m' },
   { type: 'rect_table', name: 'Tablón', width: 2.44, height: 0.7, capacity: 10, desc: '2.4x0.7m' },
   { type: 'ovalada', name: 'Mesa Ovalada', width: 3.05, height: 1.22, capacity: 12, desc: '3.0x1.2m' },
-  { type: 'serpentina', name: 'Serpentina', width: 1.8, height: 1.8, capacity: 10, desc: 'Curva' }
+  { type: 'serpentina', name: 'Serpentina', width: 1.8, height: 1.8, capacity: 9, desc: 'Curva' }
 ];
 
 const STRUCTURAL_CATALOG = [
@@ -4738,9 +4925,9 @@ const TableWithChairs = ({ tableData, occupancy, scale, tableGuests = [], search
       cx = (tableW / 2) + rX * Math.cos(aRad) - (chairSize / 2);
       cy = (tableH / 2) + rY * Math.sin(aRad) - (chairSize / 2);
     } else if (tipo === 'ovalada') {
-      const topCap = config ? config.ladosOvalada.top : 4;
-      const botCap = config ? config.ladosOvalada.bottom : 4;
-      const leftCap = config ? config.ladosOvalada.left : Math.floor((cap - topCap - botCap) / 2);
+      const topCap = config?.ladosOvalada?.top ?? 4;
+      const botCap = config?.ladosOvalada?.bottom ?? 4;
+      const leftCap = config?.ladosOvalada?.left ?? Math.floor((cap - topCap - botCap) / 2);
       const radius = tableH / 2; const straightW = tableW - tableH; 
       
       if (i < topCap) {
@@ -4767,9 +4954,9 @@ const TableWithChairs = ({ tableData, occupancy, scale, tableGuests = [], search
         angleDeg = 360 - (-90 + (180 / (rightCap + 1)) * (idx + 1)); 
       }
     } else if (tipo === 'serpentina') {
-      const extCap = config ? config.ladosSerpentina.ext : Math.ceil(cap/2);
-      const intCap = config ? config.ladosSerpentina.int : Math.floor(cap/2) - 2;
-      const izqCap = config ? config.ladosSerpentina.izq : 1;
+      const extCap = config?.ladosSerpentina?.ext ?? Math.ceil(cap/2);
+      const intCap = config?.ladosSerpentina?.int ?? Math.floor(cap/2) - 2;
+      const izqCap = config?.ladosSerpentina?.izq ?? 1;
       const widthT = widthT_meters * scale;
       
       if (i < extCap) {
