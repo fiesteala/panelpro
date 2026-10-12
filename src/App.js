@@ -2639,24 +2639,63 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       setTimeout(() => { handleAutoAssign(); }, 800);
    };
 
+   const consolidateToNull = async (guestsList) => {
+       const currentGuests = guestsRef.current || safeGuests;
+       const updates = [];
+       const deletes = [];
+       const nullRoots = new Map(); 
+       
+       currentGuests.filter(g => !g.tableId).forEach(g => {
+           const rootId = g.parentId || g.id;
+           if (!nullRoots.has(rootId)) {
+               nullRoots.set(rootId, { ...g });
+           } else {
+               const existing = nullRoots.get(rootId);
+               existing.passes += g.passes;
+               existing.subGuests = [...(existing.subGuests || []), ...(g.subGuests || [])];
+               deletes.push(g.id);
+           }
+       });
+
+       for (const g of guestsList) {
+           const rootId = g.parentId || g.id;
+           if (nullRoots.has(rootId)) {
+               const existing = nullRoots.get(rootId);
+               existing.passes += g.passes;
+               existing.subGuests = [...(existing.subGuests || []), ...(g.subGuests || [])];
+               updates.push(existing);
+               deletes.push(g.id);
+           } else {
+               const movedGuest = { ...g, tableId: null };
+               nullRoots.set(rootId, movedGuest);
+               updates.push(movedGuest);
+           }
+       }
+
+       const promesas = [];
+       updates.forEach(u => promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", u.id), u)));
+       deletes.forEach(id => promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", id))));
+       await Promise.all(promesas);
+   };
+
    const emptyTable = async (tableId) => {
-    const guestsToUpdate = guests.filter(g => g.tableId === tableId);
-    const promesas = guestsToUpdate.map(g => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", g.id), { ...g, tableId: null }));
-    await Promise.all(promesas);
-      if(addNotification) addNotification('Mesa Vaciada', 'Invitados liberados en la nube.', 'info');
+      const currentGuests = guestsRef.current || safeGuests;
+      const guestsToUpdate = currentGuests.filter(g => g.tableId === tableId);
+      await consolidateToNull(guestsToUpdate);
+      if(addNotification) addNotification('Mesa Vaciada', 'Invitados consolidados y liberados.', 'info');
    };
 
    const deleteTable = async (tableId) => {
       await emptyTable(tableId);
-    await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", tableId));
+      await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", tableId));
       if(addNotification) addNotification('Mesa Eliminada', 'La mesa ha sido borrada.', 'warning');
    };
 
    const emptyAllTables = async () => {
-    const guestsToUpdate = guests.filter(g => g.tableId !== null);
-    const promesas = guestsToUpdate.map(g => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", g.id), { ...g, tableId: null }));
-    await Promise.all(promesas);
-      if(addNotification) addNotification('Todas las mesas vaciadas', 'Cambios guardados.', 'info');
+      const currentGuests = guestsRef.current || safeGuests;
+      const guestsToUpdate = currentGuests.filter(g => g.tableId !== null);
+      await consolidateToNull(guestsToUpdate);
+      if(addNotification) addNotification('Todas las mesas vaciadas', 'Invitados consolidados.', 'info');
    };
 
    const deleteAllTables = async () => {
@@ -2691,12 +2730,11 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
           return;
       }
 
-      // Buscamos familiares tanto en mesas como en "No asignados" (targetTableId === null)
       const familyRootId = guest.parentId || guest.id;
-      const siblingFragment = safeGuests.find(g => 
+      const siblingFragment = currentGuests.find(g => 
           g.id !== guest.id && 
           (g.parentId === familyRootId || g.id === familyRootId) && 
-          g.tableId === targetTableId
+          (isToTable ? g.tableId === targetTableId : !g.tableId)
       );
 
       if (guest.passes > 1 && (isForcedSplit || modoSeparador)) {
