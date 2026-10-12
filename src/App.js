@@ -2710,7 +2710,10 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
    const handleDragOver = (e) => e.preventDefault();
 
    const moverInvitado = async (guestId, targetTableId) => {
-      const guest = safeGuests.find(g => g.id === guestId);
+      const currentGuests = guestsRef.current || safeGuests;
+      const currentTables = tablesRef.current || safeTables;
+
+      const guest = currentGuests.find(g => g.id === guestId);
       if (!guest || guest.tableId === targetTableId) return;
 
       const isToTable = targetTableId !== null;
@@ -2718,8 +2721,8 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       let usedChairs = 0;
         
       if (isToTable) {
-           table = safeTables.find(t => t.id === targetTableId);
-           usedChairs = safeGuests.filter(g => g.tableId === targetTableId).reduce((sum, g) => sum + g.passes, 0);
+           table = currentTables.find(t => t.id === targetTableId);
+           usedChairs = currentGuests.filter(g => g.tableId === targetTableId).reduce((sum, g) => sum + g.passes, 0);
       }
 
       const availableChairs = isToTable ? table.capacity - usedChairs : Infinity;
