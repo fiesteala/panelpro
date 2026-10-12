@@ -2517,28 +2517,54 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
          .filter(g => !g.tableId && g.status !== 'cancelado')
          .sort((a, b) => b.passes - a.passes);
 
-      unassignedGuests.forEach(guest => {
-         const tablesWithSpace = mesasDisponibles.map(table => {
+      for (let guest of unassignedGuests) {
+         let tablesWithSpace = mesasDisponibles.map(table => {
             const assignedGuests = currentGuests.filter(g => g.tableId === table.id);
             const usedChairs = assignedGuests.reduce((sum, g) => sum + g.passes, 0);
             return { table, available: table.capacity - usedChairs };
-         }).filter(t => t.available >= guest.passes);
+         }).filter(t => t.available > 0);
 
-         if (tablesWithSpace.length > 0) {
-            tablesWithSpace.sort((a, b) => a.available - b.available);
-            const bestFitTable = tablesWithSpace[0].table;
-            
-            guest.tableId = bestFitTable.id; 
-            changesMade = true; 
+         if (tablesWithSpace.length === 0) continue; 
+
+         const fullFitTables = tablesWithSpace.filter(t => t.available >= guest.passes);
+         
+         if (fullFitTables.length > 0) {
+            fullFitTables.sort((a, b) => a.available - b.available);
+            const bestTable = fullFitTables[0].table;
+            guest.tableId = bestTable.id; 
+            changesMade = true;
             promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), guest));
-         }
-      });
+         } else {
+            // PAUSA ACTIVA: No cabe entero. Encontramos la mesa con MÁS espacio y pausamos.
+            tablesWithSpace.sort((a, b) => b.available - a.available);
+            const bestPartialTable = tablesWithSpace[0].table;
+            const availableChairs = tablesWithSpace[0].available;
+            const maxPlaceable = Math.min(guest.passes - 1, availableChairs);
 
-      if (changesMade) {
+            if (promesas.length > 0) await Promise.all(promesas);
+            
+            setSepararCantidad(maxPlaceable); 
+            setGuestSplitPrompt({
+               guest, 
+               targetTableId: bestPartialTable.id, 
+               table: bestPartialTable, 
+               usedChairs: bestPartialTable.capacity - availableChairs,
+               availableChairs,
+               minPlaceable: 1,
+               maxPlaceable,
+               isForced: true,
+               siblingFragment: null,
+               isAutoAssign: true
+            });
+            return; // Detiene el bucle para esperar al cliente
+         }
+      }
+
+      if (promesas.length > 0) {
          await Promise.all(promesas);
-         if(addNotification) addNotification('Auto-Acomodo Inteligente', 'Algoritmo BFD aplicado con éxito.', 'success');
-      } else {
-         if(addNotification) addNotification('Fragmentación', 'Hay sillas pero están muy separadas. Activa el Modo Separador para acomodarlos.', 'warning');
+         if(addNotification) addNotification('Auto-Acomodo Inteligente', 'Acomodo automático completado.', 'success');
+      } else if (!changesMade) {
+         if(addNotification) addNotification('Sin Cambios', 'No se pudieron asignar más invitados.', 'info');
       }
    };
 
@@ -2617,74 +2643,79 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
            usedChairs = safeGuests.filter(g => g.tableId === targetTableId).reduce((sum, g) => sum + g.passes, 0);
       }
 
-      // --- LÓGICA DE RE-FUSIÓN (RE-JOIN) ---
+      const availableChairs = isToTable ? table.capacity - usedChairs : Infinity;
+      const isForcedSplit = isToTable && guest.passes > availableChairs;
+
+      if (isToTable && availableChairs <= 0) {
+          if(addNotification) addNotification('Mesa Llena', `No hay sillas disponibles en ${table.name}.`, 'warning');
+          return;
+      }
+
       const familyRootId = guest.parentId || guest.id;
-      const siblingFragment = safeGuests.find(g => 
+      const siblingFragment = isToTable ? safeGuests.find(g => 
           g.id !== guest.id && 
           (g.parentId === familyRootId || g.id === familyRootId) && 
           g.tableId === targetTableId
-      );
+      ) : null;
+
+      if (guest.passes > 1 && (isForcedSplit || modoSeparador)) {
+          const maxPlaceable = Math.min(guest.passes - 1, availableChairs);
+          setSepararCantidad(maxPlaceable);
+          setGuestSplitPrompt({
+              guest, targetTableId, table, usedChairs, availableChairs,
+              minPlaceable: 1, maxPlaceable, isForced: isForcedSplit, siblingFragment
+          });
+          return;
+      }
 
       if (siblingFragment) {
           const mergedPasses = siblingFragment.passes + guest.passes;
           await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { ...siblingFragment, passes: mergedPasses });
           await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id));
-          if(addNotification) addNotification('Familias Unidas', `Fragmentos de la familia fusionados.`, 'success');
+          if(addNotification) addNotification('Familias Unidas', `Fragmentos fusionados con éxito.`, 'success');
           return;
-      }
-
-      // --- LÓGICA DE SEPARACIÓN INTELIGENTE ---
-      const overflow = isToTable ? guest.passes - (table.capacity - usedChairs) : 0;
-      
-      if (guest.passes > 1 && (overflow > 0 || modoSeparador)) {
-           const minToSeparate = Math.max(1, overflow);
-           setSepararCantidad(minToSeparate);
-           setGuestSplitPrompt({ guest, targetTableId, table, usedChairs, minToSeparate, maxToSeparate: guest.passes - 1, isForced: overflow > 0 });
-           return;
-      }
-
-      if (isToTable && overflow > 0) {
-           if(addNotification) addNotification('Mesa Llena', `No hay sillas suficientes en ${table.name}.`, 'warning');
-           return;
       }
 
       await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guestId), { ...guest, tableId: targetTableId });
    };
 
    const handleSplitChoice = async (mode) => {
-         const { guest, targetTableId, table, usedChairs, isForced } = guestSplitPrompt;
+         const { guest, targetTableId, table, usedChairs, siblingFragment, isAutoAssign } = guestSplitPrompt;
           
          if (mode === 'all') {
-               if (table && usedChairs + guest.passes > table.capacity) {
-                     if(addNotification) addNotification('Acción Denegada', `La mesa no soporta el grupo completo. Sepáralos.`, 'warning');
+               if (siblingFragment) {
+                   const mergedPasses = siblingFragment.passes + guest.passes;
+                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { ...siblingFragment, passes: mergedPasses });
+                   await deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id));
                } else {
-                     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, tableId: targetTableId });
-                     setGuestSplitPrompt(null);
+                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, tableId: targetTableId });
                }
+               setGuestSplitPrompt(null);
+               if (isAutoAssign) setTimeout(() => handleAutoAssign(), 500);
          } else if (mode === 'split') {
                const qtyToMove = separarCantidad;
                const qtyRemaining = guest.passes - qtyToMove;
 
-               if (table && usedChairs + qtyToMove > table.capacity) {
-                     if(addNotification) addNotification('Mesa Llena', `Incluso separados, no caben en ${table.name}.`, 'warning');
-                     return;
+               if (siblingFragment) {
+                   const mergedPasses = siblingFragment.passes + qtyToMove;
+                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { ...siblingFragment, passes: mergedPasses });
+                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, passes: qtyRemaining });
+               } else {
+                   const newGuestId = `sep_${Date.now()}`;
+                   const newGuest = { 
+                       ...guest, 
+                       id: newGuestId, 
+                       parentId: guest.parentId || guest.id,
+                       name: `${guest.name} (Separado)`, 
+                       passes: qtyToMove, 
+                       childrenPasses: 0, 
+                       tableId: targetTableId 
+                   };
+                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, passes: qtyRemaining });
+                   await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", newGuestId), newGuest);
                }
-
-               const newGuestId = `sep_${Date.now()}`;
-               const newGuest = { 
-                   ...guest, 
-                   id: newGuestId, 
-                   parentId: guest.parentId || guest.id,
-                   name: `${guest.name} (Separado)`, 
-                   passes: qtyToMove, 
-                   childrenPasses: 0, 
-                   tableId: targetTableId 
-               };
-               const updatedGuest = { ...guest, passes: qtyRemaining };
-              
-               await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), updatedGuest);
-               await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", newGuestId), newGuest);
                setGuestSplitPrompt(null);
+               if (isAutoAssign) setTimeout(() => handleAutoAssign(), 500);
          } else {
              setGuestSplitPrompt(null);
          }
@@ -2976,24 +3007,28 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white dark:bg-[#111] rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl animate-in zoom-in-95 border border-slate-200 dark:border-white/10">
             <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-4"><Users size={32} /></div>
-            <h3 className="font-bold text-xl text-slate-800 dark:text-white mb-2">Dividir Grupo</h3>
+            <h3 className="font-bold text-xl text-slate-800 dark:text-white mb-2">Acomodar Grupo</h3>
             
             {guestSplitPrompt.isForced ? (
-                <p className="text-rose-500 mb-4 text-sm font-medium">La mesa no tiene espacio suficiente. Debes separar al grupo.</p>
+                <p className="text-rose-500 mb-4 text-[13px] font-medium leading-relaxed">
+                   Esta mesa es para <b>{guestSplitPrompt.table.capacity} personas</b> y solo quedan <b>{guestSplitPrompt.availableChairs} sillas disponibles</b>. La familia ({guestSplitPrompt.guest.passes} pases) supera la capacidad.<br/><br/>¿Cuántos deseas acomodar en esta mesa?
+                </p>
             ) : (
-                <p className="text-slate-500 dark:text-slate-400 mb-4 text-sm"><b>{guestSplitPrompt.guest.name}</b> tiene {guestSplitPrompt.guest.passes} pases. ¿Cuántos deseas mover a esta mesa?</p>
+                <p className="text-slate-500 dark:text-slate-400 mb-4 text-[13px] leading-relaxed">
+                   <b>{guestSplitPrompt.guest.name}</b> tiene {guestSplitPrompt.guest.passes} pases y hay {guestSplitPrompt.availableChairs} sillas libres en esta mesa.<br/><br/>¿Cuántos deseas acomodar aquí?
+                </p>
             )}
 
-            <div className="flex items-center justify-center gap-4 mb-6 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl">
+            <div className="flex items-center justify-center gap-4 mb-6 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-transparent">
                 <button 
-                   onClick={() => setSepararCantidad(Math.max(guestSplitPrompt.minToSeparate, separarCantidad - 1))}
-                   disabled={separarCantidad <= guestSplitPrompt.minToSeparate}
+                   onClick={() => setSepararCantidad(Math.max(guestSplitPrompt.minPlaceable, separarCantidad - 1))}
+                   disabled={separarCantidad <= guestSplitPrompt.minPlaceable}
                    className="w-10 h-10 rounded-full bg-white dark:bg-[#222] border border-slate-200 dark:border-white/10 flex items-center justify-center font-black text-slate-800 dark:text-white shadow-sm disabled:opacity-30"
                 >-</button>
                 <div className="text-3xl font-black text-indigo-600 dark:text-amber-500 w-12 text-center">{separarCantidad}</div>
                 <button 
-                   onClick={() => setSepararCantidad(Math.min(guestSplitPrompt.maxToSeparate, separarCantidad + 1))}
-                   disabled={separarCantidad >= guestSplitPrompt.maxToSeparate}
+                   onClick={() => setSepararCantidad(Math.min(guestSplitPrompt.maxPlaceable, separarCantidad + 1))}
+                   disabled={separarCantidad >= guestSplitPrompt.maxPlaceable}
                    className="w-10 h-10 rounded-full bg-white dark:bg-[#222] border border-slate-200 dark:border-white/10 flex items-center justify-center font-black text-slate-800 dark:text-white shadow-sm disabled:opacity-30"
                 >+</button>
             </div>
@@ -3002,7 +3037,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
               <button onClick={() => handleSplitChoice('split')} className="w-full p-3 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-md transition-transform active:scale-95">Mover {separarCantidad} pase(s)</button>
               
               {!guestSplitPrompt.isForced && (
-                 <button onClick={() => handleSplitChoice('all')} className="w-full p-3 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 transition-colors">Mover toda la familia ({guestSplitPrompt.guest.passes})</button>
+                 <button onClick={() => handleSplitChoice('all')} className="w-full p-3 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 transition-colors">Mover familia completa ({guestSplitPrompt.guest.passes})</button>
               )}
               
               <button onClick={() => handleSplitChoice('cancel')} className="w-full p-3 text-slate-400 font-bold hover:text-slate-600 dark:hover:text-slate-200 mt-2 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
