@@ -3197,11 +3197,11 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                   <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">+{Math.ceil(smartAssign.faltantes/9)} mesas</span>
                 </button>
 
-                <button onClick={() => generarYAsignarMagico('mixto')} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
-                  <Wand2 size={28} className="text-purple-500 dark:text-purple-400 mb-3"/>
-                  <p className="font-bold text-slate-800 dark:text-white text-sm">Mezcla 50/50</p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">Redonda y Tablón</p>
-                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">Magia</span>
+                <button onClick={() => { setSmartAssign(null); setCurrentConfig({...configActual, tipo: 'libre'}); setCreationMode('iguales'); setIsAddModalOpen(true); }} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
+                  <Settings2 size={28} className="text-slate-500 dark:text-slate-400 mb-3"/>
+                  <p className="font-bold text-slate-800 dark:text-white text-sm">Diseño Libre</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">A tu medida</p>
+                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">Configurar</span>
                 </button>
               </div>
 
@@ -3414,7 +3414,7 @@ const TableWithChairs = ({ tableData, occupancy, scale, tableGuests = [], search
     if (config?.modeloSerpentina === 'mod3') { arcLength = 2.10; widthT_meters = 0.75; }
     if (config?.modeloSerpentina === 'mod4') { arcLength = 2.44; widthT_meters = 0.90; }
     wMeters = arcLength / (Math.PI / 2); hMeters = wMeters; 
-  } else if (tipo === 'libre') { 
+  } else if (tipo === 'personalizada' || tipo === 'libre') { 
     wMeters = config?.libreMedidas?.largo || 2.0; hMeters = config?.libreMedidas?.ancho || 1.0; 
   }
 
