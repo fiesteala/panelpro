@@ -2366,6 +2366,14 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
     ladosLibre: { top: 4, bottom: 4, left: 2, right: 2 }
   });
 
+  // 🟢 REFERENCIAS FRESCAS PARA EVITAR STALE CLOSURES (FOTOGRAFÍAS VIEJAS)
+  const guestsRef = useRef(guests || []);
+  const tablesRef = useRef(tables || []);
+  useEffect(() => {
+      guestsRef.current = guests || [];
+      tablesRef.current = tables || [];
+  }, [guests, tables]);
+
   const safeTables = tables || [];
   const safeGuests = guests || [];
   const invitadosSinMesa = safeGuests.filter(g => !g.tableId && g.status !== 'cancelado');
@@ -2486,30 +2494,43 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       if(addNotification) addNotification('Mesas Creadas', `Se agregaron ${nuevasMesas.length} mesas a la nube.`, 'success');
    };
 
+   const isProcessingAutoAssign = useRef(false);
+
    const handleAutoAssign = () => {
-      if (!guests || guests.length === 0) return;
-      const unassigned = guests.filter(g => !g.tableId && g.status !== 'cancelado');
+      if (isProcessingAutoAssign.current) return;
+      isProcessingAutoAssign.current = true;
+
+      const currentGuests = guestsRef.current || safeGuests;
+      const currentTables = tablesRef.current || safeTables;
+
+      if (!currentGuests || currentGuests.length === 0) {
+         isProcessingAutoAssign.current = false;
+         return;
+      }
+      const unassigned = currentGuests.filter(g => !g.tableId && g.status !== 'cancelado');
       if (unassigned.length === 0) {
          if(addNotification) addNotification('Listo', 'Todos los invitados ya tienen mesa asignada.', 'info');
+         isProcessingAutoAssign.current = false;
          return;
       }
       const unassignedPasses = unassigned.reduce((sum, g) => sum + g.passes, 0);
       let availableChairs = 0;
-      safeTables.forEach(t => {
-         const assigned = guests.filter(g => g.tableId === t.id);
+      currentTables.forEach(t => {
+         const assigned = currentGuests.filter(g => g.tableId === t.id);
          const used = assigned.reduce((sum, g) => sum + g.passes, 0);
          availableChairs += (t.capacity - used);
       });
 
       if (unassignedPasses > availableChairs) {
          setSmartAssign({ faltantes: unassignedPasses - availableChairs, invitadosPendientes: unassignedPasses });
+         isProcessingAutoAssign.current = false;
          return;
       }
-      ejecutarAsignacionLogic(safeTables);
+      ejecutarAsignacionLogic(currentTables, currentGuests);
    };
 
-   const ejecutarAsignacionLogic = async (mesasDisponibles) => {
-      let currentGuests = [...safeGuests];
+   const ejecutarAsignacionLogic = async (mesasDisponibles, invitadosActuales) => {
+      let currentGuests = [...invitadosActuales];
       let changesMade = false;
       let promesas = [];
 
@@ -2531,15 +2552,32 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
          if (fullFitTables.length > 0) {
             fullFitTables.sort((a, b) => a.available - b.available);
             const bestTable = fullFitTables[0].table;
-            guest.tableId = bestTable.id; 
+            
+            const familyRootId = guest.parentId || guest.id;
+            const siblingFragment = currentGuests.find(g => g.id !== guest.id && (g.parentId === familyRootId || g.id === familyRootId) && g.tableId === bestTable.id);
+
+            if (siblingFragment) {
+                const mergedPasses = siblingFragment.passes + guest.passes;
+                const mergedSubGuests = [...(siblingFragment.subGuests || []), ...(guest.subGuests || [])];
+                promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { ...siblingFragment, passes: mergedPasses, subGuests: mergedSubGuests }));
+                promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id)));
+            } else {
+                guest.tableId = bestTable.id; 
+                promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), guest));
+            }
+            
             changesMade = true;
-            promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), guest));
+            // Actualizar arreglo virtual para que las sillas se descuenten en la misma vuelta
+            currentGuests = currentGuests.map(g => g.id === guest.id ? { ...g, tableId: bestTable.id } : g);
          } else {
             // PAUSA ACTIVA: No cabe entero. Encontramos la mesa con MÁS espacio y pausamos.
             tablesWithSpace.sort((a, b) => b.available - a.available);
             const bestPartialTable = tablesWithSpace[0].table;
             const availableChairs = tablesWithSpace[0].available;
             const maxPlaceable = Math.min(guest.passes - 1, availableChairs);
+
+            const familyRootId = guest.parentId || guest.id;
+            const siblingFragment = currentGuests.find(g => g.id !== guest.id && (g.parentId === familyRootId || g.id === familyRootId) && g.tableId === bestPartialTable.id);
 
             if (promesas.length > 0) await Promise.all(promesas);
             
@@ -2553,9 +2591,10 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                minPlaceable: 1,
                maxPlaceable,
                isForced: true,
-               siblingFragment: null,
+               siblingFragment,
                isAutoAssign: true
             });
+            isProcessingAutoAssign.current = false;
             return; // Detiene el bucle para esperar al cliente
          }
       }
@@ -2566,6 +2605,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       } else if (!changesMade) {
          if(addNotification) addNotification('Sin Cambios', 'No se pudieron asignar más invitados.', 'info');
       }
+      isProcessingAutoAssign.current = false;
    };
 
    const generarYAsignarMagico = async (opcion) => {
@@ -2596,7 +2636,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
     await Promise.all(mesasNuevas.map(m => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", m.id), m)));
       setSmartAssign(null);
       if(addNotification) addNotification('¡Magia Aplicada!', `Se generaron mesas mágicas en la nube.`, 'success');
-      setTimeout(() => { ejecutarAsignacionLogic([...safeTables, ...mesasNuevas]); }, 500);
+      setTimeout(() => { handleAutoAssign(); }, 800);
    };
 
    const emptyTable = async (tableId) => {
@@ -2688,7 +2728,11 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
    };
 
    const handleSplitChoice = async (mode) => {
-         const { guest, targetTableId, table, usedChairs, siblingFragment, isAutoAssign } = guestSplitPrompt;
+         if (!guestSplitPrompt) return; // Bloqueo Anti Doble-Clic
+         const promptData = { ...guestSplitPrompt };
+         setGuestSplitPrompt(null); // Cierra el modal instantáneamente
+
+         const { guest, targetTableId, table, usedChairs, siblingFragment, isAutoAssign } = promptData;
           
          if (mode === 'all') {
                if (siblingFragment) {
@@ -2699,13 +2743,12 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                } else {
                    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, tableId: targetTableId });
                }
-               setGuestSplitPrompt(null);
-               if (isAutoAssign) setTimeout(() => handleAutoAssign(), 500);
+               
+               if (isAutoAssign) setTimeout(() => handleAutoAssign(), 800);
          } else if (mode === 'split') {
                const qtyToMove = separarCantidad;
                const qtyRemaining = guest.passes - qtyToMove;
                
-               // Dividimos los subGuests equitativamente para no inflar la base de datos
                const subGuestsOriginal = guest.subGuests || [];
                const subGuestsToMove = subGuestsOriginal.slice(0, qtyToMove);
                const subGuestsToKeep = subGuestsOriginal.slice(qtyToMove);
@@ -2730,10 +2773,8 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, passes: qtyRemaining, subGuests: subGuestsToKeep });
                    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", newGuestId), newGuest);
                }
-               setGuestSplitPrompt(null);
-               if (isAutoAssign) setTimeout(() => handleAutoAssign(), 500);
-         } else {
-             setGuestSplitPrompt(null);
+               
+               if (isAutoAssign) setTimeout(() => handleAutoAssign(), 800);
          }
    };
 
