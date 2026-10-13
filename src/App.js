@@ -1817,10 +1817,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           );
       })()}
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Gestión de Invitados</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Control de asistencia, pases y credenciales.</p>
+          <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">Gestión de Invitados</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Control de asistencia, pases y credenciales.</p>
         </div>
         
         <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
@@ -1854,38 +1854,38 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       </div>
 
-      <div className={`grid grid-cols-3 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-2 sm:gap-4`}>
+      <div className={`grid grid-cols-2 md:grid-cols-3 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-2 sm:gap-4`}>
         <div className="bg-white dark:bg-[#0a0a0a] p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col transition-colors">
           <div className="text-slate-500 dark:text-slate-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0 text-slate-400 dark:text-slate-500"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
-          <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-none mt-0.5">{passCountEnabled ? totalPases : safeGuests.length}</h3>
+          <h3 className="text-xl sm:text-2xl font-editorial text-slate-900 dark:text-white leading-none mt-0.5">{passCountEnabled ? totalPases : safeGuests.length}</h3>
         </div>
         
         {isPremium && passCountEnabled && (
         <div className="bg-sky-50 dark:bg-sky-500/10 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-sky-200 dark:border-sky-500/20 shadow-sm flex flex-col transition-colors">
           <div className="text-sky-600 dark:text-sky-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Niños</div>
-          <h3 className="text-xl sm:text-2xl font-black text-sky-600 dark:text-sky-400 leading-none mt-0.5">{totalNinos}</h3>
+          <h3 className="text-xl sm:text-2xl font-editorial text-sky-600 dark:text-sky-400 leading-none mt-0.5">{totalNinos}</h3>
         </div>
         )}
         
         <div className="bg-amber-50 dark:bg-amber-500/10 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex flex-col transition-colors">
           <div className="text-amber-600 dark:text-amber-500 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Confirmados</div>
-          <h3 className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-500 leading-none mt-0.5">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3>
+          <h3 className="text-xl sm:text-2xl font-editorial text-amber-600 dark:text-amber-500 leading-none mt-0.5">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3>
         </div>
         
         <div className="bg-slate-50 dark:bg-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col transition-colors">
           <div className="text-slate-500 dark:text-slate-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Pendientes</div>
-          <h3 className="text-xl sm:text-2xl font-black text-slate-600 dark:text-slate-300 leading-none mt-0.5">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
+          <h3 className="text-xl sm:text-2xl font-editorial text-slate-600 dark:text-slate-300 leading-none mt-0.5">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
         </div>
         
         <div className="bg-rose-50 dark:bg-rose-500/10 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-rose-200 dark:border-rose-500/20 shadow-sm flex flex-col transition-colors">
           <div className="text-rose-600 dark:text-rose-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><X className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Cancelados</div>
-          <h3 className="text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-400 leading-none mt-0.5">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
+          <h3 className="text-xl sm:text-2xl font-editorial text-rose-600 dark:text-rose-400 leading-none mt-0.5">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
         </div>
         
         {isPremium && qrEnabled && (
         <div className="bg-emerald-50 dark:bg-emerald-500/10 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex flex-col transition-colors">
           <div className="text-emerald-600 dark:text-emerald-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><Scan className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Ingresaron</div>
-          <h3 className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 leading-none mt-0.5">{totalIngresos}</h3>
+          <h3 className="text-xl sm:text-2xl font-editorial text-emerald-600 dark:text-emerald-400 leading-none mt-0.5">{totalIngresos}</h3>
         </div>
         )}
       </div>
@@ -2361,8 +2361,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 const InvitacionView = ({ guests, urlInvitacion }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGuestId, setSelectedGuestId] = useState(guests[0]?.id || null);
-  const [isMobileSimulatorOpen, setIsMobileSimulatorOpen] = useState(false);
-
+  
   const filteredGuests = guests.filter(g => g.name.toLowerCase().includes(searchTerm.toLowerCase()));
   const guest = guests.find(g => g.id === selectedGuestId) || guests[0];
 
@@ -2373,75 +2372,31 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
     iframeUrl = `${urlInvitacion}${separator}u=${selectedGuestId || ''}&preview=1`;
   }
 
-  // 🔴 REUTILIZAMOS EL SIMULADOR PARA ESCRITORIO Y MÓVIL
-  const SimulatorContent = () => (
-    <>
-      {!urlInvitacion ? (
-        <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
-           <Link size={56} className="text-slate-300 dark:text-slate-600 mb-6"/>
-           <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 font-editorial">Falta el Enlace</h3>
-           <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-[250px]">No se ha guardado el enlace de la invitación web para este evento.</p>
-           <div className="mt-8 border border-slate-200 dark:border-white/10 p-4 rounded-xl bg-slate-50 dark:bg-white/5 text-xs text-slate-500 dark:text-slate-400 text-left flex items-start transition-colors">
-              <Info size={16} className="mr-2.5 shrink-0 mt-0.5 text-indigo-400 dark:text-amber-500"/>
-              <p>Ve a "Centro de Operaciones" y edita la licencia del cliente para agregar la URL.</p>
-           </div>
-        </div>
-      ) : (
-        <div className="w-full flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden transition-colors">
-           
-           {/* 🔴 Badge de seguridad superior */}
-           <div className="absolute top-0 inset-x-0 flex justify-center z-30 pointer-events-none">
-              <span className="bg-rose-500 text-white text-[9px] font-black uppercase tracking-widest py-1 px-4 rounded-b-lg shadow-md flex items-center">
-                 <Lock size={10} className="mr-1.5"/> Simulación Segura
-              </span>
-           </div>
-
-           {guest ? (
-              <iframe 
-                 key={iframeUrl}
-                 src={iframeUrl} 
-                 className="absolute inset-0 w-full h-full border-none rounded-[2rem] z-10" 
-                 title="Invitacion Simulada"
-              ></iframe>
-           ) : (
-             <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 transition-colors z-10 relative">
-               <Users size={32} className="mb-3 opacity-20"/>
-               <span className="text-xs font-bold uppercase tracking-widest">Selecciona un invitado</span>
-             </div>
-           )}
-        </div>
-      )}
-    </>
-  );
-
   return (
     <div className="h-full flex flex-col lg:flex-row gap-6 pb-6 relative overflow-hidden transition-colors items-stretch">
       
       {/* PANEL IZQUIERDO: LISTA DE INVITADOS */}
       <div className="flex-1 flex flex-col h-full min-h-0 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
-        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] transition-colors shrink-0">
-          <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white flex items-center"><Smartphone size={18} className="mr-2 text-indigo-500 dark:text-amber-500"/> Simulador en Vivo</h2>
-          <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">Selecciona una familia para ver cómo funciona su pase en tu diseño real.</p>
+        <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] transition-colors">
+          <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center"><Smartphone size={20} className="mr-2 text-indigo-500 dark:text-amber-500"/> Simulador en Vivo</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">Selecciona una familia para ver cómo funciona su pase en tu diseño real.</p>
           <div className="mt-4 relative">
             <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input type="text" placeholder="Buscar familia para simular..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050505] text-slate-800 dark:text-white rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-amber-500/20 focus:border-indigo-400 dark:focus:border-amber-500 transition-colors shadow-sm" />
+            <input type="text" placeholder="Buscar familia para simular..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-3 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050505] text-slate-800 dark:text-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-amber-500/20 focus:border-indigo-400 dark:focus:border-amber-500 transition-colors" />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2 sm:p-3 custom-scrollbar bg-slate-50/50 dark:bg-transparent">
+        <div className="flex-1 overflow-y-auto p-3 custom-scrollbar bg-slate-50/50 dark:bg-transparent">
           {filteredGuests.length > 0 ? (
-            <ul className="space-y-1.5 pb-12 lg:pb-0">
+            <ul className="space-y-1.5">
               {filteredGuests.map(g => (
                 <li key={g.id}>
-                  {/* 🔴 EN MÓVIL ABRIMOS EL MODAL, EN ESCRITORIO SOLO CAMBIAMOS EL ID */}
-                  <button onClick={() => { setSelectedGuestId(g.id); setIsMobileSimulatorOpen(true); }} className={`w-full text-left p-3 sm:p-3.5 rounded-xl transition-all flex items-center justify-between shadow-sm ${selectedGuestId === g.id ? 'bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/30' : 'bg-white dark:bg-[#111] hover:bg-slate-50 dark:hover:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'}`}>
-                    <div className="min-w-0 pr-3">
-                      <p className={`font-bold text-sm truncate ${selectedGuestId === g.id ? 'text-indigo-900 dark:text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>{g.name}</p>
-                      <p className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 mt-1 truncate">{g.originalPasses || g.passes} Pases | <span className={`uppercase font-bold tracking-wider ${g.status === 'cancelado' ? 'text-rose-500' : g.status === 'confirmado' ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`}>{g.status.replace('_', ' ')}</span></p>
+                  <button onClick={() => setSelectedGuestId(g.id)} className={`w-full text-left p-3.5 rounded-xl transition-all flex items-center justify-between ${selectedGuestId === g.id ? 'bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/30 shadow-sm' : 'hover:bg-slate-50 dark:hover:bg-white/5 border border-transparent'}`}>
+                    <div>
+                      <p className={`font-bold text-sm ${selectedGuestId === g.id ? 'text-indigo-900 dark:text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>{g.name}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{g.originalPasses || g.passes} Pases | <span className={`uppercase font-bold tracking-wider ${g.status === 'cancelado' ? 'text-rose-500' : g.status === 'confirmado' ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`}>{g.status.replace('_', ' ')}</span></p>
                     </div>
-                    <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 dark:bg-black/20 border border-slate-100 dark:border-white/5">
-                      <Smartphone size={14} className={selectedGuestId === g.id ? 'text-indigo-500 dark:text-amber-500' : 'text-slate-400'}/>
-                    </div>
+                    {selectedGuestId === g.id && <ArrowRight size={18} className="text-indigo-500 dark:text-amber-500"/>}
                   </button>
                 </li>
               ))}
@@ -2450,26 +2405,46 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
         </div>
       </div>
 
-      {/* PANEL DERECHO: SIMULADOR ESCRITORIO */}
-      <div className="hidden lg:flex w-[400px] flex-shrink-0 flex-col h-full">
-        <SimulatorContent />
-      </div>
+      {/* PANEL DERECHO: SIMULADOR MINIMALISTA DE ALTA COSTURA */}
+      <div className="w-full lg:w-[400px] flex-shrink-0 flex flex-col h-full">
+        
+        {!urlInvitacion ? (
+          <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
+             <Link size={56} className="text-slate-300 dark:text-slate-600 mb-6"/>
+             <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 font-editorial">Falta el Enlace</h3>
+             <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-[250px]">No se ha guardado el enlace de la invitación web para este evento.</p>
+             <div className="mt-8 border border-slate-200 dark:border-white/10 p-4 rounded-xl bg-slate-50 dark:bg-white/5 text-xs text-slate-500 dark:text-slate-400 text-left flex items-start transition-colors">
+                <Info size={16} className="mr-2.5 shrink-0 mt-0.5 text-indigo-400 dark:text-amber-500"/>
+                <p>Ve a "Centro de Operaciones" y edita la licencia del cliente para agregar la URL.</p>
+             </div>
+          </div>
+        ) : (
+          <div className="w-full flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden transition-colors">
+             
+             {/* 🔴 Badge de seguridad superior (Z-Index alto, pointer-events none para no bloquear clicks) */}
+             <div className="absolute top-0 inset-x-0 flex justify-center z-20 pointer-events-none">
+                <span className="bg-rose-500 text-white text-[9px] font-black uppercase tracking-widest py-1 px-4 rounded-b-lg shadow-md flex items-center">
+                   <Lock size={10} className="mr-1.5"/> Simulación Segura
+                </span>
+             </div>
 
-      {/* 🔴 MODAL MÓVIL: SIMULADOR A PANTALLA COMPLETA */}
-      {isMobileSimulatorOpen && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/90 backdrop-blur-md flex flex-col pt-10 sm:p-4 animate-in slide-in-from-bottom-full duration-300 lg:hidden">
-          <div className="flex justify-between items-center bg-white dark:bg-[#0a0a0a] rounded-t-3xl p-4 shrink-0 border-b border-slate-200 dark:border-white/10 shadow-lg relative z-20">
-            <div className="min-w-0 pr-4">
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">Viendo: {guest.name}</h3>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Modo Seguro Activado</p>
-            </div>
-            <button onClick={() => setIsMobileSimulatorOpen(false)} className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-500 hover:text-rose-500 shrink-0 shadow-sm border border-slate-200 dark:border-white/5"><X size={20}/></button>
+             {guest ? (
+                // 🔴 Iframe absoluto, ocupando todo el espacio, sin margen superior, z-index base (10)
+                <iframe 
+                   key={iframeUrl}
+                   src={iframeUrl} 
+                   className="absolute inset-0 w-full h-full border-none rounded-[2rem] z-10" 
+                   title="Invitacion Simulada"
+                ></iframe>
+             ) : (
+               <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 transition-colors z-10 relative">
+                 <Users size={32} className="mb-3 opacity-20"/>
+                 <span className="text-xs font-bold uppercase tracking-widest">Selecciona un invitado</span>
+               </div>
+             )}
           </div>
-          <div className="flex-1 w-full bg-white dark:bg-[#0a0a0a] relative overflow-hidden flex flex-col pb-4 px-2">
-             <SimulatorContent />
-          </div>
-        </div>
-      )}
+        )}
+      </div>
 
     </div>
   );
@@ -14687,9 +14662,25 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     e.preventDefault();
     setFormError('');
 
+    // 🟢 SIMULACIÓN ELEGANTE: Simulamos el éxito sin tocar la base de datos
     if (isPreviewMode) {
-      alert("🔒 MODO VISTA PREVIA\nAquí se guardarían los datos y se comunicarían a la invitación HTML.");
-      return;
+      setRsvpStatus('submitting');
+      setTimeout(() => {
+         setRsvpStatus('success');
+         showToast('Modo Simulación: Flujo exitoso (Base de datos intacta).', 'success');
+         
+         // Inyectamos datos simulados para que tu HTML muestre los QRs visualmente
+         if (guestInfo) {
+           const mockData = {
+             ...guestInfo,
+             status: 'confirmado',
+             passes: qrEnabled ? tempSubGuests.filter(sg => sg.willAttend).length : attendingCount,
+             subGuests: qrEnabled ? tempSubGuests.filter(sg => sg.willAttend) : Array(attendingCount).fill({id: 'sim_qr', name: guestInfo.name})
+           };
+           comunicarDatosALaInvitacionHTML(mockData);
+         }
+      }, 1200);
+      return; 
     }
 
     setRsvpStatus('submitting');
