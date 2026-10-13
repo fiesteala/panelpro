@@ -14687,9 +14687,25 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     e.preventDefault();
     setFormError('');
 
+    // 🟢 SIMULACIÓN ELEGANTE: Simulamos el éxito sin tocar la base de datos
     if (isPreviewMode) {
-      alert("🔒 MODO VISTA PREVIA\nAquí se guardarían los datos y se comunicarían a la invitación HTML.");
-      return;
+      setRsvpStatus('submitting');
+      setTimeout(() => {
+         setRsvpStatus('success');
+         showToast('Modo Simulación: Flujo exitoso (Base de datos intacta).', 'success');
+         
+         // Inyectamos datos simulados para que tu HTML muestre los QRs visualmente
+         if (guestInfo) {
+           const mockData = {
+             ...guestInfo,
+             status: 'confirmado',
+             passes: qrEnabled ? tempSubGuests.filter(sg => sg.willAttend).length : attendingCount,
+             subGuests: qrEnabled ? tempSubGuests.filter(sg => sg.willAttend) : Array(attendingCount).fill({id: 'sim_qr', name: guestInfo.name})
+           };
+           comunicarDatosALaInvitacionHTML(mockData);
+         }
+      }, 1200);
+      return; 
     }
 
     setRsvpStatus('submitting');
