@@ -14580,19 +14580,36 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const t_font = urlParams.get('font') || '';
 
   const textRgb = hexToRgb(t_txt);
+  
+  // 🟢 MAGIA VISUAL: Detectamos si el texto es oscuro para crear un Cristal Blanco, o si es blanco para un Cristal Ahumado.
+  const isDarkText = (textRgb.r * 0.299 + textRgb.g * 0.587 + textRgb.b * 0.114) < 186;
 
   const themeContainer = { backgroundColor: 'transparent', fontFamily: t_font ? `"${t_font}", sans-serif` : 'inherit', minHeight: '100vh', color: t_txt };
   
   const themeGlassForm = {
-    backgroundColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.05)`,
-    backdropFilter: 'blur(25px)',
-    WebkitBackdropFilter: 'blur(25px)',
-    border: `1px solid rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)`,
+    backgroundColor: isDarkText ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.35)',
+    backdropFilter: 'blur(24px)',
+    WebkitBackdropFilter: 'blur(24px)',
+    border: isDarkText ? '1px solid rgba(255, 255, 255, 0.7)' : '1px solid rgba(255, 255, 255, 0.15)',
+    boxShadow: '0 12px 40px 0 rgba(0, 0, 0, 0.08)',
     color: t_txt
   };
 
   const themeBtn = { backgroundColor: t_btn, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.1em' };
-  const themeInput = { backgroundColor: 'rgba(255,255,255,0.2)', color: t_txt, borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)` };
+  
+  const themeInput = { 
+    backgroundColor: isDarkText ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.3)', 
+    color: t_txt, 
+    borderColor: isDarkText ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.2)' 
+  };
+
+  // 🟢 ESCUDO ANTI-MODO OSCURO: Evita que el celular contamine el iframe con fondos negros
+  useEffect(() => {
+    if (isIframe) {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.style.colorScheme = 'light';
+    }
+  }, [isIframe]);
 
   // 🔴 VARIABLES MAESTRAS MULTI-MODALES
   const qrEnabled = eventoInfo?.isQrEnabled !== false;
