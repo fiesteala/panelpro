@@ -14559,51 +14559,73 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [logoFailed, setLogoFailed] = useState(false);
   const [dataSent, setDataSent] = useState(false); 
   
-  // Estados para Modo Estricto (Con QRs)
+  // 🟢 TOAST NOTIFICATION
+  const [toast, setToast] = useState(null);
+  const showToast = (text, type = 'info') => {
+    setToast({ text, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  // Estados para Modo Estricto y Simple
   const [tempSubGuests, setTempSubGuests] = useState([]);
-  
-  // Estados para Modo Simple (Sin QRs)
   const [willAttendSimple, setWillAttendSimple] = useState(true);
   const [attendingCount, setAttendingCount] = useState(1);
-
   const [extraRequested, setExtraRequested] = useState(0);
   const [openPasses, setOpenPasses] = useState(1);
   const [openName, setOpenName] = useState('');
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const isIframe = urlParams.get('iframe') === 'true';
-  const isPreviewMode = urlParams.get('preview') === '1';
+  // 🟢 EXTRACCIÓN MAESTRA DE DISEÑO
+  const searchString = window.location.search || (window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '');
+  const urlParams = new URLSearchParams(searchString);
+  const isIframe = urlParams.get('iframe') === 'true' || window.location.href.includes('iframe=true');
+  const isPreviewMode = urlParams.get('preview') === '1' || window.location.href.includes('preview=1');
   
-  const t_bg = urlParams.get('bg') ? `#${urlParams.get('bg')}` : '#f8fafc'; 
-  const t_btn = urlParams.get('btn') ? `#${urlParams.get('btn')}` : '#d97706'; 
-  const t_txt = urlParams.get('txt') ? `#${urlParams.get('txt')}` : '#1c1917'; 
+  const getHex = (param) => {
+      const val = urlParams.get(param);
+      if (!val) return null;
+      if (val === 'transparent') return 'transparent';
+      return val.startsWith('#') ? val : `#${val}`;
+  };
+
+  const t_bg = getHex('bg') || 'transparent';
+  const t_card = getHex('card'); // ¡Ahora sí leemos la tarjeta!
+  const t_btn = getHex('btn') || '#d97706'; 
+  const t_txt = getHex('txt') || '#1c1917'; 
   const t_font = urlParams.get('font') || '';
 
   const textRgb = hexToRgb(t_txt);
-  
-  // 🟢 MAGIA VISUAL: Detectamos si el texto es oscuro para crear un Cristal Blanco, o si es blanco para un Cristal Ahumado.
   const isDarkText = (textRgb.r * 0.299 + textRgb.g * 0.587 + textRgb.b * 0.114) < 186;
 
-  const themeContainer = { backgroundColor: 'transparent', fontFamily: t_font ? `"${t_font}", sans-serif` : 'inherit', minHeight: '100vh', color: t_txt };
+  // 🟢 INTEGRACIÓN NATIVA: Si la invitación manda un color de tarjeta, lo usamos. 
+  // Si no manda nada, aplicamos un color sólido base de acuerdo al texto.
+  const finalCardBg = (t_card && t_card !== 'transparent') ? t_card : (isDarkText ? '#ffffff' : '#111111');
+
+  const themeContainer = { 
+    backgroundColor: t_bg, 
+    fontFamily: t_font ? `"${t_font}", sans-serif` : 'inherit', 
+    minHeight: '100vh', 
+    color: t_txt 
+  };
   
-  const themeGlassForm = {
-    backgroundColor: isDarkText ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.35)',
-    backdropFilter: 'blur(24px)',
-    WebkitBackdropFilter: 'blur(24px)',
-    border: isDarkText ? '1px solid rgba(255, 255, 255, 0.7)' : '1px solid rgba(255, 255, 255, 0.15)',
-    boxShadow: '0 12px 40px 0 rgba(0, 0, 0, 0.08)',
+  // 🟢 DISEÑO SÓLIDO Y ELEGANTE (Cero transparencias raras)
+  const themeSolidForm = {
+    backgroundColor: finalCardBg,
+    border: `1px solid rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)`,
+    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
     color: t_txt
   };
 
   const themeBtn = { backgroundColor: t_btn, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.1em' };
   
+  // Cajas de texto con un tono muy sutil del color del texto para no desentonar
   const themeInput = { 
-    backgroundColor: isDarkText ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.3)', 
+    backgroundColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.04)`, 
     color: t_txt, 
-    borderColor: isDarkText ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.2)' 
+    borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)`,
+    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
   };
 
-  // 🟢 ESCUDO ANTI-MODO OSCURO: Evita que el celular contamine el iframe con fondos negros
+  // 🟢 ESCUDO ANTI-MODO OSCURO
   useEffect(() => {
     if (isIframe) {
       document.documentElement.classList.remove('dark');
@@ -14611,7 +14633,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     }
   }, [isIframe]);
 
-  // 🔴 VARIABLES MAESTRAS MULTI-MODALES
   const qrEnabled = eventoInfo?.isQrEnabled !== false;
   const passCountEnabled = eventoInfo?.isPassCountEnabled !== false;
 
@@ -14637,6 +14658,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
         eventNames: eventoInfo?.nombres || ''
     })) || [];
 
+    // 1. Paquete avanzado
     window.parent.postMessage({ 
         action: 'RSVP_SUCCESS_DATA', 
         passesLimit: guestData.originalPasses || guestData.passes,
@@ -14645,6 +14667,9 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
         status: guestData.status,
         theme: { btn: t_btn, txt: t_txt, txtRgb: textRgb }
     }, '*');
+
+    // 2. Señal clásica
+    window.parent.postMessage('rsvp_success', '*');
     
     setDataSent(true);
   }, [eventId, isIframe, eventoInfo, t_btn, t_txt, textRgb, dataSent, qrEnabled]);
@@ -14665,15 +14690,12 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
             const totalLimit = gData.originalPasses || gData.passes; 
             const currentSubs = gData.subGuests || [];
             
-            // Setup Modo Estricto
             const newTemp = Array(totalLimit).fill(null).map((_, i) => {
               if (currentSubs[i]) return { ...currentSubs[i], willAttend: true };
               const esMenor = gData.childrenPasses > 0 && i >= (totalLimit - gData.childrenPasses);
               return { name: i === 0 ? gData.name : '', isChild: esMenor, willAttend: false, id: `s_new_${Date.now()}_${i}` };
             });
             setTempSubGuests(newTemp);
-
-            // Setup Modo Simple
             setAttendingCount(totalLimit);
             setWillAttendSimple(gData.status !== 'cancelado');
           }
@@ -14704,14 +14726,11 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     e.preventDefault();
     setFormError('');
 
-    // 🟢 SIMULACIÓN ELEGANTE: Simulamos el éxito sin tocar la base de datos
     if (isPreviewMode) {
       setRsvpStatus('submitting');
       setTimeout(() => {
          setRsvpStatus('success');
-         showToast('Modo Simulación: Flujo exitoso (Base de datos intacta).', 'success');
-         
-         // Inyectamos datos simulados para que tu HTML muestre los QRs visualmente
+         showToast('Modo Simulación: Flujo exitoso (Base intacta).', 'success');
          if (guestInfo) {
            const mockData = {
              ...guestInfo,
@@ -14738,7 +14757,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
           if (!isCancelled) {
             const emptyNames = attendingGuests.filter(sg => !sg.name.trim());
             if(emptyNames.length > 0) { 
-               setFormError("Por favor, ingresa el nombre de todos los que SÍ asistirán."); 
+               setFormError("Ingresa el nombre de todos los asistentes."); 
                setRsvpStatus('idle'); 
                return; 
             }
@@ -14746,52 +14765,35 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
 
           const subGuestsArray = attendingGuests.map((sg, i) => ({ 
             id: sg.id?.startsWith('s_new') ? `usr_${guestInfo.id}_${i}` : sg.id, 
-            name: sg.name, 
-            isChild: sg.isChild, 
-            entered: false 
+            name: sg.name, isChild: sg.isChild, entered: false 
           }));
 
           finalGuestData = {
-            ...guestInfo, 
-            passes: isCancelled ? 0 : attendingGuests.length, 
-            status: isCancelled ? 'cancelado' : 'confirmado', 
-            extraRequested: extraRequested, 
-            fechaConfirmacion: serverTimestamp(),
-            subGuests: subGuestsArray
+            ...guestInfo, passes: isCancelled ? 0 : attendingGuests.length, 
+            status: isCancelled ? 'cancelado' : 'confirmado', extraRequested: extraRequested, 
+            fechaConfirmacion: serverTimestamp(), subGuests: subGuestsArray
           };
         } else {
           const isCancelled = !willAttendSimple;
-          // 🔴 CIRUGÍA: Si no se cuentan los pases, forzamos la cantidad a la original o 1
           const finalCount = isCancelled ? 0 : (passCountEnabled ? attendingCount : (guestInfo.originalPasses || 1));
-          
           const subGuestsArray = isCancelled ? [] : Array(finalCount).fill(null).map((_, i) => ({
-              id: `usr_${guestInfo.id}_${i}`,
-              name: i === 0 ? guestInfo.name : `Acompañante de ${guestInfo.name}`,
-              isChild: false,
-              entered: false
+              id: `usr_${guestInfo.id}_${i}`, name: i === 0 ? guestInfo.name : `Acompañante de ${guestInfo.name}`,
+              isChild: false, entered: false
           }));
 
           finalGuestData = {
-            ...guestInfo,
-            passes: finalCount,
-            status: isCancelled ? 'cancelado' : 'confirmado',
-            extraRequested: passCountEnabled ? extraRequested : 0, // Si está apagado, 0 pases extra
-            fechaConfirmacion: serverTimestamp(),
-            subGuests: subGuestsArray
+            ...guestInfo, passes: finalCount, status: isCancelled ? 'cancelado' : 'confirmado',
+            extraRequested: passCountEnabled ? extraRequested : 0, 
+            fechaConfirmacion: serverTimestamp(), subGuests: subGuestsArray
           };
         }
-
         await setDoc(doc(db, "eventos", eventId, "invitados", guestUid), finalGuestData);
         setGuestInfo(finalGuestData);
-        
       } else {
         const subGuestsArray = Array(parseInt(openPasses)).fill(null).map((_, i) => ({ 
-          id: `usr_gen_${Date.now()}_${i}`, 
-          name: i === 0 ? openName : `Acompañante de ${openName}`, 
-          isChild: false, 
-          entered: false 
+          id: `usr_gen_${Date.now()}_${i}`, name: i === 0 ? openName : `Acompañante de ${openName}`, 
+          isChild: false, entered: false 
         }));
-
         const newDocRef = await addDoc(collection(db, "eventos", eventId, "invitados"), {
           name: openName, passes: parseInt(openPasses), originalPasses: parseInt(openPasses),
           status: 'confirmado', fechaConfirmacion: serverTimestamp(), side: 'general', entered: 0, tableId: null,
@@ -14804,10 +14806,8 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
       
       setRsvpStatus('success');
       if (finalGuestData) comunicarDatosALaInvitacionHTML(finalGuestData);
-
     } catch (error) { 
-      setFormError("Error al guardar. Revisa tu conexión."); 
-      setRsvpStatus('idle'); 
+      setFormError("Error al guardar. Revisa tu conexión."); setRsvpStatus('idle'); 
     }
   };
 
@@ -14843,6 +14843,14 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
       {isIframe && (<style>{`html, body, #root { background: transparent !important; overflow-x: hidden !important; touch-action: pan-y !important; }`}</style>)}
       {t_font && <style>{`@import url('https://fonts.googleapis.com/css2?family=${t_font.replace(/ /g, '+')}&display=swap');`}</style>}
 
+      {toast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[99999] animate-in slide-in-from-top-4 fade-in duration-300 w-max max-w-[90vw]">
+          <div className={`px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 text-[10px] sm:text-xs font-bold text-white border border-white/20 ${toast.type === 'error' ? 'bg-rose-600' : 'bg-emerald-600'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> {toast.text}
+          </div>
+        </div>
+      )}
+
       {showRSVP && (
         <div className="w-full max-w-sm mx-auto z-50 animate-in slide-in-from-bottom-8 duration-500">
           
@@ -14852,20 +14860,15 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
             </div>
           )}
 
-          <div style={themeGlassForm} className={`w-full ${isPreviewMode ? 'rounded-b-2xl' : 'rounded-2xl'} p-5 sm:p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar`}>
+          {/* 🟢 LA TARJETA SÓLIDA NATIVA */}
+          <div style={themeSolidForm} className={`w-full ${isPreviewMode ? 'rounded-b-2xl' : 'rounded-3xl'} p-6 sm:p-8 max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar`}>
             
             <div className="text-center mb-6 border-b pb-4" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
                {!logoFailed ? (
-                 <img 
-                   src={`/${eventId}/logodeevento.svg`} 
-                   alt="Logotipo" 
-                   className="h-16 mx-auto mb-3 object-contain drop-shadow-md" 
-                   onError={() => setLogoFailed(true)} 
-                 />
+                 <img src={`/${eventId}/logodeevento.svg`} alt="Logotipo" className="h-16 mx-auto mb-3 object-contain drop-shadow-md" onError={() => setLogoFailed(true)} />
                ) : (
                  <h3 className="text-xl sm:text-2xl font-editorial font-bold leading-tight mb-2">{eventoInfo?.nombres || 'Confirmación'}</h3>
                )}
-               {/* 🔴 Si no hay recuento de pases, ni mostramos "X lugares" */}
                {guestInfo && (
                   <p className="mt-1 text-sm font-medium opacity-80">
                      {guestInfo.name} {passCountEnabled && `(${guestInfo.originalPasses || guestInfo.passes} lugares)`}
@@ -14878,31 +14881,30 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                 <>
                   {qrEnabled ? (
                     <>
-                      <div className="text-center mt-5 mb-2">
+                      <div className="text-center mt-5 mb-3">
                         <h4 className="font-bold text-sm uppercase tracking-widest opacity-90">Asistentes</h4>
                       </div>
                       
-                      <div className="space-y-2.5">
+                      <div className="space-y-3">
                         {tempSubGuests.map((sg, idx) => (
-                          <div key={idx} style={{ borderColor: sg.willAttend ? `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.3)` : `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)`, opacity: sg.willAttend ? 1 : 0.6 }} className="p-3 rounded-xl border transition-all bg-white/5">
-                            <div className="flex justify-between items-center mb-1.5">
+                          <div key={idx} style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, ${sg.willAttend ? '0.2' : '0.1'})`, backgroundColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.03)` }} className="p-4 rounded-2xl border transition-all">
+                            <div className="flex justify-between items-center mb-1">
                               <label className="text-xs font-bold uppercase tracking-wider">Pase #{idx + 1}</label>
-                              <label style={{ backgroundColor: 'rgba(255,255,255,0.1)' }} className="flex items-center space-x-1.5 cursor-pointer px-2 py-1 rounded-md border border-white/5" >
-                                <input type="checkbox" checked={sg.willAttend} onChange={(e) => handleSubGuestChange(idx, 'willAttend', e.target.checked)} className="w-3.5 h-3.5 accent-emerald-600" />
+                              <label style={{ backgroundColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.05)` }} className="flex items-center space-x-2 cursor-pointer px-3 py-1.5 rounded-lg border border-white/5" >
+                                <input type="checkbox" checked={sg.willAttend} onChange={(e) => handleSubGuestChange(idx, 'willAttend', e.target.checked)} className="w-4 h-4 accent-emerald-600" />
                                 <span className="text-[10px] font-bold uppercase tracking-wider">{sg.willAttend ? 'SÍ VOY' : 'NO VOY'}</span>
                               </label>
                             </div>
                             
                             {sg.willAttend && (
-                              <div className="space-y-2 mt-3 pt-3 border-t animate-in fade-in" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)` }}>
+                              <div className="space-y-2 mt-4 pt-3 border-t animate-in fade-in" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)` }}>
                                 <input 
-                                  type="text" required 
-                                  placeholder={sg.isChild ? "Nombre del niño..." : (idx === 0 ? "Tu nombre..." : "Nombre del adulto...")} 
+                                  type="text" required placeholder={sg.isChild ? "Nombre del niño..." : (idx === 0 ? "Tu nombre..." : "Nombre del adulto...")} 
                                   value={sg.name || ''} onChange={(e) => handleSubGuestChange(idx, 'name', e.target.value)} 
-                                  style={themeInput} className="w-full p-2.5 border rounded-lg text-sm font-medium outline-none shadow-inner" 
+                                  style={themeInput} className="w-full p-3 border rounded-xl text-sm font-medium outline-none" 
                                 />
-                                <label className="flex items-center space-x-2 cursor-pointer pt-1">
-                                   <input type="checkbox" checked={sg.isChild || false} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-3.5 h-3.5 accent-indigo-600" />
+                                <label className="flex items-center space-x-2 cursor-pointer pt-2">
+                                   <input type="checkbox" checked={sg.isChild || false} onChange={(e) => handleSubGuestChange(idx, 'isChild', e.target.checked)} className="w-4 h-4 accent-indigo-600" />
                                    <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">Pase de Menor / Niño</span>
                                 </label>
                               </div>
@@ -14914,16 +14916,15 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                   ) : (
                     <div className="space-y-4 text-center mt-6">
                        <p className="text-sm font-bold opacity-90 uppercase tracking-widest">¿Asistirás al evento?</p>
-                       <div className="flex gap-2 justify-center">
-                          <button type="button" onClick={() => setWillAttendSimple(true)} style={{ backgroundColor: willAttendSimple ? t_btn : 'transparent', color: willAttendSimple ? '#ffffff' : t_txt, borderColor: willAttendSimple ? 'transparent' : `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)` }} className="flex-1 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border">Sí, Asistiré</button>
-                          <button type="button" onClick={() => setWillAttendSimple(false)} style={{ backgroundColor: !willAttendSimple ? '#ef4444' : 'transparent', color: !willAttendSimple ? '#ffffff' : t_txt, borderColor: !willAttendSimple ? 'transparent' : `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)` }} className="flex-1 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border opacity-90">No Asistiré</button>
+                       <div className="flex gap-3 justify-center">
+                          <button type="button" onClick={() => setWillAttendSimple(true)} style={{ backgroundColor: willAttendSimple ? t_btn : 'transparent', color: willAttendSimple ? '#ffffff' : t_txt, borderColor: willAttendSimple ? 'transparent' : `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)` }} className="flex-1 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all border shadow-sm">Sí, Asistiré</button>
+                          <button type="button" onClick={() => setWillAttendSimple(false)} style={{ backgroundColor: !willAttendSimple ? '#ef4444' : 'transparent', color: !willAttendSimple ? '#ffffff' : t_txt, borderColor: !willAttendSimple ? 'transparent' : `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)` }} className="flex-1 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all border opacity-90 shadow-sm">No Asistiré</button>
                        </div>
                        
-                       {/* 🔴 SOLO PEDIMOS NÚMEROS SI isPassCountEnabled ESTÁ ENCENDIDO */}
                        {passCountEnabled && willAttendSimple && (
-                          <div className="p-4 rounded-xl border bg-white/5 mt-4 text-left animate-in fade-in slide-in-from-top-2" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
-                             <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 opacity-90">¿Cuántos asisten de tu grupo?</label>
-                             <select value={attendingCount} onChange={e => setAttendingCount(Number(e.target.value))} style={themeInput} className="w-full p-3 border rounded-lg outline-none font-medium text-sm shadow-inner cursor-pointer appearance-none">
+                          <div className="p-5 rounded-2xl border mt-5 text-left animate-in fade-in slide-in-from-top-2" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)`, backgroundColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.03)` }}>
+                             <label className="block text-[10px] font-bold uppercase tracking-widest mb-2.5 opacity-90">¿Cuántos asisten de tu grupo?</label>
+                             <select value={attendingCount} onChange={e => setAttendingCount(Number(e.target.value))} style={themeInput} className="w-full p-3.5 border rounded-xl outline-none font-medium text-sm cursor-pointer appearance-none">
                                 {Array.from({ length: guestInfo.originalPasses || guestInfo.passes }, (_, i) => i + 1).map(n => (
                                    <option key={n} value={n} className="text-slate-900">{n} {n === 1 ? 'persona' : 'personas'}</option>
                                 ))}
@@ -14933,31 +14934,30 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
                     </div>
                   )}
 
-                  {/* 🔴 SOLO PEDIMOS PASES EXTRA SI isPassCountEnabled ESTÁ ENCENDIDO */}
                   {passCountEnabled && (
-                    <div className="border-t pt-4 mt-5 flex items-center justify-between p-2" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
+                    <div className="border-t pt-5 mt-6 flex items-center justify-between p-2" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
                       <div>
                         <p className="text-xs font-bold uppercase tracking-widest">¿Pases extra?</p>
-                        <p className="text-[8px] opacity-60 leading-tight">Sujeto a disponibilidad.</p>
+                        <p className="text-[9px] opacity-60 leading-tight mt-0.5">Sujeto a disponibilidad.</p>
                       </div>
-                      <div style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)` }} className="flex items-center border rounded-lg p-0.5 shadow-sm bg-white/10">
-                        <button type="button" onClick={() => setExtraRequested(Math.max(0, extraRequested - 1))} className="px-2 py-1 text-lg font-bold hover:opacity-50">-</button>
-                        <span className="text-sm font-black w-6 text-center">{extraRequested}</span>
-                        <button type="button" onClick={() => setExtraRequested(extraRequested + 1)} className="px-2 py-1 text-lg font-bold hover:opacity-50">+</button>
+                      <div style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.2)`, backgroundColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.05)` }} className="flex items-center border rounded-xl p-1 shadow-inner">
+                        <button type="button" onClick={() => setExtraRequested(Math.max(0, extraRequested - 1))} className="w-8 h-8 rounded-lg flex items-center justify-center text-lg font-bold hover:bg-black/5">-</button>
+                        <span className="text-sm font-black w-8 text-center">{extraRequested}</span>
+                        <button type="button" onClick={() => setExtraRequested(extraRequested + 1)} className="w-8 h-8 rounded-lg flex items-center justify-center text-lg font-bold hover:bg-black/5">+</button>
                       </div>
                     </div>
                   )}
                 </>
               ) : (
-                <div className="space-y-3">
-                  <div className="p-3 rounded-xl border bg-white/5" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5 opacity-90">Para Ti</label>
-                    <input type="text" required value={openName} onChange={e => setOpenName(e.target.value)} style={themeInput} className="w-full p-2.5 border rounded-lg outline-none font-medium text-sm shadow-inner" placeholder="Ej. Familia López" />
+                <div className="space-y-4 mt-4">
+                  <div className="p-4 rounded-2xl border" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)`, backgroundColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.03)` }}>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 opacity-90">Para Ti</label>
+                    <input type="text" required value={openName} onChange={e => setOpenName(e.target.value)} style={themeInput} className="w-full p-3.5 border rounded-xl outline-none font-medium text-sm" placeholder="Ej. Familia López" />
                   </div>
                   {passCountEnabled && (
-                    <div className="p-3 rounded-xl border bg-white/5" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
-                      <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5 opacity-90">¿Cuántos asisten?</label>
-                      <select value={openPasses} onChange={e => setOpenPasses(e.target.value)} style={themeInput} className="w-full p-2.5 border rounded-lg outline-none font-medium text-sm shadow-inner appearance-none">
+                    <div className="p-4 rounded-2xl border" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)`, backgroundColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.03)` }}>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 opacity-90">¿Cuántos asisten?</label>
+                      <select value={openPasses} onChange={e => setOpenPasses(e.target.value)} style={themeInput} className="w-full p-3.5 border rounded-xl outline-none font-medium text-sm appearance-none cursor-pointer">
                         {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n} className="text-slate-900">{n} persona(s)</option>)}
                       </select>
                     </div>
@@ -14966,13 +14966,13 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
               )}
               
               {formError && (
-                 <div className="bg-rose-500/20 border border-rose-500/40 text-rose-500 p-3 rounded-xl font-bold text-xs flex items-center shadow-sm animate-in shake">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> {formError}
+                 <div className="bg-rose-500/10 border border-rose-500/30 text-rose-600 p-4 rounded-2xl font-bold text-xs flex items-center shadow-sm animate-in shake mt-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> {formError}
                  </div>
               )}
 
-              <button type="submit" disabled={rsvpStatus === 'submitting'} style={{...themeBtn, opacity: (!guestInfo || (qrEnabled ? tempSubGuests.filter(s => s.willAttend).length > 0 : willAttendSimple)) ? 1 : 0.8 }} className="w-full py-4 rounded-xl font-bold text-sm shadow-xl hover:scale-[1.02] transition-transform mt-6 border-b-4 border-black/20">
-                {rsvpStatus === 'submitting' ? 'Enviando...' : (!guestInfo || (qrEnabled ? tempSubGuests.filter(s => s.willAttend).length > 0 : willAttendSimple) ? 'Confirmar Asistencia' : 'Declinar Invitación')}
+              <button type="submit" disabled={rsvpStatus === 'submitting'} style={{...themeBtn, opacity: (!guestInfo || (qrEnabled ? tempSubGuests.filter(s => s.willAttend).length > 0 : willAttendSimple)) ? 1 : 0.8 }} className="w-full py-4 rounded-2xl font-bold text-sm shadow-xl hover:scale-[1.02] transition-transform mt-8 border-b-4 border-black/10 flex justify-center items-center">
+                {rsvpStatus === 'submitting' ? <><svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Enviando...</> : (!guestInfo || (qrEnabled ? tempSubGuests.filter(s => s.willAttend).length > 0 : willAttendSimple) ? 'Confirmar Asistencia' : 'Declinar Invitación')}
               </button>
             </form>
           </div>
