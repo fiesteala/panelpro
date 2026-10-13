@@ -7,10 +7,14 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500;600;700&family=Pinyon+Script&display=swap" rel="stylesheet">
 
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Dependencia para renderizar los Pases VIP (Fase 4) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -26,6 +30,7 @@
                     },
                     animation: {
                         'fade-in-up': 'fadeInUp 1.2s ease-out forwards',
+                        'fade-in': 'fadeIn 1s ease-out forwards',
                         'float': 'float 6s ease-in-out infinite',
                         'pulse-slow': 'pulseSlow 4s infinite alternate',
                         'slow-zoom': 'slowZoom 20s ease-in-out infinite alternate',
@@ -36,6 +41,7 @@
                     },
                     keyframes: {
                         fadeInUp: { '0%': { opacity: '0', transform: 'translateY(40px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },
                         pulseSlow: { '0%': { transform: 'scale(1)', opacity: '0.8' }, '100%': { transform: 'scale(1.05)', opacity: '1' } },
                         slowZoom: { '0%': { transform: 'scale(1)' }, '100%': { transform: 'scale(1.15)' } },
@@ -45,14 +51,17 @@
                             '100%': { transform: 'translate(20vw, 100vh) rotate(360deg)', opacity: '0' },
                         }
                     },
-                    boxShadow: { 'card-luxury': '0 20px 50px -10px rgba(0, 0, 0, 0.3), 0 0 30px rgba(212, 175, 55, 0.1)' }
+                    boxShadow: { 
+                        'card-luxury': '0 20px 50px -10px rgba(0, 0, 0, 0.15), 0 0 30px rgba(247, 108, 130, 0.05)',
+                        'gold-glow': '0 0 20px rgba(212, 175, 55, 0.4)'
+                    }
                 }
             }
         }
     </script>
 
     <style>
-        body { background-color: #1a1a1a; overflow-x: hidden; }
+        body { background-color: #FDFBF7; overflow-x: hidden; }
         .text-gold-metallic {
             background: linear-gradient(to right, #BF953F, #D4AF37, #B38728, #FDF1A9, #AA771C);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent;
@@ -62,8 +71,13 @@
         .delay-500 { animation-delay: 0.5s; opacity: 0; }
         .delay-700 { animation-delay: 0.7s; opacity: 0; }
         .delay-1000 { animation-delay: 1.0s; opacity: 0; }
+        
+        /* Ocultar barra de scroll para el carrusel VIP */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 
+    <!-- React y Babel -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -117,30 +131,48 @@
             const [language, setLanguage] = useState('ES');
             const [isPlaying, setIsPlaying] = useState(false);
             const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+            
+            // 🔴 FASE 4: Estados para la gestión Multi-Modal de Baulia
             const [isModalOpen, setIsModalOpen] = useState(false);
             const [isConfirmed, setIsConfirmed] = useState(false);
+            const [confirmedData, setConfirmedData] = useState(null);
             
-            // 🔴 ESTADO PARA EL NOMBRE DEL INVITADO
-            const [guestName, setGuestName] = useState('');
             const eventIdStr = "diamante-6a0u"; // ID EXACTO DE TU BÓVEDA
             
             const urlParams = new URLSearchParams(window.location.search);
             const guestUid = urlParams.get('u') || '';
+            // Si el nombre viene en URL (opcional para un saludo rápido si el host lo envía)
+            const urlName = urlParams.get('n') || '';
 
             const audioRef = useRef(null);
 
-            // 🔴 FETCH INTELIGENTE Y SEGURO A FIREBASE
-            useEffect(() => {
-                if(guestUid) {
-                    fetch(`https://firestore.googleapis.com/v1/projects/panel-de-control-intelig-db278/databases/(default)/documents/eventos/${eventIdStr}/invitados/${guestUid}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if(data && data.fields && data.fields.name) {
-                            setGuestName(data.fields.name.stringValue);
+            const getMapLink = () => {
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                const isAndroid = /Android/.test(navigator.userAgent);
+                const query = "Palapa Los Otates, Av. Reyes Aztecas 102, Tacoteno, 96870 Minatitlán, Ver.";
+                if (isIOS) return `maps://?q=${encodeURIComponent(query)}`;
+                if (isAndroid) return `geo:0,0?q=${encodeURIComponent(query)}`;
+                return "https://maps.app.goo.gl/jbq8caTyzZdFDBz5A";
+            };
+
+            const descargarPase = async (id, name) => {
+                try {
+                    const html2canvas = window.html2canvas;
+                    const element = document.getElementById(`ticket_${id}`);
+                    // Escalamos la resolución para mayor calidad
+                    const canvas = await html2canvas(element, { scale: 3, useCORS: true, backgroundColor: null });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], `Pase_${name.replace(/ /g, '_')}.png`, { type: 'image/png' });
+                        // Intenta invocar la API Nativa de Compartir del dispositivo
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: 'Mi Pase VIP' });
+                        } else {
+                            // Fallback para descarga en navegador de PC
+                            const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = file.name; link.click();
                         }
-                    }).catch(err => console.log("Guest no encontrado"));
-                }
-            }, [guestUid]);
+                    }, 'image/png');
+                } catch (e) { console.error("Error al descargar:", e); }
+            };
 
             useEffect(() => {
                 const targetDate = new Date("May 23, 2026 15:00:00").getTime();
@@ -162,13 +194,27 @@
 
             useEffect(() => {
                 const handleMessage = (event) => {
-                    if (event.data === 'rsvp_success') {
+                    if (!event.origin.includes('baulia.com')) return;
+                    if (event.data && event.data.action === 'RSVP_SUCCESS_DATA') {
+                        setConfirmedData(event.data);
+                        setIsModalOpen(false); // Cierra el modal transparente
                         setIsConfirmed(true);
-                        setTimeout(() => setIsModalOpen(false), 3500);
                     }
                 };
                 window.addEventListener('message', handleMessage);
                 return () => window.removeEventListener('message', handleMessage);
+            }, []);
+
+            useEffect(() => {
+                const preventDefault = (e) => e.preventDefault();
+                document.addEventListener('contextmenu', preventDefault);
+                document.addEventListener('selectstart', preventDefault);
+                document.addEventListener('dragstart', preventDefault);
+                return () => {
+                    document.removeEventListener('contextmenu', preventDefault);
+                    document.removeEventListener('selectstart', preventDefault);
+                    document.removeEventListener('dragstart', preventDefault);
+                };
             }, []);
 
             const toggleLanguage = () => setLanguage(prev => prev === 'ES' ? 'EN' : 'ES');
@@ -181,8 +227,10 @@
             return (
                 <div className="relative min-h-screen w-full overflow-hidden font-sans bg-[#FDFBF7]">
                     
-                    <audio ref={audioRef} id="bg-music" src="/primavera-vibrante/cancion.mp3" loop />
+                    {/* Música Ambiental */}
+                    <audio ref={audioRef} id="bg-music" src="https://assets.mixkit.co/music/preview/mixkit-beautiful-dream-493.mp3" loop />
 
+                    {/* Fondo Inmersivo */}
                     <div className="fixed inset-0 z-0 overflow-hidden bg-gradient-to-br from-[#FFF5F5] via-[#FDFBF7] to-[#FDF1F3]">
                         <div className="absolute top-0 left-[15%] w-3 h-3 md:w-4 md:h-4 bg-spring-pink/40 rounded-full blur-[1px] animate-falling-1 z-0"></div>
                         <div className="absolute top-0 left-[50%] w-2 h-2 md:w-3 md:h-3 bg-gold/40 rounded-full blur-[1px] animate-falling-2 z-0"></div>
@@ -196,6 +244,7 @@
                         </div>
                     </div>
 
+                    {/* Botón Idioma */}
                     <div className="absolute top-6 right-6 z-50 animate-fade-in-up delay-100">
                         <button onClick={toggleLanguage} className="bg-white/80 backdrop-blur-md px-4 py-2 rounded-full text-xs font-medium tracking-widest uppercase transition-all duration-300 hover:bg-white shadow-lg border border-gold/30 flex items-center gap-2 text-spring-dark">
                             <span className="text-gold-dark"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10 15.3 15.3 0 0 1 4-10z"></path></svg></span>
@@ -203,11 +252,15 @@
                         </button>
                     </div>
 
+                    {}
                     <main className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
                         <div className="relative w-full max-w-lg flex flex-col items-center text-center mt-12 mb-20 animate-fade-in-up delay-300">
                             
                             <div className="mb-8 z-20 animate-pulse-slow">
-                                <img src="/primavera-vibrante/monograma.svg" alt="Monograma" className="w-20 h-20 md:w-24 md:h-24 mx-auto drop-shadow-md object-contain hover:scale-105 transition-transform duration-700" />
+                                <svg className="w-20 h-20 md:w-24 md:h-24 mx-auto drop-shadow-md hover:scale-105 transition-transform duration-700" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="50" cy="50" r="48" stroke="#D4AF37" strokeWidth="2" fill="rgba(255,255,255,0.5)"/>
+                                    <text x="50" y="65" fontFamily="'Pinyon Script', cursive" fontSize="50" fill="#F76C82" textAnchor="middle">M</text>
+                                </svg>
                             </div>
 
                             <div className="flex flex-col items-center z-10 px-4 mb-8">
@@ -224,7 +277,7 @@
 
                             <div className="relative w-64 h-80 md:w-72 md:h-[26rem] rounded-full p-2 border border-gold/30 bg-white/40 backdrop-blur-sm shadow-xl z-10 mb-10 overflow-hidden">
                                 <div className="w-full h-full rounded-full overflow-hidden relative">
-                                    <img src="/primavera-vibrante/portada.jpg" alt="Foto de Maricela" className="w-full h-full object-cover animate-slow-zoom"/>
+                                    <img src="https://images.unsplash.com/photo-1549468057-5ce75806e232?auto=format&fit=crop&q=80&w=800" alt="Foto de Maricela" className="w-full h-full object-cover animate-slow-zoom"/>
                                 </div>
                             </div>
 
@@ -248,10 +301,11 @@
                         </div>
                     </main>
 
+                    {}
                     <div className="relative z-10 flex flex-col items-center w-full px-4 md:px-8 pb-10 space-y-32 md:space-y-40">
                         
-                        {/* 🔴 NUEVA BIENVENIDA CÁLIDA Y HUMANA (Justo arriba del reloj) */}
-                        {guestName && (
+                        {/* Mensaje Personal (Opcional si viene en URL) */}
+                        {urlName && (
                             <RevealOnScroll className="w-full max-w-2xl flex flex-col items-center text-center mt-4 mb-4 px-4">
                                 <div className="bg-white/60 backdrop-blur-xl border border-gold/30 p-8 rounded-[2rem] shadow-card-luxury relative overflow-hidden group">
                                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold to-transparent"></div>
@@ -261,7 +315,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 text-spring-pink" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" /></svg>
                                     </span>
                                     <h3 className="font-serif text-3xl md:text-4xl text-spring-dark mb-4">
-                                        {language === 'ES' ? '¡Qué alegría tenerte aquí,' : 'So glad to have you here,'} <br/><span className="text-spring-pink italic">{guestName}</span>!
+                                        {language === 'ES' ? '¡Qué alegría tenerte aquí,' : 'So glad to have you here,'} <br/><span className="text-spring-pink italic">{urlName}</span>!
                                     </h3>
                                     <p className="font-sans text-sm text-gray-600 leading-relaxed font-medium">
                                         {language === 'ES' 
@@ -317,7 +371,7 @@
                                 </div>
 
                                 <div className="flex flex-col md:flex-row gap-4 w-full md:justify-center z-10">
-                                    <a href="https://maps.app.goo.gl/jbq8caTyzZdFDBz5A" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-spring-dark text-white rounded-full font-sans text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-gold-dark hover:shadow-lg hover:-translate-y-1 flex justify-center items-center">{language === 'ES' ? 'Ver en GPS' : 'Open in GPS'}</a>
+                                    <a href={getMapLink()} target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-spring-dark text-white rounded-full font-sans text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-gold-dark hover:shadow-lg hover:-translate-y-1 flex justify-center items-center">{language === 'ES' ? 'Ver en GPS' : 'Open in GPS'}</a>
                                     <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Mis+50+A%C3%B1os+-+Maricela&dates=20260523T210000Z/20260524T030000Z&details=Celebraci%C3%B3n+de+los+50+A%C3%B1os+de+Maricela+Estudillo+Gonz%C3%A1lez&location=Palapa+los+Otates,+Av.+Reyes+Aztecas+102,+Tacoteno,+96870+Minatitl%C3%A1n,+Ver." target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-transparent text-spring-dark border border-gold-dark rounded-full font-sans text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-gold/5 hover:-translate-y-1 flex justify-center items-center">{language === 'ES' ? 'Agendar' : 'Add to Calendar'}</a>
                                 </div>
                             </div>
@@ -363,7 +417,7 @@
                                 <h3 className="font-serif text-5xl md:text-6xl text-spring-dark mt-4">{language === 'ES' ? 'Momentos Inolvidables' : 'Unforgettable Moments'}</h3>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px] md:auto-rows-[300px]">
-                                {[ { url: "/primavera-vibrante/foto1.jpg", span: "row-span-2 col-span-2 md:col-span-2" }, { url: "/primavera-vibrante/foto2.jpg", span: "row-span-1 col-span-1" }, { url: "/primavera-vibrante/foto3.jpg", span: "row-span-2 col-span-1" }, { url: "/primavera-vibrante/foto4.jpg", span: "row-span-1 col-span-1" }
+                                {[ { url: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=600", span: "row-span-2 col-span-2 md:col-span-2" }, { url: "https://images.unsplash.com/photo-1530103862676-de3c9de59f9e?auto=format&fit=crop&q=80&w=600", span: "row-span-1 col-span-1" }, { url: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=600", span: "row-span-2 col-span-1" }, { url: "https://images.unsplash.com/photo-1478146896981-b80fe463b330?auto=format&fit=crop&q=80&w=600", span: "row-span-1 col-span-1" }
                                 ].map((img, idx) => (
                                     <div key={idx} className={`${img.span} rounded-3xl overflow-hidden shadow-lg transition-all duration-700 hover:scale-[1.05] group bg-white/20 border-2 border-white/50 relative flex items-center justify-center`}><img src={img.url} alt={`Momento ${idx+1}`} className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:rotate-1 transition-all duration-700 relative z-10" /></div>
                                 ))}
@@ -389,136 +443,169 @@
                             </div>
                         </RevealOnScroll>
 
-                        <RevealOnScroll className="w-full max-w-4xl px-4 pb-10">
-                            <div className="relative overflow-hidden bg-gradient-to-br from-spring-pink/20 to-spring-yellow/20 rounded-[4rem] p-10 md:p-20 text-center border border-white/50 shadow-inner">
-                                <FloralCorner className="absolute -top-10 -right-10 w-40 h-40 opacity-30 transform rotate-180 animate-pulse-slow" />
-                                <span className="font-sans text-xs tracking-[0.3em] uppercase text-spring-pink font-bold mb-6 block relative z-10">{language === 'ES' ? 'Compartamos la Alegría' : 'Share the Joy'}</span>
-                                <h3 className="font-serif text-4xl md:text-6xl text-spring-dark mb-8 relative z-10">{language === 'ES' ? 'Captura el Momento' : 'Capture the Moment'}</h3>
-                                <p className="font-serif italic text-2xl md:text-3xl text-gray-700 mb-10 max-w-2xl mx-auto relative z-10">{language === 'ES' ? 'Sube tus fotos y videos usando nuestro hashtag especial:' : 'Upload your photos and videos using our special hashtag:'}</p>
-                                <div className="inline-block bg-white/60 backdrop-blur-md px-4 md:px-8 py-3 md:py-4 rounded-full border border-spring-pink/30 mb-12 shadow-md relative z-10 animate-float hover:scale-105 transition-transform duration-300 max-w-[90vw]">
-                                    <span className="font-sans text-[3.8vw] sm:text-lg md:text-2xl text-spring-pink font-bold tracking-tight block truncate">#Mis50PrimaverasMaricela</span>
-                                </div>
-                                <div className="flex flex-col items-center relative z-10">
-                                    <p className="font-sans text-xs tracking-[0.2em] uppercase text-gray-500 mb-6 font-medium">O usa nuestro filtro de Instagram</p>
-                                    <a href="#" className="group flex items-center gap-4 bg-white px-8 py-5 rounded-full shadow-xl transition-all duration-500 hover:shadow-spring-pink/30 hover:-translate-y-2 border border-spring-pink/20">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center text-white shadow-md group-hover:rotate-12 transition-transform duration-500"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></div>
-                                        <span className="font-sans text-xs tracking-[0.2em] uppercase font-bold text-gray-700">{language === 'ES' ? 'Probar Filtro' : 'Try Filter'}</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </RevealOnScroll>
+                        {}
+                        <RevealOnScroll className="w-full max-w-2xl pb-10 mt-10">
+                            
+                            {/* EL VIGILANTE INVISIBLE (Oculto) - Comunica nativamente con Baulia */}
+                            <iframe 
+                                src={`https://panel.baulia.com/?modo=invitacion&e=${eventIdStr}&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=F76C82&txt=2A2A2A&font=Montserrat&v=${Date.now()}`} 
+                                style={{ display: 'none' }}
+                            ></iframe>
 
-                        {/* 🔴 BOTÓN RSVP GIGANTE CON BLOQUEO ANTI-DOBLE CONFIRMACIÓN */}
-                        <RevealOnScroll className="w-full max-w-xl pb-10 mt-10">
-                            <div className="flex flex-col items-center text-center">
-                                <div className="text-spring-pink mb-4 animate-pulse">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            {!confirmedData ? (
+                                /* ESTADO 1: AÚN NO CONFIRMA - BOTÓN RSVP ORIGINAL ADAPTADO */
+                                <div className="flex flex-col items-center text-center">
+                                    <div className="text-spring-pink mb-4 animate-pulse">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                    </div>
+                                    <h3 className="font-serif text-4xl md:text-5xl text-spring-dark mb-10 px-4">
+                                        {language === 'ES' ? 'Acompáñame a celebrar este día tan especial' : 'Join me to celebrate this special day'}
+                                    </h3>
+                                    <button 
+                                        onClick={() => !isConfirmed && setIsModalOpen(true)}
+                                        disabled={isConfirmed}
+                                        className={`w-full max-w-md py-8 rounded-full font-sans font-bold text-sm tracking-[0.4em] uppercase shadow-2xl transition-all duration-500 flex justify-center items-center group relative overflow-hidden ${isConfirmed ? 'bg-gold-dark text-white cursor-not-allowed scale-[0.98] opacity-90' : 'bg-spring-pink text-white hover:scale-[1.03] hover:bg-gold-warm hover:shadow-gold-glow'}`}
+                                    >
+                                        {!isConfirmed && <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>}
+                                        <span className="relative z-10">
+                                            {isConfirmed 
+                                                ? (language === 'ES' ? '¡Asistencia Confirmada!' : 'Attendance Confirmed!') 
+                                                : (language === 'ES' ? 'Confirmar Asistencia' : 'Confirm Attendance')}
+                                        </span>
+                                    </button>
+                                    <p className="mt-6 font-script text-3xl text-gold-warm">Maricela espera tu confirmación</p>
                                 </div>
-                                <h3 className="font-serif text-4xl md:text-5xl text-spring-dark mb-10 px-4">
-                                    {language === 'ES' ? 'Acompáñame a celebrar este día tan especial' : 'Join me to celebrate this special day'}
-                                </h3>
-                                <button 
-                                    onClick={() => !isConfirmed && setIsModalOpen(true)}
-                                    disabled={isConfirmed}
-                                    className={`w-full py-8 rounded-full font-sans font-bold text-sm tracking-[0.4em] uppercase shadow-2xl transition-all duration-500 flex justify-center items-center group relative overflow-hidden ${isConfirmed ? 'bg-gold-dark text-white cursor-not-allowed scale-[0.98] opacity-90' : 'bg-spring-pink text-white hover:scale-[1.03] hover:bg-gold-warm hover:shadow-gold-glow'}`}
-                                >
-                                    {!isConfirmed && <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>}
-                                    <span className="relative z-10">
-                                        {isConfirmed 
-                                            ? (language === 'ES' ? '¡Asistencia Confirmada!' : 'Attendance Confirmed!') 
-                                            : (language === 'ES' ? 'Confirmar Asistencia' : 'Confirm Attendance')}
-                                    </span>
-                                </button>
-                                <p className="mt-6 font-script text-3xl text-gold-warm">Maricela espera tu confirmación</p>
-                            </div>
+                            ) : confirmedData.subGuests && confirmedData.subGuests.length > 0 ? (
+                                /* ESTADO 2: CONFIRMÓ Y TIENE QRS - CARRUSEL NATIVO VIP */
+                                <div className="w-full max-w-2xl mx-auto mt-4 animate-fade-in mb-10">
+                                    <h3 className="text-center font-serif text-4xl mb-2 text-spring-dark tracking-widest uppercase">Mis Pases VIP</h3>
+                                    <p className="text-center text-xs opacity-70 mb-2 text-gray-600">Presenta estos códigos en la entrada.</p>
+                                    {confirmedData.subGuests.length > 1 && <p className="text-center text-[10px] uppercase tracking-widest text-spring-pink mb-6 animate-pulse md:hidden">← Desliza para ver más →</p>}
+                                    
+                                    <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 px-4 hide-scrollbar md:justify-center md:[mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
+                                        {confirmedData.subGuests.map(sg => {
+                                            // Fallbacks dinámicos del tema de Baulia, orientados al diseño actual "Primavera Vibrante"
+                                            const themeBtn = confirmedData.theme?.btn || '#F76C82';
+                                            const themeTxt = confirmedData.theme?.txt || '#2A2A2A';
+                                            
+                                            return (
+                                            <div key={sg.id} className="w-80 md:w-72 flex-shrink-0 snap-center flex flex-col items-center group">
+                                                <div id={`ticket_${sg.id}`} style={{ backgroundColor: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(15px)', borderColor: 'rgba(212,175,55,0.3)', color: themeTxt }} className="w-full p-6 rounded-[2rem] border relative overflow-hidden shadow-card-luxury">
+                                                    
+                                                    {/* Acabado superior */}
+                                                    <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: themeBtn }}></div>
+                                                    
+                                                    <div className="text-center pb-4 mb-4 border-b border-gray-300 border-dashed flex flex-col items-center">
+                                                        <svg className="w-14 h-14 mx-auto mb-3" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <circle cx="50" cy="50" r="48" stroke="#D4AF37" strokeWidth="2" fill="none"/>
+                                                            <text x="50" y="65" fontFamily="'Pinyon Script', cursive" fontSize="50" fill={themeBtn} textAnchor="middle">M</text>
+                                                        </svg>
+                                                        <h3 style={{display: 'none'}} className="font-bold text-xl uppercase mb-3 text-spring-pink">{confirmedData.theme?.eventNames || 'Maricela 50'}</h3>
+                                                        
+                                                        <p className="text-[10px] font-bold uppercase tracking-widest text-gold-dark mb-1">Entrada Personal</p>
+                                                        <h4 className="text-2xl font-serif font-bold leading-tight" style={{ color: themeTxt }}>{sg.name || 'Acompañante VIP'}</h4>
+                                                        {sg.isChild && <span style={{ backgroundColor: `${themeBtn}15`, color: themeBtn }} className="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mt-3 inline-block">Pase Infantil</span>}
+                                                    </div>
+                                                    
+                                                    <div className="bg-white p-3 rounded-3xl mx-auto w-max mb-4 shadow-md border border-gray-100">
+                                                        <img src={sg.qrUrl} alt="QR" className="w-40 h-40 mix-blend-multiply" crossOrigin="anonymous" />
+                                                    </div>
+                                                    
+                                                    <div className="text-center space-y-1.5">
+                                                        <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">23 MAYO 2026 | 15:00 HRS</p>
+                                                        <p className="text-[10px] font-bold uppercase tracking-widest text-gold-dark/80 pt-1">Asiento Asignado</p>
+                                                        <p className="text-sm font-black uppercase tracking-widest" style={{ color: themeBtn }}>{sg.tableId ? `Mesa Asignada` : 'Pendiente Recepción'}</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <button onClick={() => descargarPase(sg.id, sg.name)} style={{ backgroundColor: themeBtn }} className="w-[85%] py-4 rounded-b-3xl font-sans font-bold text-[10px] text-white shadow-xl -mt-4 relative z-0 uppercase tracking-widest hover:scale-105 transition-transform group-hover:-translate-y-1">
+                                                    Guardar Tarjeta VIP
+                                                </button>
+                                            </div>
+                                        )})}
+                                    </div>
+                                </div>
+                            ) : (
+                                /* ESTADO 3: CONFIRMÓ PLAN SIMPLE SIN QRS - MENSAJE DE ÉXITO */
+                                <div className="w-full max-w-lg mx-auto mt-4 animate-fade-in pb-10 px-4">
+                                    <div className="p-10 rounded-[3rem] border border-gold/30 flex flex-col items-center justify-center text-center shadow-card-luxury bg-white/80 backdrop-blur-xl">
+                                        <div className="w-20 h-20 rounded-full mb-6 flex items-center justify-center animate-pulse shadow-inner" style={{ backgroundColor: `${confirmedData.theme?.btn || '#F76C82'}15`, border: `2px solid ${confirmedData.theme?.btn || '#F76C82'}` }}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={confirmedData.theme?.btn || '#F76C82'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        </div>
+                                        <h3 className="font-serif text-4xl md:text-5xl mb-4 text-spring-dark uppercase tracking-widest">¡Asistencia Confirmada!</h3>
+                                        <p className="text-sm md:text-base text-gray-600 leading-relaxed font-sans">Tu lugar está asegurado. Gracias por confirmar tu presencia en este gran evento.</p>
+                                        <p className="mt-6 font-bold tracking-[0.3em] text-xs uppercase" style={{ color: confirmedData.theme?.btn || '#F76C82' }}>¡Te esperamos!</p>
+                                    </div>
+                                </div>
+                            )}
                         </RevealOnScroll>
 
                     </div>
 
+                    {}
                     <footer className="w-full text-center pb-12 pt-10">
-                        <div className="w-full max-w-2xl mx-auto flex flex-col items-center border-t border-gold/20 pt-12">
+                        <div className="w-full max-w-2xl mx-auto flex flex-col items-center pt-8 border-t border-gold/20 px-4">
                             
-                            {!urlParams.has('u') && (
-                                <a href="https://panel.baulia.com" className="font-sans text-[10px] tracking-[0.3em] uppercase text-gray-400 opacity-40 hover:opacity-100 mb-12 hover:text-spring-pink transition-all duration-500">
+                            {!guestUid && (
+                                <a href="https://panel.baulia.com" className="font-sans text-[10px] tracking-[0.3em] uppercase text-gray-400 opacity-50 hover:opacity-100 mb-12 hover:text-spring-pink transition-all duration-500">
                                     {language === 'ES' ? '¿Eres el anfitrión? Iniciar Sesión' : 'Host Login'}
                                 </a>
                             )}
                             
-                            <RevealOnScroll className="w-full px-4">
-                                <div className="relative overflow-hidden bg-white/40 backdrop-blur-md rounded-[2rem] p-8 md:p-10 border border-gold/30 shadow-xl group hover:shadow-gold-glow transition-all duration-500">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-spring-pink/5 via-transparent to-spring-yellow/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                                    
+                            <div className="flex flex-col items-center w-full group mb-6">
+                                <span className="font-sans text-[10px] tracking-widest text-gray-500/60 mb-2">
+                                    {language === 'ES' ? '¿Te gustó esta invitación?' : 'Did you like this invitation?'}
+                                </span>
+                                <a href="https://baulia.com?utm_source=invitacion" target="_blank" rel="noopener noreferrer" className="font-sans text-xs font-bold text-spring-pink tracking-[0.2em] uppercase hover:scale-105 transition-transform mb-8">
+                                    {language === 'ES' ? 'Crea la tuya' : 'Create yours'}
+                                </a>
+                                
+                                {/* Tarjeta Corporativa de Baulia */}
+                                <a href="https://baulia.com" target="_blank" rel="noopener noreferrer" className="relative p-6 md:p-8 rounded-[2rem] bg-white border border-gray-100 shadow-xl hover:shadow-2xl hover:border-gold/30 transition-all duration-500 hover:-translate-y-1 overflow-hidden w-full max-w-md">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                                     <div className="relative z-10 flex flex-col items-center">
-                                        <span className="font-serif italic text-xl md:text-2xl text-gray-700 mb-4">
-                                            {language === 'ES' ? '¿Te encantó esta invitación?' : 'Loved this invitation?'}
-                                        </span>
+                                        <span className="font-sans text-[8px] tracking-[0.4em] uppercase text-gold-dark font-bold mb-4 opacity-80">Tecnología Inteligente</span>
                                         
-                                        <p className="font-sans text-xs md:text-sm text-gray-500 mb-6 max-w-md tracking-wide">
-                                            {language === 'ES' 
-                                                ? 'Crea una experiencia digital inolvidable para tu próximo evento.' 
-                                                : 'Create an unforgettable digital experience for your next event.'}
-                                        </p>
-                                        
-                                        <a href="https://www.baulia.com" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center transform transition-transform duration-300 hover:scale-105">
-                                            <span className="font-sans text-[9px] tracking-[0.3em] uppercase text-gold-dark font-bold mb-3">Tecnología Inteligente</span>
-                                            
-                                            {/* 🔴 LOGO SVG INYECTADO DIRECTAMENTE EN EL CÓDIGO */}
-                                            <svg viewBox="0 0 915 201" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 md:h-10 w-auto mb-4 drop-shadow-sm transition-transform duration-500 hover:scale-105" style={{ overflow: 'visible', display: 'inline-block' }}>
-                                                <style>{`.baulia-text { fill: #D4AF37; transition: fill 0.5s ease; } .baulia-diamond-animator { transform-origin: 100px 100px; transform: rotate(45deg) scale(0.8); transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); } .baulia-diamond-shape { fill: transparent; stroke: #D4AF37; stroke-width: 1.72px; transition: fill 0.5s ease, stroke-width 0.3s ease; } .baulia-b { fill: #D4AF37; transition: all 0.6s ease; transform-origin: 100px 100px; } svg:hover .baulia-diamond-animator { transform: rotate(135deg) scale(0.85); } svg:hover .baulia-diamond-shape { stroke-width: 3px; } svg:hover .baulia-b { transform: scale(1.05); fill: #FDF1A9; }`}</style>
-                                                <g className="baulia-text">
-                                                    <path d="M265.12,78.58h-.35c0-2.04-.75-3.8-2.24-5.25-1.5-1.46-3.27-2.18-5.31-2.18h-1.42l-.12-1.18h9.44v8.62ZM265.12,143.97v8.62h-9.44l.12-1.18h1.42c2.05,0,3.82-.73,5.31-2.18,1.49-1.46,2.24-3.21,2.24-5.25h.35ZM272.44,69.96v82.62h-7.67v-82.62h7.67ZM279.17,69.96c5.51,0,10.17.83,13.99,2.48,3.82,1.65,6.71,3.95,8.68,6.91,1.97,2.95,2.95,6.39,2.95,10.33,0,3.3-.63,6.2-1.89,8.68-1.26,2.48-2.87,4.49-4.84,6.02-1.97,1.53-4.05,2.62-6.26,3.25,4.17.63,7.77,2.01,10.8,4.13,3.03,2.12,5.35,4.78,6.96,7.97,1.61,3.19,2.42,6.75,2.42,10.68,0,4.41-1.06,8.28-3.19,11.63-2.12,3.35-5.25,5.94-9.38,7.79-4.13,1.85-9.11,2.77-14.93,2.77h-13.1c.08-1.42.12-2.83.12-4.25h12.51c4.09,0,7.55-.73,10.39-2.18,2.83-1.46,5-3.6,6.49-6.43,1.49-2.83,2.24-6.22,2.24-10.15,0-4.41-.85-7.99-2.54-10.74-1.69-2.75-3.88-4.84-6.55-6.26-2.68-1.42-5.57-2.38-8.68-2.89-3.11-.51-6.08-.77-8.91-.77v-1.06c1.81,0,3.82-.2,6.02-.59,2.2-.39,4.33-1.18,6.37-2.36,2.04-1.18,3.74-2.93,5.08-5.25,1.34-2.32,2.01-5.37,2.01-9.15,0-3.54-.65-6.57-1.95-9.09-1.3-2.52-3.23-4.43-5.78-5.72-2.56-1.3-5.72-1.95-9.5-1.95h-10.86c0-.08-.1-.41-.29-1-.2-.59-.49-1.51-.89-2.77h12.51Z"/>
-                                                    <path d="M381.98,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM407.36,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.86-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM424,120.36v3.54h-36.95v-3.54h36.95ZM407.36,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM429.31,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95,1.18-1.3,1.34-3.13.47-5.49Z"/>
-                                                    <path d="M506.51,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM513.83,69.96v51.94c0,5.67,1.04,10.66,3.13,14.99,2.08,4.33,5.02,7.69,8.79,10.09,3.78,2.4,8.14,3.6,13.1,3.6,5.27,0,9.87-1.14,13.81-3.42,3.93-2.28,7-5.45,9.21-9.5,2.2-4.05,3.31-8.79,3.31-14.22v-53.47h5.55v53.47c0,6.14-1.32,11.51-3.95,16.11-2.64,4.6-6.36,8.2-11.15,10.8-4.8,2.6-10.39,3.9-16.76,3.9s-12.26-1.28-17.17-3.84c-4.92-2.56-8.73-6.14-11.45-10.74-2.71-4.6-4.07-9.97-4.07-16.11v-53.59h7.67ZM521.97,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38ZM538.73,61.58c1.65-1.81,3.31-3.6,4.96-5.37,1.65-1.77,3.32-3.5,5.02-5.19s3.36-3.32,5.02-4.9c.87.94,1.73,1.93,2.6,2.95.87,1.02,1.61,2.12,2.24,3.31-2.12,1.18-4.25,2.36-6.37,3.54-2.12,1.18-4.23,2.3-6.31,3.36-2.09,1.06-4.19,2.11-6.31,3.13l-.83-.83ZM565.53,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM578.86,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38Z"/>
-                                                    <path d="M646.97,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM646.97,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM654.29,69.96v82.62h-7.67v-82.62h7.67ZM653.94,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18s-2.22,3.21-2.3,5.25h-.35ZM686.16,148.93v3.66h-32.22v-3.66h32.22ZM693.36,133.46l-6.85,19.12h-19.59l4.25-3.66c4.17,0,7.57-.65,10.21-1.95,2.64-1.3,4.78-3.13,6.43-5.49,1.65-2.36,3.11-5.04,4.37-8.03h1.18Z"/>
-                                                    <path d="M758.75,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM758.75,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM766.07,69.96v82.62h-7.67v-82.62h7.67ZM765.72,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18-1.46,1.46-2.22,3.21-2.3,5.25h-.35ZM765.72,143.97h.35c.08,2.05.84,3.8,2.3,5.25,1.46,1.46,3.21,2.18,5.25,2.18h1.53v1.18h-9.44v-8.62Z"/>
-                                                    <path d="M846.33,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM871.71,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.87-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM888.35,120.36v3.54h-36.95v-3.54h36.95ZM871.71,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM893.67,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95s1.34-3.13.47-5.49Z"/>
-                                                </g>
-                                                <g className="baulia-diamond-animator">
-                                                    <rect className="baulia-diamond-shape" x=".86" y=".86" width="198.64" height="198.64" transform="translate(0 200.36) rotate(-90)" strokeMiterlimit="10" />
-                                                </g>
-                                                <path className="baulia-b" d="M116.87,94.54l6.01-.41c6.47,0,11.27,1.21,14.42,3.62,3.14,2.42,4.72,5.83,4.72,10.25s-2.01,9.59-6.01,15.51c-4.01,5.92-9.2,11.3-15.58,16.13h7.79c3.19,0,5.42-.14,6.7-.41,1.27-.27,2-.41,2.19-.41,1.27,0,1.91.68,1.91,2.05s-.91,2.1-2.73,2.19c-7.02,0-13.76-.09-20.23-.27-10.2,6.47-20.23,9.7-30.07,9.7-4.65,0-8.34-.87-11.07-2.6s-4.1-3.48-4.1-5.26.75-3.16,2.25-4.17c1.5-1,3.62-1.5,6.36-1.5,10.66,0,22.59.23,35.81.68,5.47-4.46,9.84-9.64,13.12-15.51,3.28-5.88,4.92-11.18,4.92-15.92,0-7.56-4.06-11.34-12.16-11.34-3.19,0-6.49.5-9.91,1.5-3.42,1-5.47,1.71-6.15,2.12s-1.12.61-1.3.61c-.55,0-.82-.39-.82-1.16s1.18-1.71,3.55-2.8c10.39-5.01,20.54-11.68,30.48-20.02,9.93-8.34,14.9-14.28,14.9-17.83,0-1.64-1.28-2.46-3.83-2.46-10.39.09-24.65,7.88-42.78,23.37-3.65,9.38-9.64,20.91-17.97,34.58-8.34,13.67-17.06,25.9-26.17,36.69-9.11,10.8-15.9,16.19-20.36,16.19-2.73,0-4.1-1.41-4.1-4.24,0-6.47,6.13-17.99,18.38-34.58,12.25-16.58,26.12-31.84,41.61-45.78,2.73-6.65,4.1-11.5,4.1-14.56s-.73-5.47-2.19-7.24c-1.46-1.78-3.6-3.08-6.42-3.9-4.46-1.18-9.18-1.78-14.14-1.78s-8.77.12-11.41.34c-2.64.23-5.86.68-9.64,1.37-3.78.68-6.86,1.87-9.22,3.55-2.37,1.69-3.55,3.83-3.55,6.42s1.27,4.6,3.83,6.01c2.55,1.41,5.67,2.39,9.36,2.94s7.36,1.14,11,1.78c3.64.64,6.74,1.89,9.29,3.76,2.55,1.87,3.83,4.49,3.83,7.86,0,.91-.2,1.37-.61,1.37s-.73-.14-.96-.41c-.23-.27-.62-.82-1.16-1.64-.82-1.18-2.03-2.1-3.62-2.73-1.59-.64-4.06-1.25-7.38-1.84-3.33-.59-6.47-1.23-9.43-1.91-2.96-.68-5.94-1.57-8.95-2.66-3.01-1.09-5.42-2.64-7.24-4.65-1.82-2-2.73-4.35-2.73-7.04s1.14-5.08,3.42-7.17c2.28-2.1,5.28-3.74,9.02-4.92,7.65-2.28,15.63-3.42,23.92-3.42,21.5,0,32.25,5.65,32.25,16.95,0,1-.23,2.51-.68,4.51,18.4-14.85,33.35-22.28,44.83-22.28,5.1,0,7.65,1.55,7.65,4.65,0,4.46-4.67,10.8-14.01,19-9.34,8.2-18.98,14.58-28.9,19.13ZM44.17,163.69c2.64,0,9.73-8.45,21.25-25.35,11.52-16.9,20.75-32.64,27.68-47.22-13.67,13.03-25.76,26.58-36.29,40.66-10.52,14.08-15.78,23.66-15.78,28.77,0,2.09,1.05,3.14,3.14,3.14ZM111,142.64l-24.74-.55c-7.02,0-10.52,1.05-10.52,3.14,0,1.18,1.18,2.3,3.55,3.35,2.37,1.05,5.1,1.57,8.2,1.57,8.11,0,15.94-2.5,23.51-7.52Z"/>
-                                            </svg>
-                                            
-                                            <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-spring-dark text-white font-sans text-[10px] tracking-widest uppercase shadow-md group-hover:bg-gold-dark transition-colors">
-                                                <span>{language === 'ES' ? 'Crear mi invitación' : 'Create mine'}</span>
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                                </svg>
-                                            </div>
-                                        </a>
+                                        {/* SVG Oficial Baulia adaptado a fondo claro */}
+                                        <svg viewBox="0 0 915 201" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 md:h-10 w-auto transition-transform duration-500 group-hover:scale-105 drop-shadow-sm" style={{ overflow: 'visible', display: 'inline-block' }}>
+                                            <style>{`.baulia-text { fill: #1C1917; transition: fill 0.5s ease; } .baulia-diamond-animator { transform-origin: 100px 100px; transform: rotate(45deg) scale(0.8); transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); } .baulia-diamond-shape { fill: transparent; stroke: #D4AF37; stroke-width: 1.72px; transition: fill 0.5s ease, stroke-width 0.3s ease; } .baulia-b { fill: #D4AF37; transition: all 0.6s ease; transform-origin: 100px 100px; } svg:hover .baulia-diamond-animator { transform: rotate(135deg) scale(0.85); } svg:hover .baulia-diamond-shape { stroke-width: 3px; } svg:hover .baulia-b { transform: scale(1.05); fill: #FDF1A9; }`}</style>
+                                            <g className="baulia-text">
+                                                <path d="M265.12,78.58h-.35c0-2.04-.75-3.8-2.24-5.25-1.5-1.46-3.27-2.18-5.31-2.18h-1.42l-.12-1.18h9.44v8.62ZM265.12,143.97v8.62h-9.44l.12-1.18h1.42c2.05,0,3.82-.73,5.31-2.18,1.49-1.46,2.24-3.21,2.24-5.25h.35ZM272.44,69.96v82.62h-7.67v-82.62h7.67ZM279.17,69.96c5.51,0,10.17.83,13.99,2.48,3.82,1.65,6.71,3.95,8.68,6.91,1.97,2.95,2.95,6.39,2.95,10.33,0,3.3-.63,6.2-1.89,8.68-1.26,2.48-2.87,4.49-4.84,6.02-1.97,1.53-4.05,2.62-6.26,3.25,4.17.63,7.77,2.01,10.8,4.13,3.03,2.12,5.35,4.78,6.96,7.97,1.61,3.19,2.42,6.75,2.42,10.68,0,4.41-1.06,8.28-3.19,11.63-2.12,3.35-5.25,5.94-9.38,7.79-4.13,1.85-9.11,2.77-14.93,2.77h-13.1c.08-1.42.12-2.83.12-4.25h12.51c4.09,0,7.55-.73,10.39-2.18,2.83-1.46,5-3.6,6.49-6.43,1.49-2.83,2.24-6.22,2.24-10.15,0-4.41-.85-7.99-2.54-10.74-1.69-2.75-3.88-4.84-6.55-6.26-2.68-1.42-5.57-2.38-8.68-2.89-3.11-.51-6.08-.77-8.91-.77v-1.06c1.81,0,3.82-.2,6.02-.59,2.2-.39,4.33-1.18,6.37-2.36,2.04-1.18,3.74-2.93,5.08-5.25,1.34-2.32,2.01-5.37,2.01-9.15,0-3.54-.65-6.57-1.95-9.09-1.3-2.52-3.23-4.43-5.78-5.72-2.56-1.3-5.72-1.95-9.5-1.95h-10.86c0-.08-.1-.41-.29-1-.2-.59-.49-1.51-.89-2.77h12.51Z"/>
+                                                <path d="M381.98,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM407.36,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.86-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM424,120.36v3.54h-36.95v-3.54h36.95ZM407.36,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM429.31,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95,1.18-1.3,1.34-3.13.47-5.49Z"/>
+                                                <path d="M506.51,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM513.83,69.96v51.94c0,5.67,1.04,10.66,3.13,14.99,2.08,4.33,5.02,7.69,8.79,10.09,3.78,2.4,8.14,3.6,13.1,3.6,5.27,0,9.87-1.14,13.81-3.42,3.93-2.28,7-5.45,9.21-9.5,2.2-4.05,3.31-8.79,3.31-14.22v-53.47h5.55v53.47c0,6.14-1.32,11.51-3.95,16.11-2.64,4.6-6.36,8.2-11.15,10.8-4.8,2.6-10.39,3.9-16.76,3.9s-12.26-1.28-17.17-3.84c-4.92-2.56-8.73-6.14-11.45-10.74-2.71-4.6-4.07-9.97-4.07-16.11v-53.59h7.67ZM521.97,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38ZM538.73,61.58c1.65-1.81,3.31-3.6,4.96-5.37,1.65-1.77,3.32-3.5,5.02-5.19s3.36-3.32,5.02-4.9c.87.94,1.73,1.93,2.6,2.95.87,1.02,1.61,2.12,2.24,3.31-2.12,1.18-4.25,2.36-6.37,3.54-2.12,1.18-4.23,2.3-6.31,3.36-2.09,1.06-4.19,2.11-6.31,3.13l-.83-.83ZM565.53,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM578.86,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38Z"/>
+                                                <path d="M646.97,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM646.97,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM654.29,69.96v82.62h-7.67v-82.62h7.67ZM653.94,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18s-2.22,3.21-2.3,5.25h-.35ZM686.16,148.93v3.66h-32.22v-3.66h32.22ZM693.36,133.46l-6.85,19.12h-19.59l4.25-3.66c4.17,0,7.57-.65,10.21-1.95,2.64-1.3,4.78-3.13,6.43-5.49,1.65-2.36,3.11-5.04,4.37-8.03h1.18Z"/>
+                                                <path d="M758.75,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM758.75,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM766.07,69.96v82.62h-7.67v-82.62h7.67ZM765.72,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18-1.46,1.46-2.22,3.21-2.3,5.25h-.35ZM765.72,143.97h.35c.08,2.05.84,3.8,2.3,5.25,1.46,1.46,3.21,2.18,5.25,2.18h1.53v1.18h-9.44v-8.62Z"/>
+                                                <path d="M846.33,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM871.71,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.87-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM888.35,120.36v3.54h-36.95v-3.54h36.95ZM871.71,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM893.67,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95s1.34-3.13.47-5.49Z"/>
+                                            </g>
+                                            <g className="baulia-diamond-animator">
+                                                <rect className="baulia-diamond-shape" x=".86" y=".86" width="198.64" height="198.64" transform="translate(0 200.36) rotate(-90)" strokeMiterlimit="10" />
+                                            </g>
+                                            <path className="baulia-b" d="M116.87,94.54l6.01-.41c6.47,0,11.27,1.21,14.42,3.62,3.14,2.42,4.72,5.83,4.72,10.25s-2.01,9.59-6.01,15.51c-4.01,5.92-9.2,11.3-15.58,16.13h7.79c3.19,0,5.42-.14,6.7-.41,1.27-.27,2-.41,2.19-.41,1.27,0,1.91.68,1.91,2.05s-.91,2.1-2.73,2.19c-7.02,0-13.76-.09-20.23-.27-10.2,6.47-20.23,9.7-30.07,9.7-4.65,0-8.34-.87-11.07-2.6s-4.1-3.48-4.1-5.26.75-3.16,2.25-4.17c1.5-1,3.62-1.5,6.36-1.5,10.66,0,22.59.23,35.81.68,5.47-4.46,9.84-9.64,13.12-15.51,3.28-5.88,4.92-11.18,4.92-15.92,0-7.56-4.06-11.34-12.16-11.34-3.19,0-6.49.5-9.91,1.5-3.42,1-5.47,1.71-6.15,2.12s-1.12.61-1.3.61c-.55,0-.82-.39-.82-1.16s1.18-1.71,3.55-2.8c10.39-5.01,20.54-11.68,30.48-20.02,9.93-8.34,14.9-14.28,14.9-17.83,0-1.64-1.28-2.46-3.83-2.46-10.39.09-24.65,7.88-42.78,23.37-3.65,9.38-9.64,20.91-17.97,34.58-8.34,13.67-17.06,25.9-26.17,36.69-9.11,10.8-15.9,16.19-20.36,16.19-2.73,0-4.1-1.41-4.1-4.24,0-6.47,6.13-17.99,18.38-34.58,12.25-16.58,26.12-31.84,41.61-45.78,2.73-6.65,4.1-11.5,4.1-14.56s-.73-5.47-2.19-7.24c-1.46-1.78-3.6-3.08-6.42-3.9-4.46-1.18-9.18-1.78-14.14-1.78s-8.77.12-11.41.34c-2.64.23-5.86.68-9.64,1.37-3.78.68-6.86,1.87-9.22,3.55-2.37,1.69-3.55,3.83-3.55,6.42s1.27,4.6,3.83,6.01c2.55,1.41,5.67,2.39,9.36,2.94s7.36,1.14,11,1.78c3.64.64,6.74,1.89,9.29,3.76,2.55,1.87,3.83,4.49,3.83,7.86,0,.91-.2,1.37-.61,1.37s-.73-.14-.96-.41c-.23-.27-.62-.82-1.16-1.64-.82-1.18-2.03-2.1-3.62-2.73-1.59-.64-4.06-1.25-7.38-1.84-3.33-.59-6.47-1.23-9.43-1.91-2.96-.68-5.94-1.57-8.95-2.66-3.01-1.09-5.42-2.64-7.24-4.65-1.82-2-2.73-4.35-2.73-7.04s1.14-5.08,3.42-7.17c2.28-2.1,5.28-3.74,9.02-4.92,7.65-2.28,15.63-3.42,23.92-3.42,21.5,0,32.25,5.65,32.25,16.95,0,1-.23,2.51-.68,4.51,18.4-14.85,33.35-22.28,44.83-22.28,5.1,0,7.65,1.55,7.65,4.65,0,4.46-4.67,10.8-14.01,19-9.34,8.2-18.98,14.58-28.9,19.13ZM44.17,163.69c2.64,0,9.73-8.45,21.25-25.35,11.52-16.9,20.75-32.64,27.68-47.22-13.67,13.03-25.76,26.58-36.29,40.66-10.52,14.08-15.78,23.66-15.78,28.77,0,2.09,1.05,3.14,3.14,3.14ZM111,142.64l-24.74-.55c-7.02,0-10.52,1.05-10.52,3.14,0,1.18,1.18,2.3,3.55,3.35,2.37,1.05,5.1,1.57,8.2,1.57,8.11,0,15.94-2.5,23.51-7.52Z"/>
+                                        </svg>
                                     </div>
-                                </div>
-                            </RevealOnScroll>
+                                </a>
+                            </div>
                         </div>
                     </footer>
 
-                    {/* 🔴 EL IFRAME APUNTA A PANEL.BAULIA.COM AHORA */}
+                    {}
                     {isModalOpen && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-white/10 backdrop-blur-md animate-fade-in-up">
-                            <div className="relative w-full max-w-4xl h-[90vh] md:h-[85vh] flex flex-col items-center justify-center">
-                                <button onClick={() => setIsModalOpen(false)} className="absolute -top-4 -right-4 md:top-0 md:-right-12 z-[110] w-10 h-10 rounded-full bg-white shadow-xl flex items-center justify-center hover:bg-gray-100 transition-all hover:rotate-90">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                                </button>
-                                {isConfirmed ? (
-                                    <div className="w-full bg-white/95 rounded-[3rem] p-10 md:p-20 text-center shadow-2xl animate-fade-in-up border border-white">
-                                        <div className="w-24 h-24 bg-spring-green/20 text-spring-green rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" /></svg></div>
-                                        <h2 className="font-serif text-5xl md:text-6xl text-spring-dark mb-4">¡Gracias por confirmar!</h2>
-                                        <p className="font-script text-3xl text-gold-dark">Tu lugar está reservado para esta gran celebración.</p>
-                                    </div>
-                                ) : (
-                                    <div className="w-full h-full max-h-[85vh] bg-white/40 backdrop-blur-2xl rounded-3xl overflow-hidden shadow-2xl border border-white/60 relative">
-                                        <iframe 
-                                            src={`https://panel.baulia.com/?modo=invitacion&e=${eventIdStr}&u=${guestUid}&iframe=true&card=FDFBF7&btn=F76C82&txt=2A2A2A&font=Montserrat&bg=transparent`} 
-                                            allowTransparency="true"
-                                            style={{ backgroundColor: 'transparent', touchAction: 'pan-y' }}
-                                            className="w-full h-full border-none relative z-10"
-                                        ></iframe>
-                                    </div>
-                                )}
+                        <div className="fixed inset-0 z-[100] flex flex-col justify-center items-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
+                            <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 md:top-8 md:right-8 w-10 h-10 bg-black/80 border border-white/50 rounded-full flex items-center justify-center text-white hover:bg-white hover:text-black transition-colors z-[150]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                            <div className="relative w-full max-w-md mx-auto flex flex-col items-center justify-center z-10 h-[85vh] mt-10">
+                                <iframe 
+                                    src={`https://panel.baulia.com/?modo=invitacion&e=${eventIdStr}&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=F76C82&txt=2A2A2A&font=Montserrat&v=${Date.now()}`} 
+                                    allowTransparency="true" 
+                                    style={{ backgroundColor: 'transparent', border: 'none' }} 
+                                    className="w-full h-full relative z-10"
+                                ></iframe>
                             </div>
                         </div>
                     )}
                     
+                    {/* Botón de Música Flotante */}
                     <div className="fixed bottom-6 right-6 z-50 animate-fade-in-up delay-1000">
                         <button onClick={toggleAudio} className={`w-14 h-14 rounded-full bg-white flex items-center justify-center transition-all duration-500 hover:scale-110 shadow-xl border border-gold/30 ${isPlaying ? 'bg-spring-pink/10 border-spring-pink' : ''}`} aria-label="Reproducir música">
                             {isPlaying ? (
@@ -536,7 +623,5 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
-    <script> document.addEventListener('contextmenu', e => e.preventDefault()); document.onkeydown = function(e) { if(e.keyCode == 123) { return false; } if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; } if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { return false; } if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { return false; } if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; } } </script>
-    <style> body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; } </style>
 </body>
 </html>
