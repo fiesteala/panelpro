@@ -1,5 +1,5 @@
 git add .
-git commit -m "mquina del tiempo 1"
+git commit -m "prueba de invitaciones"
 git push origin main
 
 .
