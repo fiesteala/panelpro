@@ -1,5 +1,5 @@
 git add .
-git commit -m "prueba de invitaciones"
+git commit -m "conexion de invitaciones"
 git push origin main
 
 .
