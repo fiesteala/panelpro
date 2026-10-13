@@ -14620,7 +14620,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
         eventNames: eventoInfo?.nombres || ''
     })) || [];
 
-    // 1. Mandamos el paquete de datos avanzado
     window.parent.postMessage({ 
         action: 'RSVP_SUCCESS_DATA', 
         passesLimit: guestData.originalPasses || guestData.passes,
@@ -14629,9 +14628,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
         status: guestData.status,
         theme: { btn: t_btn, txt: t_txt, txtRgb: textRgb }
     }, '*');
-    
-    // 2. 🔴 MANDAMOS LA SEÑAL CLÁSICA QUE TU INVITACIÓN YA TIENE PROGRAMADA
-    window.parent.postMessage('rsvp_success', '*');
     
     setDataSent(true);
   }, [eventId, isIframe, eventoInfo, t_btn, t_txt, textRgb, dataSent, qrEnabled]);
