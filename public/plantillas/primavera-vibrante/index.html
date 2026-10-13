@@ -119,6 +119,10 @@
             const [isPlaying, setIsPlaying] = useState(false);
             const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
             
+            // ESTADO RESTAURADO: Pantalla de Bienvenida
+            const [showWelcome, setShowWelcome] = useState(true);
+            const [guestName, setGuestName] = useState("");
+            
             // FASE 4: Nuevos Estados Multi-Modal
             const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
             const [confirmedData, setConfirmedData] = useState(null);
@@ -129,6 +133,17 @@
             const guestUid = urlParams.get('u') || '';
 
             const audioRef = useRef(null);
+
+            // EFECTO RESTAURADO: Lógica del cuadro de Bienvenida
+            useEffect(() => {
+                // Aquí va tu lógica original para traer el nombre del invitado.
+                // Usamos un timeout para que la pantalla de bienvenida se desvanezca suavemente.
+                if (guestUid) {
+                    setGuestName("Buscando tu invitación...");
+                }
+                const timer = setTimeout(() => setShowWelcome(false), 3500);
+                return () => clearTimeout(timer);
+            }, [guestUid]);
 
             // FASE 4: Protección Anti-Robo
             useEffect(() => {
@@ -208,6 +223,29 @@
             return (
                 <div className="relative min-h-screen w-full overflow-hidden font-sans bg-[#FDFBF7]">
                     
+                    {/* CUADRO DE BIENVENIDA RESTAURADO */}
+                    <div className={`fixed inset-0 z-[200] flex flex-col justify-center items-center p-4 bg-[#FDFBF7] transition-all duration-1000 ${showWelcome ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+                        <div className="absolute -top-16 -left-16 w-80 h-80 opacity-40 transform -rotate-12 pointer-events-none">
+                            <FloralCorner className="w-full h-full" />
+                        </div>
+                        <div className="absolute -bottom-16 -right-16 w-80 h-80 opacity-40 transform rotate-[165deg] pointer-events-none">
+                            <FloralCorner className="w-full h-full" />
+                        </div>
+                        
+                        <div className="flex flex-col items-center text-center animate-fade-in-up z-10">
+                            <img src="/primavera-vibrante/monograma.svg" alt="Monograma" className="w-24 h-24 md:w-32 md:h-32 mb-6 drop-shadow-md object-contain animate-pulse-slow" onError={(e) => e.target.style.display='none'} />
+                            <span className="font-sans text-[10px] md:text-xs tracking-[0.4em] uppercase text-spring-green font-semibold mb-4 block">
+                                {language === 'ES' ? 'Bienvenido a la celebración de' : 'Welcome to the celebration of'}
+                            </span>
+                            <h2 className="font-serif text-5xl md:text-6xl text-spring-dark mb-6">Maricela</h2>
+                            <div className="w-24 h-px bg-gradient-to-r from-transparent via-gold-dark to-transparent mb-8"></div>
+                            
+                            <p className="font-sans text-xs md:text-sm text-gold-dark font-bold tracking-widest uppercase animate-pulse">
+                                {guestName || (language === 'ES' ? 'Cargando invitación...' : 'Loading invitation...')}
+                            </p>
+                        </div>
+                    </div>
+
                     <audio ref={audioRef} id="bg-music" src="/primavera-vibrante/cancion.mp3" loop />
 
                     <div className="fixed inset-0 z-0 overflow-hidden bg-gradient-to-br from-[#FFF5F5] via-[#FDFBF7] to-[#FDF1F3]">
