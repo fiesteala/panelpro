@@ -63,6 +63,8 @@
         .delay-500 { animation-delay: 0.5s; opacity: 0; }
         .delay-700 { animation-delay: 0.7s; opacity: 0; }
         .delay-1000 { animation-delay: 1.0s; opacity: 0; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -465,13 +467,13 @@
                                     <h3 className="font-serif text-4xl md:text-5xl text-spring-dark mb-10 px-4">
                                         {language === 'ES' ? 'Acompáñame a celebrar este día tan especial' : 'Join me to celebrate this special day'}
                                     </h3>
-                                    <button onClick={() => setIsRsvpModalOpen(true)} className="w-full max-w-md py-8 rounded-full font-sans font-bold text-sm tracking-[0.4em] uppercase shadow-2xl transition-all duration-500 flex justify-center items-center group relative overflow-hidden bg-spring-pink text-white hover:scale-[1.03] hover:bg-gold-warm hover:shadow-gold-glow">
+                                    <button onClick={() => setIsRsvpModalOpen(true)} className="px-12 md:px-16 py-4 md:py-5 rounded-full font-sans font-bold text-xs md:text-sm tracking-[0.2em] md:tracking-[0.3em] uppercase shadow-xl transition-all duration-500 flex justify-center items-center group relative overflow-hidden bg-spring-pink text-white hover:scale-[1.03] hover:bg-gold-warm hover:shadow-2xl">
                                         <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
                                         <span className="relative z-10">
                                             {language === 'ES' ? 'Confirmar Asistencia' : 'Confirm Attendance'}
                                         </span>
                                     </button>
-                                    <p className="mt-6 font-script text-3xl text-gold-warm">Maricela espera tu confirmación</p>
+                                    <p className="mt-8 font-script text-3xl md:text-4xl text-gold-warm">Maricela espera tu confirmación</p>
                                 </div>
                             ) : confirmedData.subGuests && confirmedData.subGuests.length > 0 ? (
                                 /* ESTADO 2: CONFIRMÓ Y TIENE QRS - CARRUSEL NATIVO TAILWIND */
@@ -483,7 +485,7 @@
                                     <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 px-4 hide-scrollbar md:justify-center md:[mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
                                         {confirmedData.subGuests.map(sg => (
                                             <div key={sg.id} className="w-80 md:w-64 flex-shrink-0 snap-center flex flex-col items-center">
-                                                <div id={`ticket_${sg.id}`} style={{ backgroundColor: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(15px)', borderColor: `${confirmedData.theme?.txtRgb || '42,42,42'}20`, color: confirmedData.theme?.txt || '#2A2A2A' }} className="w-full p-6 rounded-3xl border relative overflow-hidden shadow-xl">
+                                                <div id={`ticket_${sg.id}`} style={{ backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(15px)', borderColor: `${confirmedData.theme?.txtRgb || '42,42,42'}20`, color: confirmedData.theme?.txt || '#2A2A2A' }} className="w-full p-6 rounded-3xl border relative overflow-hidden shadow-2xl">
                                                     <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: confirmedData.theme?.btn || '#F76C82' }}></div>
                                                     
                                                     <div className="text-center pb-4 mb-4 border-b border-gray-300 border-dashed flex flex-col items-center">
@@ -515,13 +517,13 @@
                             ) : (
                                 /* ESTADO 3: CONFIRMÓ PLAN SIMPLE SIN QRS - MENSAJE DE ÉXITO */
                                 <div className="w-full max-w-lg mx-auto mt-12 animate-fade-in-up pb-10 px-4">
-                                    <div className="p-10 rounded-3xl border border-gold/30 flex flex-col items-center justify-center text-center shadow-2xl bg-white/60 backdrop-blur-md">
+                                    <div className="p-10 rounded-3xl border border-gold/30 flex flex-col items-center justify-center text-center shadow-2xl" style={{ backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)' }}>
                                         <div className="w-16 h-16 rounded-full mb-6 flex items-center justify-center animate-pulse" style={{ backgroundColor: `${confirmedData.theme?.btn || '#F76C82'}20`, border: `2px solid ${confirmedData.theme?.btn || '#F76C82'}` }}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={confirmedData.theme?.btn || '#F76C82'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                         </div>
-                                        <h3 className="font-serif text-3xl md:text-4xl mb-4 text-spring-dark tracking-widest uppercase">¡Asistencia Confirmada!</h3>
+                                        <h3 className="font-bold text-3xl mb-4 text-spring-dark uppercase tracking-widest">¡Asistencia Confirmada!</h3>
                                         <p className="text-sm font-sans opacity-80 text-gray-700 leading-relaxed font-medium">Tu lugar está asegurado. Gracias por confirmar tu presencia en este gran evento.</p>
-                                        <p className="mt-6 font-bold font-sans tracking-widest text-xs uppercase" style={{ color: confirmedData.theme?.btn || '#F76C82' }}>¡Te esperamos!</p>
+                                        <p className="mt-6 font-bold tracking-widest text-xs uppercase" style={{ color: confirmedData.theme?.btn || '#F76C82' }}>¡Te esperamos!</p>
                                     </div>
                                 </div>
                             )}
@@ -529,12 +531,11 @@
 
                     </div>
 
-                    {/* FASE 4: EL MOTOR VIRAL Y FOOTER MINIMALISTA */}
                     <footer className="w-full text-center pb-12 pt-10">
                         <div className="w-full max-w-2xl mx-auto flex flex-col items-center pt-12">
                             
                             {!urlParams.has('u') && (
-                                <a href="https://panel.baulia.com" className="font-sans text-[10px] tracking-[0.3em] uppercase text-gray-400 opacity-40 hover:opacity-100 mb-8 transition-all duration-500">
+                                <a href="https://panel.baulia.com" className="font-sans text-[10px] tracking-[0.3em] uppercase text-gray-500 opacity-40 hover:opacity-100 mb-8 transition-all duration-500">
                                     {language === 'ES' ? '¿Eres el anfitrión? Iniciar Sesión' : 'Host Login'}
                                 </a>
                             )}
@@ -546,7 +547,6 @@
                                 </a>
                             </div>
 
-                            {/* Firma Baulia y Logotipo Oficial */}
                             <a href="https://baulia.com" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center transform transition-transform duration-300 hover:scale-105">
                                 <svg viewBox="0 0 915 201" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ height: '40px', width: 'auto', overflow: 'visible', display: 'inline-block' }}>
                                     <style>{`.baulia-text { fill: #1C1917; transition: fill 0.5s ease; } .baulia-diamond-animator { transform-origin: 100px 100px; transform: rotate(45deg) scale(0.8); transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); } .baulia-diamond-shape { fill: transparent; stroke: #D4AF37; stroke-width: 1.72px; transition: fill 0.5s ease, stroke-width 0.3s ease; } .baulia-b { fill: #D4AF37; transition: all 0.6s ease; transform-origin: 100px 100px; } svg:hover .baulia-diamond-animator { transform: rotate(135deg) scale(0.85); } svg:hover .baulia-diamond-shape { stroke-width: 3px; } svg:hover .baulia-b { transform: scale(1.05); fill: #FDF1A9; }`}</style>
