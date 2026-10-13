@@ -408,15 +408,15 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Monitoreo en tiempo real de tu evento.</p>
         </div>
         
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => setPassModal({ ...passModal, open: true })} className="px-4 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-xs font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center">
-            <Key size={14} className="mr-2 text-amber-500" /> Cambiar Contraseña
+        <div className="flex w-full sm:w-auto gap-2">
+          <button onClick={() => setPassModal({ ...passModal, open: true })} className="flex-1 sm:flex-none justify-center px-2 py-2.5 sm:px-4 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-[10px] sm:text-xs font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center">
+            <Key size={14} className="mr-1.5 sm:mr-2 text-amber-500" /> <span className="hidden sm:inline">Cambiar</span> Contraseña
           </button>
           {/* El botón de PDF se oculta si es Social Wall porque no hay mesas ni invitados que imprimir */}
           {plan !== 'social_wall' && (
-            <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="px-5 py-2.5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center disabled:opacity-50">
-              {isPreparingPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
-              {isPreparingPrint ? 'Generando PDF...' : 'Descargar Reporte'}
+            <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="flex-1 sm:flex-none justify-center px-2 py-2.5 sm:px-5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-[10px] sm:text-sm font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center disabled:opacity-50">
+              {isPreparingPrint ? <RefreshCw size={14} className="mr-1.5 sm:mr-2 animate-spin"/> : <Download size={14} className="mr-1.5 sm:mr-2"/>} 
+              {isPreparingPrint ? 'Generando...' : <><span className="hidden sm:inline">Descargar</span> Reporte</>}
             </button>
           )}
         </div>
@@ -444,66 +444,65 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
       ) : (
         <>
           {/* VISTA NORMAL (ORO/DIAMANTE) - GRÁFICAS DE MESAS, DINERO, ETC. */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mt-6">
-            <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-6 mt-6">
+            <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors">Pases Asignados</p>
-                  <h3 className="text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{totalPasses}</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-colors">Asignados</p>
+                  <h3 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{totalPasses}</h3>
                 </div>
-                <div className="p-3 bg-indigo-100 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl group-hover:scale-110 transition-transform"><Users size={24} /></div>
+                <div className="p-2 sm:p-3 bg-indigo-100 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-lg sm:rounded-xl group-hover:scale-110 transition-transform"><Users className="w-4 h-4 sm:w-6 sm:h-6" /></div>
               </div>
-              <div className="mt-4 flex items-center text-sm">
-                <span className="text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-2 py-0.5 rounded text-[10px] uppercase tracking-widest transition-colors">{confirmationPercentage}% Confirmado</span>
+              <div className="mt-3 sm:mt-4 flex items-center text-sm">
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-2 py-0.5 rounded text-[8px] sm:text-[10px] uppercase tracking-widest transition-colors">{confirmationPercentage}% Confirmado</span>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
+            <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors">Mesas Creadas</p>
-                  <h3 className="text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{totalMesas}</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-colors">Mesas</p>
+                  <h3 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{totalMesas}</h3>
                 </div>
-                <div className="p-3 bg-purple-100 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 text-purple-600 dark:text-purple-400 rounded-xl group-hover:scale-110 transition-transform"><Layers size={24} /></div>
+                <div className="p-2 sm:p-3 bg-purple-100 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 text-purple-600 dark:text-purple-400 rounded-lg sm:rounded-xl group-hover:scale-110 transition-transform"><Layers className="w-4 h-4 sm:w-6 sm:h-6" /></div>
               </div>
-              <div className="mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
+              <div className="mt-3 sm:mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
                 <div className="bg-purple-500 h-full rounded-full transition-all duration-500" style={{ width: `${ocupacionPorcentaje}%` }}></div>
               </div>
-              <p className="text-[10px] text-slate-500 mt-3 font-bold uppercase tracking-widest transition-colors">
-                <span className="text-purple-600 dark:text-purple-400 transition-colors">{capacidadTotalSillas} Sillas</span> • {ocupacionPorcentaje}% uso
+              <p className="text-[8px] sm:text-[10px] text-slate-500 mt-2 sm:mt-3 font-bold uppercase tracking-widest transition-colors">
+                <span className="text-purple-600 dark:text-purple-400 transition-colors">{capacidadTotalSillas} Sillas</span> • {ocupacionPorcentaje}%
               </p>
             </div>
 
-            <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
+            <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors">Gasto Estimado</p>
-                  <h3 className="text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">${(totalEstimado / 1000).toFixed(0)}k</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-colors">Estimado</p>
+                  <h3 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">${(totalEstimado / 1000).toFixed(0)}k</h3>
                 </div>
-                <div className="p-3 bg-amber-100 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl group-hover:scale-110 transition-transform"><Wallet size={24} /></div>
+                <div className="p-2 sm:p-3 bg-amber-100 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-lg sm:rounded-xl group-hover:scale-110 transition-transform"><Wallet className="w-4 h-4 sm:w-6 sm:h-6" /></div>
               </div>
-              <div className="mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
+              <div className="mt-3 sm:mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
                 <div className={`h-full rounded-full transition-colors ${budgetPercentage > 100 ? 'bg-rose-500' : 'bg-amber-500'}`} style={{ width: `${Math.min(budgetPercentage, 100)}%` }}></div>
               </div>
-              <p className="text-[10px] text-slate-500 mt-3 font-bold uppercase tracking-widest flex justify-between transition-colors">
+              <p className="text-[8px] sm:text-[10px] text-slate-500 mt-2 sm:mt-3 font-bold uppercase tracking-widest flex flex-col sm:flex-row sm:justify-between transition-colors">
                 <span>Pagado: ${(totalPagado/1000).toFixed(1)}k</span>
-                <span className={budgetPercentage > 100 ? 'text-rose-500' : ''}>{budgetPercentage}% del total</span>
               </p>
             </div>
 
-            <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
+            <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors">Avance Evento</p>
-                  <h3 className="text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{tareasPorcentaje}%</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-colors">Avance</p>
+                  <h3 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{tareasPorcentaje}%</h3>
                 </div>
-                <div className="p-3 bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl group-hover:scale-110 transition-transform"><CheckSquare size={24} /></div>
+                <div className="p-2 sm:p-3 bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg sm:rounded-xl group-hover:scale-110 transition-transform"><CheckSquare className="w-4 h-4 sm:w-6 sm:h-6" /></div>
               </div>
-              <div className="mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
+              <div className="mt-3 sm:mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
                 <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${tareasPorcentaje}%` }}></div>
               </div>
-              <p className="text-[10px] text-slate-500 mt-3 font-bold uppercase tracking-widest transition-colors">
-                <span className="text-emerald-600 dark:text-emerald-400 transition-colors">{tareasCompletadas} Listas</span> de {tareasTotal} tareas
+              <p className="text-[8px] sm:text-[10px] text-slate-500 mt-2 sm:mt-3 font-bold uppercase tracking-widest transition-colors">
+                <span className="text-emerald-600 dark:text-emerald-400 transition-colors">{tareasCompletadas}</span> de {tareasTotal}
               </p>
             </div>
           </div>
@@ -1818,47 +1817,77 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           );
       })()}
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">Gestión de Invitados</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Control de asistencia, pases y credenciales.</p>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Gestión de Invitados</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Control de asistencia, pases y credenciales.</p>
         </div>
         
-        <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
-          <button onClick={() => setExportViewOpen(true)} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Exportar Lista</button>
-          {isBodaType && (
-            <div className="flex items-center bg-white dark:bg-[#0a0a0a] p-1 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
-              <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-2 ml-2">Boda</span>
-              <button onClick={async () => {
-                const newVal = !isWeddingMode;
-                setIsWeddingMode(newVal);
-                try {
-                  await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' });
-                } catch(e) { console.error(e) }
-              }} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
-                <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
-              </button>
-            </div>
-          )}
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+          <div className="flex w-full sm:w-auto gap-2">
+            <button onClick={() => setExportViewOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center px-4 py-2.5 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-[10px] sm:text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors uppercase tracking-widest"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Exportar</button>
+            
+            {isBodaType && (
+              <div className="flex items-center bg-white dark:bg-[#0a0a0a] px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors shrink-0">
+                <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-2">Boda</span>
+                <button onClick={async () => {
+                  const newVal = !isWeddingMode;
+                  setIsWeddingMode(newVal);
+                  try { await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' }); } catch(e) {}
+                }} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                  <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                </button>
+              </div>
+            )}
+          </div>
 
-          {isWeddingMode ? (
-            <div className="flex gap-1.5">
-              <button onClick={() => handleOpenAdd('novia')} className="flex items-center px-4 py-2 bg-rose-500 text-white rounded-xl text-xs font-bold hover:bg-rose-600 shadow-md transition-colors"><UserPlus size={14} className="mr-1"/> + Invitado Novia</button>
-              <button onClick={() => handleOpenAdd('novio')} className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-md transition-colors"><UserPlus size={14} className="mr-1"/> + Invitado Novio</button>
-            </div>
-          ) : (
-            <button onClick={() => handleOpenAdd('general')} className="flex items-center px-4 py-2 bg-amber-500 text-slate-900 rounded-xl text-xs font-black shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-colors"><UserPlus size={14} className="mr-1"/> + Nuevo Invitado</button>
-          )}
+          <div className="flex w-full sm:w-auto gap-2">
+            {isWeddingMode ? (
+              <>
+                <button onClick={() => handleOpenAdd('novia')} className="flex-1 sm:flex-none flex items-center justify-center px-3 py-2.5 bg-rose-500 text-white rounded-xl text-[10px] sm:text-xs font-bold hover:bg-rose-600 shadow-md transition-colors uppercase tracking-widest"><UserPlus size={14} className="mr-1.5"/> Novia</button>
+                <button onClick={() => handleOpenAdd('novio')} className="flex-1 sm:flex-none flex items-center justify-center px-3 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] sm:text-xs font-bold hover:bg-indigo-700 shadow-md transition-colors uppercase tracking-widest"><UserPlus size={14} className="mr-1.5"/> Novio</button>
+              </>
+            ) : (
+              <button onClick={() => handleOpenAdd('general')} className="w-full sm:w-auto flex items-center justify-center px-5 py-2.5 bg-amber-500 text-slate-900 rounded-xl text-[10px] sm:text-xs font-black shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-colors uppercase tracking-widest"><UserPlus size={14} className="mr-1.5"/> Nuevo Invitado</button>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className={`grid grid-cols-2 md:grid-cols-3 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-4`}>
-        <div className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col transition-colors"><div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Users size={12} className="inline mr-1 text-slate-400 dark:text-slate-500"/> {passCountEnabled ? 'Pases Totales' : 'Invitados Totales'}</div><h3 className="text-2xl font-editorial text-slate-900 dark:text-white">{passCountEnabled ? totalPases : safeGuests.length}</h3></div>
-        {isPremium && passCountEnabled && <div className="bg-sky-50 dark:bg-sky-500/10 p-4 rounded-2xl border border-sky-200 dark:border-sky-500/20 shadow-sm flex flex-col transition-colors"><div className="text-sky-600 dark:text-sky-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Users size={12} className="inline mr-1"/> Niños</div><h3 className="text-2xl font-editorial text-sky-600 dark:text-sky-400">{totalNinos}</h3></div>}
-        <div className="bg-amber-50 dark:bg-amber-500/10 p-4 rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex flex-col transition-colors"><div className="text-amber-600 dark:text-amber-500 font-bold text-[9px] uppercase tracking-widest mb-1"><CheckCircle size={12} className="inline mr-1"/> Confirmados</div><h3 className="text-2xl font-editorial text-amber-600 dark:text-amber-500">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3></div>
-        <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col transition-colors"><div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Clock size={12} className="inline mr-1"/> Pendientes</div><h3 className="text-2xl font-editorial text-slate-600 dark:text-slate-300">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3></div>
-        <div className="bg-rose-50 dark:bg-rose-500/10 p-4 rounded-2xl border border-rose-200 dark:border-rose-500/20 shadow-sm flex flex-col transition-colors"><div className="text-rose-600 dark:text-rose-400 font-bold text-[9px] uppercase tracking-widest mb-1"><X size={12} className="inline mr-1"/> Cancelados</div><h3 className="text-2xl font-editorial text-rose-600 dark:text-rose-400">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3></div>
-        {isPremium && qrEnabled && <div className="bg-emerald-50 dark:bg-emerald-500/10 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex flex-col transition-colors"><div className="text-emerald-600 dark:text-emerald-400 font-bold text-[9px] uppercase tracking-widest mb-1"><Scan size={12} className="inline mr-1"/> Ingresaron</div><h3 className="text-2xl font-editorial text-emerald-600 dark:text-emerald-400">{totalIngresos}</h3></div>}
+      <div className={`grid grid-cols-3 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-2 sm:gap-4`}>
+        <div className="bg-white dark:bg-[#0a0a0a] p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col transition-colors">
+          <div className="text-slate-500 dark:text-slate-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0 text-slate-400 dark:text-slate-500"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
+          <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-none mt-0.5">{passCountEnabled ? totalPases : safeGuests.length}</h3>
+        </div>
+        
+        {isPremium && passCountEnabled && (
+        <div className="bg-sky-50 dark:bg-sky-500/10 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-sky-200 dark:border-sky-500/20 shadow-sm flex flex-col transition-colors">
+          <div className="text-sky-600 dark:text-sky-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Niños</div>
+          <h3 className="text-xl sm:text-2xl font-black text-sky-600 dark:text-sky-400 leading-none mt-0.5">{totalNinos}</h3>
+        </div>
+        )}
+        
+        <div className="bg-amber-50 dark:bg-amber-500/10 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex flex-col transition-colors">
+          <div className="text-amber-600 dark:text-amber-500 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Confirmados</div>
+          <h3 className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-500 leading-none mt-0.5">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3>
+        </div>
+        
+        <div className="bg-slate-50 dark:bg-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col transition-colors">
+          <div className="text-slate-500 dark:text-slate-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Pendientes</div>
+          <h3 className="text-xl sm:text-2xl font-black text-slate-600 dark:text-slate-300 leading-none mt-0.5">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
+        </div>
+        
+        <div className="bg-rose-50 dark:bg-rose-500/10 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-rose-200 dark:border-rose-500/20 shadow-sm flex flex-col transition-colors">
+          <div className="text-rose-600 dark:text-rose-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><X className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Cancelados</div>
+          <h3 className="text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-400 leading-none mt-0.5">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
+        </div>
+        
+        {isPremium && qrEnabled && (
+        <div className="bg-emerald-50 dark:bg-emerald-500/10 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex flex-col transition-colors">
+          <div className="text-emerald-600 dark:text-emerald-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><Scan className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Ingresaron</div>
+          <h3 className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 leading-none mt-0.5">{totalIngresos}</h3>
+        </div>
+        )}
       </div>
 
       {isWeddingMode && passCountEnabled && (
@@ -1980,7 +2009,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
             </table>
           </div>
 
-          <div className="block md:hidden p-3 space-y-2.5 pb-24">
+          <div className="block md:hidden p-2 space-y-2 pb-24">
             {flattenedList.length === 0 ? (
               <div className="text-center p-8 text-slate-400 dark:text-slate-500 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl mt-4">No se encontraron invitados.</div>
             ) : (
@@ -1988,53 +2017,53 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 const isExpanded = expandedMobileRow === row._rowId;
                 const isCancelado = row.parentGuest.status === 'cancelado';
                 
-                let tableNameDisplay = row.specificTableName || 'Sin mesa asignada';
+                let tableNameDisplay = row.specificTableName || 'Sin mesa';
                 if (row.isMissing) tableNameDisplay = '-';
 
                 return (
-                  <div key={`mobile_${row._rowId}`} className={`rounded-2xl transition-all duration-300 overflow-hidden border ${row.isMain ? 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 shadow-sm mt-4' : 'bg-slate-50/60 dark:bg-white/[0.03] border-l-[3px] border-l-indigo-200 dark:border-l-amber-500/40 border-y-transparent border-r-transparent ml-4 rounded-l-none'} ${isCancelado ? 'opacity-60' : ''}`}>
-                    <div onClick={() => toggleMobileRow(row._rowId)} className="p-4 flex justify-between items-center cursor-pointer select-none">
-                      <div className="flex-1 min-w-0 pr-3">
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          <span className={`font-bold truncate text-base ${row.isMain ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
+                  <div key={`mobile_${row._rowId}`} className={`rounded-xl transition-all duration-300 overflow-hidden border ${row.isMain ? 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 shadow-sm mt-3' : 'bg-slate-50/60 dark:bg-white/[0.03] border-l-[3px] border-l-indigo-200 dark:border-l-amber-500/40 border-y-transparent border-r-transparent ml-3 rounded-l-none'} ${isCancelado ? 'opacity-60' : ''}`}>
+                    <div onClick={() => toggleMobileRow(row._rowId)} className="p-3 flex justify-between items-center cursor-pointer select-none">
+                      <div className="flex-1 min-w-0 pr-2">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className={`font-bold truncate text-sm ${row.isMain ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                             {row.displayName}
                           </span>
                           {row.isMain && row.parentGuest.todasMesasNombre?.length > 1 && (
-                            <span className="ml-1 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">
+                            <span className="shrink-0 ml-1 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-widest border bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">
                               Dividida
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-xs">
-                          <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center truncate max-w-[150px]"><MapPin size={12} className="mr-1 shrink-0 text-indigo-400 dark:text-amber-500"/> <span className="truncate">{tableNameDisplay}</span></span>
+                        <div className="flex items-center gap-1.5 text-[10px]">
+                          <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center truncate max-w-[120px]"><MapPin size={10} className="mr-1 shrink-0 text-indigo-400 dark:text-amber-500"/> <span className="truncate">{tableNameDisplay}</span></span>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-2.5 shrink-0">
+                      <div className="flex flex-col items-end gap-2 shrink-0">
                         {row.isMissing ? null : row.entered && !row.isMain && qrEnabled ? (
-                           <span className="px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
-                             EN EL EVENTO
+                           <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+                             EN EVENTO
                            </span>
                         ) : (
-                           <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'nuevo' ? 'bg-rose-500 text-white border-rose-600 animate-pulse shadow-md' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-400 text-amber-900 border-amber-500 shadow-md' : row.parentGuest.status === 'ingreso' ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : row.parentGuest.status === 'confirmado' ? 'bg-emerald-500 text-white border-emerald-600 dark:bg-emerald-600 dark:border-emerald-700' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-white/10 dark:text-slate-300 dark:border-white/20' : 'bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
-                             {row.parentGuest.status === 'ingreso' ? `EN EL EVENTO` : row.parentGuest.status === 'nuevo' ? '¡NUEVO!' : row.parentGuest.status.replace('_', ' ')}
+                           <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'nuevo' ? 'bg-rose-500 text-white border-rose-600 animate-pulse shadow-md' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-400 text-amber-900 border-amber-500 shadow-md' : row.parentGuest.status === 'ingreso' ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : row.parentGuest.status === 'confirmado' ? 'bg-emerald-500 text-white border-emerald-600 dark:bg-emerald-600 dark:border-emerald-700' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-white/10 dark:text-slate-300 dark:border-white/20' : 'bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
+                             {row.parentGuest.status === 'ingreso' ? `EN EVENTO` : row.parentGuest.status === 'nuevo' ? '¡NUEVO!' : row.parentGuest.status.replace('_', ' ')}
                            </span>
                         )}
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-slate-400 dark:text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-indigo-500 dark:text-amber-500' : ''}`}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-slate-400 dark:text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-indigo-500 dark:text-amber-500' : ''}`}><polyline points="6 9 12 15 18 9"></polyline></svg>
                       </div>
                     </div>
                     {isExpanded && (
-                      <div className="px-4 pb-4 pt-1 border-t border-slate-100 dark:border-white/5 animate-in slide-in-from-top-2 fade-in duration-300">
-                        <div className="flex flex-wrap gap-2 mt-3">
+                      <div className="px-3 pb-3 pt-1 border-t border-slate-100 dark:border-white/5 animate-in slide-in-from-top-2 fade-in duration-300">
+                        <div className="flex justify-between gap-1.5 mt-2">
                           {row.isMain ? (
                             <>
-                              <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-1 py-3 ${row.parentGuest.sent ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' : 'bg-white dark:bg-transparent text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'} rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center border transition-colors shadow-sm`}>
-                                <MessageCircle size={16} className="mr-1.5"/> Enviar
+                              <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-[1.5] py-2 ${row.parentGuest.sent ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' : 'bg-white dark:bg-transparent text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'} rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border transition-colors shadow-sm`}>
+                                <MessageCircle size={14} className="mr-1"/> Enviar
                               </button>
-                              <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-1 py-3 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-500 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center border border-indigo-200 dark:border-amber-500/20 transition-colors shadow-sm">
-                                <Edit2 size={16} className="mr-1.5"/> Editar
+                              <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-1 py-2 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-500 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border border-indigo-200 dark:border-amber-500/20 transition-colors shadow-sm">
+                                <Edit2 size={14}/>
                               </button>
-                              <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="flex-1 py-3 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center border border-rose-200 dark:border-rose-500/20 transition-colors shadow-sm hover:bg-rose-100 dark:hover:bg-rose-500/20">
-                                <Trash2 size={16} className="mr-1.5"/> Eliminar
+                              <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="flex-1 py-2 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border border-rose-200 dark:border-rose-500/20 transition-colors shadow-sm hover:bg-rose-100 dark:hover:bg-rose-500/20">
+                                <Trash2 size={14}/>
                               </button>
                             </>
                           ) : null}
@@ -2332,7 +2361,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 const InvitacionView = ({ guests, urlInvitacion }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGuestId, setSelectedGuestId] = useState(guests[0]?.id || null);
-  
+  const [isMobileSimulatorOpen, setIsMobileSimulatorOpen] = useState(false);
+
   const filteredGuests = guests.filter(g => g.name.toLowerCase().includes(searchTerm.toLowerCase()));
   const guest = guests.find(g => g.id === selectedGuestId) || guests[0];
 
@@ -2343,31 +2373,75 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
     iframeUrl = `${urlInvitacion}${separator}u=${selectedGuestId || ''}&preview=1`;
   }
 
+  // 🔴 REUTILIZAMOS EL SIMULADOR PARA ESCRITORIO Y MÓVIL
+  const SimulatorContent = () => (
+    <>
+      {!urlInvitacion ? (
+        <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
+           <Link size={56} className="text-slate-300 dark:text-slate-600 mb-6"/>
+           <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 font-editorial">Falta el Enlace</h3>
+           <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-[250px]">No se ha guardado el enlace de la invitación web para este evento.</p>
+           <div className="mt-8 border border-slate-200 dark:border-white/10 p-4 rounded-xl bg-slate-50 dark:bg-white/5 text-xs text-slate-500 dark:text-slate-400 text-left flex items-start transition-colors">
+              <Info size={16} className="mr-2.5 shrink-0 mt-0.5 text-indigo-400 dark:text-amber-500"/>
+              <p>Ve a "Centro de Operaciones" y edita la licencia del cliente para agregar la URL.</p>
+           </div>
+        </div>
+      ) : (
+        <div className="w-full flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden transition-colors">
+           
+           {/* 🔴 Badge de seguridad superior */}
+           <div className="absolute top-0 inset-x-0 flex justify-center z-30 pointer-events-none">
+              <span className="bg-rose-500 text-white text-[9px] font-black uppercase tracking-widest py-1 px-4 rounded-b-lg shadow-md flex items-center">
+                 <Lock size={10} className="mr-1.5"/> Simulación Segura
+              </span>
+           </div>
+
+           {guest ? (
+              <iframe 
+                 key={iframeUrl}
+                 src={iframeUrl} 
+                 className="absolute inset-0 w-full h-full border-none rounded-[2rem] z-10" 
+                 title="Invitacion Simulada"
+              ></iframe>
+           ) : (
+             <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 transition-colors z-10 relative">
+               <Users size={32} className="mb-3 opacity-20"/>
+               <span className="text-xs font-bold uppercase tracking-widest">Selecciona un invitado</span>
+             </div>
+           )}
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div className="h-full flex flex-col lg:flex-row gap-6 pb-6 relative overflow-hidden transition-colors items-stretch">
       
       {/* PANEL IZQUIERDO: LISTA DE INVITADOS */}
       <div className="flex-1 flex flex-col h-full min-h-0 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
-        <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] transition-colors">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center"><Smartphone size={20} className="mr-2 text-indigo-500 dark:text-amber-500"/> Simulador en Vivo</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">Selecciona una familia para ver cómo funciona su pase en tu diseño real.</p>
+        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] transition-colors shrink-0">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white flex items-center"><Smartphone size={18} className="mr-2 text-indigo-500 dark:text-amber-500"/> Simulador en Vivo</h2>
+          <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">Selecciona una familia para ver cómo funciona su pase en tu diseño real.</p>
           <div className="mt-4 relative">
             <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input type="text" placeholder="Buscar familia para simular..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-3 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050505] text-slate-800 dark:text-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-amber-500/20 focus:border-indigo-400 dark:focus:border-amber-500 transition-colors" />
+            <input type="text" placeholder="Buscar familia para simular..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050505] text-slate-800 dark:text-white rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-amber-500/20 focus:border-indigo-400 dark:focus:border-amber-500 transition-colors shadow-sm" />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3 custom-scrollbar bg-slate-50/50 dark:bg-transparent">
+        <div className="flex-1 overflow-y-auto p-2 sm:p-3 custom-scrollbar bg-slate-50/50 dark:bg-transparent">
           {filteredGuests.length > 0 ? (
-            <ul className="space-y-1.5">
+            <ul className="space-y-1.5 pb-12 lg:pb-0">
               {filteredGuests.map(g => (
                 <li key={g.id}>
-                  <button onClick={() => setSelectedGuestId(g.id)} className={`w-full text-left p-3.5 rounded-xl transition-all flex items-center justify-between ${selectedGuestId === g.id ? 'bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/30 shadow-sm' : 'hover:bg-slate-50 dark:hover:bg-white/5 border border-transparent'}`}>
-                    <div>
-                      <p className={`font-bold text-sm ${selectedGuestId === g.id ? 'text-indigo-900 dark:text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>{g.name}</p>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{g.originalPasses || g.passes} Pases | <span className={`uppercase font-bold tracking-wider ${g.status === 'cancelado' ? 'text-rose-500' : g.status === 'confirmado' ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`}>{g.status.replace('_', ' ')}</span></p>
+                  {/* 🔴 EN MÓVIL ABRIMOS EL MODAL, EN ESCRITORIO SOLO CAMBIAMOS EL ID */}
+                  <button onClick={() => { setSelectedGuestId(g.id); setIsMobileSimulatorOpen(true); }} className={`w-full text-left p-3 sm:p-3.5 rounded-xl transition-all flex items-center justify-between shadow-sm ${selectedGuestId === g.id ? 'bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/30' : 'bg-white dark:bg-[#111] hover:bg-slate-50 dark:hover:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'}`}>
+                    <div className="min-w-0 pr-3">
+                      <p className={`font-bold text-sm truncate ${selectedGuestId === g.id ? 'text-indigo-900 dark:text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>{g.name}</p>
+                      <p className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 mt-1 truncate">{g.originalPasses || g.passes} Pases | <span className={`uppercase font-bold tracking-wider ${g.status === 'cancelado' ? 'text-rose-500' : g.status === 'confirmado' ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`}>{g.status.replace('_', ' ')}</span></p>
                     </div>
-                    {selectedGuestId === g.id && <ArrowRight size={18} className="text-indigo-500 dark:text-amber-500"/>}
+                    <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 dark:bg-black/20 border border-slate-100 dark:border-white/5">
+                      <Smartphone size={14} className={selectedGuestId === g.id ? 'text-indigo-500 dark:text-amber-500' : 'text-slate-400'}/>
+                    </div>
                   </button>
                 </li>
               ))}
@@ -2376,46 +2450,26 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
         </div>
       </div>
 
-      {/* PANEL DERECHO: SIMULADOR MINIMALISTA DE ALTA COSTURA */}
-      <div className="w-full lg:w-[400px] flex-shrink-0 flex flex-col h-full">
-        
-        {!urlInvitacion ? (
-          <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
-             <Link size={56} className="text-slate-300 dark:text-slate-600 mb-6"/>
-             <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 font-editorial">Falta el Enlace</h3>
-             <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-[250px]">No se ha guardado el enlace de la invitación web para este evento.</p>
-             <div className="mt-8 border border-slate-200 dark:border-white/10 p-4 rounded-xl bg-slate-50 dark:bg-white/5 text-xs text-slate-500 dark:text-slate-400 text-left flex items-start transition-colors">
-                <Info size={16} className="mr-2.5 shrink-0 mt-0.5 text-indigo-400 dark:text-amber-500"/>
-                <p>Ve a "Centro de Operaciones" y edita la licencia del cliente para agregar la URL.</p>
-             </div>
-          </div>
-        ) : (
-          <div className="w-full flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden transition-colors">
-             
-             {/* 🔴 Badge de seguridad superior (Z-Index alto, pointer-events none para no bloquear clicks) */}
-             <div className="absolute top-0 inset-x-0 flex justify-center z-20 pointer-events-none">
-                <span className="bg-rose-500 text-white text-[9px] font-black uppercase tracking-widest py-1 px-4 rounded-b-lg shadow-md flex items-center">
-                   <Lock size={10} className="mr-1.5"/> Simulación Segura
-                </span>
-             </div>
-
-             {guest ? (
-                // 🔴 Iframe absoluto, ocupando todo el espacio, sin margen superior, z-index base (10)
-                <iframe 
-                   key={iframeUrl}
-                   src={iframeUrl} 
-                   className="absolute inset-0 w-full h-full border-none rounded-[2rem] z-10" 
-                   title="Invitacion Simulada"
-                ></iframe>
-             ) : (
-               <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 transition-colors z-10 relative">
-                 <Users size={32} className="mb-3 opacity-20"/>
-                 <span className="text-xs font-bold uppercase tracking-widest">Selecciona un invitado</span>
-               </div>
-             )}
-          </div>
-        )}
+      {/* PANEL DERECHO: SIMULADOR ESCRITORIO */}
+      <div className="hidden lg:flex w-[400px] flex-shrink-0 flex-col h-full">
+        <SimulatorContent />
       </div>
+
+      {/* 🔴 MODAL MÓVIL: SIMULADOR A PANTALLA COMPLETA */}
+      {isMobileSimulatorOpen && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/90 backdrop-blur-md flex flex-col pt-10 sm:p-4 animate-in slide-in-from-bottom-full duration-300 lg:hidden">
+          <div className="flex justify-between items-center bg-white dark:bg-[#0a0a0a] rounded-t-3xl p-4 shrink-0 border-b border-slate-200 dark:border-white/10 shadow-lg relative z-20">
+            <div className="min-w-0 pr-4">
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">Viendo: {guest.name}</h3>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Modo Seguro Activado</p>
+            </div>
+            <button onClick={() => setIsMobileSimulatorOpen(false)} className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-500 hover:text-rose-500 shrink-0 shadow-sm border border-slate-200 dark:border-white/5"><X size={20}/></button>
+          </div>
+          <div className="flex-1 w-full bg-white dark:bg-[#0a0a0a] relative overflow-hidden flex flex-col pb-4 px-2">
+             <SimulatorContent />
+          </div>
+        </div>
+      )}
 
     </div>
   );
@@ -6325,9 +6379,9 @@ const ChecklistView = ({ tareas, addNotification }) => {
     const overdue = isOverdue(tarea.fechaLimite) && tarea.estado !== 'listo';
     
     return (
-      <div key={tarea.id} className={`bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border shadow-sm mb-3 transition-all hover:shadow-md hover:scale-[1.01] group ${overdue ? 'border-rose-300 dark:border-rose-500/50' : 'border-slate-200 dark:border-white/10'}`}>
+      <div key={tarea.id} className={`bg-white dark:bg-[#0a0a0a] p-3 sm:p-4 rounded-2xl border shadow-sm mb-3 transition-all hover:shadow-md hover:scale-[1.01] group ${overdue ? 'border-rose-300 dark:border-rose-500/50' : 'border-slate-200 dark:border-white/10'}`}>
         <div className="flex justify-between items-start mb-2">
-          <span className="px-2.5 py-1 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-transparent dark:border-white/5 rounded-md text-[9px] font-black uppercase tracking-widest">{tarea.categoria}</span>
+          <span className="px-2 py-1 sm:px-2.5 sm:py-1 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-transparent dark:border-white/5 rounded-md text-[8px] sm:text-[9px] font-black uppercase tracking-widest">{tarea.categoria}</span>
           <button onClick={() => eliminarTarea(tarea.id)} className="text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-500 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity p-1"><X size={14}/></button>
         </div>
         
@@ -6335,32 +6389,33 @@ const ChecklistView = ({ tareas, addNotification }) => {
           {tarea.titulo}
         </h4>
         
-        <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100 dark:border-white/5">
-          <div className="flex items-center">
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100 dark:border-white/5 gap-2">
+          <div className="flex items-center shrink-0">
             {tarea.fechaLimite ? (
-              <span className={`text-[9px] font-black uppercase tracking-widest flex items-center px-2 py-1 rounded-md border ${overdue ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20' : 'text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'}`}>
-                {overdue ? <AlertCircle size={10} className="mr-1.5"/> : <Calendar size={10} className="mr-1.5"/>}
-                {tarea.fechaLimite}
+              <span className={`text-[8px] sm:text-[9px] font-black uppercase tracking-widest flex items-center px-1.5 py-1 sm:px-2 sm:py-1 rounded-md border ${overdue ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20' : 'text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'}`}>
+                {overdue ? <AlertCircle size={10} className="mr-1 sm:mr-1.5"/> : <Calendar size={10} className="mr-1 sm:mr-1.5"/>}
+                <span className="hidden sm:inline">{tarea.fechaLimite}</span>
+                <span className="sm:hidden">{tarea.fechaLimite.slice(5)}</span>
               </span>
-            ) : <span className="text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest flex items-center"><Calendar size={10} className="mr-1"/> Sin fecha</span>}
+            ) : <span className="text-[8px] sm:text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest flex items-center"><Calendar size={10} className="mr-1"/> <span className="hidden sm:inline">Sin fecha</span><span className="sm:hidden">S/F</span></span>}
           </div>
           
-          <div className="flex space-x-1.5">
+          <div className="flex flex-wrap gap-1.5 justify-end">
             {tarea.estado === 'pendiente' && (
-              <button onClick={() => moverTarea(tarea.id, 'proceso')} className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center">
-                <Clock size={12} className="mr-1.5"/> Iniciar
+              <button onClick={() => moverTarea(tarea.id, 'proceso')} className="px-2 py-1.5 sm:px-3 sm:py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 text-[8px] sm:text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center">
+                <Clock size={10} className="mr-1 sm:mr-1.5 sm:w-3 sm:h-3"/> Iniciar
               </button>
             )}
             {tarea.estado === 'proceso' && (
               <>
-                <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-3 py-1.5 text-slate-500 dark:text-slate-400 text-[9px] font-black uppercase tracking-widest hover:text-slate-700 dark:hover:text-white transition-colors">Pausar</button>
-                <button onClick={() => moverTarea(tarea.id, 'listo')} className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors flex items-center">
-                  <CheckCircle2 size={12} className="mr-1.5"/> Listo
+                <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-2 py-1.5 sm:px-3 sm:py-1.5 text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] font-black uppercase tracking-widest hover:text-slate-700 dark:hover:text-white transition-colors">Pausar</button>
+                <button onClick={() => moverTarea(tarea.id, 'listo')} className="px-2 py-1.5 sm:px-3 sm:py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[8px] sm:text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors flex items-center">
+                  <CheckCircle2 size={10} className="mr-1 sm:mr-1.5 sm:w-3 sm:h-3"/> Listo
                 </button>
               </>
             )}
             {tarea.estado === 'listo' && (
-              <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-3 py-1.5 text-slate-400 dark:text-slate-500 text-[9px] font-black uppercase tracking-widest hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Reabrir</button>
+              <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-2 py-1.5 sm:px-3 sm:py-1.5 text-slate-400 dark:text-slate-500 text-[8px] sm:text-[9px] font-black uppercase tracking-widest hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Reabrir</button>
             )}
           </div>
         </div>
@@ -6376,12 +6431,12 @@ const ChecklistView = ({ tareas, addNotification }) => {
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Organiza tu progreso moviendo las tareas entre las columnas.</p>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
-          <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className="px-4 py-2 border border-slate-200 dark:border-white/10 rounded-xl bg-white dark:bg-[#0a0a0a] text-sm font-bold text-slate-700 dark:text-white outline-none shadow-sm transition-colors flex-1 md:flex-none cursor-pointer">
+          <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className="px-3 sm:px-4 py-2 border border-slate-200 dark:border-white/10 rounded-xl bg-white dark:bg-[#0a0a0a] text-xs sm:text-sm font-bold text-slate-700 dark:text-white outline-none shadow-sm transition-colors flex-1 md:flex-none cursor-pointer">
             <option value="Todas">Todas las Categorías</option>
             {categorias.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          <button onClick={() => setIsFormOpen(true)} className="flex items-center justify-center px-5 py-2.5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-all flex-1 md:flex-none uppercase tracking-widest text-[10px]">
-            <Plus size={16} className="mr-1.5" /> Nueva Tarea
+          <button onClick={() => setIsFormOpen(true)} className="flex items-center justify-center px-4 sm:px-5 py-2 sm:py-2.5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-all flex-1 md:flex-none uppercase tracking-widest text-[9px] sm:text-[10px]">
+            <Plus size={14} className="mr-1.5 sm:size-16" /> Nueva Tarea
           </button>
         </div>
       </div>
@@ -6390,8 +6445,8 @@ const ChecklistView = ({ tareas, addNotification }) => {
       <div className="flex-1 flex md:flex-row gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory custom-scrollbar pb-4 md:pb-0">
         
         {/* COLUMNA 1: POR HACER */}
-        <div className="w-[85vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-slate-50/80 dark:bg-white/[0.02] backdrop-blur-sm rounded-[2rem] border border-slate-200/50 dark:border-white/5 p-4 transition-colors shadow-inner">
-          <div className="flex items-center justify-between mb-5 px-3 pt-2">
+        <div className="w-[80vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-slate-50/80 dark:bg-white/[0.02] backdrop-blur-sm rounded-[2rem] border border-slate-200/50 dark:border-white/5 p-3 sm:p-4 transition-colors shadow-inner">
+          <div className="flex items-center justify-between mb-4 sm:mb-5 px-2 sm:px-3 pt-2">
             <h3 className="font-black text-slate-700 dark:text-slate-300 flex items-center text-xs uppercase tracking-widest"><Circle size={14} className="mr-2 text-slate-400 dark:text-slate-500"/> Por Hacer</h3>
             <span className="bg-white dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400 text-[10px] font-black px-2.5 py-1 rounded-md border border-slate-200 dark:border-white/10 shadow-sm">{pendientes.length}</span>
           </div>
@@ -6402,8 +6457,8 @@ const ChecklistView = ({ tareas, addNotification }) => {
         </div>
 
         {/* COLUMNA 2: EN PROCESO */}
-        <div className="w-[85vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-indigo-50/50 dark:bg-indigo-500/5 backdrop-blur-sm rounded-[2rem] border border-indigo-100/50 dark:border-indigo-500/10 p-4 transition-colors shadow-inner">
-          <div className="flex items-center justify-between mb-5 px-3 pt-2">
+        <div className="w-[80vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-indigo-50/50 dark:bg-indigo-500/5 backdrop-blur-sm rounded-[2rem] border border-indigo-100/50 dark:border-indigo-500/10 p-3 sm:p-4 transition-colors shadow-inner">
+          <div className="flex items-center justify-between mb-4 sm:mb-5 px-2 sm:px-3 pt-2">
             <h3 className="font-black text-indigo-800 dark:text-indigo-400 flex items-center text-xs uppercase tracking-widest"><Clock size={14} className="mr-2 text-indigo-500 dark:text-indigo-500"/> En Proceso</h3>
             <span className="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{enProceso.length}</span>
           </div>
@@ -6414,8 +6469,8 @@ const ChecklistView = ({ tareas, addNotification }) => {
         </div>
 
         {/* COLUMNA 3: COMPLETADO */}
-        <div className="w-[85vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-emerald-50/50 dark:bg-emerald-500/5 backdrop-blur-sm rounded-[2rem] border border-emerald-100/50 dark:border-emerald-500/10 p-4 transition-colors shadow-inner">
-          <div className="flex items-center justify-between mb-5 px-3 pt-2">
+        <div className="w-[80vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-emerald-50/50 dark:bg-emerald-500/5 backdrop-blur-sm rounded-[2rem] border border-emerald-100/50 dark:border-emerald-500/10 p-3 sm:p-4 transition-colors shadow-inner">
+          <div className="flex items-center justify-between mb-4 sm:mb-5 px-2 sm:px-3 pt-2">
             <h3 className="font-black text-emerald-800 dark:text-emerald-400 flex items-center text-xs uppercase tracking-widest"><CheckCircle2 size={14} className="mr-2 text-emerald-500 dark:text-emerald-500"/> Completado</h3>
             <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{completadas.length}</span>
           </div>
@@ -6979,65 +7034,69 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
 
   return (
     <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500 z-10">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide transition-colors">Control Financiero</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light transition-colors">Gestión de capital, abonos y reportes de tu bóveda.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-xl border border-slate-200 dark:border-white/10 p-1 hidden sm:flex shadow-sm transition-colors">
             <button onClick={()=>setViewMode('table')} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center transition-colors ${viewMode === 'table' ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><LayoutGrid size={14} className="mr-2"/> Tabla</button>
             <button onClick={()=>setViewMode('calendar')} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center transition-colors ${viewMode === 'calendar' ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><CalendarDays size={14} className="mr-2"/> Fechas</button>
           </div>
-          <button onClick={triggerPdfDownload} disabled={isPreparingPrint} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors disabled:opacity-50">
-            {isPreparingPrint ? <RefreshCw size={14} className="mr-2 animate-spin"/> : <FileDown size={14} className="mr-2 text-amber-500"/>} 
-            Reporte PDF
+          <button onClick={triggerPdfDownload} disabled={isPreparingPrint} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white rounded-xl text-[10px] sm:text-xs uppercase tracking-widest font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors disabled:opacity-50">
+            {isPreparingPrint ? <RefreshCw size={14} className="mr-1.5 sm:mr-2 animate-spin"/> : <FileDown size={14} className="mr-1.5 sm:mr-2 text-amber-500"/>} 
+            PDF
           </button>
-          <button onClick={exportData} className="hidden sm:flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors"><Download size={14} className="mr-2 text-indigo-500 dark:text-indigo-400"/> Excel</button>
-          <button onClick={() => { setFormData({ concepto: '', categoria: 'Lugar', estimado: '', fechaLimite: '' }); setIsFormOpen(true); }} className="flex items-center px-5 py-2 bg-amber-500 text-slate-900 rounded-xl font-black text-sm shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all"><Plus size={16} className="mr-1.5" /> Gasto</button>
+          <button onClick={exportData} className="hidden sm:flex items-center justify-center px-4 py-2.5 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors">
+            <Download size={14} className="mr-2 text-indigo-500 dark:text-indigo-400"/> Excel
+          </button>
+          <button onClick={() => { setFormData({ concepto: '', categoria: 'Lugar', estimado: '', fechaLimite: '' }); setIsFormOpen(true); }} className="flex-1 md:flex-none flex items-center justify-center px-5 py-2.5 bg-amber-500 text-slate-900 rounded-xl font-black text-[10px] sm:text-sm uppercase tracking-widest shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all">
+            <Plus size={16} className="mr-1.5" /> Gasto
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mt-4">
+        <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-3 flex justify-between items-center z-10 relative transition-colors">
-            <span className="flex items-center"><Wallet size={14} className="mr-2 text-indigo-500 dark:text-indigo-400"/> Presupuesto Total</span>
+          <div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest mb-2 flex justify-between items-center z-10 relative transition-colors">
+            <span className="flex items-center"><Wallet size={12} className="mr-1.5 text-indigo-500 dark:text-indigo-400"/> Presupuesto</span>
             {!isEditingBudget && (
-              <button onClick={() => setIsEditingBudget(true)} className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-white transition-colors p-1.5 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10" title="Editar Presupuesto"><Edit2 size={12}/></button>
+              <button onClick={() => setIsEditingBudget(true)} className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-white transition-colors p-1.5 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10" title="Editar Presupuesto"><Edit2 size={10}/></button>
             )}
           </div>
           {isEditingBudget ? (
              <div className="flex mt-auto bg-slate-50 dark:bg-[#111] rounded-xl overflow-hidden border border-indigo-300 dark:border-indigo-500/50 focus-within:border-amber-500 transition-colors z-10 relative">
-               <span className="pl-3 py-2 text-slate-500 dark:text-slate-400 font-bold">$</span>
-               <input type="number" autoFocus value={tempBudget} onChange={(e)=>setTempBudget(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') guardarPresupuestoNube(); }} className="w-full py-2 px-2 bg-transparent font-bold outline-none text-slate-900 dark:text-white transition-colors" />
-               <button onClick={guardarPresupuestoNube} className="bg-amber-500 text-slate-900 px-4 font-black text-xs hover:bg-amber-400 transition-colors">OK</button>
+               <span className="pl-2 py-1 text-slate-500 font-bold text-xs">$</span>
+               <input type="number" autoFocus value={tempBudget} onChange={(e)=>setTempBudget(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') guardarPresupuestoNube(); }} className="w-full py-1 px-1 bg-transparent font-bold outline-none text-slate-900 dark:text-white text-xs transition-colors" />
+               <button onClick={guardarPresupuestoNube} className="bg-amber-500 text-slate-900 px-3 font-black text-[9px]">OK</button>
              </div>
           ) : (
-             <h3 className="text-3xl lg:text-4xl font-editorial text-slate-900 dark:text-white mt-auto z-10 relative tracking-wide transition-colors">{formatMoney(presupuestoTotal)}</h3>
+             <h3 className="text-xl sm:text-3xl lg:text-4xl font-editorial text-slate-900 dark:text-white mt-auto z-10 relative tracking-wide transition-colors truncate">{formatMoney(presupuestoTotal)}</h3>
           )}
         </div>
 
-        <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
+        <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
           <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-3 flex items-center z-10 relative transition-colors"><PieChart size={14} className="mr-2 text-sky-500 dark:text-sky-400"/> Costo Estimado</div>
-          <h3 className="text-3xl lg:text-4xl font-editorial text-slate-900 dark:text-white mt-auto z-10 relative tracking-wide transition-colors">{formatMoney(totalEstimado)}</h3>
+          <div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest mb-2 flex items-center z-10 relative transition-colors"><PieChart size={12} className="mr-1.5 text-sky-500 dark:text-sky-400"/> Estimado</div>
+          <h3 className="text-xl sm:text-3xl lg:text-4xl font-editorial text-slate-900 dark:text-white mt-auto z-10 relative tracking-wide transition-colors truncate">{formatMoney(totalEstimado)}</h3>
         </div>
 
-        <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
+        <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-3 flex items-center z-10 relative transition-colors"><DollarSign size={14} className="mr-2 text-emerald-500 dark:text-emerald-400"/> Capital Pagado</div>
-          <h3 className="text-3xl lg:text-4xl font-editorial text-emerald-600 dark:text-emerald-400 mt-auto z-10 relative tracking-wide transition-colors">{formatMoney(totalPagado)}</h3>
+          <div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest mb-2 flex items-center z-10 relative transition-colors"><DollarSign size={12} className="mr-1.5 text-emerald-500 dark:text-emerald-400"/> Pagado</div>
+          <h3 className="text-xl sm:text-3xl lg:text-4xl font-editorial text-emerald-600 dark:text-emerald-400 mt-auto z-10 relative tracking-wide transition-colors truncate">{formatMoney(totalPagado)}</h3>
         </div>
 
-        <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
+        <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-3 flex items-center z-10 relative transition-colors"><TrendingDown size={14} className="mr-2 text-amber-500"/> Deuda Restante</div>
-          <h3 className="text-3xl lg:text-4xl font-editorial text-amber-600 dark:text-amber-500 mt-auto z-10 relative tracking-wide transition-colors">{formatMoney(totalDeuda)}</h3>
+          <div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest mb-2 flex items-center z-10 relative transition-colors"><TrendingDown size={12} className="mr-1.5 text-amber-500"/> Deuda Restante</div>
+          <h3 className="text-xl sm:text-3xl lg:text-4xl font-editorial text-amber-600 dark:text-amber-500 mt-auto z-10 relative tracking-wide transition-colors truncate">{formatMoney(totalDeuda)}</h3>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#0a0a0a] p-8 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl print:hidden transition-colors">
+      <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-8 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl print:hidden transition-colors mt-6">
         <h3 className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 flex items-center transition-colors"><PieChart size={14} className="mr-2 text-indigo-500 dark:text-indigo-400"/> Distribución del Capital (Estimado)</h3>
         <div className="w-full h-3 rounded-full overflow-hidden flex bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 transition-colors">
           {Object.entries(gastosPorCategoria).map(([cat, amount], idx) => {
@@ -7105,7 +7164,7 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
             </table>
           </div>
 
-          <div className="md:hidden flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-50/50 dark:bg-transparent">
+          <div className="md:hidden flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 custom-scrollbar bg-slate-50/50 dark:bg-transparent mt-4 pb-24">
             {safeGastos.map((gasto) => {
               const deuda = gasto.estimado - gasto.pagado;
               const overdue = isOverdue(gasto.fechaLimite, deuda);
@@ -7855,31 +7914,43 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
 
       {/* MODALES ADICIONALES (Contrato, Galería, Cancelación, Contratación) */}
       {viewContract && (
-        <div className="fixed inset-0 z-[210] bg-slate-900/90 dark:bg-black/90 backdrop-blur-md flex flex-col p-4 sm:p-10 animate-in fade-in duration-200 transition-colors">
-          <div className="flex justify-between items-center w-full max-w-4xl mx-auto mb-4 text-white">
-            <h3 className="font-bold text-lg flex items-center"><FileText size={20} className="mr-2"/> Documento Adjunto: {viewContract}</h3>
-            <button onClick={() => setViewContract(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24}/></button>
-          </div>
-          <div className="flex-1 w-full max-w-4xl mx-auto bg-slate-200 dark:bg-[#111] border dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center relative transition-colors">
-            <div className="text-center">
-              <FileSignature size={64} className="mx-auto text-slate-400 dark:text-slate-600 mb-4 opacity-50"/>
-              <p className="text-slate-600 dark:text-slate-400 font-bold text-xl">Visor de Documentos Seguro</p>
-              <button className="mt-6 px-6 py-2 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-lg font-bold shadow hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors" onClick={()=>setViewContract(null)}>Cerrar Previsualización</button>
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] border border-transparent dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center truncate">
+                <FileText size={20} className="mr-2 text-indigo-600 dark:text-amber-500 shrink-0"/> <span className="truncate">{viewContract}</span>
+              </h3>
+              <button onClick={() => setViewContract(null)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors shrink-0 ml-2"><X size={20}/></button>
+            </div>
+            <div className="p-8 text-center">
+              <div className="w-20 h-20 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                 <FileSignature size={32} className="text-indigo-400 dark:text-amber-500/50"/>
+              </div>
+              <p className="text-slate-600 dark:text-slate-400 font-bold text-lg mb-8">Visor de Documentos Seguro</p>
+              <button onClick={() => setViewContract(null)} className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-md hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors">Cerrar Previsualización</button>
             </div>
           </div>
         </div>
       )}
 
       {viewGallery && (
-        <div className="fixed inset-0 z-[210] bg-slate-900/90 dark:bg-black/90 backdrop-blur-md flex flex-col p-4 sm:p-10 animate-in fade-in duration-200 transition-colors">
-          <div className="flex justify-between items-center w-full max-w-4xl mx-auto mb-4 text-white">
-            <h3 className="font-bold text-lg flex items-center"><ImageIcon size={20} className="mr-2"/> Inspiración y Referencias: {viewGallery.nombre}</h3>
-            <button onClick={() => setViewGallery(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24}/></button>
-          </div>
-          <div className="flex-1 w-full max-w-4xl mx-auto bg-slate-100 dark:bg-[#0a0a0a] border-4 border-dashed border-slate-300 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl p-6 flex flex-col items-center justify-center transition-colors">
-            <UploadCloud size={64} className="text-indigo-300 dark:text-amber-500/30 mb-4"/>
-            <h4 className="text-xl font-bold text-slate-700 dark:text-white mb-2">Sube fotos de referencia</h4>
-            <button className="px-6 py-3 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold shadow hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors flex items-center"><Camera size={18} className="mr-2"/> Seleccionar Archivos</button>
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] border border-transparent dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center truncate">
+                <ImageIcon size={20} className="mr-2 text-indigo-500 dark:text-amber-500 shrink-0"/> <span className="truncate">Referencias</span>
+              </h3>
+              <button onClick={() => setViewGallery(null)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors shrink-0 ml-2"><X size={20}/></button>
+            </div>
+            <div className="p-6 text-center">
+              <div className="w-full bg-slate-50 dark:bg-[#111] border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl p-8 flex flex-col items-center justify-center transition-colors mb-4">
+                 <UploadCloud size={48} className="text-indigo-300 dark:text-amber-500/30 mb-4"/>
+                 <h4 className="text-lg font-bold text-slate-700 dark:text-white mb-2">{viewGallery.nombre}</h4>
+                 <p className="text-xs text-slate-500 mb-6">Sube fotos de inspiración para este proveedor.</p>
+                 <button className="px-6 py-3 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold shadow-md hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors flex items-center text-xs uppercase tracking-widest"><Camera size={16} className="mr-2"/> Seleccionar Archivos</button>
+              </div>
+              <button onClick={() => setViewGallery(null)} className="w-full py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Cerrar Ventana</button>
+            </div>
           </div>
         </div>
       )}
@@ -15095,7 +15166,13 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
 
   return (
     <div className="flex h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans overflow-hidden text-slate-900 dark:text-slate-200 transition-colors duration-700 selection:bg-amber-500 selection:text-white relative">
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap'); .font-editorial { font-family: 'Playfair Display', serif; }`}</style>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap'); 
+        .font-editorial { font-family: 'Playfair Display', serif; }
+        @media screen and (max-width: 768px) {
+          input, select, textarea { font-size: 16px !important; }
+        }
+      `}</style>
       
       {impersonating && (
         <div className="absolute top-0 left-0 w-full bg-rose-600 text-white z-[9999] py-1.5 px-4 text-center text-xs font-black uppercase tracking-widest shadow-lg flex justify-center items-center">
