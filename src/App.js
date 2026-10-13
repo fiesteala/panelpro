@@ -14588,7 +14588,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   };
 
   const t_bg = getHex('bg') || 'transparent';
-  const t_card = getHex('card'); // ¡Ahora sí leemos la tarjeta!
+  const t_card = getHex('card'); 
   const t_btn = getHex('btn') || '#d97706'; 
   const t_txt = getHex('txt') || '#1c1917'; 
   const t_font = urlParams.get('font') || '';
@@ -14596,8 +14596,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const textRgb = hexToRgb(t_txt);
   const isDarkText = (textRgb.r * 0.299 + textRgb.g * 0.587 + textRgb.b * 0.114) < 186;
 
-  // 🟢 INTEGRACIÓN NATIVA: Si la invitación manda un color de tarjeta, lo usamos. 
-  // Si no manda nada, aplicamos un color sólido base de acuerdo al texto.
+  // 🟢 INTEGRACIÓN NATIVA: Color sólido para la tarjeta
   const finalCardBg = (t_card && t_card !== 'transparent') ? t_card : (isDarkText ? '#ffffff' : '#111111');
 
   const themeContainer = { 
@@ -14607,7 +14606,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     color: t_txt 
   };
   
-  // 🟢 DISEÑO SÓLIDO Y ELEGANTE (Cero transparencias raras)
   const themeSolidForm = {
     backgroundColor: finalCardBg,
     border: `1px solid rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.1)`,
@@ -14617,7 +14615,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
 
   const themeBtn = { backgroundColor: t_btn, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.1em' };
   
-  // Cajas de texto con un tono muy sutil del color del texto para no desentonar
   const themeInput = { 
     backgroundColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.04)`, 
     color: t_txt, 
@@ -14658,7 +14655,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
         eventNames: eventoInfo?.nombres || ''
     })) || [];
 
-    // 1. Paquete avanzado
     window.parent.postMessage({ 
         action: 'RSVP_SUCCESS_DATA', 
         passesLimit: guestData.originalPasses || guestData.passes,
@@ -14668,7 +14664,6 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
         theme: { btn: t_btn, txt: t_txt, txtRgb: textRgb }
     }, '*');
 
-    // 2. Señal clásica
     window.parent.postMessage('rsvp_success', '*');
     
     setDataSent(true);
@@ -14730,7 +14725,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
       setRsvpStatus('submitting');
       setTimeout(() => {
          setRsvpStatus('success');
-         showToast('Modo Simulación: Flujo exitoso (Base intacta).', 'success');
+         showToast('Modo Simulación: Flujo exitoso.', 'success');
          if (guestInfo) {
            const mockData = {
              ...guestInfo,
@@ -14811,35 +14806,66 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
     }
   };
 
+  // ==========================================
+  // PANTALLA 1: ESTADO DE CARGA (INTEGRADO)
+  // ==========================================
   if (loading) return (
-    <div style={themeContainer} className="flex flex-col items-center justify-center p-6 min-h-[50vh]">
-      <svg className="animate-spin h-10 w-10 mb-4" style={{ color: t_btn }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-      <p className="text-xs font-bold uppercase tracking-widest opacity-70" style={{ color: t_txt }}>Conectando Bóveda...</p>
+    <div style={themeContainer} className="relative flex items-center justify-center p-3 sm:p-4 overflow-hidden min-h-screen">
+      {isIframe && (<style>{`html, body, #root { background: transparent !important; overflow-x: hidden !important; touch-action: pan-y !important; }`}</style>)}
+      {t_font && <style>{`@import url('https://fonts.googleapis.com/css2?family=${t_font.replace(/ /g, '+')}&display=swap');`}</style>}
+      
+      <div className="w-full max-w-sm mx-auto z-50 animate-in slide-in-from-bottom-8 duration-500">
+        <div style={themeSolidForm} className={`w-full ${isPreviewMode ? 'rounded-b-2xl' : 'rounded-3xl'} p-8 flex flex-col items-center justify-center min-h-[300px] shadow-2xl`}>
+          <svg className="animate-spin h-10 w-10 mb-5" style={{ color: t_btn }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          <p className="text-[10px] font-bold uppercase tracking-widest opacity-60" style={{ color: t_txt }}>Conectando Bóveda...</p>
+        </div>
+      </div>
     </div>
   );
 
+  // ==========================================
+  // PANTALLA 2: ERROR 404
+  // ==========================================
   if (!eventoInfo) return (
-    <div style={themeContainer} className="flex flex-col items-center justify-center p-6 min-h-[50vh]">
-      <div className="w-16 h-16 rounded-full bg-rose-500/20 flex items-center justify-center mb-4"><svg className="text-rose-500 w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
-      <p className="text-sm font-bold uppercase tracking-widest text-rose-500">Error 404</p>
-      <p className="text-xs opacity-70 mt-2" style={{ color: t_txt }}>El enlace de evento es inválido.</p>
+    <div style={themeContainer} className="relative flex items-center justify-center p-3 sm:p-4 overflow-hidden min-h-screen">
+      {isIframe && (<style>{`html, body, #root { background: transparent !important; overflow-x: hidden !important; touch-action: pan-y !important; }`}</style>)}
+      <div className="w-full max-w-sm mx-auto z-50">
+        <div style={themeSolidForm} className="w-full rounded-3xl p-10 flex flex-col items-center justify-center shadow-2xl text-center">
+          <div className="w-16 h-16 rounded-full bg-rose-500/10 flex items-center justify-center mb-4"><svg className="text-rose-500 w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
+          <p className="text-sm font-bold uppercase tracking-widest text-rose-500">Error 404</p>
+          <p className="text-xs opacity-70 mt-2" style={{ color: t_txt }}>El enlace es inválido.</p>
+        </div>
+      </div>
     </div>
   );
 
+  // ==========================================
+  // PANTALLA 3: CONFIRMACIÓN EXITOSA
+  // ==========================================
   if (isConfirmadoOrSuccess) {
     return (
-      <div style={themeContainer} className="flex flex-col items-center justify-center p-6 min-h-[50vh] animate-in fade-in">
-        <div style={{ borderColor: t_btn, color: t_btn }} className="w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-lg border-2 bg-white/5 backdrop-blur-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+      <div style={themeContainer} className="relative flex items-center justify-center p-3 sm:p-4 overflow-hidden min-h-screen">
+        {isIframe && (<style>{`html, body, #root { background: transparent !important; overflow-x: hidden !important; touch-action: pan-y !important; }`}</style>)}
+        {t_font && <style>{`@import url('https://fonts.googleapis.com/css2?family=${t_font.replace(/ /g, '+')}&display=swap');`}</style>}
+        
+        <div className="w-full max-w-sm mx-auto z-50 animate-in zoom-in-95 duration-500">
+          <div style={themeSolidForm} className={`w-full ${isPreviewMode ? 'rounded-b-2xl' : 'rounded-3xl'} p-10 flex flex-col items-center justify-center shadow-2xl text-center min-h-[300px]`}>
+            <div style={{ borderColor: t_btn, color: t_btn, backgroundColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.03)` }} className="w-16 h-16 rounded-full flex items-center justify-center mb-6 shadow-inner border">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <h2 className="text-lg font-bold uppercase tracking-widest mb-3" style={{ color: t_txt }}>¡Confirmado!</h2>
+            <p className="text-xs opacity-70 leading-relaxed max-w-[250px]" style={{ color: t_txt }}>Tu asistencia ha sido registrada exitosamente en nuestra base de datos.</p>
+          </div>
         </div>
-        <h2 className="text-xl font-bold uppercase tracking-widest text-center" style={{ color: t_txt }}>¡Asistencia Confirmada!</h2>
-        <p className="text-xs opacity-80 mt-3 text-center leading-relaxed" style={{ color: t_txt }}>Tu asistencia ha sido registrada exitosamente en nuestra base de datos.<br/><br/>Ya puedes cerrar esta ventana.</p>
       </div>
     );
   }
 
+  // ==========================================
+  // PANTALLA 4: EL FORMULARIO DE RSVP
+  // ==========================================
   return (
-    <div style={themeContainer} className="relative flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+    <div style={themeContainer} className="relative flex items-center justify-center p-3 sm:p-4 overflow-hidden min-h-screen">
       {isIframe && (<style>{`html, body, #root { background: transparent !important; overflow-x: hidden !important; touch-action: pan-y !important; }`}</style>)}
       {t_font && <style>{`@import url('https://fonts.googleapis.com/css2?family=${t_font.replace(/ /g, '+')}&display=swap');`}</style>}
 
@@ -14861,7 +14887,7 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
           )}
 
           {/* 🟢 LA TARJETA SÓLIDA NATIVA */}
-          <div style={themeSolidForm} className={`w-full ${isPreviewMode ? 'rounded-b-2xl' : 'rounded-3xl'} p-6 sm:p-8 max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar`}>
+          <div style={themeSolidForm} className={`w-full ${isPreviewMode ? 'rounded-b-2xl' : 'rounded-3xl'} p-6 sm:p-8 max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar shadow-2xl`}>
             
             <div className="text-center mb-6 border-b pb-4" style={{ borderColor: `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.15)` }}>
                {!logoFailed ? (
