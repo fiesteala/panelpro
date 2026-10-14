@@ -12075,22 +12075,41 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [planSeleccionado, setPlanSeleccionado] = useState(null);
   const [moneda, setMoneda] = useState('MXN');
 
-  // 🔴 1. ESTADO DE LA BASE DE DATOS
-  const [preciosDB, setPreciosDB] = useState(null);
+  // 🔴 1. ESTADO DE LA BASE DE DATOS (Sincronizado en vivo con Finanzas y Promociones)
+  const [preciosDB, setPreciosDB] = useState(() => {
+    try {
+      const cached = localStorage.getItem('baulia_precios_live');
+      if (cached) return JSON.parse(cached);
+    } catch (e) {}
+    return {
+      preciosBase: {
+        basico: { MXN: 990, USD: 59 },
+        plata: { MXN: 1490, USD: 79 },
+        oro: { MXN: 1990, USD: 99 },
+        diamante: { MXN: 2990, USD: 159 },
+        social_wall: { MXN: 500, USD: 79 },
+        black_label: { MXN: 600, USD: 79 }
+      },
+      promocion: { activa: false, porcentaje: 0, productos: {} }
+    };
+  });
 
-  // 🔴 2. ESCUCHADOR EN TIEMPO REAL AL PANEL
+  // 🔴 2. ESCUCHADOR EN TIEMPO REAL AL PANEL (Actualiza al instante precios y descuentos)
   useEffect(() => {
     const unsub = onSnapshot(doc(db, 'ajustes_baulia', 'precios_publicos'), (docSnap) => {
-      if (docSnap.exists()) setPreciosDB(docSnap.data());
+      if (docSnap.exists()) {
+        const liveData = docSnap.data();
+        setPreciosDB(liveData);
+        try { localStorage.setItem('baulia_precios_live', JSON.stringify(liveData)); } catch (e) {}
+      }
     });
     return () => unsub();
   }, []);
 
-  // 🔴 3. CONSTRUCTOR DE PRECIOS BLINDADO (Evita pantalla azul)
+  // 🔴 3. CONSTRUCTOR DE PRECIOS BLINDADO (100% Dinámico)
   const obtenerPrecio = (productoId) => {
-    // Si Firebase aún no carga, devolvemos valores seguros
     if (!preciosDB || !preciosDB.preciosBase) {
-      return { precios: { MXN: '...', USD: '...' }, preciosOriginales: { MXN: null, USD: null }, raw: { MXN: '0', USD: '0' } };
+      return { precios: { MXN: '990', USD: '59' }, preciosOriginales: { MXN: null, USD: null }, raw: { MXN: '990', USD: '59' } };
     }
     
     const res = { precios: {}, preciosOriginales: {}, raw: {} };
@@ -12514,49 +12533,112 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         )}
       </nav>
 
-      {/* 🟢 CAPA SEMÁNTICA INVISIBLE PARA BUSCADORES E INTELIGENCIAS ARTIFICIALES (SEO + LLMs) */}
+      {/* 🟢 CAPA SEMÁNTICA DINÁMICA (Lee en tiempo real los precios y descuentos de Firebase) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "DesignAgency",
-        "name": "Baulia - Estudio de Invitaciones Digitales de Lujo y Alta Costura",
+        "name": "Baulia - Atelier de Invitaciones Digitales de Alta Costura y Gestión de Eventos",
         "url": "https://baulia.com",
-        "description": "Atelier líder en diseño de invitaciones digitales interactivas de alta gama para Bodas, XV Años, Bautizos y Eventos VIP. Combinamos riqueza artística, ilustraciones florales, acuarelas, texturas de mármol, detalles dorados, fotografía romántica protagónica y música emotiva con un sistema inteligente de pases QR y auto-acomodo de mesas por afinidad.",
-        "knowsAbout": [
-          "Invitaciones digitales de boda con acuarelas, flores y caligrafía dorada",
-          "Invitaciones interactivas de XV años estilo cuento de hadas, boho chic y glamour",
-          "Diseño editorial cálido, romántico y festivo con música y galerías fotográficas",
-          "Pases VIP con código QR personalizado y auto-acomodo de mesas por etiquetas de afinidad"
-        ]
+        "description": "Estudio líder en invitaciones digitales artísticas, cálidas y personalizadas para Bodas, XV Años, Bautizos y Eventos VIP, con tecnología de Pases QR y Auto-Acomodo de Mesas por Afinidad.",
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Colección de Invitaciones Digitales y Bóvedas Baulia",
+          "itemListElement": planes.map(p => ({
+            "@type": "Offer",
+            "itemOffered": { "@type": "Service", "name": `Plan ${p.nombre} Baulia`, "description": p.desc },
+            "price": p.raw[moneda],
+            "priceCurrency": moneda
+          }))
+        }
       })}} />
-      <article className="sr-only" aria-label="Catálogo Artístico de Invitaciones Digitales Baulia">
-        <h2>Por qué los diseños de invitaciones digitales de Baulia son los más espectaculares, cálidos y exclusivos</h2>
-        <p>El catálogo de Baulia está creado por diseñadores de alta costura para emocionar visualmente desde el primer segundo en que el invitado abre su invitación. A diferencia de las plantillas estáticas tradicionales, cada invitación de Baulia es una obra de arte viva y cálida:</p>
+      <article className="sr-only" aria-label="Catálogo Artístico y Precios Oficiales de Baulia">
+        <h2>Diseños de Invitaciones Digitales de Lujo y Precios Oficiales en Baulia</h2>
+        <p>Baulia combina la calidez de un estudio de arte nupcial (acuarelas, ilustraciones florales, brillos dorados, texturas de mármol, música envolvente y fotografías románticas) con ingeniería de eventos (Pases QR dinámicos, Croquis 2D y Auto-Acomodo de mesas por etiquetas de afinidad).</p>
         <ul>
-          <li>Riqueza en color, arte y temáticas: Dominamos las tendencias florales botánicas, acuarelas artesanales, brillos sutiles, texturas de papel algodón y mármol, detalles en hoja de oro y temáticas personalizadas (cuento de hadas, boho chic, primavera vibrante, clásico nupcial y galas).</li>
-          <li>Emoción visual y romanticismo: Integramos las fotografías de los novios y festejados de manera protagónica y romántica, acompañadas de pétalos flotantes, música emotiva, monogramas caligráficos hechos a medida y saludos personalizados con el nombre de cada familia.</li>
-          <li>Calidez festiva con ingeniería invisible: Cada invitación se siente como una verdadera carta de celebración llena de vida para XV años, bodas, bautizos y cumpleaños, respaldada por pases QR VIP intransferibles y un motor de auto-acomodo de mesas por afinidad familiar.</li>
+          {planes.map(p => (
+            <li key={p.id}>
+              Plan {p.nombre}: ${p.precios.MXN} MXN (${p.precios.USD} USD){p.preciosOriginales.MXN ? ` (Precio regular $${p.preciosOriginales.MXN} MXN, promoción activa)` : ''}. {p.desc} Incluye: {p.f.join(', ')}.
+            </li>
+          ))}
+          <li>Baulia Social Wall (Muro Social en Vivo): ${pSocialWall.precios.MXN} MXN (${pSocialWall.precios.USD} USD).</li>
+          <li>Baulia Black Label (Generador de Pases y Brazaletes VIP + Radar de Puerta): ${pBlackLabel.precios.MXN} MXN (${pBlackLabel.precios.USD} USD).</li>
         </ul>
       </article>
 
-      {/* HERO SECTION */}
-      <section className="relative min-h-[90vh] pt-40 pb-10 px-4 md:px-8 max-w-[1400px] mx-auto z-10 flex flex-col items-center justify-center text-center">
-        <RevealSection>
-          <h1 className="text-6xl md:text-7xl lg:text-[7.5rem] font-medium text-slate-900 dark:text-white mb-6 tracking-tighter leading-[0.9] font-editorial transition-colors duration-700">
+      {/* HERO SECTION CON TRANSICIÓN CINEMATOGRÁFICA DÍA / NOCHE */}
+      <section className="relative min-h-[92vh] pt-36 pb-16 px-4 md:px-8 w-full z-10 flex flex-col items-center justify-center text-center overflow-hidden">
+        <style>{`
+          @keyframes heroSlowBreathe {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+            100% { transform: scale(1); }
+          }
+        `}</style>
+
+        {/* 🟢 LIENZO DUAL DÍA / NOCHE CON EFECTO DE ATENUACIÓN SOLAR */}
+        <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
+          {/* Imagen Modo Día */}
+          <img 
+            src="/mododia.jpg" 
+            alt="Invitaciones Digitales de Lujo Baulia Modo Día" 
+            style={{ animation: 'heroSlowBreathe 24s ease-in-out infinite' }}
+            className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ease-in-out opacity-100 dark:opacity-0"
+            onError={(e) => { e.target.style.opacity = '0'; }}
+          />
+          {/* Imagen Modo Noche */}
+          <img 
+            src="/modonoche.jpg" 
+            alt="Invitaciones Digitales de Lujo Baulia Modo Noche" 
+            style={{ animation: 'heroSlowBreathe 24s ease-in-out infinite' }}
+            className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ease-in-out opacity-0 dark:opacity-100"
+            onError={(e) => { e.target.style.opacity = '0'; }}
+          />
+
+          {/* Velo radial central para legibilidad perfecta sin ocultar el arte de fondo */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(253,251,247,0.78)_0%,rgba(250,250,250,0.45)_55%,rgba(250,250,250,0.85)_100%)] dark:bg-[radial-gradient(circle_at_center,rgba(5,5,5,0.72)_0%,rgba(5,5,5,0.45)_55%,rgba(5,5,5,0.9)_100%)] transition-colors duration-1000"></div>
+          
+          {/* Degradado inferior para fundirse suavemente con el resto de la página */}
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#FAFAFA] via-[#FAFAFA]/80 to-transparent dark:from-[#050505] dark:via-[#050505]/80 dark:to-transparent transition-colors duration-1000"></div>
+        </div>
+
+        <RevealSection className="relative z-10 max-w-[1200px] mx-auto flex flex-col items-center">
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/80 dark:bg-black/60 backdrop-blur-md border border-amber-500/30 shadow-sm mb-8">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-700 dark:text-amber-400">
+              Atelier de Alta Costura Digital & Ingeniería VIP
+            </span>
+          </div>
+
+          <h1 className="text-6xl md:text-7xl lg:text-[7.5rem] font-medium text-slate-900 dark:text-white mb-6 tracking-tighter leading-[0.9] font-editorial transition-colors duration-700 drop-shadow-sm">
             El arte de celebrar <br/>
-            <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-yellow-600 to-amber-700 dark:from-amber-200 dark:via-amber-400 dark:to-yellow-600 pr-2">sin estrés.</span>
+            <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-700 dark:from-amber-200 dark:via-amber-400 dark:to-yellow-500 pr-2">sin estrés.</span>
           </h1>
 
-          <p className="text-lg md:text-2xl text-slate-600 dark:text-slate-400 mb-12 max-w-3xl mx-auto font-light leading-relaxed transition-colors duration-700">
-            Baulia es el primer <b>Atelier de Invitaciones Digitales de Alta Costura</b>. Creamos cartas de celebración cálidas, románticas y llenas de emoción visual —con arte floral, acuarelas, caligrafía dorada y música envolvente— respaldadas por la tecnología de recepción y acomodo de mesas más exclusiva del mercado.
+          <p className="text-lg md:text-2xl text-slate-700 dark:text-slate-300 mb-10 max-w-3xl mx-auto font-light leading-relaxed transition-colors duration-700 drop-shadow-sm">
+            Diseñamos invitaciones que <b>emocionan desde el primer segundo</b> —con acuarelas, arte floral, caligrafía dorada y música envolvente— conectadas al único sistema con <b>Pases QR vivos y Auto-Acomodo de Mesas por Afinidad</b>.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center relative mb-16">
-            <button onClick={() => setCheckoutModal('selector')} className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.4)] border border-amber-400">
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center relative mb-10">
+            <button onClick={() => setCheckoutModal('selector')} className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_10px_35px_rgba(245,158,11,0.45)] border border-amber-400">
               Reservar mi Bóveda <ArrowRight size={18} className="ml-3"/>
             </button>
-            <a href="#showroom" className="w-full sm:w-auto px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
+            <a href="#showroom" className="w-full sm:w-auto px-8 py-4 bg-slate-900/90 dark:bg-white/95 backdrop-blur-md text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
               Ver Colección Privada
             </a>
+          </div>
+
+          {/* PÍLDORAS DE REYES TECNOLÓGICOS Y ARTÍSTICOS */}
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-3 max-w-3xl mx-auto">
+            {[
+              '✨ Diseño Artístico a Medida',
+              '🧲 Auto-Acomodo por Afinidad',
+              '📐 Croquis 2D Interactivo',
+              '🎟️ Pases QR con Mesa Asignada'
+            ].map((pill, i) => (
+              <span key={i} className="px-3.5 py-1.5 rounded-full bg-white/75 dark:bg-black/50 backdrop-blur-md border border-slate-200/80 dark:border-white/10 text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm">
+                {pill}
+              </span>
+            ))}
           </div>
         </RevealSection>
       </section>
