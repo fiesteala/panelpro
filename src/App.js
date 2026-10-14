@@ -12565,24 +12565,24 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </ul>
       </article>
 
-      {/* HERO SECTION CON TRANSICIÓN CINEMATOGRÁFICA DÍA / NOCHE */}
-      <section className="relative min-h-[92vh] pt-36 pb-16 px-4 md:px-8 w-full z-10 flex flex-col items-center justify-center text-center overflow-hidden">
+      {/* HERO SECTION CON VENTANA CENTRAL LIBRE PARA EL ROSTRO DE LOS NOVIOS */}
+      <section className="relative min-h-[100dvh] md:min-h-[94vh] pt-24 sm:pt-28 md:pt-28 pb-24 sm:pb-14 md:pb-12 px-4 md:px-8 w-full z-10 flex flex-col justify-between items-center text-center overflow-hidden">
         <style>{`
           @keyframes heroSlowBreathe {
             0% { transform: scale(1); }
-            50% { transform: scale(1.06); }
+            50% { transform: scale(1.05); }
             100% { transform: scale(1); }
           }
         `}</style>
 
-        {/* 🟢 LIENZO DUAL DÍA / NOCHE CON EFECTO DE ATENUACIÓN SOLAR */}
+        {/* 🟢 LIENZO DUAL DÍA / NOCHE CON ENCUADRE CALIBRADO */}
         <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
           {/* Imagen Modo Día */}
           <img 
             src="/mododia.jpg" 
             alt="Invitaciones Digitales de Lujo Baulia Modo Día" 
             style={{ animation: 'heroSlowBreathe 24s ease-in-out infinite' }}
-            className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ease-in-out opacity-100 dark:opacity-0"
+            className="absolute inset-0 w-full h-full object-cover object-[center_48%] md:object-[center_38%] transition-opacity duration-1000 ease-in-out opacity-100 dark:opacity-0"
             onError={(e) => { e.target.style.opacity = '0'; }}
           />
           {/* Imagen Modo Noche */}
@@ -12590,39 +12590,43 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             src="/modonoche.jpg" 
             alt="Invitaciones Digitales de Lujo Baulia Modo Noche" 
             style={{ animation: 'heroSlowBreathe 24s ease-in-out infinite' }}
-            className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ease-in-out opacity-0 dark:opacity-100"
+            className="absolute inset-0 w-full h-full object-cover object-[center_48%] md:object-[center_38%] transition-opacity duration-1000 ease-in-out opacity-0 dark:opacity-100"
             onError={(e) => { e.target.style.opacity = '0'; }}
           />
 
-          {/* Velo sutil de baja opacidad para destacar la fotografía de fondo */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(253,251,247,0.48)_0%,rgba(250,250,250,0.18)_55%,rgba(250,250,250,0.55)_100%)] dark:bg-[radial-gradient(circle_at_center,rgba(5,5,5,0.45)_0%,rgba(5,5,5,0.18)_55%,rgba(5,5,5,0.65)_100%)] transition-colors duration-1000"></div>
-          
-          {/* Degradado inferior más corto para no cubrir la cauda del vestido */}
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#FAFAFA] via-[#FAFAFA]/60 to-transparent dark:from-[#050505] dark:via-[#050505]/60 dark:to-transparent transition-colors duration-1000"></div>
+          {/* Velo inteligente: protege la lectura arriba y abajo, pero deja el centro (rostros) 100% cristalino */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(253,251,247,0.72)_0%,rgba(253,251,247,0.42)_34%,rgba(253,251,247,0.02)_46%,rgba(253,251,247,0.02)_62%,rgba(253,251,247,0.68)_78%,rgba(250,250,250,0.95)_100%)] dark:bg-[linear-gradient(to_bottom,rgba(5,5,5,0.72)_0%,rgba(5,5,5,0.42)_34%,rgba(5,5,5,0.04)_46%,rgba(5,5,5,0.04)_62%,rgba(5,5,5,0.72)_78%,rgba(5,5,5,0.96)_100%)] transition-colors duration-1000"></div>
         </div>
 
-        <RevealSection className="relative z-10 max-w-[1200px] mx-auto flex flex-col items-center">
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/80 dark:bg-black/60 backdrop-blur-md border border-amber-500/30 shadow-sm mb-8">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-700 dark:text-amber-400">
-              Atelier de Alta Costura Digital & Ingeniería VIP
+        {/* 🟢 ZONA SUPERIOR: ETIQUETA FINA + TÍTULO (ARRIBA DE LOS NOVIOS) */}
+        <RevealSection className="relative z-10 max-w-[1200px] mx-auto flex flex-col items-center mt-1 md:mt-2">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white/80 dark:bg-black/60 backdrop-blur-md border border-amber-500/30 shadow-sm mb-3 sm:mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
+            <span className="text-[7.5px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-[0.16em] sm:tracking-[0.24em] text-amber-700 dark:text-amber-400 whitespace-nowrap">
+              Atelier de Alta Costura Digital
             </span>
           </div>
 
-          <h1 className="text-6xl md:text-7xl lg:text-[7.5rem] font-medium text-slate-900 dark:text-white mb-6 tracking-tighter leading-[0.9] font-editorial transition-colors duration-700 drop-shadow-[0_2px_12px_rgba(255,255,255,0.6)] dark:drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]">
+          <h1 className="text-[2.6rem] sm:text-6xl md:text-6xl lg:text-[5.6rem] font-medium text-slate-900 dark:text-white tracking-tighter leading-[0.92] font-editorial transition-colors duration-700 drop-shadow-[0_2px_14px_rgba(255,255,255,0.85)] dark:drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]">
             El arte de celebrar <br/>
-            <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-700 dark:from-amber-200 dark:via-amber-400 dark:to-yellow-500 pr-2">sin estrés.</span>
+            <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-700 dark:from-amber-200 dark:via-amber-400 dark:to-yellow-500 pr-1">sin estrés.</span>
           </h1>
+        </RevealSection>
 
-          <p className="text-lg md:text-2xl text-slate-800 dark:text-slate-200 mb-12 max-w-3xl mx-auto font-normal leading-relaxed transition-colors duration-700 drop-shadow-[0_1px_8px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+        {/* 🟢 VENTANA CENTRAL DESPEJADA: DEJA LIBRE EL ROSTRO DE LOS NOVIOS */}
+        <div className="flex-1 min-h-[175px] sm:min-h-[200px] md:min-h-[190px] lg:min-h-[210px] pointer-events-none"></div>
+
+        {/* 🟢 ZONA INFERIOR: DESCRIPCIÓN + BOTONES (SOBRE ESCALONES INFERIORES) */}
+        <RevealSection className="relative z-10 max-w-[1000px] mx-auto flex flex-col items-center w-full">
+          <p className="text-xs sm:text-base md:text-xl text-slate-800 dark:text-slate-200 mb-5 sm:mb-7 max-w-2xl mx-auto font-normal leading-relaxed transition-colors duration-700 drop-shadow-[0_1px_10px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] px-2">
             Diseñamos invitaciones que <b>emocionan desde el primer segundo</b> —con acuarelas, arte floral, caligrafía dorada y música envolvente— conectadas al único sistema con <b>Pases QR vivos y Auto-Acomodo de Mesas por Afinidad</b>.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center relative">
-            <button onClick={() => setCheckoutModal('selector')} className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_10px_35px_rgba(245,158,11,0.45)] border border-amber-400">
-              Reservar mi Bóveda <ArrowRight size={18} className="ml-3"/>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto justify-center relative px-2 sm:px-0">
+            <button onClick={() => setCheckoutModal('selector')} className="w-full sm:w-auto px-7 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-xs sm:text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_10px_35px_rgba(245,158,11,0.45)] border border-amber-400">
+              Reservar mi Bóveda <ArrowRight size={16} className="ml-2.5"/>
             </button>
-            <a href="#showroom" className="w-full sm:w-auto px-8 py-4 bg-slate-900/90 dark:bg-white/95 backdrop-blur-md text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
+            <a href="#showroom" className="w-full sm:w-auto px-7 sm:px-8 py-3.5 sm:py-4 bg-slate-900/90 dark:bg-white/95 backdrop-blur-md text-white dark:text-slate-900 rounded-full font-bold text-xs sm:text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
               Ver Colección Privada
             </a>
           </div>
