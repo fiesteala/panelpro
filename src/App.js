@@ -12594,31 +12594,31 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             onError={(e) => { e.target.style.opacity = '0'; }}
           />
 
-          {/* Velo inteligente: protege la lectura arriba y abajo, pero deja el centro (rostros) 100% cristalino */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(253,251,247,0.72)_0%,rgba(253,251,247,0.42)_34%,rgba(253,251,247,0.02)_46%,rgba(253,251,247,0.02)_62%,rgba(253,251,247,0.68)_78%,rgba(250,250,250,0.95)_100%)] dark:bg-[linear-gradient(to_bottom,rgba(5,5,5,0.72)_0%,rgba(5,5,5,0.42)_34%,rgba(5,5,5,0.04)_46%,rgba(5,5,5,0.04)_62%,rgba(5,5,5,0.72)_78%,rgba(5,5,5,0.96)_100%)] transition-colors duration-1000"></div>
+          {/* Velo independiente: en Móvil sube la niebla marfil hasta el texto inferior; en Escritorio (md:) se mantiene intacto */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(253,251,247,0.75)_0%,rgba(253,251,247,0.42)_30%,rgba(253,251,247,0.02)_40%,rgba(253,251,247,0.05)_52%,rgba(253,251,247,0.82)_62%,rgba(253,251,247,0.94)_75%,rgba(250,250,250,0.98)_100%)] md:bg-[linear-gradient(to_bottom,rgba(253,251,247,0.72)_0%,rgba(253,251,247,0.42)_34%,rgba(253,251,247,0.02)_46%,rgba(253,251,247,0.02)_62%,rgba(253,251,247,0.68)_78%,rgba(250,250,250,0.95)_100%)] dark:bg-[linear-gradient(to_bottom,rgba(5,5,5,0.72)_0%,rgba(5,5,5,0.42)_34%,rgba(5,5,5,0.04)_44%,rgba(5,5,5,0.08)_54%,rgba(5,5,5,0.72)_68%,rgba(5,5,5,0.96)_100%)] md:dark:bg-[linear-gradient(to_bottom,rgba(5,5,5,0.72)_0%,rgba(5,5,5,0.42)_34%,rgba(5,5,5,0.04)_46%,rgba(5,5,5,0.04)_62%,rgba(5,5,5,0.72)_78%,rgba(5,5,5,0.96)_100%)] transition-colors duration-1000"></div>
         </div>
 
         {/* 🟢 ZONA SUPERIOR: ETIQUETA FINA + TÍTULO (ARRIBA DE LOS NOVIOS) */}
-        <RevealSection className="relative z-10 max-w-[1200px] mx-auto flex flex-col items-center mt-1 md:mt-2">
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white/80 dark:bg-black/60 backdrop-blur-md border border-amber-500/30 shadow-sm mb-3 sm:mb-4">
+        <RevealSection className="relative z-10 max-w-[1200px] mx-auto flex flex-col items-center mt-0 md:mt-2">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white/80 dark:bg-black/60 backdrop-blur-md border border-amber-500/30 shadow-sm mb-2.5 sm:mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
             <span className="text-[7.5px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-[0.16em] sm:tracking-[0.24em] text-amber-700 dark:text-amber-400 whitespace-nowrap">
               Atelier de Alta Costura Digital
             </span>
           </div>
 
-          <h1 className="text-[2.6rem] sm:text-6xl md:text-6xl lg:text-[5.6rem] font-medium text-slate-900 dark:text-white tracking-tighter leading-[0.92] font-editorial transition-colors duration-700 drop-shadow-[0_2px_14px_rgba(255,255,255,0.85)] dark:drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]">
+          <h1 className="text-[2.5rem] sm:text-6xl md:text-6xl lg:text-[5.6rem] font-medium text-slate-900 dark:text-white tracking-tighter leading-[0.92] font-editorial transition-colors duration-700 drop-shadow-[0_2px_14px_rgba(255,255,255,0.85)] dark:drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]">
             El arte de celebrar <br/>
             <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-700 dark:from-amber-200 dark:via-amber-400 dark:to-yellow-500 pr-1">sin estrés.</span>
           </h1>
         </RevealSection>
 
-        {/* 🟢 VENTANA CENTRAL DESPEJADA: DEJA LIBRE EL ROSTRO DE LOS NOVIOS */}
-        <div className="flex-1 min-h-[175px] sm:min-h-[200px] md:min-h-[190px] lg:min-h-[210px] pointer-events-none"></div>
+        {/* 🟢 VENTANA CENTRAL DESPEJADA: DEJA LIBRE EL ROSTRO Y TORSO DE LOS NOVIOS */}
+        <div className="flex-1 min-h-[210px] sm:min-h-[220px] md:min-h-[190px] lg:min-h-[210px] pointer-events-none"></div>
 
-        {/* 🟢 ZONA INFERIOR: DESCRIPCIÓN + BOTONES (SOBRE ESCALONES INFERIORES) */}
+        {/* 🟢 ZONA INFERIOR: DESCRIPCIÓN + BOTONES (SOBRE LA NIEBLA INFERIOR) */}
         <RevealSection className="relative z-10 max-w-[1000px] mx-auto flex flex-col items-center w-full">
-          <p className="text-xs sm:text-base md:text-xl text-slate-800 dark:text-slate-200 mb-5 sm:mb-7 max-w-2xl mx-auto font-normal leading-relaxed transition-colors duration-700 drop-shadow-[0_1px_10px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] px-2">
+          <p className="text-xs sm:text-base md:text-xl text-slate-900 dark:text-slate-100 mb-4 sm:mb-7 max-w-2xl mx-auto font-medium md:font-normal leading-relaxed transition-colors duration-700 drop-shadow-[0_1px_12px_rgba(255,255,255,1)] dark:drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] px-2">
             Diseñamos invitaciones que <b>emocionan desde el primer segundo</b> —con acuarelas, arte floral, caligrafía dorada y música envolvente— conectadas al único sistema con <b>Pases QR vivos y Auto-Acomodo de Mesas por Afinidad</b>.
           </p>
 
