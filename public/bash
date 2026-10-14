@@ -1,5 +1,5 @@
 git add .
-git commit -m "simulacion invitacion app pases QR no real"
+git commit -m "inyeccion para busquedas landingpage"
 git push origin main
 
 .
