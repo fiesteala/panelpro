@@ -1,5 +1,5 @@
 git add .
-git commit -m "fondo confirmacion de invitaciones"
+git commit -m "fver invitacion app pases QR unificados"
 git push origin main
 
 .

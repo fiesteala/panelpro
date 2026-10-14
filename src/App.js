@@ -1193,7 +1193,7 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
 };
 
 // ==========================================
-// --- COMPONENTE: INVITADOS (DARK PREMIUM - MULTIMODAL) ---
+// --- COMPONENTE: INVITADOS (DARK PREMIUM - MULTIMODAL + MOTOR DE AFINIDAD) ---
 // ==========================================
 const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento, userPlan, eventName, urlInvitacion }) => {
   const isBodaType = tipoEvento === 'boda';
@@ -1205,13 +1205,18 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   const [qrEnabled, setQrEnabled] = useState(true);
   const [passCountEnabled, setPassCountEnabled] = useState(true);
   
+  // 🟢 BANCO GLOBAL DE ETIQUETAS (AFINIDAD)
+  const [globalTags, setGlobalTags] = useState([]);
+  const [newTagInput, setNewTagInput] = useState('');
+  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
+
   // 🟢 ESTADOS PARA LA PORTADA, LOGO Y SUBIDAS CLOUDINARY
   const [qrCover, setQrCover] = useState(null);
   const [eventLogo, setEventLogo] = useState(null); 
-  const [hasManualLogo, setHasManualLogo] = useState(false); // 🟢 Controla si aparece el basurero
+  const [hasManualLogo, setHasManualLogo] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
-  const [logoError, setLogoError] = useState(false); // Evita que un logo roto borre el estado global
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     setIsWeddingMode(tipoEvento === 'boda');
@@ -1226,34 +1231,61 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         setQrEnabled(data.isQrEnabled !== false); 
         setPassCountEnabled(data.isPassCountEnabled !== false);
         if (data.tipoEvento) setIsWeddingMode(data.tipoEvento === 'boda');
+        if (data.etiquetasGlobales) setGlobalTags(data.etiquetasGlobales);
+        else setGlobalTags([]);
         
-        // Carga la portada si ya existe en la base de datos
         if (data.qrCoverUrl) setQrCover(data.qrCoverUrl);
         else setQrCover(null);
         
-        // 🟢 LÓGICA DE LOGO Y PORTADA (ESTRICTAMENTE MANUAL)
         if (data.monogramaUrl) {
            setHasManualLogo(true);
-           setEventLogo(data.monogramaUrl); // Si subieron logo a mano, lo mostramos
+           setEventLogo(data.monogramaUrl);
         } else {
            setHasManualLogo(false);
-           setEventLogo(null); // Si no hay logo manual, mostramos iniciales elegantes
+           setEventLogo(null);
         }
       }
     });
     return () => unsub();
   }, []);
 
+  // 🟢 FUNCIONES DEL BANCO DE ETIQUETAS
+  const handleCreateGlobalTag = async (e) => {
+    if (e) e.preventDefault();
+    const cleanTag = newTagInput.trim();
+    if (!cleanTag) return;
+    const exists = globalTags.some(t => t.toLowerCase() === cleanTag.toLowerCase());
+    if (exists) {
+      if (addNotification) addNotification('Etiqueta duplicada', 'Esa etiqueta ya existe en tu banco.', 'warning');
+      setNewTagInput('');
+      return;
+    }
+    const updated = [...globalTags, cleanTag];
+    setGlobalTags(updated);
+    setNewTagInput('');
+    try {
+      await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { etiquetasGlobales: updated });
+    } catch (err) { console.error(err); }
+  };
+
+  const handleDeleteGlobalTag = async (tagToRemove) => {
+    const updated = globalTags.filter(t => t !== tagToRemove);
+    setGlobalTags(updated);
+    try {
+      await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { etiquetasGlobales: updated });
+      if (addNotification) addNotification('Etiqueta Eliminada', `Se quitó "${tagToRemove}" del banco.`, 'info');
+    } catch (err) { console.error(err); }
+  };
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroLado, setFiltroLado] = useState('Todos');
 
   const [addModal, setAddModal] = useState({ open: false, side: 'general' });
-  const [newGuest, setNewGuest] = useState({ name: '', adultPasses: 1, childrenPasses: 0, phone: '', status: 'por_invitar' });
+  const [newGuest, setNewGuest] = useState({ name: '', adultPasses: 1, childrenPasses: 0, phone: '', status: 'por_invitar', tags: [] });
   const [editModal, setEditModal] = useState({ open: false, guest: null });
   const [deleteModal, setDeleteModal] = useState(null);
   const [qrModal, setQrModal] = useState(null); 
 
-  // Resetear el error visual del logo cuando se abre otro QR
   useEffect(() => { setLogoError(false); }, [qrModal, eventLogo]);
 
   const [exportViewOpen, setExportViewOpen] = useState(false);
@@ -1284,7 +1316,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               id: `usr_extra_${Date.now()}_${i}`,
               name: '',
               isChild: false,
-              entered: false
+              entered: false,
+              tags: currentRequest.tags || []
           });
       }
 
@@ -1341,12 +1374,82 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   };
 
   const handleOpenAdd = (side) => {
-    setNewGuest({ name: '', adultPasses: 1, childrenPasses: 0, phone: '', status: 'por_invitar' });
+    setNewGuest({ name: '', adultPasses: 1, childrenPasses: 0, phone: '', status: 'por_invitar', tags: [] });
     setAddModal({ open: true, side });
   };
 
   const handleOpenEdit = (guest) => {
-    setEditModal({ open: true, guest: { ...guest } });
+    const pNum = guest.passes || 1;
+    const adultos = pNum - (guest.childrenPasses || 0);
+    const existingSubs = guest.subGuests && guest.subGuests.length > 0 
+      ? guest.subGuests.map(sg => ({ ...sg, tags: sg.tags || [] }))
+      : Array(pNum).fill(null).map((_, i) => ({
+          id: `usr_${guest.id}_${i}`,
+          name: i === 0 ? guest.name : '',
+          isChild: i >= adultos,
+          entered: false,
+          tags: guest.tags || []
+        }));
+
+    setEditModal({ 
+      open: true, 
+      guest: { 
+        ...guest, 
+        tags: guest.tags || [],
+        subGuests: existingSubs
+      } 
+    });
+  };
+
+  const toggleNewGuestTag = (tag) => {
+    setNewGuest(prev => {
+      const current = prev.tags || [];
+      const exists = current.includes(tag);
+      return { ...prev, tags: exists ? current.filter(t => t !== tag) : [...current, tag] };
+    });
+  };
+
+  const toggleEditGuestFamilyTag = (tag) => {
+    setEditModal(prev => {
+      const g = prev.guest;
+      const current = g.tags || [];
+      const exists = current.includes(tag);
+      const updatedFamilyTags = exists ? current.filter(t => t !== tag) : [...current, tag];
+      
+      // Sincroniza la etiqueta familiar en los integrantes que no la tenían o que la tenían
+      const updatedSubs = (g.subGuests || []).map(sg => {
+        const sgTags = sg.tags || [];
+        if (exists) {
+          return { ...sg, tags: sgTags.filter(t => t !== tag) };
+        } else {
+          return { ...sg, tags: sgTags.includes(tag) ? sgTags : [...sgTags, tag] };
+        }
+      });
+
+      return { ...prev, guest: { ...g, tags: updatedFamilyTags, subGuests: updatedSubs } };
+    });
+  };
+
+  const toggleSubGuestTag = (subIdx, tag) => {
+    setEditModal(prev => {
+      const g = prev.guest;
+      const subs = [...(g.subGuests || [])];
+      const target = { ...subs[subIdx] };
+      const currentTags = target.tags || [];
+      target.tags = currentTags.includes(tag) ? currentTags.filter(t => t !== tag) : [...currentTags, tag];
+      subs[subIdx] = target;
+      return { ...prev, guest: { ...g, subGuests: subs } };
+    });
+  };
+
+  const handleSubGuestEditChange = (subIdx, field, val) => {
+    setEditModal(prev => {
+      const g = prev.guest;
+      const subs = [...(g.subGuests || [])];
+      subs[subIdx] = { ...subs[subIdx], [field]: val };
+      const childrenCount = subs.filter(s => s.isChild).length;
+      return { ...prev, guest: { ...g, subGuests: subs, childrenPasses: childrenCount } };
+    });
   };
 
   // 🟢 FUNCIONES PARA SUBIR IMÁGENES A LA NUBE Y GUARDARLAS PERMANENTEMENTE
@@ -1358,7 +1461,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     
     const formData = new FormData(); 
     formData.append('file', file); 
-    formData.append('upload_preset', "ml_default"); // Tu preset de Cloudinary
+    formData.append('upload_preset', "ml_default");
     
     try {
       const res = await fetch(`https://api.cloudinary.com/v1_1/duy0mcqsh/image/upload`, { method: 'POST', body: formData });
@@ -1389,7 +1492,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       const res = await fetch(`https://api.cloudinary.com/v1_1/duy0mcqsh/image/upload`, { method: 'POST', body: formData });
       const data = await res.json();
       if (data.secure_url) {
-         // Guarda el monograma en Firebase, esto tiene Prioridad 1 y se usará también en Pulseras
          await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { monogramaUrl: data.secure_url });
          if (addNotification) addNotification('¡Listo!', 'Logo actualizado correctamente.', 'success');
       }
@@ -1408,7 +1510,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
   const handleRemoveManualLogo = async () => {
     try {
-      // Esto borra el logo manual y fuerza al sistema a buscar en la URL de la invitación
       await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { monogramaUrl: null });
       if (addNotification) addNotification('Modo Automático', 'Buscando monograma de la invitación...', 'info');
     } catch(e) { console.error(e); }
@@ -1439,15 +1540,14 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       const tableObj = tables?.find(t => String(t.id) === String(g.tableId));
       const tName = tableObj ? tableObj.name : g.tableId;
 
-      // Etiquetamos a cada sub-invitado con la mesa exacta a la que pertenece su fragmento
       const subGuestsWithTable = (g.subGuests || []).map(sg => ({
           ...sg,
+          tags: sg.tags || g.tags || [],
           specificTableId: g.tableId,
           specificTableName: tName
       }));
 
       if (!familiasUnificadasMap.has(rootId)) {
-          // Buscamos el objeto original para asegurar que los datos del titular (nombre, tel) sean los correctos
           const rootGuest = safeGuests.find(rg => rg.id === rootId) || g;
           familiasUnificadasMap.set(rootId, { 
               ...rootGuest, 
@@ -1469,14 +1569,11 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       }
   });
 
-  // 🟢 ORDEN ESTRICTO: Obligamos a que el sub-invitado titular siempre quede en la posición 0
   const unifiedGuests = Array.from(familiasUnificadasMap.values()).map(parent => {
       if (parent.mergedSubGuests && parent.mergedSubGuests.length > 0) {
           parent.mergedSubGuests.sort((a, b) => {
-              // 1. Prioridad absoluta: El que se llama igual que el titular de la familia
               if (a.name === parent.name && b.name !== parent.name) return -1;
               if (b.name === parent.name && a.name !== parent.name) return 1;
-              // 2. Segunda prioridad: Nombres llenos vs Nombres vacíos
               if (a.name && !b.name) return -1;
               if (!a.name && b.name) return 1;
               return 0;
@@ -1495,19 +1592,21 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     const side = g.side ? g.side.toLowerCase() : ''; 
     const subGuestsNames = g.mergedSubGuests ? g.mergedSubGuests.map(sg => (sg.name || '').toLowerCase()).join(' ') : '';
     const mesasNames = g.todasMesasNombre ? g.todasMesasNombre.join(' ').toLowerCase() : '';
+    const guestTagsStr = (g.tags || []).join(' ').toLowerCase();
+    const subTagsStr = g.mergedSubGuests ? g.mergedSubGuests.map(sg => (sg.tags || []).join(' ')).join(' ').toLowerCase() : '';
 
-    return (name.includes(term) || status.includes(term) || subGuestsNames.includes(term) || mesasNames.includes(term) || side.includes(term)) && matchesSide;
+    return (name.includes(term) || status.includes(term) || subGuestsNames.includes(term) || mesasNames.includes(term) || side.includes(term) || guestTagsStr.includes(term) || subTagsStr.includes(term)) && matchesSide;
   });
 
   const getFlattenedGuests = (guestList) => {
     const flattened = [];
     guestList.forEach(guest => {
       if (!isPremium) {
-        flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.displayPasses || guest.passes, isMain: true, isChild: false, pin: null, entered: false, specificTableName: null });
+        flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.displayPasses || guest.passes, isMain: true, isChild: false, pin: null, entered: false, specificTableName: null, rowTags: guest.tags || [] });
         return; 
       }
       if (!guest.mergedSubGuests || guest.mergedSubGuests.length === 0 || !qrEnabled) {
-        flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.displayPasses || guest.passes, isMain: true, isChild: false, pin: null, entered: false, specificTableName: null });
+        flattened.push({ _rowId: guest.id, parentGuest: guest, displayName: guest.name, passes: guest.displayPasses || guest.passes, isMain: true, isChild: false, pin: null, entered: false, specificTableName: null, rowTags: guest.tags || [] });
       } else {
         guest.mergedSubGuests.forEach((sg, idx) => {
           flattened.push({ 
@@ -1520,12 +1619,13 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
             pin: sg.id, 
             entered: sg.entered,
             isEmptyName: !sg.name,
-            specificTableName: sg.specificTableName
+            specificTableName: sg.specificTableName,
+            rowTags: (sg.tags && sg.tags.length > 0) ? sg.tags : (guest.tags || [])
           });
         });
         const faltantes = (guest.displayPasses || guest.passes || 0) - guest.mergedSubGuests.length;
         if (faltantes > 0 && (guest.status === 'pendiente' || guest.status === 'por_invitar')) {
-          flattened.push({ _rowId: `${guest.id}_faltantes`, parentGuest: guest, displayName: `Lugares sin confirmar (${faltantes})`, passes: faltantes, isMain: false, isChild: false, pin: null, isMissing: true, entered: false, specificTableName: null });
+          flattened.push({ _rowId: `${guest.id}_faltantes`, parentGuest: guest, displayName: `Lugares sin confirmar (${faltantes})`, passes: faltantes, isMain: false, isChild: false, pin: null, isMissing: true, entered: false, specificTableName: null, rowTags: [] });
         }
       }
     });
@@ -1565,18 +1665,21 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     const adultos = passCountEnabled ? (Number(newGuest.adultPasses) || 1) : 1;
     const ninos = passCountEnabled ? (Number(newGuest.childrenPasses) || 0) : 0; 
     const pNum = adultos + ninos;
+    const selectedTags = newGuest.tags || [];
     
     const initSubGuests = qrEnabled ? Array(pNum).fill(null).map((_, i) => ({
       id: `usr_${nuevoId}_${i}`,
       name: i === 0 ? newGuest.name : '', 
       isChild: i >= adultos, 
-      entered: false
+      entered: false,
+      tags: [...selectedTags]
     })) : [];
 
     const datosInvitado = {
       name: newGuest.name, passes: pNum, childrenPasses: ninos, phone: newGuest.phone, 
       status: newGuest.status, side: addModal.side, entered: 0, tableId: null, 
-      sent: false, subGuests: initSubGuests, extraRequested: 0, originalPasses: pNum
+      sent: false, subGuests: initSubGuests, extraRequested: 0, originalPasses: pNum,
+      tags: selectedTags
     };
     
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", nuevoId), datosInvitado);
@@ -1589,6 +1692,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     if (!passCountEnabled) updatedGuest.passes = 1; 
     await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", updatedGuest.id), updatedGuest);
     setEditModal({ open: false, guest: null });
+    if (addNotification) addNotification('Guardado', 'Datos y etiquetas actualizados.', 'success');
   };
 
   const executeDeleteGuest = async () => {
@@ -1682,6 +1786,27 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
     link.click();
     document.body.removeChild(link);
   };
+
+  // 🟢 ELEMENTO JSX ESTABLE (Evita que el input pierda el foco al teclear)
+  const quickTagCreatorJSX = (
+    <div className="flex gap-1.5 mt-2">
+      <input 
+        type="text" 
+        value={newTagInput} 
+        onChange={e => setNewTagInput(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleCreateGlobalTag(); } }}
+        placeholder="Nueva etiqueta (ej. Primos, VIP)..." 
+        className="flex-1 px-3 py-1.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-lg text-xs outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white"
+      />
+      <button 
+        type="button" 
+        onClick={handleCreateGlobalTag}
+        className="px-3 py-1.5 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-400 border border-indigo-200 dark:border-amber-500/20 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-colors shrink-0"
+      >
+        + Crear
+      </button>
+    </div>
+  );
 
   return (
     <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500">
@@ -1820,11 +1945,18 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Gestión de Invitados</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Control de asistencia, pases y credenciales.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Control de asistencia, pases, etiquetas de afinidad y credenciales.</p>
         </div>
         
         <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
           <div className="flex w-full sm:w-auto gap-2">
+            {/* 🟢 BOTÓN BANCO DE ETIQUETAS */}
+            {isPremium && (
+              <button onClick={() => setIsTagManagerOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center px-4 py-2.5 bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/20 text-indigo-700 dark:text-amber-400 rounded-xl text-[10px] sm:text-xs font-bold hover:bg-indigo-100 dark:hover:bg-amber-500/20 shadow-sm transition-colors uppercase tracking-widest">
+                <Layers size={14} className="mr-1.5"/> Etiquetas ({globalTags.length})
+              </button>
+            )}
+
             <button onClick={() => setExportViewOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center px-4 py-2.5 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-[10px] sm:text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors uppercase tracking-widest"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Exportar</button>
             
             {isBodaType && (
@@ -1913,7 +2045,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-400 sticky top-0 z-10 transition-colors">
                 <tr>
                   <th className="px-5 py-3 font-bold uppercase tracking-wider text-[10px]">Nombre</th>
-                  {isPremium && passCountEnabled && <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Tipo</th>}
+                  {isPremium && passCountEnabled && <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Tipo / Etiquetas</th>}
                   {passCountEnabled && <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Pases</th>}
                   {isPremium && <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Mesa</th>}
                   {isPremium && qrEnabled && <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">QR Pase</th>}
@@ -1946,7 +2078,23 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     
                     {isPremium && passCountEnabled && (
                       <td className="px-3 py-3 text-center">
-                        {row.isMissing ? <span className="text-slate-300 dark:text-slate-600">-</span> : row.isChild ? <span className="text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 px-2 py-0.5 rounded text-[8px] uppercase font-black tracking-widest">Niño</span> : <span className="text-slate-300">-</span>}
+                        {row.isMissing ? (
+                          <span className="text-slate-300 dark:text-slate-600">-</span>
+                        ) : (
+                          <div className="flex items-center justify-center gap-1 flex-wrap max-w-[220px] mx-auto">
+                            {row.isChild && (
+                              <span className="text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 px-2 py-0.5 rounded text-[8px] uppercase font-black tracking-widest">Niño</span>
+                            )}
+                            {row.rowTags && row.rowTags.map(t => (
+                              <span key={t} className="text-indigo-600 dark:text-amber-400 bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/20 px-2 py-0.5 rounded text-[8px] uppercase font-bold tracking-wider">
+                                {t}
+                              </span>
+                            ))}
+                            {!row.isChild && (!row.rowTags || row.rowTags.length === 0) && (
+                              <span className="text-slate-300 dark:text-slate-600">-</span>
+                            )}
+                          </div>
+                        )}
                       </td>
                     )}
                     
@@ -1998,10 +2146,14 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                       {row.isMain || !qrEnabled ? (
                         <div className="flex justify-end space-x-1.5">
                           <button onClick={() => handleSendWhatsApp(row.parentGuest)} className={`p-2 rounded-lg transition-colors border ${row.parentGuest.sent ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'text-slate-400 bg-white border-slate-200 hover:bg-slate-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5'}`} title="Enviar por WhatsApp"><MessageCircle size={14}/></button>
-                          <button onClick={() => handleOpenEdit(row.parentGuest)} className="p-2 text-slate-400 bg-white border border-slate-200 hover:text-indigo-600 hover:bg-indigo-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5 rounded-lg transition-colors"><Edit2 size={14} /></button>
+                          <button onClick={() => handleOpenEdit(row.parentGuest)} className="p-2 text-slate-400 bg-white border border-slate-200 hover:text-indigo-600 hover:bg-indigo-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5 rounded-lg transition-colors" title="Editar Familia y Etiquetas"><Edit2 size={14} /></button>
                           <button onClick={() => setDeleteModal(row.parentGuest)} className="p-2 text-slate-400 bg-white border border-slate-200 hover:text-rose-600 hover:bg-rose-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:text-rose-500 dark:hover:bg-white/5 rounded-lg transition-colors"><Trash2 size={14} /></button>
                         </div>
-                      ) : <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">Vinculado</span>}
+                      ) : (
+                        <button onClick={() => handleOpenEdit(row.parentGuest)} className="text-[9px] text-indigo-500 dark:text-amber-500 hover:underline uppercase tracking-widest font-bold">
+                          Etiquetar
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -2024,15 +2176,18 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   <div key={`mobile_${row._rowId}`} className={`rounded-xl transition-all duration-300 overflow-hidden border ${row.isMain ? 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 shadow-sm mt-3' : 'bg-slate-50/60 dark:bg-white/[0.03] border-l-[3px] border-l-indigo-200 dark:border-l-amber-500/40 border-y-transparent border-r-transparent ml-3 rounded-l-none'} ${isCancelado ? 'opacity-60' : ''}`}>
                     <div onClick={() => toggleMobileRow(row._rowId)} className="p-3 flex justify-between items-center cursor-pointer select-none">
                       <div className="flex-1 min-w-0 pr-2">
-                        <div className="flex items-center gap-1.5 mb-1">
+                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                           <span className={`font-bold truncate text-sm ${row.isMain ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                             {row.displayName}
                           </span>
-                          {row.isMain && row.parentGuest.todasMesasNombre?.length > 1 && (
-                            <span className="shrink-0 ml-1 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-widest border bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">
-                              Dividida
-                            </span>
+                          {row.isChild && (
+                            <span className="px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-widest border bg-sky-50 text-sky-600 border-sky-200 dark:bg-sky-500/10 dark:text-sky-400">Niño</span>
                           )}
+                          {row.rowTags && row.rowTags.map(t => (
+                            <span key={t} className="px-1.5 py-0.5 rounded text-[7px] font-bold uppercase tracking-wider border bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">
+                              {t}
+                            </span>
+                          ))}
                         </div>
                         <div className="flex items-center gap-1.5 text-[10px]">
                           <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center truncate max-w-[120px]"><MapPin size={10} className="mr-1 shrink-0 text-indigo-400 dark:text-amber-500"/> <span className="truncate">{tableNameDisplay}</span></span>
@@ -2054,19 +2209,17 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     {isExpanded && (
                       <div className="px-3 pb-3 pt-1 border-t border-slate-100 dark:border-white/5 animate-in slide-in-from-top-2 fade-in duration-300">
                         <div className="flex justify-between gap-1.5 mt-2">
-                          {row.isMain ? (
-                            <>
-                              <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-[1.5] py-2 ${row.parentGuest.sent ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' : 'bg-white dark:bg-transparent text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'} rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border transition-colors shadow-sm`}>
-                                <MessageCircle size={14} className="mr-1"/> Enviar
-                              </button>
-                              <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-1 py-2 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-500 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border border-indigo-200 dark:border-amber-500/20 transition-colors shadow-sm">
-                                <Edit2 size={14}/>
-                              </button>
-                              <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="flex-1 py-2 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border border-rose-200 dark:border-rose-500/20 transition-colors shadow-sm hover:bg-rose-100 dark:hover:bg-rose-500/20">
-                                <Trash2 size={14}/>
-                              </button>
-                            </>
-                          ) : null}
+                          <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-[1.5] py-2 ${row.parentGuest.sent ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' : 'bg-white dark:bg-transparent text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'} rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border transition-colors shadow-sm`}>
+                            <MessageCircle size={14} className="mr-1"/> Enviar
+                          </button>
+                          <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-1 py-2 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-500 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border border-indigo-200 dark:border-amber-500/20 transition-colors shadow-sm">
+                            <Edit2 size={14}/>
+                          </button>
+                          {row.isMain && (
+                            <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="flex-1 py-2 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border border-rose-200 dark:border-rose-500/20 transition-colors shadow-sm hover:bg-rose-100 dark:hover:bg-rose-500/20">
+                              <Trash2 size={14}/>
+                            </button>
+                          )}
                         </div>
                       </div>
                     )}
@@ -2078,51 +2231,204 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       </div>
 
-      {addModal.open && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 transition-colors"><h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-wide">Nuevo Invitado</h3><button onClick={() => setAddModal({ open: false, side: 'general' })} className="text-slate-400 hover:text-slate-800 dark:hover:text-white"><X size={20}/></button></div>
-            <form onSubmit={handleSaveGuest} className="p-6">
-              <div className="space-y-5">
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre del Titular o Familia</label><input type="text" required value={newGuest.name} onChange={e=>setNewGuest({...newGuest, name: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" value={newGuest.phone} onChange={e=>setNewGuest({...newGuest, phone: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" placeholder="10 dígitos" /></div>
-                {passCountEnabled && (
-                  <div className={`grid ${isPremium ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
-                    <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases {isPremium ? 'Adultos' : 'Totales'}</label><input type="number" min="1" required value={newGuest.adultPasses} onChange={e=>setNewGuest({...newGuest, adultPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-indigo-600 dark:text-amber-500 font-black text-center transition-colors" /></div>
-                    {isPremium && (
-                      <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Niños</label><input type="number" min="0" required value={newGuest.childrenPasses} onChange={e=>setNewGuest({...newGuest, childrenPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sky-600 dark:text-sky-400 font-black text-center transition-colors" /></div>
-                    )}
+      {/* 🟢 MODAL GESTOR DEL BANCO DE ETIQUETAS */}
+      {isTagManagerOpen && (
+        <div className="fixed inset-0 z-[250] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5">
+              <div>
+                <h3 className="font-bold text-lg text-slate-900 dark:text-white">Banco de Etiquetas</h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">Crea grupos para el acomodo inteligente por afinidad.</p>
+              </div>
+              <button onClick={() => setIsTagManagerOpen(false)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white"><X size={20}/></button>
+            </div>
+            <div className="p-6 space-y-5">
+              <form onSubmit={handleCreateGlobalTag} className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={newTagInput} 
+                  onChange={e => setNewTagInput(e.target.value)} 
+                  placeholder="Ej. Amigos Novio, Primos, Universidad..." 
+                  className="flex-1 p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold"
+                />
+                <button type="submit" className="px-5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors shrink-0">
+                  Agregar
+                </button>
+              </form>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Etiquetas Activas ({globalTags.length})</label>
+                {globalTags.length === 0 ? (
+                  <div className="text-center p-6 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl text-xs text-slate-400">
+                    Aún no has creado etiquetas. Escribe arriba para comenzar.
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto custom-scrollbar p-1">
+                    {globalTags.map(tag => (
+                      <div key={tag} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#111] border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-200">
+                        <span>#{tag}</span>
+                        <button onClick={() => handleDeleteGlobalTag(tag)} className="text-slate-400 hover:text-rose-500 transition-colors"><X size={14}/></button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
+              <button onClick={() => setIsTagManagerOpen(false)} className="w-full py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest">Listo</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🟢 MODAL NUEVO INVITADO CON CHIPS DE ETIQUETAS */}
+      {addModal.open && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors flex flex-col max-h-[90vh]">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 transition-colors shrink-0"><h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-wide">Nuevo Invitado</h3><button onClick={() => setAddModal({ open: false, side: 'general' })} className="text-slate-400 hover:text-slate-800 dark:hover:text-white"><X size={20}/></button></div>
+            <form onSubmit={handleSaveGuest} className="p-6 overflow-y-auto custom-scrollbar space-y-5">
+              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre del Titular o Familia</label><input type="text" required value={newGuest.name} onChange={e=>setNewGuest({...newGuest, name: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
+              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" value={newGuest.phone} onChange={e=>setNewGuest({...newGuest, phone: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" placeholder="10 dígitos" /></div>
+              {passCountEnabled && (
+                <div className={`grid ${isPremium ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
+                  <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases {isPremium ? 'Adultos' : 'Totales'}</label><input type="number" min="1" required value={newGuest.adultPasses} onChange={e=>setNewGuest({...newGuest, adultPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-indigo-600 dark:text-amber-500 font-black text-center transition-colors" /></div>
+                  {isPremium && (
+                    <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Niños</label><input type="number" min="0" required value={newGuest.childrenPasses} onChange={e=>setNewGuest({...newGuest, childrenPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sky-600 dark:text-sky-400 font-black text-center transition-colors" /></div>
+                  )}
+                </div>
+              )}
+
+              {/* 🟢 SELECTOR DE ETIQUETAS (TOCAR PARA SELECCIONAR) */}
+              {isPremium && (
+                <div className="pt-2 border-t border-slate-100 dark:border-white/5">
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Etiquetas de Afinidad (Toca para asignar)</label>
+                  {globalTags.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {globalTags.map(tag => {
+                        const isSelected = (newGuest.tags || []).includes(tag);
+                        return (
+                          <button
+                            type="button"
+                            key={tag}
+                            onClick={() => toggleNewGuestTag(tag)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${isSelected ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-600 dark:border-amber-500 shadow-sm scale-[1.02]' : 'bg-slate-50 dark:bg-[#111] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:border-indigo-300'}`}
+                          >
+                            #{tag}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-slate-400 italic mb-2">Crea tu primera etiqueta abajo (ej. Primos, Amigos, Trabajo):</p>
+                  )}
+                  {quickTagCreatorJSX}
+                </div>
+              )}
+
               <button type="submit" className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-6 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors">Guardar Invitado</button>
             </form>
           </div>
         </div>
       )}
 
+      {/* 🟢 MODAL EDITAR FAMILIA + MICRO-ETIQUETADO POR INTEGRANTE */}
       {editModal.open && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 transition-colors"><h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-wide">Editar Familia</h3><button onClick={() => setEditModal({ open: false, guest: null })} className="text-slate-400 hover:text-slate-800 dark:hover:text-white"><X size={20}/></button></div>
-            <form onSubmit={handleSaveEdit} className="p-6 space-y-5">
-              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre</label><input type="text" required value={editModal.guest.name} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, name: e.target.value }})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
-              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" value={editModal.guest.phone || ''} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, phone: e.target.value }})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors flex flex-col max-h-[92vh]">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 transition-colors shrink-0"><h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-wide">Editar Familia y Etiquetas</h3><button onClick={() => setEditModal({ open: false, guest: null })} className="text-slate-400 hover:text-slate-800 dark:hover:text-white"><X size={20}/></button></div>
+            <form onSubmit={handleSaveEdit} className="p-6 space-y-5 overflow-y-auto custom-scrollbar flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre Titular</label><input type="text" required value={editModal.guest.name} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, name: e.target.value }})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" value={editModal.guest.phone || ''} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, phone: e.target.value }})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
+              </div>
+
               <div className={`grid ${isPremium ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
                 {isPremium && (
-                  <div className={`${passCountEnabled ? 'col-span-2' : 'col-span-1'}`}><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Asignar Mesa</label>
-                    <select value={editModal.guest.tableId || ''} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, tableId: e.target.value }})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors">
+                  <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Asignar Mesa</label>
+                    <select value={editModal.guest.tableId || ''} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, tableId: e.target.value || null }})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors">
                       <option value="">Sin Mesa</option>
                       {tables?.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                     </select>
                   </div>
                 )}
                 <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Estatus</label>
-                  <select value={editModal.guest.status} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, status: e.target.value }})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors">
+                  <select value={editModal.guest.status} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, status: e.target.value }})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors">
                     <option value="por_invitar">Por Invitar</option><option value="pendiente">Pendiente</option><option value="confirmado">Confirmado</option><option value="cancelado">Canceló</option>
                   </select>
                 </div>
               </div>
+
+              {/* 🟢 ETIQUETAS DE TODA LA FAMILIA */}
+              {isPremium && (
+                <div className="pt-3 border-t border-slate-100 dark:border-white/5">
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Etiqueta Familiar General (Aplica a todos)</label>
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {globalTags.map(tag => {
+                      const isSelected = (editModal.guest.tags || []).includes(tag);
+                      return (
+                        <button
+                          type="button"
+                          key={tag}
+                          onClick={() => toggleEditGuestFamilyTag(tag)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${isSelected ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-600 dark:border-amber-500 shadow-sm' : 'bg-slate-50 dark:bg-[#111] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:border-indigo-300'}`}
+                        >
+                          #{tag}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {quickTagCreatorJSX}
+                </div>
+              )}
+
+              {/* 🟢 MICRO-ETIQUETADO POR INTEGRANTE INDIVIDUAL (IDEAL PARA SEPARAR PRIMOS EN FAMILIAS GRANDES) */}
+              {isPremium && editModal.guest.subGuests && editModal.guest.subGuests.length > 1 && (
+                <div className="pt-3 border-t border-slate-100 dark:border-white/5">
+                  <div className="mb-3">
+                    <label className="block text-[10px] font-bold text-indigo-600 dark:text-amber-500 uppercase tracking-widest">Integrantes Individuales ({editModal.guest.subGuests.length})</label>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Si etiquetas solo a algunos integrantes (ej. #Primos), el Modo Afinidad los separará automáticamente para sentarlos con su grupo.</p>
+                  </div>
+                  <div className="space-y-2.5 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                    {editModal.guest.subGuests.map((sg, idx) => (
+                      <div key={sg.id || idx} className="p-3 rounded-2xl bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-black text-slate-400 w-5">#{idx + 1}</span>
+                          <input 
+                            type="text" 
+                            value={sg.name || ''} 
+                            placeholder={`Integrante ${idx + 1}`}
+                            onChange={e => handleSubGuestEditChange(idx, 'name', e.target.value)}
+                            className="flex-1 px-2.5 py-1.5 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-lg text-xs font-bold text-slate-800 dark:text-white outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleSubGuestEditChange(idx, 'isChild', !sg.isChild)}
+                            className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-colors ${sg.isChild ? 'bg-sky-500 text-white border-sky-500' : 'bg-white dark:bg-[#050505] text-slate-400 border-slate-200 dark:border-white/10'}`}
+                          >
+                            Niño
+                          </button>
+                        </div>
+                        {globalTags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 pl-5">
+                            {globalTags.map(tag => {
+                              const hasTag = (sg.tags || []).includes(tag);
+                              return (
+                                <button
+                                  type="button"
+                                  key={tag}
+                                  onClick={() => toggleSubGuestTag(idx, tag)}
+                                  className={`px-2 py-0.5 rounded-md text-[9px] font-bold transition-all border ${hasTag ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-600 dark:border-amber-500' : 'bg-white dark:bg-[#050505] text-slate-400 border-slate-200 dark:border-white/10'}`}
+                                >
+                                  #{tag}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <button type="submit" className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-4 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors">Guardar Cambios</button>
             </form>
           </div>
@@ -2152,12 +2458,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         <div className="fixed inset-0 z-[400] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-300 flex flex-col relative max-h-[95vh]">
             
-            {/* CONTROLES SUPERIORES AVANZADOS */}
             <div className="px-6 py-4 border-b border-slate-100 dark:bg-white/5 flex justify-between items-center z-10 shrink-0 bg-slate-50">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white tracking-wide">Diseño del Pase</h3>
               
               <div className="flex gap-2 print:hidden items-center">
-                 {/* BOTÓN OVERRIDE LOGO (Manual) */}
                  <div className="flex items-center gap-1">
                      <label className="cursor-pointer text-amber-600 bg-amber-50 dark:bg-amber-500/10 px-3 py-1.5 rounded-full hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center shadow-sm border border-amber-200 dark:border-amber-500/20" title="Subir Logo Manual">
                         {isUploadingLogo ? <RefreshCw size={14} className="animate-spin"/> : <><ImageIcon size={14} className="mr-1"/> Logo</>}
@@ -2168,7 +2472,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                      )}
                  </div>
 
-                 {/* BOTÓN SUBIR PORTADA */}
                  <label className="cursor-pointer text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center shadow-sm border border-indigo-200 dark:border-indigo-500/20" title="Subir foto de fondo">
                     {isUploadingCover ? <RefreshCw size={14} className="animate-spin"/> : <><ImageIcon size={14} className="mr-1"/> Fondo</>}
                     <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload}/>
@@ -2182,11 +2485,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               </div>
             </div>
             
-            {/* 🟢 EL LIENZO QUE SE CONVIERTE EN FOTO */}
             <div className="overflow-y-auto custom-scrollbar bg-slate-200 dark:bg-[#050505] p-4 sm:p-6 flex-1 flex justify-center items-center">
                <div id={`qr-container-${qrModal.pin}`} className="bg-white relative rounded-2xl overflow-hidden shadow-xl w-full max-w-[300px] mx-auto flex flex-col" style={{ aspectRatio: '9/16' }}>
                   
-                  {/* ZONA DE LA IMAGEN DE FONDO */}
                   <div className="absolute inset-0 w-full h-[60%] bg-slate-50 flex items-center justify-center overflow-hidden">
                      {qrCover ? (
                         <img src={qrCover} alt="Portada" className="w-full h-full object-cover" crossOrigin="anonymous"/>
@@ -2198,13 +2499,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                      )}
                   </div>
 
-                  {/* EL DEGRADADO QUE SE FUNDE A BLANCO */}
                   <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent 20%, rgba(255,255,255,0.9) 45%, #ffffff 55%, #ffffff 100%)' }}></div>
 
-                  {/* INFORMACIÓN DEL INVITADO Y QR */}
                   <div className="relative z-10 flex flex-col h-full justify-end px-5 pb-6 items-center text-center">
                      
-                     {/* 1. ESPACIO PARA LOGO MANUAL (Vacío por defecto) */}
                      <div className="mb-2 h-12 flex items-center justify-center">
                         {!logoError && eventLogo && (
                           <img 
@@ -2216,12 +2514,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                         )}
                      </div>
 
-                     {/* 2. NOMBRE DEL INVITADO */}
                      <h2 className="text-2xl font-editorial font-black text-slate-900 leading-normal mb-1 whitespace-normal break-words w-full px-2" style={{ paddingBottom: '2px' }}>
                         {qrModal.displayName}
                      </h2>
 
-                     {/* 3. MESA ASIGNADA */}
                      {isPremium && qrModal.parentGuest.tableId && (
                        <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-3">
                          {tables?.find(t => String(t.id) === String(qrModal.parentGuest.tableId))?.name || qrModal.parentGuest.tableId}
@@ -2229,7 +2525,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                      )}
                      {(!isPremium || !qrModal.parentGuest.tableId) && <div className="h-3 mb-3"></div>}
 
-                     {/* 4. CÓDIGO QR */}
                      <div className="bg-white p-2 rounded-xl shadow-[0_5px_15px_rgba(0,0,0,0.08)] border border-slate-100 mb-3">
                         <img 
                            src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${qrModal.pin}&margin=1`} 
@@ -2239,18 +2534,15 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                         />
                      </div>
 
-                     {/* 5. PIN (Mostrando ID completo para captura manual) */}
                      <p className="font-mono text-[9px] text-slate-700 tracking-widest bg-slate-50 py-1.5 px-3 rounded-lg border border-slate-200 mb-2">
                        PIN: <strong className="text-slate-900 font-bold break-all">{qrModal.pin}</strong>
                      </p>
 
-                     {/* 6. TEXTO INTRANSFERIBLE */}
                      <p className="text-[8px] uppercase tracking-[0.15em] text-slate-500 font-bold">Pase Personal • Intransferible</p>
                   </div>
                </div>
             </div>
 
-            {/* BOTÓN DE DESCARGA */}
             <div className="p-4 border-t border-slate-100 dark:bg-[#0a0a0a] shrink-0 bg-white">
               <button 
                 disabled={isPreparingQRPrint}
@@ -2360,11 +2652,28 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 // ==========================================
 const InvitacionView = ({ guests, urlInvitacion }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGuestId, setSelectedGuestId] = useState(guests[0]?.id || null);
+  
+  // 🟢 UNIFICAR FAMILIAS DIVIDIDAS EN MESAS (Mantiene 1 sola invitación y su ID original corto)
+  const unifiedGuests = React.useMemo(() => {
+    const map = new Map();
+    (guests || []).forEach(g => {
+      const rootId = g.parentId || g.id;
+      if (!map.has(rootId)) {
+        const rootObj = (guests || []).find(rg => rg.id === rootId) || g;
+        map.set(rootId, { ...rootObj, id: rootId, passes: g.passes || 0 });
+      } else {
+        const existing = map.get(rootId);
+        existing.passes += (g.passes || 0);
+      }
+    });
+    return Array.from(map.values());
+  }, [guests]);
+
+  const [selectedGuestId, setSelectedGuestId] = useState(unifiedGuests[0]?.id || null);
   const [isMobileSimulatorOpen, setIsMobileSimulatorOpen] = useState(false);
 
-  const filteredGuests = guests.filter(g => g.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  const guest = guests.find(g => g.id === selectedGuestId) || guests[0];
+  const filteredGuests = unifiedGuests.filter(g => (g.name || '').toLowerCase().includes(searchTerm.toLowerCase()));
+  const guest = unifiedGuests.find(g => g.id === selectedGuestId) || unifiedGuests[0];
 
   // 🔴 CONSTRUCCIÓN DE LA URL SEGURA PARA EL IFRAME
   let iframeUrl = '';
@@ -2476,7 +2785,7 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
 };
 
 // ==========================================
-// --- COMPONENTE: GESTIÓN DE MESAS (DARK PREMIUM COMPLETO) ---
+// --- COMPONENTE: GESTIÓN DE MESAS (MOTOR DUAL: TETRIS + AFINIDAD) ---
 // ==========================================
 const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -2489,6 +2798,16 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
   const [guestSplitPrompt, setGuestSplitPrompt] = useState(null);
   const [modoSeparador, setModoSeparador] = useState(false);
   const [separarCantidad, setSepararCantidad] = useState(1);
+
+  // 🟢 ESTADOS DE ETIQUETAS Y MOTOR DE AFINIDAD
+  const [globalTags, setGlobalTags] = useState([]);
+  const [tableTags, setTableTags] = useState([]);
+  const [newTagInput, setNewTagInput] = useState('');
+  const [autoAssignModal, setAutoAssignModal] = useState(false);
+  const [assignMode, setAssignMode] = useState('afinidad'); // 'clasico' | 'afinidad'
+  const [selectedAffinityTags, setSelectedAffinityTags] = useState([]);
+  const lastAssignParams = useRef({ mode: 'clasico', tags: [] });
+
   const [configActual, setCurrentConfig] = useState({
     tipo: 'redonda', 
     capacidadRedonda: 10,
@@ -2504,7 +2823,41 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
     ladosLibre: { top: 4, bottom: 4, left: 2, right: 2 }
   });
 
-  // 🟢 REFERENCIAS FRESCAS PARA EVITAR STALE CLOSURES (FOTOGRAFÍAS VIEJAS)
+  // 🟢 ESCUCHA EL BANCO DE ETIQUETAS DE LA BÓVEDA
+  useEffect(() => {
+    if (typeof ID_DEL_EVENTO === 'undefined') return;
+    const unsub = onSnapshot(doc(db, "eventos", ID_DEL_EVENTO), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const tags = data.etiquetasGlobales || [];
+        setGlobalTags(tags);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  const handleCreateGlobalTag = async (e) => {
+    if (e) e.preventDefault();
+    const clean = newTagInput.trim();
+    if (!clean) return;
+    if (globalTags.some(t => t.toLowerCase() === clean.toLowerCase())) {
+      setNewTagInput('');
+      return;
+    }
+    const updated = [...globalTags, clean];
+    setGlobalTags(updated);
+    setTableTags(prev => [...prev, clean]);
+    setNewTagInput('');
+    try {
+      await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { etiquetasGlobales: updated });
+    } catch (err) { console.error(err); }
+  };
+
+  const toggleTableTag = (tag) => {
+    setTableTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
+  };
+
+  // 🟢 REFERENCIAS FRESCAS PARA EVITAR STALE CLOSURES
   const guestsRef = useRef(guests || []);
   const tablesRef = useRef(tables || []);
   useEffect(() => {
@@ -2515,6 +2868,13 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
   const safeTables = tables || [];
   const safeGuests = guests || [];
   const invitadosSinMesa = safeGuests.filter(g => !g.tableId && g.status !== 'cancelado');
+
+  // Extraemos todas las etiquetas disponibles (del banco + las que tengan los invitados o mesas)
+  const allAvailableTags = Array.from(new Set([
+    ...globalTags,
+    ...safeGuests.flatMap(g => [...(g.tags || []), ...(g.subGuests || []).flatMap(sg => sg.tags || [])]),
+    ...safeTables.flatMap(t => t.tags || [])
+  ]));
 
   const modelosSerpentina = {
     'mod1': { nombre: '1.58m x 0.75m', max: { ext: 3, int: 1, izq: 1, der: 1 } },
@@ -2579,7 +2939,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       if(addNotification) addNotification('Error', 'La mesa debe tener al menos 1 silla.', 'warning');
       return;
     }
-    setMezclaVariedad([...mezclaVariedad, { id: Date.now(), cantidad: cantidadIguales, config: { ...configActual, capacidadCalculada: capacidad } }]);
+    setMezclaVariedad([...mezclaVariedad, { id: Date.now(), cantidad: cantidadIguales, tags: [...tableTags], config: { ...configActual, capacidadCalculada: capacidad } }]);
     setCantidadIguales(1);
     if(addNotification) addNotification('Agregada a la mezcla', `Paquete de ${cantidadIguales} mesa(s) añadido.`, 'success');
   };
@@ -2595,11 +2955,18 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
               if(addNotification) addNotification('Acción Denegada', `La mesa ya tiene ${usedChairs} personas asignadas. Libera invitados primero.`, 'warning');
               return;
          }
-         await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", tableToEdit.id), { ...tableToEdit, capacity: capacidad, tipo: configActual.tipo, configDetalle: configActual });
+         await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", tableToEdit.id), { 
+            ...tableToEdit, 
+            capacity: capacidad, 
+            tipo: configActual.tipo, 
+            configDetalle: configActual,
+            tags: tableTags 
+         });
          setIsAddModalOpen(false);
          setTableToEdit(null);
+         setTableTags([]);
          setCreationMode('iguales');
-         if(addNotification) addNotification('Mesa Actualizada', 'Los cambios se guardaron con éxito en la nube.', 'success');
+         if(addNotification) addNotification('Mesa Actualizada', 'Los cambios y etiquetas se guardaron con éxito.', 'success');
          return;
       }
 
@@ -2610,32 +2977,54 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
          const capacidad = calcularCapacidad(configActual);
          if (capacidad === 0) return;
          for (let i = 0; i < cantidadIguales; i++) {
-            nuevasMesas.push({ id: `mesa_${Date.now()}_${i}`, name: `Mesa ${startIdx + i}`, capacity: capacidad, tipo: configActual.tipo, configDetalle: configActual });
+            nuevasMesas.push({ id: `mesa_${Date.now()}_${i}`, name: `Mesa ${startIdx + i}`, capacity: capacidad, tipo: configActual.tipo, configDetalle: configActual, tags: tableTags });
          }
       } else if (creationMode === 'variedad') {
          if (mezclaVariedad.length === 0) return;
          mezclaVariedad.forEach(paquete => {
             for (let i = 0; i < paquete.cantidad; i++) {
-               nuevasMesas.push({ id: `mesa_${Date.now()}_${Math.random()}`, name: `Mesa ${startIdx}`, capacity: paquete.config.capacidadCalculada, tipo: paquete.config.tipo, configDetalle: paquete.config });
+               nuevasMesas.push({ id: `mesa_${Date.now()}_${Math.random()}`, name: `Mesa ${startIdx}`, capacity: paquete.config.capacidadCalculada, tipo: paquete.config.tipo, configDetalle: paquete.config, tags: paquete.tags || [] });
                startIdx++;
             }
          });
       }
 
-    const promesas = nuevasMesas.map(mesa => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", mesa.id), mesa));
-    await Promise.all(promesas);
+      const promesas = nuevasMesas.map(mesa => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", mesa.id), mesa));
+      await Promise.all(promesas);
 
       setIsAddModalOpen(false);
       setMezclaVariedad([]);
+      setTableTags([]);
       setCantidadIguales(1);
       if(addNotification) addNotification('Mesas Creadas', `Se agregaron ${nuevasMesas.length} mesas a la nube.`, 'success');
    };
 
    const isProcessingAutoAssign = useRef(false);
 
-   const handleAutoAssign = () => {
+   // 🟢 PASO 1: ABRIR EL MODAL DEL MOTOR DUAL (O EJECUTAR DIRECTO SI NO HAY ETIQUETAS)
+   const handleOpenAutoAssign = () => {
+      const currentGuests = guestsRef.current || safeGuests;
+      const unassigned = currentGuests.filter(g => !g.tableId && g.status !== 'cancelado');
+      if (unassigned.length === 0) {
+         if(addNotification) addNotification('Listo', 'Todos los invitados ya tienen mesa asignada.', 'info');
+         return;
+      }
+
+      if (allAvailableTags.length > 0) {
+         setSelectedAffinityTags(allAvailableTags);
+         setAssignMode('afinidad');
+         setAutoAssignModal(true);
+      } else {
+         iniciarProcesoAutoAcomodo('clasico', []);
+      }
+   };
+
+   // 🟢 PASO 2: VERIFICAR SILLAS Y DISPARAR EL MOTOR ELEGIDO
+   const iniciarProcesoAutoAcomodo = (mode = lastAssignParams.current.mode, activeTags = lastAssignParams.current.tags) => {
       if (isProcessingAutoAssign.current) return;
       isProcessingAutoAssign.current = true;
+      setAutoAssignModal(false);
+      lastAssignParams.current = { mode, tags: activeTags };
 
       const currentGuests = guestsRef.current || safeGuests;
       const currentTables = tablesRef.current || safeTables;
@@ -2663,12 +3052,192 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
          isProcessingAutoAssign.current = false;
          return;
       }
-      ejecutarAsignacionLogic(currentTables, currentGuests);
+
+      if (mode === 'afinidad' && activeTags.length > 0) {
+         ejecutarAsignacionAfinidad(currentTables, currentGuests, activeTags);
+      } else {
+         ejecutarAsignacionLogic(currentTables, currentGuests);
+      }
    };
 
-   const ejecutarAsignacionLogic = async (mesasDisponibles, invitadosActuales) => {
+   // 🟢 MOTOR 2: ALGORITMO DE AFINIDAD + DESGARRE SILENCIOSO + IMÁN DE MESAS + TETRIS
+   const ejecutarAsignacionAfinidad = async (mesasDisponibles, invitadosActuales, activeTags) => {
       let currentGuests = [...invitadosActuales];
+      let preSplitWrites = [];
+
+      // FASE A: DESGARRE SILENCIOSO (Si una familia sin mesa tiene solo algunos integrantes con una etiqueta activa, los separamos automáticamente)
+      const unassignedInitial = currentGuests.filter(g => !g.tableId && g.status !== 'cancelado');
+
+      for (let guest of unassignedInitial) {
+         if (guest.passes > 1 && guest.subGuests && guest.subGuests.length > 1) {
+            const subGroups = new Map();
+            guest.subGuests.forEach(sg => {
+               const sgTags = (sg.tags && sg.tags.length > 0) ? sg.tags : (guest.tags || []);
+               const matchingTag = activeTags.find(at => sgTags.includes(at)) || '__REMAINDER__';
+               if (!subGroups.has(matchingTag)) subGroups.set(matchingTag, []);
+               subGroups.get(matchingTag).push(sg);
+            });
+
+            if (subGroups.size > 1) {
+               const entries = Array.from(subGroups.entries());
+               const [firstKey, firstSubs] = entries[0];
+               const rootId = guest.parentId || guest.id;
+
+               const updatedOriginal = {
+                  ...guest,
+                  passes: firstSubs.length,
+                  childrenPasses: firstSubs.filter(s => s.isChild).length,
+                  subGuests: firstSubs,
+                  tags: firstKey === '__REMAINDER__' ? (guest.tags || []).filter(t => !activeTags.includes(t)) : [firstKey]
+               };
+               currentGuests = currentGuests.map(g => g.id === guest.id ? updatedOriginal : g);
+               preSplitWrites.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), updatedOriginal));
+
+               for (let idx = 1; idx < entries.length; idx++) {
+                  const [tagKey, subs] = entries[idx];
+                  const newId = `sep_aff_${Date.now()}_${Math.floor(Math.random()*10000)}_${idx}`;
+                  const newFragment = {
+                     ...guest,
+                     id: newId,
+                     parentId: rootId,
+                     name: guest.name.replace(' (Separado)', ''),
+                     passes: subs.length,
+                     childrenPasses: subs.filter(s => s.isChild).length,
+                     tableId: null,
+                     subGuests: subs,
+                     tags: tagKey === '__REMAINDER__' ? [] : [tagKey]
+                  };
+                  currentGuests.push(newFragment);
+                  preSplitWrites.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", newId), newFragment));
+               }
+            }
+         }
+      }
+
+      if (preSplitWrites.length > 0) {
+         await Promise.all(preSplitWrites);
+      }
+
+      // Función auxiliar para obtener las etiquetas efectivas de un bloque
+      const getEffectiveTags = (g) => {
+         const set = new Set(g.tags || []);
+         (g.subGuests || []).forEach(sg => (sg.tags || []).forEach(t => set.add(t)));
+         return Array.from(set);
+      };
+
+      let promesas = [];
       let changesMade = false;
+
+      // Función interna para sentar a un grupo en una mesa (o consolidar si ya hay un hermano ahí)
+      const seatGuestInTable = (guest, targetTable) => {
+         const familyRootId = guest.parentId || guest.id;
+         const siblingFragment = currentGuests.find(g => g.id !== guest.id && (g.parentId === familyRootId || g.id === familyRootId) && g.tableId === targetTable.id);
+
+         if (siblingFragment) {
+            const mergedPasses = siblingFragment.passes + guest.passes;
+            const mergedSubGuests = [...(siblingFragment.subGuests || []), ...(guest.subGuests || [])];
+            const updatedSibling = { ...siblingFragment, passes: mergedPasses, subGuests: mergedSubGuests };
+            promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), updatedSibling));
+            promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id)));
+            currentGuests = currentGuests.filter(g => g.id !== guest.id).map(g => g.id === siblingFragment.id ? updatedSibling : g);
+         } else {
+            const updatedGuest = { ...guest, tableId: targetTable.id };
+            promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), updatedGuest));
+            currentGuests = currentGuests.map(g => g.id === guest.id ? updatedGuest : g);
+         }
+         changesMade = true;
+      };
+
+      // FASE B: AGRUPACIÓN POR CADA ETIQUETA SELECCIONADA (Priorizando Mesas con Imán de Etiqueta)
+      for (let tag of activeTags) {
+         let tagGuests = currentGuests
+            .filter(g => !g.tableId && g.status !== 'cancelado' && getEffectiveTags(g).includes(tag))
+            .sort((a, b) => b.passes - a.passes);
+
+         for (let guest of tagGuests) {
+            // Verificamos que siga sin mesa
+            const freshGuest = currentGuests.find(g => g.id === guest.id);
+            if (!freshGuest || freshGuest.tableId) continue;
+
+            let tablesWithSpace = mesasDisponibles.map(table => {
+               const assigned = currentGuests.filter(g => g.tableId === table.id);
+               const used = assigned.reduce((sum, g) => sum + g.passes, 0);
+               const hasTableTag = (table.tags || []).includes(tag);
+               const hasSameTagCompanions = assigned.some(ag => getEffectiveTags(ag).includes(tag));
+               const isEmpty = used === 0;
+               return { table, available: table.capacity - used, hasTableTag, hasSameTagCompanions, isEmpty };
+            }).filter(t => t.available > 0);
+
+            if (tablesWithSpace.length === 0) continue;
+
+            // Prioridad 1: Mesas etiquetadas explícitamente con este Tag
+            // Prioridad 2: Mesas neutrales donde ya sentamos a otros con este mismo Tag
+            // Prioridad 3: Mesas neutrales totalmente vacías
+            // Prioridad 4: Cualquier mesa neutral con espacio
+            const getPriority = (tObj) => {
+               if (tObj.hasTableTag) return 1;
+               const hasOtherTableTags = (tObj.table.tags || []).length > 0;
+               if (!hasOtherTableTags && tObj.hasSameTagCompanions) return 2;
+               if (!hasOtherTableTags && tObj.isEmpty) return 3;
+               if (!hasOtherTableTags) return 4;
+               return 5;
+            };
+
+            const fullFitTables = tablesWithSpace.filter(t => t.available >= freshGuest.passes);
+            if (fullFitTables.length > 0) {
+               fullFitTables.sort((a, b) => {
+                  const pA = getPriority(a);
+                  const pB = getPriority(b);
+                  if (pA !== pB) return pA - pB;
+                  return a.available - b.available;
+               });
+               seatGuestInTable(freshGuest, fullFitTables[0].table);
+            } else {
+               // Si no cabe entero en ninguna mesa, pausamos y preguntamos al cliente cómo dividirlo
+               tablesWithSpace.sort((a, b) => {
+                  const pA = getPriority(a);
+                  const pB = getPriority(b);
+                  if (pA !== pB) return pA - pB;
+                  return b.available - a.available;
+               });
+               const bestPartial = tablesWithSpace[0];
+               const maxPlaceable = Math.min(freshGuest.passes - 1, bestPartial.available);
+               const familyRootId = freshGuest.parentId || freshGuest.id;
+               const siblingFragment = currentGuests.find(g => g.id !== freshGuest.id && (g.parentId === familyRootId || g.id === familyRootId) && g.tableId === bestPartial.table.id);
+
+               if (promesas.length > 0) await Promise.all(promesas);
+
+               setSepararCantidad(maxPlaceable);
+               setGuestSplitPrompt({
+                  guest: freshGuest,
+                  targetTableId: bestPartial.table.id,
+                  table: bestPartial.table,
+                  usedChairs: bestPartial.table.capacity - bestPartial.available,
+                  availableChairs: bestPartial.available,
+                  minPlaceable: 1,
+                  maxPlaceable,
+                  isForced: true,
+                  siblingFragment,
+                  isAutoAssign: true
+               });
+               isProcessingAutoAssign.current = false;
+               return;
+            }
+         }
+      }
+
+      if (promesas.length > 0) {
+         await Promise.all(promesas);
+      }
+
+      // FASE C: RELLENO TETRIS PARA EL RESTO DE INVITADOS SIN ETIQUETA ACTIVA
+      await ejecutarAsignacionLogic(mesasDisponibles, currentGuests, changesMade);
+   };
+
+   // 🟢 MOTOR 1: ALGORITMO CLÁSICO (EL TETRIS PERFECTO)
+   const ejecutarAsignacionLogic = async (mesasDisponibles, invitadosActuales, priorChanges = false) => {
+      let currentGuests = [...invitadosActuales];
+      let changesMade = priorChanges;
       let promesas = [];
 
       const unassignedGuests = currentGuests
@@ -2696,18 +3265,18 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
             if (siblingFragment) {
                 const mergedPasses = siblingFragment.passes + guest.passes;
                 const mergedSubGuests = [...(siblingFragment.subGuests || []), ...(guest.subGuests || [])];
-                promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { ...siblingFragment, passes: mergedPasses, subGuests: mergedSubGuests }));
+                const updatedSibling = { ...siblingFragment, passes: mergedPasses, subGuests: mergedSubGuests };
+                promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), updatedSibling));
                 promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id)));
+                currentGuests = currentGuests.filter(g => g.id !== guest.id).map(g => g.id === siblingFragment.id ? updatedSibling : g);
             } else {
-                guest.tableId = bestTable.id; 
-                promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), guest));
+                const updatedGuest = { ...guest, tableId: bestTable.id };
+                promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), updatedGuest));
+                currentGuests = currentGuests.map(g => g.id === guest.id ? updatedGuest : g);
             }
             
             changesMade = true;
-            // Actualizar arreglo virtual para que las sillas se descuenten en la misma vuelta
-            currentGuests = currentGuests.map(g => g.id === guest.id ? { ...g, tableId: bestTable.id } : g);
          } else {
-            // PAUSA ACTIVA: No cabe entero. Encontramos la mesa con MÁS espacio y pausamos.
             tablesWithSpace.sort((a, b) => b.available - a.available);
             const bestPartialTable = tablesWithSpace[0].table;
             const availableChairs = tablesWithSpace[0].available;
@@ -2732,14 +3301,16 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                isAutoAssign: true
             });
             isProcessingAutoAssign.current = false;
-            return; // Detiene el bucle para esperar al cliente
+            return;
          }
       }
 
       if (promesas.length > 0) {
          await Promise.all(promesas);
-         if(addNotification) addNotification('Auto-Acomodo Inteligente', 'Acomodo automático completado.', 'success');
-      } else if (!changesMade) {
+         if(addNotification) addNotification('Auto-Acomodo Inteligente', 'Acomodo automático completado con éxito.', 'success');
+      } else if (changesMade) {
+         if(addNotification) addNotification('Auto-Acomodo Inteligente', 'Grupos acomodados por afinidad.', 'success');
+      } else {
          if(addNotification) addNotification('Sin Cambios', 'No se pudieron asignar más invitados.', 'info');
       }
       isProcessingAutoAssign.current = false;
@@ -2765,53 +3336,57 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
          } else {
             cfg = baseConfig[opcion];
          }
-         mesasNuevas.push({ id: `mesa_smart_${Date.now()}_${startIdx}`, name: `Mesa ${startIdx}`, capacity: cfg.cap, tipo: cfg.tipo, configDetalle: cfg.config });
+         mesasNuevas.push({ id: `mesa_smart_${Date.now()}_${startIdx}`, name: `Mesa ${startIdx}`, capacity: cfg.cap, tipo: cfg.tipo, configDetalle: cfg.config, tags: [] });
          sillasGeneradas += cfg.cap;
          startIdx++;
       }
 
-    await Promise.all(mesasNuevas.map(m => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", m.id), m)));
+      await Promise.all(mesasNuevas.map(m => setDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", m.id), m)));
       setSmartAssign(null);
       if(addNotification) addNotification('¡Magia Aplicada!', `Se generaron mesas mágicas en la nube.`, 'success');
-      setTimeout(() => { handleAutoAssign(); }, 800);
+      setTimeout(() => { iniciarProcesoAutoAcomodo(); }, 800);
    };
 
    const consolidateToNull = async (guestsList) => {
        const currentGuests = guestsRef.current || safeGuests;
-       const updates = [];
-       const deletes = [];
-       const nullRoots = new Map(); 
-       
-       currentGuests.filter(g => !g.tableId).forEach(g => {
-           const rootId = g.parentId || g.id;
-           if (!nullRoots.has(rootId)) {
-               nullRoots.set(rootId, { ...g });
-           } else {
-               const existing = nullRoots.get(rootId);
-               existing.passes += g.passes;
-               existing.subGuests = [...(existing.subGuests || []), ...(g.subGuests || [])];
-               deletes.push(g.id);
+       const affectedRootIds = new Set(guestsList.map(g => g.parentId || g.id));
+       const movingIds = new Set(guestsList.map(g => g.id));
+       const promesas = [];
+
+       affectedRootIds.forEach(rootId => {
+           const familyDocs = currentGuests.filter(g => (g.parentId || g.id) === rootId);
+           const toConsolidate = familyDocs.filter(g => !g.tableId || movingIds.has(g.id));
+
+           if (toConsolidate.length > 0) {
+               const baseDoc = familyDocs.find(g => g.id === rootId) || toConsolidate[0];
+               const totalPasses = toConsolidate.reduce((sum, g) => sum + (g.passes || 0), 0);
+               const mergedSubs = toConsolidate.flatMap(g => g.subGuests || []);
+               const mergedTags = Array.from(new Set([
+                   ...(baseDoc.tags || []),
+                   ...mergedSubs.flatMap(sg => sg.tags || [])
+               ]));
+
+               const survivingId = (!baseDoc.tableId || movingIds.has(baseDoc.id)) ? rootId : toConsolidate[0].id;
+               const unifiedDoc = {
+                   ...baseDoc,
+                   id: survivingId,
+                   parentId: survivingId === rootId ? null : rootId,
+                   tableId: null,
+                   passes: totalPasses,
+                   childrenPasses: mergedSubs.filter(s => s.isChild).length,
+                   subGuests: mergedSubs,
+                   tags: mergedTags
+               };
+
+               promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", survivingId), unifiedDoc));
+               toConsolidate.forEach(g => {
+                   if (g.id !== survivingId) {
+                       promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", g.id)));
+                   }
+               });
            }
        });
 
-       for (const g of guestsList) {
-           const rootId = g.parentId || g.id;
-           if (nullRoots.has(rootId)) {
-               const existing = nullRoots.get(rootId);
-               existing.passes += g.passes;
-               existing.subGuests = [...(existing.subGuests || []), ...(g.subGuests || [])];
-               updates.push(existing);
-               deletes.push(g.id);
-           } else {
-               const movedGuest = { ...g, tableId: null };
-               nullRoots.set(rootId, movedGuest);
-               updates.push(movedGuest);
-           }
-       }
-
-       const promesas = [];
-       updates.forEach(u => promesas.push(setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", u.id), u)));
-       deletes.forEach(id => promesas.push(deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", id))));
        await Promise.all(promesas);
    };
 
@@ -2837,8 +3412,8 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
    const deleteAllTables = async () => {
       await emptyAllTables();
-    const promesas = safeTables.map(t => deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", t.id)));
-    await Promise.all(promesas);
+      const promesas = safeTables.map(t => deleteDoc(doc(db, "eventos", ID_DEL_EVENTO, "mesas", t.id)));
+      await Promise.all(promesas);
       if(addNotification) addNotification('Mesas Eliminadas', 'Se borraron todas las mesas de la base de datos.', 'warning');
    };
 
@@ -2890,7 +3465,6 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
       if (siblingFragment) {
           const mergedPasses = siblingFragment.passes + guest.passes;
-          // Unimos los pases QR internos (subGuests) para no perder nada
           const mergedSubGuests = [...(siblingFragment.subGuests || []), ...(guest.subGuests || [])];
           await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", siblingFragment.id), { 
               ...siblingFragment, 
@@ -2906,11 +3480,11 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
    };
 
    const handleSplitChoice = async (mode) => {
-         if (!guestSplitPrompt) return; // Bloqueo Anti Doble-Clic
+         if (!guestSplitPrompt) return;
          const promptData = { ...guestSplitPrompt };
-         setGuestSplitPrompt(null); // Cierra el modal instantáneamente
+         setGuestSplitPrompt(null);
 
-         const { guest, targetTableId, table, usedChairs, siblingFragment, isAutoAssign } = promptData;
+         const { guest, targetTableId, siblingFragment, isAutoAssign } = promptData;
           
          if (mode === 'all') {
                if (siblingFragment) {
@@ -2922,7 +3496,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", guest.id), { ...guest, tableId: targetTableId });
                }
                
-               if (isAutoAssign) setTimeout(() => handleAutoAssign(), 800);
+               if (isAutoAssign) setTimeout(() => iniciarProcesoAutoAcomodo(), 800);
          } else if (mode === 'split') {
                const qtyToMove = separarCantidad;
                const qtyRemaining = guest.passes - qtyToMove;
@@ -2952,7 +3526,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                    await setDoc(doc(db, "eventos", ID_DEL_EVENTO, "invitados", newGuestId), newGuest);
                }
                
-               if (isAutoAssign) setTimeout(() => handleAutoAssign(), 800);
+               if (isAutoAssign) setTimeout(() => iniciarProcesoAutoAcomodo(), 800);
          }
    };
 
@@ -3098,30 +3672,30 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
   return (
     <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
-          <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">Gestión de Mesas y Acomodo</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Arrastra invitados a las mesas, o tócalos para seleccionarlos.</p>
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+        <div className="shrink-0">
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Gestión de Mesas y Acomodo</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Arrastra invitados a las mesas, o tócalos para seleccionarlos.</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-           <div className="flex-1 md:flex-none flex items-center bg-white dark:bg-[#0a0a0a] p-1.5 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm justify-between md:justify-start">
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mx-2">Modo Separador</span>
-              <button onClick={() => setModoSeparador(!modoSeparador)} className={`relative w-9 h-5 rounded-full transition-colors ${modoSeparador ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full xl:w-auto justify-start xl:justify-end">
+           <div className="flex-1 sm:flex-none flex items-center bg-white dark:bg-[#0a0a0a] px-2.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm justify-between sm:justify-start whitespace-nowrap shrink-0">
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-2">Modo Separador</span>
+              <button onClick={() => setModoSeparador(!modoSeparador)} className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${modoSeparador ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
                 <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${modoSeparador ? 'translate-x-4' : 'translate-x-0'}`}></div>
               </button>
            </div>
-           <button onClick={handleAutoAssign} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-sm font-bold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors shadow-sm">
-              <Wand2 size={16} className="mr-2" /> Auto-Acomodar
+           <button onClick={handleOpenAutoAssign} className="flex-1 sm:flex-none flex items-center justify-center px-3.5 py-2.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-xs sm:text-sm font-bold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors shadow-sm whitespace-nowrap shrink-0">
+              <Wand2 size={15} className="mr-1.5 shrink-0" /> Auto-Acomodar
            </button>
-           <button onClick={emptyAllTables} className="flex-1 md:flex-none px-4 py-2.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 rounded-xl text-sm font-bold hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors">
+           <button onClick={emptyAllTables} className="flex-1 sm:flex-none px-3.5 py-2.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 rounded-xl text-xs sm:text-sm font-bold hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors whitespace-nowrap shrink-0">
               Vaciar
            </button>
-           <button onClick={deleteAllTables} className="flex-1 md:flex-none px-4 py-2.5 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 rounded-xl text-sm font-bold hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors">
+           <button onClick={deleteAllTables} className="flex-1 sm:flex-none px-3.5 py-2.5 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 rounded-xl text-xs sm:text-sm font-bold hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors whitespace-nowrap shrink-0">
               Borrar Mesas
            </button>
-           <button onClick={() => setIsAddModalOpen(true)} className="flex-1 md:flex-none flex items-center justify-center px-5 py-2.5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors">
-              <Plus size={18} className="mr-2" /> Nuevas Mesas
+           <button onClick={() => { setTableToEdit(null); setTableTags([]); setCreationMode('iguales'); setIsAddModalOpen(true); }} className="w-full sm:w-auto flex items-center justify-center px-4 py-2.5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl text-xs sm:text-sm font-bold shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors whitespace-nowrap shrink-0">
+              <Plus size={16} className="mr-1.5 shrink-0" /> Nuevas Mesas
            </button>
         </div>
       </div>
@@ -3129,7 +3703,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
       {/* 🔴 CONTENEDOR PRINCIPAL: PANELES DE MESAS E INVITADOS */}
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 flex-1 overflow-hidden z-10 relative">
         
-        {/* PANEL: INVITADOS SIN MESA (Carrusel horizontal en móvil / Columna en PC) */}
+        {/* PANEL: INVITADOS SIN MESA */}
         <div 
           className={`w-full lg:w-72 bg-white dark:bg-[#0a0a0a] rounded-2xl lg:rounded-3xl border flex flex-col transition-all duration-300 shadow-sm dark:shadow-2xl ${guestSeleccionado ? 'border-indigo-400 dark:border-amber-500 ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10'} max-h-[30vh] lg:max-h-none shrink-0`}
           onDragOver={handleDragOver}
@@ -3142,23 +3716,37 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
           </div>
           
           <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-4 flex flex-row lg:flex-col gap-2.5 custom-scrollbar bg-slate-50/50 dark:bg-transparent flex-wrap lg:flex-nowrap content-start">
-            {invitadosSinMesa.map(g => (
-              <div 
-                key={g.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, g.id)}
-                onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
-                className={`px-3 py-2 lg:p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all shadow-sm w-auto lg:w-full flex-grow-0 ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 border-indigo-700 dark:border-amber-400 text-white dark:text-slate-900 transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'}`}
-              >
-                <div className="flex items-center truncate max-w-[140px] lg:max-w-none">
-                  <GripVertical size={14} className={`mr-2 hidden lg:block ${guestSeleccionado?.id === g.id ? 'text-white/50 dark:text-slate-900/50' : 'text-slate-400 cursor-grab'}`} />
-                  <span className="font-bold text-xs lg:text-sm truncate">{g.name}</span>
+            {invitadosSinMesa.map(g => {
+              const gTags = Array.from(new Set([...(g.tags || []), ...(g.subGuests || []).flatMap(sg => sg.tags || [])]));
+              return (
+                <div 
+                  key={g.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, g.id)}
+                  onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
+                  className={`px-3 py-2 lg:p-3.5 rounded-xl border flex flex-col cursor-pointer transition-all shadow-sm w-auto lg:w-full flex-grow-0 ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 border-indigo-700 dark:border-amber-400 text-white dark:text-slate-900 transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'}`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center truncate max-w-[140px] lg:max-w-none">
+                      <GripVertical size={14} className={`mr-2 hidden lg:block ${guestSeleccionado?.id === g.id ? 'text-white/50 dark:text-slate-900/50' : 'text-slate-400 cursor-grab'}`} />
+                      <span className="font-bold text-xs lg:text-sm truncate">{g.name}</span>
+                    </div>
+                    <span className={`text-[9px] lg:text-[10px] font-black px-2 py-0.5 rounded-md ml-2 shrink-0 ${guestSeleccionado?.id === g.id ? 'bg-white/20 dark:bg-slate-900/20 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5'}`}>
+                      {g.passes}p
+                    </span>
+                  </div>
+                  {gTags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1.5 lg:pl-5">
+                      {gTags.map(t => (
+                        <span key={t} className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded ${guestSeleccionado?.id === g.id ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900' : 'bg-indigo-50 text-indigo-600 dark:bg-amber-500/10 dark:text-amber-400'}`}>
+                          #{t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <span className={`text-[9px] lg:text-[10px] font-black px-2 py-1 rounded-md ml-3 ${guestSeleccionado?.id === g.id ? 'bg-white/20 dark:bg-slate-900/20 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5'}`}>
-                  {g.passes}p
-                </span>
-              </div>
-            ))}
+              );
+            })}
             {invitadosSinMesa.length === 0 && (
               <div className="text-center p-4 lg:p-8 text-slate-400 dark:text-slate-500 text-xs lg:text-sm border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl font-medium w-full mt-2">Todos están asignados.</div>
             )}
@@ -3190,12 +3778,12 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                     className={`bg-white dark:bg-[#111] p-4 lg:p-5 rounded-2xl lg:rounded-3xl border shadow-sm flex flex-col relative group transition-all duration-300 ${guestSeleccionado && !isFull ? 'border-indigo-400 dark:border-amber-500 bg-indigo-50/50 dark:bg-amber-500/10 cursor-pointer shadow-md ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10 hover:border-indigo-200 dark:hover:border-white/30'}`}
                   >
                     <div className="absolute top-3 lg:top-4 right-3 lg:right-4 flex opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity space-x-1.5 z-50">
-                       <button onClick={(e) => { e.stopPropagation(); setTableToEdit(table); setCurrentConfig(table.configDetalle || configActual); setCreationMode('edit'); setIsAddModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-indigo-600 dark:text-slate-500 dark:hover:text-white bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors"><Edit2 size={14}/></button>
-                       <button onClick={(e) => { e.stopPropagation(); emptyTable(table.id); }} className="p-1.5 text-slate-400 hover:text-amber-500 dark:text-slate-500 dark:hover:text-amber-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors"><Users size={14}/></button>
-                       <button onClick={(e) => { e.stopPropagation(); deleteTable(table.id); }} className="p-1.5 text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors"><Trash2 size={14}/></button>
+                       <button onClick={(e) => { e.stopPropagation(); setTableToEdit(table); setTableTags(table.tags || []); setCurrentConfig(table.configDetalle || configActual); setCreationMode('edit'); setIsAddModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-indigo-600 dark:text-slate-500 dark:hover:text-white bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors" title="Editar Mesa y Etiquetas"><Edit2 size={14}/></button>
+                       <button onClick={(e) => { e.stopPropagation(); emptyTable(table.id); }} className="p-1.5 text-slate-400 hover:text-amber-500 dark:text-slate-500 dark:hover:text-amber-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors" title="Vaciar Mesa"><Users size={14}/></button>
+                       <button onClick={(e) => { e.stopPropagation(); deleteTable(table.id); }} className="p-1.5 text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors" title="Borrar Mesa"><Trash2 size={14}/></button>
                     </div>
                     
-                    <div className="flex items-center mb-4">
+                    <div className="flex items-center mb-3">
                       <div className="w-10 h-10 lg:w-12 lg:h-12 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mr-3 border border-slate-100 dark:border-white/10 shrink-0">
                         {getTipoIcon(table.tipo, table.configDetalle?.formaPersonalizada)}
                       </div>
@@ -3206,6 +3794,17 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                         </p>
                       </div>
                     </div>
+
+                    {/* 🟢 ETIQUETAS IMÁN DE LA MESA */}
+                    {table.tags && table.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {table.tags.map(tag => (
+                          <span key={tag} className="px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-600 border border-indigo-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20 flex items-center">
+                            <Magnet size={9} className="mr-1"/> {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
                     <div className="mb-4 bg-slate-50 dark:bg-[#050505] rounded-xl p-2.5 lg:p-3 border border-slate-100 dark:border-white/5 flex items-center justify-between transition-colors">
                       <div className="flex items-center text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -3236,6 +3835,111 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         </div>
       </div>
 
+      {/* 🟢 MODAL DEL MOTOR DUAL: CLÁSICO VS AFINIDAD */}
+      {autoAssignModal && (
+        <div className="fixed inset-0 z-[300] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+            <div className="px-8 py-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20">
+                  <Wand2 size={20}/>
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-white">Motor de Auto-Acomodo</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Las mesas ya asignadas manualmente no se moverán.</p>
+                </div>
+              </div>
+              <button onClick={() => setAutoAssignModal(false)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white"><X size={22}/></button>
+            </div>
+
+            <div className="p-8 overflow-y-auto custom-scrollbar space-y-6">
+              {/* SELECTOR DE MODO */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setAssignMode('afinidad')}
+                  className={`p-4 rounded-2xl border-2 text-left transition-all ${assignMode === 'afinidad' ? 'border-indigo-600 dark:border-amber-500 bg-indigo-50/60 dark:bg-amber-500/10 shadow-md' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] opacity-70 hover:opacity-100'}`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-black text-xs uppercase tracking-widest text-indigo-600 dark:text-amber-400">Modo Afinidad</span>
+                    <Magnet size={16} className="text-indigo-600 dark:text-amber-400"/>
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">Agrupa por las etiquetas que elijas, separa primos automáticamente y rellena huecos al final.</p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAssignMode('clasico')}
+                  className={`p-4 rounded-2xl border-2 text-left transition-all ${assignMode === 'clasico' ? 'border-indigo-600 dark:border-amber-500 bg-indigo-50/60 dark:bg-amber-500/10 shadow-md' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] opacity-70 hover:opacity-100'}`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-black text-xs uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Modo Clásico</span>
+                    <LayoutGrid size={16} className="text-emerald-600 dark:text-emerald-400"/>
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">Tetris matemático puro. Prioriza familias completas optimizando cada silla e ignora etiquetas.</p>
+                </button>
+              </div>
+
+              {/* CHIPS DE ETIQUETAS A CONSIDERAR EN MODO AFINIDAD */}
+              {assignMode === 'afinidad' && (
+                <div className="bg-slate-50 dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 space-y-4 animate-in fade-in">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between gap-4">
+                      <h4 className="text-xs font-black uppercase tracking-widest text-slate-800 dark:text-white">Etiquetas a agrupar hoy</h4>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (selectedAffinityTags.length === allAvailableTags.length) setSelectedAffinityTags([]);
+                          else setSelectedAffinityTags([...allAvailableTags]);
+                        }}
+                        className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-amber-400 hover:underline shrink-0"
+                      >
+                        {selectedAffinityTags.length === allAvailableTags.length ? 'Desmarcar todas' : 'Seleccionar todas'}
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400">Toca las etiquetas que quieres que el algoritmo junte en las mesas.</p>
+                  </div>
+
+                  {/* CHIP INAMOVIBLE DE NÚCLEO FAMILIAR */}
+                  <div className="flex flex-wrap gap-2">
+                    <div className="px-3 py-2 rounded-xl text-xs font-black bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5 cursor-default">
+                      <CheckCircle size={13}/> Familia / Grupo Original (Base)
+                    </div>
+                    {allAvailableTags.map(tag => {
+                      const active = selectedAffinityTags.includes(tag);
+                      return (
+                        <button
+                          type="button"
+                          key={tag}
+                          onClick={() => {
+                            setSelectedAffinityTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
+                          }}
+                          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${active ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-600 dark:border-amber-500 shadow-sm scale-[1.02]' : 'bg-white dark:bg-[#050505] text-slate-500 border-slate-200 dark:border-white/10'}`}
+                        >
+                          #{tag}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-slate-100 dark:border-white/10 bg-white dark:bg-[#0a0a0a] flex gap-3 shrink-0">
+              <button onClick={() => setAutoAssignModal(false)} className="px-6 py-4 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 font-bold text-xs uppercase tracking-widest">
+                Cancelar
+              </button>
+              <button 
+                onClick={() => iniciarProcesoAutoAcomodo(assignMode, selectedAffinityTags)} 
+                className="flex-1 py-4 rounded-xl bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 font-black text-xs uppercase tracking-widest shadow-lg hover:bg-indigo-700 dark:hover:bg-amber-400 transition-all flex items-center justify-center gap-2"
+              >
+                <Wand2 size={16}/> Comenzar Auto-Acomodo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL INTELIGENTE: SEPARAR FAMILIA O MOVER GRUPO */}
       {guestSplitPrompt && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
@@ -3245,7 +3949,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
             
             {guestSplitPrompt.isForced ? (
                 <p className="text-rose-500 mb-4 text-[13px] font-medium leading-relaxed">
-                   Esta mesa es para <b>{guestSplitPrompt.table.capacity} personas</b> y solo quedan <b>{guestSplitPrompt.availableChairs} sillas disponibles</b>. La familia <b>{guestSplitPrompt.guest.name}</b> ({guestSplitPrompt.guest.passes} pases) supera la capacidad.<br/><br/>¿Cuántos deseas acomodar en esta mesa?
+                   Esta mesa es para <b>{guestSplitPrompt.table.capacity} personas</b> y solo quedan <b>{guestSplitPrompt.availableChairs} sillas disponibles</b>. El grupo de <b>{guestSplitPrompt.guest.name}</b> ({guestSplitPrompt.guest.passes} pases) supera la capacidad.<br/><br/>¿Cuántos deseas acomodar en esta mesa?
                 </p>
             ) : (
                 <p className="text-slate-500 dark:text-slate-400 mb-4 text-[13px] leading-relaxed">
@@ -3280,7 +3984,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         </div>
       )}
 
-      {/* MODAL: ASISTENTE INTELIGENTE AUTO-ACOMODAR */}
+      {/* MODAL: ASISTENTE INTELIGENTE AUTO-ACOMODAR (CUANDO FALTAN MESAS) */}
       {smartAssign && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10">
@@ -3349,26 +4053,23 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         </div>
       )}
 
-      {/* MODALES MANUALES (Add, Edit, Delete) CON ESTILO DARK/PREMIUM */}
+      {/* MODAL CONFIGURAR / EDITAR MESAS CON IMÁN DE ETIQUETAS */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 duration-200 transition-colors">
           <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-transparent dark:border-white/10 flex flex-col max-h-[90vh] transition-colors">
             
             <div className="px-8 py-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 shrink-0 transition-colors">
-              <h3 className="font-bold text-xl text-slate-800 dark:text-white flex items-center tracking-wide"><LayoutGrid size={22} className="mr-2.5 text-indigo-600 dark:text-amber-500"/> Configurar Mesas</h3>
+              <h3 className="font-bold text-xl text-slate-800 dark:text-white flex items-center tracking-wide"><LayoutGrid size={22} className="mr-2.5 text-indigo-600 dark:text-amber-500"/> {creationMode === 'edit' ? `Editar ${tableToEdit?.name}` : 'Configurar Mesas'}</h3>
               <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={24}/></button>
             </div>
 
             <div className="p-8 overflow-y-auto flex-1 custom-scrollbar">
-              <div className="flex p-1.5 bg-slate-100 dark:bg-[#111] rounded-xl mb-6 border border-slate-200 dark:border-white/5 transition-colors">
-                <button onClick={() => {setCreationMode('iguales'); setTableToEdit(null);}} className={`flex-1 py-2.5 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${creationMode === 'iguales' && !tableToEdit ? 'bg-white dark:bg-[#222] text-indigo-600 dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>Todas Iguales</button>
-                <button onClick={() => {setCreationMode('variedad'); setTableToEdit(null);}} className={`flex-1 py-2.5 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${creationMode === 'variedad' ? 'bg-white dark:bg-[#222] text-indigo-600 dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>Crear Mezcla</button>
-              </div>
-
-              <div className="bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/20 p-4 rounded-xl mb-6 text-xs text-indigo-800 dark:text-amber-400 flex items-start shadow-sm transition-colors">
-                <Info size={18} className="mr-2 flex-shrink-0 mt-0.5"/>
-                <span className="leading-relaxed"><b>Tip Operativo:</b> Al seleccionar un tipo de mesa, se cargará su <b>capacidad física máxima</b>. Puedes reducir el número de sillas si tu montaje lo requiere.</span>
-              </div>
+              {creationMode !== 'edit' && (
+                <div className="flex p-1.5 bg-slate-100 dark:bg-[#111] rounded-xl mb-6 border border-slate-200 dark:border-white/5 transition-colors">
+                  <button onClick={() => {setCreationMode('iguales'); setTableToEdit(null);}} className={`flex-1 py-2.5 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${creationMode === 'iguales' && !tableToEdit ? 'bg-white dark:bg-[#222] text-indigo-600 dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>Todas Iguales</button>
+                  <button onClick={() => {setCreationMode('variedad'); setTableToEdit(null);}} className={`flex-1 py-2.5 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${creationMode === 'variedad' ? 'bg-white dark:bg-[#222] text-indigo-600 dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>Crear Mezcla</button>
+                </div>
+              )}
 
               <label className="block text-[10px] font-black uppercase tracking-widest mb-3 text-slate-500 dark:text-slate-400">Forma de la mesa</label>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
@@ -3389,18 +4090,60 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
               {renderConfigForm()}
 
-              <div className="mt-8 border-t border-slate-100 dark:border-white/10 pt-6 transition-colors">
-                <label className="block text-[10px] font-black uppercase tracking-widest mb-3 text-slate-500 dark:text-slate-400">Cantidad a generar</label>
-                <div className="flex items-center gap-4">
-                  <input type="number" min="1" value={cantidadIguales} onChange={(e) => { let v = parseInt(e.target.value); if(v>0) setCantidadIguales(v); }} className="w-24 p-4 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 font-black text-center text-xl bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white shadow-inner transition-colors" />
-                  
-                  {creationMode === 'variedad' && (
-                    <button onClick={agregarAVariedad} className="flex-1 py-4 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 font-bold uppercase tracking-widest text-xs rounded-xl border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-200 dark:hover:bg-indigo-500/30 transition-colors flex items-center justify-center shadow-sm">
-                      <Plus size={16} className="mr-2"/> Añadir a mezcla
-                    </button>
-                  )}
+              {/* 🟢 IMÁN DE ETIQUETAS PARA LA MESA (SOPORTA MÚLTIPLES ETIQUETAS) */}
+              <div className="mt-6 border-t border-slate-100 dark:border-white/10 pt-5">
+                <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-indigo-600 dark:text-amber-400 flex items-center">
+                  <Magnet size={13} className="mr-1.5"/> Imán de Afinidad para esta mesa (Opcional)
+                </label>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-3">Toca una o varias etiquetas (ej. #Primos y #Amigos) para que esta mesa atraiga a esos grupos en automático.</p>
+                
+                {allAvailableTags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {allAvailableTags.map(tag => {
+                      const active = tableTags.includes(tag);
+                      return (
+                        <button
+                          type="button"
+                          key={tag}
+                          onClick={() => toggleTableTag(tag)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${active ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-600 dark:border-amber-500 shadow-sm' : 'bg-slate-50 dark:bg-[#111] text-slate-500 border-slate-200 dark:border-white/10'}`}
+                        >
+                          #{tag}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={newTagInput} 
+                    onChange={e => setNewTagInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleCreateGlobalTag(); } }}
+                    placeholder="Crear nueva etiqueta..." 
+                    className="flex-1 px-3 py-2 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-xs outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white"
+                  />
+                  <button type="button" onClick={handleCreateGlobalTag} className="px-4 py-2 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white rounded-xl text-[10px] font-black uppercase tracking-widest">
+                    + Añadir
+                  </button>
                 </div>
               </div>
+
+              {creationMode !== 'edit' && (
+                <div className="mt-6 border-t border-slate-100 dark:border-white/10 pt-6 transition-colors">
+                  <label className="block text-[10px] font-black uppercase tracking-widest mb-3 text-slate-500 dark:text-slate-400">Cantidad a generar</label>
+                  <div className="flex items-center gap-4">
+                    <input type="number" min="1" value={cantidadIguales} onChange={(e) => { let v = parseInt(e.target.value); if(v>0) setCantidadIguales(v); }} className="w-24 p-4 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 font-black text-center text-xl bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white shadow-inner transition-colors" />
+                    
+                    {creationMode === 'variedad' && (
+                      <button onClick={agregarAVariedad} className="flex-1 py-4 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 font-bold uppercase tracking-widest text-xs rounded-xl border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-200 dark:hover:bg-indigo-500/30 transition-colors flex items-center justify-center shadow-sm">
+                        <Plus size={16} className="mr-2"/> Añadir a mezcla
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {creationMode === 'variedad' && mezclaVariedad.length > 0 && (
                 <div className="mt-6 bg-slate-800 dark:bg-[#111] border dark:border-white/10 rounded-2xl p-5 text-white animate-in slide-in-from-bottom-4 shadow-inner transition-colors">
@@ -3408,10 +4151,13 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                   <ul className="space-y-2.5 mb-5 max-h-40 overflow-y-auto custom-scrollbar">
                     {mezclaVariedad.map(item => (
                       <li key={item.id} className="flex items-center justify-between text-xs bg-slate-700/50 dark:bg-black/50 border border-slate-600 dark:border-white/5 p-3 rounded-xl transition-colors">
-                        <div className="flex items-center font-medium">
-                          <span className="font-black text-indigo-300 dark:text-amber-400 mr-2.5 text-sm">{item.cantidad}x</span> 
+                        <div className="flex items-center font-medium flex-wrap gap-1">
+                          <span className="font-black text-indigo-300 dark:text-amber-400 mr-1.5 text-sm">{item.cantidad}x</span> 
                           <span className="uppercase tracking-wider">{item.config.tipo === 'libre' ? 'Diseño Libre' : item.config.tipo}</span> 
-                          <span className="text-slate-400 dark:text-slate-500 ml-2 font-bold">({item.config.capacidadCalculada} sillas)</span>
+                          <span className="text-slate-400 dark:text-slate-500 ml-1 font-bold">({item.config.capacidadCalculada} sillas)</span>
+                          {item.tags && item.tags.map(t => (
+                            <span key={t} className="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded ml-1">#{t}</span>
+                          ))}
                         </div>
                         <button onClick={() => eliminarDeVariedad(item.id)} className="text-slate-400 hover:text-rose-400 transition-colors p-1"><Trash2 size={16}/></button>
                       </li>
@@ -3423,7 +4169,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
             </div>
 
             <div className="p-6 border-t border-slate-100 dark:border-white/10 bg-white dark:bg-[#0a0a0a] shrink-0 transition-colors">
-              {creationMode === 'iguales' ? (
+              {creationMode === 'iguales' || creationMode === 'edit' ? (
                 <button onClick={generarMesas} className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black uppercase tracking-widest text-xs shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors active:scale-95">
                   {creationMode === 'edit' ? 'Guardar Cambios' : `Generar ${cantidadIguales} Mesa${cantidadIguales > 1 ? 's' : ''}`}
                 </button>
@@ -14670,15 +15416,61 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   }, [eventId, isIframe, eventoInfo, t_btn, t_txt, textRgb, dataSent, qrEnabled]);
 
   useEffect(() => {
+    const getColOnce = (colRef) => new Promise((resolve) => {
+      const unsub = onSnapshot(colRef, (snap) => {
+        unsub();
+        resolve(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      }, () => resolve([]));
+    });
+
     const fetchData = async () => {
       try {
         const docSnap = await getDoc(doc(db, "eventos", eventId));
         if (docSnap.exists()) setEventoInfo(docSnap.data());
 
         if (guestUid) {
-          const guestSnap = await getDoc(doc(db, "eventos", eventId, "invitados", guestUid));
-          if (guestSnap.exists()) {
-            const gData = guestSnap.data();
+          const [allGuests, allTables] = await Promise.all([
+            getColOnce(collection(db, "eventos", eventId, "invitados")),
+            getColOnce(collection(db, "eventos", eventId, "mesas"))
+          ]);
+
+          const tablesMap = {};
+          allTables.forEach(t => { tablesMap[t.id] = t.name; });
+
+          const targetDoc = allGuests.find(d => d.id === guestUid);
+          if (targetDoc) {
+            const rootId = targetDoc.parentId || targetDoc.id;
+            const familyFragments = allGuests.filter(d => (d.parentId || d.id) === rootId);
+            const rootDoc = familyFragments.find(d => d.id === rootId) || targetDoc;
+
+            // Reunimos todos los QRs de la familia inyectando a cada uno su mesa asignada
+            let mergedSubs = [];
+            familyFragments.forEach(frag => {
+              const rawTableName = frag.tableId ? (tablesMap[frag.tableId] || frag.tableId) : null;
+              const cleanTableLabel = rawTableName ? String(rawTableName).replace(/^Mesa\s*:?\s*/i, '').trim() : null;
+              const fragSubs = (frag.subGuests || []).map(sg => ({
+                ...sg,
+                tableId: cleanTableLabel,
+                tableName: rawTableName
+              }));
+              mergedSubs = [...mergedSubs, ...fragSubs];
+            });
+
+            // Ordenamos para que el titular siempre aparezca primero
+            mergedSubs.sort((a, b) => {
+              if (a.name === rootDoc.name && b.name !== rootDoc.name) return -1;
+              if (b.name === rootDoc.name && a.name !== rootDoc.name) return 1;
+              return 0;
+            });
+
+            const totalActivePasses = familyFragments.reduce((sum, f) => sum + (f.passes || 0), 0);
+            const gData = {
+              ...rootDoc,
+              id: rootId,
+              passes: totalActivePasses,
+              subGuests: mergedSubs
+            };
+
             setGuestInfo(gData);
             setExtraRequested(gData.extraRequested || 0);
             
