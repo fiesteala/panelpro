@@ -15320,11 +15320,18 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   const [openPasses, setOpenPasses] = useState(1);
   const [openName, setOpenName] = useState('');
 
-  // 🟢 EXTRACCIÓN MAESTRA DE DISEÑO
+  // 🟢 EXTRACCIÓN MAESTRA DE DISEÑO Y DETECCIÓN AUTOMÁTICA DE SIMULADOR
   const searchString = window.location.search || (window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '');
   const urlParams = new URLSearchParams(searchString);
   const isIframe = urlParams.get('iframe') === 'true' || window.location.href.includes('iframe=true');
-  const isPreviewMode = urlParams.get('preview') === '1' || window.location.href.includes('preview=1');
+  
+  // Si el padre del iframe NO es la ventana superior (window.top), significa que estamos dentro del Simulador del Panel
+  const isInsideSimulator = (() => {
+    try { return window.self !== window.top && window.parent !== window.top; } 
+    catch (e) { return true; }
+  })();
+
+  const isPreviewMode = urlParams.get('preview') === '1' || window.location.href.includes('preview=1') || document.referrer.includes('preview=1') || isInsideSimulator;
   
   const getHex = (param) => {
       const val = urlParams.get(param);
@@ -15517,17 +15524,23 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
       setRsvpStatus('submitting');
       setTimeout(() => {
          setRsvpStatus('success');
-         showToast('Modo Simulación: Flujo exitoso.', 'success');
+         showToast('Simulación Segura: Base de datos intacta.', 'success');
          if (guestInfo) {
+           const attendingList = tempSubGuests.filter(sg => sg.willAttend);
+           const safeAttending = (attendingList.length > 0 ? attendingList : tempSubGuests).map((sg, i) => ({
+             ...sg,
+             name: sg.name?.trim() || (i === 0 ? guestInfo.name : `Acompañante ${i + 1}`)
+           }));
+
            const mockData = {
              ...guestInfo,
              status: 'confirmado',
-             passes: qrEnabled ? tempSubGuests.filter(sg => sg.willAttend).length : attendingCount,
-             subGuests: qrEnabled ? tempSubGuests.filter(sg => sg.willAttend) : Array(attendingCount).fill({id: 'sim_qr', name: guestInfo.name})
+             passes: qrEnabled ? safeAttending.length : attendingCount,
+             subGuests: qrEnabled ? safeAttending : Array(attendingCount).fill({ id: 'sim_qr', name: guestInfo.name })
            };
            comunicarDatosALaInvitacionHTML(mockData);
          }
-      }, 1200);
+      }, 900);
       return; 
     }
 

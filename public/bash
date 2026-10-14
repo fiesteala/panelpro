@@ -1,5 +1,5 @@
 git add .
-git commit -m "fver invitacion app pases QR unificados"
+git commit -m "simulacion invitacion app pases QR no real"
 git push origin main
 
 .
