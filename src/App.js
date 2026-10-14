@@ -12594,11 +12594,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             onError={(e) => { e.target.style.opacity = '0'; }}
           />
 
-          {/* Velo radial central para legibilidad perfecta sin ocultar el arte de fondo */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(253,251,247,0.78)_0%,rgba(250,250,250,0.45)_55%,rgba(250,250,250,0.85)_100%)] dark:bg-[radial-gradient(circle_at_center,rgba(5,5,5,0.72)_0%,rgba(5,5,5,0.45)_55%,rgba(5,5,5,0.9)_100%)] transition-colors duration-1000"></div>
+          {/* Velo sutil de baja opacidad para destacar la fotografía de fondo */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(253,251,247,0.48)_0%,rgba(250,250,250,0.18)_55%,rgba(250,250,250,0.55)_100%)] dark:bg-[radial-gradient(circle_at_center,rgba(5,5,5,0.45)_0%,rgba(5,5,5,0.18)_55%,rgba(5,5,5,0.65)_100%)] transition-colors duration-1000"></div>
           
-          {/* Degradado inferior para fundirse suavemente con el resto de la página */}
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#FAFAFA] via-[#FAFAFA]/80 to-transparent dark:from-[#050505] dark:via-[#050505]/80 dark:to-transparent transition-colors duration-1000"></div>
+          {/* Degradado inferior más corto para no cubrir la cauda del vestido */}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#FAFAFA] via-[#FAFAFA]/60 to-transparent dark:from-[#050505] dark:via-[#050505]/60 dark:to-transparent transition-colors duration-1000"></div>
         </div>
 
         <RevealSection className="relative z-10 max-w-[1200px] mx-auto flex flex-col items-center">
@@ -12609,36 +12609,22 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </span>
           </div>
 
-          <h1 className="text-6xl md:text-7xl lg:text-[7.5rem] font-medium text-slate-900 dark:text-white mb-6 tracking-tighter leading-[0.9] font-editorial transition-colors duration-700 drop-shadow-sm">
+          <h1 className="text-6xl md:text-7xl lg:text-[7.5rem] font-medium text-slate-900 dark:text-white mb-6 tracking-tighter leading-[0.9] font-editorial transition-colors duration-700 drop-shadow-[0_2px_12px_rgba(255,255,255,0.6)] dark:drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]">
             El arte de celebrar <br/>
             <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-700 dark:from-amber-200 dark:via-amber-400 dark:to-yellow-500 pr-2">sin estrés.</span>
           </h1>
 
-          <p className="text-lg md:text-2xl text-slate-700 dark:text-slate-300 mb-10 max-w-3xl mx-auto font-light leading-relaxed transition-colors duration-700 drop-shadow-sm">
+          <p className="text-lg md:text-2xl text-slate-800 dark:text-slate-200 mb-12 max-w-3xl mx-auto font-normal leading-relaxed transition-colors duration-700 drop-shadow-[0_1px_8px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
             Diseñamos invitaciones que <b>emocionan desde el primer segundo</b> —con acuarelas, arte floral, caligrafía dorada y música envolvente— conectadas al único sistema con <b>Pases QR vivos y Auto-Acomodo de Mesas por Afinidad</b>.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center relative mb-10">
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center relative">
             <button onClick={() => setCheckoutModal('selector')} className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_10px_35px_rgba(245,158,11,0.45)] border border-amber-400">
               Reservar mi Bóveda <ArrowRight size={18} className="ml-3"/>
             </button>
             <a href="#showroom" className="w-full sm:w-auto px-8 py-4 bg-slate-900/90 dark:bg-white/95 backdrop-blur-md text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
               Ver Colección Privada
             </a>
-          </div>
-
-          {/* PÍLDORAS DE REYES TECNOLÓGICOS Y ARTÍSTICOS */}
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-3 max-w-3xl mx-auto">
-            {[
-              '✨ Diseño Artístico a Medida',
-              '🧲 Auto-Acomodo por Afinidad',
-              '📐 Croquis 2D Interactivo',
-              '🎟️ Pases QR con Mesa Asignada'
-            ].map((pill, i) => (
-              <span key={i} className="px-3.5 py-1.5 rounded-full bg-white/75 dark:bg-black/50 backdrop-blur-md border border-slate-200/80 dark:border-white/10 text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm">
-                {pill}
-              </span>
-            ))}
           </div>
         </RevealSection>
       </section>
