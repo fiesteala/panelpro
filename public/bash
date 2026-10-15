@@ -1,5 +1,5 @@
 git add .
-git commit -m "experiencia y boveda actualizada landingpage"
+git commit -m "paso 3 ver planes y lista comparativa"
 git push origin main
 
 .

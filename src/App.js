@@ -12078,6 +12078,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   ]);
   const [bovedaScanCount, setBovedaScanCount] = useState(184);
 
+  // 🟢 ESTADOS PASO 3: FICHA TÉCNICA POR PLAN Y PORTAL COMPARATIVO
+  const [fichaPlanModal, setFichaPlanModal] = useState(null); // 'basico' | 'plata' | 'oro' | 'diamante' | null
+  const [fichaTab, setFichaTab] = useState('invitacion'); // 'invitacion' | 'boveda'
+  const [portalComparativoOpen, setPortalComparativoOpen] = useState(false);
+  const [mobileComparePlan, setMobileComparePlan] = useState('oro');
+
   const updateMesaPositionFromClientXY = (clientX, clientY, targetId = draggingMesaId) => {
     if (!targetId || !croquisCanvasRef.current) return;
     const rect = croquisCanvasRef.current.getBoundingClientRect();
@@ -12180,11 +12186,129 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   };
 
   // 🔴 4. ARREGLO "planes" CON ENFOQUE ARTÍSTICO Y ALTA COSTURA + SOFTWARE VIP
+  // 🔴 4. ARREGLO "planes" CON FICHA TÉCNICA COMPLETA Y PRECIOS DINÁMICOS DE FIREBASE
   const planes = [
-    { id: 'basico', nombre: 'Básico', ...obtenerPrecio('basico'), desc: 'Calidez artística, emoción visual y diseño a medida para anunciar tu gran día.', icon: <Smartphone size={24}/>, f: ['Diseño artístico (Floral, Acuarela o Temático)', 'Música emotiva y fotografía protagónica', 'Confirmación directa (RSVP) y Cuenta Regresiva', 'Logística GPS nativa'] },
-    { id: 'plata', nombre: 'Plata', ...obtenerPrecio('plata'), desc: 'Romanticismo interactivo con mesa de regalos y lluvia de sobres sin comisiones.', icon: <Wallet size={24}/>, f: ['Todo el arte del Plan Básico', 'Mesa de Regalos y Lluvia de Sobres', 'Itinerario ilustrado y Dress Code', 'Agendado directo en Calendario'] },
-    { id: 'oro', nombre: 'Oro', ...obtenerPrecio('oro'), desc: 'Alta costura visual por fuera, pases QR VIP y control de acceso por dentro.', icon: <ShieldCheck size={24}/>, popular: true, d2: true, f: ['Todo lo del Plan Plata', 'Pases QR VIP personalizados con nombre', 'App Escáner de recepción para Hostess', 'Auto-Acomodo de Mesas por Afinidad'] },
-    { id: 'diamante', nombre: 'Diamante', ...obtenerPrecio('diamante'), desc: 'La obra maestra definitiva: arte nupcial, proyección en vivo y brazaletes VIP.', icon: <Gem size={24}/>, d1: true, f: ['Todo lo del Plan Oro', 'Croquis y Acomodo Inteligente 2D', 'Baulia Social Wall (Fotos en Vivo)', 'Baulia Black Label (Brazaletes Físicos VIP)'] }
+    { 
+      id: 'basico', 
+      nombre: 'Básico', 
+      subtitulo: 'La Esencia Artística',
+      ...obtenerPrecio('basico'), 
+      desc: 'El anuncio elegante con diseño de alta costura para quienes desean simplicidad con estética impecable.', 
+      icon: <Smartphone size={24}/>, 
+      f: [
+        'Diseño de Alta Costura + 1 Foto de Portada (Slow Zoom)',
+        'Reproductor de Música sin bloqueo y Frase Emotiva',
+        'Cuenta Regresiva en vivo y 1 Ubicación GPS nativa',
+        'Confirmación de asistencia directa a tu WhatsApp',
+        'Bóveda Baulia en Modo Bienvenida (Enlace listo)'
+      ],
+      fichaInvitacion: [
+        { t: '1 Fotografía de Portada (Efecto Slow Zoom)', d: 'Encuadre protagónico con movimiento cinematográfico suave y tipografía de alta costura.' },
+        { t: 'Música de Fondo sin Bloqueos', d: 'Tu canción especial se reproduce al abrir la invitación con botón flotante tipo ecualizador.' },
+        { t: 'Frase Emotiva y Cuenta Regresiva', d: 'Cita especial en caligrafía serif fina y reloj en tiempo real hasta el día del evento.' },
+        { t: '1 Ubicación GPS Inteligente', d: 'Detecta iOS o Android para abrir Apple Maps o Google Maps con la ruta exacta.' },
+        { t: 'Confirmación Directa por WhatsApp', d: 'Tus invitados confirman con un toque enviando un mensaje directo a tu teléfono.' }
+      ],
+      fichaBoveda: [
+        { t: 'Panel de Bienvenida y Enlace Oficial', d: 'Acceso a tu cuenta Baulia con tu invitación lista para compartir.', ok: true },
+        { t: 'Vista Previa de Herramientas Pro (Con Candado)', d: 'Podrás visualizar los módulos de Mesas, QRs y Finanzas por si deseas hacer Upgrade en cualquier momento.', ok: true },
+        { t: 'Lista de Invitados para Envíos WhatsApp', d: 'Disponible a partir del Plan Plata.', ok: false },
+        { t: 'Pases QR Vivos y Auto-Acomodo de Mesas', d: 'Disponible a partir del Plan Oro.', ok: false },
+        { t: 'Croquis 2D, Social Wall y Black Label', d: 'Exclusivo del Plan Diamante.', ok: false }
+      ]
+    },
+    { 
+      id: 'plata', 
+      nombre: 'Plata', 
+      subtitulo: 'Retorno de Inversión',
+      ...obtenerPrecio('plata'), 
+      desc: 'Se paga solo: integra Lluvia de Sobres a 1 clic, mesa de regalos, galería fotográfica e itinerario.', 
+      icon: <Wallet size={24}/>, 
+      f: [
+        'Todo el Plan Básico + Monograma de Iniciales',
+        'Galería Fotográfica en Carrusel (Hasta 5 fotos)',
+        'Lluvia de Sobres (CLABE 1-clic) y Mesa de Regalos',
+        'Sección de Padres, Itinerario y Dress Code visual',
+        '2 Ubicaciones GPS + Botón Agendar en Calendario',
+        'Bóveda: Lista de Invitados para envíos por WhatsApp'
+      ],
+      fichaInvitacion: [
+        { t: 'Todo el Arte del Plan Básico + Monograma', d: 'Incluye sello o monograma elegante con las iniciales de los festejados.' },
+        { t: 'Galería Fotográfica Estándar (Hasta 5 Fotos)', d: 'Carrusel táctil de alta resolución con tus mejores fotografías.' },
+        { t: 'Lluvia de Sobres (1-Clic) y Mesa de Regalos', d: 'Tus invitados copian tu CLABE bancaria en un toque (0% comisión) o abren tus mesas de Liverpool, Palacio de Hierro o Amazon.' },
+        { t: 'Mención de Padres, Itinerario y Dress Code', d: 'Línea de tiempo minuto a minuto e íconos de código de vestimenta.' },
+        { t: '2 Ubicaciones GPS + Agendar en Calendario', d: 'Ceremonia y Recepción con descarga directa a Apple y Google Calendar.' }
+      ],
+      fichaBoveda: [
+        { t: 'Módulo de Invitados Desbloqueado (Modo Envío)', d: 'Registra a tus familias y envíales su invitación por WhatsApp en 1 clic llevando el control de a quién ya invitaste.', ok: true },
+        { t: 'Simulador de Invitación en Vivo', d: 'Previsualiza tu invitación dentro de tu panel en todo momento.', ok: true },
+        { t: 'RSVP Blindado y Pases QR con Mesa', d: 'Bloqueado con candado (Desbloquéalo subiendo a Plan Oro).', ok: false },
+        { t: 'Gestión de Mesas + Algoritmo por Afinidad', d: 'Bloqueado con candado (Desbloquéalo subiendo a Plan Oro).', ok: false },
+        { t: 'Croquis 2D, Social Wall y Black Label', d: 'Exclusivo del Plan Diamante.', ok: false }
+      ]
+    },
+    { 
+      id: 'oro', 
+      nombre: 'Oro', 
+      subtitulo: 'Cero Colados & Mesas IA',
+      ...obtenerPrecio('oro'), 
+      desc: 'El estándar de lujo: Saludo VIP, Pases QR con número de mesa y Auto-Acomodo inteligente por Afinidad.', 
+      icon: <ShieldCheck size={24}/>, 
+      popular: true, 
+      d2: true, 
+      f: [
+        'Todo el Plan Plata + Saludo VIP por Nombre en Portada',
+        'Hasta 3 Fotos de Portada (Fade-out) + Galería 10 Fotos (Masonry/Arcos)',
+        'Padres, Padrinos, Sugerencias de Hospedaje y Filtro IG',
+        'RSVP Blindado + Pases QR Vivos con Número de Mesa',
+        'Gestión de Mesas + Auto-Acomodo (Afinidad y Tetris)',
+        'App Escáner Hostess + Finanzas, Proveedores y Checklist'
+      ],
+      fichaInvitacion: [
+        { t: 'Hasta 3 Fotos de Portada (Transición Fade-Out)', d: 'Atenuación cinematográfica suave estilo revista editorial.' },
+        { t: 'Saludo VIP Personalizado por Familia', d: 'Extrae el nombre de cada invitado desde la nube y lo recibe en portada ("Pase Especial para: Familia Montemayor").' },
+        { t: 'Galería Extendida (10 Fotos: Carrusel, Masonry o Arcos)', d: 'Arquitectura fotográfica asimétrica o con marcos curvos de alta costura.' },
+        { t: 'Padres, Padrinos, Hospedaje y Filtro de Instagram', d: 'Créditos completos de honor, hoteles recomendados, 3 GPS y botón para filtro social.' },
+        { t: 'Carrusel de Pases QR Vivos con Número de Mesa', d: 'Al confirmar asistencia, la invitación entrega los pases descargables indicando exactamente en qué mesa se sienta cada integrante.' }
+      ],
+      fichaBoveda: [
+        { t: 'RSVP Blindado + Solicitudes de Pases Extra', d: 'Control estricto de lugares por familia y aprobación de pases adicionales en 1 clic.', ok: true },
+        { t: 'Gestión de Mesas + Motor Dual (Afinidad y Tetris)', d: 'Etiqueta invitados (#Primos, #Amigos), ponle imanes a tus mesas y deja que el algoritmo acomode todo el salón respetando a tus VIPs.', ok: true },
+        { t: 'App Escáner QR para Hostess en Recepción', d: 'Tu staff escanea desde su celular validando el ingreso y viendo la mesa asignada.', ok: true },
+        { t: 'Bóveda Financiera, Proveedores, Checklist y Reportes PDF/Excel', d: 'Control total de presupuesto, abonos y exportación de listas oficiales para el banquetero.', ok: true },
+        { t: 'Croquis 2D Arrastrable, Social Wall y Black Label', d: 'Disponibles como Add-on o incluidos en el Plan Diamante.', ok: false }
+      ]
+    },
+    { 
+      id: 'diamante', 
+      nombre: 'Diamante', 
+      subtitulo: 'La Obra Maestra All-Inclusive',
+      ...obtenerPrecio('diamante'), 
+      desc: 'La suite definitiva sin límites: Croquis 2D arrastrable, proyección de fotos en vivo y brazaletes VIP.', 
+      icon: <Gem size={24}/>, 
+      d1: true, 
+      f: [
+        'Todo lo del Plan Oro + Galería Fotográfica Ilimitada',
+        'Ubicaciones GPS Ilimitadas y Monograma a Medida',
+        'Croquis Arquitectónico 2D Interactivo (Arrastra Mesas)',
+        'Baulia Social Wall Incluido (Álbum y Proyección en Vivo)',
+        'Baulia Black Label Incluido (PDF Brazaletes Físicos VIP)',
+        'Radar de Aforo en Tiempo Real + Soporte Prioritario'
+      ],
+      fichaInvitacion: [
+        { t: 'Todo el Poder Artístico del Plan Oro sin Límites', d: 'Hasta 3 portadas cinematográficas, monograma a medida, saludo VIP por familia y ubicaciones GPS ilimitadas.' },
+        { t: 'Galería Fotográfica Ilimitada Multi-Estilo', d: 'Exhibe tu sesión completa en formato Carrusel, Masonry Editorial o Arcos.' },
+        { t: 'Pases QR Vivos Sincronizados con el Croquis 2D', d: 'Cada tarjeta VIP descargable muestra el nombre del evento, el integrante y su mesa actualizada en tiempo real.' },
+        { t: 'Acceso Directo al Muro Social desde la Invitación', d: 'Tus invitados pueden subir y compartir las fotos que toman durante la fiesta sin instalar aplicaciones.' }
+      ],
+      fichaBoveda: [
+        { t: 'Bóveda Baulia 100% Desbloqueada (Sin Candados)', d: 'Incluye RSVP Blindado, Etiquetas, Auto-Acomodo por Afinidad, Finanzas, Proveedores, Checklist y Escáner Hostess.', ok: true },
+        { t: 'Croquis Arquitectónico 2D Interactivo', d: 'Diseña el plano real de tu salón moviendo mesas redondas, cuadradas, tablones, serpentinas, pista y escenario.', ok: true },
+        { t: 'Baulia Social Wall Incluido (Valor $990+)', d: 'Álbum fotográfico en vivo con panel de moderación para proyectar las fotos de tus invitados en las pantallas del salón.', ok: true },
+        { t: 'Baulia Black Label Incluido (Valor $790+)', d: 'Generador de plantillas vectoriales en PDF listas para imprimir brazaletes físicos con QR encriptado.', ok: true },
+        { t: 'Monitor y Radar de Puerta en Vivo', d: 'Velocímetro de aforo en tiempo real en tu celular mientras tu staff escanea en la entrada.', ok: true }
+      ]
+    }
   ];
 
   const pSocialWall = obtenerPrecio('social_wall');
@@ -12267,16 +12391,33 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const currentNotif = heroNotifications[notifIndex];
 
   const característicasTabla = [
-    { n: 'Diseño Inmersivo Alta Costura', b: true, p: true, o: true, d: true, icon: <Palette/>, grupo: 'LA INVITACIÓN' },
-    { n: 'Ubicaciones GPS (Mapas)', b: '1', p: '2', o: '3', d: 'Ilimitado', icon: <MapPin/>, grupo: 'LA INVITACIÓN' },
-    { n: 'Confirmaciones (RSVP)', b: 'Vía WhatsApp', p: 'Vía WhatsApp', o: 'Bóveda Inteligente', d: 'Bóveda Inteligente', icon: <UserCheck/>, grupo: 'LA INVITACIÓN' },
-    { n: 'Mesa de Regalos / Efectivo', b: false, p: true, o: true, d: true, icon: <Gift/>, grupo: 'LA INVITACIÓN' },
-    
-    { n: 'Panel: Lista de Invitados y Mesas', b: false, p: false, o: true, d: true, icon: <Users/>, grupo: 'EL PODER DEL SOFTWARE' },
-    { n: 'Pases QR Intransferibles', b: false, p: false, o: true, d: true, icon: <QrCode/>, grupo: 'EL PODER DEL SOFTWARE' },
-    { n: 'App Escáner para Hostess', b: false, p: false, o: true, d: true, icon: <Scan/>, grupo: 'EL PODER DEL SOFTWARE' },
-    { n: 'Baulia Social Wall (Proyector)', b: false, p: false, o: false, d: true, icon: <Camera/>, grupo: 'EL PODER DEL SOFTWARE' },
-    { n: 'Black Label (Generador VIP)', b: false, p: false, o: false, d: true, icon: <Lock/>, grupo: 'EL PODER DEL SOFTWARE' }
+    // GRUPO 1: ARTE Y DISEÑO DE LA INVITACIÓN
+    { n: 'Diseño Inmersivo de Alta Costura (Cero Plantillas Genéricas)', b: true, p: true, o: true, d: true, icon: <Palette size={16}/>, grupo: '1. ARTE Y DISEÑO DE LA INVITACIÓN' },
+    { n: 'Fotografías en Portada Principal', b: '1 (Slow Zoom)', p: '1 (Slow Zoom)', o: 'Hasta 3 (Fade-out)', d: 'Hasta 3 (Fade-out)', icon: <Camera size={16}/>, grupo: '1. ARTE Y DISEÑO DE LA INVITACIÓN' },
+    { n: 'Monograma con Iniciales de los Festejados', b: false, p: 'Estándar', o: 'Personalizado', d: 'Personalizado VIP', icon: <Gem size={16}/>, grupo: '1. ARTE Y DISEÑO DE LA INVITACIÓN' },
+    { n: 'Galería de Sesión Fotográfica', b: false, p: 'Hasta 5 (Carrusel)', o: 'Hasta 10 (Masonry/Arcos)', d: 'Ilimitadas (Multi-Estilo)', icon: <Camera size={16}/>, grupo: '1. ARTE Y DISEÑO DE LA INVITACIÓN' },
+    { n: 'Música de Fondo sin Bloqueo y Cuenta Regresiva', b: true, p: true, o: true, d: true, icon: <PlayCircle size={16}/>, grupo: '1. ARTE Y DISEÑO DE LA INVITACIÓN' },
+    { n: 'Sección de Padres y Padrinos de Honor', b: false, p: 'Padres', o: 'Padres y Padrinos', d: 'Padres y Padrinos', icon: <Users size={16}/>, grupo: '1. ARTE Y DISEÑO DE LA INVITACIÓN' },
+    { n: 'Saludo VIP Automático con el Nombre de cada Invitado', b: false, p: false, o: true, d: true, icon: <UserCheck size={16}/>, grupo: '1. ARTE Y DISEÑO DE LA INVITACIÓN' },
+
+    // GRUPO 2: EXPERIENCIA Y LOGÍSTICA DEL INVITADO
+    { n: 'Ubicaciones con GPS Nativo (Apple Maps / Google Maps)', b: '1 Ubicación', p: '2 Ubicaciones', o: '3 Ubicaciones', d: 'Ilimitadas', icon: <MapPin size={16}/>, grupo: '2. EXPERIENCIA Y LOGÍSTICA DEL INVITADO' },
+    { n: 'Lluvia de Sobres (CLABE 1-Clic) y Mesa de Regalos', b: false, p: true, o: true, d: true, icon: <Gift size={16}/>, grupo: '2. EXPERIENCIA Y LOGÍSTICA DEL INVITADO' },
+    { n: 'Itinerario (Minuto a Minuto) y Código de Vestimenta', b: false, p: true, o: true, d: true, icon: <CheckSquare size={16}/>, grupo: '2. EXPERIENCIA Y LOGÍSTICA DEL INVITADO' },
+    { n: 'Botón Agendar en Calendario (iCal / Google)', b: false, p: true, o: true, d: true, icon: <CheckCircle size={16}/>, grupo: '2. EXPERIENCIA Y LOGÍSTICA DEL INVITADO' },
+    { n: 'Sugerencias de Hospedaje y Filtro de Instagram', b: false, p: false, o: true, d: true, icon: <Smartphone size={16}/>, grupo: '2. EXPERIENCIA Y LOGÍSTICA DEL INVITADO' },
+    { n: 'Sistema de Confirmación de Asistencia (RSVP)', b: 'Directo a WhatsApp', p: 'Directo a WhatsApp', o: 'Bóveda Inteligente', d: 'Bóveda Inteligente', icon: <UserCheck size={16}/>, grupo: '2. EXPERIENCIA Y LOGÍSTICA DEL INVITADO' },
+    { n: 'Pases QR Descargables con Número de Mesa Asignada', b: false, p: false, o: 'Sí (Con su Mesa)', d: 'Sí (Con su Mesa)', icon: <QrCode size={16}/>, grupo: '2. EXPERIENCIA Y LOGÍSTICA DEL INVITADO' },
+
+    // GRUPO 3: TU BÓVEDA DE CONTROL (EL PODER DEL SOFTWARE)
+    { n: 'Acceso a tu Bóveda Baulia (Panel de Control)', b: 'Modo Bienvenida', p: 'Lista Envío WhatsApp', o: 'Bóveda VIP Activa', d: 'Bóveda Total 100%', icon: <LayoutDashboard size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' },
+    { n: 'Gestión de Mesas + Auto-Acomodo (Afinidad y Tetris)', b: false, p: false, o: true, d: true, icon: <Wand2 size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' },
+    { n: 'Banco de Etiquetas (#Primos, #Amigos) y Pases Extra', b: false, p: false, o: true, d: true, icon: <Users size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' },
+    { n: 'App Escáner QR de Recepción para Hostess', b: false, p: false, o: true, d: true, icon: <Scan size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' },
+    { n: 'Finanzas, Proveedores, Checklist y Reportes PDF/Excel', b: false, p: false, o: true, d: true, icon: <Wallet size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' },
+    { n: 'Croquis Arquitectónico 2D Interactivo (Mover Mesas)', b: false, p: false, o: false, d: true, icon: <LayoutGrid size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' },
+    { n: 'Baulia Social Wall (Álbum y Proyección en Vivo)', b: 'Add-on Opcional', p: 'Add-on Opcional', o: 'Add-on Opcional', d: 'Incluido sin costo', icon: <Camera size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' },
+    { n: 'Baulia Black Label (PDF Brazaletes VIP + Radar Aforo)', b: 'Add-on Opcional', p: 'Add-on Opcional', o: 'Add-on Opcional', d: 'Incluido sin costo', icon: <Lock size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' }
   ];
 
   return (
@@ -14481,24 +14622,25 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* ========================================== */}
-      {/* 🔴 NUEVA SECCIÓN DE PRECIOS SAAS (Tabla Comparativa) */}
+      {/* 🔴 SECCIÓN DE PLANES Y PORTAL COMPARATIVO DE ALTA COSTURA */}
       {/* ========================================== */}
       <div id="planes" className="py-32 px-4 max-w-[1400px] mx-auto z-10 relative">
         <RevealSection className="text-center mb-20">
           <span className="px-4 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-black uppercase tracking-[0.2em] border border-amber-500/20 shadow-sm mb-6 inline-block">
-            El Software de Gestión
+            Atelier & Software de Gestión
           </span>
           <h2 className="text-5xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white mt-4 mb-6 transition-colors leading-tight">
             La Colección Sagrada.
           </h2>
           <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-sm md:text-base transition-colors mb-8 font-light leading-relaxed">
-            Compara la anatomía de cada bóveda de software. Cero mensualidades, un solo pago único y control absoluto hasta el último baile. Solo aceptamos 50 eventos al mes para garantizar la excelencia concierge.
+            Todos nuestros planes incluyen una invitación de Alta Costura y acceso a tu Bóveda Privada. Cero mensualidades, un solo pago único y control absoluto hasta el último baile.
           </p>
           
-          {/* 🔴 NUEVO: INTERRUPTOR DE MONEDA ESTÉTICO */}
+          {/* INTERRUPTOR DE MONEDA ESTÉTICO */}
           <div className="flex justify-center items-center gap-4 relative z-10 mt-8">
              <span className={`text-xs font-black uppercase tracking-widest transition-colors ${moneda === 'MXN' ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>🇲🇽 MXN</span>
              <button 
+                type="button"
                 onClick={() => setMoneda(m => m === 'MXN' ? 'USD' : 'MXN')} 
                 className="w-16 h-8 bg-slate-200 dark:bg-white/10 rounded-full relative transition-colors border border-slate-300 dark:border-white/20 flex items-center shadow-inner"
              >
@@ -14508,125 +14650,361 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           </div>
         </RevealSection>
 
-        {/* TARJETAS DE PLANES (Solo SaaS) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start mb-20 relative z-10">
+        {/* TARJETAS DE LOS 4 PLANES CON BOTÓN DE FICHA TÉCNICA COMPLETA */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch mb-14 relative z-10">
           {planes.map((plan, idx) => {
             const tienePromo = plan.preciosOriginales[moneda] !== null;
             
             return (
-            <RevealSection key={idx} delay={idx * 100} className={`relative flex-1 ${plan.d2 ? 'lg:-translate-y-4' : ''}`}>
-               {plan.d2 && <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md whitespace-nowrap z-20">El Estándar</div>}
+            <RevealSection key={idx} delay={idx * 100} className={`relative flex flex-col ${plan.d2 ? 'lg:-translate-y-4' : ''}`}>
+               {plan.d2 && <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-slate-900 text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md whitespace-nowrap z-20">Más Vendido</div>}
                {plan.d1 && <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-bl-lg whitespace-nowrap z-20"><Gem size={10} className="mr-1 inline"/> Suite Todo Incluido</div>}
 
-               <div className={`h-full bg-white dark:bg-[#0a0a0a] rounded-3xl p-8 border ${plan.d2 ? 'border-2 border-amber-500 dark:border-amber-500 shadow-amber-500/10' : plan.d1 ? 'border-indigo-500/30 dark:border-indigo-500/30' : 'border-slate-200 dark:border-white/10'} flex flex-col justify-between group overflow-hidden relative shadow-lg transition-colors`}>
+               <div className={`h-full bg-white dark:bg-[#0a0a0a] rounded-3xl p-7 sm:p-8 border ${plan.d2 ? 'border-2 border-amber-500 dark:border-amber-500 shadow-amber-500/10' : plan.d1 ? 'border-indigo-500/30 dark:border-indigo-500/30' : 'border-slate-200 dark:border-white/10'} flex flex-col justify-between group overflow-hidden relative shadow-lg transition-colors`}>
                  
                   {plan.d1 && <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none transition-colors duration-700"></div>}
-                  {plan.d2 && <div className="absolute inset-0 opacity-10 bg-[linear-gradient(45deg,_transparent_70%,_#f59e0b_100%)] rounded-3xl transition-opacity group-hover:opacity-20"></div>}
+                  {plan.d2 && <div className="absolute inset-0 opacity-10 bg-[linear-gradient(45deg,_transparent_70%,_#f59e0b_100%)] rounded-3xl transition-opacity group-hover:opacity-20 pointer-events-none"></div>}
 
-                  <div className="relative z-10 mb-8 flex-1">
-                     <h3 className="text-2xl font-editorial font-bold text-slate-900 dark:text-white mb-2 transition-colors">{plan.nombre}</h3>
-                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium leading-relaxed transition-colors">{plan.desc}</p>
+                  <div className="relative z-10 mb-6 flex-1">
+                     <span className={`text-[9px] font-black uppercase tracking-widest block mb-1 ${plan.d2 ? 'text-amber-600 dark:text-amber-400' : plan.d1 ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`}>
+                       {plan.subtitulo}
+                     </span>
+                     <h3 className="text-2xl sm:text-3xl font-editorial font-bold text-slate-900 dark:text-white mb-2 transition-colors">{plan.nombre}</h3>
+                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-5 font-medium leading-relaxed transition-colors">{plan.desc}</p>
                      
-                     {/* 🔴 EL PRECIO DINÁMICO LEÍDO DESDE LA NUBE */}
-                     <div className="text-4xl font-light text-slate-900 dark:text-white mb-8 relative flex items-baseline transition-colors">
-                        {tienePromo && <span className="text-xl text-rose-500 line-through font-bold mr-3">${plan.preciosOriginales[moneda]}</span>}
+                     {/* PRECIO DINÁMICO DESDE FIREBASE */}
+                     <div className="text-4xl font-light text-slate-900 dark:text-white mb-6 relative flex items-baseline transition-colors">
+                        {tienePromo && <span className="text-lg text-rose-500 line-through font-bold mr-2.5">${plan.preciosOriginales[moneda]}</span>}
                         <span className="font-editorial text-transparent bg-clip-text bg-gradient-to-tr from-slate-900 to-slate-700 dark:from-white dark:to-slate-100">${plan.precios[moneda]}</span> 
-                        <span className="text-sm text-slate-400 font-normal ml-2">{moneda}</span>
+                        <span className="text-xs text-slate-400 font-bold uppercase tracking-widest ml-2">{moneda}</span>
                      </div>
 
-                     <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-300 relative transition-colors">
+                     <ul className="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300 relative transition-colors">
                         {plan.f.map((feat, fIdx) => (
-                           <li key={fIdx} className="flex items-start"><Check size={16} className="text-amber-500 mr-2.5 shrink-0 mt-0.5" /> <span>{feat}</span></li>
+                           <li key={fIdx} className="flex items-start leading-snug"><Check size={15} className="text-amber-500 mr-2.5 shrink-0 mt-0.5" /> <span>{feat}</span></li>
                         ))}
                      </ul>
                   </div>
                   
-                  <button onClick={() => { setPlanSeleccionado({ plan: plan.nombre, precio: plan.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} className={`w-full py-4 rounded-full ${plan.d2 ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white' : plan.d1 ? 'bg-indigo-600 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'} font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-lg mt-auto relative z-10`}>
-                     Reservar mi Bóveda {plan.nombre}
-                  </button>
+                  <div className="space-y-2.5 relative z-10 mt-auto pt-4 border-t border-slate-100 dark:border-white/5">
+                    <button 
+                      type="button"
+                      onClick={() => { setFichaPlanModal(plan.id); setFichaTab('invitacion'); }}
+                      className="w-full py-3 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-bold text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 border border-slate-200/80 dark:border-white/10"
+                    >
+                      <BookOpenText size={13} className="text-amber-500"/> Ver todo lo que incluye
+                    </button>
+
+                    <button 
+                      type="button"
+                      onClick={() => { setPlanSeleccionado({ plan: plan.nombre, precio: plan.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} 
+                      className={`w-full py-4 rounded-2xl ${plan.d2 ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-[0_8px_25px_rgba(245,158,11,0.35)]' : plan.d1 ? 'bg-indigo-600 text-white shadow-[0_8px_25px_rgba(79,70,229,0.35)]' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg'} font-black text-[10px] uppercase tracking-widest hover:scale-[1.02] transition-all`}
+                    >
+                      Reservar mi Bóveda {plan.nombre}
+                    </button>
+                  </div>
                </div>
             </RevealSection>
           )})}
         </div>
 
-        {/* 🔴 TABLA COMPARATIVA ADAPTATIVA (De image_6.png) */}
-        <RevealSection delay={600} className="mt-32 max-w-6xl mx-auto relative z-10 overflow-hidden">
-          <div className="text-center mb-16">
-            <h3 className="text-3xl md:text-4xl font-editorial font-medium text-slate-900 dark:text-white transition-colors leading-tight">Anatomía Comparativa<br/>de la Colección Sagrada</h3>
-            <p className="text-slate-500 dark:text-slate-400 text-base mt-3 font-light leading-relaxed max-w-xl mx-auto">Compara el nivel de tecnología y exclusividad de cada bóveda de software.</p>
+        {/* 🟢 BANNER EJECUTIVO PARA ABRIR EL PORTAL COMPARATIVO DE 22 CARACTERÍSTICAS */}
+        <RevealSection delay={300} className="max-w-5xl mx-auto relative z-10">
+          <div className="bg-gradient-to-r from-slate-900 via-[#111] to-slate-900 dark:from-[#0d0d0d] dark:via-[#15120c] dark:to-[#0d0d0d] rounded-[2.5rem] p-8 sm:p-10 border border-slate-800 dark:border-amber-500/20 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+            <div className="max-w-xl">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-400 block mb-2">
+                Radiografía Completa • 22 Puntos
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-editorial font-medium text-white mb-2">
+                ¿Dudas entre dos planes? Compáralos lado a lado.
+              </h3>
+              <p className="text-slate-400 text-xs sm:text-sm font-light leading-relaxed">
+                Revisa cuántas fotos de portada y galería incluye cada paquete, ubicaciones GPS, monograma, padrinos, filtro de Instagram y qué módulos se desbloquean en tu Bóveda.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPortalComparativoOpen(true)}
+              className="w-full md:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black text-xs uppercase tracking-widest shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:scale-105 transition-all shrink-0 flex items-center justify-center gap-2"
+            >
+              <Layers size={16}/> Comparar los 4 Planes a Fondo
+            </button>
           </div>
+        </RevealSection>
 
-          {!isMobileDevice ? (
-            // ==========================================
-            // --- VERSIÓN ESCRITORIO (Tabla Estándar) ---
-            // ==========================================
-            <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-xl overflow-hidden transition-colors duration-700">
-               <table className="w-full text-left border-collapse">
-                  <thead>
-                     <tr className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 transition-colors">
-                        <th className="py-6 px-8 font-bold text-xs uppercase tracking-widest text-slate-500 w-[35%]">Característica</th>
-                        <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-slate-700 dark:text-slate-300 w-[15%]">Básico</th>
-                        <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-slate-700 dark:text-slate-300 w-[15%]">Plata</th>
-                        <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-amber-600 dark:text-amber-500 bg-amber-50/50 dark:bg-amber-500/10 w-[17.5%]">Oro</th>
-                        <th className="py-6 px-4 text-center font-bold text-xs uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-50/60 dark:bg-indigo-500/10 w-[17.5%]">Diamante</th>
-                     </tr>
-                  </thead>
-                  <tbody className="text-sm">
-                     {/* Agrupamos por grupo de característica */}
-                     {Object.entries(característicasTabla.reduce((acc, current) => {
+        {/* ========================================================= */}
+        {/* 🟢 MODAL 1: FICHA TÉCNICA DETALLADA POR PLAN (INVITACIÓN + BÓVEDA) */}
+        {/* ========================================================= */}
+        {fichaPlanModal && (() => {
+          const planActual = planes.find(p => p.id === fichaPlanModal) || planes[2];
+          const tienePromo = planActual.preciosOriginales[moneda] !== null;
+
+          return (
+            <div className="fixed inset-0 z-[99999] bg-slate-950/85 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+              <div className="bg-white dark:bg-[#0a0a0a] w-full max-w-2xl rounded-t-[2.5rem] sm:rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[92dvh] animate-in zoom-in-95 duration-200">
+                
+                {/* Cabecera con selector rápido de los 4 planes */}
+                <div className="p-5 sm:p-6 bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/10 shrink-0">
+                  <div className="flex items-center justify-between gap-2 mb-4">
+                    <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar py-0.5">
+                      {planes.map(p => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setFichaPlanModal(p.id)}
+                          className={`px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shrink-0 ${fichaPlanModal === p.id ? 'bg-amber-500 text-slate-950 shadow-sm' : 'bg-white dark:bg-white/5 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'}`}
+                        >
+                          {p.nombre}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFichaPlanModal(null)}
+                      className="w-9 h-9 rounded-full bg-slate-200/70 dark:bg-white/10 flex items-center justify-center text-slate-500 hover:text-rose-500 transition-colors shrink-0"
+                    >
+                      <X size={18}/>
+                    </button>
+                  </div>
+
+                  <div className="flex flex-wrap items-end justify-between gap-4">
+                    <div>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 block">
+                        Ficha Técnica Oficial • {planActual.subtitulo}
+                      </span>
+                      <h3 className="text-3xl font-editorial font-bold text-slate-900 dark:text-white mt-0.5">
+                        Plan {planActual.nombre}
+                      </h3>
+                    </div>
+                    <div className="text-right">
+                      {tienePromo && <span className="text-xs text-rose-500 line-through font-bold mr-2">${planActual.preciosOriginales[moneda]}</span>}
+                      <span className="text-3xl font-editorial font-bold text-slate-900 dark:text-white">${planActual.precios[moneda]}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1.5">{moneda}</span>
+                    </div>
+                  </div>
+
+                  {/* Pestañas Internas: Invitación vs Bóveda */}
+                  <div className="grid grid-cols-2 gap-2 mt-5 p-1 bg-slate-200/70 dark:bg-black/60 rounded-2xl border border-slate-300/60 dark:border-white/10">
+                    <button
+                      type="button"
+                      onClick={() => setFichaTab('invitacion')}
+                      className={`py-2.5 px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${fichaTab === 'invitacion' ? 'bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
+                    >
+                      <Palette size={14} className="text-amber-500 shrink-0"/> 1. Tu Invitación
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFichaTab('boveda')}
+                      className={`py-2.5 px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${fichaTab === 'boveda' ? 'bg-white dark:bg-[#1a1a1a] text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
+                    >
+                      <LayoutDashboard size={14} className="text-indigo-500 shrink-0"/> 2. Tu Bóveda
+                    </button>
+                  </div>
+                </div>
+
+                {/* Cuerpo desplazable con el desglose */}
+                <div className="p-5 sm:p-6 overflow-y-auto custom-scrollbar flex-1 space-y-3">
+                  {fichaTab === 'invitacion' ? (
+                    planActual.fichaInvitacion.map((item, i) => (
+                      <div key={i} className="p-4 rounded-2xl bg-slate-50 dark:bg-[#111] border border-slate-200/80 dark:border-white/10 flex items-start gap-3.5">
+                        <div className="w-7 h-7 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 shrink-0 mt-0.5">
+                          <Check size={14}/>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-slate-900 dark:text-white">{item.t}</h4>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{item.d}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    planActual.fichaBoveda.map((item, i) => (
+                      <div key={i} className={`p-4 rounded-2xl border flex items-start gap-3.5 ${item.ok ? 'bg-slate-50 dark:bg-[#111] border-slate-200/80 dark:border-white/10' : 'bg-slate-50/50 dark:bg-white/[0.02] border-dashed border-slate-200 dark:border-white/5 opacity-75'}`}>
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 border ${item.ok ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-500' : 'bg-slate-200 dark:bg-white/10 border-transparent text-slate-400'}`}>
+                          {item.ok ? <Check size={14}/> : <Lock size={13}/>}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-bold text-sm text-slate-900 dark:text-white">{item.t}</h4>
+                            {!item.ok && <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400">Upgrade Disponible</span>}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{item.d}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* Pie de acción */}
+                <div className="p-4 sm:p-5 bg-white dark:bg-[#0a0a0a] border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row gap-2.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => { setFichaPlanModal(null); setPortalComparativoOpen(true); }}
+                    className="py-3.5 px-5 rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 font-bold text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-colors"
+                  >
+                    Comparar con otros planes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFichaPlanModal(null);
+                      setPlanSeleccionado({ plan: planActual.nombre, precio: planActual.raw[moneda], moneda: moneda });
+                      setCheckoutModal('pago');
+                    }}
+                    className="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 font-black text-xs uppercase tracking-widest shadow-lg hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
+                  >
+                    Elegir Plan {planActual.nombre} (${planActual.precios[moneda]} {moneda}) <ArrowRight size={15}/>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* ========================================================= */}
+        {/* 🟢 MODAL 2: PORTAL COMPARATIVO DE ALTA COSTURA (22 PUNTOS - PC Y MÓVIL) */}
+        {/* ========================================================= */}
+        {portalComparativoOpen && (
+          <div className="fixed inset-0 z-[99999] bg-slate-950/90 backdrop-blur-xl flex flex-col animate-in fade-in duration-200">
+            
+            {/* Barra fija superior */}
+            <div className="px-4 sm:px-8 py-4 bg-white/95 dark:bg-[#0a0a0a]/95 border-b border-slate-200 dark:border-white/10 flex items-center justify-between gap-4 shrink-0">
+              <div>
+                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-amber-600 dark:text-amber-400 block">
+                  Portal Comparativo de Alta Costura
+                </span>
+                <h3 className="text-lg sm:text-2xl font-editorial font-bold text-slate-900 dark:text-white leading-tight">
+                  Anatomía de los 4 Planes Baulia
+                </h3>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setPortalComparativoOpen(false)}
+                  className="px-4 py-2.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-[10px] uppercase tracking-widest flex items-center gap-1.5 shadow-md"
+                >
+                  <X size={14}/> Cerrar Portal
+                </button>
+              </div>
+            </div>
+
+            {/* Selector pegajoso en Móvil para comparar sin hacer zoom ni desbordar */}
+            <div className="lg:hidden px-4 py-3 bg-slate-100 dark:bg-[#111] border-b border-slate-200 dark:border-white/10 shrink-0">
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 text-center mb-2">
+                Toca un plan para resaltar su columna o revisa los 4 abajo:
+              </p>
+              <div className="grid grid-cols-4 gap-1.5">
+                {planes.map(p => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setMobileComparePlan(p.id)}
+                    className={`py-2 px-1 rounded-xl text-center transition-all border ${mobileComparePlan === p.id ? 'bg-amber-500 text-slate-950 border-amber-400 font-black shadow-sm scale-[1.02]' : 'bg-white dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 font-bold'}`}
+                  >
+                    <span className="block text-[10px] uppercase tracking-wider">{p.nombre}</span>
+                    <span className="block text-[9px] opacity-80">${p.precios[moneda]}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Cuerpo scrollable de comparación */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8">
+              <div className="max-w-6xl mx-auto">
+                
+                {/* VISTA ESCRITORIO: TABLA COMPLETA DE 22 PUNTOS */}
+                <div className="hidden lg:block bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/10">
+                        <th className="py-5 px-6 font-black text-xs uppercase tracking-widest text-slate-500 w-[36%]">Característica Incluida</th>
+                        {planes.map(p => (
+                          <th key={p.id} className={`py-5 px-4 text-center w-[16%] ${p.d2 ? 'bg-amber-500/10' : p.d1 ? 'bg-indigo-500/10' : ''}`}>
+                            <span className={`block text-xs font-black uppercase tracking-widest ${p.d2 ? 'text-amber-500' : p.d1 ? 'text-indigo-400' : 'text-slate-700 dark:text-slate-200'}`}>{p.nombre}</span>
+                            <span className="block font-editorial text-lg font-bold text-slate-900 dark:text-white mt-0.5">${p.precios[moneda]} <small className="text-[9px] font-sans text-slate-400">{moneda}</small></span>
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="text-xs">
+                      {Object.entries(característicasTabla.reduce((acc, current) => {
                         (acc[current.grupo] = acc[current.grupo] || []).push(current);
                         return acc;
-                     }, {})).map(([grupo, feats], gIdx) => (
+                      }, {})).map(([grupo, feats], gIdx) => (
                         <React.Fragment key={gIdx}>
-                           <tr>
-                              <td colSpan="5" className="bg-slate-100 dark:bg-white/5 py-3 px-8 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 transition-colors">
-                                 {grupo}
+                          <tr>
+                            <td colSpan="5" className="bg-slate-100 dark:bg-white/5 py-3 px-6 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                              {grupo}
+                            </td>
+                          </tr>
+                          {feats.map((row, i) => (
+                            <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50/80 dark:hover:bg-white/[0.03] transition-colors">
+                              <td className="py-3.5 px-6 text-slate-800 dark:text-slate-200 font-medium flex items-center gap-2.5">
+                                <span className="text-amber-500 shrink-0">{row.icon}</span>
+                                <span>{row.n}</span>
                               </td>
-                           </tr>
-                           {feats.map((row, i) => (
-                              <tr key={i} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                                 <td className="py-4 px-8 text-slate-700 dark:text-slate-300 font-medium flex items-center gap-2.5">
-                                    <span className="text-slate-400/80 shrink-0">{row.icon}</span>
-                                    <span>{row.n}</span>
-                                 </td>
-                                 <td className="py-4 px-4 text-center">{row.b === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.b === false || row.b === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-bold text-slate-600 dark:text-slate-400">{row.b}</span>}</td>
-                                 <td className="py-4 px-4 text-center">{row.p === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.p === false || row.p === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-bold text-slate-600 dark:text-slate-400">{row.p}</span>}</td>
-                                 <td className="py-4 px-4 text-center bg-amber-50/30 dark:bg-amber-500/5">{row.o === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.o === false || row.o === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-black text-amber-600 dark:text-amber-500">{row.o}</span>}</td>
-                                 <td className="py-4 px-4 text-center bg-indigo-50/30 dark:bg-indigo-500/5">{row.d === true ? <Check size={18} className="mx-auto text-amber-500"/> : row.d === false || row.d === '-' ? <span className="text-slate-300 dark:text-slate-700">-</span> : <span className="font-black text-indigo-600 dark:text-indigo-400">{row.d}</span>}</td>
-                              </tr>
-                           ))}
+                              <td className="py-3.5 px-3 text-center">{row.b === true ? <Check size={17} className="mx-auto text-emerald-500"/> : row.b === false ? <span className="text-slate-300 dark:text-slate-700">—</span> : <span className="font-bold text-slate-600 dark:text-slate-400">{row.b}</span>}</td>
+                              <td className="py-3.5 px-3 text-center">{row.p === true ? <Check size={17} className="mx-auto text-emerald-500"/> : row.p === false ? <span className="text-slate-300 dark:text-slate-700">—</span> : <span className="font-bold text-slate-600 dark:text-slate-400">{row.p}</span>}</td>
+                              <td className="py-3.5 px-3 text-center bg-amber-500/[0.04]">{row.o === true ? <Check size={17} className="mx-auto text-amber-500"/> : row.o === false ? <span className="text-slate-300 dark:text-slate-700">—</span> : <span className="font-black text-amber-600 dark:text-amber-400">{row.o}</span>}</td>
+                              <td className="py-3.5 px-3 text-center bg-indigo-500/[0.04]">{row.d === true ? <Check size={17} className="mx-auto text-indigo-400"/> : row.d === false ? <span className="text-slate-300 dark:text-slate-700">—</span> : <span className="font-black text-indigo-600 dark:text-indigo-400">{row.d}</span>}</td>
+                            </tr>
+                          ))}
                         </React.Fragment>
-                     ))}
-                  </tbody>
-               </table>
-            </div>
-          ) : (
-            // ==========================================
-            // --- VERSIÓN MÓVIL (Acordeones Apilados) ---
-            // ==========================================
-            <div className="space-y-4">
-               {característicasTabla.map((feat, i) => (
-                  <details key={i} className="group bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors duration-700">
-                     <summary className="flex items-center justify-between p-5 cursor-pointer list-none select-none font-medium text-slate-700 dark:text-slate-300 text-sm gap-3">
-                        <span className="flex items-center gap-3">
-                           <span className="text-slate-400/80 shrink-0">{feat.icon}</span>
-                           <span>{feat.n}</span>
-                        </span>
-                        <ChevronRight size={18} className="text-slate-400 transform group-open:rotate-90 transition-transform"/>
-                     </summary>
-                     <div className="px-5 pb-5 pt-1 space-y-3 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 rounded-b-2xl">
-                        <div className="grid grid-cols-2 gap-3 text-center">
-                           <div className="bg-white dark:bg-[#111] rounded-xl p-3 border border-slate-100 dark:border-white/5"><p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mb-1">Básico</p>{feat.b === true ? <Check size={16} className="text-amber-500 mx-auto"/> : <span className="text-xs text-slate-700 dark:text-slate-300 font-bold">{feat.b}</span>}</div>
-                           <div className="bg-white dark:bg-[#111] rounded-xl p-3 border border-slate-100 dark:border-white/5"><p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mb-1">Plata</p>{feat.p === true ? <Check size={16} className="text-amber-500 mx-auto"/> : <span className="text-xs text-slate-700 dark:text-slate-300 font-bold">{feat.p}</span>}</div>
-                           <div className="bg-amber-50 dark:bg-amber-500/10 rounded-xl p-3 border border-amber-100 dark:border-amber-500/20"><p className="text-[10px] text-amber-600 dark:text-amber-500 font-black uppercase mb-1">Oro</p>{feat.o === true ? <Check size={16} className="text-amber-600 mx-auto"/> : <span className="text-xs text-amber-600 dark:text-amber-500 font-black">{feat.o}</span>}</div>
-                           <div className="bg-indigo-50 dark:bg-indigo-500/10 rounded-xl p-3 border border-indigo-100 dark:border-indigo-500/20"><p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-black uppercase mb-1">Diamante</p>{feat.d === true ? <Check size={16} className="text-indigo-600 mx-auto"/> : <span className="text-xs text-indigo-600 dark:text-indigo-400 font-black">{feat.d}</span>}</div>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* VISTA MÓVIL: TARJETAS COMPARATIVAS CON LOS 4 PLANES VISIBLES DE UN VISTAZO */}
+                <div className="lg:hidden space-y-6 pb-10">
+                  {Object.entries(característicasTabla.reduce((acc, current) => {
+                    (acc[current.grupo] = acc[current.grupo] || []).push(current);
+                    return acc;
+                  }, {})).map(([grupo, feats], gIdx) => (
+                    <div key={gIdx} className="space-y-2.5">
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-500 px-2">
+                        {grupo}
+                      </h4>
+                      {feats.map((row, i) => (
+                        <div key={i} className="bg-white dark:bg-[#0a0a0a] rounded-2xl p-3.5 border border-slate-200 dark:border-white/10 shadow-sm space-y-2.5">
+                          <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                            <span className="text-amber-500 shrink-0">{row.icon}</span>
+                            <span>{row.n}</span>
+                          </div>
+                          <div className="grid grid-cols-4 gap-1.5 text-center">
+                            {[
+                              { id: 'basico', lbl: 'Básico', val: row.b },
+                              { id: 'plata', lbl: 'Plata', val: row.p },
+                              { id: 'oro', lbl: 'Oro', val: row.o },
+                              { id: 'diamante', lbl: 'Diamante', val: row.d }
+                            ].map(col => {
+                              const isHighlighted = mobileComparePlan === col.id;
+                              return (
+                                <div key={col.id} className={`p-2 rounded-xl border flex flex-col items-center justify-center min-h-[52px] transition-all ${isHighlighted ? 'bg-amber-500/15 border-amber-500/50 ring-1 ring-amber-500/30' : 'bg-slate-50 dark:bg-[#111] border-slate-100 dark:border-white/5'}`}>
+                                  <span className={`text-[8px] font-black uppercase mb-1 ${isHighlighted ? 'text-amber-500' : 'text-slate-400'}`}>{col.lbl}</span>
+                                  {col.val === true ? (
+                                    <Check size={14} className="text-emerald-500"/>
+                                  ) : col.val === false ? (
+                                    <span className="text-[10px] text-slate-300 dark:text-slate-700 font-bold">—</span>
+                                  ) : (
+                                    <span className="text-[9px] font-black text-slate-800 dark:text-slate-200 leading-tight">{col.val}</span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
-                     </div>
-                  </details>
-               ))}
+                      ))}
+                    </div>
+                  ))}
+                </div>
+
+              </div>
             </div>
-          )}
-        </RevealSection>
+
+          </div>
+        )}
       </div>
 
       {/* PREGUNTAS FRECUENTES (FAQ) */}
