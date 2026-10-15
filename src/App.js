@@ -11121,38 +11121,38 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
     setLoading(false);
   };
 
+  const nombrePlanLimpio = planSeleccionado.plan === 'social_wall' ? 'Social Wall' : planSeleccionado.plan;
+
   return (
-    <div className="flex flex-col h-full">
-      <div className="mb-6 relative overflow-hidden bg-gradient-to-br from-amber-50 to-white dark:from-amber-500/10 dark:to-[#111] border border-amber-200 dark:border-amber-500/30 rounded-2xl p-6 shadow-sm shrink-0">
-         <div className="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/20 blur-2xl rounded-full pointer-events-none"></div>
-         <div className="flex justify-between items-center relative z-10">
-           <div>
-             <p className="text-amber-600 dark:text-amber-500 text-[10px] font-black uppercase tracking-widest mb-1.5">Suscripción Premium</p>
-             <p className="text-slate-900 dark:text-white font-editorial text-2xl md:text-3xl leading-none">{planSeleccionado.plan}</p>
+    <div className="flex flex-col w-full max-w-full overflow-x-hidden box-border">
+      <div className="mb-5 relative overflow-hidden bg-gradient-to-br from-amber-50 to-white dark:from-amber-500/10 dark:to-[#111] border border-amber-200 dark:border-amber-500/30 rounded-2xl p-5 sm:p-6 shadow-sm shrink-0 w-full box-border">
+         <div className="flex justify-between items-center gap-3 relative z-10">
+           <div className="min-w-0">
+             <p className="text-amber-600 dark:text-amber-500 text-[10px] font-black uppercase tracking-widest mb-1">Suscripción Premium</p>
+             <p className="text-slate-900 dark:text-white font-editorial text-2xl md:text-3xl leading-none truncate">{nombrePlanLimpio}</p>
            </div>
-           <div className="text-right">
-             <p className="text-slate-900 dark:text-white font-black text-2xl md:text-3xl">${planSeleccionado.precio.split('.')[0]}</p>
-             {/* 🔴 CAMBIO VISUAL */}
+           <div className="text-right shrink-0">
+             <p className="text-slate-900 dark:text-white font-black text-2xl md:text-3xl">${String(planSeleccionado.precio).split('.')[0]}</p>
              <p className="text-slate-500 dark:text-slate-400 text-[9px] uppercase tracking-widest font-bold mt-1">{planSeleccionado.moneda || 'MXN'} / Pago Único</p>
            </div>
          </div>
       </div>
 
       {!clientSecret ? (
-        <form onSubmit={generarOrden} className="space-y-4 shrink-0 animate-in fade-in">
-          <div>
+        <form onSubmit={generarOrden} className="space-y-4 shrink-0 animate-in fade-in w-full max-w-full overflow-x-hidden">
+          <div className="w-full min-w-0">
             <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Nombre de los Festejados</label>
-            <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Carlos & María" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
+            <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Carlos & María" className="w-full max-w-full box-border bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+            <div className="w-full min-w-0">
               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Correo Electrónico</label>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" className="w-full max-w-full box-border bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
             </div>
-            <div>
+            <div className="w-full min-w-0 overflow-hidden">
               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Fecha del Evento</label>
-              <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium [color-scheme:light] dark:[color-scheme:dark]" />
+              <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="block w-full max-w-full min-w-0 box-border appearance-none bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium [color-scheme:light] dark:[color-scheme:dark]" />
             </div>
           </div>
 
@@ -12612,12 +12612,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       )}
 
-      {/* 🔴 MODAL 2: PASARELA DE PAGO (100% Encajada en Móvil con Cabecera Fija y Salida Directa) */}
+      {/* 🔴 MODAL 2: PASARELA DE PAGO (Bloqueo estricto de movimiento horizontal en iPhone/Android) */}
       {checkoutModal === 'pago' && planSeleccionado && (
-        <div className="fixed inset-0 z-[99999] h-[100dvh] w-full bg-[#FAFAFA] dark:bg-[#0a0a0a] flex flex-col overflow-hidden animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[99999] h-[100dvh] w-screen max-w-[100vw] bg-[#FAFAFA] dark:bg-[#0a0a0a] flex flex-col overflow-x-hidden overflow-y-hidden animate-in fade-in duration-300">
           
-          {/* Cabecera Fija (Nunca desaparece al hacer scroll en el celular) */}
-          <div className="shrink-0 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10 shadow-sm z-20">
+          {/* Cabecera Fija */}
+          <div className="shrink-0 w-full bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10 shadow-sm z-20">
             <div className="max-w-4xl mx-auto px-4 py-3.5 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2.5 min-w-0">
                 <ShieldCheck size={22} className="text-emerald-500 shrink-0" />
@@ -12638,7 +12638,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 <button 
                   type="button"
                   onClick={() => setCheckoutModal(null)} 
-                  className="flex items-center text-xs font-black uppercase tracking-wider text-white bg-rose-500 hover:bg-rose-600 px-4 py-2 rounded-full shadow-md transition-all"
+                  className="flex items-center text-xs font-black uppercase tracking-wider text-white bg-rose-500 hover:bg-rose-600 px-4 py-2 rounded-full shadow-md transition-all shrink-0"
                 >
                   <X size={15} className="mr-1"/> Cerrar
                 </button>
@@ -12646,9 +12646,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </div>
           </div>
           
-          {/* Cuerpo con Scroll Propio y espacio inferior amplio en móvil */}
-          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain custom-scrollbar px-4 py-6 md:py-10 pb-28">
-            <div className="max-w-2xl mx-auto">
+          {/* Cuerpo con Scroll 100% Vertical (touch-pan-y y overflow-x-hidden) */}
+          <div className="flex-1 min-h-0 w-full max-w-full overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y custom-scrollbar px-4 py-5 md:py-10 pb-28 box-border">
+            <div className="w-full max-w-xl mx-auto overflow-x-hidden">
                <CheckoutForm 
                   planSeleccionado={planSeleccionado} 
                   onSuccess={handlePaymentSuccess} 
@@ -12706,12 +12706,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       {/* NAVEGACIÓN FLOTANTE (RESPONSIVA) */}
       <nav className="fixed w-full z-50 top-0 pt-4 md:pt-6 px-4 md:px-8 pointer-events-none">
         
-        {/* BARRA PRINCIPAL */}
-        <div className="max-w-[1400px] mx-auto bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-2xl border border-slate-200/50 dark:border-white/10 h-16 md:h-20 rounded-[2rem] flex items-center justify-between px-4 md:px-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] pointer-events-auto transition-colors duration-700 relative z-50">
+        {/* BARRA PRINCIPAL (Calibrada en móvil para que nada se pegue al logo ni se desborde) */}
+        <div className="max-w-[1400px] mx-auto bg-white/75 dark:bg-[#0a0a0a]/75 backdrop-blur-2xl border border-slate-200/60 dark:border-white/10 h-14 sm:h-16 md:h-20 rounded-full flex items-center justify-between px-3 sm:px-5 md:px-6 gap-2 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] pointer-events-auto transition-colors duration-700 relative z-50 overflow-hidden">
             
-            {/* LOGO */}
-            <a href="/" className="flex items-center group">
-               <BauliaLogo className="h-7 md:h-10 w-auto" />
+            {/* LOGO CON ESPACIO DE RESPIRO */}
+            <a href="/" className="flex items-center group shrink-0 pr-1">
+               <BauliaLogo className="h-5 sm:h-7 md:h-10 w-auto" />
             </a>
 
             {/* MENÚ DE ESCRITORIO */}
@@ -12734,34 +12734,38 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </button>
             </div>
 
-            {/* CONTROLES DERECHOS */}
-            <div className="flex items-center gap-2 md:gap-4">
+            {/* CONTROLES DERECHOS COMPACTOS Y ALINEADOS */}
+            <div className="flex items-center gap-1 sm:gap-2 md:gap-3.5 shrink-0">
               
-              {/* 🔴 NUEVO: SELECTOR GLOBAL DE MONEDA */}
-              <div className="flex items-center bg-slate-100 dark:bg-white/10 p-1 rounded-full shadow-inner border border-slate-200 dark:border-white/5">
-                 <button onClick={() => setMoneda('MXN')} className={`px-2 md:px-3 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all ${moneda === 'MXN' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>MXN</button>
-                 <button onClick={() => setMoneda('USD')} className={`px-2 md:px-3 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all ${moneda === 'USD' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>USD</button>
+              {/* SELECTOR GLOBAL DE MONEDA */}
+              <div className="flex items-center bg-slate-100 dark:bg-white/10 p-0.5 sm:p-1 rounded-full shadow-inner border border-slate-200 dark:border-white/5 shrink-0">
+                 <button type="button" onClick={() => setMoneda('MXN')} className={`px-2 sm:px-2.5 md:px-3 py-1 rounded-full text-[7.5px] sm:text-[8.5px] md:text-[9px] font-black uppercase tracking-wider transition-all ${moneda === 'MXN' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>MXN</button>
+                 <button type="button" onClick={() => setMoneda('USD')} className={`px-2 sm:px-2.5 md:px-3 py-1 rounded-full text-[7.5px] sm:text-[8.5px] md:text-[9px] font-black uppercase tracking-wider transition-all ${moneda === 'USD' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>USD</button>
               </div>
 
-              <button onClick={cycleTheme} className="p-2 text-slate-400 hover:text-amber-600 dark:text-slate-500 dark:hover:text-amber-400 transition-colors" title={`Modo: ${themeSetting.toUpperCase()}`}>
+              {/* BOTÓN DÍA / NOCHE / AUTO */}
+              <button type="button" onClick={cycleTheme} className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-slate-500 hover:text-amber-600 dark:text-slate-400 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shrink-0" title={`Modo: ${themeSetting.toUpperCase()}`}>
                 {themeSetting === 'auto' ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                 ) : themeSetting === 'dark' ? (
-                  <Moon size={18} />
+                  <Moon size={15} />
                 ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                 )}
               </button>
 
-              <button onClick={() => window.location.href = 'https://panel.baulia.com'} className="text-[9px] md:text-xs font-black uppercase tracking-widest text-white dark:text-slate-900 bg-slate-900 dark:bg-white px-4 py-2 md:px-5 md:py-2.5 rounded-full hover:scale-105 transition-transform shadow-md whitespace-nowrap">
+              {/* BOTÓN ENTRAR */}
+              <button type="button" onClick={() => window.location.href = 'https://panel.baulia.com'} className="text-[8.5px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest text-white dark:text-slate-900 bg-slate-900 dark:bg-white px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-full hover:scale-105 transition-transform shadow-md whitespace-nowrap shrink-0">
                 Entrar
               </button>
 
+              {/* BOTÓN MENÚ MÓVIL */}
               <button 
+                type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-                className="p-2 lg:hidden text-slate-900 dark:text-white"
+                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center lg:hidden text-slate-900 dark:text-white rounded-full hover:bg-slate-100 dark:hover:bg-white/10 shrink-0"
               >
-                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
               </button>
             </div>
         </div>
@@ -14552,7 +14556,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                  </div>
 
                  <div className="mt-10 relative z-10">
-                    <button onClick={() => { setPlanSeleccionado({ plan: 'social_wall', precio: pSocialWall.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(79,70,229,0.3)]">
+                    <button onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: pSocialWall.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(79,70,229,0.3)]">
                        <Camera size={18} className="mr-3 text-white/70" /> Comprar Muro Social (${pSocialWall.precios[moneda]})
                     </button>
                  </div>
@@ -14701,29 +14705,16 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       {/* 🔴 SECCIÓN DE PLANES Y PORTAL COMPARATIVO DE ALTA COSTURA */}
       {/* ========================================== */}
       <div id="planes" className="py-32 px-4 max-w-[1400px] mx-auto relative">
-        <RevealSection className="text-center mb-20">
+        <RevealSection className="text-center mb-16">
           <span className="px-4 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-black uppercase tracking-[0.2em] border border-amber-500/20 shadow-sm mb-6 inline-block">
             Atelier & Software de Gestión
           </span>
           <h2 className="text-5xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white mt-4 mb-6 transition-colors leading-tight">
             La Colección Sagrada.
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-sm md:text-base transition-colors mb-8 font-light leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-sm md:text-base transition-colors font-light leading-relaxed">
             Todos nuestros planes incluyen una invitación de Alta Costura y acceso a tu Bóveda Privada. Cero mensualidades, un solo pago único y control absoluto hasta el último baile.
           </p>
-          
-          {/* INTERRUPTOR DE MONEDA ESTÉTICO */}
-          <div className="flex justify-center items-center gap-4 relative z-10 mt-8">
-             <span className={`text-xs font-black uppercase tracking-widest transition-colors ${moneda === 'MXN' ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>🇲🇽 MXN</span>
-             <button 
-                type="button"
-                onClick={() => setMoneda(m => m === 'MXN' ? 'USD' : 'MXN')} 
-                className="w-16 h-8 bg-slate-200 dark:bg-white/10 rounded-full relative transition-colors border border-slate-300 dark:border-white/20 flex items-center shadow-inner"
-             >
-                <div className={`absolute w-6 h-6 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 shadow-md transition-all duration-300 ${moneda === 'USD' ? 'left-[34px]' : 'left-1'}`}></div>
-             </button>
-             <span className={`text-xs font-black uppercase tracking-widest transition-colors ${moneda === 'USD' ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>🇺🇸 USD</span>
-          </div>
         </RevealSection>
 
         {/* TARJETAS DE LOS 4 PLANES CON BOTÓN DE FICHA TÉCNICA COMPLETA */}
