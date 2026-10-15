@@ -12078,12 +12078,22 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   ]);
   const [bovedaScanCount, setBovedaScanCount] = useState(184);
 
-  const handleCroquisPointerMove = (e) => {
-    if (!draggingMesaId || !croquisCanvasRef.current) return;
+  const updateMesaPositionFromClientXY = (clientX, clientY, targetId = draggingMesaId) => {
+    if (!targetId || !croquisCanvasRef.current) return;
     const rect = croquisCanvasRef.current.getBoundingClientRect();
-    const relX = Math.max(14, Math.min(86, ((e.clientX - rect.left) / rect.width) * 100));
-    const relY = Math.max(20, Math.min(82, ((e.clientY - rect.top) / rect.height) * 100));
-    setCroquisDemoMesas(prev => prev.map(m => m.id === draggingMesaId ? { ...m, x: relX, y: relY } : m));
+    const relX = Math.max(15, Math.min(85, ((clientX - rect.left) / rect.width) * 100));
+    const relY = Math.max(22, Math.min(80, ((clientY - rect.top) / rect.height) * 100));
+    setCroquisDemoMesas(prev => prev.map(m => m.id === targetId ? { ...m, x: relX, y: relY } : m));
+  };
+
+  const handleCroquisPointerMove = (e) => {
+    if (!draggingMesaId) return;
+    updateMesaPositionFromClientXY(e.clientX, e.clientY);
+  };
+
+  const handleCroquisTouchMove = (e) => {
+    if (!draggingMesaId || !e.touches || !e.touches[0]) return;
+    updateMesaPositionFromClientXY(e.touches[0].clientX, e.touches[0].clientY);
   };
   const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 59 });
   const [accentColor, setAccentColor] = useState('monochrome');
@@ -13498,19 +13508,21 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </div>
             </div>
 
-            {/* Lienzo Arquitectónico 2D con Drag & Drop en Vivo */}
+            {/* Lienzo Arquitectónico 2D con Drag & Drop Táctil y Mouse 100% Fluido */}
             <div 
               ref={croquisCanvasRef}
               onPointerMove={handleCroquisPointerMove}
               onPointerUp={() => setDraggingMesaId(null)}
-              onPointerLeave={() => setDraggingMesaId(null)}
-              className="relative bg-slate-50 dark:bg-[#0d0d0d] rounded-2xl border border-slate-200/80 dark:border-white/10 h-[215px] w-full overflow-hidden select-none touch-none" 
-              style={{ backgroundImage: 'radial-gradient(rgba(148,163,184,0.25) 1px, transparent 1px)', backgroundSize: '14px 14px' }}
+              onPointerCancel={() => setDraggingMesaId(null)}
+              onTouchMove={handleCroquisTouchMove}
+              onTouchEnd={() => setDraggingMesaId(null)}
+              className="relative bg-slate-50 dark:bg-[#0d0d0d] rounded-2xl border border-slate-200/80 dark:border-white/10 h-[220px] w-full overflow-hidden select-none touch-none" 
+              style={{ touchAction: 'none', WebkitUserSelect: 'none', backgroundImage: 'radial-gradient(rgba(148,163,184,0.25) 1px, transparent 1px)', backgroundSize: '14px 14px' }}
             >
               {/* Pista de Baile Central de Referencia */}
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-20 rounded-xl border border-dashed border-slate-300 dark:border-white/10 bg-white/40 dark:bg-white/[0.02] flex flex-col items-center justify-center pointer-events-none">
                 <span className="text-[7px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Pista Principal</span>
-                <span className="text-[7px] text-slate-400/70 mt-0.5">Arrastra alrededor</span>
+                <span className="text-[7px] text-slate-400/70 mt-0.5">Mueve las mesas</span>
               </div>
 
               {croquisDemoMesas.map((m) => {
@@ -13519,11 +13531,15 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   <div
                     key={m.id}
                     onPointerDown={(e) => {
-                      e.currentTarget.setPointerCapture(e.pointerId);
+                      e.stopPropagation();
                       setDraggingMesaId(m.id);
                     }}
-                    style={{ left: `${m.x}%`, top: `${m.y}%`, transform: 'translate(-50%, -50%)' }}
-                    className={`absolute flex flex-col items-center justify-center cursor-grab active:cursor-grabbing transition-shadow ${isDragging ? 'z-30 scale-110 drop-shadow-[0_10px_20px_rgba(245,158,11,0.35)]' : 'z-10 hover:scale-105'}`}
+                    onTouchStart={(e) => {
+                      e.stopPropagation();
+                      setDraggingMesaId(m.id);
+                    }}
+                    style={{ left: `${m.x}%`, top: `${m.y}%`, transform: 'translate(-50%, -50%)', touchAction: 'none' }}
+                    className={`absolute flex flex-col items-center justify-center cursor-grab active:cursor-grabbing p-2 ${isDragging ? 'z-30 scale-110 drop-shadow-[0_10px_20px_rgba(245,158,11,0.4)]' : 'z-10 hover:scale-105'}`}
                   >
                     {m.tipo === 'redonda' ? (
                       <div className="relative w-16 h-16 flex items-center justify-center">
@@ -13861,25 +13877,30 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
               <div className="bg-white/60 dark:bg-black/60 p-2 md:p-3.5 rounded-[2rem] border border-slate-200/70 dark:border-white/10 shadow-2xl dark:shadow-[0_30px_80px_rgba(0,0,0,0.8)] relative z-10 backdrop-blur-xl">
                 
-                <div className="bg-slate-50 dark:bg-slate-950 rounded-[1.5rem] border border-slate-200 dark:border-white/10 w-full overflow-hidden flex flex-col relative transition-colors shadow-inner h-[450px] sm:h-[510px]">
-                  {/* Barra de navegador superior */}
-                  <div className="h-10 border-b border-slate-200 dark:border-white/5 flex items-center justify-between px-4 bg-white dark:bg-[#111] shrink-0 transition-colors">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-rose-400/80"></div>
-                      <div className="w-3 h-3 rounded-full bg-amber-400/80"></div>
-                      <div className="w-3 h-3 rounded-full bg-emerald-400/80"></div>
+                <div className="bg-slate-50 dark:bg-slate-950 rounded-[1.5rem] border border-slate-200 dark:border-white/10 w-full overflow-hidden flex flex-col relative transition-colors shadow-inner h-[460px] sm:h-[510px]">
+                  {/* Barra de navegador superior adaptativa */}
+                  <div className="h-10 border-b border-slate-200 dark:border-white/5 flex items-center justify-between px-3 sm:px-4 gap-2 bg-white dark:bg-[#111] shrink-0 transition-colors">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-rose-400/80"></div>
+                      <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-400/80"></div>
+                      <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-400/80"></div>
                     </div>
-                    <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 flex items-center">
-                      <Lock size={10} className="mr-1 text-emerald-500"/> panel.baulia.com/{bovedaPreviewTab}
+                    <div className="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500 flex items-center truncate">
+                      <Lock size={10} className="mr-1 text-emerald-500 shrink-0"/> <span className="truncate">panel.baulia.com/{bovedaPreviewTab}</span>
                     </div>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-amber-500">Plan Diamante</span>
+                    <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-amber-500 whitespace-nowrap shrink-0">Diamante</span>
                   </div>
                   
-                  <div className="flex-1 flex overflow-hidden select-none">
-                     {/* MENÚ LATERAL INTERACTIVO DE 7 PESTAÑAS */}
-                     <div className="w-16 sm:w-44 border-r border-slate-200 dark:border-white/5 bg-white/80 dark:bg-[#050505]/70 flex flex-col p-2.5 sm:p-3.5 gap-1 transition-colors overflow-y-auto custom-scrollbar shrink-0">
-                        <div className="flex justify-center sm:justify-start items-center mb-3 sm:mb-4 mt-1 px-1">
+                  <div className="flex-1 flex overflow-hidden select-none min-w-0">
+                     {/* MENÚ LATERAL INTERACTIVO DE 7 PESTAÑAS (Sin desbordamiento de logo en móvil) */}
+                     <div className="w-14 sm:w-44 border-r border-slate-200 dark:border-white/5 bg-white/80 dark:bg-[#050505]/70 flex flex-col p-2 sm:p-3.5 gap-1 transition-colors overflow-y-auto overflow-x-hidden custom-scrollbar shrink-0">
+                        <div className="hidden sm:flex justify-start items-center mb-4 mt-1 px-1">
                            <BauliaLogo className="h-5 w-auto" forceWhite={isDarkMode} />
+                        </div>
+                        <div className="flex sm:hidden justify-center items-center mb-2 mt-1">
+                           <div className="w-8 h-8 rounded-xl bg-slate-900 dark:bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-500 font-editorial font-bold text-sm">
+                             B
+                           </div>
                         </div>
                         
                         <p className="hidden sm:block text-[8px] text-slate-400 font-black uppercase tracking-widest mt-1 mb-1 ml-2">Planeación</p>
@@ -13893,7 +13914,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             key={t.id}
                             type="button"
                             onClick={() => setBovedaPreviewTab(t.id)}
-                            className={`w-full flex items-center justify-center sm:justify-start gap-2.5 p-2 sm:px-3 sm:py-2 rounded-xl text-left transition-all ${bovedaPreviewTab === t.id ? 'bg-amber-500 text-slate-900 font-black shadow-md scale-[1.02]' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 font-medium'}`}
+                            className={`w-full flex items-center justify-center sm:justify-start gap-2.5 p-2 sm:px-3 sm:py-2 rounded-xl text-left transition-all ${bovedaPreviewTab === t.id ? 'bg-amber-500 text-slate-900 font-black shadow-md' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 font-medium'}`}
                           >
                             {t.icon}<span className="hidden sm:inline text-xs">{t.lbl}</span>
                           </button>
@@ -13908,7 +13929,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                             key={t.id}
                             type="button"
                             onClick={() => setBovedaPreviewTab(t.id)}
-                            className={`w-full flex items-center justify-center sm:justify-start gap-2.5 p-2 sm:px-3 sm:py-2 rounded-xl text-left transition-all ${bovedaPreviewTab === t.id ? 'bg-amber-500 text-slate-900 font-black shadow-md scale-[1.02]' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 font-medium'}`}
+                            className={`w-full flex items-center justify-center sm:justify-start gap-2.5 p-2 sm:px-3 sm:py-2 rounded-xl text-left transition-all ${bovedaPreviewTab === t.id ? 'bg-amber-500 text-slate-900 font-black shadow-md' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 font-medium'}`}
                           >
                             {t.icon}<span className="hidden sm:inline text-xs">{t.lbl}</span>
                           </button>
@@ -13918,73 +13939,73 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         <button
                           type="button"
                           onClick={() => setBovedaPreviewTab('escaner')}
-                          className={`w-full flex items-center justify-center sm:justify-start gap-2.5 p-2 sm:px-3 sm:py-2 rounded-xl text-left transition-all ${bovedaPreviewTab === 'escaner' ? 'bg-amber-500 text-slate-900 font-black shadow-md scale-[1.02]' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 font-medium'}`}
+                          className={`w-full flex items-center justify-center sm:justify-start gap-2.5 p-2 sm:px-3 sm:py-2 rounded-xl text-left transition-all ${bovedaPreviewTab === 'escaner' ? 'bg-amber-500 text-slate-900 font-black shadow-md' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 font-medium'}`}
                         >
                           <Scan size={15}/><span className="hidden sm:inline text-xs">Control QR</span>
                         </button>
                      </div>
                      
-                     {/* CONTENIDO DINÁMICO DE LAS 7 PESTAÑAS */}
-                     <div className="flex-1 p-4 sm:p-5 bg-slate-50/50 dark:bg-[#0a0a0a]/50 flex flex-col gap-3.5 overflow-y-auto custom-scrollbar transition-colors">
+                     {/* CONTENIDO DINÁMICO DE LAS 7 PESTAÑAS (100% Contenido en Móvil y Escritorio) */}
+                     <div className="flex-1 min-w-0 p-3 sm:p-5 bg-slate-50/50 dark:bg-[#0a0a0a]/50 flex flex-col gap-3 overflow-y-auto overflow-x-hidden custom-scrollbar transition-colors">
                         
                         {/* 1. VISTA: RESUMEN */}
                         {bovedaPreviewTab === 'resumen' && (
-                          <div className="flex flex-col gap-3.5 h-full animate-in fade-in duration-300">
-                            <div className="flex justify-between items-center shrink-0">
-                               <div>
-                                 <h2 className="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight">Centro de Mando</h2>
-                                 <p className="text-[9px] sm:text-[10px] text-slate-500 mt-0.5">Monitoreo ejecutivo en tiempo real.</p>
+                          <div className="flex flex-col gap-3 h-full animate-in fade-in duration-300 min-w-0">
+                            <div className="flex justify-between items-center gap-2 shrink-0">
+                               <div className="min-w-0">
+                                 <h2 className="text-sm sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate">Centro de Mando</h2>
+                                 <p className="text-[9px] sm:text-[10px] text-slate-500 mt-0.5 truncate">Monitoreo ejecutivo en tiempo real.</p>
                                </div>
-                               <button type="button" onClick={() => setBovedaPreviewTab('invitados')} className="px-3 py-1.5 bg-slate-900 dark:bg-white/10 text-white rounded-lg text-[9px] sm:text-xs font-bold flex items-center shadow-md hover:scale-105 transition-transform">
-                                 <Download size={13} className="mr-1.5"/> <span className="hidden sm:inline">Reporte PDF / Excel</span>
+                               <button type="button" onClick={() => setBovedaPreviewTab('invitados')} className="px-2.5 py-1.5 bg-slate-900 dark:bg-white/10 text-white rounded-lg text-[9px] sm:text-xs font-bold flex items-center shadow-md shrink-0">
+                                 <Download size={12} className="sm:mr-1.5"/> <span className="hidden sm:inline">Reporte PDF / Excel</span>
                                </button>
                             </div>
                             
-                            <div className="grid grid-cols-2 gap-3 shrink-0">
-                               <div onClick={() => setBovedaPreviewTab('invitados')} className="bg-white dark:bg-[#111] p-3.5 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm flex flex-col cursor-pointer hover:border-amber-500/40 transition-colors">
-                                  <div className="flex justify-between items-start">
-                                    <div>
-                                      <p className="text-slate-500 text-[8px] sm:text-[9px] font-black uppercase tracking-widest">Pases Asignados</p>
-                                      <h3 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">240</h3>
+                            <div className="grid grid-cols-2 gap-2.5 shrink-0">
+                               <div onClick={() => setBovedaPreviewTab('invitados')} className="bg-white dark:bg-[#111] p-3 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm flex flex-col cursor-pointer hover:border-amber-500/40 transition-colors min-w-0">
+                                  <div className="flex justify-between items-start gap-1">
+                                    <div className="min-w-0">
+                                      <p className="text-slate-500 text-[7px] sm:text-[9px] font-black uppercase tracking-wider truncate">Pases Asignados</p>
+                                      <h3 className="text-lg sm:text-3xl font-black text-slate-900 dark:text-white mt-0.5">240</h3>
                                     </div>
-                                    <div className="p-1.5 sm:p-2 bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg"><Users size={16}/></div>
+                                    <div className="p-1.5 bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0"><Users size={14}/></div>
                                   </div>
-                                  <div className="mt-2 sm:mt-3 text-[8px] sm:text-[9px] text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 px-2 py-0.5 rounded font-bold w-max uppercase tracking-wider">95% Confirmado</div>
+                                  <div className="mt-2 text-[7px] sm:text-[9px] text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded font-bold w-max uppercase tracking-wider">95% Confirmado</div>
                                </div>
 
-                               <div onClick={() => setBovedaPreviewTab('presupuesto')} className="bg-white dark:bg-[#111] p-3.5 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm flex flex-col cursor-pointer hover:border-amber-500/40 transition-colors">
-                                  <div className="flex justify-between items-start">
-                                    <div>
-                                      <p className="text-slate-500 text-[8px] sm:text-[9px] font-black uppercase tracking-widest">Presupuesto Ejercido</p>
-                                      <h3 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">$285k</h3>
+                               <div onClick={() => setBovedaPreviewTab('presupuesto')} className="bg-white dark:bg-[#111] p-3 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm flex flex-col cursor-pointer hover:border-amber-500/40 transition-colors min-w-0">
+                                  <div className="flex justify-between items-start gap-1">
+                                    <div className="min-w-0">
+                                      <p className="text-slate-500 text-[7px] sm:text-[9px] font-black uppercase tracking-wider truncate">Presupuesto</p>
+                                      <h3 className="text-lg sm:text-3xl font-black text-slate-900 dark:text-white mt-0.5">$285k</h3>
                                     </div>
-                                    <div className="p-1.5 sm:p-2 bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg"><Wallet size={16}/></div>
+                                    <div className="p-1.5 bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg shrink-0"><Wallet size={14}/></div>
                                   </div>
-                                  <div className="mt-3 sm:mt-4 w-full bg-slate-100 dark:bg-white/5 h-1.5 rounded-full overflow-hidden"><div className="bg-amber-500 h-1.5 rounded-full w-[80%]"></div></div>
+                                  <div className="mt-3 w-full bg-slate-100 dark:bg-white/5 h-1.5 rounded-full overflow-hidden"><div className="bg-amber-500 h-1.5 rounded-full w-[80%]"></div></div>
                                </div>
                             </div>
 
-                            <div className="flex-1 bg-white dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm flex flex-col overflow-hidden">
-                               <div className="p-3 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center">
-                                 <h3 className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-white flex items-center"><CheckSquare size={14} className="mr-1.5 text-indigo-500"/> Alertas Operativas</h3>
-                                 <button type="button" onClick={() => setBovedaPreviewTab('checklist')} className="text-[9px] font-black text-amber-500 uppercase hover:underline">Ir a Checklist →</button>
+                            <div className="flex-1 bg-white dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm flex flex-col overflow-hidden min-w-0">
+                               <div className="p-2.5 sm:p-3 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center gap-2">
+                                 <h3 className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-white flex items-center truncate"><CheckSquare size={13} className="mr-1.5 text-indigo-500 shrink-0"/> Alertas Operativas</h3>
+                                 <button type="button" onClick={() => setBovedaPreviewTab('checklist')} className="text-[8px] sm:text-[9px] font-black text-amber-500 uppercase hover:underline whitespace-nowrap shrink-0">Checklist →</button>
                                </div>
-                               <div className="p-3 space-y-2">
-                                 <div onClick={() => setBovedaPreviewTab('proveedores')} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 cursor-pointer hover:border-rose-500/30">
+                               <div className="p-2.5 sm:p-3 space-y-2">
+                                 <div onClick={() => setBovedaPreviewTab('proveedores')} className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 cursor-pointer hover:border-rose-500/30">
                                    <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0"></div>
                                    <div className="flex-1 min-w-0">
                                      <p className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-white truncate">Liquidación Banquete Hacienda</p>
-                                     <p className="text-[8px] sm:text-[9px] text-slate-500">Proveedores • Finanzas</p>
+                                     <p className="text-[8px] sm:text-[9px] text-slate-500 truncate">Proveedores • Finanzas</p>
                                    </div>
-                                   <div className="text-[8px] text-rose-500 font-bold bg-rose-50 dark:bg-rose-500/10 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-500/20">VENCE HOY</div>
+                                   <div className="text-[7px] sm:text-[8px] text-rose-500 font-bold bg-rose-50 dark:bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-200 dark:border-rose-500/20 whitespace-nowrap shrink-0">VENCE HOY</div>
                                  </div>
-                                 <div onClick={() => setBovedaPreviewTab('mesas')} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 cursor-pointer hover:border-amber-500/30">
+                                 <div onClick={() => setBovedaPreviewTab('mesas')} className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 cursor-pointer hover:border-amber-500/30">
                                    <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0"></div>
                                    <div className="flex-1 min-w-0">
-                                     <p className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-white truncate">Auto-Acomodo de Mesas por Afinidad</p>
-                                     <p className="text-[8px] sm:text-[9px] text-slate-500">228 de 240 lugares asignados</p>
+                                     <p className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-white truncate">Auto-Acomodo por Afinidad</p>
+                                     <p className="text-[8px] sm:text-[9px] text-slate-500 truncate">228 de 240 lugares asignados</p>
                                    </div>
-                                   <div className="text-[8px] text-emerald-500 font-black uppercase">Ver Mesas →</div>
+                                   <div className="text-[8px] text-emerald-500 font-black uppercase whitespace-nowrap shrink-0">Mesas →</div>
                                  </div>
                                </div>
                             </div>
@@ -13993,35 +14014,35 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
                         {/* 2. VISTA: CHECKLIST INTERACTIVO */}
                         {bovedaPreviewTab === 'checklist' && (
-                          <div className="flex flex-col gap-3 h-full animate-in fade-in duration-300">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">Tablero de Actividades</h2>
-                                <p className="text-[10px] text-slate-500">Toca una tarea para marcarla como completada.</p>
+                          <div className="flex flex-col gap-3 h-full animate-in fade-in duration-300 min-w-0">
+                            <div className="flex justify-between items-center gap-2">
+                              <div className="min-w-0">
+                                <h2 className="text-sm sm:text-lg font-black text-slate-900 dark:text-white truncate">Tablero de Actividades</h2>
+                                <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">Toca una tarea para marcarla como lista.</p>
                               </div>
-                              <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black">
+                              <span className="px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-black whitespace-nowrap shrink-0">
                                 {bovedaChecklistDemo.filter(t => t.done).length}/{bovedaChecklistDemo.length} Listas
                               </span>
                             </div>
 
-                            <div className="space-y-2.5 my-auto">
+                            <div className="space-y-2 my-auto">
                               {bovedaChecklistDemo.map(tarea => (
                                 <div 
                                   key={tarea.id}
                                   onClick={() => setBovedaChecklistDemo(prev => prev.map(item => item.id === tarea.id ? { ...item, done: !item.done } : item))}
-                                  className={`p-3.5 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${tarea.done ? 'bg-emerald-50/40 dark:bg-emerald-500/5 border-emerald-500/20 opacity-75' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-amber-500/40 shadow-sm'}`}
+                                  className={`p-3 rounded-2xl border flex items-center justify-between gap-2 cursor-pointer transition-all ${tarea.done ? 'bg-emerald-50/40 dark:bg-emerald-500/5 border-emerald-500/20 opacity-75' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-amber-500/40 shadow-sm'}`}
                                 >
-                                  <div className="flex items-center gap-3 min-w-0">
-                                    <div className={`w-5 h-5 rounded-lg flex items-center justify-center border transition-colors shrink-0 ${tarea.done ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-white/20'}`}>
-                                      {tarea.done && <Check size={12}/>}
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-md flex items-center justify-center border transition-colors shrink-0 ${tarea.done ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-white/20'}`}>
+                                      {tarea.done && <Check size={11}/>}
                                     </div>
-                                    <div className="truncate">
-                                      <p className={`text-xs font-bold truncate ${tarea.done ? 'line-through text-slate-400' : 'text-slate-800 dark:text-white'}`}>{tarea.t}</p>
+                                    <div className="min-w-0">
+                                      <p className={`text-[11px] sm:text-xs font-bold leading-snug ${tarea.done ? 'line-through text-slate-400' : 'text-slate-800 dark:text-white'}`}>{tarea.t}</p>
                                       <span className="text-[8px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">{tarea.cat}</span>
                                     </div>
                                   </div>
-                                  <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md shrink-0 ${tarea.done ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
-                                    {tarea.done ? 'Completado' : 'En Proceso'}
+                                  <span className={`text-[7px] sm:text-[8px] font-black uppercase px-1.5 py-0.5 rounded shrink-0 ${tarea.done ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                                    {tarea.done ? 'Listo' : 'Activo'}
                                   </span>
                                 </div>
                               ))}
@@ -14029,41 +14050,41 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                           </div>
                         )}
 
-                        {/* 3. VISTA: PRESUPUESTO */}
+                        {/* 3. VISTA: PRESUPUESTO (3 columnas calibradas sin desbordamiento en móvil) */}
                         {bovedaPreviewTab === 'presupuesto' && (
-                          <div className="flex flex-col gap-3.5 h-full animate-in fade-in duration-300">
+                          <div className="flex flex-col gap-3 h-full animate-in fade-in duration-300 min-w-0">
                             <div>
-                              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">Bóveda Financiera</h2>
-                              <p className="text-[10px] text-slate-500">Control de anticipos, liquidaciones y presupuesto disponible.</p>
+                              <h2 className="text-sm sm:text-lg font-black text-slate-900 dark:text-white">Bóveda Financiera</h2>
+                              <p className="text-[9px] sm:text-[10px] text-slate-500">Control de anticipos, liquidaciones y saldo.</p>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-2.5">
-                              <div className="bg-white dark:bg-[#111] p-3 rounded-2xl border border-slate-200 dark:border-white/10">
-                                <p className="text-[8px] font-black uppercase text-slate-400">Presupuesto</p>
-                                <p className="text-sm sm:text-base font-black text-slate-900 dark:text-white mt-0.5">$350,000</p>
+                            <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5">
+                              <div className="bg-white dark:bg-[#111] p-2 sm:p-3 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-white/10 min-w-0">
+                                <p className="text-[7px] sm:text-[8px] font-black uppercase text-slate-400 truncate">Presupuesto</p>
+                                <p className="text-[11px] sm:text-base font-black text-slate-900 dark:text-white mt-0.5 truncate">$350,000</p>
                               </div>
-                              <div className="bg-white dark:bg-[#111] p-3 rounded-2xl border border-amber-500/20">
-                                <p className="text-[8px] font-black uppercase text-amber-500">Pagado</p>
-                                <p className="text-sm sm:text-base font-black text-amber-500 mt-0.5">$285,000</p>
+                              <div className="bg-white dark:bg-[#111] p-2 sm:p-3 rounded-xl sm:rounded-2xl border border-amber-500/20 min-w-0">
+                                <p className="text-[7px] sm:text-[8px] font-black uppercase text-amber-500 truncate">Pagado</p>
+                                <p className="text-[11px] sm:text-base font-black text-amber-500 mt-0.5 truncate">$285,000</p>
                               </div>
-                              <div className="bg-white dark:bg-[#111] p-3 rounded-2xl border border-emerald-500/20">
-                                <p className="text-[8px] font-black uppercase text-emerald-500">Disponible</p>
-                                <p className="text-sm sm:text-base font-black text-emerald-500 mt-0.5">$65,000</p>
+                              <div className="bg-white dark:bg-[#111] p-2 sm:p-3 rounded-xl sm:rounded-2xl border border-emerald-500/20 min-w-0">
+                                <p className="text-[7px] sm:text-[8px] font-black uppercase text-emerald-500 truncate">Disponible</p>
+                                <p className="text-[11px] sm:text-base font-black text-emerald-500 mt-0.5 truncate">$65,000</p>
                               </div>
                             </div>
 
-                            <div className="bg-white dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-3.5 space-y-2.5 my-auto">
+                            <div className="bg-white dark:bg-[#111] rounded-2xl border border-slate-200 dark:border-white/10 p-3 space-y-2 my-auto">
                               {[
                                 { c: 'Hacienda & Banquete VIP', m: '$180,000', st: 'Liquidado', col: 'text-emerald-500' },
                                 { c: 'Producción Floral y Diseño', m: '$65,000', st: 'Anticipo 70%', col: 'text-amber-500' },
                                 { c: 'Fotografía, Video y DJ', m: '$40,000', st: 'Liquidado', col: 'text-emerald-500' }
                               ].map((g, i) => (
-                                <div key={i} className="flex items-center justify-between text-xs border-b border-slate-100 dark:border-white/5 last:border-0 pb-2 last:pb-0">
-                                  <div>
-                                    <p className="font-bold text-slate-800 dark:text-white">{g.c}</p>
-                                    <p className={`text-[9px] font-black uppercase ${g.col}`}>{g.st}</p>
+                                <div key={i} className="flex items-center justify-between gap-2 text-[11px] sm:text-xs border-b border-slate-100 dark:border-white/5 last:border-0 pb-2 last:pb-0">
+                                  <div className="min-w-0">
+                                    <p className="font-bold text-slate-800 dark:text-white truncate">{g.c}</p>
+                                    <p className={`text-[8px] sm:text-[9px] font-black uppercase ${g.col}`}>{g.st}</p>
                                   </div>
-                                  <span className="font-black text-slate-900 dark:text-white">{g.m}</span>
+                                  <span className="font-black text-slate-900 dark:text-white shrink-0">{g.m}</span>
                                 </div>
                               ))}
                             </div>
@@ -14072,28 +14093,28 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
                         {/* 4. VISTA: PROVEEDORES */}
                         {bovedaPreviewTab === 'proveedores' && (
-                          <div className="flex flex-col gap-3 h-full animate-in fade-in duration-300">
+                          <div className="flex flex-col gap-3 h-full animate-in fade-in duration-300 min-w-0">
                             <div>
-                              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">Directorio de Proveedores</h2>
-                              <p className="text-[10px] text-slate-500">Contratos, teléfonos directos y saldos pendientes.</p>
+                              <h2 className="text-sm sm:text-lg font-black text-slate-900 dark:text-white">Directorio de Proveedores</h2>
+                              <p className="text-[9px] sm:text-[10px] text-slate-500">Contratos, WhatsApp directo y saldos.</p>
                             </div>
 
-                            <div className="space-y-2.5 my-auto">
+                            <div className="space-y-2 my-auto">
                               {[
                                 { n: 'Hacienda San Gabriel', rub: 'Locación & Catering', sal: 'Pagado 100%', ok: true },
                                 { n: 'Atelier Botánico Floral', rub: 'Decoración y Flores', sal: 'Restan $19,500', ok: false },
-                                { n: ' String Quartet & DJ Pro', rub: 'Música e Iluminación', sal: 'Pagado 100%', ok: true }
+                                { n: 'String Quartet & DJ Pro', rub: 'Música e Iluminación', sal: 'Pagado 100%', ok: true }
                               ].map((p, i) => (
-                                <div key={i} className="p-3.5 rounded-2xl bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 flex items-center justify-between">
-                                  <div>
-                                    <p className="text-xs font-bold text-slate-900 dark:text-white">{p.n}</p>
-                                    <p className="text-[9px] text-slate-400">{p.rub}</p>
+                                <div key={i} className="p-3 rounded-2xl bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 flex items-center justify-between gap-2">
+                                  <div className="min-w-0">
+                                    <p className="text-[11px] sm:text-xs font-bold text-slate-900 dark:text-white truncate">{p.n}</p>
+                                    <p className="text-[8px] sm:text-[9px] text-slate-400 truncate">{p.rub}</p>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md ${p.ok ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md whitespace-nowrap ${p.ok ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
                                       {p.sal}
                                     </span>
-                                    <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500"><MessageCircle size={13}/></span>
+                                    <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500"><MessageCircle size={12}/></span>
                                   </div>
                                 </div>
                               ))}
@@ -14101,15 +14122,15 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                           </div>
                         )}
 
-                        {/* 5. VISTA: INVITADOS CON ETIQUETAS Y PASES QR */}
+                        {/* 5. VISTA: INVITADOS (Nombres 100% visibles en móvil y escritorio) */}
                         {bovedaPreviewTab === 'invitados' && (
-                          <div className="flex flex-col gap-3 h-full animate-in fade-in duration-300">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">Gestión de Invitados</h2>
-                                <p className="text-[10px] text-slate-500">Etiquetas de afinidad, mesas y envío por WhatsApp.</p>
+                          <div className="flex flex-col gap-3 h-full animate-in fade-in duration-300 min-w-0">
+                            <div className="flex justify-between items-center gap-2">
+                              <div className="min-w-0">
+                                <h2 className="text-sm sm:text-lg font-black text-slate-900 dark:text-white truncate">Gestión de Invitados</h2>
+                                <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">Etiquetas de afinidad, mesas y QRs.</p>
                               </div>
-                              <span className="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase border border-amber-500/20">
+                              <span className="px-2 py-1 rounded-lg bg-amber-500/10 text-amber-500 text-[8px] sm:text-[9px] font-black uppercase border border-amber-500/20 whitespace-nowrap shrink-0">
                                 228 Confirmados
                               </span>
                             </div>
@@ -14118,19 +14139,19 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                               {[
                                 { n: 'Familia Montemayor', tag: '#FamiliaVIP', p: '4 Pases', m: 'Mesa 1', st: 'CONFIRMADO' },
                                 { n: 'Jóvenes Villarreal', tag: '#Primos', p: '3 Pases', m: 'Mesa 2', st: 'CONFIRMADO' },
-                                { n: 'Grupo Universidad', tag: '#AmigosNovio', p: '4 Pases', m: 'Mesa 2', st: 'EN EL EVENTO' }
+                                { n: 'Grupo Universidad', tag: '#AmigosNovio', p: '4 Pases', m: 'Mesa 2', st: 'EN EVENTO' }
                               ].map((inv, i) => (
-                                <div key={i} className="p-3 rounded-2xl bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 flex items-center justify-between gap-2">
+                                <div key={i} className="p-2.5 sm:p-3 rounded-2xl bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
                                   <div className="min-w-0">
-                                    <div className="flex items-center gap-1.5">
-                                      <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{inv.n}</p>
-                                      <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">{inv.tag}</span>
+                                    <p className="text-[11px] sm:text-xs font-bold text-slate-900 dark:text-white leading-snug">{inv.n}</p>
+                                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                      <span className="px-1.5 py-0.5 rounded text-[7px] sm:text-[8px] font-bold bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 border border-indigo-500/20">{inv.tag}</span>
+                                      <span className="text-[8px] sm:text-[9px] text-slate-400">{inv.p} • <b className="text-amber-500">{inv.m}</b></span>
                                     </div>
-                                    <p className="text-[9px] text-slate-400 mt-0.5">{inv.p} • <b className="text-amber-500">{inv.m}</b></p>
                                   </div>
-                                  <div className="flex items-center gap-1.5 shrink-0">
-                                    <span className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400"><QrCode size={13}/></span>
-                                    <span className="px-2 py-1 rounded-md bg-emerald-500 text-white text-[8px] font-black uppercase">{inv.st}</span>
+                                  <div className="flex items-center justify-between sm:justify-end gap-1.5 shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-white/5">
+                                    <span className="p-1 rounded-lg bg-indigo-500/10 text-indigo-400"><QrCode size={12}/></span>
+                                    <span className="px-2 py-0.5 rounded-md bg-emerald-500 text-white text-[7px] sm:text-[8px] font-black uppercase">{inv.st}</span>
                                   </div>
                                 </div>
                               ))}
@@ -14140,41 +14161,41 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
                         {/* 6. VISTA: MESAS Y AUTO-ACOMODO POR AFINIDAD */}
                         {bovedaPreviewTab === 'mesas' && (
-                          <div className="flex flex-col gap-3 h-full animate-in fade-in duration-300">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">Mesas e Imanes de Afinidad</h2>
-                                <p className="text-[10px] text-slate-500">Agrupación inteligente por etiquetas y modo Tetris.</p>
+                          <div className="flex flex-col gap-2.5 h-full animate-in fade-in duration-300 min-w-0">
+                            <div className="flex justify-between items-center gap-2">
+                              <div className="min-w-0">
+                                <h2 className="text-sm sm:text-lg font-black text-slate-900 dark:text-white truncate">Mesas e Imanes</h2>
+                                <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">Agrupación por etiquetas y Tetris.</p>
                               </div>
-                              <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 text-[9px] font-black uppercase flex items-center gap-1">
-                                <Wand2 size={11}/> Optimizado
+                              <span className="px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-500 text-[8px] sm:text-[9px] font-black uppercase flex items-center gap-1 shrink-0">
+                                <Wand2 size={10}/> Optimizado
                               </span>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 my-auto">
-                              <div className="p-3.5 rounded-2xl bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10">
-                                <div className="flex justify-between items-center mb-1.5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 my-auto">
+                              <div className="p-3 rounded-2xl bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10">
+                                <div className="flex justify-between items-center mb-1">
                                   <span className="font-bold text-xs text-slate-900 dark:text-white">Mesa 1 • Redonda</span>
                                   <span className="text-[9px] font-black text-emerald-500">10/10</span>
                                 </div>
-                                <span className="inline-block text-[8px] font-black uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-2">
+                                <span className="inline-block text-[7px] sm:text-[8px] font-black uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 mb-2">
                                   📌 VIP / Familia Directa
                                 </span>
-                                <div className="space-y-1 text-[9px] text-slate-400">
+                                <div className="space-y-1 text-[9px] text-slate-500 dark:text-slate-400">
                                   <div className="p-1.5 rounded bg-slate-50 dark:bg-black flex justify-between"><span>Papás de los Novios</span><b>(4)</b></div>
                                   <div className="p-1.5 rounded bg-slate-50 dark:bg-black flex justify-between"><span>Fam. Montemayor</span><b>(6)</b></div>
                                 </div>
                               </div>
 
-                              <div className="p-3.5 rounded-2xl bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10">
-                                <div className="flex justify-between items-center mb-1.5">
+                              <div className="p-3 rounded-2xl bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10">
+                                <div className="flex justify-between items-center mb-1">
                                   <span className="font-bold text-xs text-slate-900 dark:text-white">Mesa 2 • Tablón</span>
                                   <span className="text-[9px] font-black text-amber-500">10/10</span>
                                 </div>
-                                <span className="inline-block text-[8px] font-black uppercase px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-2">
+                                <span className="inline-block text-[7px] sm:text-[8px] font-black uppercase px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 mb-2">
                                   🧲 Imán: #Primos + #Amigos
                                 </span>
-                                <div className="space-y-1 text-[9px] text-slate-400">
+                                <div className="space-y-1 text-[9px] text-slate-500 dark:text-slate-400">
                                   <div className="p-1.5 rounded bg-slate-50 dark:bg-black flex justify-between"><span>Jóvenes Villarreal</span><b>(5)</b></div>
                                   <div className="p-1.5 rounded bg-slate-50 dark:bg-black flex justify-between"><span>Grupo Universidad</span><b>(5)</b></div>
                                 </div>
@@ -14183,37 +14204,37 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                           </div>
                         )}
 
-                        {/* 7. VISTA: CONTROL QR DE PUERTA EN VIVO */}
+                        {/* 7. VISTA: CONTROL QR DE PUERTA EN VIVO (Sin desbordamiento lateral en móvil) */}
                         {bovedaPreviewTab === 'escaner' && (
-                          <div className="flex flex-col gap-3 h-full animate-in fade-in duration-300">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">Escáner QR de Recepción</h2>
-                                <p className="text-[10px] text-slate-500">Simula el escaneo en puerta en tiempo real.</p>
+                          <div className="flex flex-col gap-3 h-full animate-in fade-in duration-300 min-w-0">
+                            <div className="flex flex-wrap justify-between items-center gap-2">
+                              <div className="min-w-0">
+                                <h2 className="text-sm sm:text-lg font-black text-slate-900 dark:text-white truncate">Escáner QR de Recepción</h2>
+                                <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">Simula el escaneo en puerta en vivo.</p>
                               </div>
                               <button
                                 type="button"
                                 onClick={() => setBovedaScanCount(c => c < 240 ? c + 1 : 184)}
-                                className="px-3 py-1.5 rounded-xl bg-amber-500 text-slate-900 text-[9px] font-black uppercase tracking-wider shadow-md hover:scale-105 transition-transform"
+                                className="px-2.5 py-1.5 rounded-xl bg-amber-500 text-slate-900 text-[8px] sm:text-[9px] font-black uppercase tracking-wider shadow-md active:scale-95 transition-transform shrink-0"
                               >
                                 + Simular Escaneo QR
                               </button>
                             </div>
 
-                            <div className="my-auto p-4 rounded-2xl bg-white dark:bg-[#111] border border-emerald-500/30 flex items-center justify-between gap-4 shadow-md">
-                              <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-                                  <CheckCircle size={24}/>
+                            <div className="my-auto p-3.5 rounded-2xl bg-white dark:bg-[#111] border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500 shrink-0">
+                                  <CheckCircle size={22}/>
                                 </div>
-                                <div>
-                                  <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400">Acceso Concedido • QR Válido</span>
-                                  <h4 className="text-sm font-black text-slate-900 dark:text-white">Alejandro Montemayor</h4>
-                                  <p className="text-[10px] font-bold text-amber-500">Dirigir a: Mesa 1 VIP (Pase 1 de 4)</p>
+                                <div className="min-w-0">
+                                  <span className="block text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-emerald-500">Acceso Concedido • QR Válido</span>
+                                  <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate">Alejandro Montemayor</h4>
+                                  <p className="text-[9px] sm:text-[10px] font-bold text-amber-500 truncate">Dirigir a: Mesa 1 VIP (Pase 1 de 4)</p>
                                 </div>
                               </div>
-                              <div className="text-right shrink-0">
-                                <p className="text-[8px] font-black uppercase text-slate-400">Adentro</p>
-                                <p className="text-xl font-black text-emerald-500">{bovedaScanCount}/240</p>
+                              <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 border-slate-100 dark:border-white/5 pt-2 sm:pt-0 shrink-0">
+                                <p className="text-[8px] font-black uppercase text-slate-400">Aforo Adentro</p>
+                                <p className="text-base sm:text-xl font-black text-emerald-500">{bovedaScanCount}/240</p>
                               </div>
                             </div>
                           </div>
