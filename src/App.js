@@ -12084,7 +12084,22 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [portalComparativoOpen, setPortalComparativoOpen] = useState(false);
   const [mobileComparePlan, setMobileComparePlan] = useState('oro');
 
-  // 🟢 BLOQUEO INTELIGENTE DE SCROLL DE FONDO: Evita que el celular mueva la página de atrás cuando hay una pasarela o modal abierto
+  const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 59 });
+  const [accentColor, setAccentColor] = useState('monochrome');
+  
+  // ESTADO PARA ABRIR LA REVISTA
+  const [showAnatomy, setShowAnatomy] = useState(false);
+  const [showPanelAnatomy, setShowPanelAnatomy] = useState(false);
+
+  // ESTADOS PARA EL SHOWROOM INCRUSTADO
+  const [activeCategory, setActiveCategory] = useState('boda');
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // 🔴 ESTADO VITAL PARA EL VISOR MÓVIL (Evita la pantalla negra)
+  const [fullScreenDemo, setFullScreenDemo] = useState(null);
+
+  // 🟢 BLOQUEO INTELIGENTE DE SCROLL DE FONDO (Ahora ubicado después de declarar todos los estados)
   useEffect(() => {
     const isAnyModalOpen = Boolean(checkoutModal || checkoutSuccess || legalModal || fullScreenDemo || fichaPlanModal || portalComparativoOpen || showAnatomy || showPanelAnatomy);
     if (isAnyModalOpen) {
@@ -12112,20 +12127,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     if (!draggingMesaId || !e.touches || !e.touches[0]) return;
     updateMesaPositionFromClientXY(e.touches[0].clientX, e.touches[0].clientY);
   };
-  const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 59 });
-  const [accentColor, setAccentColor] = useState('monochrome');
-  
-  // ESTADO PARA ABRIR LA REVISTA
-  const [showAnatomy, setShowAnatomy] = useState(false);
-  const [showPanelAnatomy, setShowPanelAnatomy] = useState(false);
-
-  // ESTADOS PARA EL SHOWROOM INCRUSTADO
-  const [activeCategory, setActiveCategory] = useState('boda');
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // 🔴 ESTADO VITAL PARA EL VISOR MÓVIL (Evita la pantalla negra)
-  const [fullScreenDemo, setFullScreenDemo] = useState(null);
 
   // ESTADOS PARA NOTIFICACIONES DINÁMICAS (HERO)
   const [notifIndex, setNotifIndex] = useState(0);
