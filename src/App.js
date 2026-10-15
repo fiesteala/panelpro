@@ -13111,130 +13111,186 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </section>
 
-      {/* BENTO BOX: INVITACIONES INTERACTIVAS */}
-      <section id="experiencia" className="py-32 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
-        <RevealSection className="mb-16 text-center md:text-left">
-          <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Detalles de Alta Costura</span>
-          <h2 className="text-5xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 leading-tight">Más que una invitación.<br/><span className="italic text-slate-500 dark:text-slate-400">Una experiencia táctil.</span></h2>
+      {/* BENTO BOX: ARTE EDITORIAL + REYES TECNOLÓGICOS DE BAULIA */}
+      <section id="experiencia" className="py-28 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
+        <RevealSection className="mb-16 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Arte Nupcial & Ingeniería Invisible</span>
+            <h2 className="text-5xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 leading-tight">
+              Cálida por fuera.<br/><span className="italic text-slate-500 dark:text-slate-400">Superdotada por dentro.</span>
+            </h2>
+          </div>
+          <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base max-w-md font-light leading-relaxed">
+            Mientras tus invitados viven una carta de celebración llena de arte floral, música y emoción visual, tu invitación opera en secreto con la tecnología más avanzada de la industria.
+          </p>
         </RevealSection>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[280px]">
-          <RevealSection delay={100} className="md:col-span-2 md:row-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-10 md:p-12 border border-slate-200 dark:border-white/10 flex flex-col justify-end relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5 md:gap-6 md:auto-rows-[300px]">
+          
+          {/* 👑 TARJETA 1 (2x2): ARTE EDITORIAL, CALIDEZ Y SALUDO VIP POR NOMBRE */}
+          <RevealSection delay={100} className="md:col-span-2 md:row-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 sm:p-10 md:p-12 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700 min-h-[460px]">
             <div className={`absolute inset-0 opacity-5 dark:opacity-10 transition-colors duration-700 ${accentColor === 'monochrome' ? 'bg-slate-500' : (accentThemes[accentColor]?.bg || '')}`}></div>
             
-            <div className={`absolute top-16 sm:top-20 left-10 sm:left-12 z-20 transition-all duration-700 transform group-hover:scale-105 group-hover:-rotate-2 drop-shadow-xl ${accentColor === 'monochrome' ? 'text-slate-800 dark:text-white' : accentThemes[accentColor]?.text}`}>
-                <h3 style={{ fontFamily: '"Birthstone", cursive', fontSize: '4.5rem', lineHeight: '1' }} className="font-medium -rotate-6">
+            {/* Saludo VIP Personalizado flotante */}
+            <div className="relative z-20 flex flex-col items-start gap-3">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#FDFBF7] dark:bg-white/5 border border-[#D4AF37]/40 shadow-md">
+                <Gem size={14} className="text-amber-500 shrink-0"/>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Pase Especial Para:</span>
+                <span className="font-editorial italic font-bold text-sm text-slate-900 dark:text-white">Familia Zárate (4 Lugares)</span>
+              </div>
+
+              <div className={`mt-2 transition-all duration-700 transform group-hover:scale-105 group-hover:-rotate-2 drop-shadow-xl ${accentColor === 'monochrome' ? 'text-slate-800 dark:text-white' : accentThemes[accentColor]?.text}`}>
+                <h3 style={{ fontFamily: '"Birthstone", cursive', fontSize: '4.2rem', lineHeight: '1' }} className="font-medium -rotate-3">
                   Ana y Rodrigo
                 </h3>
+              </div>
             </div>
 
-            <div className="absolute top-10 right-0 md:right-10 w-full md:w-56 h-64 pointer-events-none perspective-[1000px] flex items-center justify-center">
-               <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 1" className="absolute w-40 h-52 object-cover rounded-xl border-[4px] border-white dark:border-[#111] transform rotate-[10deg] translate-x-16 translate-y-6 group-hover:rotate-[15deg] group-hover:translate-x-24 shadow-xl transition-all duration-700 ease-out" />
-               <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 2" className="absolute w-40 h-52 object-cover rounded-xl border-[4px] border-white dark:border-[#111] transform -rotate-[5deg] group-hover:-rotate-[10deg] group-hover:-translate-x-4 shadow-xl transition-all duration-700 ease-out z-10" />
+            {/* Fotografías Románticas Protagónicas */}
+            <div className="relative sm:absolute sm:top-16 sm:right-6 w-full sm:w-56 h-52 sm:h-64 pointer-events-none perspective-[1000px] flex items-center justify-center my-4 sm:my-0">
+               <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Invitación digital romántica con fotografía editorial" className="absolute w-36 sm:w-40 h-48 sm:h-52 object-cover rounded-2xl border-[4px] border-white dark:border-[#111] transform rotate-[10deg] translate-x-12 sm:translate-x-16 translate-y-4 group-hover:rotate-[15deg] group-hover:translate-x-20 shadow-xl transition-all duration-700 ease-out" />
+               <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Diseño de invitación de boda de alta costura" className="absolute w-36 sm:w-40 h-48 sm:h-52 object-cover rounded-2xl border-[4px] border-white dark:border-[#111] transform -rotate-[5deg] group-hover:-rotate-[10deg] group-hover:-translate-x-4 shadow-xl transition-all duration-700 ease-out z-10" />
             </div>
             
-            <div className="relative z-30 w-full md:w-3/4 mt-48 sm:mt-32">
-               <div className="flex gap-2 p-2 bg-white/80 dark:bg-black/40 backdrop-blur-md rounded-full border border-slate-200 dark:border-white/10 w-max mb-6 shadow-sm">
-                 <button onMouseEnter={()=>setAccentColor('monochrome')} className={`w-5 h-5 rounded-full bg-[linear-gradient(135deg,_#0f172a_50%,_#ffffff_50%)] dark:bg-[linear-gradient(135deg,_#ffffff_50%,_#0f172a_50%)] border border-slate-300 dark:border-slate-600 transition-all ${accentColor === 'monochrome' ? 'scale-125 ring-2 ring-offset-2 ring-slate-400 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Clásico"></button>
-                 <button onMouseEnter={()=>setAccentColor('amber')} className={`w-5 h-5 rounded-full bg-amber-500 transition-all ${accentColor === 'amber' ? 'scale-125 ring-2 ring-offset-2 ring-amber-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
-                 <button onMouseEnter={()=>setAccentColor('rose')} className={`w-5 h-5 rounded-full bg-rose-500 transition-all ${accentColor === 'rose' ? 'scale-125 ring-2 ring-offset-2 ring-rose-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
-                 <button onMouseEnter={()=>setAccentColor('emerald')} className={`w-5 h-5 rounded-full bg-emerald-500 transition-all ${accentColor === 'emerald' ? 'scale-125 ring-2 ring-offset-2 ring-emerald-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
-                 <button onMouseEnter={()=>setAccentColor('indigo')} className={`w-5 h-5 rounded-full bg-indigo-500 transition-all ${accentColor === 'indigo' ? 'scale-125 ring-2 ring-offset-2 ring-indigo-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`}></button>
+            <div className="relative z-30 w-full md:w-4/5 mt-auto pt-4">
+               <div className="flex items-center gap-2 p-2 bg-white/90 dark:bg-black/60 backdrop-blur-md rounded-full border border-slate-200 dark:border-white/10 w-max mb-5 shadow-sm">
+                 <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-2">ADN Visual:</span>
+                 <button onMouseEnter={()=>setAccentColor('monochrome')} onClick={()=>setAccentColor('monochrome')} className={`w-5 h-5 rounded-full bg-[linear-gradient(135deg,_#0f172a_50%,_#ffffff_50%)] dark:bg-[linear-gradient(135deg,_#ffffff_50%,_#0f172a_50%)] border border-slate-300 dark:border-slate-600 transition-all ${accentColor === 'monochrome' ? 'scale-125 ring-2 ring-offset-2 ring-slate-400 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Editorial Clásico"></button>
+                 <button onMouseEnter={()=>setAccentColor('amber')} onClick={()=>setAccentColor('amber')} className={`w-5 h-5 rounded-full bg-amber-500 transition-all ${accentColor === 'amber' ? 'scale-125 ring-2 ring-offset-2 ring-amber-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Hoja de Oro"></button>
+                 <button onMouseEnter={()=>setAccentColor('rose')} onClick={()=>setAccentColor('rose')} className={`w-5 h-5 rounded-full bg-rose-500 transition-all ${accentColor === 'rose' ? 'scale-125 ring-2 ring-offset-2 ring-rose-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Acuarela Floral"></button>
+                 <button onMouseEnter={()=>setAccentColor('emerald')} onClick={()=>setAccentColor('emerald')} className={`w-5 h-5 rounded-full bg-emerald-500 transition-all ${accentColor === 'emerald' ? 'scale-125 ring-2 ring-offset-2 ring-emerald-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Botánico"></button>
+                 <button onMouseEnter={()=>setAccentColor('indigo')} onClick={()=>setAccentColor('indigo')} className={`w-5 h-5 rounded-full bg-indigo-500 transition-all ${accentColor === 'indigo' ? 'scale-125 ring-2 ring-offset-2 ring-indigo-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Gala Nocturna"></button>
                </div>
 
-               <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-3 leading-tight transition-colors duration-500">Diseño Inmersivo</h3>
-               <p className="text-slate-600 dark:text-slate-400 text-base leading-relaxed transition-colors duration-500">
-                 Galerías fotográficas, logotipos manuscritos y paletas de color <b className={`transition-colors duration-500 ${accentColor === 'monochrome' ? 'text-slate-900 dark:text-white' : accentThemes[accentColor]?.text}`}>adaptativas</b> que reflejan la elegancia de tu evento.
+               <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2.5 leading-tight transition-colors duration-500">
+                 Arte Cálido & Saludo VIP por Invitado
+               </h3>
+               <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed transition-colors duration-500">
+                 Acuarelas, ilustraciones florales, música envolvente sin bloqueos y <b className={`transition-colors duration-500 ${accentColor === 'monochrome' ? 'text-slate-900 dark:text-white' : accentThemes[accentColor]?.text}`}>extracción inteligente</b> que recibe a cada familia por su nombre desde que abre el enlace.
                </p>
             </div>
           </RevealSection>
 
-          <RevealSection delay={200} className="md:col-span-2 bg-slate-100 dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 md:p-10 border border-slate-200 dark:border-white/10 flex items-center justify-between relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
-            <div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 transition-colors">Cuenta Regresiva</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm max-w-[200px] transition-colors">El latido de tu evento en tiempo real.</p>
+          {/* 👑 TARJETA 2 (2x1): PASES QR VIVOS CON MESA ASIGNADA EN TIEMPO REAL */}
+          <RevealSection delay={200} className="md:col-span-2 bg-slate-900 dark:bg-[#111] rounded-[2.5rem] p-8 md:p-9 border border-slate-800 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden group shadow-xl transition-colors duration-700">
+            <div className="absolute -right-10 -top-10 w-44 h-44 bg-amber-500/15 blur-3xl rounded-full pointer-events-none"></div>
+            <div className="relative z-10 flex-1">
+              <span className="inline-block text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 mb-3">
+                Micro-Frontend Camaleónico
+              </span>
+              <h3 className="text-2xl font-bold text-white mb-2 leading-snug">
+                Pases QR Vivos con Mesa Asignada
+              </h3>
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                Al confirmar asistencia sin salir de su invitación, el sistema despliega un carrusel con el <b>Pase VIP descargable de cada integrante</b> indicando su mesa exacta en tiempo real.
+              </p>
             </div>
-            <div className="flex gap-2 text-center relative z-10">
-              <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 w-16 shadow-sm transition-colors">
-                <span className="block text-2xl font-light text-slate-800 dark:text-white">{String(timeLeft.d).padStart(2, '0')}</span>
-                <span className="text-[9px] uppercase tracking-widest text-slate-400 font-bold mt-1 block">Días</span>
+
+            {/* Mini Tarjeta Pase VIP QR */}
+            <div className="relative z-10 w-44 bg-[#FDFBF7] text-slate-900 rounded-2xl p-3.5 shadow-2xl border border-amber-500/40 shrink-0 transform group-hover:scale-105 group-hover:-rotate-2 transition-all duration-500 text-center">
+              <div className="w-full h-1.5 bg-amber-500 rounded-full mb-2"></div>
+              <p className="text-[7px] font-black uppercase tracking-widest text-slate-400">Entrada Personal</p>
+              <p className="font-editorial font-bold text-sm text-slate-900 truncate">Roberto Zárate</p>
+              <div className="bg-white p-1.5 rounded-xl w-20 h-20 mx-auto my-2 shadow-inner border border-slate-100">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=BAULIA-VIP-PASS" alt="Pase QR VIP con mesa asignada" className="w-full h-full mix-blend-multiply" />
               </div>
-              <div className="text-slate-300 dark:text-white/20 font-light text-3xl mt-2">:</div>
-              <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 w-16 shadow-sm transition-colors">
-                <span className="block text-2xl font-light text-slate-800 dark:text-white">{String(timeLeft.h).padStart(2, '0')}</span>
-                <span className="text-[9px] uppercase tracking-widest text-slate-400 font-bold mt-1 block">Hrs</span>
-              </div>
-              <div className="text-slate-300 dark:text-white/20 font-light text-3xl mt-2">:</div>
-              <div className="bg-slate-900 dark:bg-white rounded-2xl p-4 w-16 shadow-lg transform scale-110 transition-colors">
-                <span className="block text-2xl font-light text-white dark:text-slate-900">{String(timeLeft.s).padStart(2, '0')}</span>
-                <span className="text-[9px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-bold mt-1 block">Seg</span>
-              </div>
+              <p className="text-[7px] font-bold uppercase tracking-widest text-slate-400">Asiento Asignado</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mt-0.5">Mesa 1 • VIP</p>
             </div>
           </RevealSection>
 
-          <RevealSection delay={300} className="h-full">
-            <div onMouseEnter={() => setFakeRsvp(true)} onMouseLeave={() => setFakeRsvp(false)} className="h-full bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[2.5rem] p-8 flex flex-col justify-between relative overflow-hidden transform hover:scale-[1.02] transition-all shadow-sm dark:shadow-none cursor-pointer group">
-               <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-               <div className="flex justify-between items-start relative z-10">
-                 <div>
-                   <h3 className="text-2xl font-bold leading-tight mb-2 text-slate-900 dark:text-white">RSVP<br/>Blindado</h3>
-                   <p className="text-slate-500 dark:text-slate-400 text-sm">Pasa el cursor / Toca</p>
-                 </div>
-                 <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-sm border transition-colors duration-500 ${fakeRsvp ? 'bg-emerald-500 border-emerald-500' : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'}`}>
-                   {fakeRsvp ? <CheckCircle size={24} className="text-white animate-in zoom-in duration-300"/> : <Plus size={24} className="text-slate-400"/>}
-                 </div>
-               </div>
+          {/* 👑 TARJETA 3 (2x1): MOTOR DUAL DE AUTO-ACOMODO (AFINIDAD + TETRIS) */}
+          <RevealSection delay={300} className="md:col-span-2 bg-gradient-to-br from-indigo-50 via-white to-amber-50/40 dark:from-[#0d0f17] dark:via-[#0a0a0a] dark:to-[#141008] rounded-[2.5rem] p-8 md:p-9 border border-indigo-200/70 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-sm transition-colors duration-700">
+            <div className="flex flex-wrap items-center gap-1.5 relative z-10 mb-4">
+              <span className="px-3 py-1 rounded-xl text-[10px] font-black bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <CheckCircle size={11}/> Papás Fijos (Mesa 1)
+              </span>
+              <span className="px-3 py-1 rounded-xl text-[10px] font-bold bg-indigo-600 text-white shadow-sm">
+                #Primos
+              </span>
+              <span className="px-3 py-1 rounded-xl text-[10px] font-bold bg-amber-500 text-slate-900 shadow-sm">
+                #AmigosNovio
+              </span>
+              <span className="px-3 py-1 rounded-xl text-[10px] font-bold bg-white dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10">
+                #Universidad
+              </span>
+            </div>
+
+            <div className="relative z-10 mt-auto">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Wand2 size={18} className="text-indigo-600 dark:text-amber-400"/>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
+                  Auto-Acomodo por Afinidad y Tetris
+                </h3>
+              </div>
+              <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">
+                Etiqueta invitados y ponle <b>imanes de afinidad</b> a tus mesas. El algoritmo respeta a los papás en la Mesa 1, separa primos jóvenes automáticamente para sentarlos con amigos y rellena los lugares libres en modo Tetris.
+              </p>
             </div>
           </RevealSection>
 
-          <RevealSection delay={400} className="h-full">
-            <div className="h-full bg-slate-50 dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700">
-               <div className="absolute right-8 top-8 w-12 h-12 flex items-center justify-center">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-slate-400 dark:bg-white opacity-20 animate-ping"></span>
-                  <div className="relative w-3 h-3 bg-slate-800 dark:bg-white rounded-full shadow-lg"></div>
+          {/* 👑 TARJETA 4 (2x1): CROQUIS ARQUITECTÓNICO 2D Y MESAS A MEDIDA */}
+          <RevealSection delay={150} className="md:col-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 md:p-9 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-sm transition-colors duration-700">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 relative z-10 mb-4">
+              {[
+                { n: 'Redonda', c: '10p' },
+                { n: 'Cuadrada', c: '12p' },
+                { n: 'Tablón', c: '12p' },
+                { n: 'Ovalada', c: '14p' },
+                { n: 'Serpentina', c: '9p' },
+                { n: 'A Medida', c: '0.5m' }
+              ].map((m, i) => (
+                <div key={i} className="p-2.5 rounded-2xl bg-slate-50 dark:bg-[#111] border border-slate-200/80 dark:border-white/10 text-center group-hover:border-amber-500/40 transition-colors">
+                  <p className="text-[10px] font-black text-indigo-600 dark:text-amber-400">{m.c}</p>
+                  <p className="text-[8px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-0.5 truncate">{m.n}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="relative z-10 mt-auto">
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2">
+                <LayoutGrid size={18} className="text-amber-500"/> Croquis 2D & Ingeniería Física Real
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">
+                Diseña el plano de tu salón con piste de baile, escenario y 6 tipos de mesas o <b>medidas libres con cálculo físico (0.5m lineales por silla)</b>.Si dividiste a una familia, sus QRs se actualizan sin romper su enlace original.
+              </p>
+            </div>
+          </RevealSection>
+
+          {/* 👑 TARJETA 5 (1x1): LLUVIA DE SOBRES CON COPIADO EN 1 CLIC */}
+          <RevealSection delay={250} className="h-full">
+            <div className="h-full bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:border-amber-500/40 transition-colors relative overflow-hidden shadow-sm">
+               <div className="flex items-center justify-between mb-4">
+                 <div className="w-12 h-12 bg-amber-50 dark:bg-amber-500/10 rounded-2xl flex items-center justify-center border border-amber-200 dark:border-amber-500/20">
+                   <Wallet size={22} className="text-amber-600 dark:text-amber-400" />
+                 </div>
+                 <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">
+                   0% Comisión
+                 </span>
                </div>
                <div className="relative z-10 mt-auto">
-                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 transition-colors">Logística GPS</h3>
-                 <p className="text-slate-500 dark:text-slate-400 text-sm max-w-[200px] transition-colors">Rutas exactas e integración con calendarios.</p>
+                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5 transition-colors">Lluvia de Sobres 1-Clic</h3>
+                 <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed transition-colors">
+                   Tus invitados copian tu cuenta CLABE con un toque y el dinero entra íntegro a tu banco, sin intermediarios.
+                 </p>
                </div>
             </div>
           </RevealSection>
 
-          <RevealSection delay={100} className="md:col-span-2 h-full">
-            <div className="h-full bg-slate-900 dark:bg-white rounded-[2.5rem] p-8 md:p-10 border border-transparent flex items-center justify-between relative overflow-hidden group shadow-xl transition-colors duration-700">
-               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-               <div className="relative z-10 max-w-[200px] md:max-w-[280px]">
-                 <h3 className="text-2xl font-bold text-white dark:text-slate-900 mb-2 flex items-center transition-colors"><QrCode size={24} className="mr-2 opacity-70"/> Accesos QR</h3>
-                 <p className="text-slate-400 dark:text-slate-500 text-sm transition-colors">Protegemos tu evento. Cada invitado recibe un código único e infalsificable.</p>
+          {/* 👑 TARJETA 6 (1x1): GPS NATIVO IOS/ANDROID Y CALENDARIO .ICS */}
+          <RevealSection delay={350} className="h-full">
+            <div className="h-full bg-slate-50 dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-sm transition-colors duration-700">
+               <div className="flex items-center justify-between mb-4">
+                 <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-200 dark:border-indigo-500/20">
+                   <MapPin size={22} className="text-indigo-600 dark:text-indigo-400" />
+                 </div>
+                 <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">iOS & Android</span>
                </div>
-               <div className="relative z-10 w-24 h-24 bg-white dark:bg-slate-100 rounded-3xl p-3 shadow-lg group-hover:scale-105 transition-transform flex items-center justify-center">
-                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VIP-PASS-123`} alt="QR Code VIP" className="w-full h-full mix-blend-multiply opacity-80" />
-               </div>
-            </div>
-          </RevealSection>
-
-          <RevealSection delay={200} className="h-full">
-            <div className="h-full bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:border-slate-300 dark:hover:border-white/20 transition-colors relative overflow-hidden shadow-sm dark:shadow-none">
-               <div className="w-12 h-12 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mb-4 group-hover:-translate-y-1 transition-transform border border-slate-100 dark:border-white/5">
-                 <Wallet size={20} className="text-slate-700 dark:text-slate-300" />
-               </div>
-               <div className="relative z-10">
-                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 transition-colors">Cero Comisiones</h3>
-                 <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">Recibe dinero directamente en tus cuentas bancarias.</p>
-               </div>
-            </div>
-          </RevealSection>
-
-          <RevealSection delay={300} className="h-full">
-            <div className="h-full bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:border-slate-300 dark:hover:border-white/20 transition-colors relative overflow-hidden shadow-sm dark:shadow-none">
-               <div className="space-y-3 mb-6 relative z-10 opacity-70 group-hover:opacity-100 transition-opacity">
-                 <div className="flex items-center gap-3"><div className="w-2 h-2 bg-amber-500 rounded-full"></div><div className="h-1 w-16 bg-slate-200 dark:bg-white/20 rounded-full"></div></div>
-                 <div className="flex items-center gap-3"><div className="w-2 h-2 border border-slate-400 rounded-full"></div><div className="h-1 w-12 bg-slate-100 dark:bg-white/10 rounded-full"></div></div>
-                 <div className="flex items-center gap-3"><div className="w-2 h-2 border border-slate-400 rounded-full"></div><div className="h-1 w-20 bg-slate-100 dark:bg-white/10 rounded-full"></div></div>
-               </div>
-               <div className="relative z-10">
-                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 transition-colors">El Minuto a Minuto</h3>
-                 <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">Muestra el itinerario de forma elegante y clara.</p>
+               <div className="relative z-10 mt-auto">
+                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5 transition-colors">GPS Nativo y Agenda</h3>
+                 <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed transition-colors">
+                   Abre Apple Maps o Google Maps nativamente según el celular del invitado y descarga el recordatorio en su calendario.
+                 </p>
                </div>
             </div>
           </RevealSection>
@@ -13252,12 +13308,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               <h2 className="text-5xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white mb-8 tracking-tight leading-tight transition-colors">El evento bajo tu <span className="italic text-slate-500">dominio absoluto.</span></h2>
               <p className="text-slate-600 dark:text-slate-400 text-lg mb-10 font-light leading-relaxed transition-colors">Se acabó el caos de los excels y las listas perdidas. Te entregamos un Centro de Comando para que administres, desde cualquier dispositivo, cada milímetro de tu evento.</p>
               
-              <div className="space-y-8">
+              <div className="space-y-7">
                 {[
-                  { i: <LayoutGrid strokeWidth={1.5}/>, t: 'Acomodo de Mesas 2D', d: 'Arrastra a tus invitados a sus sillas de forma visual y rápida.' },
-                  { i: <Scan strokeWidth={1.5}/>, t: 'Escáner QR de Recepción', d: 'Tu staff usará la cámara de sus celulares para dar acceso.' },
-                  { i: <Wallet strokeWidth={1.5}/>, t: 'Inteligencia Financiera', d: 'Gestiona proveedores, abonos y contratos centralizados.' },
-                  { i: <Camera strokeWidth={1.5}/>, t: 'Muro Social (Proyector)', d: 'Proyecta en vivo las fotos que suben tus invitados a la red privada.' }
+                  { i: <Wand2 strokeWidth={1.5}/>, t: 'Auto-Acomodo Dual (Afinidad + Tetris)', d: 'Etiqueta invitados (#Primos, #Amigos) y ponle imanes a tus mesas. El algoritmo agrupa por afinidad y optimiza sillas respetando a tus invitados VIP.' },
+                  { i: <LayoutGrid strokeWidth={1.5}/>, t: 'Croquis 2D y Simulador Protegido', d: 'Diseña el plano real de tu salón y previsualiza cómo luce el pase de cada familia en vivo sin alterar tu base de datos.' },
+                  { i: <Scan strokeWidth={1.5}/>, t: 'Escáner QR y Aprobar Pases Extra', d: 'Tu staff escanea códigos en la puerta con su celular y tú apruebas o rechazas solicitudes de lugares adicionales con notificación por WhatsApp.' },
+                  { i: <Wallet strokeWidth={1.5}/>, t: 'Finanzas, Proveedores y Tablero Kanban', d: 'Administra presupuesto, abonos a proveedores, checklist de tareas y exporta reportes ejecutivos en PDF y Excel.' }
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-start">
                     <div className="w-12 h-12 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-800 dark:text-white shrink-0 mr-6 shadow-sm dark:shadow-none transition-colors">
@@ -13265,7 +13321,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     </div>
                     <div className="pt-1">
                       <h4 className="font-bold text-lg text-slate-900 dark:text-slate-100 mb-1 transition-colors">{item.t}</h4>
-                      <p className="text-slate-500 dark:text-slate-500 text-sm leading-relaxed transition-colors">{item.d}</p>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed transition-colors">{item.d}</p>
                     </div>
                   </div>
                 ))}
@@ -14000,6 +14056,11 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
   const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null });
 
+  // 🟢 ESTADOS EXCLUSIVOS SUPERADMIN: MODO PRUEBA Y REINICIO DE FINANZAS
+  const [modoPrueba, setModoPrueba] = useState(false);
+  const [modoPruebaDesde, setModoPruebaDesde] = useState(0);
+  const [isResettingFinanzas, setIsResettingFinanzas] = useState(false);
+
   const isSuperAdmin = authData?.role === 'superadmin';
 
   const PRECIOS = { basico: 990, plata: 1490, oro: 1990, diamante: 2990, social_wall: 1490, security_kit: 1490 };
@@ -14021,6 +14082,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       if (field.seconds) return field.seconds * 1000;
       return 0;
     };
+
+    const unsubAjustes = onSnapshot(doc(db, "ajustes_baulia", "precios_publicos"), (docSnap) => {
+      if (docSnap.exists()) {
+        const d = docSnap.data();
+        setModoPrueba(d.modoPrueba === true);
+        setModoPruebaDesde(d.modoPruebaDesde || 0);
+      }
+    });
 
     const unsubLic = onSnapshot(collection(db, "usuarios"), (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -14048,8 +14117,56 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       setPedidosTaller(pedidos);
     });
 
-    return () => { unsubLic(); unsubRes(); unsubVentas(); unsubEventosTaller(); };
+    return () => { unsubAjustes(); unsubLic(); unsubRes(); unsubVentas(); unsubEventosTaller(); };
   }, []);
+
+  // 🟢 Si entra una compra por Stripe mientras Modo Prueba está encendido, la marca automáticamente como prueba para no sumar en Finanzas
+  useEffect(() => {
+    if (!isSuperAdmin || !modoPrueba || !modoPruebaDesde) return;
+    ventas.forEach(v => {
+      const vTime = v.fecha?.toMillis ? v.fecha.toMillis() : (v.fecha?.seconds ? v.fecha.seconds * 1000 : 0);
+      if (v.esPrueba !== true && vTime >= modoPruebaDesde) {
+        updateDoc(doc(db, "ventas", v.id), { esPrueba: true }).catch(() => {});
+        updateDoc(doc(db, "usuarios", v.id), { esPrueba: true }).catch(() => {});
+      }
+    });
+  }, [ventas, modoPrueba, modoPruebaDesde, isSuperAdmin]);
+
+  const toggleModoPrueba = async () => {
+    if (!isSuperAdmin) return;
+    const nuevoEstado = !modoPrueba;
+    const ahora = Date.now();
+    setModoPrueba(nuevoEstado);
+    if (nuevoEstado) setModoPruebaDesde(ahora);
+    try {
+      await setDoc(doc(db, "ajustes_baulia", "precios_publicos"), {
+        modoPrueba: nuevoEstado,
+        ...(nuevoEstado ? { modoPruebaDesde: ahora } : {})
+      }, { merge: true });
+    } catch (e) { console.error(e); }
+  };
+
+  const handleReiniciarFinanzas = () => {
+    if (!isSuperAdmin) return;
+    setDialog({
+      isOpen: true,
+      type: 'confirm',
+      title: '¿Reiniciar Finanzas a $0?',
+      message: '⚠️ Se borrarán todas las transacciones registradas en Finanzas para dejar el contador limpio en $0.00 (las bóvedas de tus clientes NO se eliminarán). ¿Deseas continuar?',
+      onConfirm: async () => {
+        setDialog({ ...dialog, isOpen: false });
+        setIsResettingFinanzas(true);
+        try {
+          const snap = await getDocs(collection(db, "ventas"));
+          await Promise.all(snap.docs.map(d => deleteDoc(doc(db, "ventas", d.id))));
+          setDialog({ isOpen: true, type: 'alert', title: '¡Finanzas en $0.00!', message: 'Todos los registros anteriores fueron eliminados. Tu contabilidad está en cero.' });
+        } catch (err) {
+          setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'Fallo al reiniciar finanzas: ' + err.message });
+        }
+        setIsResettingFinanzas(false);
+      }
+    });
+  };
 
   const procesarOrdenTaller = async (evento) => {
     setIsFetchingOrden(true);
@@ -14314,14 +14431,15 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       await setDoc(doc(db, "usuarios", newEventId), { 
         email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, 
         nombres: formData.nombres, status: 'nuevo', urlInvitacion: formData.urlInvitacion, creadoPor: authData.email, 
-        referenciaPago: formData.referenciaPago, createdAt: serverTimestamp(),
+        referenciaPago: modoPrueba ? (formData.referenciaPago || 'MODO PRUEBA') : formData.referenciaPago, createdAt: serverTimestamp(),
         isQrEnabled: formData.isQrEnabled, 
         isPassCountEnabled: formData.isPassCountEnabled,
         fechaEvento: formData.fechaEvento, 
         horaEvento: formData.horaEvento,
         telefono: formData.telefono,
-        hasSocialWall: formData.hasSocialWall === true, // 🟢 BLINDADO ESTRICTO
-        hasBlackLabel: formData.hasBlackLabel === true  // 🟢 BLINDADO ESTRICTO
+        hasSocialWall: formData.hasSocialWall === true,
+        hasBlackLabel: formData.hasBlackLabel === true,
+        esPrueba: modoPrueba === true
       });
 
       await setDoc(doc(db, "eventos", newEventId), { 
@@ -14333,20 +14451,25 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           isPassCountEnabled: formData.isPassCountEnabled,
           fecha: formData.fechaEvento, 
           horaEvento: formData.horaEvento,
-          hasSocialWall: formData.hasSocialWall === true, // 🟢 BLINDADO ESTRICTO
-          hasBlackLabel: formData.hasBlackLabel === true  // 🟢 BLINDADO ESTRICTO
+          hasSocialWall: formData.hasSocialWall === true,
+          hasBlackLabel: formData.hasBlackLabel === true,
+          esPrueba: modoPrueba === true
       });
 
-      const mesAnioAct = new Date().toISOString().slice(0, 7);
-      await setDoc(doc(db, "ventas", newEventId), {
-        fecha: serverTimestamp(),
-        mesAnio: mesAnioAct,
-        monto: PRECIOS[formData.plan] || 0,
-        plan: formData.plan,
-        vendedor: authData.email,
-        referencia: formData.referenciaPago,
-        cliente: formData.nombres
-      });
+      // 🟢 Si Modo Prueba está activo, NO suma la venta en Finanzas
+      if (!modoPrueba) {
+        const mesAnioAct = new Date().toISOString().slice(0, 7);
+        await setDoc(doc(db, "ventas", newEventId), {
+          fecha: serverTimestamp(),
+          mesAnio: mesAnioAct,
+          monto: PRECIOS[formData.plan] || 0,
+          plan: formData.plan,
+          vendedor: authData.email,
+          referencia: formData.referenciaPago,
+          cliente: formData.nombres,
+          esPrueba: false
+        });
+      }
 
       if (!esClienteRecurrente) {
           try {
@@ -14417,7 +14540,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         });
       } catch(err) { console.log("Doc evento no listo", err); }
 
-      if (newPrice > oldPrice) {
+      if (newPrice > oldPrice && !modoPrueba && !editingLic.esPrueba) {
          try {
            await updateDoc(doc(db, "ventas", editingLic.eventId), { plan: editingLic.plan, monto: newPrice });
          } catch(err) { console.log("Doc venta no listo", err); }
@@ -14483,9 +14606,11 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       (p.plan && p.plan.toLowerCase().includes(tallerSearchQuery.toLowerCase()))
   );
 
-  const mesesDisponibles = [...new Set(ventas.map(v => v.mesAnio))].sort().reverse();
+  // 🟢 SOLO CONTABILIZAMOS VENTAS REALES (Ignora todo lo hecho en Modo Prueba)
+  const ventasReales = ventas.filter(v => v.esPrueba !== true);
+  const mesesDisponibles = [...new Set(ventasReales.map(v => v.mesAnio))].sort().reverse();
   if (!mesesDisponibles.includes(currentMonthYear)) mesesDisponibles.unshift(currentMonthYear);
-  const ventasDelMes = ventas.filter(v => v.mesAnio === mesSeleccionado);
+  const ventasDelMes = ventasReales.filter(v => v.mesAnio === mesSeleccionado);
   const ingresoMensualTotal = ventasDelMes.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
   
   const desglosePlanes = { basico: 0, plata: 0, oro: 0, diamante: 0, social_wall: 0, security_kit: 0 };
@@ -14495,6 +14620,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   });
 
   const totalesPorLicencia = licencias.reduce((acc, user) => {
+    if (user.esPrueba === true) return acc;
     let tipo = (user.plan || 'basico').toLowerCase().trim();
     acc[tipo] = (acc[tipo] || 0) + 1;
     return acc;
@@ -14736,7 +14862,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           <div className="space-y-6">
             {/* CARDS */}
             <div className="flex flex-col xl:flex-row gap-3 mb-6 w-full overflow-x-auto pb-2 custom-scrollbar">
-              <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true }); }} className="shrink-0 px-6 py-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-2xl font-black shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform flex items-center justify-center min-w-[200px]">
+              <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: modoPrueba ? 'MODO PRUEBA' : '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true, hasSocialWall: false, hasBlackLabel: false }); }} className="shrink-0 px-6 py-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-2xl font-black shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform flex items-center justify-center min-w-[200px]">
                   <Plus size={18} className="mr-2 text-amber-500 dark:text-slate-900"/> Nueva Bóveda
               </button>
 
@@ -14878,12 +15004,12 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           </div>
         )}
 
-        {/* FINANZAS */}
+        {/* FINANZAS (EXCLUSIVO SUPERADMIN NIVEL 3) */}
         {adminTab === 'finanzas' && isSuperAdmin && (
           <div className="animate-in fade-in space-y-6">
-             <div className="flex flex-col md:flex-row justify-between items-center bg-white dark:bg-[#0a0a0a] p-5 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
-                <div className="flex items-center mb-4 md:mb-0">
-                  <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mr-4 border border-transparent dark:border-emerald-500/30"><Wallet size={24}/></div>
+             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white dark:bg-[#0a0a0a] p-5 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mr-4 border border-transparent dark:border-emerald-500/30 shrink-0"><Wallet size={24}/></div>
                   <div>
                     <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Periodo a evaluar</p>
                     <select value={mesSeleccionado} onChange={(e) => setMesSeleccionado(e.target.value)} className="text-xl font-black text-slate-800 dark:text-white bg-transparent outline-none cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
@@ -14895,9 +15021,43 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </select>
                   </div>
                 </div>
-                <button onClick={exportarCorteContador} className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold shadow-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center">
-                  <FileSpreadsheet size={18} className="mr-2 text-emerald-400 dark:text-emerald-600"/> Descargar Excel
-                </button>
+
+                {/* 🟢 CONTROLES EXCLUSIVOS SUPERADMIN DENTRO DE FINANZAS */}
+                <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
+                  {/* SWITCH MODO PRUEBA */}
+                  <div className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border transition-all flex-1 sm:flex-none ${modoPrueba ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/40' : 'bg-slate-50 dark:bg-[#111] border-slate-200 dark:border-white/10'}`}>
+                    <div className="flex flex-col">
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${modoPrueba ? 'text-amber-700 dark:text-amber-400' : 'text-slate-600 dark:text-slate-300'}`}>
+                        {modoPrueba ? '🧪 Modo Prueba Activo' : 'Modo Prueba'}
+                      </span>
+                      <span className="text-[9px] text-slate-400 dark:text-slate-500 leading-none mt-0.5">
+                        {modoPrueba ? 'Compras no suman' : 'Contabilidad en vivo'}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={toggleModoPrueba}
+                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${modoPrueba ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                    >
+                      <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${modoPrueba ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                    </button>
+                  </div>
+
+                  {/* BOTÓN REINICIAR FINANZAS A $0 */}
+                  <button 
+                    type="button"
+                    onClick={handleReiniciarFinanzas} 
+                    disabled={isResettingFinanzas || ventas.length === 0}
+                    className="px-4 py-3 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-colors flex items-center justify-center disabled:opacity-40 flex-1 sm:flex-none"
+                  >
+                    <Trash2 size={16} className="mr-1.5 shrink-0"/> {isResettingFinanzas ? 'Reiniciando...' : 'Reiniciar a $0'}
+                  </button>
+
+                  {/* BOTÓN DESCARGAR EXCEL */}
+                  <button onClick={exportarCorteContador} className="px-5 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-xs sm:text-sm font-bold shadow-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center justify-center flex-1 sm:flex-none">
+                    <FileSpreadsheet size={18} className="mr-2 text-emerald-400 dark:text-emerald-600 shrink-0"/> Descargar Excel
+                  </button>
+                </div>
              </div>
              
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -14983,9 +15143,18 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                   </div>
                   
                   <div className="space-y-4 mb-6">
-                    <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-xl transition-colors">
-                      <label className="block text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Wallet size={12} className="mr-1"/> Referencia de Pago (Obligatorio)</label>
-                      <input type="text" required value={formData.referenciaPago} onChange={e => setFormData({...formData, referenciaPago: e.target.value})} placeholder="Ej: Pago en Efectivo, Transf BBVA..." className="w-full p-3 bg-white dark:bg-[#111] border border-emerald-200 dark:border-emerald-500/30 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                    <div className={`${modoPrueba ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20' : 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20'} border p-4 rounded-xl transition-colors`}>
+                      <label className={`block text-[10px] font-bold ${modoPrueba ? 'text-amber-700 dark:text-amber-400' : 'text-emerald-700 dark:text-emerald-400'} uppercase tracking-widest mb-1.5 flex items-center transition-colors`}>
+                        <Wallet size={12} className="mr-1"/> {modoPrueba ? 'Referencia de Pago (Modo Prueba Activo)' : 'Referencia de Pago (Obligatorio)'}
+                      </label>
+                      <input 
+                        type="text" 
+                        required={!modoPrueba} 
+                        value={modoPrueba && !formData.referenciaPago ? 'MODO PRUEBA' : formData.referenciaPago} 
+                        onChange={e => setFormData({...formData, referenciaPago: e.target.value})} 
+                        placeholder="Ej: Pago en Efectivo, Transf BBVA..." 
+                        className="w-full p-3 bg-white dark:bg-[#111] border border-emerald-200 dark:border-emerald-500/30 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" 
+                      />
                     </div>
 
                     <div className="flex gap-4">

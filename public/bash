@@ -1,5 +1,5 @@
 git add .
-git commit -m "inyeccion imagenes head landingpage"
+git commit -m "experiencia y boveda actualizada landingpage"
 git push origin main
 
 .
