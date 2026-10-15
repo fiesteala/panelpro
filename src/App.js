@@ -12051,6 +12051,20 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [checkoutModal, setCheckoutModal] = useState(null);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [fakeRsvp, setFakeRsvp] = useState(false);
+
+  // 🟢 ESTADOS PARA LOS MINI-SIMULADORES INTERACTIVOS DEL BENTO BOX
+  const [rsvpDemoMode, setRsvpDemoMode] = useState('qr'); // 'qr' | 'whatsapp'
+  const [acomodoSimulated, setAcomodoSimulated] = useState(false);
+  const [demoTagsActivas, setDemoTagsActivas] = useState(['Primos', 'Amigos']);
+  const [croquisDemoMesas, setCroquisDemoMesas] = useState([
+    { id: 1, nombre: 'Mesa 1 VIP', tipo: 'redonda', cap: 10, ocupadas: 10 },
+    { id: 2, nombre: 'Mesa 2', tipo: 'redonda', cap: 10, ocupadas: 7 },
+    { id: 3, nombre: 'Mesa 3', tipo: 'tablon', cap: 10, ocupadas: 8 }
+  ]);
+  const [galeriaDemoEstilo, setGaleriaDemoEstilo] = useState('carrusel'); // 'carrusel' | 'masonry' | 'arcos'
+  const [regaloDemoTipo, setRegaloDemoTipo] = useState('sobres'); // 'sobres' | 'tiendas'
+  const [clabeDemoCopiada, setClabeDemoCopiada] = useState(false);
+  const [gpsDemoActivo, setGpsDemoActivo] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 59 });
   const [accentColor, setAccentColor] = useState('monochrome');
   
@@ -13111,187 +13125,583 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         </div>
       </section>
 
-      {/* BENTO BOX: ARTE EDITORIAL + REYES TECNOLÓGICOS DE BAULIA */}
+      {/* BENTO BOX INTERACTIVO: DEMOSTRACIÓN EN VIVO DE ALTA COSTURA E INGENIERÍA */}
       <section id="experiencia" className="py-28 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
         <RevealSection className="mb-16 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Arte Nupcial & Ingeniería Invisible</span>
+            <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-4 block">Laboratorio Interactivo en Vivo</span>
             <h2 className="text-5xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white tracking-tight transition-colors duration-700 leading-tight">
               Cálida por fuera.<br/><span className="italic text-slate-500 dark:text-slate-400">Superdotada por dentro.</span>
             </h2>
           </div>
           <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base max-w-md font-light leading-relaxed">
-            Mientras tus invitados viven una carta de celebración llena de arte floral, música y emoción visual, tu invitación opera en secreto con la tecnología más avanzada de la industria.
+            Toca y prueba cada módulo aquí mismo. Mientras tus invitados disfrutan una invitación llena de emoción visual, tú tienes el motor logístico más avanzado del mercado.
           </p>
         </RevealSection>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5 md:gap-6 md:auto-rows-[300px]">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           
-          {/* 👑 TARJETA 1 (2x2): ARTE EDITORIAL, CALIDEZ Y SALUDO VIP POR NOMBRE */}
-          <RevealSection delay={100} className="md:col-span-2 md:row-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 sm:p-10 md:p-12 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-sm dark:shadow-none transition-colors duration-700 min-h-[460px]">
+          {/* 👑 TARJETA 1 (2 cols): ARTE CÁLIDO & SALUDO VIP PERSONALIZADO */}
+          <RevealSection delay={100} className="lg:col-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 sm:p-10 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-sm transition-colors duration-700 min-h-[420px]">
             <div className={`absolute inset-0 opacity-5 dark:opacity-10 transition-colors duration-700 ${accentColor === 'monochrome' ? 'bg-slate-500' : (accentThemes[accentColor]?.bg || '')}`}></div>
             
-            {/* Saludo VIP Personalizado flotante */}
             <div className="relative z-20 flex flex-col items-start gap-3">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#FDFBF7] dark:bg-white/5 border border-[#D4AF37]/40 shadow-md">
                 <Gem size={14} className="text-amber-500 shrink-0"/>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Pase Especial Para:</span>
-                <span className="font-editorial italic font-bold text-sm text-slate-900 dark:text-white">Familia Zárate (4 Lugares)</span>
+                <span className="font-editorial italic font-bold text-sm text-slate-900 dark:text-white">Familia Montemayor (4 Lugares)</span>
               </div>
 
               <div className={`mt-2 transition-all duration-700 transform group-hover:scale-105 group-hover:-rotate-2 drop-shadow-xl ${accentColor === 'monochrome' ? 'text-slate-800 dark:text-white' : accentThemes[accentColor]?.text}`}>
                 <h3 style={{ fontFamily: '"Birthstone", cursive', fontSize: '4.2rem', lineHeight: '1' }} className="font-medium -rotate-3">
-                  Ana y Rodrigo
+                  Sofía y Alejandro
                 </h3>
               </div>
             </div>
 
-            {/* Fotografías Románticas Protagónicas */}
-            <div className="relative sm:absolute sm:top-16 sm:right-6 w-full sm:w-56 h-52 sm:h-64 pointer-events-none perspective-[1000px] flex items-center justify-center my-4 sm:my-0">
-               <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Invitación digital romántica con fotografía editorial" className="absolute w-36 sm:w-40 h-48 sm:h-52 object-cover rounded-2xl border-[4px] border-white dark:border-[#111] transform rotate-[10deg] translate-x-12 sm:translate-x-16 translate-y-4 group-hover:rotate-[15deg] group-hover:translate-x-20 shadow-xl transition-all duration-700 ease-out" />
-               <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Diseño de invitación de boda de alta costura" className="absolute w-36 sm:w-40 h-48 sm:h-52 object-cover rounded-2xl border-[4px] border-white dark:border-[#111] transform -rotate-[5deg] group-hover:-rotate-[10deg] group-hover:-translate-x-4 shadow-xl transition-all duration-700 ease-out z-10" />
+            {/* Fotos reales desde /demos/boda/ */}
+            <div className="relative sm:absolute sm:top-12 sm:right-6 w-full sm:w-56 h-52 sm:h-64 pointer-events-none perspective-[1000px] flex items-center justify-center my-4 sm:my-0">
+               <img src="/demos/boda/foto2.jpg" alt="Fotografía romántica de boda Baulia" className="absolute w-36 sm:w-40 h-48 sm:h-52 object-cover rounded-2xl border-[4px] border-white dark:border-[#111] transform rotate-[10deg] translate-x-12 sm:translate-x-14 translate-y-4 group-hover:rotate-[15deg] group-hover:translate-x-18 shadow-xl transition-all duration-700 ease-out" />
+               <img src="/demos/boda/foto4.jpg" alt="Diseño de invitación de alta costura" className="absolute w-36 sm:w-40 h-48 sm:h-52 object-cover rounded-2xl border-[4px] border-white dark:border-[#111] transform -rotate-[5deg] group-hover:-rotate-[10deg] group-hover:-translate-x-4 shadow-xl transition-all duration-700 ease-out z-10" />
             </div>
             
-            <div className="relative z-30 w-full md:w-4/5 mt-auto pt-4">
-               <div className="flex items-center gap-2 p-2 bg-white/90 dark:bg-black/60 backdrop-blur-md rounded-full border border-slate-200 dark:border-white/10 w-max mb-5 shadow-sm">
-                 <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-2">ADN Visual:</span>
-                 <button onMouseEnter={()=>setAccentColor('monochrome')} onClick={()=>setAccentColor('monochrome')} className={`w-5 h-5 rounded-full bg-[linear-gradient(135deg,_#0f172a_50%,_#ffffff_50%)] dark:bg-[linear-gradient(135deg,_#ffffff_50%,_#0f172a_50%)] border border-slate-300 dark:border-slate-600 transition-all ${accentColor === 'monochrome' ? 'scale-125 ring-2 ring-offset-2 ring-slate-400 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Editorial Clásico"></button>
-                 <button onMouseEnter={()=>setAccentColor('amber')} onClick={()=>setAccentColor('amber')} className={`w-5 h-5 rounded-full bg-amber-500 transition-all ${accentColor === 'amber' ? 'scale-125 ring-2 ring-offset-2 ring-amber-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Hoja de Oro"></button>
-                 <button onMouseEnter={()=>setAccentColor('rose')} onClick={()=>setAccentColor('rose')} className={`w-5 h-5 rounded-full bg-rose-500 transition-all ${accentColor === 'rose' ? 'scale-125 ring-2 ring-offset-2 ring-rose-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Acuarela Floral"></button>
-                 <button onMouseEnter={()=>setAccentColor('emerald')} onClick={()=>setAccentColor('emerald')} className={`w-5 h-5 rounded-full bg-emerald-500 transition-all ${accentColor === 'emerald' ? 'scale-125 ring-2 ring-offset-2 ring-emerald-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Botánico"></button>
-                 <button onMouseEnter={()=>setAccentColor('indigo')} onClick={()=>setAccentColor('indigo')} className={`w-5 h-5 rounded-full bg-indigo-500 transition-all ${accentColor === 'indigo' ? 'scale-125 ring-2 ring-offset-2 ring-indigo-500 dark:ring-offset-[#0a0a0a]' : 'hover:scale-110'}`} title="Gala Nocturna"></button>
+            <div className="relative z-30 w-full sm:w-3/4 mt-auto pt-4">
+               <div className="flex items-center gap-2 p-2 bg-white/90 dark:bg-black/60 backdrop-blur-md rounded-full border border-slate-200 dark:border-white/10 w-max mb-4 shadow-sm">
+                 <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-2">Paleta:</span>
+                 <button type="button" onMouseEnter={()=>setAccentColor('monochrome')} onClick={()=>setAccentColor('monochrome')} className={`w-5 h-5 rounded-full bg-[linear-gradient(135deg,_#0f172a_50%,_#ffffff_50%)] border border-slate-300 transition-all ${accentColor === 'monochrome' ? 'scale-125 ring-2 ring-amber-500' : 'hover:scale-110'}`}></button>
+                 <button type="button" onMouseEnter={()=>setAccentColor('amber')} onClick={()=>setAccentColor('amber')} className={`w-5 h-5 rounded-full bg-amber-500 transition-all ${accentColor === 'amber' ? 'scale-125 ring-2 ring-amber-500' : 'hover:scale-110'}`}></button>
+                 <button type="button" onMouseEnter={()=>setAccentColor('rose')} onClick={()=>setAccentColor('rose')} className={`w-5 h-5 rounded-full bg-rose-500 transition-all ${accentColor === 'rose' ? 'scale-125 ring-2 ring-rose-500' : 'hover:scale-110'}`}></button>
+                 <button type="button" onMouseEnter={()=>setAccentColor('emerald')} onClick={()=>setAccentColor('emerald')} className={`w-5 h-5 rounded-full bg-emerald-500 transition-all ${accentColor === 'emerald' ? 'scale-125 ring-2 ring-emerald-500' : 'hover:scale-110'}`}></button>
+                 <button type="button" onMouseEnter={()=>setAccentColor('indigo')} onClick={()=>setAccentColor('indigo')} className={`w-5 h-5 rounded-full bg-indigo-500 transition-all ${accentColor === 'indigo' ? 'scale-125 ring-2 ring-indigo-500' : 'hover:scale-110'}`}></button>
                </div>
 
-               <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2.5 leading-tight transition-colors duration-500">
+               <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">
                  Arte Cálido & Saludo VIP por Invitado
                </h3>
-               <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed transition-colors duration-500">
-                 Acuarelas, ilustraciones florales, música envolvente sin bloqueos y <b className={`transition-colors duration-500 ${accentColor === 'monochrome' ? 'text-slate-900 dark:text-white' : accentThemes[accentColor]?.text}`}>extracción inteligente</b> que recibe a cada familia por su nombre desde que abre el enlace.
+               <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">
+                 Acuarelas, música envolvente sin bloqueos y <b className={accentColor === 'monochrome' ? 'text-slate-900 dark:text-white' : accentThemes[accentColor]?.text}>extracción inteligente</b> que saluda a cada familia por su nombre desde la portada.
                </p>
             </div>
           </RevealSection>
 
-          {/* 👑 TARJETA 2 (2x1): PASES QR VIVOS CON MESA ASIGNADA EN TIEMPO REAL */}
-          <RevealSection delay={200} className="md:col-span-2 bg-slate-900 dark:bg-[#111] rounded-[2.5rem] p-8 md:p-9 border border-slate-800 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden group shadow-xl transition-colors duration-700">
-            <div className="absolute -right-10 -top-10 w-44 h-44 bg-amber-500/15 blur-3xl rounded-full pointer-events-none"></div>
-            <div className="relative z-10 flex-1">
-              <span className="inline-block text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 mb-3">
-                Micro-Frontend Camaleónico
-              </span>
-              <h3 className="text-2xl font-bold text-white mb-2 leading-snug">
-                Pases QR Vivos con Mesa Asignada
-              </h3>
-              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
-                Al confirmar asistencia sin salir de su invitación, el sistema despliega un carrusel con el <b>Pase VIP descargable de cada integrante</b> indicando su mesa exacta en tiempo real.
-              </p>
-            </div>
+          {/* 👑 TARJETA 2 (2 cols): CONFIRMACIÓN DUAL INTERACTIVA (PASES QR VIVOS VS WHATSAPP) */}
+          <RevealSection delay={150} className="lg:col-span-2 bg-slate-900 dark:bg-[#0d0d0d] rounded-[2.5rem] p-8 sm:p-10 border border-slate-800 dark:border-white/10 flex flex-col justify-between relative overflow-hidden shadow-xl min-h-[420px]">
+            <div className="absolute -right-12 -top-12 w-52 h-52 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
 
-            {/* Mini Tarjeta Pase VIP QR */}
-            <div className="relative z-10 w-44 bg-[#FDFBF7] text-slate-900 rounded-2xl p-3.5 shadow-2xl border border-amber-500/40 shrink-0 transform group-hover:scale-105 group-hover:-rotate-2 transition-all duration-500 text-center">
-              <div className="w-full h-1.5 bg-amber-500 rounded-full mb-2"></div>
-              <p className="text-[7px] font-black uppercase tracking-widest text-slate-400">Entrada Personal</p>
-              <p className="font-editorial font-bold text-sm text-slate-900 truncate">Roberto Zárate</p>
-              <div className="bg-white p-1.5 rounded-xl w-20 h-20 mx-auto my-2 shadow-inner border border-slate-100">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=BAULIA-VIP-PASS" alt="Pase QR VIP con mesa asignada" className="w-full h-full mix-blend-multiply" />
+            {/* Selector Interactivo de Modalidad */}
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-6">
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 flex items-center gap-1.5">
+                <QrCode size={14}/> Modalidad de Confirmación
+              </span>
+              <div className="flex bg-white/10 p-1 rounded-full border border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setRsvpDemoMode('qr')}
+                  className={`px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${rsvpDemoMode === 'qr' ? 'bg-amber-500 text-slate-900 shadow-md' : 'text-slate-300 hover:text-white'}`}
+                >
+                  Pases QR (Oro/Diamante)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRsvpDemoMode('whatsapp')}
+                  className={`px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${rsvpDemoMode === 'whatsapp' ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-300 hover:text-white'}`}
+                >
+                  WhatsApp (Básico/Plata)
+                </button>
               </div>
-              <p className="text-[7px] font-bold uppercase tracking-widest text-slate-400">Asiento Asignado</p>
-              <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mt-0.5">Mesa 1 • VIP</p>
-            </div>
-          </RevealSection>
-
-          {/* 👑 TARJETA 3 (2x1): MOTOR DUAL DE AUTO-ACOMODO (AFINIDAD + TETRIS) */}
-          <RevealSection delay={300} className="md:col-span-2 bg-gradient-to-br from-indigo-50 via-white to-amber-50/40 dark:from-[#0d0f17] dark:via-[#0a0a0a] dark:to-[#141008] rounded-[2.5rem] p-8 md:p-9 border border-indigo-200/70 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-sm transition-colors duration-700">
-            <div className="flex flex-wrap items-center gap-1.5 relative z-10 mb-4">
-              <span className="px-3 py-1 rounded-xl text-[10px] font-black bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                <CheckCircle size={11}/> Papás Fijos (Mesa 1)
-              </span>
-              <span className="px-3 py-1 rounded-xl text-[10px] font-bold bg-indigo-600 text-white shadow-sm">
-                #Primos
-              </span>
-              <span className="px-3 py-1 rounded-xl text-[10px] font-bold bg-amber-500 text-slate-900 shadow-sm">
-                #AmigosNovio
-              </span>
-              <span className="px-3 py-1 rounded-xl text-[10px] font-bold bg-white dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10">
-                #Universidad
-              </span>
             </div>
 
-            <div className="relative z-10 mt-auto">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Wand2 size={18} className="text-indigo-600 dark:text-amber-400"/>
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
-                  Auto-Acomodo por Afinidad y Tetris
-                </h3>
+            {/* Vista Dinámica según el botón seleccionado */}
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6 my-auto">
+              <div className="flex-1 text-left">
+                {rsvpDemoMode === 'qr' ? (
+                  <div className="animate-in fade-in duration-300">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2.5 leading-tight">
+                      Pases QR Vivos con Mesa Asignada
+                    </h3>
+                    <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-4">
+                      Al confirmar sin salir de su invitación, el sistema genera un carrusel con el <b>Pase VIP descargable de cada integrante</b> e imprime automáticamente la mesa que le asignaste.
+                    </p>
+                    <div className="inline-flex items-center gap-2 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
+                      <CheckCircle size={13}/> Cero colados • Intransferible
+                    </div>
+                  </div>
+                ) : (
+                  <div className="animate-in fade-in duration-300">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2.5 leading-tight">
+                      Confirmación Directa vía WhatsApp
+                    </h3>
+                    <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-4">
+                      ¿Prefieres una recepción tradicional y cálida sin escáneres? Tus invitados confirman con un toque enviando un mensaje prellenado directo a tu WhatsApp personal.
+                    </p>
+                    <div className="inline-flex items-center gap-2 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
+                      <MessageCircle size={13}/> Incluido en Planes Básico y Plata
+                    </div>
+                  </div>
+                )}
               </div>
-              <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">
-                Etiqueta invitados y ponle <b>imanes de afinidad</b> a tus mesas. El algoritmo respeta a los papás en la Mesa 1, separa primos jóvenes automáticamente para sentarlos con amigos y rellena los lugares libres en modo Tetris.
-              </p>
-            </div>
-          </RevealSection>
 
-          {/* 👑 TARJETA 4 (2x1): CROQUIS ARQUITECTÓNICO 2D Y MESAS A MEDIDA */}
-          <RevealSection delay={150} className="md:col-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 md:p-9 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-sm transition-colors duration-700">
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 relative z-10 mb-4">
-              {[
-                { n: 'Redonda', c: '10p' },
-                { n: 'Cuadrada', c: '12p' },
-                { n: 'Tablón', c: '12p' },
-                { n: 'Ovalada', c: '14p' },
-                { n: 'Serpentina', c: '9p' },
-                { n: 'A Medida', c: '0.5m' }
-              ].map((m, i) => (
-                <div key={i} className="p-2.5 rounded-2xl bg-slate-50 dark:bg-[#111] border border-slate-200/80 dark:border-white/10 text-center group-hover:border-amber-500/40 transition-colors">
-                  <p className="text-[10px] font-black text-indigo-600 dark:text-amber-400">{m.c}</p>
-                  <p className="text-[8px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-0.5 truncate">{m.n}</p>
+              {/* Tarjeta Derecha Simulada */}
+              {rsvpDemoMode === 'qr' ? (
+                <div className="w-48 bg-[#FDFBF7] text-slate-900 rounded-2xl p-4 shadow-2xl border border-amber-500/40 shrink-0 text-center animate-in zoom-in-95 duration-300">
+                  <div className="w-full h-1.5 bg-amber-500 rounded-full mb-2.5"></div>
+                  <p className="text-[7px] font-black uppercase tracking-widest text-slate-400">Entrada Personal</p>
+                  <p className="font-editorial font-bold text-sm text-slate-900 truncate mt-0.5">Alejandro Montemayor</p>
+                  <div className="bg-white p-2 rounded-xl w-24 h-24 mx-auto my-2.5 shadow-inner border border-slate-200">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=BAULIA-VIP-DEMO" alt="Pase QR VIP Baulia" className="w-full h-full mix-blend-multiply" />
+                  </div>
+                  <p className="text-[7px] font-bold uppercase tracking-widest text-slate-400">Asiento Asignado</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mt-0.5">Mesa 1 • VIP</p>
                 </div>
-              ))}
+              ) : (
+                <div className="w-52 bg-[#0b141a] text-white rounded-2xl p-4 shadow-2xl border border-emerald-500/40 shrink-0 text-left animate-in zoom-in-95 duration-300">
+                  <div className="flex items-center gap-2 border-b border-white/10 pb-2.5 mb-3">
+                    <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-xs">S&A</div>
+                    <div>
+                      <p className="text-[10px] font-bold leading-none">Sofía y Alejandro</p>
+                      <p className="text-[8px] text-emerald-400 mt-0.5">En línea • WhatsApp</p>
+                    </div>
+                  </div>
+                  <div className="bg-[#005c4b] p-2.5 rounded-xl rounded-tr-none text-[10px] leading-relaxed text-white/95 mb-3 shadow">
+                    ¡Hola! Somos la <b>Familia Montemayor</b> ✨ Confirmamos con mucha alegría nuestra asistencia a la boda.
+                  </div>
+                  <div className="w-full py-2 bg-emerald-500 text-slate-950 rounded-lg text-center font-black text-[9px] uppercase tracking-widest">
+                    Respuesta Instantánea
+                  </div>
+                </div>
+              )}
+            </div>
+          </RevealSection>
+
+          {/* 👑 TARJETA 3 (2 cols): SIMULADOR INTERACTIVO EN VIVO DE AUTO-ACOMODO POR AFINIDAD */}
+          <RevealSection delay={200} className="lg:col-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-7 sm:p-9 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden shadow-sm">
+            {/* Barra superior interactiva del simulador */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100 dark:border-white/10">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mr-1">Etiquetas:</span>
+                {['Primos', 'Amigos'].map(tag => {
+                  const active = demoTagsActivas.includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        setAcomodoSimulated(false);
+                        setDemoTagsActivas(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${active ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-transparent shadow-sm' : 'bg-slate-100 dark:bg-[#111] text-slate-400 border-slate-200 dark:border-white/10'}`}
+                    >
+                      #{tag}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setAcomodoSimulated(!acomodoSimulated)}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 shadow-md active:scale-95 ${acomodoSimulated ? 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-white' : 'bg-emerald-500 text-white hover:bg-emerald-600 animate-pulse'}`}
+              >
+                <Wand2 size={13}/> {acomodoSimulated ? 'Reiniciar Demo' : '¡Probar Auto-Acomodar!'}
+              </button>
             </div>
 
-            <div className="relative z-10 mt-auto">
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2">
-                <LayoutGrid size={18} className="text-amber-500"/> Croquis 2D & Ingeniería Física Real
+            {/* Escenario: Lista de No Asignados (Izquierda) + 2 Mesas estilo MesasView (Derecha) */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 my-auto">
+              {/* Columna Izquierda: No Asignados */}
+              <div className="sm:col-span-5 bg-slate-50 dark:bg-[#111] rounded-2xl p-3.5 border border-slate-200/80 dark:border-white/10 flex flex-col">
+                <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-slate-200/60 dark:border-white/5">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-200 flex items-center gap-1">
+                    <Users size={11} className="text-amber-500"/> No Asignados
+                  </span>
+                  <span className="text-[9px] font-black bg-slate-200 dark:bg-white/10 px-1.5 py-0.5 rounded text-slate-700 dark:text-white">
+                    {acomodoSimulated ? 0 : 3}
+                  </span>
+                </div>
+
+                {!acomodoSimulated ? (
+                  <div className="space-y-2 animate-in fade-in duration-300">
+                    <div className="p-2 rounded-xl bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 flex items-center justify-between">
+                      <div>
+                        <p className="text-[11px] font-bold text-slate-800 dark:text-white leading-none">Fam. Montemayor</p>
+                        <span className="text-[8px] font-black uppercase text-emerald-600 dark:text-emerald-400">Familiar</span>
+                      </div>
+                      <span className="text-[9px] font-black bg-slate-100 dark:bg-white/10 px-1.5 py-0.5 rounded">4p</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 flex items-center justify-between">
+                      <div>
+                        <p className="text-[11px] font-bold text-slate-800 dark:text-white leading-none">Jóvenes Villarreal</p>
+                        <span className="text-[8px] font-black uppercase text-indigo-500 dark:text-amber-400">#Primos</span>
+                      </div>
+                      <span className="text-[9px] font-black bg-slate-100 dark:bg-white/10 px-1.5 py-0.5 rounded">3p</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 flex items-center justify-between">
+                      <div>
+                        <p className="text-[11px] font-bold text-slate-800 dark:text-white leading-none">Grupo Universidad</p>
+                        <span className="text-[8px] font-black uppercase text-indigo-500 dark:text-amber-400">#Amigos</span>
+                      </div>
+                      <span className="text-[9px] font-black bg-slate-100 dark:bg-white/10 px-1.5 py-0.5 rounded">3p</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center py-6 text-emerald-600 dark:text-emerald-400 animate-in zoom-in-95 duration-300">
+                    <CheckCircle size={24} className="mb-1.5"/>
+                    <p className="text-[10px] font-black uppercase tracking-widest">¡Salón Optimizado!</p>
+                    <p className="text-[9px] text-slate-400 mt-0.5">0 pendientes</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Columna Derecha: 2 Mesas idénticas a MesasView */}
+              <div className="sm:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {/* Mesa 1 */}
+                <div className="bg-slate-50 dark:bg-[#111] p-3 rounded-2xl border border-slate-200/80 dark:border-white/10 flex flex-col">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-bold text-xs text-slate-800 dark:text-white">Mesa 1</span>
+                    <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400">{acomodoSimulated ? '8 / 10' : '4 / 10'}</span>
+                  </div>
+                  <span className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 w-max mb-2">
+                    📌 VIP / Familia
+                  </span>
+                  <div className="space-y-1.5 mt-auto">
+                    <div className="text-[9px] font-bold px-2 py-1 rounded-lg bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 flex justify-between">
+                      <span>Papás Novios (Fijos)</span>
+                      <span className="opacity-60">(4)</span>
+                    </div>
+                    {acomodoSimulated && (
+                      <div className="text-[9px] font-bold px-2 py-1 rounded-lg bg-emerald-500 text-white flex justify-between animate-in zoom-in-95 duration-300 shadow-sm">
+                        <span>Fam. Montemayor</span>
+                        <span>(4)</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Mesa 2 con Imán */}
+                <div className="bg-slate-50 dark:bg-[#111] p-3 rounded-2xl border border-slate-200/80 dark:border-white/10 flex flex-col">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-bold text-xs text-slate-800 dark:text-white">Mesa 2</span>
+                    <span className="text-[9px] font-black text-indigo-600 dark:text-amber-400">{acomodoSimulated ? '6 / 10' : '0 / 10'}</span>
+                  </div>
+                  <div className="flex gap-1 mb-2 flex-wrap">
+                    <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-amber-400 border border-indigo-500/20 flex items-center">
+                      <Magnet size={8} className="mr-0.5"/> #Primos
+                    </span>
+                    <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-amber-400 border border-indigo-500/20 flex items-center">
+                      <Magnet size={8} className="mr-0.5"/> #Amigos
+                    </span>
+                  </div>
+                  <div className="space-y-1.5 mt-auto">
+                    {!acomodoSimulated ? (
+                      <p className="text-[9px] italic text-slate-400 text-center py-3">Esperando imán...</p>
+                    ) : (
+                      <>
+                        <div className="text-[9px] font-bold px-2 py-1 rounded-lg bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 flex justify-between animate-in zoom-in-95 duration-300 shadow-sm">
+                          <span>Jóvenes Villarreal</span>
+                          <span>(3)</span>
+                        </div>
+                        <div className="text-[9px] font-bold px-2 py-1 rounded-lg bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 flex justify-between animate-in zoom-in-95 duration-500 shadow-sm">
+                          <span>Grupo Universidad</span>
+                          <span>(3)</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 pt-3 border-t border-slate-100 dark:border-white/5">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+                <Wand2 size={18} className="text-indigo-600 dark:text-amber-400"/> Motor Dual: Auto-Acomodo por Afinidad y Tetris
               </h3>
-              <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">
-                Diseña el plano de tu salón con piste de baile, escenario y 6 tipos de mesas o <b>medidas libres con cálculo físico (0.5m lineales por silla)</b>.Si dividiste a una familia, sus QRs se actualizan sin romper su enlace original.
+              <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
+                Fija a los papás en la Mesa 1, ponle imanes (`#Primos`, `#Amigos`) a las mesas y presiona el botón: Baulia agrupa por afinidad y optimiza los lugares libres en un segundo.
               </p>
             </div>
           </RevealSection>
 
-          {/* 👑 TARJETA 5 (1x1): LLUVIA DE SOBRES CON COPIADO EN 1 CLIC */}
-          <RevealSection delay={250} className="h-full">
-            <div className="h-full bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between group hover:border-amber-500/40 transition-colors relative overflow-hidden shadow-sm">
-               <div className="flex items-center justify-between mb-4">
-                 <div className="w-12 h-12 bg-amber-50 dark:bg-amber-500/10 rounded-2xl flex items-center justify-center border border-amber-200 dark:border-amber-500/20">
-                   <Wallet size={22} className="text-amber-600 dark:text-amber-400" />
-                 </div>
-                 <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">
-                   0% Comisión
-                 </span>
-               </div>
-               <div className="relative z-10 mt-auto">
-                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5 transition-colors">Lluvia de Sobres 1-Clic</h3>
-                 <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed transition-colors">
-                   Tus invitados copian tu cuenta CLABE con un toque y el dinero entra íntegro a tu banco, sin intermediarios.
-                 </p>
-               </div>
+          {/* 👑 TARJETA 4 (2 cols): SIMULADOR INTERACTIVO DE CROQUIS 2D CON SILLAS OCUPADAS Y VACÍAS */}
+          <RevealSection delay={250} className="lg:col-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-7 sm:p-9 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden shadow-sm">
+            {/* Controles para agregar o quitar mesas en vivo */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100 dark:border-white/10">
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (croquisDemoMesas.length < 6) {
+                      const nextNum = croquisDemoMesas.length + 1;
+                      setCroquisDemoMesas([...croquisDemoMesas, { id: Date.now(), nombre: `Mesa ${nextNum}`, tipo: 'redonda', cap: 10, ocupadas: 6 }]);
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-400 border border-indigo-200 dark:border-amber-500/20 text-[10px] font-black uppercase tracking-wider hover:scale-105 transition-transform"
+                >
+                  + Redonda
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (croquisDemoMesas.length < 6) {
+                      const nextNum = croquisDemoMesas.length + 1;
+                      setCroquisDemoMesas([...croquisDemoMesas, { id: Date.now(), nombre: `Mesa ${nextNum}`, tipo: 'tablon', cap: 10, ocupadas: 8 }]);
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-black uppercase tracking-wider hover:scale-105 transition-transform"
+                >
+                  + Tablón
+                </button>
+                {croquisDemoMesas.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => setCroquisDemoMesas(croquisDemoMesas.slice(0, -1))}
+                    className="px-2.5 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 text-[10px] font-black uppercase tracking-wider"
+                  >
+                    - Quitar
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> Ocupada</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 inline-block"></span> Libre</span>
+              </div>
+            </div>
+
+            {/* Lienzo Arquitectónico 2D Interactivo */}
+            <div className="relative bg-slate-50 dark:bg-[#0d0d0d] rounded-2xl border border-slate-200/80 dark:border-white/10 p-4 min-h-[195px] flex items-center justify-center overflow-hidden" style={{ backgroundImage: 'radial-gradient(rgba(148,163,184,0.25) 1px, transparent 1px)', backgroundSize: '14px 14px' }}>
+              <div className="grid grid-cols-3 gap-4 items-center justify-items-center w-full">
+                {croquisDemoMesas.map((m) => (
+                  <div key={m.id} className="relative flex flex-col items-center justify-center animate-in zoom-in-95 duration-300">
+                    {m.tipo === 'redonda' ? (
+                      <div className="relative w-16 h-16 flex items-center justify-center">
+                        {/* 8 Sillas perimetrales alrededor de la mesa redonda */}
+                        {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, sIdx) => {
+                          const isOccupied = sIdx < Math.round((m.ocupadas / m.cap) * 8);
+                          return (
+                            <span
+                              key={deg}
+                              style={{ transform: `rotate(${deg}deg) translateY(-27px)` }}
+                              className={`absolute w-2.5 h-2.5 rounded-full border ${isOccupied ? 'bg-amber-500 border-amber-600 shadow-[0_0_6px_rgba(245,158,11,0.5)]' : 'bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-white/10'}`}
+                            />
+                          );
+                        })}
+                        <div className="w-11 h-11 rounded-full bg-white dark:bg-[#1a1a1a] border-2 border-slate-300 dark:border-white/20 shadow-md flex flex-col items-center justify-center">
+                          <span className="text-[8px] font-black text-slate-800 dark:text-white leading-none">{m.nombre.replace(' VIP', '')}</span>
+                          <span className="text-[7px] font-bold text-amber-600 dark:text-amber-400 mt-0.5">{m.ocupadas}/{m.cap}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative w-20 h-16 flex flex-col items-center justify-center">
+                        {/* Sillas superiores del tablón */}
+                        <div className="flex gap-1.5 mb-1">
+                          {[0, 1, 2, 3].map(sIdx => (
+                            <span key={sIdx} className={`w-2.5 h-2 rounded-sm ${sIdx < 3 ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`} />
+                          ))}
+                        </div>
+                        <div className="w-16 h-8 rounded-lg bg-white dark:bg-[#1a1a1a] border-2 border-emerald-500/40 shadow-md flex flex-col items-center justify-center">
+                          <span className="text-[8px] font-black text-slate-800 dark:text-white leading-none">{m.nombre}</span>
+                          <span className="text-[7px] font-bold text-emerald-600 dark:text-emerald-400">{m.ocupadas}/{m.cap}</span>
+                        </div>
+                        {/* Sillas inferiores del tablón */}
+                        <div className="flex gap-1.5 mt-1">
+                          {[0, 1, 2, 3].map(sIdx => (
+                            <span key={sIdx} className={`w-2.5 h-2 rounded-sm ${sIdx < 3 ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-5 pt-3 border-t border-slate-100 dark:border-white/5">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+                <LayoutGrid size={18} className="text-amber-500"/> Croquis 2D & Sillas en Tiempo Real
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
+                Agrega mesas redondas, cuadradas, tablones, ovaladas o serpentinas en tu plano 2D y visualiza al instante qué sillas están ocupadas y cuáles siguen libres.
+              </p>
             </div>
           </RevealSection>
 
-          {/* 👑 TARJETA 6 (1x1): GPS NATIVO IOS/ANDROID Y CALENDARIO .ICS */}
-          <RevealSection delay={350} className="h-full">
-            <div className="h-full bg-slate-50 dark:bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden group shadow-sm transition-colors duration-700">
-               <div className="flex items-center justify-between mb-4">
-                 <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-200 dark:border-indigo-500/20">
-                   <MapPin size={22} className="text-indigo-600 dark:text-indigo-400" />
-                 </div>
-                 <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">iOS & Android</span>
-               </div>
-               <div className="relative z-10 mt-auto">
-                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5 transition-colors">GPS Nativo y Agenda</h3>
-                 <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed transition-colors">
-                   Abre Apple Maps o Google Maps nativamente según el celular del invitado y descarga el recordatorio en su calendario.
-                 </p>
-               </div>
+          {/* 👑 TARJETA 5 (2 cols): GALERÍAS FOTOGRÁFICAS INTERACTIVAS (CARRUSEL, MASONRY Y ARCOS) */}
+          <RevealSection delay={300} className="lg:col-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-7 sm:p-9 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100 dark:border-white/10">
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                <Camera size={14}/> Galerías Editoriales
+              </span>
+              <div className="flex bg-slate-100 dark:bg-[#111] p-1 rounded-xl border border-slate-200 dark:border-white/10">
+                {[
+                  { id: 'carrusel', lbl: '1. Carrusel' },
+                  { id: 'masonry', lbl: '2. Masonry' },
+                  { id: 'arcos', lbl: '3. Arcos y Formas' }
+                ].map(st => (
+                  <button
+                    key={st.id}
+                    type="button"
+                    onClick={() => setGaleriaDemoEstilo(st.id)}
+                    className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${galeriaDemoEstilo === st.id ? 'bg-white dark:bg-amber-500 text-slate-900 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+                  >
+                    {st.lbl}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Contenedor Dinámico con tus 6 fotos de /demos/cumple_formal/ */}
+            <div className="my-auto min-h-[190px] flex items-center justify-center">
+              {galeriaDemoEstilo === 'carrusel' && (
+                <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar w-full snap-x snap-mandatory animate-in fade-in duration-300">
+                  {[1, 2, 3, 4, 5, 6].map(n => (
+                    <div key={n} className="w-36 h-44 shrink-0 snap-center rounded-2xl overflow-hidden border-2 border-amber-500/30 shadow-md relative group">
+                      <img src={`/demos/cumple_formal/foto${n}.jpg`} alt={`Galería Carrusel ${n}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {galeriaDemoEstilo === 'masonry' && (
+                <div className="grid grid-cols-3 gap-2.5 w-full animate-in zoom-in-95 duration-300">
+                  {[1, 2, 3, 4, 5, 6].map((n, idx) => (
+                    <div key={n} className={`overflow-hidden rounded-xl border border-slate-200 dark:border-white/10 shadow-sm ${idx % 2 === 0 ? 'h-24' : 'h-20 translate-y-2'}`}>
+                      <img src={`/demos/cumple_formal/foto${n}.jpg`} alt={`Galería Masonry ${n}`} className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {galeriaDemoEstilo === 'arcos' && (
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5 w-full items-center animate-in zoom-in-95 duration-300">
+                  {[
+                    { n: 1, shape: 'rounded-t-full rounded-b-xl' },
+                    { n: 2, shape: 'rounded-full aspect-square' },
+                    { n: 3, shape: 'rounded-tl-[2rem] rounded-br-[2rem] rounded-tr-md rounded-bl-md' },
+                    { n: 4, shape: 'rounded-t-full rounded-b-xl' },
+                    { n: 5, shape: 'rounded-full aspect-square' },
+                    { n: 6, shape: 'rounded-tr-[2rem] rounded-bl-[2rem] rounded-tl-md rounded-br-md' }
+                  ].map(item => (
+                    <div key={item.n} className={`h-28 w-full overflow-hidden border-2 border-[#D4AF37]/60 shadow-md p-0.5 bg-[#FDFBF7] dark:bg-[#111] ${item.shape}`}>
+                      <img src={`/demos/cumple_formal/foto${item.n}.jpg`} alt={`Galería Formas ${item.n}`} className={`w-full h-full object-cover ${item.shape}`} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-5 pt-3 border-t border-slate-100 dark:border-white/5">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">
+                Sesiones Fotográficas con Arquitectura Editorial
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
+                Cambia arriba entre <b>Carrusel</b>, <b>Masonry</b> o <b>Arcos y Formas</b>. Tus fotografías lucen con encuadres artísticos dignos de revista.
+              </p>
+            </div>
+          </RevealSection>
+
+          {/* 👑 TARJETA 6 (1 col): MESA DE REGALOS DINÁMICA (SOBRES CLABE / PALACIO DE HIERRO / LIVERPOOL) */}
+          <RevealSection delay={350} className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-7 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden shadow-sm">
+            <div className="flex items-center justify-between gap-1 mb-3">
+              <div className="flex bg-slate-100 dark:bg-[#111] p-1 rounded-xl border border-slate-200 dark:border-white/10 w-full">
+                <button
+                  type="button"
+                  onClick={() => setRegaloDemoTipo('sobres')}
+                  className={`flex-1 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${regaloDemoTipo === 'sobres' ? 'bg-amber-500 text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                >
+                  Sobres / CLABE
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRegaloDemoTipo('tiendas')}
+                  className={`flex-1 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${regaloDemoTipo === 'tiendas' ? 'bg-amber-500 text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                >
+                  Tiendas VIP
+                </button>
+              </div>
+            </div>
+
+            {regaloDemoTipo === 'sobres' ? (
+              <div className="my-auto bg-slate-50 dark:bg-[#111] p-3.5 rounded-2xl border border-slate-200/80 dark:border-white/10 text-center animate-in fade-in duration-300">
+                <p className="text-[8px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">BBVA • 0% Comisión</p>
+                <p className="font-mono text-[11px] font-bold text-slate-800 dark:text-white my-1.5">0121 8000 4589 1234 56</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setClabeDemoCopiada(true);
+                    setTimeout(() => setClabeDemoCopiada(false), 2000);
+                  }}
+                  className={`w-full py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${clabeDemoCopiada ? 'bg-emerald-500 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'}`}
+                >
+                  {clabeDemoCopiada ? '¡CLABE Copiada! ✓' : 'Copiar CLABE (1-Clic)'}
+                </button>
+              </div>
+            ) : (
+              <div className="my-auto space-y-2 animate-in fade-in duration-300">
+                <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-black text-amber-700 dark:text-amber-400">El Palacio de Hierro</p>
+                    <p className="text-[8px] text-slate-500">Evento #409281</p>
+                  </div>
+                  <span className="text-[8px] font-black uppercase px-2 py-1 rounded bg-amber-500 text-slate-900">Abrir</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-black text-rose-600 dark:text-rose-400">Liverpool / Amazon</p>
+                    <p className="text-[8px] text-slate-500">Evento #992814</p>
+                  </div>
+                  <span className="text-[8px] font-black uppercase px-2 py-1 rounded bg-rose-500 text-white">Abrir</span>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Mesa de Regalos y Sobres</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                Combina transferencia CLABE con copiado en 1 clic y mesas en Liverpool, Palacio de Hierro o Amazon.
+              </p>
+            </div>
+          </RevealSection>
+
+          {/* 👑 TARJETA 7 (1 col): RADAR GPS EN VIVO & CALENDARIO .ICS */}
+          <RevealSection delay={400} className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-7 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden shadow-sm">
+            {/* Mini Mapa Interactivo con Ruta Animada */}
+            <div className="relative h-36 rounded-2xl bg-slate-900 overflow-hidden border border-slate-800 p-3 flex flex-col justify-between">
+              <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)', backgroundSize: '18px 18px' }}></div>
+              
+              {/* Línea de ruta SVG */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 200 120">
+                <path
+                  d="M 25 95 Q 80 85, 105 55 T 170 30"
+                  fill="none"
+                  stroke={gpsDemoActivo ? '#10b981' : '#f59e0b'}
+                  strokeWidth="3"
+                  strokeDasharray="6 4"
+                />
+                <circle cx="25" cy="95" r="4" fill="#94a3b8" />
+                <circle cx="170" cy="30" r="6" fill={gpsDemoActivo ? '#10b981' : '#f59e0b'} />
+              </svg>
+
+              <div className="relative z-10 flex justify-between items-center">
+                <span className="px-2 py-0.5 rounded bg-black/70 text-[8px] font-black uppercase tracking-widest text-amber-400 border border-white/10">
+                  {gpsDemoActivo ? '🚗 En Ruta • 12 min' : '📍 Hacienda San Gabriel'}
+                </span>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setGpsDemoActivo(!gpsDemoActivo)}
+                className="relative z-10 w-full py-2 rounded-xl bg-white/95 text-slate-900 font-black text-[9px] uppercase tracking-widest shadow-lg hover:bg-amber-400 transition-colors flex items-center justify-center gap-1.5"
+              >
+                <MapPin size={11} className="text-rose-500"/> {gpsDemoActivo ? 'Abriendo Apple / Google Maps' : 'Toca para Trazar Ruta GPS'}
+              </button>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">GPS Inteligente y Agenda</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                Detecta si tu invitado usa iPhone o Android para abrir su navegador GPS nativo y agendar el día en 1 toque.
+              </p>
             </div>
           </RevealSection>
 
