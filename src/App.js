@@ -12084,6 +12084,14 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [portalComparativoOpen, setPortalComparativoOpen] = useState(false);
   const [mobileComparePlan, setMobileComparePlan] = useState('oro');
 
+  // 🟢 ESTADOS PASO 4: SIMULADORES PHYGITAL DE SOCIAL WALL Y BLACK LABEL
+  const [socialFotoActiva, setSocialFotoActiva] = useState(1); // 1 (/social1.jpg) | 2 (/social2.jpg)
+  const [socialLikes, setSocialLikes] = useState(28);
+  const [socialCardFinish, setSocialCardFinish] = useState('obsidiana'); // 'obsidiana' | 'marfil' | 'champagne'
+  const [pulseraColor, setPulseraColor] = useState('oro'); // 'oro' | 'negro' | 'plata' | 'rosa'
+  const [radarCount, setRadarCount] = useState(184);
+  const [radarGuestIdx, setRadarGuestIdx] = useState(0);
+
   const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 59 });
   const [accentColor, setAccentColor] = useState('monochrome');
   
@@ -12296,29 +12304,29 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       nombre: 'Diamante', 
       subtitulo: 'La Obra Maestra All-Inclusive',
       ...obtenerPrecio('diamante'), 
-      desc: 'La suite definitiva sin límites: Croquis 2D arrastrable, proyección de fotos en vivo y brazaletes VIP.', 
+      desc: 'La suite definitiva Phygital: Croquis 2D, proyección en vivo y Caja VIP enviada a tu domicilio con Brazaletes Tyvek 2.5 cm y Tarjetas de Mesa.', 
       icon: <Gem size={24}/>, 
       d1: true, 
       f: [
-        'Todo lo del Plan Oro + Galería Fotográfica Ilimitada',
-        'Ubicaciones GPS Ilimitadas y Monograma a Medida',
+        'Todo lo del Plan Oro + Galería y GPS Ilimitados',
         'Croquis Arquitectónico 2D Interactivo (Arrastra Mesas)',
-        'Baulia Social Wall Incluido (Álbum y Proyección en Vivo)',
-        'Baulia Black Label Incluido (PDF Brazaletes Físicos VIP)',
-        'Radar de Aforo en Tiempo Real + Soporte Prioritario'
+        'Social Wall + Tarjetas Impresas para Mesas (Envío Incluido)',
+        'Black Label + Brazaletes Tyvek 2.5 cm Impresos (Envío Incluido)',
+        'Unboxing en Caja de Lujo Baulia directo a tu domicilio',
+        'Radar de Aforo en Tiempo Real + Respaldo PDF Vectorial'
       ],
       fichaInvitacion: [
         { t: 'Todo el Poder Artístico del Plan Oro sin Límites', d: 'Hasta 3 portadas cinematográficas, monograma a medida, saludo VIP por familia y ubicaciones GPS ilimitadas.' },
         { t: 'Galería Fotográfica Ilimitada Multi-Estilo', d: 'Exhibe tu sesión completa en formato Carrusel, Masonry Editorial o Arcos.' },
-        { t: 'Pases QR Vivos Sincronizados con el Croquis 2D', d: 'Cada tarjeta VIP descargable muestra el nombre del evento, el integrante y su mesa actualizada en tiempo real.' },
+        { t: 'Pases QR Ópticos Sincronizados con el Croquis 2D', d: 'Cada tarjeta VIP descargable muestra el nombre del evento, el integrante y su mesa actualizada en tiempo real.' },
         { t: 'Acceso Directo al Muro Social desde la Invitación', d: 'Tus invitados pueden subir y compartir las fotos que toman durante la fiesta sin instalar aplicaciones.' }
       ],
       fichaBoveda: [
         { t: 'Bóveda Baulia 100% Desbloqueada (Sin Candados)', d: 'Incluye RSVP Blindado, Etiquetas, Auto-Acomodo por Afinidad, Finanzas, Proveedores, Checklist y Escáner Hostess.', ok: true },
         { t: 'Croquis Arquitectónico 2D Interactivo', d: 'Diseña el plano real de tu salón moviendo mesas redondas, cuadradas, tablones, serpentinas, pista y escenario.', ok: true },
-        { t: 'Baulia Social Wall Incluido (Valor $990+)', d: 'Álbum fotográfico en vivo con panel de moderación para proyectar las fotos de tus invitados en las pantallas del salón.', ok: true },
-        { t: 'Baulia Black Label Incluido (Valor $790+)', d: 'Generador de plantillas vectoriales en PDF listas para imprimir brazaletes físicos con QR encriptado.', ok: true },
-        { t: 'Monitor y Radar de Puerta en Vivo', d: 'Velocímetro de aforo en tiempo real en tu celular mientras tu staff escanea en la entrada.', ok: true }
+        { t: 'Social Wall + Tarjetas Físicas para Mesas (Envío Incluido)', d: 'Personaliza tus tarjetas con tu logo y nombre del evento; las imprimimos en papel de alto gramaje y te las enviamos sin costo extra.', ok: true },
+        { t: 'Black Label + Brazaletes Tyvek 2.5 cm Impresos (Envío Incluido)', d: 'Elige color de pulsera, personalízalas con tu logo y recíbelas impresas con QR macro de enfoque rápido en una Caja VIP Baulia.', ok: true },
+        { t: 'Monitor y Radar de Puerta en Vivo + PDF de Emergencia', d: 'Velocímetro de aforo en tiempo real en tu celular y opción de descarga PDF vectorial inmediata.', ok: true }
       ]
     }
   ];
@@ -12428,8 +12436,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     { n: 'App Escáner QR de Recepción para Hostess', b: false, p: false, o: true, d: true, icon: <Scan size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' },
     { n: 'Finanzas, Proveedores, Checklist y Reportes PDF/Excel', b: false, p: false, o: true, d: true, icon: <Wallet size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' },
     { n: 'Croquis Arquitectónico 2D Interactivo (Mover Mesas)', b: false, p: false, o: false, d: true, icon: <LayoutGrid size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' },
-    { n: 'Baulia Social Wall (Álbum y Proyección en Vivo)', b: 'Add-on Opcional', p: 'Add-on Opcional', o: 'Add-on Opcional', d: 'Incluido sin costo', icon: <Camera size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' },
-    { n: 'Baulia Black Label (PDF Brazaletes VIP + Radar Aforo)', b: 'Add-on Opcional', p: 'Add-on Opcional', o: 'Add-on Opcional', d: 'Incluido sin costo', icon: <Lock size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' }
+    { n: 'Baulia Social Wall (Proyección + Tarjetas Impresas con Envío)', b: 'Add-on Opcional', p: 'Add-on Opcional', o: 'Add-on Opcional', d: 'Incluido + Envío VIP', icon: <Camera size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' },
+    { n: 'Baulia Black Label (Brazaletes Tyvek 2.5cm Impresos + Envío + Radar)', b: 'Add-on Opcional', p: 'Add-on Opcional', o: 'Add-on Opcional', d: 'Incluido + Envío VIP', icon: <Lock size={16}/>, grupo: '3. TU BÓVEDA DE CONTROL (SOFTWARE)' }
   ];
 
   return (
@@ -14508,197 +14516,533 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* ========================================== */}
-      {/* 🔴 NUEVA SECCIÓN: SOCIAL WALL (Atmósfera de Fiesta) */}
+      {/* 🔴 PASO 4A: BAULIA SOCIAL WALL (EXPERIENCIA EN VIVO + TARJETAS DE MESA IMPRESAS CON ENVÍO) */}
       {/* ========================================== */}
-      <section id="muro-social" className="py-24 bg-indigo-50 dark:bg-[#080808] relative overflow-hidden transition-colors duration-700 border-t border-indigo-200 dark:border-white/5">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-indigo-500/10  hidden md:block  hidden md:block blur-[150px] rounded-full pointer-events-none transition-colors duration-700"></div>
+      <section id="muro-social" className="py-28 bg-indigo-50/70 dark:bg-[#07070b] relative overflow-hidden transition-colors duration-700 border-t border-indigo-200/70 dark:border-white/5">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-indigo-500/10 hidden md:block blur-[150px] rounded-full pointer-events-none"></div>
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 flex flex-col items-center">
             
-            {/* HEADER CENTRALIZADO */}
-            <RevealSection className="text-center mb-16 max-w-3xl">
-              <div className="inline-flex gap-3 bg-white/80 dark:bg-[#111]/80 backdrop-blur-md px-5 py-2.5 rounded-full border border-indigo-200 dark:border-indigo-500/20 shadow-sm mb-6">
-                 <Gem size={20} className="text-amber-500" />
-                 <span className="text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-[0.2em] text-[10px] whitespace-nowrap">
-                   Incluido en Plan Diamante
-                 </span>
+          {/* CABECERA CON INSIGNIA PHYGITAL */}
+          <RevealSection className="text-center mb-14 max-w-3xl">
+            <div className="inline-flex flex-wrap items-center justify-center gap-2 bg-white/90 dark:bg-[#111]/90 backdrop-blur-md px-5 py-2 rounded-full border border-indigo-200 dark:border-indigo-500/30 shadow-sm mb-6">
+              <Gem size={16} className="text-amber-500 shrink-0" />
+              <span className="text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-[0.18em] text-[9px] sm:text-[10px]">
+                Incluido en Plan Diamante • Incluye Impresión y Envío en Caja Baulia
+              </span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-editorial font-medium text-indigo-950 dark:text-white mb-5 tracking-tight leading-tight">
+              Baulia Social Wall.<br/>
+              <span className="italic text-indigo-600 dark:text-indigo-400 pr-1">Del brindis en la mesa a la pantalla gigante.</span>
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base md:text-lg font-light leading-relaxed max-w-2xl mx-auto">
+              Sin instalar aplicaciones. Te enviamos a domicilio un <b>kit de tarjetas de mesa impresas en papel de lujo</b> con tu logo y nuestro QR óptico, conectado en vivo al proyector de tu salón.
+            </p>
+
+            {/* REGLA DE 3 PASOS CLAROS */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-8 text-left">
+              {[
+                { step: '01', title: 'Personaliza y Recibe en Casa', desc: 'Sube tu logo, nombre y tipo de evento. Imprimimos tus tarjetas de mesa y las enviamos en una caja VIP Baulia.' },
+                { step: '02', title: 'Escaneo Instantáneo (0 Apps)', desc: 'Tus invitados escanean el QR óptico de su mesa y suben fotos en segundos desde Safari o Chrome.' },
+                { step: '03', title: 'Moderación DJ y Proyección', desc: 'Tú o tu DJ aprueban en 1 clic qué fotografías vuelan en vivo a las pantallas gigantes del salón.' }
+              ].map((st, idx) => (
+                <div key={idx} className="bg-white/80 dark:bg-[#111]/90 backdrop-blur-md p-4 rounded-2xl border border-indigo-100 dark:border-white/10 shadow-sm">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 block mb-1">Paso {st.step}</span>
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white mb-1">{st.title}</h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">{st.desc}</p>
+                </div>
+              ))}
+            </div>
+          </RevealSection>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch w-full">
+            
+            {/* TARJETA IZQUIERDA: TALLER DE IMPRESIÓN DE TARJETAS DE MESA + QR ÓPTICO */}
+            <RevealSection delay={150} className="bg-white dark:bg-[#111] rounded-[2.5rem] p-6 sm:p-10 border border-indigo-100 dark:border-white/10 shadow-xl flex flex-col justify-between relative overflow-hidden">
+              <div>
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-100 dark:border-white/10">
+                  <div>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 block">Atelier de Impresión Incluido</span>
+                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Tarjetas Físicas para tus Mesas</h3>
+                  </div>
+
+                  {/* Selector interactivo de acabado de papel */}
+                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-black/60 p-1 rounded-xl border border-slate-200 dark:border-white/10">
+                    {[
+                      { id: 'obsidiana', lbl: 'Obsidiana' },
+                      { id: 'marfil', lbl: 'Marfil' },
+                      { id: 'champagne', lbl: 'Champagne' }
+                    ].map(fin => (
+                      <button
+                        key={fin.id}
+                        type="button"
+                        onClick={() => setSocialCardFinish(fin.id)}
+                        className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${socialCardFinish === fin.id ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'}`}
+                      >
+                        {fin.lbl}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Simulador 3D de la Tarjeta de Mesa Física + Fotos Locales (/social1.jpg y /social2.jpg) */}
+                <div className="relative py-4 flex flex-col sm:flex-row items-center justify-center gap-6">
+                  
+                  {/* Miniaturas de las fotos reales de tus invitados */}
+                  <div className="flex sm:flex-col gap-3 shrink-0">
+                    {[1, 2].map(num => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => setSocialFotoActiva(num)}
+                        className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 transition-all shadow-md group ${socialFotoActiva === num ? 'border-indigo-500 scale-105 ring-4 ring-indigo-500/20' : 'border-white dark:border-white/10 opacity-75 hover:opacity-100'}`}
+                      >
+                        <img 
+                          src={`/social${num}.jpg`} 
+                          alt={`Foto Social Wall ${num}`} 
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.src = '/demos/boda/foto2.jpg'; }}
+                        />
+                        <span className="absolute bottom-1.5 inset-x-1.5 bg-black/75 backdrop-blur-sm text-white text-[8px] font-black uppercase tracking-wider py-0.5 rounded text-center">
+                          Foto #{num} {socialFotoActiva === num ? '• En Vivo' : ''}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Previsualización Física de la Tarjeta de Mesa que se envía al cliente */}
+                  <div className={`w-full max-w-[250px] rounded-3xl p-5 border-2 shadow-2xl transition-all duration-500 flex flex-col items-center text-center relative ${
+                    socialCardFinish === 'obsidiana'
+                      ? 'bg-[#09090d] text-white border-amber-500/40'
+                      : socialCardFinish === 'marfil'
+                      ? 'bg-[#FDFBF7] text-slate-900 border-[#D4AF37]/50'
+                      : 'bg-gradient-to-b from-[#fdf6e9] to-[#f5e6c8] text-slate-900 border-amber-600/40'
+                  }`}>
+                    <span className="text-[7px] font-black uppercase tracking-[0.28em] text-amber-500 mb-1">
+                      Boda Civil & Religiosa
+                    </span>
+                    <h4 className="font-editorial font-bold text-xl leading-none mb-1">
+                      Sofía & Alejandro
+                    </h4>
+                    <p className={`text-[8px] uppercase tracking-widest mb-3 ${socialCardFinish === 'obsidiana' ? 'text-slate-400' : 'text-slate-500'}`}>
+                      Comparte tus fotos en la pantalla
+                    </p>
+
+                    {/* QR ÓPTICO BAULIA (3 Cuadros Maestros de Enfoque + Trama Circular + Monograma Central) */}
+                    <div className="bg-white p-2.5 rounded-2xl shadow-inner border border-amber-500/30 w-28 h-28 flex items-center justify-center relative">
+                      <svg viewBox="0 0 100 100" className="w-full h-full text-slate-900">
+                        {/* 3 Cuadros Maestros de Enfoque Óptico */}
+                        <rect x="6" y="6" width="26" height="26" rx="5" fill="none" stroke="currentColor" strokeWidth="5"/>
+                        <rect x="13" y="13" width="12" height="12" rx="2.5" fill="currentColor"/>
+                        
+                        <rect x="68" y="6" width="26" height="26" rx="5" fill="none" stroke="currentColor" strokeWidth="5"/>
+                        <rect x="75" y="13" width="12" height="12" rx="2.5" fill="currentColor"/>
+                        
+                        <rect x="6" y="68" width="26" height="26" rx="5" fill="none" stroke="currentColor" strokeWidth="5"/>
+                        <rect x="13" y="75" width="12" height="12" rx="2.5" fill="currentColor"/>
+
+                        {/* Rombos y círculos estéticos de alta lectura */}
+                        {[
+                          [42,10],[50,10],[58,10],[42,18],[54,18],[46,26],[58,26],
+                          [10,42],[18,42],[26,42],[14,50],[24,50],[10,58],[20,58],
+                          [72,42],[82,42],[90,42],[76,50],[88,50],[72,58],[84,58],
+                          [42,72],[52,72],[62,72],[72,72],[84,72],[46,82],[58,82],[70,82],[88,82],[42,90],[54,90],[66,90],[78,90]
+                        ].map(([cx, cy], idx) => (
+                          <circle key={idx} cx={cx} cy={cy} r="3.2" fill="currentColor" />
+                        ))}
+
+                        {/* Sello / Monograma Central Baulia */}
+                        <rect x="36" y="36" width="28" height="28" rx="7" fill="#0f172a" stroke="#f59e0b" strokeWidth="2.5"/>
+                        <text x="50" y="54" textAnchor="middle" fill="#f59e0b" fontSize="11" fontWeight="bold" fontFamily="serif">S&A</text>
+                      </svg>
+                    </div>
+
+                    <span className="mt-3 text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-indigo-600 text-white shadow-sm">
+                      📱 Escanea sin instalar Apps
+                    </span>
+                  </div>
+                </div>
+
+                {/* Especificación del Unboxing incluido */}
+                <div className="mt-4 p-3.5 rounded-2xl bg-indigo-50/80 dark:bg-white/[0.03] border border-indigo-200/70 dark:border-white/10 flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 shrink-0 mt-0.5">
+                    <Gift size={16}/>
+                  </div>
+                  <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <b>Impresión, Empaque y Envío Incluido:</b> Personalízalas en tu panel y recíbelas en una <b>Caja Baulia de colección</b> lista para colocar en tus mesas (también incluye descarga QR digital inmediata).
+                  </p>
+                </div>
               </div>
-              <h2 className="text-5xl md:text-6xl font-editorial font-medium text-indigo-950 dark:text-white mb-6 tracking-tight leading-tight transition-colors duration-700">
-                Baulia Social Wall.<br/>
-                <span className="italic text-indigo-500 dark:text-indigo-400 pr-1">Tu fiesta, en vivo y en directo.</span>
-              </h2>
-              <p className="text-indigo-800 dark:text-slate-400 text-lg md:text-xl font-light leading-relaxed max-w-xl mx-auto transition-colors duration-700">
-                Convierte las pantallas de tu salón en una <b>experiencia inmersiva e interactiva</b>. Cero aplicaciones; tus invitados suben fotos instantáneamente desde su navegador.
+
+              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/5">
+                <button 
+                  type="button"
+                  onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: pSocialWall.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} 
+                  className="w-full px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest hover:scale-[1.01] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(79,70,229,0.35)]"
+                >
+                  <Camera size={18} className="mr-2.5 text-white/80 shrink-0" /> Activar Social Wall + Kit Impreso (${pSocialWall.precios[moneda]} {moneda})
+                </button>
+              </div>
+            </RevealSection>
+
+            {/* TARJETA DERECHA: SIMULADOR DE MODERACIÓN DJ Y PROYECCIÓN EN PANTALLA GIGANTE */}
+            <RevealSection delay={300} className="bg-white dark:bg-[#111] rounded-[2.5rem] p-6 sm:p-10 border border-indigo-100 dark:border-white/10 shadow-xl flex flex-col justify-between relative overflow-hidden">
+              <div>
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-100 dark:border-white/10">
+                  <div>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 block">Simulador de Cabina DJ / Host</span>
+                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Moderación y Proyección en Vivo</h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSocialFotoActiva(prev => prev === 1 ? 2 : 1);
+                      setSocialLikes(l => l + 1);
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[10px] uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1.5"
+                  >
+                    <Check size={13}/> Aprobar Siguiente Foto
+                  </button>
+                </div>
+
+                {/* Barra de control de moderación */}
+                <div className="bg-slate-50 dark:bg-[#0a0a0a] p-3.5 rounded-2xl border border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-3 mb-5">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <img 
+                      src={socialFotoActiva === 1 ? '/social2.jpg' : '/social1.jpg'} 
+                      alt="Siguiente en cola" 
+                      className="w-11 h-11 rounded-xl object-cover border border-indigo-500/30 shrink-0"
+                      onError={(e) => { e.target.src = '/demos/boda/foto4.jpg'; }}
+                    />
+                    <div className="min-w-0">
+                      <span className="text-[8px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 block">En Cola de Moderación</span>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                        {socialFotoActiva === 1 ? 'Mesa 4 • Amigos de los Novios' : 'Mesa 1 • Familia Montemayor'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button 
+                      type="button"
+                      onClick={() => setSocialFotoActiva(prev => prev === 1 ? 2 : 1)}
+                      className="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-colors"
+                      title="Rechazar foto"
+                    >
+                      <X size={16}/>
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setSocialFotoActiva(prev => prev === 1 ? 2 : 1);
+                        setSocialLikes(l => l + 1);
+                      }}
+                      className="w-9 h-9 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 flex items-center justify-center shadow-sm transition-colors"
+                      title="Aprobar y proyectar"
+                    >
+                      <Check size={16}/>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pantalla Gigante del Salón con tus fotos /social1.jpg y /social2.jpg */}
+              <div className="my-auto relative w-full aspect-video bg-slate-950 rounded-3xl border-4 border-indigo-500/40 shadow-2xl overflow-hidden group">
+                <img 
+                  key={socialFotoActiva}
+                  src={`/social${socialFotoActiva}.jpg`} 
+                  alt="Proyección Social Wall en Vivo" 
+                  className="absolute inset-0 w-full h-full object-cover animate-in fade-in zoom-in-95 duration-500"
+                  onError={(e) => { e.target.src = '/demos/boda/foto2.jpg'; }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
+
+                {/* Etiqueta superior en el proyector */}
+                <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2">
+                  <span className="px-3 py-1 rounded-full bg-black/65 backdrop-blur-md border border-white/15 text-[9px] font-black uppercase tracking-widest text-white flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Proyector Principal • En Vivo
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSocialLikes(l => l + 1)}
+                    className="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5 shadow-lg active:scale-95 transition-transform"
+                  >
+                    <Heart size={13} className="fill-white"/> {socialLikes}
+                  </button>
+                </div>
+
+                {/* Pie de foto proyectada */}
+                <div className="absolute bottom-3.5 left-3.5 right-3.5 flex items-end justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-9 h-9 rounded-full bg-indigo-600 text-white font-black text-xs flex items-center justify-center border border-white/30 shrink-0">
+                      {socialFotoActiva === 1 ? 'M1' : 'M4'}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white font-bold text-sm sm:text-base leading-tight truncate drop-shadow">
+                        {socialFotoActiva === 1 ? 'Familia Montemayor (Mesa 1)' : 'Amigos de la Universidad (Mesa 4)'}
+                      </p>
+                      <p className="text-amber-300 text-xs italic truncate">
+                        {socialFotoActiva === 1 ? '"¡Que vivan los novios! La mejor noche 🥂✨"' : '"¡La pista está encendida! #BodaSofiaYAlejandro 🔥"'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-4 text-center">
+                Al terminar el evento, descarga el álbum completo en alta resolución desde tu Bóveda Baulia.
               </p>
             </RevealSection>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch w-full">
-              
-              {/* TARJETA IZQUIERDA (Info + Botón) */}
-              <RevealSection delay={200} className="bg-white dark:bg-[#111] rounded-[2.5rem] p-10 md:p-12 border border-indigo-100 dark:border-white/5 shadow-xl dark:shadow-none transition-all flex flex-col justify-between group overflow-hidden relative h-full">
-                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none"></div>
-                 <div className="relative z-10">
-                   <h3 className="text-2xl font-bold text-indigo-950 dark:text-white mb-4 transition-colors">Tus Invitados son los Fotógrafos</h3>
-                   
-                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6 relative w-max mx-auto md:mx-0">
-                      {[1,2,3].map((idx) => (
-                         <img key={idx} src={`https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80`} alt={`Social Wall Photo ${idx}`} className={`w-24 h-24 object-cover rounded-2xl shadow-md transition-transform group-hover:scale-105 ${idx === 2 ? 'relative -top-2' : ''}`} />
-                      ))}
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-indigo-600 rounded-2xl flex flex-col items-center justify-center p-3 text-center border-[4px] border-white dark:border-[#111] group-hover:rotate-6 transition-transform shadow-2xl">
-                         <QrCode size={32} className="text-white mb-1.5" />
-                         <span className="text-[10px] text-white font-bold uppercase tracking-widest leading-tight">Escanea <br/>para subir</span>
-                      </div>
-                   </div>
-                   
-                   <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed max-w-md transition-colors">
-                     Tus invitados escanean un QR dinámico en las mesas o el proyector y acceden al cargador web instantáneo. ¡Sube, etiqueta y comparte en tiempo real!
-                   </p>
-                 </div>
-
-                 <div className="mt-10 relative z-10">
-                    <button onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: pSocialWall.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(79,70,229,0.3)]">
-                       <Camera size={18} className="mr-3 text-white/70" /> Comprar Muro Social (${pSocialWall.precios[moneda]})
-                    </button>
-                 </div>
-              </RevealSection>
-
-              {/* TARJETA DERECHA (Moderación y Pantalla) */}
-              <RevealSection delay={400} className="bg-white dark:bg-[#111] rounded-[2.5rem] p-10 md:p-12 border border-indigo-100 dark:border-white/5 shadow-xl dark:shadow-none transition-all flex flex-col group overflow-hidden relative h-full">
-                 <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none"></div>
-                 
-                 <div className="relative z-10 mb-8">
-                   <h3 className="text-2xl font-bold text-indigo-950 dark:text-white mb-4 transition-colors">Moderación y Control Total</h3>
-                   <div className="bg-indigo-50 dark:bg-[#0a0a0a] p-4 rounded-xl border border-indigo-100 dark:border-white/5 flex items-center justify-between mb-4 shadow-inner">
-                     <div>
-                       <p className="text-indigo-600 dark:text-indigo-400 font-bold text-xs uppercase tracking-widest">Estación de DJ / Host</p>
-                       <p className="text-slate-900 dark:text-white font-editorial text-lg font-medium mt-1">4 fotos pendientes</p>
-                     </div>
-                     <div className="flex gap-2">
-                       <button className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-600 flex items-center justify-center border border-rose-200 dark:border-rose-500/30 shadow-sm hover:scale-110 transition-transform"><X size={18} /></button>
-                       <button className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 flex items-center justify-center border border-emerald-200 dark:border-emerald-500/30 shadow-sm hover:scale-110 transition-transform"><Check size={18} /></button>
-                     </div>
-                   </div>
-                   <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed transition-colors">
-                     Tú o tu DJ deciden qué aparece en la pantalla gigante. Un dashboard exclusivo permite aprobar o rechazar fotos instantáneamente.
-                   </p>
-                 </div>
-
-                 <div className="mt-auto relative w-full aspect-video bg-indigo-900 rounded-3xl border-4 border-indigo-500/30 shadow-xl overflow-hidden group">
-                    <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Galeria 2" className="absolute inset-0 w-full h-full object-cover opacity-60" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-indigo-950/80 to-transparent"></div>
-                    <div className="absolute bottom-4 left-4 flex items-center gap-3">
-                       <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white font-bold border border-white/30">M</div>
-                       <div>
-                          <p className="text-white font-bold text-lg drop-shadow-md">María López</p>
-                          <p className="text-white/80 text-sm italic">"¡La mejor boda del año! 🥂"</p>
-                       </div>
-                    </div>
-                    <div className="absolute top-4 right-4 flex gap-2">
-                       <div className="bg-rose-500/90 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-                          <Heart size={14} className="fill-white"/> 24
-                       </div>
-                    </div>
-                 </div>
-              </RevealSection>
-
-            </div>
+          </div>
         </div>
       </section>
 
       {/* ========================================== */}
-      {/* 🔴 NUEVA SECCIÓN: BLACK LABEL (Lujo Físico) */}
+      {/* 🔴 PASO 4B: BAULIA BLACK LABEL (BRAZALETES TYVEK 2.5 CM IMPRESOS + RADAR EN VIVO) */}
       {/* ========================================== */}
-      <section id="black-label" className="py-24 bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white relative overflow-hidden transition-colors duration-700 border-t border-slate-200 dark:border-white/5">
-         <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[60vw] h-[60vw] bg-amber-500/5  hidden md:block  hidden md:block blur-[150px] rounded-full pointer-events-none transition-colors duration-700"></div>
+      <section id="black-label" className="py-28 bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white relative overflow-hidden transition-colors duration-700 border-t border-slate-200 dark:border-white/5">
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[60vw] h-[60vw] bg-amber-500/5 hidden md:block blur-[150px] rounded-full pointer-events-none"></div>
 
-         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 flex flex-col items-center">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 flex flex-col items-center">
+          
+          <RevealSection className="text-center mb-14 max-w-3xl">
+            <div className="inline-flex flex-wrap items-center justify-center gap-2 bg-white/90 dark:bg-[#111]/90 backdrop-blur-md px-5 py-2 rounded-full border border-amber-300 dark:border-amber-500/30 shadow-sm mb-6">
+              <Gem size={16} className="text-amber-500 shrink-0" />
+              <span className="text-amber-700 dark:text-amber-400 font-black uppercase tracking-[0.18em] text-[9px] sm:text-[10px]">
+                Incluido en Plan Diamante • Taller de Impresión + Envío a Domicilio Incluido
+              </span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white mb-5 tracking-tight leading-tight">
+              Baulia Black Label.<br/>
+              <span className="italic text-amber-500 pr-1">Brazaletes VIP de 2.5 cm listos en tu puerta.</span>
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base md:text-lg font-light leading-relaxed max-w-2xl mx-auto">
+              Olvídate de lidiar con imprentas.Cuando tengas tu lista de confirmados, envíala a nuestro <b>Taller de Impresión Baulia</b>: fabricamos tus brazaletes Tyvek de <b>2.5 cm de ancho</b> con QR óptico de enfoque rápido y te los enviamos en una <b>Caja VIP de colección</b> sin costo adicional.
+            </p>
+          </RevealSection>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch w-full">
             
-            <RevealSection className="text-center mb-16 max-w-3xl">
-              <div className="inline-flex gap-3 bg-white/80 dark:bg-[#111]/80 backdrop-blur-md px-5 py-2.5 rounded-full border border-amber-200 dark:border-amber-500/20 shadow-sm mb-6">
-                 <Gem size={20} className="text-amber-500" />
-                 <span className="text-amber-600 dark:text-amber-400 font-bold uppercase tracking-[0.2em] text-[10px] whitespace-nowrap">
-                   Incluido en Plan Diamante
-                 </span>
+            {/* TARJETA IZQUIERDA: PERSONALIZADOR DE BRAZALETES TYVEK 2.5 CM + FOTO /pulsera.jpg */}
+            <RevealSection delay={150} className="bg-white dark:bg-[#111] rounded-[2.5rem] p-6 sm:p-10 border border-slate-200 dark:border-white/10 shadow-xl flex flex-col justify-between relative overflow-hidden">
+              <div>
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-100 dark:border-white/10">
+                  <div>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 block">Formato Ancho 2.5 cm • Enfoque Instantáneo</span>
+                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Taller de Brazaletes Tyvek VIP</h3>
+                  </div>
+
+                  {/* Selector de color de pulsera (Sujeto a disponibilidad) */}
+                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-black/60 px-2.5 py-1.5 rounded-full border border-slate-200 dark:border-white/10">
+                    <span className="text-[8px] font-black uppercase tracking-wider text-slate-400 mr-1">Color:</span>
+                    {[
+                      { id: 'oro', bg: 'bg-gradient-to-tr from-amber-500 to-yellow-300', lbl: 'Oro Imperial' },
+                      { id: 'negro', bg: 'bg-slate-950', lbl: 'Negro Obsidiana' },
+                      { id: 'plata', bg: 'bg-gradient-to-tr from-slate-400 to-slate-200', lbl: 'Plata Titanio' },
+                      { id: 'rosa', bg: 'bg-gradient-to-tr from-rose-400 to-pink-200', lbl: 'Rosa Champagne' }
+                    ].map(c => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setPulseraColor(c.id)}
+                        title={c.lbl}
+                        className={`w-5 h-5 rounded-full ${c.bg} border border-white/40 transition-transform ${pulseraColor === c.id ? 'scale-125 ring-2 ring-amber-500' : 'opacity-70 hover:opacity-100'}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* SIMULADOR REALISTA DE LA PULSERA TYVEK DE 2.5 CM DE ANCHO CON MACRO-QR ÓPTICO */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 px-1">
+                    <span>Vista Previa Brazalete Físico (Ancho Real 2.5 cm)</span>
+                    <span className="text-amber-500">*Color sujeto a disponibilidad</span>
+                  </div>
+
+                  <div className={`w-full rounded-2xl p-3 sm:p-4 border-2 shadow-xl transition-all duration-500 flex items-center justify-between gap-2 sm:gap-4 relative overflow-hidden ${
+                    pulseraColor === 'oro'
+                      ? 'bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-slate-950 border-amber-300'
+                      : pulseraColor === 'negro'
+                      ? 'bg-gradient-to-r from-[#09090b] via-[#18181b] to-[#09090b] text-white border-amber-500/50'
+                      : pulseraColor === 'plata'
+                      ? 'bg-gradient-to-r from-slate-300 via-white to-slate-300 text-slate-900 border-slate-400'
+                      : 'bg-gradient-to-r from-[#e8a598] via-[#fce4df] to-[#d88a9b] text-slate-900 border-rose-300'
+                  }`}>
+                    {/* Cintilla adhesiva de seguridad izquierda */}
+                    <div className="w-5 sm:w-7 self-stretch border-r-2 border-dashed border-current/30 flex flex-col items-center justify-center opacity-60 shrink-0">
+                      <span className="text-[6px] font-black uppercase -rotate-90 tracking-widest whitespace-nowrap">TYVEK 2.5CM</span>
+                    </div>
+
+                    {/* Datos del Evento y del Invitado */}
+                    <div className="flex-1 min-w-0 text-left">
+                      <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-[0.22em] opacity-75 block truncate">
+                        BAULIA BLACK LABEL • BODA CIVIL & RELIGIOSA
+                      </span>
+                      <h4 className="font-editorial font-bold text-base sm:text-xl leading-none truncate mt-0.5">
+                        Sofía & Alejandro
+                      </h4>
+                      <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${pulseraColor === 'negro' ? 'bg-amber-500 text-slate-950' : 'bg-slate-950 text-amber-400'}`}>
+                          FAM. MONTEMAYOR
+                        </span>
+                        <span className="text-[8px] font-black uppercase tracking-wider opacity-85">
+                          • MESA 1 VIP
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* MACRO QR ÓPTICO DE 3 CUADROS Y PUNTO CENTRAL (Enfoque en 0.3s) */}
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl p-1.5 shadow-md border border-slate-900/20 shrink-0 flex flex-col items-center justify-center">
+                      <svg viewBox="0 0 100 100" className="w-full h-full text-slate-950">
+                        <rect x="5" y="5" width="30" height="30" rx="6" fill="none" stroke="currentColor" strokeWidth="7"/>
+                        <rect x="14" y="14" width="12" height="12" rx="2" fill="currentColor"/>
+                        
+                        <rect x="65" y="5" width="30" height="30" rx="6" fill="none" stroke="currentColor" strokeWidth="7"/>
+                        <rect x="74" y="14" width="12" height="12" rx="2" fill="currentColor"/>
+                        
+                        <rect x="5" y="65" width="30" height="30" rx="6" fill="none" stroke="currentColor" strokeWidth="7"/>
+                        <rect x="14" y="74" width="12" height="12" rx="2" fill="currentColor"/>
+
+                        {/* Puntos gruesos de alto contraste para cámaras móviles */}
+                        {[
+                          [46,12],[54,12],[46,24],[54,24],
+                          [12,46],[24,46],[12,54],[24,54],
+                          [76,46],[88,46],[76,54],[88,54],
+                          [46,76],[56,76],[68,76],[82,76],[46,88],[60,88],[74,88],[88,88]
+                        ].map(([cx, cy], i) => (
+                          <circle key={i} cx={cx} cy={cy} r="4.2" fill="currentColor"/>
+                        ))}
+
+                        {/* Centro Óptico Baulia */}
+                        <circle cx="50" cy="50" r="11" fill="#0f172a"/>
+                        <circle cx="50" cy="50" r="5" fill="#f59e0b"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fotografía Local /pulsera.jpg + Unboxing VIP */}
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-center bg-slate-50 dark:bg-[#0a0a0a] p-3.5 rounded-2xl border border-slate-200/80 dark:border-white/10">
+                  <div className="sm:col-span-5 h-32 sm:h-36 rounded-xl overflow-hidden border border-amber-500/30 relative bg-slate-900">
+                    <img 
+                      src="/pulsera.jpg" 
+                      alt="Pulsera Tyvek Baulia Black Label" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.target.src = '/demos/boda/foto4.jpg'; }}
+                    />
+                    <span className="absolute bottom-2 left-2 bg-black/80 backdrop-blur-md text-amber-400 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-amber-500/30">
+                      Caja VIP Incluida
+                    </span>
+                  </div>
+                  <div className="sm:col-span-7 space-y-2 text-left">
+                    <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                      <CheckCircle size={13}/> Doble Garantía de Entrega
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                      <b>1. Envío a Taller Baulia:</b> Imprimimos tus brazaletes de 2.5 cm resistentes al agua y los enviamos a tu puerta en nuestra caja de lujo.<br/>
+                      <b>2. Exportación PDF Inmediata:</b> ¿Confirmados de último minuto?También tienes el botón para descargar e imprimir al instante.
+                    </p>
+                  </div>
+                </div>
               </div>
-              <h2 className="text-5xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white mb-6 tracking-tight leading-tight transition-colors duration-700">
-                Baulia Black Label.<br/>
-                <span className="italic text-amber-500 pr-1">Plantillas VIP.</span>
-              </h2>
-              <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl font-light leading-relaxed max-w-xl mx-auto transition-colors duration-700">
-                Eleva la exclusividad de tu evento de ultra-lujo. Genera e imprime tus propios brazaletes Tyvek físicos con QR encriptado, inconfundibles y blindados.
-              </p>
+
+              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/5">
+                <button 
+                  type="button"
+                  onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: pBlackLabel.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} 
+                  className="w-full px-6 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest hover:scale-[1.01] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(245,158,11,0.35)]"
+                >
+                  <Printer size={18} className="mr-2.5 text-slate-950/80 shrink-0" /> Pedir Kit Black Label + Envío (${pBlackLabel.precios[moneda]} {moneda})
+                </button>
+              </div>
             </RevealSection>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch w-full">
-              
-              <RevealSection delay={200} className="bg-white dark:bg-[#111] rounded-[2.5rem] p-10 md:p-12 border border-slate-200 dark:border-white/5 shadow-xl dark:shadow-none flex flex-col justify-between group overflow-hidden relative h-full transition-colors">
-                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
-                <div className="relative z-10 mb-8">
-                    <div className="w-12 h-12 bg-amber-500 text-slate-900 rounded-2xl flex flex-col items-center justify-center p-3 text-center border-[4px] border-white dark:border-[#111] shadow-lg group-hover:rotate-6 transition-transform mb-5">
-                       <QrCode size={24} className="text-slate-900" />
+            {/* TARJETA DERECHA: RADAR DE PUERTA INTERACTIVO EN TIEMPO REAL */}
+            <RevealSection delay={300} className="bg-white dark:bg-[#111] rounded-[2.5rem] p-6 sm:p-10 border border-slate-200 dark:border-white/10 shadow-xl flex flex-col justify-between relative overflow-hidden">
+              <div>
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100 dark:border-white/10">
+                  <div>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 block">Telemetría en Vivo para el Anfitrión</span>
+                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Radar de Puerta en Tiempo Real</h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRadarCount(c => c < 200 ? c + 1 : 184);
+                      setRadarGuestIdx(i => (i + 1) % 4);
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1.5"
+                  >
+                    <Scan size={13}/> + Escanear Brazalete
+                  </button>
+                </div>
+
+                <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed mb-5">
+                  Gracias al nuevo <b>QR Óptico de 2.5 cm</b>, la cámara de tu Hostess enfoca en 0.3 segundos incluso de noche. Presiona <b>"+ Escanear Brazalete"</b> arriba para ver cómo se actualiza tu velocímetro en vivo:
+                </p>
+              </div>
+
+              {/* Consola de Radar Interactiva */}
+              {(() => {
+                const porcentaje = Math.round((radarCount / 200) * 100);
+                const strokeOffset = Math.round(283 - (283 * porcentaje) / 100);
+                const invitadosDemo = [
+                  { nombre: 'Familia Garza Villarreal', mesa: 'Mesa 1 • VIP', hora: 'Hace 2 seg' },
+                  { nombre: 'Alejandro Montemayor', mesa: 'Mesa 2 • Honor', hora: 'Justo ahora' },
+                  { nombre: 'Sofía Elizondo & Esposo', mesa: 'Mesa 4 • Amigos', hora: 'Justo ahora' },
+                  { nombre: 'Mesa Directiva Corporativa', mesa: 'Mesa 1 • Presídium', hora: 'Justo ahora' }
+                ];
+                const guestActual = invitadosDemo[radarGuestIdx];
+
+                return (
+                  <div className="mt-auto relative w-full bg-slate-950 rounded-3xl border border-slate-800 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col p-5 sm:p-7">
+                    <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4 relative z-10">
+                      <div>
+                        <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest flex items-center">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-2"></span> Radar Activo
+                        </p>
+                        <h4 className="text-white font-editorial text-2xl font-bold mt-0.5">Recepción Principal</h4>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-slate-400 font-black text-[9px] uppercase tracking-widest">Pulseras Validadas</p>
+                        <p className="text-white font-black text-2xl">{radarCount} <span className="text-slate-500 text-base">/ 200</span></p>
+                      </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 transition-colors">Pases Físicos Vectoriales</h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed transition-colors">
-                      Sube tu logo y genera automáticamente los archivos en PDF listos para imprenta con calidad vectorial. ¡Imprime en tu propia oficina o estudio!
-                    </p>
-                </div>
-                
-                <div className="mt-10 relative z-10">
-                   <button onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: pBlackLabel.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} className="w-full px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-900 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(245,158,11,0.3)]">
-                      <Printer size={18} className="mr-3 text-slate-900/70" /> Comprar Generador VIP (${pBlackLabel.precios[moneda]})
-                   </button>
-                </div>
-              </RevealSection>
 
-              <RevealSection delay={400} className="bg-white dark:bg-[#111] rounded-[2.5rem] p-10 md:p-12 border border-slate-200 dark:border-white/5 shadow-xl dark:shadow-none flex flex-col group overflow-hidden relative h-full transition-colors">
-                <div className="absolute -top-10 -left-10 w-40 h-40 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
-                <div className="relative z-10 mb-8">
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 transition-colors">Radar de Puerta en Vivo</h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed transition-colors">
-                      Aforo en tiempo real exclusivo para el anfitrión. Ve cómo sube el velocímetro en tu celular mientras tu staff escanea las pulseras en la puerta.
-                    </p>
-                </div>
+                    {/* Velocímetro SVG Dinámico */}
+                    <div className="py-2 flex items-center justify-center relative z-10">
+                      <svg className="w-36 h-36 sm:w-40 sm:h-40 -rotate-90 transform drop-shadow-2xl" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#f59e0b" strokeWidth="8" strokeDasharray="283" strokeDashoffset={strokeOffset} className="transition-all duration-500 ease-out" />
+                      </svg>
+                      <div className="absolute flex flex-col items-center">
+                        <span className="text-3xl sm:text-4xl font-black text-amber-500">{porcentaje}%</span>
+                        <span className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mt-1">Aforo Adentro</span>
+                      </div>
+                    </div>
 
-                <div className="mt-auto relative w-full aspect-square md:aspect-[4/3] bg-slate-900 dark:bg-[#0a0a0a] rounded-3xl border border-slate-800 dark:border-white/5 shadow-inner overflow-hidden flex flex-col p-8 transition-colors">
-                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
-                  
-                  <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-4 relative z-10">
-                     <div>
-                       <p className="text-amber-500 font-black text-[10px] uppercase tracking-widest flex items-center"><Scan size={14} className="mr-2"/> Radar</p>
-                       <h3 className="text-white font-editorial text-2xl font-bold mt-1">Gala Diamante</h3>
-                     </div>
-                     <div className="text-right">
-                       <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest">Ingresos</p>
-                       <p className="text-white font-black text-2xl">184 / 200</p>
-                     </div>
+                    {/* Notificación en vivo del último brazalete escaneado */}
+                    <div key={radarCount} className="mt-5 bg-white/[0.06] backdrop-blur-md p-3.5 rounded-2xl border border-emerald-500/30 flex items-center justify-between gap-3 relative z-10 animate-in zoom-in-95 duration-200">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 shrink-0 shadow-md">
+                          <CheckCircle size={18} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-white font-bold text-xs sm:text-sm truncate">{guestActual.nombre}</p>
+                          <p className="text-emerald-400 text-[9px] font-black uppercase tracking-widest mt-0.5 truncate">
+                            ✓ Brazalete 2.5cm Verificado • {guestActual.mesa}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[8px] font-bold text-slate-400 uppercase shrink-0">{guestActual.hora}</span>
+                    </div>
                   </div>
+                );
+              })()}
+            </RevealSection>
 
-                  <div className="flex-1 flex items-center justify-center relative z-10 group-hover:scale-105 transition-transform duration-700">
-                     <svg className="w-40 h-40 -rotate-90 transform drop-shadow-2xl" viewBox="0 0 100 100">
-                         <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
-                         <circle cx="50" cy="50" r="45" fill="none" stroke="#f59e0b" strokeWidth="8" strokeDasharray="283" strokeDashoffset="25" />
-                     </svg>
-                     <div className="absolute flex flex-col items-center">
-                         <span className="text-4xl font-black text-amber-500 drop-shadow-lg">92%</span>
-                         <span className="text-[9px] uppercase tracking-widest text-slate-400 font-bold mt-1">Aforo</span>
-                     </div>
-                  </div>
-
-                  <div className="mt-6 bg-white/5 backdrop-blur-sm p-3 rounded-2xl border border-white/10 flex items-center gap-4 relative z-10 transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                     <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-slate-900 shrink-0">
-                       <CheckCircle size={16} />
-                     </div>
-                     <div>
-                       <p className="text-white font-bold text-xs">Familia Garza</p>
-                       <p className="text-emerald-400 text-[9px] font-bold uppercase tracking-widest mt-0.5">Acceso Concedido • VIP</p>
-                     </div>
-                  </div>
-                </div>
-
-              </RevealSection>
-            </div>
-
-         </div>
+          </div>
+        </div>
       </section>
 
       {/* ========================================== */}

@@ -1,5 +1,5 @@
 git add .
-git commit -m "paso 3 ver planes y lista comparativa"
+git commit -m "paso 4 rediseño seccion social y label"
 git push origin main
 
 .
