@@ -12057,14 +12057,25 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [acomodoSimulated, setAcomodoSimulated] = useState(false);
   const [demoTagsActivas, setDemoTagsActivas] = useState(['Primos', 'Amigos']);
   const [croquisDemoMesas, setCroquisDemoMesas] = useState([
-    { id: 1, nombre: 'Mesa 1 VIP', tipo: 'redonda', cap: 10, ocupadas: 10 },
-    { id: 2, nombre: 'Mesa 2', tipo: 'redonda', cap: 10, ocupadas: 7 },
-    { id: 3, nombre: 'Mesa 3', tipo: 'tablon', cap: 10, ocupadas: 8 }
+    { id: 1, nombre: 'Mesa 1', tipo: 'redonda', cap: 10, ocupadas: 10, x: 20, y: 34 },
+    { id: 2, nombre: 'Mesa 2', tipo: 'redonda', cap: 10, ocupadas: 7, x: 80, y: 34 },
+    { id: 3, nombre: 'Mesa 3', tipo: 'tablon', cap: 10, ocupadas: 8, x: 50, y: 76 }
   ]);
+  const [draggingMesaId, setDraggingMesaId] = useState(null);
+  const croquisCanvasRef = useRef(null);
   const [galeriaDemoEstilo, setGaleriaDemoEstilo] = useState('carrusel'); // 'carrusel' | 'masonry' | 'arcos'
   const [regaloDemoTipo, setRegaloDemoTipo] = useState('sobres'); // 'sobres' | 'tiendas'
   const [clabeDemoCopiada, setClabeDemoCopiada] = useState(false);
   const [gpsDemoActivo, setGpsDemoActivo] = useState(false);
+  const [agendaDemoGuardada, setAgendaDemoGuardada] = useState(false);
+
+  const handleCroquisPointerMove = (e) => {
+    if (!draggingMesaId || !croquisCanvasRef.current) return;
+    const rect = croquisCanvasRef.current.getBoundingClientRect();
+    const relX = Math.max(14, Math.min(86, ((e.clientX - rect.left) / rect.width) * 100));
+    const relY = Math.max(20, Math.min(82, ((e.clientY - rect.top) / rect.height) * 100));
+    setCroquisDemoMesas(prev => prev.map(m => m.id === draggingMesaId ? { ...m, x: relX, y: relY } : m));
+  };
   const [timeLeft, setTimeLeft] = useState({ d: 45, h: 12, m: 30, s: 59 });
   const [accentColor, setAccentColor] = useState('monochrome');
   
@@ -13421,7 +13432,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </div>
           </RevealSection>
 
-          {/* 👑 TARJETA 4 (2 cols): SIMULADOR INTERACTIVO DE CROQUIS 2D CON SILLAS OCUPADAS Y VACÍAS */}
+          {/* 👑 TARJETA 4 (2 cols): SIMULADOR INTERACTIVO DE CROQUIS 2D (ARRASTRA LAS MESAS CON EL DEDO O MOUSE) */}
           <RevealSection delay={250} className="lg:col-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-7 sm:p-9 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden shadow-sm">
             {/* Controles para agregar o quitar mesas en vivo */}
             <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100 dark:border-white/10">
@@ -13431,7 +13442,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   onClick={() => {
                     if (croquisDemoMesas.length < 6) {
                       const nextNum = croquisDemoMesas.length + 1;
-                      setCroquisDemoMesas([...croquisDemoMesas, { id: Date.now(), nombre: `Mesa ${nextNum}`, tipo: 'redonda', cap: 10, ocupadas: 6 }]);
+                      const posPreset = [
+                        { x: 22, y: 74 },
+                        { x: 80, y: 74 },
+                        { x: 50, y: 26 }
+                      ][(nextNum - 4) % 3];
+                      setCroquisDemoMesas([...croquisDemoMesas, { id: Date.now(), nombre: `Mesa ${nextNum}`, tipo: 'redonda', cap: 10, ocupadas: 6, x: posPreset.x, y: posPreset.y }]);
                     }
                   }}
                   className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-400 border border-indigo-200 dark:border-amber-500/20 text-[10px] font-black uppercase tracking-wider hover:scale-105 transition-transform"
@@ -13443,7 +13459,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   onClick={() => {
                     if (croquisDemoMesas.length < 6) {
                       const nextNum = croquisDemoMesas.length + 1;
-                      setCroquisDemoMesas([...croquisDemoMesas, { id: Date.now(), nombre: `Mesa ${nextNum}`, tipo: 'tablon', cap: 10, ocupadas: 8 }]);
+                      const posPreset = [
+                        { x: 80, y: 74 },
+                        { x: 22, y: 74 },
+                        { x: 50, y: 26 }
+                      ][(nextNum - 4) % 3];
+                      setCroquisDemoMesas([...croquisDemoMesas, { id: Date.now(), nombre: `Mesa ${nextNum}`, tipo: 'tablon', cap: 10, ocupadas: 8, x: posPreset.x, y: posPreset.y }]);
                     }
                   }}
                   className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-black uppercase tracking-wider hover:scale-105 transition-transform"
@@ -13462,47 +13483,67 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               </div>
 
               <div className="flex items-center gap-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                <span className="text-amber-500 animate-pulse hidden sm:inline">✋ Arrastra las mesas</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> Ocupada</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 inline-block"></span> Libre</span>
               </div>
             </div>
 
-            {/* Lienzo Arquitectónico 2D Interactivo */}
-            <div className="relative bg-slate-50 dark:bg-[#0d0d0d] rounded-2xl border border-slate-200/80 dark:border-white/10 p-4 min-h-[195px] flex items-center justify-center overflow-hidden" style={{ backgroundImage: 'radial-gradient(rgba(148,163,184,0.25) 1px, transparent 1px)', backgroundSize: '14px 14px' }}>
-              <div className="grid grid-cols-3 gap-4 items-center justify-items-center w-full">
-                {croquisDemoMesas.map((m) => (
-                  <div key={m.id} className="relative flex flex-col items-center justify-center animate-in zoom-in-95 duration-300">
+            {/* Lienzo Arquitectónico 2D con Drag & Drop en Vivo */}
+            <div 
+              ref={croquisCanvasRef}
+              onPointerMove={handleCroquisPointerMove}
+              onPointerUp={() => setDraggingMesaId(null)}
+              onPointerLeave={() => setDraggingMesaId(null)}
+              className="relative bg-slate-50 dark:bg-[#0d0d0d] rounded-2xl border border-slate-200/80 dark:border-white/10 h-[215px] w-full overflow-hidden select-none touch-none" 
+              style={{ backgroundImage: 'radial-gradient(rgba(148,163,184,0.25) 1px, transparent 1px)', backgroundSize: '14px 14px' }}
+            >
+              {/* Pista de Baile Central de Referencia */}
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-20 rounded-xl border border-dashed border-slate-300 dark:border-white/10 bg-white/40 dark:bg-white/[0.02] flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Pista Principal</span>
+                <span className="text-[7px] text-slate-400/70 mt-0.5">Arrastra alrededor</span>
+              </div>
+
+              {croquisDemoMesas.map((m) => {
+                const isDragging = draggingMesaId === m.id;
+                return (
+                  <div
+                    key={m.id}
+                    onPointerDown={(e) => {
+                      e.currentTarget.setPointerCapture(e.pointerId);
+                      setDraggingMesaId(m.id);
+                    }}
+                    style={{ left: `${m.x}%`, top: `${m.y}%`, transform: 'translate(-50%, -50%)' }}
+                    className={`absolute flex flex-col items-center justify-center cursor-grab active:cursor-grabbing transition-shadow ${isDragging ? 'z-30 scale-110 drop-shadow-[0_10px_20px_rgba(245,158,11,0.35)]' : 'z-10 hover:scale-105'}`}
+                  >
                     {m.tipo === 'redonda' ? (
                       <div className="relative w-16 h-16 flex items-center justify-center">
-                        {/* 8 Sillas perimetrales alrededor de la mesa redonda */}
                         {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, sIdx) => {
                           const isOccupied = sIdx < Math.round((m.ocupadas / m.cap) * 8);
                           return (
                             <span
                               key={deg}
-                              style={{ transform: `rotate(${deg}deg) translateY(-27px)` }}
+                              style={{ transform: `rotate(${deg}deg) translateY(-26px)` }}
                               className={`absolute w-2.5 h-2.5 rounded-full border ${isOccupied ? 'bg-amber-500 border-amber-600 shadow-[0_0_6px_rgba(245,158,11,0.5)]' : 'bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-white/10'}`}
                             />
                           );
                         })}
-                        <div className="w-11 h-11 rounded-full bg-white dark:bg-[#1a1a1a] border-2 border-slate-300 dark:border-white/20 shadow-md flex flex-col items-center justify-center">
-                          <span className="text-[8px] font-black text-slate-800 dark:text-white leading-none">{m.nombre.replace(' VIP', '')}</span>
+                        <div className={`w-11 h-11 rounded-full bg-white dark:bg-[#1a1a1a] border-2 ${isDragging ? 'border-amber-500' : 'border-slate-300 dark:border-white/20'} shadow-md flex flex-col items-center justify-center`}>
+                          <span className="text-[8px] font-black text-slate-800 dark:text-white leading-none">{m.nombre}</span>
                           <span className="text-[7px] font-bold text-amber-600 dark:text-amber-400 mt-0.5">{m.ocupadas}/{m.cap}</span>
                         </div>
                       </div>
                     ) : (
-                      <div className="relative w-20 h-16 flex flex-col items-center justify-center">
-                        {/* Sillas superiores del tablón */}
+                      <div className="relative w-20 h-14 flex flex-col items-center justify-center">
                         <div className="flex gap-1.5 mb-1">
                           {[0, 1, 2, 3].map(sIdx => (
                             <span key={sIdx} className={`w-2.5 h-2 rounded-sm ${sIdx < 3 ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`} />
                           ))}
                         </div>
-                        <div className="w-16 h-8 rounded-lg bg-white dark:bg-[#1a1a1a] border-2 border-emerald-500/40 shadow-md flex flex-col items-center justify-center">
+                        <div className={`w-16 h-7 rounded-lg bg-white dark:bg-[#1a1a1a] border-2 ${isDragging ? 'border-emerald-400' : 'border-emerald-500/40'} shadow-md flex flex-col items-center justify-center`}>
                           <span className="text-[8px] font-black text-slate-800 dark:text-white leading-none">{m.nombre}</span>
                           <span className="text-[7px] font-bold text-emerald-600 dark:text-emerald-400">{m.ocupadas}/{m.cap}</span>
                         </div>
-                        {/* Sillas inferiores del tablón */}
                         <div className="flex gap-1.5 mt-1">
                           {[0, 1, 2, 3].map(sIdx => (
                             <span key={sIdx} className={`w-2.5 h-2 rounded-sm ${sIdx < 3 ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`} />
@@ -13511,21 +13552,21 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
 
             <div className="mt-5 pt-3 border-t border-slate-100 dark:border-white/5">
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
-                <LayoutGrid size={18} className="text-amber-500"/> Croquis 2D & Sillas en Tiempo Real
+                <LayoutGrid size={18} className="text-amber-500"/> Croquis 2D Interactivo (¡Mueve las Mesas!)
               </h3>
               <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
-                Agrega mesas redondas, cuadradas, tablones, ovaladas o serpentinas en tu plano 2D y visualiza al instante qué sillas están ocupadas y cuáles siguen libres.
+                Arrastra las mesas con tu cursor o tu dedo para diseñar el plano de tu salón y supervisa en vivo qué sillas están ocupadas y cuáles libres.
               </p>
             </div>
           </RevealSection>
 
-          {/* 👑 TARJETA 5 (2 cols): GALERÍAS FOTOGRÁFICAS INTERACTIVAS (CARRUSEL, MASONRY Y ARCOS) */}
+          {/* 👑 TARJETA 5 (2 cols): GALERÍAS FOTOGRÁFICAS INTERACTIVAS CON MASONRY EDITORIAL ASIMÉTRICO REAL */}
           <RevealSection delay={300} className="lg:col-span-2 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-7 sm:p-9 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100 dark:border-white/10">
               <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
@@ -13550,24 +13591,44 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </div>
 
             {/* Contenedor Dinámico con tus 6 fotos de /demos/cumple_formal/ */}
-            <div className="my-auto min-h-[190px] flex items-center justify-center">
+            <div className="my-auto min-h-[215px] flex items-center justify-center w-full">
               {galeriaDemoEstilo === 'carrusel' && (
                 <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar w-full snap-x snap-mandatory animate-in fade-in duration-300">
                   {[1, 2, 3, 4, 5, 6].map(n => (
-                    <div key={n} className="w-36 h-44 shrink-0 snap-center rounded-2xl overflow-hidden border-2 border-amber-500/30 shadow-md relative group">
+                    <div key={n} className="w-36 h-48 shrink-0 snap-center rounded-2xl overflow-hidden border-2 border-amber-500/30 shadow-md relative group">
                       <img src={`/demos/cumple_formal/foto${n}.jpg`} alt={`Galería Carrusel ${n}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                     </div>
                   ))}
                 </div>
               )}
 
+              {/* 🟢 MASONRY EDITORIAL ASIMÉTRICO REAL (Combina 4 proporciones distintas sin huecos) */}
               {galeriaDemoEstilo === 'masonry' && (
-                <div className="grid grid-cols-3 gap-2.5 w-full animate-in zoom-in-95 duration-300">
-                  {[1, 2, 3, 4, 5, 6].map((n, idx) => (
-                    <div key={n} className={`overflow-hidden rounded-xl border border-slate-200 dark:border-white/10 shadow-sm ${idx % 2 === 0 ? 'h-24' : 'h-20 translate-y-2'}`}>
-                      <img src={`/demos/cumple_formal/foto${n}.jpg`} alt={`Galería Masonry ${n}`} className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-                    </div>
-                  ))}
+                <div className="grid grid-cols-4 grid-rows-3 gap-2.5 w-full h-[215px] animate-in zoom-in-95 duration-300">
+                  {/* Foto 1: Protagonista Grande (2x2) */}
+                  <div className="col-span-2 row-span-2 overflow-hidden rounded-2xl border border-amber-500/30 shadow-md relative group">
+                    <img src="/demos/cumple_formal/foto1.jpg" alt="Masonry Principal" className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                  {/* Foto 2: Columna Vertical Alta (1x3) */}
+                  <div className="col-span-1 row-span-3 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 shadow-md relative group">
+                    <img src="/demos/cumple_formal/foto2.jpg" alt="Masonry Vertical" className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                  {/* Foto 3: Detalle Superior Derecho (1x1) */}
+                  <div className="col-span-1 row-span-1 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm relative group">
+                    <img src="/demos/cumple_formal/foto3.jpg" alt="Masonry Detalle" className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                  {/* Foto 4: Retrato Vertical Inferior Derecho (1x2) */}
+                  <div className="col-span-1 row-span-2 overflow-hidden rounded-2xl border border-amber-500/30 shadow-md relative group">
+                    <img src="/demos/cumple_formal/foto4.jpg" alt="Masonry Retrato" className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                  {/* Foto 5: Encuadre Inferior Izquierdo (1x1) */}
+                  <div className="col-span-1 row-span-1 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm relative group">
+                    <img src="/demos/cumple_formal/foto5.jpg" alt="Masonry Inferior 1" className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                  {/* Foto 6: Encuadre Inferior Central (1x1) */}
+                  <div className="col-span-1 row-span-1 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm relative group">
+                    <img src="/demos/cumple_formal/foto6.jpg" alt="Masonry Inferior 2" className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" />
+                  </div>
                 </div>
               )}
 
@@ -13581,7 +13642,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     { n: 5, shape: 'rounded-full aspect-square' },
                     { n: 6, shape: 'rounded-tr-[2rem] rounded-bl-[2rem] rounded-tl-md rounded-br-md' }
                   ].map(item => (
-                    <div key={item.n} className={`h-28 w-full overflow-hidden border-2 border-[#D4AF37]/60 shadow-md p-0.5 bg-[#FDFBF7] dark:bg-[#111] ${item.shape}`}>
+                    <div key={item.n} className={`h-32 w-full overflow-hidden border-2 border-[#D4AF37]/60 shadow-md p-0.5 bg-[#FDFBF7] dark:bg-[#111] ${item.shape}`}>
                       <img src={`/demos/cumple_formal/foto${item.n}.jpg`} alt={`Galería Formas ${item.n}`} className={`w-full h-full object-cover ${item.shape}`} />
                     </div>
                   ))}
@@ -13594,7 +13655,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 Sesiones Fotográficas con Arquitectura Editorial
               </h3>
               <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
-                Cambia arriba entre <b>Carrusel</b>, <b>Masonry</b> o <b>Arcos y Formas</b>. Tus fotografías lucen con encuadres artísticos dignos de revista.
+                Cambia arriba entre <b>Carrusel</b>, <b>Masonry Asimétrico</b> o <b>Arcos y Formas</b>. Tus fotografías lucen con encuadres artísticos dignos de revista.
               </p>
             </div>
           </RevealSection>
@@ -13621,16 +13682,16 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </div>
 
             {regaloDemoTipo === 'sobres' ? (
-              <div className="my-auto bg-slate-50 dark:bg-[#111] p-3.5 rounded-2xl border border-slate-200/80 dark:border-white/10 text-center animate-in fade-in duration-300">
+              <div className="my-auto bg-slate-50 dark:bg-[#111] p-4 rounded-2xl border border-slate-200/80 dark:border-white/10 text-center animate-in fade-in duration-300">
                 <p className="text-[8px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">BBVA • 0% Comisión</p>
-                <p className="font-mono text-[11px] font-bold text-slate-800 dark:text-white my-1.5">0121 8000 4589 1234 56</p>
+                <p className="font-mono text-[11px] font-bold text-slate-800 dark:text-white my-2">0121 8000 4589 1234 56</p>
                 <button
                   type="button"
                   onClick={() => {
                     setClabeDemoCopiada(true);
                     setTimeout(() => setClabeDemoCopiada(false), 2000);
                   }}
-                  className={`w-full py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${clabeDemoCopiada ? 'bg-emerald-500 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'}`}
+                  className={`w-full py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${clabeDemoCopiada ? 'bg-emerald-500 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'}`}
                 >
                   {clabeDemoCopiada ? '¡CLABE Copiada! ✓' : 'Copiar CLABE (1-Clic)'}
                 </button>
@@ -13662,45 +13723,67 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </div>
           </RevealSection>
 
-          {/* 👑 TARJETA 7 (1 col): RADAR GPS EN VIVO & CALENDARIO .ICS */}
+          {/* 👑 TARJETA 7 (1 col): RADAR GPS EN VIVO + BOTÓN DE AGENDAR EN CALENDARIO (.ICS) */}
           <RevealSection delay={400} className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] p-7 border border-slate-200 dark:border-white/10 flex flex-col justify-between relative overflow-hidden shadow-sm">
-            {/* Mini Mapa Interactivo con Ruta Animada */}
-            <div className="relative h-36 rounded-2xl bg-slate-900 overflow-hidden border border-slate-800 p-3 flex flex-col justify-between">
-              <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)', backgroundSize: '18px 18px' }}></div>
-              
-              {/* Línea de ruta SVG */}
-              <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 200 120">
-                <path
-                  d="M 25 95 Q 80 85, 105 55 T 170 30"
-                  fill="none"
-                  stroke={gpsDemoActivo ? '#10b981' : '#f59e0b'}
-                  strokeWidth="3"
-                  strokeDasharray="6 4"
-                />
-                <circle cx="25" cy="95" r="4" fill="#94a3b8" />
-                <circle cx="170" cy="30" r="6" fill={gpsDemoActivo ? '#10b981' : '#f59e0b'} />
-              </svg>
+            <div className="space-y-2.5 my-auto">
+              {/* Mini Mapa Interactivo con Ruta Animada */}
+              <div className="relative h-32 rounded-2xl bg-slate-900 overflow-hidden border border-slate-800 p-3 flex flex-col justify-between">
+                <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
+                
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 200 120">
+                  <path
+                    d="M 25 90 Q 80 80, 105 50 T 170 26"
+                    fill="none"
+                    stroke={gpsDemoActivo ? '#10b981' : '#f59e0b'}
+                    strokeWidth="3"
+                    strokeDasharray="6 4"
+                  />
+                  <circle cx="25" cy="90" r="4" fill="#94a3b8" />
+                  <circle cx="170" cy="26" r="6" fill={gpsDemoActivo ? '#10b981' : '#f59e0b'} />
+                </svg>
 
-              <div className="relative z-10 flex justify-between items-center">
-                <span className="px-2 py-0.5 rounded bg-black/70 text-[8px] font-black uppercase tracking-widest text-amber-400 border border-white/10">
-                  {gpsDemoActivo ? '🚗 En Ruta • 12 min' : '📍 Hacienda San Gabriel'}
-                </span>
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <div className="relative z-10 flex justify-between items-center">
+                  <span className="px-2 py-0.5 rounded bg-black/70 text-[8px] font-black uppercase tracking-widest text-amber-400 border border-white/10">
+                    {gpsDemoActivo ? '🚗 En Ruta • 12 min' : '📍 Hacienda San Gabriel'}
+                  </span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setGpsDemoActivo(!gpsDemoActivo)}
+                  className="relative z-10 w-full py-1.5 rounded-xl bg-white/95 text-slate-900 font-black text-[9px] uppercase tracking-widest shadow-lg hover:bg-amber-400 transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <MapPin size={11} className="text-rose-500"/> {gpsDemoActivo ? 'Abriendo Apple / Google Maps' : '1. Trazar Ruta GPS'}
+                </button>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setGpsDemoActivo(!gpsDemoActivo)}
-                className="relative z-10 w-full py-2 rounded-xl bg-white/95 text-slate-900 font-black text-[9px] uppercase tracking-widest shadow-lg hover:bg-amber-400 transition-colors flex items-center justify-center gap-1.5"
-              >
-                <MapPin size={11} className="text-rose-500"/> {gpsDemoActivo ? 'Abriendo Apple / Google Maps' : 'Toca para Trazar Ruta GPS'}
-              </button>
+              {/* Widget Interactivo de Agendar en Calendario (.ICS) */}
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#111] border border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-col items-center justify-center shrink-0">
+                    <span className="text-[6px] font-black uppercase text-amber-600 dark:text-amber-400 leading-none">MAY</span>
+                    <span className="text-[11px] font-black text-slate-900 dark:text-white leading-none mt-0.5">23</span>
+                  </div>
+                  <div className="truncate">
+                    <p className="text-[10px] font-bold text-slate-800 dark:text-white truncate">Sábado • 15:00 hrs</p>
+                    <p className="text-[8px] text-slate-400 truncate">iCal / Google Calendar</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAgendaDemoGuardada(!agendaDemoGuardada)}
+                  className={`px-2.5 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-wider shrink-0 transition-all ${agendaDemoGuardada ? 'bg-emerald-500 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:scale-105'}`}
+                >
+                  {agendaDemoGuardada ? '✓ Agendado' : '+ Agendar'}
+                </button>
+              </div>
             </div>
 
             <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">GPS Inteligente y Agenda</h3>
               <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
-                Detecta si tu invitado usa iPhone o Android para abrir su navegador GPS nativo y agendar el día en 1 toque.
+                Abre Apple Maps o Google Maps nativamente según el celular del invitado y agenda el evento en su calendario.
               </p>
             </div>
           </RevealSection>
