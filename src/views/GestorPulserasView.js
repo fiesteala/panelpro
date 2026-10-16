@@ -254,8 +254,8 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     <div className="space-y-6 pb-10 animate-in fade-in duration-500 relative">
       
       {/* 🔴 MODAL DE DATOS DE ENVÍO LOGÍSTICO */}
-      {confirmModal && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-all overflow-y-auto">
+      {confirmModal && createPortal(
+        <div className="fixed inset-0 z-[999999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-all overflow-y-auto">
             <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-xl shadow-2xl p-8 border border-transparent dark:border-white/10 animate-in zoom-in-95 transition-colors my-8">
                 
                 <div className="flex justify-between items-start mb-6">
@@ -338,7 +338,8 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* 🟢 ATELIER PHYGITAL A PANTALLA COMPLETA (MODO INDEPENDIENTE: PULSERAS BLACK LABEL) */}
@@ -616,40 +617,35 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                  <Sparkles size={12}/> Elegir Color / Papel
                </button>
             </div>
-            <form onSubmit={handleSaveDesign} className="p-6 space-y-5">
-              <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-2xl border border-dashed border-slate-300 dark:border-white/20 text-center transition-colors">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 transition-colors">Logo del Evento (Opcional)</p>
-                  {isUploadingLogo ? (
-                      <div className="flex flex-col items-center justify-center py-4">
-                          <Loader2 size={24} className="text-indigo-500 animate-spin mb-2" />
-                          <span className="text-xs font-bold text-slate-500 mt-2 transition-colors">Subiendo...</span>
-                      </div>
-                  ) : designConfig.logoBase64 ? (
-                      <div className="relative inline-block">
-                          <img src={designConfig.logoBase64} alt="Logo Evento" className="h-16 object-contain rounded bg-white p-1 shadow-sm" />
-                          {!isLocked && <button type="button" onClick={removeLogo} className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-1 shadow-md hover:bg-rose-600"><X size={12} /></button>}
-                      </div>
-                  ) : (
-                      <label className={`flex flex-col items-center justify-center cursor-pointer transition-colors ${isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:text-indigo-600 dark:hover:text-amber-500'}`}>
-                          <ImageIcon size={24} className="text-slate-400 mb-2 transition-colors" />
-                          <span className="text-xs font-bold text-slate-600 dark:text-slate-400 transition-colors">Clic para subir imagen</span>
-                          <span className="text-[10px] text-slate-400 mt-1 transition-colors">Sube tu logo y mantendremos la calidad</span>
-                          <input type="file" accept="image/*" onChange={handleLogoUpload} disabled={isLocked} className="hidden" />
-                      </label>
-                  )}
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 transition-colors">Pre-Título</label>
-                    <input type="text" disabled={isLocked} placeholder="Ej. Boda de:" value={designConfig.preTitle || ''} onChange={e=>setDesignConfig({...designConfig, preTitle: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sm font-bold text-slate-800 dark:text-white disabled:opacity-50 transition-colors" />
+            <div className="p-6 space-y-4">
+              <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-2xl border border-slate-100 dark:border-white/5 space-y-3 shadow-inner">
+                <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-white/5">
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Base / Papel</span>
+                  <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase">{activeWristband.name}</span>
+                </div>
+                <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-white/5">
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Tinta</span>
+                  <div className="flex items-center gap-1.5">
+                     <span style={{ backgroundColor: effectiveInk }} className="w-2.5 h-2.5 rounded-full border border-slate-300 shadow-sm"></span>
+                     <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase">{designConfig.pulseraInkColor === '#D4AF37' ? 'Dorado' : designConfig.pulseraInkColor === '#CBD5E1' ? 'Plata' : designConfig.pulseraColorId === 'blanca_atelier' ? 'Tinta Negra' : 'Blanco'}</span>
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 transition-colors">Nombre Principal</label>
-                    <input type="text" disabled={isLocked} required placeholder="Ej. Ana & Carlos" value={designConfig.eventName} onChange={e=>setDesignConfig({...designConfig, eventName: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sm font-bold text-slate-800 dark:text-white disabled:opacity-50 transition-colors" />
+                </div>
+                <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-white/5">
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Tipografía</span>
+                  <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase truncate max-w-[120px]">{activeFont.name}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Textos Impresos</span>
+                  <div className="text-right flex flex-col items-end">
+                     <span className="text-[8px] text-slate-500 uppercase tracking-widest">{designConfig.preTitle || 'SIN PRE-TÍTULO'}</span>
+                     <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase truncate max-w-[130px]">{designConfig.eventName || 'SIN NOMBRE'}</span>
                   </div>
+                </div>
               </div>
-              <button type="submit" disabled={isLocked || isUploadingLogo} className="w-full py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-xs uppercase tracking-widest shadow-md hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors disabled:opacity-30">Guardar Diseño</button>
-            </form>
+              <button type="button" onClick={() => setShowAtelierModal(true)} disabled={isLocked} className="w-full py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-md hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors disabled:opacity-30 flex justify-center items-center gap-2">
+                 <Sparkles size={14}/> {isLocked ? 'Diseño Bloqueado' : 'Modificar en Atelier'}
+              </button>
+            </div>
           </div>
 
           <div className="bg-slate-100 dark:bg-[#111] rounded-3xl p-5 border border-slate-200 dark:border-white/5 shadow-inner transition-colors">

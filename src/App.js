@@ -10062,8 +10062,8 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
       />
 
       {/* 🟢 MODAL DE DIRECCIÓN DE ENVÍO A TALLER */}
-      {showShippingModal && (
-        <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+      {showShippingModal && createPortal(
+        <div className="fixed inset-0 z-[999999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-[#0d0d0d] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 sm:p-8 shadow-2xl text-white max-h-[92vh] overflow-y-auto custom-scrollbar">
             <form onSubmit={handleSendCardOrderToWorkshop} className="space-y-4">
               <div>
@@ -10129,7 +10129,8 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl p-6 overflow-y-auto bg-slate-50/50 dark:bg-transparent custom-scrollbar transition-colors">
