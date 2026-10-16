@@ -1,5 +1,5 @@
 git add .
-git commit -m "paso 4 rediseño seccion social y label"
+git commit -m "Reacomodo landingpage y mejora b2b"
 git push origin main
 
 .

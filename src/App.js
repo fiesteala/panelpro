@@ -14129,7 +14129,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 })}
               </div>
 
-              <button onClick={() => setShowPanelAnatomy(true)} className="mt-8 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
+              <button onClick={() => setShowPanelAnatomy(true)} className="hidden lg:flex mt-8 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all items-center justify-center shadow-xl">
                  Explorar la Bóveda a Fondo <ArrowRight size={18} className="ml-3"/>
               </button>
             </div>
@@ -14510,58 +14510,29 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                               </div>
                             </div>
                           </div>
-                        )}
+                    )}
 
-                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* SECCIÓN B2B: PLANNERS */}
-      <section id="planners" className="py-24 relative z-10 overflow-hidden">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
-          <RevealSection className="bg-slate-900 dark:bg-[#0a0a0a] rounded-[3rem] p-10 md:p-20 border border-slate-800 dark:border-white/10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between shadow-2xl transition-colors duration-700">
-             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/5 dark:bg-white/5 rounded-full  hidden md:block  hidden md:block blur-[100px] pointer-events-none transition-colors duration-700"></div>
-             
-             <div className="md:w-1/2 relative z-10 mb-12 md:mb-0">
-               <span className="text-slate-400 font-bold tracking-widest uppercase text-xs mb-4 block">Alianza B2B</span>
-               <h2 className="text-4xl md:text-5xl font-editorial font-medium text-white mb-6 leading-tight">¿Eres Wedding Planner <br/> o Agencia?</h2>
-               <p className="text-slate-400 text-lg mb-8 font-light leading-relaxed">
-                 Ofrece la Bóveda Baulia a tus clientes bajo <b className="text-white">tu propia marca</b> (White-Label). Tus colores, tu logotipo y gestión multievento para elevar el estatus de tus servicios.
-               </p>
-               <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20soy%20Planner%20y%20quiero%20vender%20Baulia', '_blank')} className="px-8 py-4 bg-white text-slate-900 font-bold rounded-full hover:scale-105 transition-all text-sm uppercase tracking-widest shadow-xl">
-                 Solicitar Licencia Planner
-               </button>
-             </div>
-
-             <div className="md:w-5/12 relative z-10 flex justify-center w-full">
-                <div className="w-full max-w-sm bg-[#050505] rounded-[2rem] border border-white/10 p-8 shadow-2xl transform md:rotate-2 hover:rotate-0 transition-all duration-700">
-                   <div className="flex items-center gap-5 mb-10 border-b border-white/10 pb-6">
-                      <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-white font-serif italic text-xl">E</div>
-                      <div>
-                        <p className="text-white font-bold text-lg leading-tight">Elite Bodas</p>
-                        <p className="text-slate-500 text-[9px] font-bold uppercase tracking-widest">Workspace Pro</p>
-                      </div>
                    </div>
-                   <div className="space-y-4">
-                      <div className="h-10 bg-white/5 rounded-xl border border-white/5 w-full flex items-center px-4"><div className="w-2 h-2 rounded-full bg-white/20 mr-3"></div><div className="h-2 w-24 bg-white/10 rounded-full"></div></div>
-                      <div className="h-10 bg-white/5 rounded-xl border border-white/5 w-4/5 flex items-center px-4"><div className="w-2 h-2 rounded-full bg-white/20 mr-3"></div><div className="h-2 w-16 bg-white/10 rounded-full"></div></div>
-                   </div>
-                </div>
+                 </div>
+               </div>
+
+               {/* Botón al final de la sección en versión móvil */}
+               <div className="mt-6 flex lg:hidden justify-center">
+                 <button type="button" onClick={() => setShowPanelAnatomy(true)} className="w-full sm:w-auto px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-xs uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
+                   Explorar la Bóveda a Fondo <ArrowRight size={16} className="ml-2.5"/>
+                 </button>
+               </div>
              </div>
-          </RevealSection>
-        </div>
-      </section>
+           </div>
+
+         </div>
+       </div>
+     </section>
 
       {/* ========================================== */}
-      {/* 🔴 PASO 4A: BAULIA SOCIAL WALL (PROYECTOR INTERACTIVO EN PRIMER PLANO + LLUVIA DE CORAZONES + COMENTARIOS) */}
+      {/* 🔴 PASO 4A: BAULIA SOCIAL WALL (DISEÑO DESPEJADO Y PULIDO EN MÓVIL Y ESCRITORIO) */}
       {/* ========================================== */}
-      <section id="muro-social" className="py-28 bg-indigo-50/70 dark:bg-[#07070b] relative overflow-hidden transition-colors duration-700 border-t border-indigo-200/70 dark:border-white/5">
+      <section id="muro-social" className="py-24 sm:py-28 bg-indigo-50/70 dark:bg-[#07070b] relative overflow-hidden transition-colors duration-700 border-t border-indigo-200/70 dark:border-white/5">
         <style>{`
           @keyframes bauliaHeartFloat {
             0% { transform: translateY(0) scale(0.6) rotate(0deg); opacity: 1; }
@@ -14573,12 +14544,12 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 flex flex-col items-center">
             
-          {/* CABECERA ORIENTADA A LA DIVERSIÓN, MODOS DE ACCESO Y ENTREGA VIP */}
-          <RevealSection className="text-center mb-12 max-w-3xl">
-            <div className="inline-flex flex-wrap items-center justify-center gap-2 bg-white/90 dark:bg-[#111]/90 backdrop-blur-md px-5 py-2 rounded-full border border-indigo-200 dark:border-indigo-500/30 shadow-sm mb-6">
-              <Gem size={16} className="text-amber-500 shrink-0" />
-              <span className="text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-[0.18em] text-[9px] sm:text-[10px]">
-                Incluido en Plan Diamante • Caja VIP a Domicilio Sin Costo
+          {/* CABECERA CON INSIGNIA ESTILIZADA EN UN SOLO RENGLÓN */}
+          <RevealSection className="text-center mb-10 sm:mb-12 max-w-3xl">
+            <div className="inline-flex items-center gap-2 bg-white/90 dark:bg-[#111]/90 backdrop-blur-md px-4 py-2 rounded-full border border-indigo-200 dark:border-indigo-500/30 shadow-sm mb-5">
+              <Gem size={14} className="text-amber-500 shrink-0" />
+              <span className="text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-[0.2em] text-[9px] sm:text-[10px] whitespace-nowrap">
+                Incluido en el Plan Diamante
               </span>
             </div>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-editorial font-medium text-indigo-950 dark:text-white mb-5 tracking-tight leading-tight">
@@ -14590,38 +14561,37 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </p>
           </RevealSection>
 
-          {/* CONSOLA MAESTRA UNIFICADA (Garantiza que ambos lados se sientan parte de lo mismo y el botón de compra quede hasta el final) */}
-          <RevealSection delay={150} className="w-full bg-white/95 dark:bg-[#0d0d12] rounded-[2.5rem] sm:rounded-[3rem] p-5 sm:p-8 md:p-10 border border-indigo-200/80 dark:border-white/10 shadow-2xl">
+          {/* CONSOLA MAESTRA UNIFICADA SOCIAL WALL */}
+          <RevealSection delay={150} className="w-full bg-white/95 dark:bg-[#0d0d12] rounded-[2.2rem] sm:rounded-[3rem] p-4 sm:p-8 md:p-10 border border-indigo-200/80 dark:border-white/10 shadow-2xl">
             
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
               
-              {/* MÓDULO 1 (PRIMERO EN MÓVIL Y ESCRITORIO): PROYECTOR EN VIVO + LLUVIA DE CORAZONES + COMENTARIOS + MODERACIÓN */}
-              <div className="lg:col-span-7 bg-slate-50 dark:bg-[#14141c] rounded-[2rem] p-4 sm:p-7 border border-indigo-100 dark:border-white/10 flex flex-col justify-between">
+              {/* MÓDULO 1: PROYECTOR INTERACTIVO EN VIVO */}
+              <div className="lg:col-span-7 bg-slate-50 dark:bg-[#14141c] rounded-[1.8rem] p-4 sm:p-6 border border-indigo-100 dark:border-white/10 flex flex-col justify-between">
                 <div>
-                  {/* Cabecera del Proyector y Selector Rápido de Fotos */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 mb-4 border-b border-slate-200/80 dark:border-white/10">
+                  {/* Encabezado limpio + Selector de Fotos */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 mb-3.5 border-b border-slate-200/80 dark:border-white/10">
                     <div>
                       <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 block">
-                        1. Pruébalo en Vivo • Proyector y Cabina DJ
+                        Prueba el Software en Vivo
                       </span>
                       <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white">
                         Pantalla Gigante Interactiva
                       </h3>
                     </div>
 
-                    {/* Botones de Fotos pegados al proyector para ver el cambio inmediato en móvil */}
                     <div className="flex items-center gap-1.5">
                       {[1, 2].map(num => (
                         <button
                           key={num}
                           type="button"
                           onClick={() => setSocialFotoActiva(num)}
-                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-wider transition-all ${socialFotoActiva === num ? 'bg-indigo-600 text-white border-indigo-500 shadow-md scale-[1.03]' : 'bg-white dark:bg-black/50 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'}`}
+                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-wider transition-all ${socialFotoActiva === num ? 'bg-indigo-600 text-white border-indigo-500 shadow-md' : 'bg-white dark:bg-black/50 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'}`}
                         >
                           <img 
                             src={`/social${num}.jpg`} 
-                            alt={`Miniatura ${num}`} 
-                            className="w-5 h-5 rounded-md object-cover"
+                            alt={`Foto ${num}`} 
+                            className="w-4 h-4 rounded object-cover"
                             onError={(e) => { e.target.src = '/demos/boda/foto2.jpg'; }}
                           />
                           Foto #{num}
@@ -14630,8 +14600,8 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     </div>
                   </div>
 
-                  {/* Cola de Moderación del DJ (La palomita verde aprueba la siguiente foto sin alterar los likes) */}
-                  <div className="bg-white dark:bg-[#0a0a0f] p-3 rounded-2xl border border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-2 mb-4 shadow-sm">
+                  {/* Cola de Moderación del DJ (Botón debajo en móvil para que el texto luzca amplio y ordenado) */}
+                  <div className="bg-white dark:bg-[#0a0a0f] p-3 rounded-2xl border border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3.5 shadow-sm">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <img 
                         src={socialFotoActiva === 1 ? '/social2.jpg' : '/social1.jpg'} 
@@ -14641,36 +14611,42 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                       />
                       <div className="min-w-0">
                         <span className="text-[8px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 block">
-                          En Cola del DJ • Lista para Proyectar
+                          En Cola del DJ • Lista para proyectar
                         </span>
-                        <p className="text-[11px] sm:text-xs font-bold text-slate-900 dark:text-white truncate">
+                        <p className="text-xs font-bold text-slate-900 dark:text-white leading-snug">
                           {socialFotoActiva === 1 ? 'Foto #2 • Amigos Universidad (Mesa 4)' : 'Foto #1 • Familia Montemayor (Mesa 1)'}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button 
-                        type="button"
-                        onClick={() => setSocialFotoActiva(prev => prev === 1 ? 2 : 1)}
-                        className="px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[9px] sm:text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-sm active:scale-95 transition-all"
-                        title="Aprobar y pasar al proyector"
-                      >
-                        <Check size={14}/> Proyectar
-                      </button>
-                    </div>
+                    <button 
+                      type="button"
+                      onClick={() => setSocialFotoActiva(prev => prev === 1 ? 2 : 1)}
+                      className="w-full sm:w-auto py-2 px-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all shrink-0"
+                    >
+                      <Check size={13}/> Proyectar en pantalla
+                    </button>
                   </div>
                 </div>
 
-                {/* PANTALLA DEL PROYECTOR CON LLUVIA DE CORAZONES AL DAR LIKE */}
-                <div className="relative w-full aspect-video bg-slate-950 rounded-3xl border-4 border-indigo-500/40 shadow-2xl overflow-hidden group select-none">
+                {/* Franja del Reto Activo (Fuera de la foto para no tapar los rostros) */}
+                <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-t-2xl bg-slate-900 text-amber-300 border-x border-t border-indigo-500/30 text-[9px] font-black uppercase tracking-wider">
+                  <span className="truncate">{socialRetoActivo}</span>
+                  <span className="text-emerald-400 flex items-center gap-1 shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> En Vivo
+                  </span>
+                </div>
+
+                {/* PANTALLA DEL PROYECTOR DESPEJADA (La foto luce limpia y completa) */}
+                <div className="relative w-full aspect-[4/3] sm:aspect-video bg-slate-950 rounded-b-2xl border-x-2 border-b-2 border-indigo-500/40 shadow-xl overflow-hidden group select-none">
                   <img 
                     key={socialFotoActiva}
                     src={`/social${socialFotoActiva}.jpg`} 
                     alt="Proyección Social Wall en Vivo" 
-                    className="absolute inset-0 w-full h-full object-cover animate-in fade-in zoom-in-95 duration-500"
+                    className="absolute inset-0 w-full h-full object-cover animate-in fade-in duration-500"
                     onError={(e) => { e.target.src = '/demos/boda/foto2.jpg'; }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/20 to-slate-950/60"></div>
+                  {/* Degradado sutil únicamente en la base para leer el comentario sin tapar la foto */}
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/85 via-black/40 to-transparent pointer-events-none"></div>
 
                   {/* LLUVIA DE CORAZONES EN VIVO */}
                   <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
@@ -14679,7 +14655,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         key={h.id}
                         style={{
                           left: `${h.left}%`,
-                          bottom: '18%',
+                          bottom: '16%',
                           animation: `bauliaHeartFloat 1.5s ease-out ${h.delay}s forwards`
                         }}
                         className="absolute text-2xl sm:text-3xl drop-shadow-[0_4px_10px_rgba(244,63,94,0.6)]"
@@ -14689,49 +14665,37 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     ))}
                   </div>
 
-                  {/* Barra superior dentro del proyector: Reto Activo + Botón de Like con Lluvia */}
-                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-30">
-                    <span className="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-amber-400/40 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-amber-300 truncate">
-                      {socialRetoActivo}
-                    </span>
+                  {/* Botón compacto de Like en la esquina superior derecha */}
+                  <button
+                    type="button"
+                    onClick={dispararLluviaCorazones}
+                    className="absolute top-2.5 right-2.5 z-30 bg-rose-500/95 hover:bg-rose-600 text-white px-3 py-1 rounded-full text-[11px] font-black flex items-center gap-1 shadow-lg active:scale-90 transition-all"
+                  >
+                    <Heart size={12} className="fill-white"/> 
+                    <span>{socialFotosData[socialFotoActiva].likes}</span>
+                    <span className="text-[8px] uppercase tracking-wider ml-0.5">Like</span>
+                  </button>
 
-                    <button
-                      type="button"
-                      onClick={dispararLluviaCorazones}
-                      className="bg-rose-500 hover:bg-rose-600 text-white px-3.5 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 shadow-[0_0_20px_rgba(244,63,94,0.6)] active:scale-90 transition-all shrink-0 animate-pulse"
-                    >
-                      <Heart size={14} className="fill-white"/> 
-                      <span>{socialFotosData[socialFotoActiva].likes}</span>
-                      <span className="text-[9px] uppercase tracking-wider bg-white/20 px-1.5 py-0.5 rounded-full">¡Dar Like!</span>
-                    </button>
-                  </div>
-
-                  {/* Barra inferior dentro del proyector: Autor y Comentario en Pantalla */}
-                  <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3 z-30">
-                    <div className="flex items-center gap-2.5 min-w-0 bg-black/55 backdrop-blur-md p-2.5 rounded-2xl border border-white/15 w-full">
-                      <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center border border-white/30 shrink-0">
-                        #{socialFotoActiva}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-white font-bold text-xs sm:text-sm leading-tight truncate">
-                          {socialFotosData[socialFotoActiva].autor}
-                        </p>
-                        <p className="text-amber-300 text-xs sm:text-sm italic truncate mt-0.5">
-                          "{socialFotosData[socialFotoActiva].comentario}"
-                        </p>
-                      </div>
+                  {/* Comentario limpio al pie de la foto sin cajas invasivas */}
+                  <div className="absolute bottom-2.5 left-3 right-3 z-30 flex items-center justify-between gap-2 text-left">
+                    <div className="min-w-0">
+                      <p className="text-white/90 font-bold text-[10px] sm:text-xs leading-none truncate drop-shadow">
+                        {socialFotosData[socialFotoActiva].autor}
+                      </p>
+                      <p className="text-amber-300 font-medium text-xs sm:text-sm italic truncate mt-0.5 drop-shadow">
+                        "{socialFotosData[socialFotoActiva].comentario}"
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                {/* INTERACCIÓN DEBAJO DEL PROYECTOR: CAMBIAR RETO Y ESCRIBIR COMENTARIO EN VIVO */}
-                <div className="mt-4 space-y-3">
-                  {/* Selector de Retos Divertidos */}
+                {/* Controles debajo del proyector: Cambiar Reto y Comentar */}
+                <div className="mt-3.5 space-y-2.5">
                   <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar py-0.5">
-                    <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 shrink-0 mr-1">Retos en Vivo:</span>
+                    <span className="text-[8.5px] font-black uppercase tracking-wider text-slate-400 shrink-0">Retos:</span>
                     {[
                       '📸 Reto: Selfie de toda la mesa',
-                      '🕺 Reto: El más bailador de la pista',
+                      '🕺 Reto: El más bailador',
                       '🥂 Reto: Brindis con los novios'
                     ].map((reto, idx) => (
                       <button
@@ -14745,39 +14709,37 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     ))}
                   </div>
 
-                  {/* Formulario para Comentar la Foto Activa */}
                   <form onSubmit={enviarComentarioSocial} className="flex items-center gap-2">
                     <input
                       type="text"
                       value={socialNuevoComentario}
                       onChange={(e) => setSocialNuevoComentario(e.target.value)}
-                      placeholder={`Escribe un comentario para la Foto #${socialFotoActiva} y míralo en pantalla...`}
+                      placeholder={`Comentar la Foto #${socialFotoActiva}...`}
                       className="flex-1 min-w-0 bg-white dark:bg-[#09090d] border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:border-indigo-500 outline-none"
                     />
                     <button
                       type="submit"
                       className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-[10px] uppercase tracking-wider shrink-0 shadow-md active:scale-95 transition-transform"
                     >
-                      Comentar
+                      Publicar
                     </button>
                   </form>
                 </div>
               </div>
 
-              {/* MÓDULO 2 (SEGUNDO EN MÓVIL, DERECHA EN ESCRITORIO): TARJETAS DE MESA IMPRESAS + MODO PÚBLICO / PRIVADO */}
-              <div className="lg:col-span-5 bg-slate-50 dark:bg-[#14141c] rounded-[2rem] p-4 sm:p-7 border border-indigo-100 dark:border-white/10 flex flex-col justify-between">
+              {/* MÓDULO 2: TARJETAS DE MESA IMPRESAS + MODO PÚBLICO / PRIVADO */}
+              <div className="lg:col-span-5 bg-slate-50 dark:bg-[#14141c] rounded-[1.8rem] p-4 sm:p-6 border border-indigo-100 dark:border-white/10 flex flex-col justify-between">
                 <div>
-                  <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 mb-4 border-b border-slate-200/80 dark:border-white/10">
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 mb-3.5 border-b border-slate-200/80 dark:border-white/10">
                     <div>
                       <span className="text-[9px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 block">
-                        2. Kit Físico Incluido • Taller Baulia
+                        Kit Físico Incluido • Taller Baulia
                       </span>
                       <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white">
                         Tarjetas para tus Mesas
                       </h3>
                     </div>
 
-                    {/* Selector de acabado de papel */}
                     <div className="flex items-center gap-1 bg-white dark:bg-black/60 p-1 rounded-xl border border-slate-200 dark:border-white/10">
                       {[
                         { id: 'obsidiana', lbl: 'Obsidiana' },
@@ -14796,7 +14758,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     </div>
                   </div>
 
-                  {/* Selector de Modalidad de Privacidad (Público vs Privado con Black Label) */}
+                  {/* Selector de Modalidad de Privacidad */}
                   <div className="mb-4">
                     <div className="grid grid-cols-2 gap-1.5 p-1 bg-white dark:bg-black/50 rounded-xl border border-slate-200 dark:border-white/10">
                       <button
@@ -14817,13 +14779,13 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
                       {socialModoAcceso === 'publico'
                         ? 'En Modo Público, cualquier invitado en su mesa escanea esta tarjeta y sube fotos, likes y comentarios al instante.'
-                        : 'En Modo Privado, el sistema solicita escanear su Pase QR o Pulsera Black Label para identificar con nombre y apellido a quien sube cada foto.'}
+                        : 'En Modo Privado, el sistema solicita escanear su Pase QR o Pulsera Black Label para identificar a quien sube cada foto.'}
                     </p>
                   </div>
 
                   {/* Tarjeta Física Personalizable */}
                   <div className="py-2 flex justify-center">
-                    <div className={`w-full max-w-[240px] rounded-3xl p-5 border-2 shadow-2xl transition-all duration-500 flex flex-col items-center text-center relative ${
+                    <div className={`w-full max-w-[235px] rounded-3xl p-5 border-2 shadow-2xl transition-all duration-500 flex flex-col items-center text-center relative ${
                       socialCardFinish === 'obsidiana'
                         ? 'bg-[#09090d] text-white border-amber-500/40'
                         : socialCardFinish === 'marfil'
@@ -14840,7 +14802,6 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         {socialModoAcceso === 'publico' ? 'Escanea, sube fotos y cumple los retos' : 'Acceso Privado • Valida tu Pase o Pulsera'}
                       </p>
 
-                      {/* QR ÓPTICO BAULIA */}
                       <div className="bg-white p-2.5 rounded-2xl shadow-inner border border-amber-500/30 w-28 h-28 flex items-center justify-center relative">
                         <svg viewBox="0 0 100 100" className="w-full h-full text-slate-900">
                           <rect x="6" y="6" width="26" height="26" rx="5" fill="none" stroke="currentColor" strokeWidth="5"/>
@@ -14873,27 +14834,26 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                   </div>
                 </div>
 
-                {/* Descripción del Kit Impreso en la Tarjeta */}
                 <div className="mt-4 p-3.5 rounded-2xl bg-white dark:bg-black/40 border border-indigo-200/70 dark:border-white/10 flex items-start gap-3">
                   <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 shrink-0 mt-0.5">
                     <Gift size={16}/>
                   </div>
                   <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    <b>Personalización y Envío Gratis:</b> Sube tu logo, nombre y tipo de evento en el panel. Imprimimos las tarjetas para tus mesas en papel de alto gramaje y las enviamos sin costo en nuestra <b>Caja VIP Baulia</b>.
+                    <b>Impresión y Envío Gratis:</b> Personalízalas con tu logo en el panel y recíbelas impresas en papel de alto gramaje dentro de tu <b>Caja VIP Baulia</b>.
                   </p>
                 </div>
               </div>
 
             </div>
 
-            {/* BARRA INFERIOR DE COMPRA UNIFICADA (Siempre al final de la sección en Móvil y Escritorio) */}
-            <div className="mt-8 pt-6 border-t border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* BARRA INFERIOR DE COMPRA CON BOTÓN DIRECTO Y CONCISO */}
+            <div className="mt-7 pt-5 border-t border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-center sm:text-left">
                 <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 block">
-                  Paquete Completo Phygital • Incluye Software + Tarjetas Impresas + Envío Gratis
+                  Software en Vivo + Tarjetas Impresas + Envío Gratis
                 </span>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                  Recibe acceso inmediato al Muro Social en vivo y tu Caja VIP Baulia directo en tu domicilio (sin costo en el <b>Plan Diamante</b>).
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Incluido sin costo al contratar el <b>Plan Diamante</b> o actívalo de forma independiente.
                 </p>
               </div>
               <button 
@@ -14901,7 +14861,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: pSocialWall.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} 
                 className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(79,70,229,0.35)] shrink-0"
               >
-                <Camera size={18} className="mr-2.5 text-white/80 shrink-0" /> Activar Social Wall + Kit VIP (${pSocialWall.precios[moneda]} {moneda})
+                <Camera size={17} className="mr-2 text-white/90 shrink-0" /> Activar por ${pSocialWall.precios[moneda]} {moneda}
               </button>
             </div>
 
@@ -14910,19 +14870,19 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </section>
 
       {/* ========================================== */}
-      {/* 🔴 PASO 4B: BAULIA BLACK LABEL (CONTROL DE ACCESO & BRAZALETES VIP CON BOTÓN DE COMPRA AL FINAL) */}
+      {/* 🔴 PASO 4B: BAULIA BLACK LABEL (DISEÑO DESAHOGADO, ELEGANTE Y CON BOTÓN LIMPIO AL FINAL) */}
       {/* ========================================== */}
-      <section id="black-label" className="py-28 bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white relative overflow-hidden transition-colors duration-700 border-t border-slate-200 dark:border-white/5">
+      <section id="black-label" className="py-24 sm:py-28 bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white relative overflow-hidden transition-colors duration-700 border-t border-slate-200 dark:border-white/5">
         <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[60vw] h-[60vw] bg-amber-500/5 hidden md:block blur-[150px] rounded-full pointer-events-none"></div>
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 flex flex-col items-center">
           
-          {/* CABECERA ENFOCADA EN EL PROBLEMA QUE SOLUCIONA (CERO COLADOS, ACCESO ÁGIL, EXCLUSIVIDAD) */}
-          <RevealSection className="text-center mb-12 max-w-3xl">
-            <div className="inline-flex flex-wrap items-center justify-center gap-2 bg-white/90 dark:bg-[#111]/90 backdrop-blur-md px-5 py-2 rounded-full border border-amber-300 dark:border-amber-500/30 shadow-sm mb-6">
-              <Gem size={16} className="text-amber-500 shrink-0" />
-              <span className="text-amber-700 dark:text-amber-400 font-black uppercase tracking-[0.18em] text-[9px] sm:text-[10px]">
-                Incluido en Plan Diamante • Caja VIP a Domicilio Sin Costo
+          {/* CABECERA CON INSIGNIA ESTILIZADA EN UN SOLO RENGLÓN */}
+          <RevealSection className="text-center mb-10 sm:mb-12 max-w-3xl">
+            <div className="inline-flex items-center gap-2 bg-white/90 dark:bg-[#111]/90 backdrop-blur-md px-4 py-2 rounded-full border border-amber-300 dark:border-amber-500/30 shadow-sm mb-5">
+              <Gem size={14} className="text-amber-500 shrink-0" />
+              <span className="text-amber-700 dark:text-amber-400 font-black uppercase tracking-[0.2em] text-[9px] sm:text-[10px] whitespace-nowrap">
+                Incluido en el Plan Diamante
               </span>
             </div>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white mb-5 tracking-tight leading-tight">
@@ -14934,26 +14894,26 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </p>
           </RevealSection>
 
-          {/* CONSOLA MAESTRA UNIFICADA BLACK LABEL (Con botón de compra único al final) */}
-          <RevealSection delay={150} className="w-full bg-white dark:bg-[#0b0b0b] rounded-[2.5rem] sm:rounded-[3rem] p-5 sm:p-8 md:p-10 border border-slate-200 dark:border-white/10 shadow-2xl">
+          {/* CONSOLA MAESTRA UNIFICADA BLACK LABEL (Espacios amplios y desahogados en móvil) */}
+          <RevealSection delay={150} className="w-full bg-white dark:bg-[#0b0b0b] rounded-[2.2rem] sm:rounded-[3rem] p-4 sm:p-8 md:p-10 border border-slate-200 dark:border-white/10 shadow-2xl">
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-stretch">
               
-              {/* MÓDULO 1: ESPECIFICACIONES DEL PRODUCTO FÍSICO (Brazaletes Tyvek 2.5 cm + Colores + Envío a Domicilio) */}
-              <div className="bg-slate-50 dark:bg-[#121212] rounded-[2rem] p-5 sm:p-7 border border-slate-200/80 dark:border-white/10 flex flex-col justify-between">
+              {/* MÓDULO 1: BRAZALETES VIP PERSONALIZADOS (Sin bordes redundantes que aprieten en móvil) */}
+              <div className="bg-slate-50 dark:bg-[#121212] rounded-[1.8rem] p-4 sm:p-7 border border-slate-200/80 dark:border-white/10 flex flex-col justify-between">
                 <div>
-                  <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-200/80 dark:border-white/10">
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 mb-4 border-b border-slate-200/80 dark:border-white/10">
                     <div>
                       <span className="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 block">
-                        1. El Kit Físico • Taller de Impresión Baulia
+                        1. El Kit Físico • Taller Baulia
                       </span>
-                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                      <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white">
                         Brazaletes VIP Personalizados
                       </h3>
                     </div>
 
-                    {/* Selector de color de pulsera */}
-                    <div className="flex items-center gap-1.5 bg-white dark:bg-black/60 px-2.5 py-1.5 rounded-full border border-slate-200 dark:border-white/10">
+                    {/* Selector de color limpio */}
+                    <div className="flex items-center gap-1.5 bg-white dark:bg-black/60 px-3 py-1.5 rounded-full border border-slate-200 dark:border-white/10">
                       <span className="text-[8px] font-black uppercase tracking-wider text-slate-400 mr-1">Color:</span>
                       {[
                         { id: 'oro', bg: 'bg-gradient-to-tr from-amber-500 to-yellow-300', lbl: 'Oro Imperial' },
@@ -14972,14 +14932,9 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     </div>
                   </div>
 
-                  {/* Simulador del Brazalete Tyvek de 2.5 cm */}
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 px-1">
-                      <span>Brazalete Tyvek de 2.5 cm de Ancho</span>
-                      <span className="text-amber-500">*Color sujeto a disponibilidad</span>
-                    </div>
-
-                    <div className={`w-full rounded-2xl p-3 sm:p-4 border-2 shadow-xl transition-all duration-500 flex items-center justify-between gap-2 sm:gap-4 relative overflow-hidden ${
+                  {/* Brazalete Tyvek con espacio completo para que el nombre nunca se corte */}
+                  <div className="mb-5">
+                    <div className={`w-full rounded-2xl p-3.5 sm:p-4 border-2 shadow-xl transition-all duration-500 flex items-center justify-between gap-3 relative overflow-hidden ${
                       pulseraColor === 'oro'
                         ? 'bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-slate-950 border-amber-300'
                         : pulseraColor === 'negro'
@@ -14988,15 +14943,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         ? 'bg-gradient-to-r from-slate-300 via-white to-slate-300 text-slate-900 border-slate-400'
                         : 'bg-gradient-to-r from-[#e8a598] via-[#fce4df] to-[#d88a9b] text-slate-900 border-rose-300'
                     }`}>
-                      <div className="w-5 sm:w-7 self-stretch border-r-2 border-dashed border-current/30 flex flex-col items-center justify-center opacity-60 shrink-0">
-                        <span className="text-[6px] font-black uppercase -rotate-90 tracking-widest whitespace-nowrap">TYVEK 2.5CM</span>
-                      </div>
-
-                      <div className="flex-1 min-w-0 text-left">
-                        <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-[0.22em] opacity-75 block truncate">
-                          BAULIA BLACK LABEL • PASE INTRANSFERIBLE
+                      <div className="flex-1 min-w-0 text-left pl-1">
+                        <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-[0.18em] opacity-75 block">
+                          BAULIA BLACK LABEL • TYVEK 2.5 CM
                         </span>
-                        <h4 className="font-editorial font-bold text-base sm:text-xl leading-none truncate mt-0.5">
+                        <h4 className="font-editorial font-bold text-lg sm:text-2xl leading-tight mt-0.5">
                           Sofía & Alejandro
                         </h4>
                         <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
@@ -15010,7 +14961,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                       </div>
 
                       {/* Macro QR Óptico */}
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl p-1.5 shadow-md border border-slate-900/20 shrink-0 flex flex-col items-center justify-center">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl p-1.5 shadow-md border border-slate-900/20 shrink-0 flex items-center justify-center">
                         <svg viewBox="0 0 100 100" className="w-full h-full text-slate-950">
                           <rect x="5" y="5" width="30" height="30" rx="6" fill="none" stroke="currentColor" strokeWidth="7"/>
                           <rect x="14" y="14" width="12" height="12" rx="2" fill="currentColor"/>
@@ -15035,115 +14986,117 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                         </svg>
                       </div>
                     </div>
+                    <p className="text-[9px] text-slate-400 text-right mt-1.5 italic">*Tono de pulsera sujeto a disponibilidad.</p>
                   </div>
                 </div>
 
-                {/* Fotografía Local /pulsera.jpg + Descripción de Medidas e Impresión */}
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-center bg-white dark:bg-[#09090b] p-3.5 rounded-2xl border border-slate-200/80 dark:border-white/10 mt-auto">
-                  <div className="sm:col-span-5 h-36 sm:h-40 rounded-xl overflow-hidden border border-amber-500/30 relative bg-slate-900">
+                {/* Imagen /pulsera.jpg y descripción sin doble marco apretado */}
+                <div className="flex flex-col sm:flex-row items-center gap-4 pt-2 border-t border-slate-200/60 dark:border-white/5 mt-auto">
+                  <div className="w-full sm:w-44 h-40 sm:h-36 rounded-2xl overflow-hidden border border-amber-500/30 relative bg-slate-900 shrink-0">
                     <img 
                       src="/pulsera.jpg" 
                       alt="Pulsera Tyvek Baulia Black Label" 
                       className="w-full h-full object-cover"
                       onError={(e) => { e.target.src = '/demos/boda/foto4.jpg'; }}
                     />
-                    <span className="absolute bottom-2 left-2 bg-black/80 backdrop-blur-md text-amber-400 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-amber-500/30">
+                    <span className="absolute bottom-2 left-2 bg-black/80 backdrop-blur-md text-amber-400 text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border border-amber-500/30">
                       Caja VIP Incluida
                     </span>
                   </div>
-                  <div className="sm:col-span-7 space-y-2 text-left">
-                    <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                      <CheckCircle size={13}/> Especificaciones & Doble Garantía
-                    </div>
+                  <div className="space-y-1.5 text-left">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                      <CheckCircle size={13}/> Impresión + Respaldo PDF
+                    </span>
                     <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                      <b>• Brazaletes Tyvek de 2.5 cm:</b> Personalízalos con tu logo, nombre y tipo de evento. Nuestro taller los imprime con un <b>QR macro de enfoque rápido</b> y los envía a tu domicilio.<br/>
-                      <b>• Respaldo de Último Minuto:</b> ¿Confirmados un día antes? También incluye botón de exportación PDF vectorial inmediata.
+                      Fabricamos tus brazaletes Tyvek de <b>2.5 cm resistentes al agua</b> con tu logo y los enviamos gratis a tu puerta. ¿Invitados de último minuto? También incluye exportación PDF inmediata.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* MÓDULO 2: TU CELULAR SE CONVIERTE EN EL ESCÁNER + RADAR EN VIVO */}
-              <div className="bg-slate-50 dark:bg-[#121212] rounded-[2rem] p-5 sm:p-7 border border-slate-200/80 dark:border-white/10 flex flex-col justify-between">
+              {/* MÓDULO 2: ESCÁNER Y MONITOR EN VIVO (Diseño limpio y espacioso) */}
+              <div className="bg-slate-50 dark:bg-[#121212] rounded-[1.8rem] p-4 sm:p-7 border border-slate-200/80 dark:border-white/10 flex flex-col justify-between">
                 <div>
-                  <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-200/80 dark:border-white/10">
-                    <div>
-                      <span className="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 block">
-                        2. Sin Equipos Costosos • Cero Apps
-                      </span>
-                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-                        Escáner Nocturno & Radar en Vivo
-                      </h3>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setRadarCount(c => c < 200 ? c + 1 : 184);
-                        setRadarGuestIdx(i => (i + 1) % 4);
-                      }}
-                      className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1.5"
-                    >
-                      <Scan size={13}/> + Escanear Brazalete
-                    </button>
+                  <div className="pb-3.5 mb-3.5 border-b border-slate-200/80 dark:border-white/10">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 block">
+                      2. Sin Equipos Costosos • Cero Apps
+                    </span>
+                    <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white">
+                      Escáner y Monitor en Vivo
+                    </h3>
                   </div>
 
-                  <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed mb-5">
-                    Convierte tu teléfono, el del <b>cadenero o el de quien recibe en la puerta en un lector óptico ultra-rápido incluso de noche</b>, sincronizado en la nube sin instalar aplicaciones. Presiona <b>"+ Escanear Brazalete"</b> arriba para probar cómo se acredita el ingreso y la mesa al instante:
+                  <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed mb-4">
+                    Convierte tu teléfono, el del <b>cadenero o el de tu Hostess en un lector óptico ultra-rápido incluso de noche</b>, sincronizado en tiempo real sin instalar aplicaciones.
                   </p>
                 </div>
 
-                {/* Consola de Radar Interactiva */}
+                {/* Consola de Radar Espaciosa y Ordenada */}
                 {(() => {
                   const porcentaje = Math.round((radarCount / 200) * 100);
                   const strokeOffset = Math.round(283 - (283 * porcentaje) / 100);
                   const invitadosDemo = [
-                    { nombre: 'Familia Garza Villarreal', mesa: 'Mesa 1 • VIP', hora: 'Hace 2 seg' },
-                    { nombre: 'Alejandro Montemayor', mesa: 'Mesa 2 • Honor', hora: 'Justo ahora' },
-                    { nombre: 'Sofía Elizondo & Esposo', mesa: 'Mesa 4 • Amigos', hora: 'Justo ahora' },
-                    { nombre: 'Mesa Directiva Corporativa', mesa: 'Mesa 1 • Presídium', hora: 'Justo ahora' }
+                    { nombre: 'Familia Garza Villarreal', mesa: 'Mesa 1 • VIP' },
+                    { nombre: 'Alejandro Montemayor', mesa: 'Mesa 2 • Honor' },
+                    { nombre: 'Sofía Elizondo & Esposo', mesa: 'Mesa 4 • Amigos' },
+                    { nombre: 'Mesa Directiva Corporativa', mesa: 'Mesa 1 • Presídium' }
                   ];
                   const guestActual = invitadosDemo[radarGuestIdx];
 
                   return (
-                    <div className="mt-auto relative w-full bg-slate-950 rounded-3xl border border-slate-800 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col p-5 sm:p-6">
-                      <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3.5 relative z-10">
+                    <div className="mt-auto w-full bg-slate-950 rounded-3xl border border-slate-800 dark:border-white/10 shadow-xl p-5 flex flex-col justify-between gap-4">
+                      
+                      {/* Fila Superior: Estado y Botón de Simulación bien separados */}
+                      <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3.5">
                         <div>
-                          <p className="text-amber-500 font-black text-[9px] uppercase tracking-widest flex items-center">
-                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-2"></span> Lector Óptico Sincronizado
+                          <span className="text-emerald-400 font-black text-[8px] uppercase tracking-widest flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Puerta Principal
+                          </span>
+                          <p className="text-white font-bold text-sm sm:text-base mt-0.5">
+                            {radarCount} <span className="text-slate-500 text-xs font-normal">/ 200 ingresos</span>
                           </p>
-                          <h4 className="text-white font-editorial text-2xl font-bold mt-0.5">Recepción Principal</h4>
                         </div>
-                        <div className="text-right">
-                          <p className="text-slate-400 font-black text-[9px] uppercase tracking-widest">Entradas Validadas</p>
-                          <p className="text-white font-black text-2xl">{radarCount} <span className="text-slate-500 text-base">/ 200</span></p>
-                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRadarCount(c => c < 200 ? c + 1 : 184);
+                            setRadarGuestIdx(i => (i + 1) % 4);
+                          }}
+                          className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[9.5px] uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+                        >
+                          <Scan size={13}/> + Escanear
+                        </button>
                       </div>
 
-                      <div className="py-1 flex items-center justify-center relative z-10">
-                        <svg className="w-32 h-32 sm:w-36 sm:h-36 -rotate-90 transform drop-shadow-2xl" viewBox="0 0 100 100">
-                          <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
-                          <circle cx="50" cy="50" r="45" fill="none" stroke="#f59e0b" strokeWidth="8" strokeDasharray="283" strokeDashoffset={strokeOffset} className="transition-all duration-500 ease-out" />
-                        </svg>
-                        <div className="absolute flex flex-col items-center">
-                          <span className="text-3xl sm:text-4xl font-black text-amber-500">{porcentaje}%</span>
-                          <span className="text-[8px] uppercase tracking-widest text-slate-400 font-bold mt-1">Aforo Adentro</span>
+                      {/* Centro: Velocímetro e Invitado Verificado lado a lado en escritorio y limpios en móvil */}
+                      <div className="flex flex-col sm:flex-row items-center justify-around gap-4 py-1">
+                        <div className="relative flex items-center justify-center shrink-0">
+                          <svg className="w-28 h-28 sm:w-32 sm:h-32 -rotate-90 transform" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="#f59e0b" strokeWidth="8" strokeDasharray="283" strokeDashoffset={strokeOffset} className="transition-all duration-500 ease-out" />
+                          </svg>
+                          <div className="absolute flex flex-col items-center">
+                            <span className="text-2xl sm:text-3xl font-black text-amber-500 leading-none">{porcentaje}%</span>
+                            <span className="text-[7px] uppercase tracking-widest text-slate-400 font-bold mt-1">Aforo</span>
+                          </div>
                         </div>
-                      </div>
 
-                      <div key={radarCount} className="mt-4 bg-white/[0.06] backdrop-blur-md p-3.5 rounded-2xl border border-emerald-500/30 flex items-center justify-between gap-3 relative z-10 animate-in zoom-in-95 duration-200">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 shrink-0 shadow-md">
+                        {/* Tarjeta del invitado recién escaneado */}
+                        <div key={radarCount} className="w-full sm:flex-1 bg-white/[0.05] p-3.5 rounded-2xl border border-emerald-500/30 flex items-center gap-3 animate-in zoom-in-95 duration-200">
+                          <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 shrink-0">
                             <CheckCircle size={18} />
                           </div>
-                          <div className="min-w-0">
-                            <p className="text-white font-bold text-xs sm:text-sm truncate">{guestActual.nombre}</p>
-                            <p className="text-emerald-400 text-[9px] font-black uppercase tracking-widest mt-0.5 truncate">
-                              ✓ Acceso Concedido • Dirigir a {guestActual.mesa}
-                            </p>
+                          <div className="min-w-0 text-left">
+                            <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400 block">
+                              ✓ Acceso Concedido
+                            </span>
+                            <p className="text-white font-bold text-xs sm:text-sm truncate mt-0.5">{guestActual.nombre}</p>
+                            <p className="text-amber-400 text-[10px] font-bold mt-0.5">{guestActual.mesa}</p>
                           </div>
                         </div>
-                        <span className="text-[8px] font-bold text-slate-400 uppercase shrink-0">{guestActual.hora}</span>
                       </div>
+
                     </div>
                   );
                 })()}
@@ -15151,14 +15104,14 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
             </div>
 
-            {/* BARRA INFERIOR DE COMPRA UNIFICADA (Siempre al final de la sección en Móvil y Escritorio) */}
-            <div className="mt-8 pt-6 border-t border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* BARRA INFERIOR DE COMPRA CON BOTÓN DIRECTO Y CONCISO */}
+            <div className="mt-7 pt-5 border-t border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-center sm:text-left">
                 <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 block">
-                  Paquete Completo Black Label • Software de Escaneo + Brazaletes Impresos + Envío Gratis
+                  Software de Escaneo + Brazaletes Impresos + Envío Gratis
                 </span>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                  Recibe tu sistema de control de acceso y tu Caja VIP de colección en la puerta de tu casa (incluido sin costo en el <b>Plan Diamante</b>).
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Incluido sin costo al contratar el <b>Plan Diamante</b> o actívalo de forma independiente.
                 </p>
               </div>
               <button 
@@ -15166,7 +15119,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                 onClick={() => { setPlanSeleccionado({ plan: 'Black Label', precio: pBlackLabel.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} 
                 className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(245,158,11,0.35)] shrink-0"
               >
-                <Printer size={18} className="mr-2.5 text-slate-950/80 shrink-0" /> Activar Black Label + Kit VIP (${pBlackLabel.precios[moneda]} {moneda})
+                <Printer size={17} className="mr-2 text-slate-950/90 shrink-0" /> Activar por ${pBlackLabel.precios[moneda]} {moneda}
               </button>
             </div>
 
@@ -15552,31 +15505,158 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         )}
       </div>
 
-      {/* PREGUNTAS FRECUENTES (FAQ) */}
+      {/* ========================================== */}
+      {/* 🟢 SECCIÓN B2B RENOVADA: WEDDING PLANNERS Y AGENCIAS (Ubicada después de los precios) */}
+      {/* ========================================== */}
+      <section id="planners" className="py-20 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
+        <RevealSection className="bg-slate-900 dark:bg-[#0a0a0a] rounded-[2.5rem] sm:rounded-[3rem] p-7 sm:p-12 md:p-16 border border-slate-800 dark:border-amber-500/20 relative overflow-hidden shadow-2xl">
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-500/10 hidden md:block blur-[100px] rounded-full pointer-events-none"></div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center relative z-10">
+            <div className="lg:col-span-7 text-left">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] mb-5">
+                <Gem size={13}/> Programa Partner B2B • Marca Blanca
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-editorial font-medium text-white mb-4 leading-tight">
+                ¿Eres Wedding Planner, Salón o Agencia de Eventos?
+              </h2>
+              <p className="text-slate-300 text-sm sm:text-base font-light leading-relaxed mb-6">
+                Diferénciate de tu competencia entregando a tus clientes una <b>Bóveda de Control e Invitaciones bajo tu propia marca (White-Label)</b>. Tu logotipo, tus colores corporativos, precios preferenciales de socio y un panel maestro para administrar múltiples bodas y eventos en simultáneo.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-7">
+                {[
+                  { t: 'Tu Propia Marca', d: 'Tus novios ven el logotipo y sello de tu agencia en su panel.' },
+                  { t: 'Control Multievento', d: 'Supervisa listas, croquis 2D y recepciones QR desde una sola cuenta.' },
+                  { t: 'Margen Preferencial', d: 'Tarifas exclusivas para Planners y prioridad en Taller de Impresión.' }
+                ].map((item, i) => (
+                  <div key={i} className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10">
+                    <h4 className="text-amber-400 font-bold text-xs mb-1">{item.t}</h4>
+                    <p className="text-slate-400 text-[11px] leading-relaxed">{item.d}</p>
+                  </div>
+                ))}
+              </div>
+
+              <button 
+                type="button"
+                onClick={() => window.open('https://wa.me/529222107575?text=Hola,%20soy%20Wedding%20Planner%20/%20Agencia%20y%20quiero%20información%20del%20Programa%20Partner%20Baulia', '_blank')} 
+                className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-amber-400 text-slate-950 font-black rounded-2xl transition-all text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-2"
+              >
+                Solicitar Alianzas y Precios Partner <ArrowRight size={15}/>
+              </button>
+            </div>
+
+            {/* Tarjeta Visual del Workspace Pro para Planners */}
+            <div className="lg:col-span-5 w-full">
+              <div className="bg-[#050505] rounded-[2rem] border border-white/10 p-6 sm:p-7 shadow-2xl">
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-slate-950 font-editorial font-bold text-xl shadow-md">
+                      E
+                    </div>
+                    <div>
+                      <p className="text-white font-bold text-sm sm:text-base leading-tight">Elite Planners Studio</p>
+                      <p className="text-amber-400 text-[9px] font-black uppercase tracking-widest mt-0.5">Panel Maestro White-Label</p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-[8px] font-black uppercase tracking-wider border border-emerald-500/30">
+                    Partner Activo
+                  </span>
+                </div>
+
+                <div className="space-y-2.5">
+                  {[
+                    { ev: 'Boda Sofía & Alejandro', fec: '23 Mayo • 240 Pases', st: 'Croquis 2D Listo' },
+                    { ev: 'XV Años Valentina', fec: '14 Junio • 180 Pases', st: 'Kit VIP Enviado' },
+                    { ev: 'Gala Anual Corporativa', fec: '08 Julio • 400 Pases', st: 'RSVP Activo' }
+                  ].map((row, idx) => (
+                    <div key={idx} className="p-3 rounded-xl bg-white/[0.04] border border-white/5 flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-white font-bold text-xs truncate">{row.ev}</p>
+                        <p className="text-slate-400 text-[10px]">{row.fec}</p>
+                      </div>
+                      <span className="text-[8px] font-black uppercase tracking-wider px-2 py-1 rounded-md bg-amber-500/15 text-amber-300 shrink-0">
+                        {row.st}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </RevealSection>
+      </section>
+
+      {/* ========================================== */}
+      {/* 🟢 PREGUNTAS FRECUENTES (FAQ AMPLIADO Y ESTRATÉGICO) */}
+      {/* ========================================== */}
       <section id="faq" className="py-24 px-4 md:px-8 max-w-4xl mx-auto relative z-10">
-         <RevealSection className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-editorial font-medium text-slate-900 dark:text-white mb-4 transition-colors">Dudas Frecuentes</h2>
-         </RevealSection>
-         <div className="space-y-2">
-            {[
-               { q: '¿Mis invitados tienen que descargar alguna App?', a: 'No, cero descargas. Todo fluye mágicamente desde el navegador de cualquier celular inteligente (Safari o Chrome).' },
-               { q: '¿Qué significa que el pase QR es estricto en el Plan Oro?', a: 'Si asignas 2 pases a una familia, el sistema solo generará un QR válido para 2 escaneos exactos en la puerta. Adiós invitados sorpresa.' },
-               { q: '¿Por cuánto tiempo tendré acceso a mi bóveda?', a: 'Tendrás acceso total desde tu compra hasta 30 días después de tu evento, tiempo perfecto para descargar tus fotos y reportes.' },
-               { q: '¿Soy Planner, puedo usar este panel para mis novias?', a: '¡Absolutamente! Contamos con alianzas B2B. Te entregamos la bóveda bajo el nombre y colores de tu propia agencia.' }
-            ].map((faq, idx) => (
-               <RevealSection key={idx} delay={idx * 100}>
-                 <details className="group bg-transparent border-b border-slate-200 dark:border-white/10 py-6 transition-colors duration-300 cursor-pointer">
-                   <summary className="font-bold text-base text-slate-800 dark:text-white list-none flex justify-between items-center select-none outline-none transition-colors">
-                     {faq.q}
-                     <span className="text-slate-400 group-open:rotate-45 transition-transform duration-300"><Plus size={20} /></span>
-                   </summary>
-                   <p className="mt-4 text-slate-500 dark:text-slate-400 leading-relaxed text-sm font-light animate-in fade-in transition-colors pr-8">
-                     {faq.a}
-                   </p>
-                 </details>
-               </RevealSection>
-            ))}
-         </div>
+        <RevealSection className="text-center mb-14">
+          <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-3 block">
+            Transparencia Total
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-editorial font-medium text-slate-900 dark:text-white mb-4 transition-colors">
+            Dudas Frecuentes
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base font-light max-w-xl mx-auto">
+            Todo lo que necesitas saber sobre el diseño de tu invitación, tu Bóveda Privada y el envío de tu Caja VIP.
+          </p>
+        </RevealSection>
+
+        <div className="space-y-2">
+          {[
+            { 
+              q: '¿Mis invitados o mi staff tienen que descargar alguna aplicación?', 
+              a: 'No, cero descargas. Tanto tu invitación interactiva como el Muro Social y el Escáner QR de recepción funcionan al instante desde el navegador de cualquier celular (Safari en iPhone o Chrome en Android).' 
+            },
+            { 
+              q: '¿Puedo contratar hoy aunque aún no tenga todas mis fotos o mi lista final de invitados?', 
+              a: '¡Sí! De hecho es lo más recomendable para asegurar tu promoción vigente. Al reservar recibes las llaves de tu Bóveda Privada de inmediato y puedes ir cargando o modificando tus fotografías, horarios, ubicaciones GPS y lista de invitados a tu propio ritmo.' 
+            },
+            { 
+              q: '¿Cómo funciona el envío gratis de la Caja VIP en Social Wall y Black Label?', 
+              a: 'Una vez que personalizas tus tarjetas de mesa o tus brazaletes Tyvek dentro de tu panel (con tu logotipo, nombre del evento y color elegido), presionas "Enviar a Taller Baulia". Nosotros absorbemos el costo de impresión, empaque en nuestra Caja VIP de colección y el envío directo a tu domicilio dentro de México. Además, siempre cuentas con el botón de descarga en PDF vectorial por si necesitas imprimir pases de último minuto.' 
+            },
+            { 
+              q: '¿Cómo evita Baulia los colados el día del evento?', 
+              a: 'A partir del Plan Oro, cada invitación es única y está blindada. Si asignas 4 lugares a la Familia Montemayor, el sistema genera únicamente 4 códigos QR encriptados con su número de mesa. Cuando llegan a la puerta y tu Hostess o cadenero los escanea con su celular, el sistema descuenta el ingreso en tiempo real e impide que un código vuelto a reenviar por WhatsApp pase dos veces.' 
+            },
+            { 
+              q: '¿Qué pasa si cambio a alguien de mesa un día antes de la fiesta?', 
+              a: 'Como los Pases QR de Baulia están conectados en vivo a la nube, cualquier ajuste que hagas en tu Bóveda o en tu Croquis 2D actualiza automáticamente el número de mesa en el celular de tu invitado y en el escáner de la Hostess, sin tener que reenviar enlaces.' 
+            },
+            { 
+              q: '¿Cobran alguna comisión por la Lluvia de Sobres o Mesa de Regalos?', 
+              a: '0% de comisión. En la modalidad de Lluvia de Sobres Digital, tus invitados copian tu cuenta CLABE en un toque y te transfieren directamente a tu banco sin intermediarios. También puedes enlazar tus mesas de regalos de Liverpool, El Palacio de Hierro, Amazon o cualquier tienda.' 
+            },
+            { 
+              q: '¿Puedo empezar con un plan Básico o Plata y subir a Oro o Diamante más adelante?', 
+              a: 'Por supuesto. Dentro de tu Bóveda Baulia puedes desbloquear un nivel superior o activar complementos como Social Wall y Black Label en cualquier momento cubriendo únicamente la diferencia.' 
+            },
+            { 
+              q: '¿Por cuánto tiempo estará activa mi invitación y mi Bóveda de control?', 
+              a: 'Es un pago único sin mensualidades. Tu cuenta permanece activa desde el minuto en que contratas hasta 30 días naturales después de la fecha de tu evento, dándote tiempo de sobra para descargar todas las fotografías de alta resolución del Social Wall y tus reportes finales.' 
+            },
+            { 
+              q: '¿Qué métodos de pago aceptan y qué tan inmediata es la entrega?', 
+              a: 'Aceptamos todas las tarjetas de crédito y débito, transferencia interbancaria SPEI y pago en efectivo en OXXO a través de la pasarela encriptada de Stripe. En cuanto se confirma tu pago, tus credenciales de acceso se envían automáticamente a tu correo electrónico.' 
+            }
+          ].map((faq, idx) => (
+            <RevealSection key={idx} delay={idx * 60}>
+              <details className="group bg-white/60 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/10 rounded-2xl px-5 sm:px-6 py-4 sm:py-5 transition-all duration-300 cursor-pointer hover:border-amber-500/40">
+                <summary className="font-bold text-sm sm:text-base text-slate-800 dark:text-white list-none flex justify-between items-center gap-4 select-none outline-none transition-colors">
+                  <span>{faq.q}</span>
+                  <span className="w-7 h-7 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center text-amber-500 shrink-0 group-open:rotate-45 transition-transform duration-300">
+                    <Plus size={16} />
+                  </span>
+                </summary>
+                <p className="mt-3.5 pt-3 border-t border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 leading-relaxed text-xs sm:text-sm font-light animate-in fade-in transition-colors">
+                  {faq.a}
+                </p>
+              </details>
+            </RevealSection>
+          ))}
+        </div>
       </section>
 
       {/* FOOTER VIP EDITORIAL */}
