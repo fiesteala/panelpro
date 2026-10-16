@@ -9306,21 +9306,21 @@ const AtelierPhygitalModal = ({
   const effectiveAccent = (draft.heredarInvitacion && draft.papelId === 'blanco_galeria') ? draft.accentColor : activePaper.accent;
 
   return createPortal(
-    <div className="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-2xl flex flex-col animate-in fade-in duration-300 text-white select-none">
+    <div className="fixed inset-0 z-[99999] bg-[#1C1917]/95 backdrop-blur-2xl flex flex-col animate-in fade-in duration-300 text-white select-none">
       {/* Importación de fuentes de Alta Costura para la vista previa */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Great+Vibes&family=Montserrat:wght@400;600;700;900&display=swap');
       `}</style>
 
       {/* BARRA SUPERIOR ESTILO APPLE STUDIO */}
-      <div className="h-16 px-6 border-b border-white/10 flex items-center justify-between bg-[#08080a]/90 shrink-0">
+      <div className="h-16 px-6 border-b border-[#D4AF37]/20 flex items-center justify-between bg-[#141210] shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+          <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
             <Sparkles size={18} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[9px] font-black uppercase tracking-[0.25em] text-amber-400">Baulia Atelier Phygital</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37]">Baulia Atelier Phygital</span>
               <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded bg-white/10 text-slate-300">
                 {isSocialWall ? 'Caballetes de Mesa • Social Wall' : 'Brazaletes Tyvek • Black Label'}
               </span>
@@ -9333,14 +9333,14 @@ const AtelierPhygitalModal = ({
 
         <div className="flex items-center gap-3">
           {isLocked && (
-            <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+            <span className="px-3.5 py-1.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-[0_0_15px_rgba(212,175,55,0.15)]">
               <Lock size={12}/> {status === 'impreso' ? 'PRODUCIDO Y DESPACHADO' : 'ORDEN EN TALLER'}
             </span>
           )}
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-white flex items-center gap-1.5 transition-colors"
+            className="px-4 py-2 rounded-full bg-white/5 hover:bg-[#D4AF37]/20 border border-white/10 hover:border-[#D4AF37]/40 text-xs font-bold text-white flex items-center gap-1.5 transition-colors"
           >
             <X size={15}/> Cerrar Estudio
           </button>
@@ -9351,10 +9351,10 @@ const AtelierPhygitalModal = ({
       <div className="flex-1 overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-12">
         
         {/* LIENZO CENTRAL (VISTA PREVIA HIPERREALISTA) */}
-        <div className="lg:col-span-7 bg-[radial-gradient(circle_at_center,#1e1b2e_0%,#070709_75%)] p-6 sm:p-10 flex flex-col items-center justify-center relative min-h-[460px] lg:h-full overflow-hidden">
-          <div className="mb-5 flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/50 border border-white/10 backdrop-blur-md">
-            <Eye size={13} className="text-amber-400"/>
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">
+        <div className="lg:col-span-7 bg-[radial-gradient(circle_at_center,#292421_0%,#141210_75%)] p-6 sm:p-10 flex flex-col items-center justify-center relative min-h-[460px] lg:h-full overflow-hidden">
+          <div className="mb-5 flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1917]/80 border border-[#D4AF37]/30 backdrop-blur-md">
+            <Eye size={13} className="text-[#D4AF37]"/>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-200">
               {isSocialWall
                 ? `Vista Previa Real • Caballete 9.5 x 12.4 cm (${activePaper.name})`
                 : `Vista Previa Real • Pulsera Tyvek 25 x 1.9 cm (${activeWristband.name})`}
@@ -9493,7 +9493,7 @@ const AtelierPhygitalModal = ({
         </div>
 
         {/* BARRA LATERAL DERECHA: CONTROLES DE PERSONALIZACIÓN */}
-        <div className="lg:col-span-5 bg-[#0e0e12] border-l border-white/10 p-6 sm:p-8 overflow-y-auto custom-scrollbar space-y-6">
+        <div className="lg:col-span-5 bg-[#1C1917] border-l border-[#D4AF37]/20 p-6 sm:p-8 overflow-y-auto custom-scrollbar space-y-6">
           
           {/* 1. INTERRUPTOR DE HERENCIA DE DISEÑO DE LA INVITACIÓN (DESACTIVADO TEMPORALMENTE) */}
 
@@ -9512,8 +9512,8 @@ const AtelierPhygitalModal = ({
                     onClick={() => setDraft({ ...draft, papelId: paper.id })}
                     className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
                       draft.papelId === paper.id
-                        ? 'bg-amber-500/15 border-amber-500 shadow-md'
-                        : 'bg-white/5 border-white/10 hover:border-white/25'
+                        ? 'bg-[#D4AF37]/15 border-[#D4AF37] shadow-md'
+                        : 'bg-white/5 border-white/10 hover:border-[#D4AF37]/40'
                     }`}
                   >
                     <span
@@ -9542,8 +9542,8 @@ const AtelierPhygitalModal = ({
                     onClick={() => setDraft({ ...draft, pulseraColorId: wb.id })}
                     className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
                       draft.pulseraColorId === wb.id
-                        ? 'bg-amber-500/15 border-amber-500 shadow-md'
-                        : 'bg-white/5 border-white/10 hover:border-white/25'
+                        ? 'bg-[#D4AF37]/15 border-[#D4AF37] shadow-md'
+                        : 'bg-white/5 border-white/10 hover:border-[#D4AF37]/40'
                     }`}
                   >
                     <span
@@ -9574,8 +9574,8 @@ const AtelierPhygitalModal = ({
                   onClick={() => setDraft({ ...draft, fontId: font.id })}
                   className={`px-3 py-2.5 rounded-xl border text-left transition-all ${
                     draft.fontId === font.id
-                      ? 'bg-amber-500/15 border-amber-500 text-amber-300'
-                      : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20'
+                      ? 'bg-[#D4AF37]/15 border-[#D4AF37] text-[#D4AF37]'
+                      : 'bg-white/5 border-white/10 text-slate-300 hover:border-[#D4AF37]/40'
                   }`}
                 >
                   <span className="text-[9px] uppercase tracking-wider block opacity-60">{font.name}</span>
@@ -9589,7 +9589,7 @@ const AtelierPhygitalModal = ({
 
           {/* 4. SUBIDA DE LOGO E IMAGEN DE FONDO */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-2xl border border-dashed border-white/20 bg-white/5 text-center">
+            <div className="p-3.5 rounded-2xl border border-dashed border-[#D4AF37]/30 bg-white/5 text-center">
               <input type="file" accept="image/*" ref={logoInputRef} onChange={e => handleUploadAsset(e, 'logoUrl')} className="hidden" disabled={isLocked} />
               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Logo / Monograma</p>
               {draft.logoUrl ? (
@@ -9597,13 +9597,13 @@ const AtelierPhygitalModal = ({
                   <img src={draft.logoUrl} alt="Logo" className="h-10 object-contain" />
                   {!isLocked && (
                     <div className="flex gap-3 text-[9px] font-bold">
-                      <button type="button" onClick={() => logoInputRef.current.click()} className="text-amber-400 underline">Cambiar</button>
+                      <button type="button" onClick={() => logoInputRef.current.click()} className="text-[#D4AF37] underline">Cambiar</button>
                       <button type="button" onClick={() => setDraft({ ...draft, logoUrl: '' })} className="text-rose-400 underline">Quitar</button>
                     </div>
                   )}
                 </div>
               ) : (
-                <button type="button" disabled={isLocked || isUploading} onClick={() => logoInputRef.current.click()} className="w-full py-2 flex flex-col items-center text-slate-400 hover:text-amber-400">
+                <button type="button" disabled={isLocked || isUploading} onClick={() => logoInputRef.current.click()} className="w-full py-2 flex flex-col items-center text-slate-400 hover:text-[#D4AF37] transition-colors">
                   <ImageIcon size={20} className="mb-1"/>
                   <span className="text-[10px] font-bold">Subir Logo PNG</span>
                 </button>
@@ -9611,7 +9611,7 @@ const AtelierPhygitalModal = ({
             </div>
 
             {isSocialWall && (
-              <div className="p-3.5 rounded-2xl border border-dashed border-white/20 bg-white/5 text-center">
+              <div className="p-3.5 rounded-2xl border border-dashed border-[#D4AF37]/30 bg-white/5 text-center">
                 <input type="file" accept="image/*" ref={bgInputRef} onChange={e => handleUploadAsset(e, 'bgImageUrl')} className="hidden" disabled={isLocked} />
                 <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Foto con Degradado</p>
                 {draft.bgImageUrl ? (
@@ -9619,13 +9619,13 @@ const AtelierPhygitalModal = ({
                     <img src={draft.bgImageUrl} alt="Fondo" className="h-10 w-16 object-cover rounded border border-white/15" />
                     {!isLocked && (
                       <div className="flex gap-3 text-[9px] font-bold">
-                        <button type="button" onClick={() => bgInputRef.current.click()} className="text-amber-400 underline">Cambiar</button>
+                        <button type="button" onClick={() => bgInputRef.current.click()} className="text-[#D4AF37] underline">Cambiar</button>
                         <button type="button" onClick={() => setDraft({ ...draft, bgImageUrl: '' })} className="text-rose-400 underline">Quitar</button>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <button type="button" disabled={isLocked || isUploading} onClick={() => bgInputRef.current.click()} className="w-full py-2 flex flex-col items-center text-slate-400 hover:text-amber-400">
+                  <button type="button" disabled={isLocked || isUploading} onClick={() => bgInputRef.current.click()} className="w-full py-2 flex flex-col items-center text-slate-400 hover:text-[#D4AF37] transition-colors">
                     <Camera size={20} className="mb-1"/>
                     <span className="text-[10px] font-bold">Subir Foto de Fondo</span>
                   </button>
@@ -9644,7 +9644,7 @@ const AtelierPhygitalModal = ({
                   disabled={isLocked}
                   value={draft.preTitle}
                   onChange={e => setDraft({ ...draft, preTitle: e.target.value })}
-                  className="w-full p-3 rounded-xl bg-black border border-white/10 text-xs font-bold text-white outline-none focus:border-amber-500"
+                  className="w-full p-3 rounded-xl bg-[#141210] border border-white/10 text-xs font-bold text-white outline-none focus:border-[#D4AF37]"
                 />
               </div>
               <div>
@@ -9654,7 +9654,7 @@ const AtelierPhygitalModal = ({
                   disabled={isLocked}
                   value={draft.eventName}
                   onChange={e => setDraft({ ...draft, eventName: e.target.value })}
-                  className="w-full p-3 rounded-xl bg-black border border-white/10 text-xs font-bold text-white outline-none focus:border-amber-500"
+                  className="w-full p-3 rounded-xl bg-[#141210] border border-white/10 text-xs font-bold text-white outline-none focus:border-[#D4AF37]"
                 />
               </div>
             </div>
@@ -9668,7 +9668,7 @@ const AtelierPhygitalModal = ({
                     disabled={isLocked}
                     value={draft.subtitle}
                     onChange={e => setDraft({ ...draft, subtitle: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-black border border-white/10 text-xs text-white outline-none focus:border-amber-500"
+                    className="w-full p-3 rounded-xl bg-[#141210] border border-white/10 text-xs text-white outline-none focus:border-[#D4AF37]"
                   />
                 </div>
                 <div>
@@ -9680,7 +9680,7 @@ const AtelierPhygitalModal = ({
                     disabled={isLocked}
                     value={draft.cantidadTarjetas}
                     onChange={e => setDraft({ ...draft, cantidadTarjetas: Math.max(1, parseInt(e.target.value) || 1) })}
-                    className="w-full p-3 rounded-xl bg-black border border-white/10 text-xs font-black text-amber-400 text-center outline-none focus:border-amber-500"
+                    className="w-full p-3 rounded-xl bg-[#141210] border border-white/10 text-xs font-black text-[#D4AF37] text-center outline-none focus:border-[#D4AF37]"
                   />
                 </div>
               </div>
@@ -9689,12 +9689,12 @@ const AtelierPhygitalModal = ({
 
           {/* 6. BOTONES DE GUARDADO Y ENVÍO A TALLER */}
           {!isLocked ? (
-            <div className="pt-3 border-t border-white/10 flex flex-col sm:flex-row gap-3">
+            <div className="pt-3 border-t border-[#D4AF37]/20 flex flex-col sm:flex-row gap-3">
               <button
                 type="button"
                 disabled={isSaving}
                 onClick={handleSave}
-                className="flex-1 py-4 rounded-xl bg-white/10 hover:bg-white/15 text-white font-black text-[10px] uppercase tracking-widest transition-colors"
+                className="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-[10px] uppercase tracking-widest transition-colors"
               >
                 {isSaving ? 'Guardando...' : 'Guardar Diseño'}
               </button>
@@ -9704,13 +9704,13 @@ const AtelierPhygitalModal = ({
                   await onSaveDesign(draft);
                   onOpenShippingModal(draft);
                 }}
-                className="flex-1 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-widest shadow-[0_10px_25px_rgba(245,158,11,0.3)] transition-all flex items-center justify-center gap-2"
+                className="flex-1 py-4 rounded-xl bg-[#D4AF37] hover:bg-[#c5a028] text-[#1C1917] font-black text-[10px] uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.25)] transition-all flex items-center justify-center gap-2"
               >
                 <Send size={14}/> Enviar a Taller Baulia
               </button>
             </div>
           ) : (
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-bold text-center">
+            <div className="p-4 rounded-xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] text-xs font-bold text-center shadow-[0_0_20px_rgba(212,175,55,0.1)]">
               ✓ Este diseño ya se encuentra en producción dentro del Taller Baulia.
             </div>
           )}
@@ -9966,8 +9966,8 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
               onClick={() => setShowCardStudio(true)}
               className={`flex items-center justify-center px-5 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all border ${
                 isLockedInWorkshop
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                  : 'bg-amber-500 hover:bg-amber-400 text-slate-950 border-amber-400 shadow-lg'
+                  ? 'bg-[#1C1917] text-[#D4AF37] border-[#D4AF37]/50 shadow-[0_0_15px_rgba(212,175,55,0.15)]'
+                  : 'bg-[#D4AF37] hover:bg-[#c5a028] text-[#1C1917] border-[#D4AF37] shadow-lg'
               }`}
             >
               {isLockedInWorkshop ? (

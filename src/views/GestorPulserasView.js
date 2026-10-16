@@ -344,15 +344,15 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
       {/* 🟢 ATELIER PHYGITAL A PANTALLA COMPLETA (MODO INDEPENDIENTE: PULSERAS BLACK LABEL) */}
       {showAtelierModal && createPortal(
-        <div className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-2xl flex flex-col animate-in fade-in duration-300 text-white select-none">
-          <div className="h-16 px-6 border-b border-white/10 flex items-center justify-between bg-[#08080a] shrink-0">
+        <div className="fixed inset-0 z-[99999] bg-[#1C1917]/95 backdrop-blur-2xl flex flex-col animate-in fade-in duration-300 text-white select-none">
+          <div className="h-16 px-6 border-b border-[#D4AF37]/20 flex items-center justify-between bg-[#141210] shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+              <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
                 <Sparkles size={18} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-black uppercase tracking-[0.25em] text-amber-400">Baulia Atelier Phygital</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37]">Baulia Atelier Phygital</span>
                   <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded bg-white/10 text-slate-300">Brazaletes Tyvek • Black Label</span>
                 </div>
                 <h2 className="text-sm font-bold text-white leading-tight">Estudio de Personalización de Pulseras VIP</h2>
@@ -361,14 +361,14 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
             <div className="flex items-center gap-3">
               {isLocked && (
-                <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                <span className="px-3.5 py-1.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-[0_0_15px_rgba(212,175,55,0.15)]">
                   <Lock size={12}/> EN PRODUCCIÓN
                 </span>
               )}
               <button
                 type="button"
                 onClick={() => setShowAtelierModal(false)}
-                className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-white flex items-center gap-1.5 transition-colors"
+                className="px-4 py-2 rounded-full bg-white/5 hover:bg-[#D4AF37]/20 border border-white/10 hover:border-[#D4AF37]/40 text-xs font-bold text-white flex items-center gap-1.5 transition-colors"
               >
                 <X size={15}/> Cerrar Estudio
               </button>
@@ -377,10 +377,10 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
           <div className="flex-1 overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-12">
             {/* VISOR INTERACTIVO CENTRAL DE LA PULSERA */}
-            <div className="lg:col-span-7 bg-[radial-gradient(circle_at_center,#1e1b2e_0%,#070709_75%)] p-6 sm:p-10 flex flex-col items-center justify-center relative min-h-[420px]">
-              <div className="mb-6 flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/50 border border-white/10 backdrop-blur-md">
-                <Eye size={13} className="text-amber-400"/>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">
+            <div className="lg:col-span-7 bg-[radial-gradient(circle_at_center,#292421_0%,#141210_75%)] p-6 sm:p-10 flex flex-col items-center justify-center relative min-h-[420px]">
+              <div className="mb-6 flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1917]/80 border border-[#D4AF37]/30 backdrop-blur-md">
+                <Eye size={13} className="text-[#D4AF37]"/>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-200">
                   Vista Previa Real • Brazalete Tyvek 25 x 1.9 cm ({activeWristband.name})
                 </span>
               </div>
@@ -435,7 +435,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
             </div>
 
             {/* BARRA LATERAL DERECHA DE CONTROLES DEL ATELIER */}
-            <div className="lg:col-span-5 bg-[#0e0e12] border-l border-white/10 p-6 sm:p-8 overflow-y-auto custom-scrollbar space-y-6">
+            <div className="lg:col-span-5 bg-[#1C1917] border-l border-[#D4AF37]/20 p-6 sm:p-8 overflow-y-auto custom-scrollbar space-y-6">
               {/* INTERRUPTOR DE HERENCIA (DESACTIVADO TEMPORALMENTE) */}
 
               {/* 1. COLOR DE PULSERA */}
@@ -452,8 +452,8 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                       onClick={() => setDesignConfig({ ...designConfig, pulseraColorId: wb.id, heredarInvitacion: wb.id === 'blanca_atelier' ? designConfig.heredarInvitacion : false })}
                       className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
                         designConfig.pulseraColorId === wb.id
-                          ? 'bg-amber-500/15 border-amber-500 shadow-md'
-                          : 'bg-white/5 border-white/10 hover:border-white/25'
+                          ? 'bg-[#D4AF37]/15 border-[#D4AF37] shadow-md'
+                          : 'bg-white/5 border-white/10 hover:border-[#D4AF37]/40'
                       }`}
                     >
                       <span style={{ backgroundColor: wb.bg }} className="w-5 h-5 rounded-full border border-white/30 shrink-0 mt-0.5"></span>
@@ -469,7 +469,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
               {/* SELECTOR DE TINTA EXCLUSIVO SI ELIGEN PULSERA NEGRA */}
               {designConfig.pulseraColorId === 'negra_obsidiana' && (
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-amber-400 mb-2">
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-2">
                     Color de Tinta sobre Pulsera Negra
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -481,8 +481,8 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                         onClick={() => setDesignConfig({ ...designConfig, pulseraInkColor: ink.hex })}
                         className={`p-2.5 rounded-xl border text-center transition-all flex items-center justify-center gap-2 ${
                           designConfig.pulseraInkColor === ink.hex
-                            ? 'bg-amber-500/15 border-amber-500 text-white'
-                            : 'bg-white/5 border-white/10 text-slate-400'
+                            ? 'bg-[#D4AF37]/15 border-[#D4AF37] text-white'
+                            : 'bg-white/5 border-white/10 text-slate-400 hover:border-[#D4AF37]/40'
                         }`}
                       >
                         <span style={{ backgroundColor: ink.hex }} className="w-3.5 h-3.5 rounded-full border border-white/30"></span>
@@ -507,8 +507,8 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                       onClick={() => setDesignConfig({ ...designConfig, fontId: font.id })}
                       className={`px-3 py-2.5 rounded-xl border text-left transition-all ${
                         designConfig.fontId === font.id
-                          ? 'bg-amber-500/15 border-amber-500 text-amber-300'
-                          : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20'
+                          ? 'bg-[#D4AF37]/15 border-[#D4AF37] text-[#D4AF37]'
+                          : 'bg-white/5 border-white/10 text-slate-300 hover:border-[#D4AF37]/40'
                       }`}
                     >
                       <span className="text-[9px] uppercase tracking-wider block opacity-60">{font.name}</span>
@@ -529,7 +529,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                     disabled={isLocked}
                     value={designConfig.preTitle || ''}
                     onChange={e => setDesignConfig({ ...designConfig, preTitle: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-black border border-white/10 text-xs font-bold text-white outline-none focus:border-amber-500"
+                    className="w-full p-3 rounded-xl bg-[#141210] border border-white/10 text-xs font-bold text-white outline-none focus:border-[#D4AF37]"
                   />
                 </div>
                 <div>
@@ -539,18 +539,18 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                     disabled={isLocked}
                     value={designConfig.eventName || ''}
                     onChange={e => setDesignConfig({ ...designConfig, eventName: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-black border border-white/10 text-xs font-bold text-white outline-none focus:border-amber-500"
+                    className="w-full p-3 rounded-xl bg-[#141210] border border-white/10 text-xs font-bold text-white outline-none focus:border-[#D4AF37]"
                   />
                 </div>
               </div>
 
-              {/* ACCIONES */}
-              {!isLocked && (
-                <div className="pt-3 border-t border-white/10 flex flex-col sm:flex-row gap-3">
+              {/* ACCIONES O ESTADO EN TALLER */}
+              {!isLocked ? (
+                <div className="pt-3 border-t border-[#D4AF37]/20 flex flex-col sm:flex-row gap-3">
                   <button
                     type="button"
                     onClick={handleSaveDesign}
-                    className="flex-1 py-4 rounded-xl bg-white/10 hover:bg-white/15 text-white font-black text-[10px] uppercase tracking-widest transition-colors"
+                    className="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-[10px] uppercase tracking-widest transition-colors"
                   >
                     Guardar Diseño
                   </button>
@@ -562,10 +562,14 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
                       setShowAtelierModal(false);
                       setConfirmModal(true);
                     }}
-                    className="flex-1 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-widest shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+                    className="flex-1 py-4 rounded-xl bg-[#D4AF37] hover:bg-[#c5a028] text-[#1C1917] font-black text-[10px] uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.25)] transition-all flex items-center justify-center gap-2 disabled:opacity-40"
                   >
                     <Send size={14}/> Enviar a Taller ({totalPulserasSolicitadas})
                   </button>
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] text-xs font-bold text-center shadow-[0_0_20px_rgba(212,175,55,0.1)]">
+                  ✓ Este diseño ya se encuentra en producción dentro del Taller Baulia.
                 </div>
               )}
             </div>
@@ -588,16 +592,18 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
           <button
             type="button"
             onClick={() => setShowAtelierModal(true)}
-            className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2 transition-all"
+            className={`px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-all border ${
+              isLocked
+                ? 'bg-[#1C1917] text-[#D4AF37] border-[#D4AF37]/50 shadow-[0_0_15px_rgba(212,175,55,0.15)]'
+                : 'bg-[#D4AF37] hover:bg-[#c5a028] text-[#1C1917] border-[#D4AF37] shadow-lg'
+            }`}
           >
-            <Sparkles size={15}/> Abrir Atelier de Brazaletes (Pantalla Completa)
+            {isLocked ? (
+              <><Lock size={14}/> Pulseras en Taller (Ver Diseño)</>
+            ) : (
+              <><Sparkles size={15}/> Abrir Atelier de Brazaletes (Pantalla Completa)</>
+            )}
           </button>
-          {isLocked && (
-             <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-4 py-2 rounded-xl flex items-center shadow-sm transition-colors">
-               <Lock size={16} className="mr-2" />
-               <span className="text-xs font-black uppercase tracking-widest">En Producción</span>
-             </div>
-          )}
         </div>
       </div>
 
