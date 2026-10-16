@@ -13292,26 +13292,53 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white transition-colors duration-700 overflow-clip relative">
+    <div className="dark baulia-gala-landing min-h-screen bg-[#1C1917] font-sans text-slate-100 selection:bg-[#D4AF37] selection:text-[#1C1917] transition-colors duration-700 overflow-clip relative">
       
       {/* INCRUSTACIÓN DE LAS REVISTAS */}
       {showAnatomy && <AnatomyOverlay onClose={() => setShowAnatomy(false)} />}
       {showPanelAnatomy && <PanelAnatomyOverlay onClose={() => setShowPanelAnatomy(false)} />}
 
-      {/* OCULTAMOS EL BOTÓN DE WHATSAPP SI ALGUNA REVISTA ESTÁ ABIERTA */}
+      {/* BOTÓN FLOTANTE DE CONCIERGE EN DORADO Y NEGRO GALA */}
       {!showAnatomy && !showPanelAnatomy && (
-        <a href="https://wa.me/529222107575?text=Hola,%20quiero%20reservar%20una%20Bóveda%20Baulia" target="_blank" rel="noreferrer" className="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-[0_10px_20px_rgba(16,185,129,0.4)] hover:scale-110 hover:bg-emerald-400 transition-all z-50 group flex items-center justify-center">
+        <a href="https://wa.me/529222107575?text=Hola,%20quiero%20reservar%20una%20Bóveda%20Baulia" target="_blank" rel="noreferrer" className="fixed bottom-6 right-6 bg-[#D4AF37] text-[#1C1917] p-4 rounded-full shadow-[0_10px_25px_rgba(212,175,55,0.4)] hover:scale-110 hover:bg-[#e3be42] border border-[#D4AF37] transition-all z-50 group flex items-center justify-center">
           <MessageCircle size={28} />
-          <span className="absolute right-full mr-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
+          <span className="absolute right-full mr-4 bg-[#141210] text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-bold px-3.5 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
             Asesoría Concierge
           </span>
         </a>
       )}
 
-      {/* 🟢 ESCUDO ANTI-AUTOZOOM EN MÓVIL PARA FORMULARIOS DE PAGO */}
+      {/* 🟢 MOTOR DE GALA PERMANENTE (#1C1917 + #D4AF37) Y ESCUDO MÓVIL */}
       <style>{`
         @media screen and (max-width: 768px) {
           input, select, textarea { font-size: 16px !important; }
+        }
+        .baulia-gala-landing {
+          background-color: #1C1917 !important;
+          color: #F5F5F4 !important;
+        }
+        .baulia-gala-landing .dark\\:bg-\\[\\#050505\\],
+        .baulia-gala-landing .dark\\:bg-\\[\\#07070b\\],
+        .baulia-gala-landing .dark\\:bg-\\[\\#080808\\],
+        .baulia-gala-landing .dark\\:bg-slate-950\\/50 {
+          background-color: #1C1917 !important;
+        }
+        .baulia-gala-landing .dark\\:bg-\\[\\#0a0a0a\\],
+        .baulia-gala-landing .dark\\:bg-\\[\\#0b0b0b\\],
+        .baulia-gala-landing .dark\\:bg-\\[\\#0d0d0d\\],
+        .baulia-gala-landing .dark\\:bg-\\[\\#0d0d12\\],
+        .baulia-gala-landing .dark\\:bg-slate-950,
+        .baulia-gala-landing .bg-slate-900 {
+          background-color: #141210 !important;
+        }
+        .baulia-gala-landing .dark\\:bg-\\[\\#111\\],
+        .baulia-gala-landing .dark\\:bg-\\[\\#121212\\],
+        .baulia-gala-landing .dark\\:bg-\\[\\#14141c\\] {
+          background-color: #24201D !important;
+        }
+        .baulia-gala-landing .dark\\:border-white\\/10,
+        .baulia-gala-landing .dark\\:border-white\\/5 {
+          border-color: rgba(212, 175, 55, 0.16) !important;
         }
       `}</style>
 
@@ -13562,59 +13589,48 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 dark:bg-amber-600/10  hidden md:block  hidden md:block  hidden md:block blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
         <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-500/5 dark:bg-indigo-600/10  hidden md:block  hidden md:block blur-[150px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
 
-      {/* NAVEGACIÓN FLOTANTE (RESPONSIVA) */}
+      {/* NAVEGACIÓN FLOTANTE DE GALA (#1C1917 + #D4AF37) */}
       <nav className="fixed w-full z-50 top-0 pt-4 md:pt-6 px-4 md:px-8 pointer-events-none">
         
-        {/* BARRA PRINCIPAL (Calibrada en móvil para que nada se pegue al logo ni se desborde) */}
-        <div className="max-w-[1400px] mx-auto bg-white/75 dark:bg-[#0a0a0a]/75 backdrop-blur-2xl border border-slate-200/60 dark:border-white/10 h-14 sm:h-16 md:h-20 rounded-full flex items-center justify-between px-3 sm:px-5 md:px-6 gap-2 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] pointer-events-auto transition-colors duration-700 relative z-50 overflow-hidden">
+        {/* BARRA PRINCIPAL */}
+        <div className="max-w-[1400px] mx-auto bg-[#1C1917]/85 backdrop-blur-2xl border border-[#D4AF37]/30 h-14 sm:h-16 md:h-20 rounded-full flex items-center justify-between px-3 sm:px-5 md:px-6 gap-2 shadow-[0_12px_40px_rgba(0,0,0,0.65)] pointer-events-auto transition-colors duration-700 relative z-50 overflow-hidden">
             
-            {/* LOGO CON ESPACIO DE RESPIRO */}
+            {/* LOGO SIEMPRE EN BLANCO Y DORADO */}
             <a href="/" className="flex items-center group shrink-0 pr-1">
-               <BauliaLogo className="h-5 sm:h-7 md:h-10 w-auto" />
+               <BauliaLogo className="h-5 sm:h-7 md:h-10 w-auto" forceWhite={true} />
             </a>
 
             {/* MENÚ DE ESCRITORIO */}
-            <div className="hidden lg:flex gap-8 text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 items-center">
-              <a href="#showroom" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">La Colección</a>
-              <a href="#experiencia" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Características</a>
-              <a href="#boveda" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">El Software</a>
+            <div className="hidden lg:flex gap-8 text-[11px] font-bold uppercase tracking-widest text-slate-300 items-center">
+              <a href="#showroom" className="hover:text-[#D4AF37] transition-colors">La Colección</a>
+              <a href="#experiencia" className="hover:text-[#D4AF37] transition-colors">Características</a>
+              <a href="#boveda" className="hover:text-[#D4AF37] transition-colors">El Software</a>
               
               <button 
                 onClick={() => setShowAnatomy(true)} 
-                className="bg-[#FDFBF7] border border-[#D4AF37]/50 px-5 py-2 rounded-full shadow-[0_4px_15px_rgba(247,108,130,0.2)] hover:shadow-[0_6px_25px_rgba(247,108,130,0.4)] hover:scale-105 transition-all flex items-center group ml-2"
+                className="bg-[#141210] border border-[#D4AF37]/50 px-5 py-2 rounded-full shadow-[0_4px_20px_rgba(212,175,55,0.15)] hover:shadow-[0_6px_25px_rgba(212,175,55,0.3)] hover:scale-105 transition-all flex items-center group ml-2"
               >
-                <BookOpenText size={16} className="text-[#8DB580] mr-2.5 group-hover:-rotate-12 transition-transform duration-300"/>
-                <span style={{ fontFamily: '"Cormorant Garamond", serif', fontWeight: 600 }} className="text-[#2A2A2A] text-[13px] tracking-[0.2em] uppercase mr-2">
+                <BookOpenText size={16} className="text-[#D4AF37] mr-2.5 group-hover:-rotate-12 transition-transform duration-300"/>
+                <span style={{ fontFamily: '"Cormorant Garamond", serif', fontWeight: 600 }} className="text-white text-[13px] tracking-[0.2em] uppercase mr-2">
                   Baulia
                 </span>
-                <span style={{ fontFamily: '"Pinyon Script", cursive' }} className="text-[#F76C82] text-[24px] lowercase tracking-normal leading-none mt-1">
+                <span style={{ fontFamily: '"Pinyon Script", cursive' }} className="text-[#D4AF37] text-[24px] lowercase tracking-normal leading-none mt-1">
                   Magazine
                 </span>
               </button>
             </div>
 
-            {/* CONTROLES DERECHOS COMPACTOS Y ALINEADOS */}
-            <div className="flex items-center gap-1 sm:gap-2 md:gap-3.5 shrink-0">
+            {/* CONTROLES DERECHOS (SIN BOTÓN DÍA/NOCHE) */}
+            <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3.5 shrink-0">
               
               {/* SELECTOR GLOBAL DE MONEDA */}
-              <div className="flex items-center bg-slate-100 dark:bg-white/10 p-0.5 sm:p-1 rounded-full shadow-inner border border-slate-200 dark:border-white/5 shrink-0">
-                 <button type="button" onClick={() => setMoneda('MXN')} className={`px-2 sm:px-2.5 md:px-3 py-1 rounded-full text-[7.5px] sm:text-[8.5px] md:text-[9px] font-black uppercase tracking-wider transition-all ${moneda === 'MXN' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>MXN</button>
-                 <button type="button" onClick={() => setMoneda('USD')} className={`px-2 sm:px-2.5 md:px-3 py-1 rounded-full text-[7.5px] sm:text-[8.5px] md:text-[9px] font-black uppercase tracking-wider transition-all ${moneda === 'USD' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>USD</button>
+              <div className="flex items-center bg-[#141210] p-0.5 sm:p-1 rounded-full shadow-inner border border-[#D4AF37]/25 shrink-0">
+                 <button type="button" onClick={() => setMoneda('MXN')} className={`px-2 sm:px-2.5 md:px-3 py-1 rounded-full text-[7.5px] sm:text-[8.5px] md:text-[9px] font-black uppercase tracking-wider transition-all ${moneda === 'MXN' ? 'bg-[#D4AF37] text-[#1C1917] shadow-sm' : 'text-slate-400 hover:text-white'}`}>MXN</button>
+                 <button type="button" onClick={() => setMoneda('USD')} className={`px-2 sm:px-2.5 md:px-3 py-1 rounded-full text-[7.5px] sm:text-[8.5px] md:text-[9px] font-black uppercase tracking-wider transition-all ${moneda === 'USD' ? 'bg-[#D4AF37] text-[#1C1917] shadow-sm' : 'text-slate-400 hover:text-white'}`}>USD</button>
               </div>
 
-              {/* BOTÓN DÍA / NOCHE / AUTO */}
-              <button type="button" onClick={cycleTheme} className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-slate-500 hover:text-amber-600 dark:text-slate-400 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors shrink-0" title={`Modo: ${themeSetting.toUpperCase()}`}>
-                {themeSetting === 'auto' ? (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                ) : themeSetting === 'dark' ? (
-                  <Moon size={15} />
-                ) : (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                )}
-              </button>
-
-              {/* BOTÓN ENTRAR */}
-              <button type="button" onClick={() => window.location.href = 'https://panel.baulia.com'} className="text-[8.5px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest text-white dark:text-slate-900 bg-slate-900 dark:bg-white px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-full hover:scale-105 transition-transform shadow-md whitespace-nowrap shrink-0">
+              {/* BOTÓN ENTRAR EN DORADO IMPERIAL */}
+              <button type="button" onClick={() => window.location.href = 'https://panel.baulia.com'} className="text-[8.5px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest text-[#1C1917] bg-[#D4AF37] hover:bg-[#e3be42] px-3.5 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-full hover:scale-105 transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] whitespace-nowrap shrink-0">
                 Entrar
               </button>
 
@@ -13622,7 +13638,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
               <button 
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center lg:hidden text-slate-900 dark:text-white rounded-full hover:bg-slate-100 dark:hover:bg-white/10 shrink-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center lg:hidden text-[#D4AF37] rounded-full hover:bg-[#D4AF37]/10 shrink-0"
               >
                 {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
               </button>
@@ -13699,58 +13715,49 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           }
         `}</style>
 
-        {/* 🟢 LIENZO DUAL DÍA / NOCHE CON ENCUADRE CALIBRADO */}
+        {/* 🟢 LIENZO GALA NOCTURNA PERMANENTE (#1C1917 + #D4AF37) */}
         <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
-          {/* Imagen Modo Día */}
-          <img 
-            src="/mododia.jpg" 
-            alt="Invitaciones Digitales de Lujo Baulia Modo Día" 
-            style={{ animation: 'heroSlowBreathe 24s ease-in-out infinite' }}
-            className="absolute inset-0 w-full h-full object-cover object-[center_48%] md:object-[center_38%] transition-opacity duration-1000 ease-in-out opacity-100 dark:opacity-0"
-            onError={(e) => { e.target.style.opacity = '0'; }}
-          />
-          {/* Imagen Modo Noche */}
           <img 
             src="/modonoche.jpg" 
-            alt="Invitaciones Digitales de Lujo Baulia Modo Noche" 
+            alt="Invitaciones Digitales de Lujo Baulia Gala" 
             style={{ animation: 'heroSlowBreathe 24s ease-in-out infinite' }}
-            className="absolute inset-0 w-full h-full object-cover object-[center_48%] md:object-[center_38%] transition-opacity duration-1000 ease-in-out opacity-0 dark:opacity-100"
+            className="absolute inset-0 w-full h-full object-cover object-[center_48%] md:object-[center_38%] opacity-100"
             onError={(e) => { e.target.style.opacity = '0'; }}
           />
 
-          {/* Velo independiente: en Móvil sube la niebla marfil hasta el texto inferior; en Escritorio (md:) se mantiene intacto */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(253,251,247,0.75)_0%,rgba(253,251,247,0.42)_30%,rgba(253,251,247,0.02)_40%,rgba(253,251,247,0.05)_52%,rgba(253,251,247,0.82)_62%,rgba(253,251,247,0.94)_75%,rgba(250,250,250,0.98)_100%)] md:bg-[linear-gradient(to_bottom,rgba(253,251,247,0.72)_0%,rgba(253,251,247,0.42)_34%,rgba(253,251,247,0.02)_46%,rgba(253,251,247,0.02)_62%,rgba(253,251,247,0.68)_78%,rgba(250,250,250,0.95)_100%)] dark:bg-[linear-gradient(to_bottom,rgba(5,5,5,0.72)_0%,rgba(5,5,5,0.42)_34%,rgba(5,5,5,0.04)_44%,rgba(5,5,5,0.08)_54%,rgba(5,5,5,0.72)_68%,rgba(5,5,5,0.96)_100%)] md:dark:bg-[linear-gradient(to_bottom,rgba(5,5,5,0.72)_0%,rgba(5,5,5,0.42)_34%,rgba(5,5,5,0.04)_46%,rgba(5,5,5,0.04)_62%,rgba(5,5,5,0.72)_78%,rgba(5,5,5,0.96)_100%)] transition-colors duration-1000"></div>
+          {/* Velo calibrado en Negro Cálido #1C1917 (rgb 28,25,23) */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(28,25,23,0.76)_0%,rgba(28,25,23,0.42)_34%,rgba(28,25,23,0.04)_44%,rgba(28,25,23,0.08)_54%,rgba(28,25,23,0.78)_68%,rgba(28,25,23,0.98)_100%)] md:bg-[linear-gradient(to_bottom,rgba(28,25,23,0.74)_0%,rgba(28,25,23,0.40)_34%,rgba(28,25,23,0.04)_46%,rgba(28,25,23,0.04)_62%,rgba(28,25,23,0.76)_78%,rgba(28,25,23,0.98)_100%)]"></div>
         </div>
 
-        {/* 🟢 ZONA SUPERIOR: ETIQUETA FINA + TÍTULO (ARRIBA DE LOS NOVIOS) */}
+        {/* 🟢 ZONA SUPERIOR: ETIQUETA FINA + TÍTULO */}
         <RevealSection className="relative z-10 max-w-[1200px] mx-auto flex flex-col items-center mt-0 md:mt-2">
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white/80 dark:bg-black/60 backdrop-blur-md border border-amber-500/30 shadow-sm mb-2.5 sm:mb-4">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
-            <span className="text-[7.5px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-[0.16em] sm:tracking-[0.24em] text-amber-700 dark:text-amber-400 whitespace-nowrap">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1 sm:py-1.5 rounded-full bg-[#1C1917]/80 backdrop-blur-md border border-[#D4AF37]/40 shadow-[0_0_20px_rgba(212,175,55,0.15)] mb-2.5 sm:mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse shrink-0"></span>
+            <span className="text-[7.5px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-[0.16em] sm:tracking-[0.24em] text-[#D4AF37] whitespace-nowrap">
               Atelier de Alta Costura Digital
             </span>
           </div>
 
-          <h1 className="text-[2.5rem] sm:text-6xl md:text-6xl lg:text-[5.6rem] font-medium text-slate-900 dark:text-white tracking-tighter leading-[0.92] font-editorial transition-colors duration-700 drop-shadow-[0_2px_14px_rgba(255,255,255,0.85)] dark:drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]">
+          <h1 className="text-[2.5rem] sm:text-6xl md:text-6xl lg:text-[5.6rem] font-medium text-white tracking-tighter leading-[0.92] font-editorial drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]">
             El arte de celebrar <br/>
-            <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-700 dark:from-amber-200 dark:via-amber-400 dark:to-yellow-500 pr-1">sin estrés.</span>
+            <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-[#FDF1A9] via-[#D4AF37] to-[#AA8529] pr-1">sin estrés.</span>
           </h1>
         </RevealSection>
 
-        {/* 🟢 VENTANA CENTRAL DESPEJADA: DEJA LIBRE EL ROSTRO Y TORSO DE LOS NOVIOS */}
+        {/* 🟢 VENTANA CENTRAL DESPEJADA */}
         <div className="flex-1 min-h-[210px] sm:min-h-[220px] md:min-h-[190px] lg:min-h-[210px] pointer-events-none"></div>
 
-        {/* 🟢 ZONA INFERIOR: DESCRIPCIÓN + BOTONES (SOBRE LA NIEBLA INFERIOR) */}
+        {/* 🟢 ZONA INFERIOR: DESCRIPCIÓN + BOTONES EN DORADO Y NEGRO */}
         <RevealSection className="relative z-10 max-w-[1000px] mx-auto flex flex-col items-center w-full">
-          <p className="text-xs sm:text-base md:text-xl text-slate-900 dark:text-slate-100 mb-4 sm:mb-7 max-w-2xl mx-auto font-medium md:font-normal leading-relaxed transition-colors duration-700 drop-shadow-[0_1px_12px_rgba(255,255,255,1)] dark:drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] px-2">
+          <p className="text-xs sm:text-base md:text-xl text-slate-100 mb-4 sm:mb-7 max-w-2xl mx-auto font-medium md:font-normal leading-relaxed drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] px-2">
             Diseñamos invitaciones que <b>emocionan desde el primer segundo</b> —con acuarelas, arte floral, caligrafía dorada y música envolvente— conectadas al único sistema con <b>Pases QR vivos y Auto-Acomodo de Mesas por Afinidad</b>.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto justify-center relative px-2 sm:px-0">
-            <button onClick={() => setCheckoutModal('selector')} className="w-full sm:w-auto px-7 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-full font-black text-xs sm:text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_10px_35px_rgba(245,158,11,0.45)] border border-amber-400">
+            <button onClick={() => setCheckoutModal('selector')} className="w-full sm:w-auto px-7 sm:px-8 py-3.5 sm:py-4 bg-[#D4AF37] hover:bg-[#e3be42] text-[#1C1917] rounded-full font-black text-xs sm:text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-[0_10px_35px_rgba(212,175,55,0.4)] border border-[#D4AF37]">
               Reservar mi Bóveda <ArrowRight size={16} className="ml-2.5"/>
             </button>
-            <a href="#showroom" className="w-full sm:w-auto px-7 sm:px-8 py-3.5 sm:py-4 bg-slate-900/90 dark:bg-white/95 backdrop-blur-md text-white dark:text-slate-900 rounded-full font-bold text-xs sm:text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
+            <a href="#showroom" className="w-full sm:w-auto px-7 sm:px-8 py-3.5 sm:py-4 bg-[#1C1917]/90 hover:bg-[#D4AF37]/15 backdrop-blur-md text-[#D4AF37] border border-[#D4AF37]/50 rounded-full font-bold text-xs sm:text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center shadow-xl">
               Ver Colección Privada
             </a>
           </div>
@@ -15352,17 +15359,17 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10 flex flex-col items-center">
             
-          {/* CABECERA CON INSIGNIA ESTILIZADA EN UN SOLO RENGLÓN */}
+          {/* CABECERA CON INSIGNIA ESTILIZADA EN DORADO Y NEGRO */}
           <RevealSection className="text-center mb-10 sm:mb-12 max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-white/90 dark:bg-[#111]/90 backdrop-blur-md px-4 py-2 rounded-full border border-indigo-200 dark:border-indigo-500/30 shadow-sm mb-5">
-              <Gem size={14} className="text-amber-500 shrink-0" />
-              <span className="text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-[0.2em] text-[9px] sm:text-[10px] whitespace-nowrap">
+            <div className="inline-flex items-center gap-2 bg-[#141210] backdrop-blur-md px-4 py-2 rounded-full border border-[#D4AF37]/40 shadow-sm mb-5">
+              <Gem size={14} className="text-[#D4AF37] shrink-0" />
+              <span className="text-[#D4AF37] font-black uppercase tracking-[0.2em] text-[9px] sm:text-[10px] whitespace-nowrap">
                 Incluido en el Plan Diamante
               </span>
             </div>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-editorial font-medium text-indigo-950 dark:text-white mb-5 tracking-tight leading-tight">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-editorial font-medium text-white mb-5 tracking-tight leading-tight">
               Baulia Social Wall.<br/>
-              <span className="italic text-indigo-600 dark:text-indigo-400 pr-1">Tus invitados son los fotógrafos.</span>
+              <span className="italic text-[#D4AF37] pr-1">Tus invitados son los fotógrafos.</span>
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base md:text-lg font-light leading-relaxed max-w-2xl mx-auto">
               Convierte las pantallas de tu salón en un espectáculo interactivo sin instalar aplicaciones. Tus invitados <b>suben fotos al instante, cumplen retos divertidos, comentan en pantalla y desatan lluvias de corazones en vivo</b> con cada like. Úsalo en <b>Modo Público</b> (escaneando el QR de su mesa) o en <b>Modo Privado</b> (validando su pase o pulsera Black Label), y <b>recibe tu software junto con tus tarjetas impresas en una Caja VIP de colección en la puerta de tu casa completamente gratis</b>.
@@ -15654,22 +15661,22 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
             </div>
 
-            {/* BARRA INFERIOR DE COMPRA CON BOTÓN DIRECTO Y CONCISO */}
-            <div className="mt-7 pt-5 border-t border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* BARRA INFERIOR DE COMPRA CON BOTÓN EN DORADO IMPERIAL */}
+            <div className="mt-7 pt-5 border-t border-[#D4AF37]/20 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-center sm:text-left">
-                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 block">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] block">
                   Software en Vivo + Tarjetas Impresas + Envío Gratis
                 </span>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-400 mt-0.5">
                   Incluido sin costo al contratar el <b>Plan Diamante</b> o actívalo de forma independiente.
                 </p>
               </div>
               <button 
                 type="button"
                 onClick={() => { setPlanSeleccionado({ plan: 'Social Wall', precio: pSocialWall.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} 
-                className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(79,70,229,0.35)] shrink-0"
+                className="w-full sm:w-auto px-8 py-4 bg-[#D4AF37] hover:bg-[#e3be42] text-[#1C1917] rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center shadow-[0_10px_30px_rgba(212,175,55,0.35)] shrink-0"
               >
-                <Camera size={17} className="mr-2 text-white/90 shrink-0" /> Activar por ${pSocialWall.precios[moneda]} {moneda}
+                <Camera size={17} className="mr-2 text-[#1C1917] shrink-0" /> Activar por ${pSocialWall.precios[moneda]} {moneda}
               </button>
             </div>
 
@@ -15971,53 +15978,52 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             
             return (
             <RevealSection key={idx} delay={idx * 100} className={`relative flex flex-col ${plan.d2 ? 'lg:-translate-y-4' : ''}`}>
-               {plan.d2 && <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-slate-900 text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md whitespace-nowrap z-20">Más Vendido</div>}
-               {plan.d1 && <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-bl-lg whitespace-nowrap z-20"><Gem size={10} className="mr-1 inline"/> Suite Todo Incluido</div>}
+               {plan.d2 && <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#D4AF37] text-[#1C1917] text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-md whitespace-nowrap z-20">Más Vendido</div>}
+               {plan.d1 && <div className="absolute top-0 right-0 bg-[#D4AF37] text-[#1C1917] text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-bl-lg whitespace-nowrap z-20"><Gem size={10} className="mr-1 inline"/> Suite Todo Incluido</div>}
 
-               <div className={`h-full bg-white dark:bg-[#0a0a0a] rounded-3xl p-7 sm:p-8 border ${plan.d2 ? 'border-2 border-amber-500 dark:border-amber-500 shadow-amber-500/10' : plan.d1 ? 'border-indigo-500/30 dark:border-indigo-500/30' : 'border-slate-200 dark:border-white/10'} flex flex-col justify-between group overflow-hidden relative shadow-lg transition-colors`}>
+               <div className={`h-full bg-[#141210] rounded-3xl p-7 sm:p-8 border ${plan.d2 || plan.d1 ? 'border-2 border-[#D4AF37] shadow-[0_10px_35px_rgba(212,175,55,0.12)]' : 'border-[#D4AF37]/20'} flex flex-col justify-between group overflow-hidden relative shadow-lg transition-colors`}>
                  
-                  {plan.d1 && <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none transition-colors duration-700"></div>}
-                  {plan.d2 && <div className="absolute inset-0 opacity-10 bg-[linear-gradient(45deg,_transparent_70%,_#f59e0b_100%)] rounded-3xl transition-opacity group-hover:opacity-20 pointer-events-none"></div>}
+                 {(plan.d1 || plan.d2) && <div className="absolute inset-0 opacity-10 bg-[linear-gradient(45deg,_transparent_70%,_#D4AF37_100%)] rounded-3xl transition-opacity group-hover:opacity-20 pointer-events-none"></div>}
 
-                  <div className="relative z-10 mb-6 flex-1">
-                     <span className={`text-[9px] font-black uppercase tracking-widest block mb-1 ${plan.d2 ? 'text-amber-600 dark:text-amber-400' : plan.d1 ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`}>
-                       {plan.subtitulo}
-                     </span>
-                     <h3 className="text-2xl sm:text-3xl font-editorial font-bold text-slate-900 dark:text-white mb-2 transition-colors">{plan.nombre}</h3>
-                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-5 font-medium leading-relaxed transition-colors">{plan.desc}</p>
-                     
-                     {/* PRECIO DINÁMICO DESDE FIREBASE */}
-                     <div className="text-4xl font-light text-slate-900 dark:text-white mb-6 relative flex items-baseline transition-colors">
-                        {tienePromo && <span className="text-lg text-rose-500 line-through font-bold mr-2.5">${plan.preciosOriginales[moneda]}</span>}
-                        <span className="font-editorial text-transparent bg-clip-text bg-gradient-to-tr from-slate-900 to-slate-700 dark:from-white dark:to-slate-100">${plan.precios[moneda]}</span> 
-                        <span className="text-xs text-slate-400 font-bold uppercase tracking-widest ml-2">{moneda}</span>
-                     </div>
+                 <div className="relative z-10 mb-6 flex-1">
+                    <span className="text-[9px] font-black uppercase tracking-widest block mb-1 text-[#D4AF37]">
+                      {plan.subtitulo}
+                    </span>
+                    <h3 className="text-2xl sm:text-3xl font-editorial font-bold text-white mb-2">{plan.nombre}</h3>
+                    <p className="text-xs text-slate-400 mb-5 font-medium leading-relaxed">{plan.desc}</p>
+                    
+                    {/* PRECIO DINÁMICO DESDE FIREBASE */}
+                    <div className="text-4xl font-light text-white mb-6 relative flex items-baseline">
+                       {tienePromo && <span className="text-lg text-rose-500 line-through font-bold mr-2.5">${plan.preciosOriginales[moneda]}</span>}
+                       <span className="font-editorial text-transparent bg-clip-text bg-gradient-to-tr from-white to-[#FDF1A9]">${plan.precios[moneda]}</span> 
+                       <span className="text-xs text-[#D4AF37] font-bold uppercase tracking-widest ml-2">{moneda}</span>
+                    </div>
 
-                     <ul className="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300 relative transition-colors">
-                        {plan.f.map((feat, fIdx) => (
-                           <li key={fIdx} className="flex items-start leading-snug"><Check size={15} className="text-amber-500 mr-2.5 shrink-0 mt-0.5" /> <span>{feat}</span></li>
-                        ))}
-                     </ul>
-                  </div>
-                  
-                  <div className="space-y-2.5 relative z-10 mt-auto pt-4 border-t border-slate-100 dark:border-white/5">
-                    <button 
-                      type="button"
-                      onClick={() => { setFichaPlanModal(plan.id); setFichaTab('invitacion'); }}
-                      className="w-full py-3 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-bold text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 border border-slate-200/80 dark:border-white/10"
-                    >
-                      <BookOpenText size={13} className="text-amber-500"/> Ver todo lo que incluye
-                    </button>
+                    <ul className="space-y-3 text-xs sm:text-sm text-slate-300 relative">
+                       {plan.f.map((feat, fIdx) => (
+                          <li key={fIdx} className="flex items-start leading-snug"><Check size={15} className="text-[#D4AF37] mr-2.5 shrink-0 mt-0.5" /> <span>{feat}</span></li>
+                       ))}
+                    </ul>
+                 </div>
+                 
+                 <div className="space-y-2.5 relative z-10 mt-auto pt-4 border-t border-[#D4AF37]/15">
+                   <button 
+                     type="button"
+                     onClick={() => { setFichaPlanModal(plan.id); setFichaTab('invitacion'); }}
+                     className="w-full py-3 rounded-2xl bg-[#1C1917] hover:bg-[#D4AF37]/15 text-[#D4AF37] font-bold text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 border border-[#D4AF37]/40"
+                   >
+                     <BookOpenText size={13} className="text-[#D4AF37]"/> Ver todo lo que incluye
+                   </button>
 
-                    <button 
-                      type="button"
-                      onClick={() => { setPlanSeleccionado({ plan: plan.nombre, precio: plan.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} 
-                      className={`w-full py-4 rounded-2xl ${plan.d2 ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-[0_8px_25px_rgba(245,158,11,0.35)]' : plan.d1 ? 'bg-indigo-600 text-white shadow-[0_8px_25px_rgba(79,70,229,0.35)]' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg'} font-black text-[10px] uppercase tracking-widest hover:scale-[1.02] transition-all`}
-                    >
-                      Reservar mi Bóveda {plan.nombre}
-                    </button>
-                  </div>
-               </div>
+                   <button 
+                     type="button"
+                     onClick={() => { setPlanSeleccionado({ plan: plan.nombre, precio: plan.raw[moneda], moneda: moneda }); setCheckoutModal('pago'); }} 
+                     className={`w-full py-4 rounded-2xl ${plan.d2 || plan.d1 ? 'bg-[#D4AF37] hover:bg-[#e3be42] text-[#1C1917] shadow-[0_8px_25px_rgba(212,175,55,0.35)]' : 'bg-[#D4AF37]/15 hover:bg-[#D4AF37] text-[#D4AF37] hover:text-[#1C1917] border border-[#D4AF37]/50'} font-black text-[10px] uppercase tracking-widest hover:scale-[1.02] transition-all`}
+                   >
+                     Reservar mi Bóveda {plan.nombre}
+                   </button>
+                 </div>
+              </div>
             </RevealSection>
           )})}
         </div>
@@ -16585,7 +16591,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
            <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
-                 <BauliaLogo className="h-10 w-auto" />
+                 <BauliaLogo className="h-10 w-auto" forceWhite={true} />
               </div>
               
               <h4 className="text-slate-900 dark:text-white font-bold mb-4 tracking-widest uppercase text-[10px] transition-colors">Nuestra Visión</h4>
