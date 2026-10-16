@@ -1,5 +1,5 @@
 git add .
-git commit -m "testimonios"
+git commit -m "mejoras social wall"
 git push origin main
 
 .

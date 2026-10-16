@@ -9149,7 +9149,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
 };
 
 // ==========================================
-// --- COMPONENTE: GALERÍA EN VIVO (DARK PREMIUM COMPACTO - LÓGICA CORREGIDA) ---
+// --- COMPONENTE: GALERÍA EN VIVO + TALLER DE TARJETAS DE MESA (SOCIAL WALL) ---
 // ==========================================
 const GaleriaView = ({ photos, addNotification, eventoId }) => {
   const [showQR, setShowQR] = useState(false); 
@@ -9159,49 +9159,137 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
   const [viewingPost, setViewingPost] = useState(null);
   const [isZipping, setIsZipping] = useState(false);
 
+  // 🟢 ESTADOS DEL TALLER DE TARJETAS DE MESA (SOCIAL WALL)
+  const [showCardStudio, setShowCardStudio] = useState(false);
+  const [cardConfig, setCardConfig] = useState({
+    preTitle: 'NUESTRA BODA',
+    eventName: 'Mis XV / Boda',
+    subtitle: 'Escanea, sube tus fotos y cumple los retos en pantalla',
+    logoUrl: '',
+    bgImageUrl: '',
+    cantidadTarjetas: 15,
+    acabado: 'obsidiana'
+  });
+  const [socialWallStatus, setSocialWallStatus] = useState('pendiente'); // 'pendiente' | 'enviado' | 'impreso'
+  const [isUploadingCardAsset, setIsUploadingCardAsset] = useState(false);
+  const [isSavingCard, setIsSavingCard] = useState(false);
+  const [showShippingModal, setShowShippingModal] = useState(false);
+  const [shippingForm, setShippingForm] = useState({
+    recipient: '',
+    country: 'México',
+    state: '',
+    city: '',
+    zipCode: '',
+    address: '',
+    references: '',
+    phoneCode: '+52',
+    phone: ''
+  });
+
   const fileInputRef = useRef(null);
+  const logoCardInputRef = useRef(null);
+  const bgCardInputRef = useRef(null);
   const cloudName = "duy0mcqsh"; 
   const uploadPreset = "ml_default"; 
 
-  // Extraemos el ID real del evento de forma segura
   const idReal = eventoId || new URLSearchParams(window.location.search).get('e') || 'demo_id';
-
   const getCleanBaseUrl = () => window.location.hostname.includes('localhost') ? window.location.origin : 'https://baulia.com';
   
   const guestLink = `${getCleanBaseUrl()}/?modo=camara&e=${idReal}`;
   const proyectorLink = `${getCleanBaseUrl()}/?modo=proyector&e=${idReal}`; 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(guestLink)}&margin=10`;
 
-  // 🔴 CORRECCIÓN: Leemos la configuración del Muro directamente de la raíz del evento
+  // Escuchamos configuración del muro + diseño de tarjetas + cantidad de mesas creadas
   useEffect(() => {
     if (!idReal || idReal === 'demo_id') return;
     const unsub = onSnapshot(doc(db, "eventos", idReal), (docSnap) => {
       if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.galeriaConfig) {
-              setConfig(data.galeriaConfig);
-          }
+        const data = docSnap.data();
+        if (data.galeriaConfig) setConfig(data.galeriaConfig);
+        if (data.socialWallStatus) setSocialWallStatus(data.socialWallStatus);
+        if (data.socialWallCardConfig) {
+          setCardConfig(prev => ({ ...prev, ...data.socialWallCardConfig }));
+        } else if (data.nombres) {
+          setCardConfig(prev => ({
+            ...prev,
+            eventName: data.nombres,
+            preTitle: data.tipoEvento ? data.tipoEvento.replace(/_/g, ' ').toUpperCase() : 'EVENTO ESPECIAL'
+          }));
+        }
+        if (data.direccionEnvioSocialWall) {
+          setShippingForm(prev => ({ ...prev, ...data.direccionEnvioSocialWall }));
+        } else if (data.direccionEnvioTaller) {
+          setShippingForm(prev => ({ ...prev, ...data.direccionEnvioTaller }));
+        }
       }
     });
     return () => unsub();
   }, [idReal]);
 
-  // 🔴 CORRECCIÓN: Guardamos la configuración de forma directa y segura en la raíz
   const updateConfig = async (key, value) => {
     if (!idReal || idReal === 'demo_id') return;
     const newConfig = { ...config, [key]: value };
-    
-    // Actualizamos la pantalla instantáneamente
     setConfig(newConfig);
-    
     try {
-        await updateDoc(doc(db, "eventos", idReal), { 
-            galeriaConfig: newConfig 
-        });
-        if(addNotification) addNotification('Ajuste Guardado', 'La configuración se actualizó en vivo.', 'success');
+      await updateDoc(doc(db, "eventos", idReal), { galeriaConfig: newConfig });
+      if(addNotification) addNotification('Ajuste Guardado', 'La configuración se actualizó en vivo.', 'success');
     } catch (err) {
-        console.error("Error guardando config del muro:", err);
-        if(addNotification) addNotification('Error', 'No se pudo guardar la configuración.', 'error');
+      if(addNotification) addNotification('Error', 'No se pudo guardar la configuración.', 'error');
+    }
+  };
+
+  // Subir Logo o Imagen de Fondo para la Tarjeta de Mesa
+  const handleCardAssetUpload = async (e, field) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setIsUploadingCardAsset(true);
+    if(addNotification) addNotification('Subiendo imagen...', 'Optimizando calidad para impresión.', 'info');
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", uploadPreset);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.secure_url) {
+        const updated = { ...cardConfig, [field]: data.secure_url };
+        setCardConfig(updated);
+        await updateDoc(doc(db, "eventos", idReal), { socialWallCardConfig: updated });
+        if(addNotification) addNotification('¡Imagen Lista!', 'Se aplicó a tu tarjeta de mesa.', 'success');
+      }
+    } catch (err) {
+      if(addNotification) addNotification('Error', 'Fallo al subir la imagen.', 'error');
+    }
+    setIsUploadingCardAsset(false);
+    e.target.value = null;
+  };
+
+  const handleSaveCardDesign = async () => {
+    if (!idReal || idReal === 'demo_id') return;
+    setIsSavingCard(true);
+    try {
+      await updateDoc(doc(db, "eventos", idReal), { socialWallCardConfig: cardConfig });
+      if(addNotification) addNotification('Diseño Guardado', 'Los datos de tu tarjeta de mesa se guardaron correctamente.', 'success');
+    } catch (err) {
+      if(addNotification) addNotification('Error', 'No se pudo guardar el diseño.', 'error');
+    }
+    setIsSavingCard(false);
+  };
+
+  const handleSendCardOrderToWorkshop = async (e) => {
+    e.preventDefault();
+    if (!idReal || idReal === 'demo_id') return;
+    try {
+      await updateDoc(doc(db, "eventos", idReal), {
+        socialWallCardConfig: cardConfig,
+        socialWallStatus: 'enviado',
+        fechaEnvioSocialWall: new Date().toISOString(),
+        direccionEnvioSocialWall: shippingForm
+      });
+      setSocialWallStatus('enviado');
+      setShowShippingModal(false);
+      if(addNotification) addNotification('¡Orden Enviada a Taller!', 'Tus tarjetas de mesa han entrado a fila de producción.', 'success');
+    } catch (err) {
+      if(addNotification) addNotification('Error', 'No se pudo enviar la orden al taller.', 'error');
     }
   };
 
@@ -9304,6 +9392,8 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
     });
   };
 
+  const isLockedInWorkshop = socialWallStatus === 'enviado' || socialWallStatus === 'impreso';
+
   return (
     <div className="h-full flex flex-col space-y-4 pb-6 relative z-10 transition-colors duration-500 max-w-[1200px] mx-auto w-full">
       
@@ -9320,14 +9410,225 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
             </div>
           </div>
           
-          <button onClick={downloadAllPhotos} disabled={isZipping || photos.length === 0} className={`flex items-center justify-center px-6 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all shadow-sm ${isZipping ? 'bg-slate-400 dark:bg-slate-700 text-white' : photos.length === 0 ? 'bg-slate-100 dark:bg-white/5 text-slate-400 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600 text-white hover:scale-105 shadow-emerald-500/20'}`}>
-            {isZipping ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
-            {isZipping ? 'Empaquetando...' : 'Descargar Álbum (.ZIP)'}
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* 🟢 BOTÓN PARA DESPLEGAR EL ESTUDIO DE TARJETAS DE MESA Y ENVIAR A TALLER */}
+            <button
+              type="button"
+              onClick={() => setShowCardStudio(!showCardStudio)}
+              className={`flex items-center justify-center px-5 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all border ${
+                isLockedInWorkshop
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                  : showCardStudio
+                  ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg'
+                  : 'bg-slate-900 dark:bg-white/10 text-white border-slate-700 dark:border-white/15 hover:border-amber-500/50'
+              }`}
+            >
+              {isLockedInWorkshop ? (
+                <><Lock size={14} className="mr-2"/> {socialWallStatus === 'impreso' ? 'Tarjetas Despachadas' : 'Tarjetas en Producción'}</>
+              ) : (
+                <><Printer size={14} className="mr-2 text-amber-400"/> {showCardStudio ? 'Ocultar Taller de Tarjetas' : 'Diseñar Tarjetas de Mesa (Envío Gratis)'}</>
+              )}
+            </button>
+
+            <button onClick={downloadAllPhotos} disabled={isZipping || photos.length === 0} className={`flex items-center justify-center px-6 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all shadow-sm ${isZipping ? 'bg-slate-400 dark:bg-slate-700 text-white' : photos.length === 0 ? 'bg-slate-100 dark:bg-white/5 text-slate-400 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600 text-white hover:scale-105 shadow-emerald-500/20'}`}>
+              {isZipping ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
+              {isZipping ? 'Empaquetando...' : 'Descargar Álbum (.ZIP)'}
+            </button>
+          </div>
         </div>
 
+        {/* 🟢 PANEL DESPLEGABLE: ESTUDIO PERSONALIZADOR DE TARJETAS DE MESA (ESTILO BLACK LABEL) */}
+        {showCardStudio && (
+          <div className="mb-6 p-5 sm:p-6 rounded-3xl bg-slate-50 dark:bg-[#111] border border-amber-500/30 shadow-xl animate-in slide-in-from-top-4 duration-300">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-200 dark:border-white/10">
+              <div>
+                <span className="text-[9px] font-black uppercase tracking-widest text-amber-500 block">Taller de Impresión Baulia • Envío Gratis Incluido</span>
+                <h3 className="text-lg sm:text-xl font-editorial font-bold text-slate-900 dark:text-white">Personalización de Tarjetas de Mesa (Caballete Plegable)</h3>
+              </div>
+              {isLockedInWorkshop && (
+                <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 w-max">
+                  <Lock size={12}/> {socialWallStatus === 'impreso' ? 'PRODUCIDO Y ENVIADO' : 'EN PRODUCCIÓN'}
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Columna Izquierda: Controles de Diseño (Idéntico a Black Label) */}
+              <div className="lg:col-span-7 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Subir Logo */}
+                  <div className="p-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/15 bg-white dark:bg-[#0a0a0a] text-center relative">
+                    <input type="file" accept="image/*" ref={logoCardInputRef} onChange={e => handleCardAssetUpload(e, 'logoUrl')} className="hidden" disabled={isLockedInWorkshop} />
+                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Logo / Monograma (Opcional)</p>
+                    {cardConfig.logoUrl ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <img src={cardConfig.logoUrl} alt="Logo" className="h-12 object-contain" />
+                        {!isLockedInWorkshop && (
+                          <div className="flex gap-2">
+                            <button type="button" onClick={() => logoCardInputRef.current.click()} className="text-[9px] font-bold text-amber-500 underline">Cambiar</button>
+                            <button type="button" onClick={() => setCardConfig({ ...cardConfig, logoUrl: '' })} className="text-[9px] font-bold text-rose-500 underline">Quitar</button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <button type="button" disabled={isLockedInWorkshop || isUploadingCardAsset} onClick={() => logoCardInputRef.current.click()} className="w-full py-2 flex flex-col items-center justify-center text-slate-500 hover:text-amber-500 transition-colors disabled:opacity-50">
+                        <ImageIcon size={22} className="mb-1"/>
+                        <span className="text-[10px] font-bold">Clic para subir logo</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Subir Imagen de Fondo con Degradado Automático */}
+                  <div className="p-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/15 bg-white dark:bg-[#0a0a0a] text-center relative">
+                    <input type="file" accept="image/*" ref={bgCardInputRef} onChange={e => handleCardAssetUpload(e, 'bgImageUrl')} className="hidden" disabled={isLockedInWorkshop} />
+                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Foto de Fondo (Opcional)</p>
+                    {cardConfig.bgImageUrl ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <img src={cardConfig.bgImageUrl} alt="Fondo" className="h-12 w-20 object-cover rounded-lg border border-white/10" />
+                        {!isLockedInWorkshop && (
+                          <div className="flex gap-2">
+                            <button type="button" onClick={() => bgCardInputRef.current.click()} className="text-[9px] font-bold text-amber-500 underline">Cambiar</button>
+                            <button type="button" onClick={() => setCardConfig({ ...cardConfig, bgImageUrl: '' })} className="text-[9px] font-bold text-rose-500 underline">Quitar</button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <button type="button" disabled={isLockedInWorkshop || isUploadingCardAsset} onClick={() => bgCardInputRef.current.click()} className="w-full py-2 flex flex-col items-center justify-center text-slate-500 hover:text-amber-500 transition-colors disabled:opacity-50">
+                        <Camera size={22} className="mb-1"/>
+                        <span className="text-[10px] font-bold">Subir foto (Degradado auto)</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Tipo de Evento (Pre-título)</label>
+                    <input
+                      type="text"
+                      disabled={isLockedInWorkshop}
+                      value={cardConfig.preTitle}
+                      onChange={e => setCardConfig({ ...cardConfig, preTitle: e.target.value })}
+                      placeholder="Ej. NUESTRA BODA / MIS XV"
+                      className="w-full p-3 rounded-xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Nombre Principal del Evento</label>
+                    <input
+                      type="text"
+                      disabled={isLockedInWorkshop}
+                      value={cardConfig.eventName}
+                      onChange={e => setCardConfig({ ...cardConfig, eventName: e.target.value })}
+                      placeholder="Ej. Sofía & Alejandro"
+                      className="w-full p-3 rounded-xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Cantidad de Mesas (Tarjetas)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      disabled={isLockedInWorkshop}
+                      value={cardConfig.cantidadTarjetas}
+                      onChange={e => setCardConfig({ ...cardConfig, cantidadTarjetas: Math.max(1, parseInt(e.target.value) || 1) })}
+                      className="w-full p-3 rounded-xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-xs font-black text-amber-500 text-center outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Frase de Invitación antes del QR</label>
+                  <input
+                    type="text"
+                    disabled={isLockedInWorkshop}
+                    value={cardConfig.subtitle}
+                    onChange={e => setCardConfig({ ...cardConfig, subtitle: e.target.value })}
+                    placeholder="Escanea, sube tus fotos y cumple los retos en pantalla"
+                    className="w-full p-3 rounded-xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-xs font-medium text-slate-900 dark:text-white outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                {!isLockedInWorkshop ? (
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={handleSaveCardDesign}
+                      disabled={isSavingCard}
+                      className="flex-1 py-3.5 rounded-xl bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 text-slate-800 dark:text-white font-black text-[10px] uppercase tracking-widest transition-colors"
+                    >
+                      {isSavingCard ? 'Guardando...' : 'Guardar Diseño'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowShippingModal(true)}
+                      className="flex-1 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-widest shadow-lg transition-all flex items-center justify-center gap-2"
+                    >
+                      <Send size={14}/> Enviar a Taller ({cardConfig.cantidadTarjetas} Tarjetas)
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-between">
+                    <span>✓ Tu orden de {cardConfig.cantidadTarjetas} tarjetas de mesa ya fue enviada a Taller Baulia.</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Columna Derecha: Vista Previa en Vivo con Degradado antes del QR */}
+              <div className="lg:col-span-5 flex flex-col items-center">
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-1.5">
+                  <Eye size={12}/> Vista Previa • Tarjeta de Mesa (9.5 x 13.5 cm parada)
+                </span>
+
+                <div className="w-[235px] h-[330px] rounded-2xl bg-white border-2 border-amber-500/40 shadow-2xl overflow-hidden relative flex flex-col items-center text-center select-none">
+                  {/* Imagen de Fondo Superior (termina con degradado suave antes del QR) */}
+                  <div className="absolute top-0 inset-x-0 h-[55%] overflow-hidden bg-slate-100">
+                    {cardConfig.bgImageUrl ? (
+                      <img src={cardConfig.bgImageUrl} alt="Fondo Tarjeta" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-b from-amber-500/15 via-slate-100 to-white"></div>
+                    )}
+                    {/* Degradado automático que funde la imagen a blanco puro antes de llegar al QR */}
+                    <div
+                      className="absolute inset-0"
+                      style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.65) 60%, #ffffff 95%, #ffffff 100%)' }}
+                    ></div>
+                  </div>
+
+                  {/* Contenido Frontal de la Tarjeta */}
+                  <div className="relative z-10 flex flex-col items-center justify-end h-full w-full px-4 pb-4 pt-6">
+                    {cardConfig.logoUrl && (
+                      <img src={cardConfig.logoUrl} alt="Logo" className="h-9 object-contain mb-1 drop-shadow-sm" />
+                    )}
+                    <span className="text-[7px] font-black uppercase tracking-[0.25em] text-amber-600 mb-0.5">
+                      {cardConfig.preTitle || 'SOCIAL WALL EN VIVO'}
+                    </span>
+                    <h4 className="font-editorial font-bold text-xl text-slate-900 leading-tight mb-1 line-clamp-1">
+                      {cardConfig.eventName || 'Nombre del Evento'}
+                    </h4>
+                    <p className="text-[8px] font-semibold text-slate-500 leading-snug max-w-[180px] mb-2.5 line-clamp-2">
+                      {cardConfig.subtitle}
+                    </p>
+
+                    <div className="bg-white p-2 rounded-xl border border-slate-200 shadow-md mb-2">
+                      <img src={qrUrl} alt="QR Mesa" className="w-28 h-28 object-contain mix-blend-multiply" />
+                    </div>
+
+                    <span className="text-[8px] font-black uppercase tracking-widest text-indigo-600">
+                      {config.hashtag || '#MiEvento'} • Sube tus Fotos
+                    </span>
+                    <span className="text-[6px] font-bold uppercase tracking-[0.25em] text-slate-400 mt-1">
+                      by BAULIA.COM
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          
           <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
             <div className="mb-4">
                <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><MonitorPlay size={16} className="text-indigo-500 dark:text-amber-500"/> Proyección y Acceso</h4>
@@ -9382,9 +9683,79 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
                </button>
             </div>
           </div>
-
         </div>
       </div>
+
+      {/* 🟢 MODAL DE DIRECCIÓN DE ENVÍO A TALLER (IDÉNTICO A BLACK LABEL) */}
+      {showShippingModal && (
+        <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-[#0d0d0d] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 sm:p-8 shadow-2xl text-white max-h-[92vh] overflow-y-auto custom-scrollbar">
+            <form onSubmit={handleSendCardOrderToWorkshop} className="space-y-4">
+              <div>
+                <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Quien recibe (Nombre Completo)</label>
+                <input type="text" required value={shippingForm.recipient} onChange={e => setShippingForm({...shippingForm, recipient: e.target.value})} placeholder="Ej. Maricela Estudillo" className="w-full p-3.5 rounded-xl bg-black border border-white/10 text-sm font-bold text-white outline-none focus:border-amber-500" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">País</label>
+                  <input type="text" required value={shippingForm.country} onChange={e => setShippingForm({...shippingForm, country: e.target.value})} className="w-full p-3.5 rounded-xl bg-black border border-white/10 text-sm font-bold text-white outline-none focus:border-amber-500" />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Estado / Provincia</label>
+                  <input type="text" required value={shippingForm.state} onChange={e => setShippingForm({...shippingForm, state: e.target.value})} placeholder="Ej. Veracruz" className="w-full p-3.5 rounded-xl bg-black border border-white/10 text-sm font-bold text-white outline-none focus:border-amber-500" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Ciudad / Municipio</label>
+                  <input type="text" required value={shippingForm.city} onChange={e => setShippingForm({...shippingForm, city: e.target.value})} placeholder="Ej. Minatitlán" className="w-full p-3.5 rounded-xl bg-black border border-white/10 text-sm font-bold text-white outline-none focus:border-amber-500" />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Código Postal</label>
+                  <input type="text" required value={shippingForm.zipCode} onChange={e => setShippingForm({...shippingForm, zipCode: e.target.value})} placeholder="96790" className="w-full p-3.5 rounded-xl bg-black border border-white/10 text-sm font-bold text-white outline-none focus:border-amber-500" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Calle y Número</label>
+                <input type="text" required value={shippingForm.address} onChange={e => setShippingForm({...shippingForm, address: e.target.value})} placeholder="Calle, Número exterior e interior, Colonia" className="w-full p-3.5 rounded-xl bg-black border border-white/10 text-sm font-bold text-white outline-none focus:border-amber-500" />
+              </div>
+
+              <div>
+                <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Referencias de Entrega (Opcional)</label>
+                <input type="text" value={shippingForm.references} onChange={e => setShippingForm({...shippingForm, references: e.target.value})} placeholder="Color de fachada, entre qué calles..." className="w-full p-3.5 rounded-xl bg-black border border-white/10 text-sm font-bold text-white outline-none focus:border-amber-500" />
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Lada</label>
+                  <input type="text" required value={shippingForm.phoneCode} onChange={e => setShippingForm({...shippingForm, phoneCode: e.target.value})} className="w-full p-3.5 rounded-xl bg-black border border-white/10 text-sm font-bold text-white text-center outline-none focus:border-amber-500" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Teléfono Móvil</label>
+                  <input type="tel" required value={shippingForm.phone} onChange={e => setShippingForm({...shippingForm, phone: e.target.value})} placeholder="10 dígitos" className="w-full p-3.5 rounded-xl bg-black border border-white/10 text-sm font-bold text-white outline-none focus:border-amber-500" />
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-2.5">
+                <AlertTriangle size={16} className="shrink-0 mt-0.5"/>
+                <span>Una vez enviada la orden a taller, <b>NO podrás editar el diseño de tus tarjetas de mesa</b>. Verifica que todo esté perfecto antes de continuar.</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <button type="button" onClick={() => setShowShippingModal(false)} className="py-4 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-[10px] uppercase tracking-widest">
+                  Revisar Diseño
+                </button>
+                <button type="submit" className="py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center justify-center gap-2">
+                  <Send size={14}/> Enviar Orden Definitiva
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl p-6 overflow-y-auto bg-slate-50/50 dark:bg-transparent custom-scrollbar transition-colors">
         {photos.length === 0 ? (
@@ -9463,7 +9834,6 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
                       </div>
                     </div>
                   </div>
-
                 </div>
               );
             })}
@@ -12207,33 +12577,34 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     };
   });
 
-  // 🟢 ESTADO Y ESCUCHADOR DE TESTIMONIOS APROBADOS EN EL PANEL
+  // 🟢 ESTADO Y ESCUCHADOR DE RESEÑAS APROBADAS DESDE EL PANEL ("resenas")
   const testimoniosEditorialFallback = [
     {
       id: 't1',
-      nombre: 'Sofía & Alejandro M.',
-      evento: 'Boda en Hacienda • Plan Diamante',
-      texto: 'El auto-acomodo de mesas por etiquetas nos ahorró semanas de discusiones familiares, y cuando llegó la Caja VIP con los brazaletes y las tarjetas del Social Wall no lo podíamos creer. Nuestros invitados subieron más de 400 fotos a la pantalla.',
+      nombre: 'Ana Sofía V.',
+      evento: 'Boda en Jardín • Anfitriona',
+      texto: 'Se los juro que el acomodo de mesas me tenía al borde del colapso porque mis papás están divorciados. Separarlos por etiquetas en la bóveda fue la salvación. Y cuando nos llegó la caja negra con las pulseras a la casa... uf, se sintió súper premium.',
       estrellas: 5
     },
     {
       id: 't2',
-      nombre: 'Mariana Villarreal',
-      evento: 'Boda Civil & Religiosa • Plan Oro',
-      texto: 'Cero colados. La Hostess escaneó los códigos QR desde su propio celular en segundos y cada invitado veía en su pase exactamente en qué mesa sentarse. La invitación con música y acuarelas emocionó a toda nuestra familia.',
+      nombre: 'Marcela Garza',
+      evento: 'XV Años de mi hija • Anfitriona',
+      texto: 'Cero colados en los XV de mi niña!! Le pasé el link a la chica de la entrada y con su propio celular iba escaneando rapidísimo. Las tías batallaron un poquito al inicio con el QR de la mesa, pero cuando vieron que sus fotos salían en la pantalla gigante no soltaron el celular jaja.',
       estrellas: 5
     },
     {
       id: 't3',
-      nombre: 'Roberto & Claudia G.',
-      evento: 'XV Años de Gala • Plan Diamante',
-      texto: 'Los chicos en la fiesta se volvieron locos con los retos del Social Wall y la lluvia de corazones en el proyector. Además, con la Lluvia de Sobres a 1 clic recuperamos la inversión de la plataforma desde la primera semana.',
+      nombre: 'Carlos y Andrea',
+      evento: 'Boda Civil & Religiosa',
+      texto: 'Yo solo quería llevar el control de pagos a proveedores para no pasarnos del presupuesto, pero el Social Wall se robó la noche. Ni gastamos en cabina de fotos porque todos subían sus selfies directo al proyector. Lo desquitamos peso por peso.',
       estrellas: 5
     }
   ];
   const [testimoniosPublicos, setTestimoniosPublicos] = useState(testimoniosEditorialFallback);
+  const [verTodosTestimoniosModal, setVerTodosTestimoniosModal] = useState(false);
 
-  // 🔴 2. ESCUCHADOR EN TIEMPO REAL AL PANEL (Precios y Testimonios Aprobados)
+  // 🔴 2. ESCUCHADOR EN TIEMPO REAL AL PANEL (Precios y Colección "resenas")
   useEffect(() => {
     const unsubPrecios = onSnapshot(doc(db, 'ajustes_baulia', 'precios_publicos'), (docSnap) => {
       if (docSnap.exists()) {
@@ -12243,26 +12614,32 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       }
     });
 
-    let unsubTestimonios = () => {};
+    let unsubResenas = () => {};
     try {
       if (typeof collection === 'function') {
-        unsubTestimonios = onSnapshot(collection(db, 'testimonios'), (snap) => {
-          const lista = [];
-          snap.forEach((d) => {
-            const data = d.data();
-            const estaAprobado = data.aprobado === true || data.estado === 'aprobado' || data.activo === true || data.visible === true || data.status === 'approved';
-            if (estaAprobado) {
-              lista.push({
-                id: d.id,
-                nombre: data.nombre || data.autor || data.cliente || 'Anfitrión Baulia',
-                evento: data.evento || data.tipoEvento || (data.plan ? `Plan ${data.plan}` : 'Evento Verificado Baulia'),
-                texto: data.comentario || data.texto || data.mensaje || data.testimonio || '',
-                estrellas: Number(data.calificacion || data.estrellas || 5)
-              });
-            }
+        unsubResenas = onSnapshot(collection(db, 'resenas'), (snap) => {
+          const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          docs.sort((a, b) => {
+            const tA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0);
+            const tB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0);
+            return tB - tA;
           });
-          if (lista.length > 0) {
-            setTestimoniosPublicos(lista);
+          const aprobadas = docs
+            .filter(data => data.status === 'aprobada' || data.aprobado === true || data.status === 'approved')
+            .map(data => ({
+              id: data.id,
+              nombre: data.authorName || data.nombre || 'Anfitrión Baulia',
+              evento: data.authorType || data.evento || 'Evento Verificado Baulia',
+              texto: data.comment || data.comentario || data.texto || '',
+              estrellas: Number(data.rating || data.estrellas || 5)
+            }));
+
+          if (aprobadas.length >= 3) {
+            setTestimoniosPublicos(aprobadas);
+          } else if (aprobadas.length > 0) {
+            setTestimoniosPublicos([...aprobadas, ...testimoniosEditorialFallback.slice(aprobadas.length)]);
+          } else {
+            setTestimoniosPublicos(testimoniosEditorialFallback);
           }
         });
       }
@@ -12270,7 +12647,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
 
     return () => {
       unsubPrecios();
-      unsubTestimonios();
+      unsubResenas();
     };
   }, []);
 
@@ -15197,16 +15574,16 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             Todos nuestros planes incluyen una invitación de Alta Costura y acceso a tu Bóveda Privada. Un solo pago único, <b>precios netos con IVA incluido</b> y acompañamiento hasta el último baile.
           </p>
 
-          {/* 🟢 GATILLO DE ESCASEZ GENERAL (Engloba todos los planes por atención Concierge y Atelier) */}
+          {/* 🟢 GATILLO DE EXCLUSIVIDAD (50 Eventos por Mes sin contador artificial fijo) */}
           <div className="max-w-2xl mx-auto bg-white dark:bg-[#111] border border-amber-500/40 rounded-2xl p-3.5 sm:px-6 sm:py-3.5 shadow-[0_10px_30px_rgba(245,158,11,0.12)] flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 text-left">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0"></span>
               <p className="text-xs text-slate-700 dark:text-slate-200 leading-snug">
-                <b>Disponibilidad Limitada:</b> Por nuestra atención artesanal y soporte Concierge 1 a 1, aceptamos únicamente <b>50 eventos por mes</b>.
+                <b>Exclusividad Garantizada:</b> Para brindar un diseño artesanal impecable y soporte Concierge 1 a 1, limitamos nuestra agenda a <b>50 eventos por mes</b>.
               </p>
             </div>
             <span className="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest whitespace-nowrap shrink-0">
-              🔥 8 Lugares Disponibles
+              Cupo Mensual Limitado
             </span>
           </div>
         </RevealSection>
@@ -15574,26 +15951,25 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       </div>
 
       {/* ========================================== */}
-      {/* 🟢 PRUEBA SOCIAL EMOCIONAL: TESTIMONIOS DE ALTA COSTURA (Conectados a Firebase + Fallback) */}
+      {/* 🟢 PRUEBA SOCIAL EMOCIONAL: TESTIMONIOS DE ALTA COSTURA (Conectados a "resenas" + Modal Ver Todos) */}
       {/* ========================================== */}
       <section id="testimonios" className="py-20 px-4 md:px-8 max-w-7xl mx-auto relative z-10 border-t border-slate-200/70 dark:border-white/5">
         <RevealSection className="text-center mb-12">
           <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-3 block">
-            El Efecto Baulia • Historias Reales
+            El Efecto Baulia • Opiniones Reales
           </span>
           <h2 className="text-3xl sm:text-5xl font-editorial font-medium text-slate-900 dark:text-white mb-4 leading-tight">
             La tranquilidad de quienes ya <span className="italic text-amber-500">celebraron sin estrés.</span>
           </h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base font-light max-w-xl mx-auto">
-            Anfitriones y parejas que transformaron la logística de su evento con nuestra Bóveda Privada.
+            Anfitriones y parejas que vivieron la experiencia desde su Bóveda Privada.
           </p>
         </RevealSection>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-          {testimoniosPublicos.slice(0, 6).map((item, idx) => (
+          {testimoniosPublicos.slice(0, 3).map((item, idx) => (
             <RevealSection key={item.id || idx} delay={idx * 100} className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-7 sm:p-8 border border-slate-200 dark:border-white/10 shadow-lg flex flex-col justify-between relative overflow-hidden group hover:border-amber-500/40 transition-all">
               <div>
-                {/* Estrellas Doradas */}
                 <div className="flex items-center gap-1 text-amber-500 mb-4">
                   {Array.from({ length: item.estrellas || 5 }).map((_, sIdx) => (
                     <svg key={sIdx} className="w-4 h-4 fill-amber-400 text-amber-400" viewBox="0 0 20 20">
@@ -15601,14 +15977,11 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
                     </svg>
                   ))}
                 </div>
-
-                {/* Cita del Testimonio */}
                 <p className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-light italic leading-relaxed mb-6">
                   "{item.texto}"
                 </p>
               </div>
 
-              {/* Firma del Cliente */}
               <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-9 h-9 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 font-editorial font-bold text-sm shrink-0">
@@ -15628,6 +16001,53 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
             </RevealSection>
           ))}
         </div>
+
+        <div className="mt-8 text-center">
+          <button
+            type="button"
+            onClick={() => setVerTodosTestimoniosModal(true)}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-100 dark:bg-white/5 hover:bg-amber-500/15 border border-slate-200 dark:border-white/10 hover:border-amber-500/40 text-slate-700 dark:text-slate-200 text-[11px] font-black uppercase tracking-widest transition-all"
+          >
+            <Star size={14} className="text-amber-500 fill-amber-500"/> Ver todas las opiniones ({testimoniosPublicos.length})
+          </button>
+        </div>
+
+        {verTodosTestimoniosModal && (
+          <div onClick={() => setVerTodosTestimoniosModal(false)} className="fixed inset-0 z-[99999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+            <div onClick={e => e.stopPropagation()} className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-4xl max-h-[85vh] border border-slate-200 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
+              <div className="p-6 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50 dark:bg-[#111]">
+                <div>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-amber-500 block">Bóveda de Reseñas Verificadas</span>
+                  <h3 className="text-2xl font-editorial font-bold text-slate-900 dark:text-white">Opiniones de Anfitriones Baulia ({testimoniosPublicos.length})</h3>
+                </div>
+                <button type="button" onClick={() => setVerTodosTestimoniosModal(false)} className="p-2 rounded-full bg-slate-200/70 dark:bg-white/10 text-slate-600 dark:text-white hover:bg-rose-500 hover:text-white transition-colors">
+                  <X size={18}/>
+                </button>
+              </div>
+              <div className="p-6 overflow-y-auto custom-scrollbar grid grid-cols-1 md:grid-cols-2 gap-4">
+                {testimoniosPublicos.map((item, idx) => (
+                  <div key={item.id || idx} className="p-6 rounded-2xl bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-1 text-amber-500 mb-3">
+                        {Array.from({ length: item.estrellas || 5 }).map((_, sIdx) => (
+                          <Star key={sIdx} size={14} className="fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                      <p className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm italic leading-relaxed mb-4">"{item.texto}"</p>
+                    </div>
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-200/60 dark:border-white/5">
+                      <div>
+                        <p className="font-bold text-xs text-slate-900 dark:text-white">{item.nombre}</p>
+                        <p className="text-[9px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">{item.evento}</p>
+                      </div>
+                      <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">✓ Verificado</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* ========================================== */}
@@ -16038,8 +16458,28 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
     const unsubEventosTaller = onSnapshot(collection(db, "eventos"), (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const pedidos = data.filter(e => e.pulserasStatus === 'enviado' || e.pulserasStatus === 'impreso');
-      pedidos.sort((a, b) => new Date(b.fechaEnvioTaller || 0) - new Date(a.fechaEnvioTaller || 0));
+      const pedidos = [];
+      data.forEach(e => {
+        if (e.pulserasStatus === 'enviado' || e.pulserasStatus === 'impreso') {
+          pedidos.push({
+            ...e,
+            orderUniqueKey: `${e.id}_pulseras`,
+            orderType: 'pulseras',
+            orderStatus: e.pulserasStatus,
+            orderDate: e.fechaEnvioTaller
+          });
+        }
+        if (e.socialWallStatus === 'enviado' || e.socialWallStatus === 'impreso') {
+          pedidos.push({
+            ...e,
+            orderUniqueKey: `${e.id}_social_wall`,
+            orderType: 'social_wall',
+            orderStatus: e.socialWallStatus,
+            orderDate: e.fechaEnvioSocialWall
+          });
+        }
+      });
+      pedidos.sort((a, b) => new Date(b.orderDate || 0) - new Date(a.orderDate || 0));
       setPedidosTaller(pedidos);
     });
 
@@ -16097,16 +16537,40 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const procesarOrdenTaller = async (evento) => {
     setIsFetchingOrden(true);
     try {
+      if (evento.orderType === 'social_wall') {
+        const cardCfg = evento.socialWallCardConfig || {};
+        setOrdenActiva({
+          orderUniqueKey: evento.orderUniqueKey,
+          orderType: 'social_wall',
+          eventoId: evento.id,
+          nombres: evento.nombres || 'Cliente Baulia',
+          cliente: evento.nombres || 'Cliente Baulia',
+          fechaPedido: evento.fechaEnvioSocialWall,
+          cardConfig: {
+            preTitle: cardCfg.preTitle || 'EVENTO ESPECIAL',
+            eventName: cardCfg.eventName || evento.nombres || 'Evento Baulia',
+            subtitle: cardCfg.subtitle || 'Escanea, sube tus fotos y cumple los retos en pantalla',
+            logoUrl: cardCfg.logoUrl || '',
+            bgImageUrl: cardCfg.bgImageUrl || '',
+            cantidadTarjetas: Number(cardCfg.cantidadTarjetas) || 15
+          },
+          hashtag: evento.galeriaConfig?.hashtag || '#MiEvento',
+          fechaEvento: evento.fecha,
+          status: evento.socialWallStatus,
+          direccionEnvioTaller: evento.direccionEnvioSocialWall || evento.direccionEnvioTaller
+        });
+        setIsFetchingOrden(false);
+        return;
+      }
+
       const listRef = collection(db, "eventos", evento.id, "invitados");
       const listSnap = await getDocs(listRef);
       const invitadosDB = listSnap.docs.map(d => ({ id: d.id, ...d.data() }));
       
-      // 🟢 CORRECCIÓN: Filtramos a todos los que tengan pases válidos (sin depender de variables viejas)
       const invitadosVIP = invitadosDB.filter(g => g.status === 'confirmado' || g.status === 'ingreso' || (g.passes && g.passes > 0));
 
       const flattened = [];
       invitadosVIP.forEach(guest => {
-        // Si tienen la nueva estructura de subInvitados, los usamos
         if (guest.subGuests && guest.subGuests.length > 0) {
             guest.subGuests.forEach((sg) => {
               flattened.push({
@@ -16117,7 +16581,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
               });
             });
         } else {
-            // Si es un invitado antiguo sin subGuests, forzamos la creación del array principal
             flattened.push({
                 idReal: guest.id,
                 nombreAImprimir: guest.name || 'Invitado VIP',
@@ -16128,7 +16591,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       });
 
       setOrdenActiva({
+         orderUniqueKey: evento.orderUniqueKey,
+         orderType: 'pulseras',
          eventoId: evento.id,
+         nombres: evento.nombres || 'Cliente Desconocido',
          cliente: evento.nombres || 'Cliente Desconocido',
          fechaPedido: evento.fechaEnvioTaller,
          config: evento.pulserasConfig || {},
@@ -16146,7 +16612,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
   const marcarComoImpreso = async () => {
      try {
-        await updateDoc(doc(db, "eventos", ordenActiva.eventoId), { pulserasStatus: 'impreso' });
+        const field = ordenActiva.orderType === 'social_wall' ? 'socialWallStatus' : 'pulserasStatus';
+        await updateDoc(doc(db, "eventos", ordenActiva.eventoId), { [field]: 'impreso' });
         setOrdenActiva({...ordenActiva, status: 'impreso'});
         setDialog({ isOpen: true, type: 'alert', title: '¡Éxito!', message: 'El lote se marcó como impreso y despachado.' });
      } catch (error) {
@@ -16159,13 +16626,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
          isOpen: true, 
          type: 'confirm', 
          title: 'Desbloquear Bóveda', 
-         message: '¿Estás seguro que deseas regresar este pedido a modo edición? El cliente podrá modificar su diseño y lista, y la orden desaparecerá de esta bandeja hasta que vuelva a enviarla.', 
+         message: '¿Estás seguro que deseas regresar este pedido a modo edición? El cliente podrá modificar su diseño y la orden desaparecerá de esta bandeja hasta que vuelva a enviarla.', 
          onConfirm: async () => { 
              setDialog({ ...dialog, isOpen: false }); 
              try {
-                // Regresamos el estatus a pendiente para que se desbloquee la vista del cliente
-                await updateDoc(doc(db, "eventos", ordenActiva.eventoId), { pulserasStatus: 'pendiente' });
-                setOrdenActiva(null); // Limpiamos la vista porque la orden ya no está en la bandeja
+                const field = ordenActiva.orderType === 'social_wall' ? 'socialWallStatus' : 'pulserasStatus';
+                await updateDoc(doc(db, "eventos", ordenActiva.eventoId), { [field]: 'pendiente' });
+                setOrdenActiva(null);
              } catch (error) {
                 setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'Fallo al desbloquear la orden.' });
              }
@@ -16256,6 +16723,164 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     printWindow.document.close();
   };
 
+  // 🟢 GENERADOR PDF PARA TARJETAS DE MESA SOCIAL WALL (2 Caballetes Plegables en Triángulo por Hoja Carta Vertical)
+  const generarPDFTarjetasSocialWall = () => {
+    if (!ordenActiva || ordenActiva.orderType !== 'social_wall') return;
+    const printWindow = window.open('', '_blank');
+    const cfg = ordenActiva.cardConfig || {};
+    const total = Number(cfg.cantidadTarjetas) || 15;
+    const guestCameraUrl = `https://baulia.com/?modo=camara&e=${ordenActiva.eventoId}`;
+    const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(guestCameraUrl)}&margin=2`;
+    const hashtag = ordenActiva.hashtag || '#MiEvento';
+
+    // Cada hoja Carta Vertical (215.9mm x 279.4mm) lleva 2 caballetes lado a lado:
+    // Ancho de cada caballete: 95mm. Alto desplegado: 268mm (124mm Cara A invertida 180° + 124mm Cara B frontal + 20mm pestaña inferior para doblar y parar en triángulo).
+    const sheetsCount = Math.ceil(total / 2);
+
+    const renderFaceHTML = (mesaNum) => `
+      <div class="face-inner">
+        <div class="bg-layer">
+          ${cfg.bgImageUrl ? `<img src="${cfg.bgImageUrl}" class="bg-img" crossorigin="anonymous" />` : `<div class="bg-fallback"></div>`}
+          <div class="bg-gradient"></div>
+        </div>
+        <div class="face-content">
+          ${cfg.logoUrl ? `<img src="${cfg.logoUrl}" class="logo-img" crossorigin="anonymous" />` : ''}
+          <div class="pre-title">${cfg.preTitle || 'SOCIAL WALL EN VIVO'}</div>
+          <div class="event-name">${cfg.eventName || 'Nuestro Evento'}</div>
+          <div class="subtitle">${cfg.subtitle || 'Escanea, sube tus fotos y cumple los retos en pantalla'}</div>
+          <div class="qr-box">
+            <img src="${qrImgUrl}" class="qr-img" crossorigin="anonymous" />
+          </div>
+          <div class="hashtag">${hashtag} • MESA ${mesaNum}</div>
+          <div class="brand">by BAULIA.COM</div>
+        </div>
+      </div>
+    `;
+
+    let html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Tarjetas Social Wall - ${cfg.eventName}</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Montserrat:wght@400;600;700;900&display=swap');
+          * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          body, html { margin: 0; padding: 0; background: #fff; font-family: 'Montserrat', sans-serif; }
+          @page { size: letter portrait; margin: 0; }
+          .sheet {
+            width: 215.9mm;
+            height: 279.4mm;
+            page-break-after: always;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 8mm;
+            padding: 5mm;
+          }
+          .sheet:last-child { page-break-after: auto; }
+          .tent-card {
+            width: 95mm;
+            height: 268mm;
+            border: 0.35mm dashed #94a3b8;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #ffffff;
+          }
+          .tent-face {
+            width: 95mm;
+            height: 124mm;
+            position: relative;
+            overflow: hidden;
+          }
+          .tent-face.upside-down {
+            transform: rotate(180deg);
+            border-bottom: 0.4mm dashed #cbd5e1;
+          }
+          .tent-tab {
+            width: 95mm;
+            height: 20mm;
+            border-top: 0.35mm dashed #cbd5e1;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7pt;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+          }
+          .face-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            text-align: center;
+            padding: 6mm 5mm 5mm 5mm;
+          }
+          .bg-layer {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 56%;
+            overflow: hidden;
+            z-index: 1;
+          }
+          .bg-img { width: 100%; height: 100%; object-fit: cover; }
+          .bg-fallback { width: 100%; height: 100%; background: linear-gradient(180deg, rgba(212,175,55,0.14) 0%, #ffffff 100%); }
+          .bg-gradient {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.7) 62%, #ffffff 95%, #ffffff 100%);
+          }
+          .face-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+          }
+          .logo-img { max-height: 12mm; max-width: 45mm; object-fit: contain; margin-bottom: 1.5mm; }
+          .pre-title { font-size: 6.5pt; font-weight: 900; color: #b45309; letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 1mm; }
+          .event-name { font-family: 'Cormorant Garamond', serif; font-size: 20pt; font-weight: 700; color: #0f172a; line-height: 1.05; margin-bottom: 1.5mm; }
+          .subtitle { font-size: 6.5pt; font-weight: 600; color: #64748b; max-width: 72mm; line-height: 1.35; margin-bottom: 3mm; }
+          .qr-box { padding: 2.5mm; background: #fff; border: 0.3mm solid #e2e8f0; border-radius: 3mm; margin-bottom: 2.5mm; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+          .qr-img { width: 34mm; height: 34mm; display: block; }
+          .hashtag { font-size: 7.5pt; font-weight: 900; color: #4f46e5; letter-spacing: 1.5px; text-transform: uppercase; }
+          .brand { font-size: 5.5pt; font-weight: 700; color: #94a3b8; letter-spacing: 2px; margin-top: 1.5mm; }
+        </style>
+      </head>
+      <body onload="setTimeout(function(){ window.print(); }, 1000)">
+    `;
+
+    let cardIndex = 1;
+    for (let s = 0; s < sheetsCount; s++) {
+      html += `<div class="sheet">`;
+      for (let col = 0; col < 2; col++) {
+        if (cardIndex <= total) {
+          html += `
+            <div class="tent-card">
+              <div class="tent-face upside-down">${renderFaceHTML(cardIndex)}</div>
+              <div class="tent-face">${renderFaceHTML(cardIndex)}</div>
+              <div class="tent-tab">Doblar y pegar base aquí (Triángulo de Mesa)</div>
+            </div>
+          `;
+          cardIndex++;
+        }
+      }
+      html += `</div>`;
+    }
+
+    html += `</body></html>`;
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
   const handlePrintShippingLabel = (shippingData, eventName) => {
     if (!shippingData) return;
     const printWindow = window.open('', '_blank', 'width=800,height=600');
@@ -16320,7 +16945,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
             <div class="footer">
               REMITENTE:<br/>
               BAULIA TECHNOLOGIES S.A. DE C.V.<br/>
-              DEPTO. DE PRODUCCIÓN BLACK LABEL
+              TALLER DE PRODUCCIÓN VIP
             </div>
           </div>
           <script>
@@ -16640,7 +17265,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           )}
         </div>
 
-        {/* 🔴 VISTA DEL TALLER DE PRODUCCIÓN */}
+        {/* 🔴 VISTA DEL TALLER DE PRODUCCIÓN (PULSERAS BLACK LABEL + TARJETAS SOCIAL WALL) */}
         {adminTab === 'taller' && isSuperAdmin && (
           <div className="animate-in fade-in space-y-6">
             <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col md:flex-row">
@@ -16662,21 +17287,32 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     ) : (
                         <ul className="divide-y divide-slate-100 dark:divide-white/5">
                           {pedidosFiltrados.map(p => {
-                            const isNuevo = p.pulserasStatus === 'enviado';
+                            const isNuevo = p.orderStatus === 'enviado';
+                            const isSocialWallOrder = p.orderType === 'social_wall';
                             return (
-                                <li key={p.id} onClick={() => procesarOrdenTaller(p)} className={`p-4 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 transition-colors ${ordenActiva?.eventoId === p.id ? 'bg-indigo-50 dark:bg-indigo-500/20 border-l-4 border-indigo-500' : 'border-l-4 border-transparent'}`}>
-                                  <div className="flex justify-between items-start mb-1">
-                                      <span className="font-black text-slate-800 dark:text-white text-sm">{p.nombres}</span>
-                                      {isNuevo ? (
-                                          <span className="bg-rose-500 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded">Nuevo</span>
-                                      ) : (
-                                          <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded">Impreso</span>
-                                      )}
+                                <li key={p.orderUniqueKey} onClick={() => procesarOrdenTaller(p)} className={`p-4 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 transition-colors ${ordenActiva?.orderUniqueKey === p.orderUniqueKey ? 'bg-indigo-50 dark:bg-indigo-500/20 border-l-4 border-indigo-500' : 'border-l-4 border-transparent'}`}>
+                                  <div className="flex justify-between items-start gap-2 mb-1.5">
+                                      <span className="font-black text-slate-800 dark:text-white text-sm truncate">{p.nombres}</span>
+                                      <div className="flex items-center gap-1.5 shrink-0">
+                                        {/* 🟢 ETIQUETA CLARA QUE DISTINGUE PULSERAS VS SOCIAL WALL */}
+                                        <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${
+                                          isSocialWallOrder
+                                            ? 'bg-pink-500/15 text-pink-500 border-pink-500/30'
+                                            : 'bg-amber-500/15 text-amber-500 border-amber-500/30'
+                                        }`}>
+                                          {isSocialWallOrder ? 'TARJETAS • SOCIAL WALL' : 'PULSERAS • BLACK LABEL'}
+                                        </span>
+                                        {isNuevo ? (
+                                            <span className="bg-rose-500 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded">Nuevo</span>
+                                        ) : (
+                                            <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded">Impreso</span>
+                                        )}
+                                      </div>
                                   </div>
                                   <div className="flex justify-between items-end mt-2 text-xs text-slate-500">
                                       <div>
                                         <p className="font-mono text-[9px] text-indigo-400 mb-0.5">ID: {p.id}</p>
-                                        <p className="flex items-center"><Calendar size={10} className="mr-1"/> {p.fechaEnvioTaller ? new Date(p.fechaEnvioTaller).toLocaleDateString() : 'Desconocida'}</p>
+                                        <p className="flex items-center"><Calendar size={10} className="mr-1"/> {p.orderDate ? new Date(p.orderDate).toLocaleDateString() : 'Desconocida'}</p>
                                       </div>
                                       <span>{(p.plan === 'security_kit' ? 'baulia_black_label' : p.plan)?.replace(/_/g, ' ').toUpperCase()}</span>
                                   </div>
@@ -16697,7 +17333,92 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </div>
                 ) : isFetchingOrden ? (
                     <div className="h-full flex items-center justify-center text-indigo-500 font-bold animate-pulse min-h-[500px]">Extrayendo datos de la bóveda...</div>
+                ) : ordenActiva.orderType === 'social_wall' ? (
+                    /* 🟢 VENTANA INTERNA DE PRODUCCIÓN PARA TARJETAS DE MESA SOCIAL WALL */
+                    <div className="p-6 space-y-6 animate-in fade-in">
+                      <div className="bg-white dark:bg-[#111] p-5 rounded-2xl border border-pink-500/30 shadow-sm flex items-center gap-5">
+                        {ordenActiva.cardConfig.logoUrl ? (
+                          <div className="w-20 h-20 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center p-2 shrink-0 border border-slate-200 dark:border-white/5">
+                            <img src={ordenActiva.cardConfig.logoUrl} alt="Logo" className="max-h-full max-w-full object-contain" />
+                          </div>
+                        ) : (
+                          <div className="w-20 h-20 bg-pink-500/10 rounded-xl flex items-center justify-center shrink-0 border border-pink-500/20">
+                            <Camera size={30} className="text-pink-400" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <span className="inline-block text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-pink-500/15 text-pink-400 border border-pink-500/30 mb-1.5">
+                            ORDEN DE IMPRESIÓN • TARJETAS DE MESA SOCIAL WALL
+                          </span>
+                          <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Tipo de Evento:</span> {ordenActiva.cardConfig.preTitle}</p>
+                          <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Nombre Principal:</span> {ordenActiva.cardConfig.eventName}</p>
+                          <p className="text-xs text-slate-400 truncate"><span className="font-bold text-slate-600 dark:text-slate-300">Hashtag / Fondo:</span> {ordenActiva.hashtag} • {ordenActiva.cardConfig.bgImageUrl ? 'Con Foto de Fondo' : 'Fondo Limpio'}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-pink-600 text-white rounded-2xl p-5 shadow-lg flex flex-col items-center justify-center text-center">
+                          <p className="text-[10px] uppercase font-black tracking-widest opacity-80 mb-1">Total a Producir</p>
+                          <p className="text-4xl font-editorial font-black">{ordenActiva.cardConfig.cantidadTarjetas}</p>
+                          <p className="text-[10px] opacity-80 mt-1">Caballetes Plegables de Mesa</p>
+                        </div>
+                        <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm flex flex-col justify-center space-y-2">
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-slate-500 font-bold">Hojas Carta</span>
+                            <span className="font-black text-slate-800 dark:text-white">{Math.ceil(ordenActiva.cardConfig.cantidadTarjetas / 2)} hojas</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-pink-500 font-bold">Formato</span>
+                            <span className="font-black text-pink-500 text-xs">2 por Hoja (Triángulo)</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
+                        {ordenActiva.direccionEnvioTaller ? (
+                          <div className="bg-slate-50 dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 mb-4 flex items-center justify-between">
+                            <div>
+                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-1 flex items-center"><MapPin size={14} className="mr-1.5 text-pink-500"/> Datos de Envío Listos</h4>
+                              <p className="text-sm font-bold text-slate-900 dark:text-white">{ordenActiva.direccionEnvioTaller.recipient}</p>
+                              <p className="text-xs text-slate-500">{ordenActiva.direccionEnvioTaller.city}, {ordenActiva.direccionEnvioTaller.country}</p>
+                            </div>
+                            <button 
+                              onClick={() => handlePrintShippingLabel(ordenActiva.direccionEnvioTaller, ordenActiva.nombres)}
+                              className="px-4 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:scale-105 transition-transform flex items-center">
+                              <Printer size={16} className="mr-2"/> Imprimir Etiqueta
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="bg-rose-50 dark:bg-rose-500/10 p-4 rounded-xl mb-4 text-xs font-medium text-rose-700 dark:text-rose-400 flex items-center">
+                            <AlertTriangle size={16} className="mr-2 shrink-0"/> Sin dirección de envío registrada.
+                          </div>
+                        )}
+
+                        <div className="bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/30 p-3 rounded-xl flex items-start gap-2 mb-3">
+                          <Info size={16} className="text-sky-600 dark:text-sky-400 mt-0.5 shrink-0" />
+                          <p className="text-xs text-sky-800 dark:text-sky-200">
+                            Imprime en papel Couché o Opalina gruesa tamaño <b>CARTA VERTICAL (100% escala)</b>. Salen <b>2 caballetes por hoja</b> con línea de doblez central y pestaña inferior para pararse en triángulo.
+                          </p>
+                        </div>
+
+                        <button onClick={generarPDFTarjetasSocialWall} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center">
+                          <Printer size={18} className="mr-2" /> Abrir Generador PDF de Tarjetas (2 por Hoja Carta)
+                        </button>
+
+                        {ordenActiva.status !== 'impreso' && (
+                          <div className="flex gap-3 mt-4">
+                            <button onClick={desbloquearOrden} className="flex-1 py-4 bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-sm hover:bg-rose-100 transition-colors flex items-center justify-center">
+                              <Edit3 size={16} className="mr-2" /> Revertir a Edición
+                            </button>
+                            <button onClick={marcarComoImpreso} className="flex-[2] py-4 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-sm hover:bg-emerald-100 transition-colors flex items-center justify-center">
+                              <CheckCircle2 size={16} className="mr-2" /> Marcar como Producido y Despachado
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                 ) : (
+                    /* 🟢 VENTANA INTERNA DE PRODUCCIÓN PARA PULSERAS BLACK LABEL (INTACTA) */
                     <div className="p-6 space-y-6 animate-in fade-in">
                         <div className="bg-white dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-5">
                             {ordenActiva.config.logoBase64 ? (
@@ -16736,8 +17457,6 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         </div>
 
                         <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
-                            
-                            {/* 🔴 NUEVO BLOQUE DE ENVÍO Y ETIQUETA EN SUPERADMIN */}
                             {ordenActiva.direccionEnvioTaller ? (
                               <div className="bg-slate-50 dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 mb-4 flex items-center justify-between">
                                 <div>
