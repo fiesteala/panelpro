@@ -9149,6 +9149,597 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
 };
 
 // ==========================================
+// --- COMPONENTE: ATELIER PHYGITAL A PANTALLA COMPLETA (MODO INDEPENDIENTE: CABALLETE O PULSERA) ---
+// ==========================================
+const AtelierPhygitalModal = ({
+  isOpen,
+  onClose,
+  mode = 'social_wall', // 'social_wall' | 'pulseras'
+  eventoData = {},
+  initialConfig = {},
+  hashtag = '#MiEvento',
+  qrUrl = '',
+  isLocked = false,
+  status = 'pendiente',
+  onSaveDesign,
+  onOpenShippingModal,
+  addNotification
+}) => {
+  const isSocialWall = mode === 'social_wall';
+  const logoInputRef = useRef(null);
+  const bgInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const cloudName = "duy0mcqsh";
+  const uploadPreset = "ml_default";
+
+  // Catálogo de Papeles para Social Wall
+  const PAPER_FINISHES = [
+    { id: 'blanco_galeria', name: 'Blanco Galería', desc: 'Opalina / Couché • Permite heredar color de invitación', bg: '#FFFFFF', text: '#0F172A', accent: '#B45309', sub: '#64748B' },
+    { id: 'marfil_algodon', name: 'Marfil Algodón', desc: 'Cálido Editorial • Tinta carbón y oro viejo', bg: '#FDFBF7', text: '#1C1917', accent: '#9A6F1A', sub: '#78716C' },
+    { id: 'obsidiana', name: 'Negro Obsidiana', desc: 'Gala Nocturna • Textos en blanco y dorado imperial', bg: '#0B0B0E', text: '#FFFFFF', accent: '#F59E0B', sub: '#94A3B8' },
+    { id: 'champagne', name: 'Champagne Perlado', desc: 'Satinado Suave • Tonos arena y dorado', bg: '#F7F1E5', text: '#27272A', accent: '#A16207', sub: '#71717A' }
+  ];
+
+  // Catálogo de Pulseras Tyvek para Black Label
+  const WRISTBAND_COLORS = [
+    { id: 'blanca_atelier', name: 'Blanca Alta Costura', desc: 'Permite heredar colores de la invitación o tinta negra', bg: '#FFFFFF', ink: '#000000', border: '#E2E8F0' },
+    { id: 'negra_obsidiana', name: 'Negra Obsidiana VIP', desc: 'Impresión de alto contraste en Dorado, Plata o Blanco', bg: '#0F0F12', ink: '#D4AF37', border: '#27272A' },
+    { id: 'oro_imperial', name: 'Oro Imperial', desc: 'Acabado metálico con tinta negra y Micro-QR', bg: '#D4AF37', ink: '#000000', border: '#B45309' },
+    { id: 'plata_platino', name: 'Plata Platino', desc: 'Acabado frío con tinta negra de alta densidad', bg: '#CBD5E1', ink: '#000000', border: '#94A3B8' },
+    { id: 'rose_gold', name: 'Rose Gold', desc: 'Tono cobrizo suave con tinta negra profunda', bg: '#F4C2C2', ink: '#000000', border: '#FDA4AF' }
+  ];
+
+  const FONT_STYLES = [
+    { id: 'editorial', name: 'Editorial Clásica', family: "'Cormorant Garamond', serif" },
+    { id: 'caligrafia', name: 'Caligrafía Imperial', family: "'Great Vibes', cursive" },
+    { id: 'alta_moda', name: 'Alta Moda Romana', family: "'Cinzel', serif" },
+    { id: 'minimal', name: 'Minimalista Moderna', family: "'Montserrat', sans-serif" }
+  ];
+
+  const [draft, setDraft] = useState({
+    heredarInvitacion: false,
+    preTitle: initialConfig.preTitle || (eventoData.tipoEvento ? String(eventoData.tipoEvento).replace(/_/g, ' ').toUpperCase() : 'NUESTRA BODA'),
+    eventName: initialConfig.eventName || eventoData.nombres || 'Sofía & Alejandro',
+    subtitle: initialConfig.subtitle || 'Escanea, sube tus fotos y cumple los retos en pantalla',
+    logoUrl: initialConfig.logoUrl || initialConfig.logoBase64 || '',
+    bgImageUrl: initialConfig.bgImageUrl || '',
+    cantidadTarjetas: Number(initialConfig.cantidadTarjetas) || 15,
+    papelId: initialConfig.papelId || 'blanco_galeria',
+    pulseraColorId: initialConfig.pulseraColorId || 'blanca_atelier',
+    pulseraInkColor: initialConfig.pulseraInkColor || '#000000',
+    fontId: initialConfig.fontId || 'editorial',
+    accentColor: initialConfig.accentColor || '#B45309'
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      setDraft(prev => ({
+        ...prev,
+        ...initialConfig,
+        preTitle: initialConfig.preTitle || (eventoData.tipoEvento ? String(eventoData.tipoEvento).replace(/_/g, ' ').toUpperCase() : 'NUESTRA BODA'),
+        eventName: initialConfig.eventName || eventoData.nombres || 'Sofía & Alejandro',
+        logoUrl: initialConfig.logoUrl || initialConfig.logoBase64 || prev.logoUrl || ''
+      }));
+    }
+  }, [isOpen, initialConfig, eventoData]);
+
+  if (!isOpen) return null;
+
+  // Activar/Desactivar Herencia Inteligente desde la Invitación Digital
+  const handleToggleInheritance = () => {
+    if (isLocked) return;
+    const nextState = !draft.heredarInvitacion;
+    if (nextState) {
+      const inheritedPhoto =
+        eventoData.portadaUrl ||
+        eventoData.fotoPortada ||
+        eventoData.heroImage ||
+        eventoData.imagenPortada ||
+        eventoData.configuracion?.portadaUrl ||
+        draft.bgImageUrl ||
+        '';
+      const inheritedColor =
+        eventoData.colorPrincipal ||
+        eventoData.themeColor ||
+        eventoData.colorTema ||
+        eventoData.configuracion?.colorPrincipal ||
+        '#B45309';
+      const inheritedLogo =
+        eventoData.logoUrl ||
+        eventoData.monogramaUrl ||
+        eventoData.pulserasConfig?.logoBase64 ||
+        draft.logoUrl ||
+        '';
+
+      setDraft(prev => ({
+        ...prev,
+        heredarInvitacion: true,
+        preTitle: eventoData.tipoEvento ? String(eventoData.tipoEvento).replace(/_/g, ' ').toUpperCase() : prev.preTitle,
+        eventName: eventoData.nombres || prev.eventName,
+        bgImageUrl: inheritedPhoto,
+        logoUrl: inheritedLogo,
+        accentColor: inheritedColor,
+        papelId: 'blanco_galeria', // En papel blanco luce al 100% la herencia de la invitación
+        pulseraColorId: 'blanca_atelier'
+      }));
+      if (addNotification) {
+        addNotification('✨ Diseño Sincronizado', 'Se heredaron los datos, estética y colores de tu invitación.', 'success');
+      }
+    } else {
+      setDraft(prev => ({ ...prev, heredarInvitacion: false }));
+    }
+  };
+
+  const handleUploadAsset = async (e, field) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setIsUploading(true);
+    if (addNotification) addNotification('Subiendo archivo...', 'Optimizando resolución para imprenta.', 'info');
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", uploadPreset);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.secure_url) {
+        setDraft(prev => ({ ...prev, [field]: data.secure_url }));
+        if (addNotification) addNotification('¡Imagen Lista!', 'Se actualizó el lienzo en vivo.', 'success');
+      }
+    } catch (err) {
+      if (addNotification) addNotification('Error', 'No se pudo subir la imagen.', 'error');
+    }
+    setIsUploading(false);
+    e.target.value = null;
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    await onSaveDesign(draft);
+    setIsSaving(false);
+  };
+
+  const activePaper = PAPER_FINISHES.find(p => p.id === draft.papelId) || PAPER_FINISHES[0];
+  const activeWristband = WRISTBAND_COLORS.find(w => w.id === draft.pulseraColorId) || WRISTBAND_COLORS[0];
+  const activeFont = FONT_STYLES.find(f => f.id === draft.fontId) || FONT_STYLES[0];
+  const effectiveAccent = (draft.heredarInvitacion && draft.papelId === 'blanco_galeria') ? draft.accentColor : activePaper.accent;
+
+  return (
+    <div className="fixed inset-0 z-[9998] bg-black/90 backdrop-blur-2xl flex flex-col animate-in fade-in duration-300 text-white select-none">
+      {/* Importación de fuentes de Alta Costura para la vista previa */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Great+Vibes&family=Montserrat:wght@400;600;700;900&display=swap');
+      `}</style>
+
+      {/* BARRA SUPERIOR ESTILO APPLE STUDIO */}
+      <div className="h-16 px-6 border-b border-white/10 flex items-center justify-between bg-[#08080a]/90 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <Sparkles size={18} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] font-black uppercase tracking-[0.25em] text-amber-400">Baulia Atelier Phygital</span>
+              <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded bg-white/10 text-slate-300">
+                {isSocialWall ? 'Caballetes de Mesa • Social Wall' : 'Brazaletes Tyvek • Black Label'}
+              </span>
+            </div>
+            <h2 className="text-sm font-bold text-white leading-tight">
+              {isSocialWall ? 'Estudio de Diseño para Tarjetas de Mesa Plegables' : 'Estudio de Diseño para Pulseras de Control VIP'}
+            </h2>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {isLocked && (
+            <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+              <Lock size={12}/> {status === 'impreso' ? 'PRODUCIDO Y DESPACHADO' : 'ORDEN EN TALLER'}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-white flex items-center gap-1.5 transition-colors"
+          >
+            <X size={15}/> Cerrar Estudio
+          </button>
+        </div>
+      </div>
+
+      {/* CUERPO PRINCIPAL: VISOR INTERACTIVO + CONTROLES */}
+      <div className="flex-1 overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+        
+        {/* LIENZO CENTRAL (VISTA PREVIA HIPERREALISTA) */}
+        <div className="lg:col-span-7 bg-[radial-gradient(circle_at_center,#1e1b2e_0%,#070709_75%)] p-6 sm:p-10 flex flex-col items-center justify-center relative min-h-[460px] lg:h-full overflow-hidden">
+          <div className="mb-5 flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/50 border border-white/10 backdrop-blur-md">
+            <Eye size={13} className="text-amber-400"/>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">
+              {isSocialWall
+                ? `Vista Previa Real • Caballete 9.5 x 12.4 cm (${activePaper.name})`
+                : `Vista Previa Real • Pulsera Tyvek 25 x 1.9 cm (${activeWristband.name})`}
+            </span>
+          </div>
+
+          {isSocialWall ? (
+            /* MOCKUP 3D DEL CABALLETE DE MESA (SOCIAL WALL) */
+            <div className="relative group">
+              {/* Sombra de base sobre la mesa */}
+              <div className="absolute -bottom-5 inset-x-6 h-8 bg-black/80 blur-xl rounded-full"></div>
+
+              {/* Tarjeta Caballete */}
+              <div
+                style={{ backgroundColor: activePaper.bg }}
+                className="w-[270px] h-[375px] rounded-2xl border border-amber-500/40 shadow-[0_25px_70px_rgba(0,0,0,0.75)] overflow-hidden relative flex flex-col items-center text-center transition-all duration-500"
+              >
+                {/* Guías sutiles de corte en las esquinas (simulando imprenta) */}
+                <div className="absolute top-2 left-2 w-2.5 h-2.5 border-t border-l border-amber-500/40 z-30 pointer-events-none"></div>
+                <div className="absolute top-2 right-2 w-2.5 h-2.5 border-t border-r border-amber-500/40 z-30 pointer-events-none"></div>
+                <div className="absolute bottom-2 left-2 w-2.5 h-2.5 border-b border-l border-amber-500/40 z-30 pointer-events-none"></div>
+                <div className="absolute bottom-2 right-2 w-2.5 h-2.5 border-b border-r border-amber-500/40 z-30 pointer-events-none"></div>
+
+                {/* Capa de Foto Superior con Degradado Inteligente que termina antes del QR */}
+                <div className="absolute top-0 inset-x-0 h-[54%] overflow-hidden">
+                  {draft.bgImageUrl ? (
+                    <img src={draft.bgImageUrl} alt="Fondo" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                  ) : (
+                    <div
+                      className="w-full h-full"
+                      style={{
+                        background: `radial-gradient(circle at top, ${effectiveAccent}33 0%, transparent 75%)`
+                      }}
+                    ></div>
+                  )}
+                  {/* Degradado automático que funde la foto con el color exacto del papel antes del QR */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: `linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, ${activePaper.bg}99 58%, ${activePaper.bg} 93%, ${activePaper.bg} 100%)`
+                    }}
+                  ></div>
+                </div>
+
+                {/* Contenido Editorial de la Tarjeta */}
+                <div className="relative z-10 flex flex-col items-center justify-end h-full w-full px-5 pb-4 pt-6">
+                  {draft.logoUrl && (
+                    <img src={draft.logoUrl} alt="Logo" className="h-10 object-contain mb-1.5 drop-shadow-sm" />
+                  )}
+
+                  <span
+                    style={{ color: effectiveAccent }}
+                    className="text-[8px] font-black uppercase tracking-[0.28em] mb-1"
+                  >
+                    {draft.preTitle || 'SOCIAL WALL EN VIVO'}
+                  </span>
+
+                  <h4
+                    style={{ fontFamily: activeFont.family, color: activePaper.text }}
+                    className={`${draft.fontId === 'caligrafia' ? 'text-3xl py-0.5' : 'text-2xl font-bold'} leading-tight mb-1 line-clamp-1`}
+                  >
+                    {draft.eventName || 'Nombre del Evento'}
+                  </h4>
+
+                  <p
+                    style={{ color: activePaper.sub }}
+                    className="text-[8.5px] font-semibold leading-snug max-w-[200px] mb-3 line-clamp-2"
+                  >
+                    {draft.subtitle}
+                  </p>
+
+                  {/* Contenedor QR (Siempre con fondo blanco óptico para lectura instantánea de cámara) */}
+                  <div className="bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-md mb-2 relative">
+                    <img src={qrUrl} alt="QR Mesa" className="w-32 h-32 object-contain" />
+                  </div>
+
+                  <span
+                    style={{ color: effectiveAccent }}
+                    className="text-[8.5px] font-black uppercase tracking-[0.2em]"
+                  >
+                    {hashtag || '#MiEvento'} • MESA 1
+                  </span>
+                  <span
+                    style={{ color: activePaper.sub }}
+                    className="text-[6px] font-bold uppercase tracking-[0.25em] mt-1 opacity-75"
+                  >
+                    by BAULIA.COM
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* MOCKUP DE LA PULSERA TYVEK (BLACK LABEL) */
+            <div className="w-full max-w-2xl px-2">
+              <div
+                style={{
+                  backgroundColor: activeWristband.bg,
+                  color: draft.pulseraColorId === 'negra_obsidiana' ? draft.pulseraInkColor : activeWristband.ink,
+                  borderColor: activeWristband.border
+                }}
+                className="w-full h-28 rounded-2xl border-2 shadow-[0_20px_60px_rgba(0,0,0,0.8)] flex items-center overflow-hidden relative transition-all duration-300"
+              >
+                <div className="w-14 h-full border-r border-dashed border-current/25 flex items-center justify-center bg-black/5 shrink-0">
+                  <span className="-rotate-90 text-[7px] font-black tracking-widest uppercase opacity-50 whitespace-nowrap">PEGAMENTO</span>
+                </div>
+                <div className="w-12 h-full border-r border-current/10 flex items-center justify-center shrink-0">
+                  <span className="-rotate-90 text-[7px] font-bold tracking-widest uppercase opacity-60 whitespace-nowrap">by BAULIA</span>
+                </div>
+                <div className="flex-1 h-full flex flex-col items-center justify-center text-center px-4 border-r border-current/10">
+                  <span className="text-[7px] font-black uppercase tracking-[0.25em] opacity-80 mb-0.5">{draft.preTitle}</span>
+                  {draft.logoUrl ? (
+                    <img src={draft.logoUrl} alt="Logo" className="h-9 object-contain my-0.5" />
+                  ) : (
+                    <span style={{ fontFamily: activeFont.family }} className="text-2xl leading-none my-0.5">{draft.eventName}</span>
+                  )}
+                  <span className="text-[7px] font-bold tracking-widest uppercase opacity-75">
+                    {eventoData.fecha ? new Date(eventoData.fecha).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : '24/10/2026'}
+                  </span>
+                </div>
+                <div className="w-40 h-full flex flex-col justify-center px-4 border-r border-current/10 shrink-0">
+                  <span className="text-[11px] font-black uppercase tracking-wider truncate">INVITADO VIP</span>
+                  <span className="text-[8px] font-bold uppercase opacity-75">PASE ADULTO</span>
+                </div>
+                <div className="w-24 h-full flex items-center justify-center bg-white p-2 shrink-0">
+                  <img src={qrUrl} alt="Micro QR" className="w-16 h-16 object-contain" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <p className="text-[11px] text-slate-400 mt-6 text-center max-w-md">
+            {isSocialWall
+              ? '✨ Cada hoja tamaño Carta imprime 2 caballetes con guías de corte y pestaña inferior para doblar en triángulo y parar en las mesas.'
+              : '✨ Impresión vectorial de alta precisión con Micro-QR de seguridad para lectura rápida en puerta.'}
+          </p>
+        </div>
+
+        {/* BARRA LATERAL DERECHA: CONTROLES DE PERSONALIZACIÓN */}
+        <div className="lg:col-span-5 bg-[#0e0e12] border-l border-white/10 p-6 sm:p-8 overflow-y-auto custom-scrollbar space-y-6">
+          
+          {/* 1. INTERRUPTOR DE HERENCIA DE DISEÑO DE LA INVITACIÓN */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/30 flex items-center justify-between gap-4">
+            <div>
+              <span className="text-[9px] font-black uppercase tracking-widest text-amber-400 flex items-center gap-1">
+                <Sparkles size={11}/> Smart Sync Phygital
+              </span>
+              <h4 className="text-xs font-bold text-white mt-0.5">Heredar diseño de mi Invitación Web</h4>
+              <p className="text-[10px] text-slate-400 leading-snug mt-0.5">
+                Sincroniza nombres, foto de portada y color de tu invitación en {isSocialWall ? 'papel blanco' : 'pulsera blanca'}.
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={isLocked}
+              onClick={handleToggleInheritance}
+              className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ${draft.heredarInvitacion ? 'bg-amber-500' : 'bg-white/15'}`}
+            >
+              <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${draft.heredarInvitacion ? 'translate-x-6' : 'translate-x-0'}`}></div>
+            </button>
+          </div>
+
+          {/* 2. SELECTOR DE COLOR DE PAPEL O COLOR DE PULSERA */}
+          {isSocialWall ? (
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5">
+                1. Color y Acabado del Papel del Caballete
+              </label>
+              <div className="grid grid-cols-2 gap-2.5">
+                {PAPER_FINISHES.map(paper => (
+                  <button
+                    key={paper.id}
+                    type="button"
+                    disabled={isLocked}
+                    onClick={() => setDraft({ ...draft, papelId: paper.id })}
+                    className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
+                      draft.papelId === paper.id
+                        ? 'bg-amber-500/15 border-amber-500 shadow-md'
+                        : 'bg-white/5 border-white/10 hover:border-white/25'
+                    }`}
+                  >
+                    <span
+                      style={{ backgroundColor: paper.bg }}
+                      className="w-5 h-5 rounded-full border border-white/30 shrink-0 mt-0.5 shadow-inner"
+                    ></span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-white truncate">{paper.name}</p>
+                      <p className="text-[9px] text-slate-400 leading-tight mt-0.5 line-clamp-2">{paper.desc}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5">
+                1. Color del Brazalete Tyvek
+              </label>
+              <div className="grid grid-cols-2 gap-2.5">
+                {WRISTBAND_COLORS.map(wb => (
+                  <button
+                    key={wb.id}
+                    type="button"
+                    disabled={isLocked}
+                    onClick={() => setDraft({ ...draft, pulseraColorId: wb.id })}
+                    className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
+                      draft.pulseraColorId === wb.id
+                        ? 'bg-amber-500/15 border-amber-500 shadow-md'
+                        : 'bg-white/5 border-white/10 hover:border-white/25'
+                    }`}
+                  >
+                    <span
+                      style={{ backgroundColor: wb.bg }}
+                      className="w-5 h-5 rounded-full border border-white/30 shrink-0 mt-0.5"
+                    ></span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-white truncate">{wb.name}</p>
+                      <p className="text-[9px] text-slate-400 leading-tight mt-0.5 line-clamp-2">{wb.desc}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 3. ESTILO TIPOGRÁFICO */}
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              2. Tipografía del Nombre Principal
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {FONT_STYLES.map(font => (
+                <button
+                  key={font.id}
+                  type="button"
+                  disabled={isLocked}
+                  onClick={() => setDraft({ ...draft, fontId: font.id })}
+                  className={`px-3 py-2.5 rounded-xl border text-left transition-all ${
+                    draft.fontId === font.id
+                      ? 'bg-amber-500/15 border-amber-500 text-amber-300'
+                      : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20'
+                  }`}
+                >
+                  <span className="text-[9px] uppercase tracking-wider block opacity-60">{font.name}</span>
+                  <span style={{ fontFamily: font.family }} className="text-base block truncate mt-0.5">
+                    {draft.eventName || 'Sofía & Alejandro'}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 4. SUBIDA DE LOGO E IMAGEN DE FONDO */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="p-3.5 rounded-2xl border border-dashed border-white/20 bg-white/5 text-center">
+              <input type="file" accept="image/*" ref={logoInputRef} onChange={e => handleUploadAsset(e, 'logoUrl')} className="hidden" disabled={isLocked} />
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Logo / Monograma</p>
+              {draft.logoUrl ? (
+                <div className="flex flex-col items-center gap-1.5">
+                  <img src={draft.logoUrl} alt="Logo" className="h-10 object-contain" />
+                  {!isLocked && (
+                    <div className="flex gap-3 text-[9px] font-bold">
+                      <button type="button" onClick={() => logoInputRef.current.click()} className="text-amber-400 underline">Cambiar</button>
+                      <button type="button" onClick={() => setDraft({ ...draft, logoUrl: '' })} className="text-rose-400 underline">Quitar</button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button type="button" disabled={isLocked || isUploading} onClick={() => logoInputRef.current.click()} className="w-full py-2 flex flex-col items-center text-slate-400 hover:text-amber-400">
+                  <ImageIcon size={20} className="mb-1"/>
+                  <span className="text-[10px] font-bold">Subir Logo PNG</span>
+                </button>
+              )}
+            </div>
+
+            {isSocialWall && (
+              <div className="p-3.5 rounded-2xl border border-dashed border-white/20 bg-white/5 text-center">
+                <input type="file" accept="image/*" ref={bgInputRef} onChange={e => handleUploadAsset(e, 'bgImageUrl')} className="hidden" disabled={isLocked} />
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Foto con Degradado</p>
+                {draft.bgImageUrl ? (
+                  <div className="flex flex-col items-center gap-1.5">
+                    <img src={draft.bgImageUrl} alt="Fondo" className="h-10 w-16 object-cover rounded border border-white/15" />
+                    {!isLocked && (
+                      <div className="flex gap-3 text-[9px] font-bold">
+                        <button type="button" onClick={() => bgInputRef.current.click()} className="text-amber-400 underline">Cambiar</button>
+                        <button type="button" onClick={() => setDraft({ ...draft, bgImageUrl: '' })} className="text-rose-400 underline">Quitar</button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <button type="button" disabled={isLocked || isUploading} onClick={() => bgInputRef.current.click()} className="w-full py-2 flex flex-col items-center text-slate-400 hover:text-amber-400">
+                    <Camera size={20} className="mb-1"/>
+                    <span className="text-[10px] font-bold">Subir Foto de Fondo</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* 5. TEXTOS Y CANTIDAD DE MESAS */}
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Tipo de Evento (Pre-título)</label>
+                <input
+                  type="text"
+                  disabled={isLocked}
+                  value={draft.preTitle}
+                  onChange={e => setDraft({ ...draft, preTitle: e.target.value })}
+                  className="w-full p-3 rounded-xl bg-black border border-white/10 text-xs font-bold text-white outline-none focus:border-amber-500"
+                />
+              </div>
+              <div>
+                <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Nombre del Evento</label>
+                <input
+                  type="text"
+                  disabled={isLocked}
+                  value={draft.eventName}
+                  onChange={e => setDraft({ ...draft, eventName: e.target.value })}
+                  className="w-full p-3 rounded-xl bg-black border border-white/10 text-xs font-bold text-white outline-none focus:border-amber-500"
+                />
+              </div>
+            </div>
+
+            {isSocialWall && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Instrucción antes del QR</label>
+                  <input
+                    type="text"
+                    disabled={isLocked}
+                    value={draft.subtitle}
+                    onChange={e => setDraft({ ...draft, subtitle: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-black border border-white/10 text-xs text-white outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Cant. de Mesas</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="150"
+                    disabled={isLocked}
+                    value={draft.cantidadTarjetas}
+                    onChange={e => setDraft({ ...draft, cantidadTarjetas: Math.max(1, parseInt(e.target.value) || 1) })}
+                    className="w-full p-3 rounded-xl bg-black border border-white/10 text-xs font-black text-amber-400 text-center outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 6. BOTONES DE GUARDADO Y ENVÍO A TALLER */}
+          {!isLocked ? (
+            <div className="pt-3 border-t border-white/10 flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={handleSave}
+                className="flex-1 py-4 rounded-xl bg-white/10 hover:bg-white/15 text-white font-black text-[10px] uppercase tracking-widest transition-colors"
+              >
+                {isSaving ? 'Guardando...' : 'Guardar Diseño'}
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  await onSaveDesign(draft);
+                  onOpenShippingModal(draft);
+                }}
+                className="flex-1 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-widest shadow-[0_10px_25px_rgba(245,158,11,0.3)] transition-all flex items-center justify-center gap-2"
+              >
+                <Send size={14}/> Enviar a Taller Baulia
+              </button>
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-bold text-center">
+              ✓ Este diseño ya se encuentra en producción dentro del Taller Baulia.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
 // --- COMPONENTE: GALERÍA EN VIVO + TALLER DE TARJETAS DE MESA (SOCIAL WALL) ---
 // ==========================================
 const GaleriaView = ({ photos, addNotification, eventoId }) => {
@@ -9159,20 +9750,22 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
   const [viewingPost, setViewingPost] = useState(null);
   const [isZipping, setIsZipping] = useState(false);
 
-  // 🟢 ESTADOS DEL TALLER DE TARJETAS DE MESA (SOCIAL WALL)
+  // 🟢 ESTADOS DEL ATELIER PHYGITAL DE TARJETAS DE MESA (SOCIAL WALL)
   const [showCardStudio, setShowCardStudio] = useState(false);
+  const [eventoRawData, setEventoRawData] = useState({});
   const [cardConfig, setCardConfig] = useState({
+    heredarInvitacion: false,
     preTitle: 'NUESTRA BODA',
     eventName: 'Mis XV / Boda',
     subtitle: 'Escanea, sube tus fotos y cumple los retos en pantalla',
     logoUrl: '',
     bgImageUrl: '',
     cantidadTarjetas: 15,
-    acabado: 'obsidiana'
+    papelId: 'blanco_galeria',
+    fontId: 'editorial',
+    accentColor: '#B45309'
   });
-  const [socialWallStatus, setSocialWallStatus] = useState('pendiente'); // 'pendiente' | 'enviado' | 'impreso'
-  const [isUploadingCardAsset, setIsUploadingCardAsset] = useState(false);
-  const [isSavingCard, setIsSavingCard] = useState(false);
+  const [socialWallStatus, setSocialWallStatus] = useState('pendiente');
   const [showShippingModal, setShowShippingModal] = useState(false);
   const [shippingForm, setShippingForm] = useState({
     recipient: '',
@@ -9187,8 +9780,6 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
   });
 
   const fileInputRef = useRef(null);
-  const logoCardInputRef = useRef(null);
-  const bgCardInputRef = useRef(null);
   const cloudName = "duy0mcqsh"; 
   const uploadPreset = "ml_default"; 
 
@@ -9199,12 +9790,12 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
   const proyectorLink = `${getCleanBaseUrl()}/?modo=proyector&e=${idReal}`; 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(guestLink)}&margin=10`;
 
-  // Escuchamos configuración del muro + diseño de tarjetas + cantidad de mesas creadas
   useEffect(() => {
     if (!idReal || idReal === 'demo_id') return;
     const unsub = onSnapshot(doc(db, "eventos", idReal), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
+        setEventoRawData(data);
         if (data.galeriaConfig) setConfig(data.galeriaConfig);
         if (data.socialWallStatus) setSocialWallStatus(data.socialWallStatus);
         if (data.socialWallCardConfig) {
@@ -9238,41 +9829,16 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
     }
   };
 
-  // Subir Logo o Imagen de Fondo para la Tarjeta de Mesa
-  const handleCardAssetUpload = async (e, field) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setIsUploadingCardAsset(true);
-    if(addNotification) addNotification('Subiendo imagen...', 'Optimizando calidad para impresión.', 'info');
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", uploadPreset);
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: formData });
-      const data = await res.json();
-      if (data.secure_url) {
-        const updated = { ...cardConfig, [field]: data.secure_url };
-        setCardConfig(updated);
-        await updateDoc(doc(db, "eventos", idReal), { socialWallCardConfig: updated });
-        if(addNotification) addNotification('¡Imagen Lista!', 'Se aplicó a tu tarjeta de mesa.', 'success');
-      }
-    } catch (err) {
-      if(addNotification) addNotification('Error', 'Fallo al subir la imagen.', 'error');
-    }
-    setIsUploadingCardAsset(false);
-    e.target.value = null;
-  };
-
-  const handleSaveCardDesign = async () => {
+  const handleSaveCardDesign = async (updatedDraft) => {
     if (!idReal || idReal === 'demo_id') return;
-    setIsSavingCard(true);
+    const toSave = updatedDraft || cardConfig;
+    setCardConfig(toSave);
     try {
-      await updateDoc(doc(db, "eventos", idReal), { socialWallCardConfig: cardConfig });
-      if(addNotification) addNotification('Diseño Guardado', 'Los datos de tu tarjeta de mesa se guardaron correctamente.', 'success');
+      await updateDoc(doc(db, "eventos", idReal), { socialWallCardConfig: toSave });
+      if(addNotification) addNotification('Diseño Guardado', 'Tu diseño de caballete de mesa se guardó en la bóveda.', 'success');
     } catch (err) {
       if(addNotification) addNotification('Error', 'No se pudo guardar el diseño.', 'error');
     }
-    setIsSavingCard(false);
   };
 
   const handleSendCardOrderToWorkshop = async (e) => {
@@ -9287,6 +9853,7 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
       });
       setSocialWallStatus('enviado');
       setShowShippingModal(false);
+      setShowCardStudio(false);
       if(addNotification) addNotification('¡Orden Enviada a Taller!', 'Tus tarjetas de mesa han entrado a fila de producción.', 'success');
     } catch (err) {
       if(addNotification) addNotification('Error', 'No se pudo enviar la orden al taller.', 'error');
@@ -9411,22 +9978,20 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
           </div>
           
           <div className="flex flex-wrap items-center gap-2.5">
-            {/* 🟢 BOTÓN PARA DESPLEGAR EL ESTUDIO DE TARJETAS DE MESA Y ENVIAR A TALLER */}
+            {/* 🟢 BOTÓN QUE ABRE EL ATELIER A PANTALLA COMPLETA (MODO INDEPENDIENTE CABALLETE) */}
             <button
               type="button"
-              onClick={() => setShowCardStudio(!showCardStudio)}
+              onClick={() => setShowCardStudio(true)}
               className={`flex items-center justify-center px-5 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all border ${
                 isLockedInWorkshop
                   ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                  : showCardStudio
-                  ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg'
-                  : 'bg-slate-900 dark:bg-white/10 text-white border-slate-700 dark:border-white/15 hover:border-amber-500/50'
+                  : 'bg-amber-500 hover:bg-amber-400 text-slate-950 border-amber-400 shadow-lg'
               }`}
             >
               {isLockedInWorkshop ? (
-                <><Lock size={14} className="mr-2"/> {socialWallStatus === 'impreso' ? 'Tarjetas Despachadas' : 'Tarjetas en Producción'}</>
+                <><Lock size={14} className="mr-2"/> {socialWallStatus === 'impreso' ? 'Tarjetas Despachadas (Ver Diseño)' : 'Tarjetas en Taller (Ver Diseño)'}</>
               ) : (
-                <><Printer size={14} className="mr-2 text-amber-400"/> {showCardStudio ? 'Ocultar Taller de Tarjetas' : 'Diseñar Tarjetas de Mesa (Envío Gratis)'}</>
+                <><Sparkles size={14} className="mr-2"/> Abrir Atelier de Tarjetas de Mesa</>
               )}
             </button>
 
@@ -9436,197 +10001,6 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
             </button>
           </div>
         </div>
-
-        {/* 🟢 PANEL DESPLEGABLE: ESTUDIO PERSONALIZADOR DE TARJETAS DE MESA (ESTILO BLACK LABEL) */}
-        {showCardStudio && (
-          <div className="mb-6 p-5 sm:p-6 rounded-3xl bg-slate-50 dark:bg-[#111] border border-amber-500/30 shadow-xl animate-in slide-in-from-top-4 duration-300">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-200 dark:border-white/10">
-              <div>
-                <span className="text-[9px] font-black uppercase tracking-widest text-amber-500 block">Taller de Impresión Baulia • Envío Gratis Incluido</span>
-                <h3 className="text-lg sm:text-xl font-editorial font-bold text-slate-900 dark:text-white">Personalización de Tarjetas de Mesa (Caballete Plegable)</h3>
-              </div>
-              {isLockedInWorkshop && (
-                <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 w-max">
-                  <Lock size={12}/> {socialWallStatus === 'impreso' ? 'PRODUCIDO Y ENVIADO' : 'EN PRODUCCIÓN'}
-                </span>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Columna Izquierda: Controles de Diseño (Idéntico a Black Label) */}
-              <div className="lg:col-span-7 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Subir Logo */}
-                  <div className="p-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/15 bg-white dark:bg-[#0a0a0a] text-center relative">
-                    <input type="file" accept="image/*" ref={logoCardInputRef} onChange={e => handleCardAssetUpload(e, 'logoUrl')} className="hidden" disabled={isLockedInWorkshop} />
-                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Logo / Monograma (Opcional)</p>
-                    {cardConfig.logoUrl ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <img src={cardConfig.logoUrl} alt="Logo" className="h-12 object-contain" />
-                        {!isLockedInWorkshop && (
-                          <div className="flex gap-2">
-                            <button type="button" onClick={() => logoCardInputRef.current.click()} className="text-[9px] font-bold text-amber-500 underline">Cambiar</button>
-                            <button type="button" onClick={() => setCardConfig({ ...cardConfig, logoUrl: '' })} className="text-[9px] font-bold text-rose-500 underline">Quitar</button>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <button type="button" disabled={isLockedInWorkshop || isUploadingCardAsset} onClick={() => logoCardInputRef.current.click()} className="w-full py-2 flex flex-col items-center justify-center text-slate-500 hover:text-amber-500 transition-colors disabled:opacity-50">
-                        <ImageIcon size={22} className="mb-1"/>
-                        <span className="text-[10px] font-bold">Clic para subir logo</span>
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Subir Imagen de Fondo con Degradado Automático */}
-                  <div className="p-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/15 bg-white dark:bg-[#0a0a0a] text-center relative">
-                    <input type="file" accept="image/*" ref={bgCardInputRef} onChange={e => handleCardAssetUpload(e, 'bgImageUrl')} className="hidden" disabled={isLockedInWorkshop} />
-                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Foto de Fondo (Opcional)</p>
-                    {cardConfig.bgImageUrl ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <img src={cardConfig.bgImageUrl} alt="Fondo" className="h-12 w-20 object-cover rounded-lg border border-white/10" />
-                        {!isLockedInWorkshop && (
-                          <div className="flex gap-2">
-                            <button type="button" onClick={() => bgCardInputRef.current.click()} className="text-[9px] font-bold text-amber-500 underline">Cambiar</button>
-                            <button type="button" onClick={() => setCardConfig({ ...cardConfig, bgImageUrl: '' })} className="text-[9px] font-bold text-rose-500 underline">Quitar</button>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <button type="button" disabled={isLockedInWorkshop || isUploadingCardAsset} onClick={() => bgCardInputRef.current.click()} className="w-full py-2 flex flex-col items-center justify-center text-slate-500 hover:text-amber-500 transition-colors disabled:opacity-50">
-                        <Camera size={22} className="mb-1"/>
-                        <span className="text-[10px] font-bold">Subir foto (Degradado auto)</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Tipo de Evento (Pre-título)</label>
-                    <input
-                      type="text"
-                      disabled={isLockedInWorkshop}
-                      value={cardConfig.preTitle}
-                      onChange={e => setCardConfig({ ...cardConfig, preTitle: e.target.value })}
-                      placeholder="Ej. NUESTRA BODA / MIS XV"
-                      className="w-full p-3 rounded-xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-amber-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Nombre Principal del Evento</label>
-                    <input
-                      type="text"
-                      disabled={isLockedInWorkshop}
-                      value={cardConfig.eventName}
-                      onChange={e => setCardConfig({ ...cardConfig, eventName: e.target.value })}
-                      placeholder="Ej. Sofía & Alejandro"
-                      className="w-full p-3 rounded-xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-amber-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Cantidad de Mesas (Tarjetas)</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="100"
-                      disabled={isLockedInWorkshop}
-                      value={cardConfig.cantidadTarjetas}
-                      onChange={e => setCardConfig({ ...cardConfig, cantidadTarjetas: Math.max(1, parseInt(e.target.value) || 1) })}
-                      className="w-full p-3 rounded-xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-xs font-black text-amber-500 text-center outline-none focus:border-amber-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Frase de Invitación antes del QR</label>
-                  <input
-                    type="text"
-                    disabled={isLockedInWorkshop}
-                    value={cardConfig.subtitle}
-                    onChange={e => setCardConfig({ ...cardConfig, subtitle: e.target.value })}
-                    placeholder="Escanea, sube tus fotos y cumple los retos en pantalla"
-                    className="w-full p-3 rounded-xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-xs font-medium text-slate-900 dark:text-white outline-none focus:border-amber-500"
-                  />
-                </div>
-
-                {!isLockedInWorkshop ? (
-                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                    <button
-                      type="button"
-                      onClick={handleSaveCardDesign}
-                      disabled={isSavingCard}
-                      className="flex-1 py-3.5 rounded-xl bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 text-slate-800 dark:text-white font-black text-[10px] uppercase tracking-widest transition-colors"
-                    >
-                      {isSavingCard ? 'Guardando...' : 'Guardar Diseño'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowShippingModal(true)}
-                      className="flex-1 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-widest shadow-lg transition-all flex items-center justify-center gap-2"
-                    >
-                      <Send size={14}/> Enviar a Taller ({cardConfig.cantidadTarjetas} Tarjetas)
-                    </button>
-                  </div>
-                ) : (
-                  <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-between">
-                    <span>✓ Tu orden de {cardConfig.cantidadTarjetas} tarjetas de mesa ya fue enviada a Taller Baulia.</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Columna Derecha: Vista Previa en Vivo con Degradado antes del QR */}
-              <div className="lg:col-span-5 flex flex-col items-center">
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-1.5">
-                  <Eye size={12}/> Vista Previa • Tarjeta de Mesa (9.5 x 13.5 cm parada)
-                </span>
-
-                <div className="w-[235px] h-[330px] rounded-2xl bg-white border-2 border-amber-500/40 shadow-2xl overflow-hidden relative flex flex-col items-center text-center select-none">
-                  {/* Imagen de Fondo Superior (termina con degradado suave antes del QR) */}
-                  <div className="absolute top-0 inset-x-0 h-[55%] overflow-hidden bg-slate-100">
-                    {cardConfig.bgImageUrl ? (
-                      <img src={cardConfig.bgImageUrl} alt="Fondo Tarjeta" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-b from-amber-500/15 via-slate-100 to-white"></div>
-                    )}
-                    {/* Degradado automático que funde la imagen a blanco puro antes de llegar al QR */}
-                    <div
-                      className="absolute inset-0"
-                      style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.65) 60%, #ffffff 95%, #ffffff 100%)' }}
-                    ></div>
-                  </div>
-
-                  {/* Contenido Frontal de la Tarjeta */}
-                  <div className="relative z-10 flex flex-col items-center justify-end h-full w-full px-4 pb-4 pt-6">
-                    {cardConfig.logoUrl && (
-                      <img src={cardConfig.logoUrl} alt="Logo" className="h-9 object-contain mb-1 drop-shadow-sm" />
-                    )}
-                    <span className="text-[7px] font-black uppercase tracking-[0.25em] text-amber-600 mb-0.5">
-                      {cardConfig.preTitle || 'SOCIAL WALL EN VIVO'}
-                    </span>
-                    <h4 className="font-editorial font-bold text-xl text-slate-900 leading-tight mb-1 line-clamp-1">
-                      {cardConfig.eventName || 'Nombre del Evento'}
-                    </h4>
-                    <p className="text-[8px] font-semibold text-slate-500 leading-snug max-w-[180px] mb-2.5 line-clamp-2">
-                      {cardConfig.subtitle}
-                    </p>
-
-                    <div className="bg-white p-2 rounded-xl border border-slate-200 shadow-md mb-2">
-                      <img src={qrUrl} alt="QR Mesa" className="w-28 h-28 object-contain mix-blend-multiply" />
-                    </div>
-
-                    <span className="text-[8px] font-black uppercase tracking-widest text-indigo-600">
-                      {config.hashtag || '#MiEvento'} • Sube tus Fotos
-                    </span>
-                    <span className="text-[6px] font-bold uppercase tracking-[0.25em] text-slate-400 mt-1">
-                      by BAULIA.COM
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
@@ -9686,7 +10060,26 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
         </div>
       </div>
 
-      {/* 🟢 MODAL DE DIRECCIÓN DE ENVÍO A TALLER (IDÉNTICO A BLACK LABEL) */}
+      {/* 🟢 ATELIER PHYGITAL A PANTALLA COMPLETA (MODO CABALLETE DE MESA) */}
+      <AtelierPhygitalModal
+        isOpen={showCardStudio}
+        onClose={() => setShowCardStudio(false)}
+        mode="social_wall"
+        eventoData={eventoRawData}
+        initialConfig={cardConfig}
+        hashtag={config.hashtag}
+        qrUrl={qrUrl}
+        isLocked={isLockedInWorkshop}
+        status={socialWallStatus}
+        onSaveDesign={handleSaveCardDesign}
+        onOpenShippingModal={(draftToSave) => {
+          setCardConfig(draftToSave);
+          setShowShippingModal(true);
+        }}
+        addNotification={addNotification}
+      />
+
+      {/* 🟢 MODAL DE DIRECCIÓN DE ENVÍO A TALLER */}
       {showShippingModal && (
         <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-[#0d0d0d] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 sm:p-8 shadow-2xl text-white max-h-[92vh] overflow-y-auto custom-scrollbar">
@@ -16552,7 +16945,11 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
             subtitle: cardCfg.subtitle || 'Escanea, sube tus fotos y cumple los retos en pantalla',
             logoUrl: cardCfg.logoUrl || '',
             bgImageUrl: cardCfg.bgImageUrl || '',
-            cantidadTarjetas: Number(cardCfg.cantidadTarjetas) || 15
+            cantidadTarjetas: Number(cardCfg.cantidadTarjetas) || 15,
+            papelId: cardCfg.papelId || 'blanco_galeria',
+            fontId: cardCfg.fontId || 'editorial',
+            accentColor: cardCfg.accentColor || '#B45309',
+            heredarInvitacion: cardCfg.heredarInvitacion || false
           },
           hashtag: evento.galeriaConfig?.hashtag || '#MiEvento',
           fechaEvento: evento.fecha,
@@ -16723,7 +17120,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     printWindow.document.close();
   };
 
-  // 🟢 GENERADOR PDF PARA TARJETAS DE MESA SOCIAL WALL (2 Caballetes Plegables en Triángulo por Hoja Carta Vertical)
+  // 🟢 GENERADOR PDF DE ALTA COSTURA PARA TARJETAS SOCIAL WALL (Con Marcas de Corte, Tipografía y Color de Papel)
   const generarPDFTarjetasSocialWall = () => {
     if (!ordenActiva || ordenActiva.orderType !== 'social_wall') return;
     const printWindow = window.open('', '_blank');
@@ -16733,26 +17130,39 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
     const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(guestCameraUrl)}&margin=2`;
     const hashtag = ordenActiva.hashtag || '#MiEvento';
 
-    // Cada hoja Carta Vertical (215.9mm x 279.4mm) lleva 2 caballetes lado a lado:
-    // Ancho de cada caballete: 95mm. Alto desplegado: 268mm (124mm Cara A invertida 180° + 124mm Cara B frontal + 20mm pestaña inferior para doblar y parar en triángulo).
+    const PAPER_MAP = {
+      blanco_galeria: { bg: '#FFFFFF', text: '#0F172A', accent: cfg.accentColor || '#B45309', sub: '#64748B' },
+      marfil_algodon: { bg: '#FDFBF7', text: '#1C1917', accent: '#9A6F1A', sub: '#78716C' },
+      obsidiana: { bg: '#0B0B0E', text: '#FFFFFF', accent: '#F59E0B', sub: '#94A3B8' },
+      champagne: { bg: '#F7F1E5', text: '#27272A', accent: '#A16207', sub: '#71717A' }
+    };
+    const FONT_MAP = {
+      editorial: "'Cormorant Garamond', serif",
+      caligrafia: "'Great Vibes', cursive",
+      alta_moda: "'Cinzel', serif",
+      minimal: "'Montserrat', sans-serif"
+    };
+
+    const paper = PAPER_MAP[cfg.papelId] || PAPER_MAP.blanco_galeria;
+    const titleFont = FONT_MAP[cfg.fontId] || FONT_MAP.editorial;
     const sheetsCount = Math.ceil(total / 2);
 
     const renderFaceHTML = (mesaNum) => `
-      <div class="face-inner">
+      <div class="face-inner" style="background-color: ${paper.bg};">
         <div class="bg-layer">
           ${cfg.bgImageUrl ? `<img src="${cfg.bgImageUrl}" class="bg-img" crossorigin="anonymous" />` : `<div class="bg-fallback"></div>`}
-          <div class="bg-gradient"></div>
+          <div class="bg-gradient" style="background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, ${paper.bg}99 58%, ${paper.bg} 93%, ${paper.bg} 100%);"></div>
         </div>
         <div class="face-content">
           ${cfg.logoUrl ? `<img src="${cfg.logoUrl}" class="logo-img" crossorigin="anonymous" />` : ''}
-          <div class="pre-title">${cfg.preTitle || 'SOCIAL WALL EN VIVO'}</div>
-          <div class="event-name">${cfg.eventName || 'Nuestro Evento'}</div>
-          <div class="subtitle">${cfg.subtitle || 'Escanea, sube tus fotos y cumple los retos en pantalla'}</div>
+          <div class="pre-title" style="color: ${paper.accent};">${cfg.preTitle || 'SOCIAL WALL EN VIVO'}</div>
+          <div class="event-name" style="font-family: ${titleFont}; color: ${paper.text};">${cfg.eventName || 'Nuestro Evento'}</div>
+          <div class="subtitle" style="color: ${paper.sub};">${cfg.subtitle || 'Escanea, sube tus fotos y cumple los retos en pantalla'}</div>
           <div class="qr-box">
             <img src="${qrImgUrl}" class="qr-img" crossorigin="anonymous" />
           </div>
-          <div class="hashtag">${hashtag} • MESA ${mesaNum}</div>
-          <div class="brand">by BAULIA.COM</div>
+          <div class="hashtag" style="color: ${paper.accent};">${hashtag} • MESA ${mesaNum}</div>
+          <div class="brand" style="color: ${paper.sub};">by BAULIA.COM</div>
         </div>
       </div>
     `;
@@ -16761,9 +17171,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Tarjetas Social Wall - ${cfg.eventName}</title>
+        <title>Impresión Alta Costura Social Wall - ${cfg.eventName}</title>
         <style>
-          @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Montserrat:wght@400;600;700;900&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Great+Vibes&family=Montserrat:wght@400;600;700;900&display=swap');
           * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           body, html { margin: 0; padding: 0; background: #fff; font-family: 'Montserrat', sans-serif; }
           @page { size: letter portrait; margin: 0; }
@@ -16779,14 +17189,27 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
             padding: 5mm;
           }
           .sheet:last-child { page-break-after: auto; }
+          .tent-wrapper {
+            position: relative;
+            padding: 2mm;
+          }
+          /* Marcas de corte profesionales tipo imprenta (Crop Marks) */
+          .crop-tl, .crop-tr, .crop-bl, .crop-br {
+            position: absolute; width: 4mm; height: 4mm; pointer-events: none; z-index: 20;
+          }
+          .crop-tl { top: 0; left: 0; border-top: 0.35mm solid #0f172a; border-left: 0.35mm solid #0f172a; }
+          .crop-tr { top: 0; right: 0; border-top: 0.35mm solid #0f172a; border-right: 0.35mm solid #0f172a; }
+          .crop-bl { bottom: 0; left: 0; border-bottom: 0.35mm solid #0f172a; border-left: 0.35mm solid #0f172a; }
+          .crop-br { bottom: 0; right: 0; border-bottom: 0.35mm solid #0f172a; border-right: 0.35mm solid #0f172a; }
+
           .tent-card {
             width: 95mm;
             height: 268mm;
-            border: 0.35mm dashed #94a3b8;
+            border: 0.25mm solid #cbd5e1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            background: #ffffff;
+            background: ${paper.bg};
           }
           .tent-face {
             width: 95mm;
@@ -16796,19 +17219,19 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           }
           .tent-face.upside-down {
             transform: rotate(180deg);
-            border-bottom: 0.4mm dashed #cbd5e1;
+            border-bottom: 0.4mm dashed #94a3b8;
           }
           .tent-tab {
             width: 95mm;
             height: 20mm;
-            border-top: 0.35mm dashed #cbd5e1;
+            border-top: 0.4mm dashed #94a3b8;
             background: #f8fafc;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 7pt;
+            font-size: 6.5pt;
             font-weight: 700;
-            color: #94a3b8;
+            color: #64748b;
             text-transform: uppercase;
             letter-spacing: 2px;
           }
@@ -16826,17 +17249,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           .bg-layer {
             position: absolute;
             top: 0; left: 0; right: 0;
-            height: 56%;
+            height: 55%;
             overflow: hidden;
             z-index: 1;
           }
           .bg-img { width: 100%; height: 100%; object-fit: cover; }
-          .bg-fallback { width: 100%; height: 100%; background: linear-gradient(180deg, rgba(212,175,55,0.14) 0%, #ffffff 100%); }
-          .bg-gradient {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.7) 62%, #ffffff 95%, #ffffff 100%);
-          }
+          .bg-fallback { width: 100%; height: 100%; background: radial-gradient(circle at top, ${paper.accent}25 0%, transparent 75%); }
+          .bg-gradient { position: absolute; inset: 0; }
           .face-content {
             position: relative;
             z-index: 2;
@@ -16846,13 +17265,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
             width: 100%;
           }
           .logo-img { max-height: 12mm; max-width: 45mm; object-fit: contain; margin-bottom: 1.5mm; }
-          .pre-title { font-size: 6.5pt; font-weight: 900; color: #b45309; letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 1mm; }
-          .event-name { font-family: 'Cormorant Garamond', serif; font-size: 20pt; font-weight: 700; color: #0f172a; line-height: 1.05; margin-bottom: 1.5mm; }
-          .subtitle { font-size: 6.5pt; font-weight: 600; color: #64748b; max-width: 72mm; line-height: 1.35; margin-bottom: 3mm; }
-          .qr-box { padding: 2.5mm; background: #fff; border: 0.3mm solid #e2e8f0; border-radius: 3mm; margin-bottom: 2.5mm; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+          .pre-title { font-size: 6.5pt; font-weight: 900; letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 1mm; }
+          .event-name { font-size: 21pt; font-weight: 700; line-height: 1.08; margin-bottom: 1.5mm; }
+          .subtitle { font-size: 6.5pt; font-weight: 600; max-width: 74mm; line-height: 1.35; margin-bottom: 3mm; }
+          .qr-box { padding: 2.5mm; background: #ffffff; border: 0.3mm solid #e2e8f0; border-radius: 3mm; margin-bottom: 2.5mm; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
           .qr-img { width: 34mm; height: 34mm; display: block; }
-          .hashtag { font-size: 7.5pt; font-weight: 900; color: #4f46e5; letter-spacing: 1.5px; text-transform: uppercase; }
-          .brand { font-size: 5.5pt; font-weight: 700; color: #94a3b8; letter-spacing: 2px; margin-top: 1.5mm; }
+          .hashtag { font-size: 7.5pt; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; }
+          .brand { font-size: 5.5pt; font-weight: 700; letter-spacing: 2px; margin-top: 1.5mm; }
         </style>
       </head>
       <body onload="setTimeout(function(){ window.print(); }, 1000)">
@@ -16864,10 +17283,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       for (let col = 0; col < 2; col++) {
         if (cardIndex <= total) {
           html += `
-            <div class="tent-card">
-              <div class="tent-face upside-down">${renderFaceHTML(cardIndex)}</div>
-              <div class="tent-face">${renderFaceHTML(cardIndex)}</div>
-              <div class="tent-tab">Doblar y pegar base aquí (Triángulo de Mesa)</div>
+            <div class="tent-wrapper">
+              <div class="crop-tl"></div><div class="crop-tr"></div><div class="crop-bl"></div><div class="crop-br"></div>
+              <div class="tent-card">
+                <div class="tent-face upside-down">${renderFaceHTML(cardIndex)}</div>
+                <div class="tent-face">${renderFaceHTML(cardIndex)}</div>
+                <div class="tent-tab">▲ Doblar aquí • Pestaña de base para parar en triángulo ▲</div>
+              </div>
             </div>
           `;
           cardIndex++;
