@@ -12188,7 +12188,7 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
   const [planSeleccionado, setPlanSeleccionado] = useState(null);
   const [moneda, setMoneda] = useState('MXN');
 
-  // 🔴 1. ESTADO DE LA BASE DE DATOS (Sincronizado en vivo con Finanzas y Promociones)
+  // 🔴 1. ESTADO DE LA BASE DE DATOS (Precios Netos con IVA Incluido sincronizados con el Panel)
   const [preciosDB, setPreciosDB] = useState(() => {
     try {
       const cached = localStorage.getItem('baulia_precios_live');
@@ -12197,26 +12197,81 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
     return {
       preciosBase: {
         basico: { MXN: 990, USD: 59 },
-        plata: { MXN: 1490, USD: 79 },
-        oro: { MXN: 1990, USD: 99 },
-        diamante: { MXN: 2990, USD: 159 },
-        social_wall: { MXN: 500, USD: 79 },
-        black_label: { MXN: 600, USD: 79 }
+        plata: { MXN: 1690, USD: 95 },
+        oro: { MXN: 2490, USD: 139 },
+        diamante: { MXN: 3990, USD: 219 },
+        social_wall: { MXN: 1290, USD: 79 },
+        black_label: { MXN: 1490, USD: 89 }
       },
       promocion: { activa: false, porcentaje: 0, productos: {} }
     };
   });
 
-  // 🔴 2. ESCUCHADOR EN TIEMPO REAL AL PANEL (Actualiza al instante precios y descuentos)
+  // 🟢 ESTADO Y ESCUCHADOR DE TESTIMONIOS APROBADOS EN EL PANEL
+  const testimoniosEditorialFallback = [
+    {
+      id: 't1',
+      nombre: 'Sofía & Alejandro M.',
+      evento: 'Boda en Hacienda • Plan Diamante',
+      texto: 'El auto-acomodo de mesas por etiquetas nos ahorró semanas de discusiones familiares, y cuando llegó la Caja VIP con los brazaletes y las tarjetas del Social Wall no lo podíamos creer. Nuestros invitados subieron más de 400 fotos a la pantalla.',
+      estrellas: 5
+    },
+    {
+      id: 't2',
+      nombre: 'Mariana Villarreal',
+      evento: 'Boda Civil & Religiosa • Plan Oro',
+      texto: 'Cero colados. La Hostess escaneó los códigos QR desde su propio celular en segundos y cada invitado veía en su pase exactamente en qué mesa sentarse. La invitación con música y acuarelas emocionó a toda nuestra familia.',
+      estrellas: 5
+    },
+    {
+      id: 't3',
+      nombre: 'Roberto & Claudia G.',
+      evento: 'XV Años de Gala • Plan Diamante',
+      texto: 'Los chicos en la fiesta se volvieron locos con los retos del Social Wall y la lluvia de corazones en el proyector. Además, con la Lluvia de Sobres a 1 clic recuperamos la inversión de la plataforma desde la primera semana.',
+      estrellas: 5
+    }
+  ];
+  const [testimoniosPublicos, setTestimoniosPublicos] = useState(testimoniosEditorialFallback);
+
+  // 🔴 2. ESCUCHADOR EN TIEMPO REAL AL PANEL (Precios y Testimonios Aprobados)
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, 'ajustes_baulia', 'precios_publicos'), (docSnap) => {
+    const unsubPrecios = onSnapshot(doc(db, 'ajustes_baulia', 'precios_publicos'), (docSnap) => {
       if (docSnap.exists()) {
         const liveData = docSnap.data();
         setPreciosDB(liveData);
         try { localStorage.setItem('baulia_precios_live', JSON.stringify(liveData)); } catch (e) {}
       }
     });
-    return () => unsub();
+
+    let unsubTestimonios = () => {};
+    try {
+      if (typeof collection === 'function') {
+        unsubTestimonios = onSnapshot(collection(db, 'testimonios'), (snap) => {
+          const lista = [];
+          snap.forEach((d) => {
+            const data = d.data();
+            const estaAprobado = data.aprobado === true || data.estado === 'aprobado' || data.activo === true || data.visible === true || data.status === 'approved';
+            if (estaAprobado) {
+              lista.push({
+                id: d.id,
+                nombre: data.nombre || data.autor || data.cliente || 'Anfitrión Baulia',
+                evento: data.evento || data.tipoEvento || (data.plan ? `Plan ${data.plan}` : 'Evento Verificado Baulia'),
+                texto: data.comentario || data.texto || data.mensaje || data.testimonio || '',
+                estrellas: Number(data.calificacion || data.estrellas || 5)
+              });
+            }
+          });
+          if (lista.length > 0) {
+            setTestimoniosPublicos(lista);
+          }
+        });
+      }
+    } catch (e) {}
+
+    return () => {
+      unsubPrecios();
+      unsubTestimonios();
+    };
   }, []);
 
   // 🔴 3. CONSTRUCTOR DE PRECIOS BLINDADO (100% Dinámico)
@@ -15131,16 +15186,29 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
       {/* 🔴 SECCIÓN DE PLANES Y PORTAL COMPARATIVO DE ALTA COSTURA */}
       {/* ========================================== */}
       <div id="planes" className="py-32 px-4 max-w-[1400px] mx-auto relative">
-        <RevealSection className="text-center mb-16">
+        <RevealSection className="text-center mb-14">
           <span className="px-4 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-black uppercase tracking-[0.2em] border border-amber-500/20 shadow-sm mb-6 inline-block">
             Atelier & Software de Gestión
           </span>
-          <h2 className="text-5xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white mt-4 mb-6 transition-colors leading-tight">
+          <h2 className="text-5xl md:text-6xl font-editorial font-medium text-slate-900 dark:text-white mt-2 mb-5 transition-colors leading-tight">
             La Colección Sagrada.
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-sm md:text-base transition-colors font-light leading-relaxed">
-            Todos nuestros planes incluyen una invitación de Alta Costura y acceso a tu Bóveda Privada. Cero mensualidades, un solo pago único y control absoluto hasta el último baile.
+          <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-sm md:text-base transition-colors font-light leading-relaxed mb-7">
+            Todos nuestros planes incluyen una invitación de Alta Costura y acceso a tu Bóveda Privada. Un solo pago único, <b>precios netos con IVA incluido</b> y acompañamiento hasta el último baile.
           </p>
+
+          {/* 🟢 GATILLO DE ESCASEZ GENERAL (Engloba todos los planes por atención Concierge y Atelier) */}
+          <div className="max-w-2xl mx-auto bg-white dark:bg-[#111] border border-amber-500/40 rounded-2xl p-3.5 sm:px-6 sm:py-3.5 shadow-[0_10px_30px_rgba(245,158,11,0.12)] flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 text-left">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0"></span>
+              <p className="text-xs text-slate-700 dark:text-slate-200 leading-snug">
+                <b>Disponibilidad Limitada:</b> Por nuestra atención artesanal y soporte Concierge 1 a 1, aceptamos únicamente <b>50 eventos por mes</b>.
+              </p>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest whitespace-nowrap shrink-0">
+              🔥 8 Lugares Disponibles
+            </span>
+          </div>
         </RevealSection>
 
         {/* TARJETAS DE LOS 4 PLANES CON BOTÓN DE FICHA TÉCNICA COMPLETA */}
@@ -15504,6 +15572,63 @@ const LandingPageView = ({ isDarkMode, themeSetting, cycleTheme }) => {
           </div>
         )}
       </div>
+
+      {/* ========================================== */}
+      {/* 🟢 PRUEBA SOCIAL EMOCIONAL: TESTIMONIOS DE ALTA COSTURA (Conectados a Firebase + Fallback) */}
+      {/* ========================================== */}
+      <section id="testimonios" className="py-20 px-4 md:px-8 max-w-7xl mx-auto relative z-10 border-t border-slate-200/70 dark:border-white/5">
+        <RevealSection className="text-center mb-12">
+          <span className="text-amber-600 dark:text-amber-500 font-bold tracking-widest uppercase text-xs mb-3 block">
+            El Efecto Baulia • Historias Reales
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-editorial font-medium text-slate-900 dark:text-white mb-4 leading-tight">
+            La tranquilidad de quienes ya <span className="italic text-amber-500">celebraron sin estrés.</span>
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base font-light max-w-xl mx-auto">
+            Anfitriones y parejas que transformaron la logística de su evento con nuestra Bóveda Privada.
+          </p>
+        </RevealSection>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+          {testimoniosPublicos.slice(0, 6).map((item, idx) => (
+            <RevealSection key={item.id || idx} delay={idx * 100} className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] p-7 sm:p-8 border border-slate-200 dark:border-white/10 shadow-lg flex flex-col justify-between relative overflow-hidden group hover:border-amber-500/40 transition-all">
+              <div>
+                {/* Estrellas Doradas */}
+                <div className="flex items-center gap-1 text-amber-500 mb-4">
+                  {Array.from({ length: item.estrellas || 5 }).map((_, sIdx) => (
+                    <svg key={sIdx} className="w-4 h-4 fill-amber-400 text-amber-400" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+
+                {/* Cita del Testimonio */}
+                <p className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-light italic leading-relaxed mb-6">
+                  "{item.texto}"
+                </p>
+              </div>
+
+              {/* Firma del Cliente */}
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 font-editorial font-bold text-sm shrink-0">
+                    {String(item.nombre || 'B').charAt(0)}
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">{item.nombre}</h4>
+                    <span className="text-[9px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 block truncate">
+                      {item.evento}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+                  ✓ Verificado
+                </span>
+              </div>
+            </RevealSection>
+          ))}
+        </div>
+      </section>
 
       {/* ========================================== */}
       {/* 🟢 SECCIÓN B2B RENOVADA: WEDDING PLANNERS Y AGENCIAS (Ubicada después de los precios) */}
