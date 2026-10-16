@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { doc, getDoc, updateDoc, setDoc, deleteDoc, collection, onSnapshot } from 'firebase/firestore';
 import { Palette, QrCode, Lock, Send, Plus, FileSpreadsheet, Users, ListTodo, Trash2, Image as ImageIcon, Download, Eye, Edit3, Info, AlertTriangle, Loader2, X, Sparkles, MapPin, Truck } from 'lucide-react';
 import { db } from '../firebase'; 
@@ -341,8 +342,8 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       )}
 
       {/* 🟢 ATELIER PHYGITAL A PANTALLA COMPLETA (MODO INDEPENDIENTE: PULSERAS BLACK LABEL) */}
-      {showAtelierModal && (
-        <div className="fixed inset-0 z-[9998] bg-black/95 backdrop-blur-2xl flex flex-col animate-in fade-in duration-300 text-white select-none">
+      {showAtelierModal && createPortal(
+        <div className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-2xl flex flex-col animate-in fade-in duration-300 text-white select-none">
           <div className="h-16 px-6 border-b border-white/10 flex items-center justify-between bg-[#08080a] shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
@@ -434,27 +435,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
             {/* BARRA LATERAL DERECHA DE CONTROLES DEL ATELIER */}
             <div className="lg:col-span-5 bg-[#0e0e12] border-l border-white/10 p-6 sm:p-8 overflow-y-auto custom-scrollbar space-y-6">
-              {!isStandalone && (
-                <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/30 flex items-center justify-between gap-4">
-                  <div>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-amber-400 flex items-center gap-1">
-                      <Sparkles size={11}/> Smart Sync Phygital
-                    </span>
-                    <h4 className="text-xs font-bold text-white mt-0.5">Heredar diseño de mi Invitación Web</h4>
-                    <p className="text-[10px] text-slate-400 leading-snug mt-0.5">
-                      Sincroniza nombres, monograma y color de tu invitación sobre la pulsera blanca.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={isLocked}
-                    onClick={handleToggleInheritance}
-                    className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ${designConfig.heredarInvitacion ? 'bg-amber-500' : 'bg-white/15'}`}
-                  >
-                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${designConfig.heredarInvitacion ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                  </button>
-                </div>
-              )}
+              {/* INTERRUPTOR DE HERENCIA (DESACTIVADO TEMPORALMENTE) */}
 
               {/* 1. COLOR DE PULSERA */}
               <div>
@@ -588,7 +569,8 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <style>{`

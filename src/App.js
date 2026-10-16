@@ -9305,8 +9305,8 @@ const AtelierPhygitalModal = ({
   const activeFont = FONT_STYLES.find(f => f.id === draft.fontId) || FONT_STYLES[0];
   const effectiveAccent = (draft.heredarInvitacion && draft.papelId === 'blanco_galeria') ? draft.accentColor : activePaper.accent;
 
-  return (
-    <div className="fixed inset-0 z-[9998] bg-black/90 backdrop-blur-2xl flex flex-col animate-in fade-in duration-300 text-white select-none">
+  return createPortal(
+    <div className="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-2xl flex flex-col animate-in fade-in duration-300 text-white select-none">
       {/* Importación de fuentes de Alta Costura para la vista previa */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Great+Vibes&family=Montserrat:wght@400;600;700;900&display=swap');
@@ -9495,26 +9495,7 @@ const AtelierPhygitalModal = ({
         {/* BARRA LATERAL DERECHA: CONTROLES DE PERSONALIZACIÓN */}
         <div className="lg:col-span-5 bg-[#0e0e12] border-l border-white/10 p-6 sm:p-8 overflow-y-auto custom-scrollbar space-y-6">
           
-          {/* 1. INTERRUPTOR DE HERENCIA DE DISEÑO DE LA INVITACIÓN */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/30 flex items-center justify-between gap-4">
-            <div>
-              <span className="text-[9px] font-black uppercase tracking-widest text-amber-400 flex items-center gap-1">
-                <Sparkles size={11}/> Smart Sync Phygital
-              </span>
-              <h4 className="text-xs font-bold text-white mt-0.5">Heredar diseño de mi Invitación Web</h4>
-              <p className="text-[10px] text-slate-400 leading-snug mt-0.5">
-                Sincroniza nombres, foto de portada y color de tu invitación en {isSocialWall ? 'papel blanco' : 'pulsera blanca'}.
-              </p>
-            </div>
-            <button
-              type="button"
-              disabled={isLocked}
-              onClick={handleToggleInheritance}
-              className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ${draft.heredarInvitacion ? 'bg-amber-500' : 'bg-white/15'}`}
-            >
-              <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${draft.heredarInvitacion ? 'translate-x-6' : 'translate-x-0'}`}></div>
-            </button>
-          </div>
+          {/* 1. INTERRUPTOR DE HERENCIA DE DISEÑO DE LA INVITACIÓN (DESACTIVADO TEMPORALMENTE) */}
 
           {/* 2. SELECTOR DE COLOR DE PAPEL O COLOR DE PULSERA */}
           {isSocialWall ? (
@@ -9735,7 +9716,8 @@ const AtelierPhygitalModal = ({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
