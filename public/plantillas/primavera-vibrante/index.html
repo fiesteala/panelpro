@@ -11,6 +11,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     
     <script>
         tailwind.config = {
@@ -155,6 +156,101 @@
             return (
                 <div ref={domRef} className={`transition-all duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'} ${delay} ${className}`}>
                     {children}
+                </div>
+            );
+        };
+
+        const BauliaSignatureQR = ({ qrUrl, color = '#1C1917', logoSrc = '/primavera-vibrante/monograma.svg' }) => {
+            const [logoOk, setLogoOk] = useState(true);
+
+            const { modules, count, safeColor, eyeColor } = React.useMemo(() => {
+                // 1. Validador Matemático de Contraste (>40% sobre blanco)
+                const ensureContrast = (hex) => {
+                    let clean = String(hex || '#1C1917').replace('#', '').trim();
+                    if (clean.length === 3) clean = clean.split('').map(c => c + c).join('');
+                    let r = parseInt(clean.substring(0, 2), 16);
+                    let g = parseInt(clean.substring(2, 4), 16);
+                    let b = parseInt(clean.substring(4, 6), 16);
+                    if (isNaN(r) || isNaN(g) || isNaN(b)) return { main: '#1C1917', eye: '#1C1917' };
+
+                    let lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                    while (lum > 0.50) {
+                        r = Math.max(0, Math.floor(r * 0.82));
+                        g = Math.max(0, Math.floor(g * 0.82));
+                        b = Math.max(0, Math.floor(b * 0.82));
+                        lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                    }
+                    const toHex = (n) => n.toString(16).padStart(2, '0');
+                    return {
+                        main: `#${toHex(r)}${toHex(g)}${toHex(b)}`,
+                        eye: `#${toHex(Math.floor(r * 0.65))}${toHex(Math.floor(g * 0.65))}${toHex(Math.floor(b * 0.65))}`
+                    };
+                };
+                const colors = ensureContrast(color);
+
+                // 2. Interceptor de datos del QR
+                let payload = qrUrl || 'https://baulia.com';
+                try {
+                    if (payload.includes('data=')) {
+                        payload = decodeURIComponent(payload.split('data=')[1].split('&')[0]);
+                    }
+                } catch (e) {}
+
+                if (typeof window.qrcode !== 'function') {
+                    return { modules: [], count: 0, safeColor: colors.main, eyeColor: colors.eye };
+                }
+
+                // 3. Construcción de Matriz con Corrección Nivel H (Permite Monograma Central)
+                const qr = window.qrcode(0, 'H');
+                qr.addData(payload);
+                qr.make();
+                const n = qr.getModuleCount();
+                const dots = [];
+                const center = n / 2;
+                const clearRadius = n * 0.135;
+
+                for (let row = 0; row < n; row++) {
+                    for (let col = 0; col < n; col++) {
+                        const isTopLeft = row < 7 && col < 7;
+                        const isTopRight = row < 7 && col >= n - 7;
+                        const isBottomLeft = row >= n - 7 && col < 7;
+                        if (isTopLeft || isTopRight || isBottomLeft) continue;
+
+                        if (logoOk && logoSrc && Math.abs(row + 0.5 - center) < clearRadius && Math.abs(col + 0.5 - center) < clearRadius) {
+                            continue;
+                        }
+                        if (qr.isDark(row, col)) dots.push({ r: row, c: col });
+                    }
+                }
+                return { modules: dots, count: n, safeColor: colors.main, eyeColor: colors.eye };
+            }, [qrUrl, color, logoOk, logoSrc]);
+
+            if (!count) return <img src={qrUrl} alt="QR" crossOrigin="anonymous" className="w-40 h-40 mix-blend-multiply block" />;
+
+            const renderEye = (x, y) => (
+                <g key={`${x}-${y}`}>
+                    <rect x={x + 0.5} y={y + 0.5} width="6" height="6" rx="1.85" fill="none" stroke={eyeColor} strokeWidth="1" />
+                    <circle cx={x + 3.5} cy={y + 3.5} r="1.5" fill={safeColor} />
+                </g>
+            );
+
+            return (
+                <div className="relative w-40 h-40 flex items-center justify-center select-none">
+                    <svg viewBox={`0 0 ${count} ${count}`} width="160" height="160" className="w-full h-full block">
+                        {renderEye(0, 0)}
+                        {renderEye(count - 7, 0)}
+                        {renderEye(0, count - 7)}
+                        {modules.map((m, i) => (
+                            <circle key={i} cx={m.c + 0.5} cy={m.r + 0.5} r="0.42" fill={safeColor} />
+                        ))}
+                    </svg>
+                    {logoOk && logoSrc && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="w-9 h-9 rounded-full bg-white shadow-md border border-[#D4AF37]/50 p-1 flex items-center justify-center">
+                                <img src={logoSrc} alt="Monograma" crossOrigin="anonymous" className="w-full h-full object-contain" onError={() => setLogoOk(false)} />
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };
@@ -597,9 +693,9 @@
                                                                 {/* Destello de Hoja de Oro */}
                                                                 <div data-html2canvas-ignore="true" className="pointer-events-none absolute -inset-full w-[220%] h-[220%] z-20" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.85) 45%, rgba(253,241,169,0.9) 50%, rgba(255,255,255,0.85) 55%, transparent 100%)', animation: 'bauliaFoilGlint 4.2s ease-in-out infinite' }}></div>
 
-                                                                {/* Código QR con reflejo tornasol en la propia tinta */}
+                                                                {/* Código QR Sello Baulia (Perlas + Squircle + Monograma + Contraste >40%) */}
                                                                 <div className="relative z-10">
-                                                                    <img src={sg.qrUrl} alt="QR" crossOrigin="anonymous" className="w-40 h-40 mix-blend-multiply block" />
+                                                                    <BauliaSignatureQR qrUrl={sg.qrUrl} color={confirmedData.theme?.btn || '#F76C82'} logoSrc="/primavera-vibrante/monograma.svg" />
                                                                     <div data-html2canvas-ignore="true" className="pointer-events-none absolute inset-0 baulia-gold-ink-sheen"></div>
                                                                 </div>
 

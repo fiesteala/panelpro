@@ -1,5 +1,5 @@
 git add .
-git commit -m "QR dinamico dorado"
+git commit -m "QR personalizado dinamico dorado"
 git push origin main
 
 .
