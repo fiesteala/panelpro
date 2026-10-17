@@ -65,6 +65,27 @@
         .delay-1000 { animation-delay: 1.0s; opacity: 0; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes bauliaHoloCycle {
+            0%, 100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+            50% { background-position: 100% 50%; filter: hue-rotate(25deg); }
+        }
+        @keyframes bauliaLaserSweep {
+            0% { top: 4%; opacity: 0; }
+            15% { opacity: 0.95; }
+            50% { top: 92%; opacity: 0.95; }
+            85% { opacity: 0.95; }
+            100% { top: 4%; opacity: 0; }
+        }
+        @keyframes bauliaShimmer {
+            0% { transform: translateX(-120%) rotate(25deg); }
+            100% { transform: translateX(220%) rotate(25deg); }
+        }
+        .baulia-qr-holo-frame {
+            background: linear-gradient(135deg, #BF953F, #FDF1A9, #D4AF37, #F76C82, #AA771C, #FDF1A9);
+            background-size: 300% 300%;
+            animation: bauliaHoloCycle 15s ease-in-out infinite;
+        }
     </style>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -513,8 +534,34 @@
                                                         {sg.isChild && <span style={{ backgroundColor: `${confirmedData.theme?.btn || '#F76C82'}30`, color: confirmedData.theme?.btn || '#F76C82' }} className="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mt-3 inline-block">Pase Infantil</span>}
                                                     </div>
                                                     
-                                                    <div className="bg-white p-3 rounded-3xl mx-auto w-max mb-4 shadow-inner">
-                                                        <img src={sg.qrUrl} alt="QR" crossOrigin="anonymous" className="w-40 h-40 mix-blend-multiply" />
+                                                    <div className="baulia-qr-holo-frame p-[3px] rounded-[1.8rem] mx-auto w-max mb-4 shadow-[0_0_25px_rgba(212,175,55,0.35)] relative overflow-hidden">
+                                                        <div className="bg-white p-3 rounded-[1.65rem] relative overflow-hidden">
+                                                            {/* Destello Holográfico Diagonal */}
+                                                            <div className="
+                                                                pointer-events-none absolute -inset-full w-1/2 h-[200%]
+                                                                bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent
+                                                            " style={{ animation: 'bauliaShimmer 4.5s infinite linear' }}></div>
+
+                                                            {/* Línea Láser Tornasol/Dorada (Ciclo Dinámico) */}
+                                                            <div 
+                                                                className="pointer-events-none absolute left-2 right-2 h-[2.5px] rounded-full z-20"
+                                                                style={{
+                                                                    background: `linear-gradient(90deg, transparent, #D4AF37, ${confirmedData.theme?.btn || '#F76C82'}, #FDF1A9, #D4AF37, transparent)`,
+                                                                    boxShadow: '0 0 10px #D4AF37, 0 0 4px #F76C82',
+                                                                    animation: 'bauliaLaserSweep 3.8s ease-in-out infinite'
+                                                                }}
+                                                            ></div>
+
+                                                            <img src={sg.qrUrl} alt="QR" crossOrigin="anonymous" className="w-40 h-40 mix-blend-multiply relative z-10" />
+
+                                                            {/* Sello de Seguridad Anti-Captura en Vivo */}
+                                                            <div className="mt-2 pt-1.5 border-t border-amber-500/20 flex items-center justify-center gap-1.5">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                                                                <span className="text-[7px] font-black uppercase tracking-[0.22em] text-amber-700">
+                                                                    Holograma Vivo • 15s
+                                                                </span>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     
                                                     <div className="text-center space-y-1.5 text-gray-700">

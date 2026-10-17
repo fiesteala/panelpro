@@ -1,5 +1,5 @@
 git add .
-git commit -m "gala nocturna"
+git commit -m "QR dinamico"
 git push origin main
 
 .
