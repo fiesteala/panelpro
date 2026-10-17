@@ -164,29 +164,50 @@
             const [logoOk, setLogoOk] = useState(true);
 
             const { modules, count, safeColor, eyeColor } = React.useMemo(() => {
-                // 1. Validador Matemático de Contraste (>40% sobre blanco)
-                const ensureContrast = (hex) => {
+                // 1. Motor Matemático HSL: mantiene el color vivo (ej. Rosa Fuerte vibrante) con >45% de contraste sobre blanco
+                const ensureVibrantContrast = (hex) => {
                     let clean = String(hex || '#1C1917').replace('#', '').trim();
                     if (clean.length === 3) clean = clean.split('').map(c => c + c).join('');
-                    let r = parseInt(clean.substring(0, 2), 16);
-                    let g = parseInt(clean.substring(2, 4), 16);
-                    let b = parseInt(clean.substring(4, 6), 16);
+                    let r = parseInt(clean.substring(0, 2), 16) / 255;
+                    let g = parseInt(clean.substring(2, 4), 16) / 255;
+                    let b = parseInt(clean.substring(4, 6), 16) / 255;
                     if (isNaN(r) || isNaN(g) || isNaN(b)) return { main: '#1C1917', eye: '#1C1917' };
 
-                    let lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-                    while (lum > 0.50) {
-                        r = Math.max(0, Math.floor(r * 0.82));
-                        g = Math.max(0, Math.floor(g * 0.82));
-                        b = Math.max(0, Math.floor(b * 0.82));
-                        lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+                    let h = 0, s = 0, l = (max + min) / 2;
+                    if (max !== min) {
+                        const d = max - min;
+                        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                        switch (max) {
+                            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                            case g: h = ((b - r) / d + 2) / 6; break;
+                            case b: h = ((r - g) / d + 4) / 6; break;
+                        }
                     }
-                    const toHex = (n) => n.toString(16).padStart(2, '0');
-                    return {
-                        main: `#${toHex(r)}${toHex(g)}${toHex(b)}`,
-                        eye: `#${toHex(Math.floor(r * 0.65))}${toHex(Math.floor(g * 0.65))}${toHex(Math.floor(b * 0.65))}`
+                    let hDeg = h * 360;
+                    // Si es rosa cálido claro, ajustamos matiz a 340° para que al intensificarse sea Rosa Fuerte y no marrón/rojo
+                    if ((hDeg >= 342 || hDeg <= 12) && s > 0.25) hDeg = 338;
+                    const finalS = s < 0.12 ? s : Math.max(s, 0.85);
+                    const finalL = Math.min(l, 0.44);
+                    const eyeL = Math.min(l, 0.36);
+
+                    const hslToHex = (hue, sat, light) => {
+                        const c = (1 - Math.abs(2 * light - 1)) * sat;
+                        const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
+                        const m = light - c / 2;
+                        let r1 = 0, g1 = 0, b1 = 0;
+                        if (hue < 60) { r1 = c; g1 = x; }
+                        else if (hue < 120) { r1 = x; g1 = c; }
+                        else if (hue < 180) { g1 = c; b1 = x; }
+                        else if (hue < 240) { g1 = x; b1 = c; }
+                        else if (hue < 300) { r1 = x; b1 = c; }
+                        else { r1 = c; b1 = x; }
+                        const toHex = (n) => Math.round((n + m) * 255).toString(16).padStart(2, '0');
+                        return `#${toHex(r1)}${toHex(g1)}${toHex(b1)}`;
                     };
+                    return { main: hslToHex(hDeg, finalS, finalL), eye: hslToHex(hDeg, finalS, eyeL) };
                 };
-                const colors = ensureContrast(color);
+                const colors = ensureVibrantContrast(color);
 
                 // 2. Interceptor de datos del QR
                 let payload = qrUrl || 'https://baulia.com';
@@ -200,14 +221,14 @@
                     return { modules: [], count: 0, safeColor: colors.main, eyeColor: colors.eye };
                 }
 
-                // 3. Construcción de Matriz con Corrección Nivel H (Permite Monograma Central)
+                // 3. Matriz Nivel H con centro despejado para Monograma
                 const qr = window.qrcode(0, 'H');
                 qr.addData(payload);
                 qr.make();
                 const n = qr.getModuleCount();
                 const dots = [];
                 const center = n / 2;
-                const clearRadius = n * 0.135;
+                const clearRadius = n * 0.14;
 
                 for (let row = 0; row < n; row++) {
                     for (let col = 0; col < n; col++) {
@@ -225,28 +246,29 @@
                 return { modules: dots, count: n, safeColor: colors.main, eyeColor: colors.eye };
             }, [qrUrl, color, logoOk, logoSrc]);
 
-            if (!count) return <img src={qrUrl} alt="QR" crossOrigin="anonymous" className="w-40 h-40 mix-blend-multiply block" />;
+            if (!count) return <img src={qrUrl} alt="QR" crossOrigin="anonymous" className="w-40 h-40 block bg-white" />;
 
             const renderEye = (x, y) => (
                 <g key={`${x}-${y}`}>
-                    <rect x={x + 0.5} y={y + 0.5} width="6" height="6" rx="1.85" fill="none" stroke={eyeColor} strokeWidth="1" />
-                    <circle cx={x + 3.5} cy={y + 3.5} r="1.5" fill={safeColor} />
+                    <rect x={x + 0.5} y={y + 0.5} width="6" height="6" rx="1.85" fill="none" stroke={eyeColor} strokeWidth="1.05" />
+                    <circle cx={x + 3.5} cy={y + 3.5} r="1.55" fill={safeColor} />
                 </g>
             );
 
             return (
-                <div className="relative w-40 h-40 flex items-center justify-center select-none">
-                    <svg viewBox={`0 0 ${count} ${count}`} width="160" height="160" className="w-full h-full block">
+                <div className="relative w-40 h-40 bg-white rounded-xl flex items-center justify-center select-none">
+                    <svg viewBox={`0 0 ${count} ${count}`} width="160" height="160" className="w-full h-full block bg-white rounded-xl">
+                        <rect width={count} height={count} fill="#FFFFFF" />
                         {renderEye(0, 0)}
                         {renderEye(count - 7, 0)}
                         {renderEye(0, count - 7)}
                         {modules.map((m, i) => (
-                            <circle key={i} cx={m.c + 0.5} cy={m.r + 0.5} r="0.42" fill={safeColor} />
+                            <circle key={i} cx={m.c + 0.5} cy={m.r + 0.5} r="0.43" fill={safeColor} />
                         ))}
                     </svg>
                     {logoOk && logoSrc && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div className="w-9 h-9 rounded-full bg-white shadow-md border border-[#D4AF37]/50 p-1 flex items-center justify-center">
+                            <div className="w-9 h-9 rounded-full bg-white shadow-sm border border-[#D4AF37]/60 p-1 flex items-center justify-center">
                                 <img src={logoSrc} alt="Monograma" crossOrigin="anonymous" className="w-full h-full object-contain" onError={() => setLogoOk(false)} />
                             </div>
                         </div>
@@ -683,20 +705,12 @@
                                                             {sg.isChild && <span style={{ backgroundColor: `${confirmedData.theme?.btn || '#F76C82'}30`, color: confirmedData.theme?.btn || '#F76C82' }} className="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mt-3 inline-block">Pase Infantil</span>}
                                                         </div>
                                                         
-                                                        {/* MARCO Y SUPERFICIE DE PAPEL TORNASOL DORADO */}
+                                                        {/* MARCO EXTERIOR TORNASOL DORADO E INTERIOR BLANCO PURO INMACULADO */}
                                                         <div className="baulia-gold-tornasol-border p-[6px] rounded-[1.9rem] mx-auto w-max mb-4 shadow-[0_10px_30px_rgba(212,175,55,0.4)] relative overflow-hidden">
                                                             <div className="bg-white p-3.5 rounded-[1.55rem] relative overflow-hidden">
-                                                                
-                                                                {/* Textura sedosa de Papel Tornasol Dorado */}
-                                                                <div data-html2canvas-ignore="true" className="pointer-events-none absolute inset-0 baulia-gold-tornasol-surface opacity-70 z-0"></div>
-
-                                                                {/* Destello de Hoja de Oro */}
-                                                                <div data-html2canvas-ignore="true" className="pointer-events-none absolute -inset-full w-[220%] h-[220%] z-20" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.85) 45%, rgba(253,241,169,0.9) 50%, rgba(255,255,255,0.85) 55%, transparent 100%)', animation: 'bauliaFoilGlint 4.2s ease-in-out infinite' }}></div>
-
-                                                                {/* Código QR Sello Baulia (Perlas + Squircle + Monograma + Contraste >40%) */}
-                                                                <div className="relative z-10">
+                                                                {/* Código QR Sello Baulia sobre Blanco Puro */}
+                                                                <div className="relative z-10 bg-white">
                                                                     <BauliaSignatureQR qrUrl={sg.qrUrl} color={confirmedData.theme?.btn || '#F76C82'} logoSrc="/primavera-vibrante/monograma.svg" />
-                                                                    <div data-html2canvas-ignore="true" className="pointer-events-none absolute inset-0 baulia-gold-ink-sheen"></div>
                                                                 </div>
 
                                                                 {/* Cintillo Metálico Tornasol Inferior */}
