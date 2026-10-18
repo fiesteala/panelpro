@@ -1,5 +1,10 @@
 git add .
-git commit -m "restauracion"
+git commit -m "QR y formulario funcionando"
 git push origin main
 
-.
+maquina del tiempo
+git reflog
+codigos de tiempo
+git reset --hard CODIGO_HASH
+forzar subida
+git push --force origin main
