@@ -11,6 +11,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     
     <script>
         tailwind.config = {
@@ -65,6 +66,34 @@
         .delay-1000 { animation-delay: 1.0s; opacity: 0; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes bauliaGoldFoilWave {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        @keyframes bauliaFoilGlint {
+            0% { transform: translate(-130%, -130%) rotate(35deg); }
+            45%, 100% { transform: translate(130%, 130%) rotate(35deg); }
+        }
+        .baulia-gold-tornasol-border {
+            background: linear-gradient(125deg, #AA771C 0%, #D4AF37 15%, #FFF8D6 30%, #F9D5E5 45%, #D4AF37 60%, #E2F3EC 75%, #FDF1A9 90%, #AA771C 100%);
+            background-size: 300% 300%;
+            animation: bauliaGoldFoilWave 6s ease-in-out infinite;
+        }
+        .baulia-gold-tornasol-surface {
+            background: linear-gradient(115deg, 
+                rgba(255,255,255,0) 0%, 
+                rgba(253,241,169,0.35) 22%, 
+                rgba(247,108,130,0.22) 36%, 
+                rgba(212,175,55,0.42) 50%, 
+                rgba(163,198,151,0.22) 64%, 
+                rgba(255,248,214,0.45) 78%, 
+                rgba(255,255,255,0) 100%
+            );
+            background-size: 280% 280%;
+            animation: bauliaGoldFoilWave 5s ease-in-out infinite;
+        }
     </style>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -116,14 +145,153 @@
             );
         };
 
+        const BauliaSignatureQR = ({ qrUrl, color = '#1C1917', logoSrc = '/primavera-vibrante/monograma.svg' }) => {
+            const [logoOk, setLogoOk] = useState(true);
+
+            const { modules, count, safeColor, eyeColor } = React.useMemo(() => {
+                // 1. Motor Matemático HSL: mantiene el color vivo (ej. Rosa Fuerte vibrante) con >45% de contraste sobre blanco
+                const ensureVibrantContrast = (hex) => {
+                    let clean = String(hex || '#1C1917').replace('#', '').trim();
+                    if (clean.length === 3) clean = clean.split('').map(c => c + c).join('');
+                    let r = parseInt(clean.substring(0, 2), 16) / 255;
+                    let g = parseInt(clean.substring(2, 4), 16) / 255;
+                    let b = parseInt(clean.substring(4, 6), 16) / 255;
+                    if (isNaN(r) || isNaN(g) || isNaN(b)) return { main: '#1C1917', eye: '#1C1917' };
+
+                    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+                    let h = 0, s = 0, l = (max + min) / 2;
+                    if (max !== min) {
+                        const d = max - min;
+                        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                        switch (max) {
+                            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                            case g: h = ((b - r) / d + 2) / 6; break;
+                            case b: h = ((r - g) / d + 4) / 6; break;
+                        }
+                    }
+                    let hDeg = h * 360;
+                    if ((hDeg >= 342 || hDeg <= 12) && s > 0.25) hDeg = 338;
+                    const finalS = s < 0.12 ? s : Math.max(s, 0.85);
+                    const finalL = Math.min(l, 0.44);
+                    const eyeL = Math.min(l, 0.36);
+
+                    const hslToHex = (hue, sat, light) => {
+                        const c = (1 - Math.abs(2 * light - 1)) * sat;
+                        const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
+                        const m = light - c / 2;
+                        let r1 = 0, g1 = 0, b1 = 0;
+                        if (hue < 60) { r1 = c; g1 = x; }
+                        else if (hue < 120) { r1 = x; g1 = c; }
+                        else if (hue < 180) { g1 = c; b1 = x; }
+                        else if (hue < 240) { g1 = x; b1 = c; }
+                        else if (hue < 300) { r1 = x; b1 = c; }
+                        else { r1 = c; b1 = x; }
+                        const toHex = (n) => Math.round((n + m) * 255).toString(16).padStart(2, '0');
+                        return `#${toHex(r1)}${toHex(g1)}${toHex(b1)}`;
+                    };
+                    return { main: hslToHex(hDeg, finalS, finalL), eye: hslToHex(hDeg, finalS, eyeL) };
+                };
+                const colors = ensureVibrantContrast(color);
+
+                // 2. Interceptor de datos del QR
+                let payload = qrUrl || 'https://baulia.com';
+                try {
+                    if (payload.includes('data=')) {
+                        payload = decodeURIComponent(payload.split('data=')[1].split('&')[0]);
+                    }
+                } catch (e) {}
+
+                if (typeof window.qrcode !== 'function') {
+                    return { modules: [], count: 0, safeColor: colors.main, eyeColor: colors.eye };
+                }
+
+                // 3. Matriz Nivel H con centro despejado para Monograma
+                const qr = window.qrcode(0, 'H');
+                qr.addData(payload);
+                qr.make();
+                const n = qr.getModuleCount();
+                const dots = [];
+                const center = n / 2;
+                const clearRadius = n * 0.14;
+
+                for (let row = 0; row < n; row++) {
+                    for (let col = 0; col < n; col++) {
+                        const isTopLeft = row < 7 && col < 7;
+                        const isTopRight = row < 7 && col >= n - 7;
+                        const isBottomLeft = row >= n - 7 && col < 7;
+                        if (isTopLeft || isTopRight || isBottomLeft) continue;
+
+                        if (logoOk && logoSrc && Math.abs(row + 0.5 - center) < clearRadius && Math.abs(col + 0.5 - center) < clearRadius) {
+                            continue;
+                        }
+                        if (qr.isDark(row, col)) dots.push({ r: row, c: col });
+                    }
+                }
+                return { modules: dots, count: n, safeColor: colors.main, eyeColor: colors.eye };
+            }, [qrUrl, color, logoOk, logoSrc]);
+
+            if (!count) return <img src={qrUrl} alt="QR" crossOrigin="anonymous" className="w-40 h-40 block bg-white" />;
+
+            const renderEye = (x, y) => (
+                <g key={`${x}-${y}`}>
+                    <rect x={x + 0.5} y={y + 0.5} width="6" height="6" rx="1.85" fill="none" stroke={eyeColor} strokeWidth="1.05" />
+                    <circle cx={x + 3.5} cy={y + 3.5} r="1.55" fill={safeColor} />
+                </g>
+            );
+
+            return (
+                <div className="relative w-40 h-40 bg-white rounded-xl flex items-center justify-center select-none">
+                    <svg viewBox={`0 0 ${count} ${count}`} width="160" height="160" className="w-full h-full block bg-white rounded-xl">
+                        <rect width={count} height={count} fill="#FFFFFF" />
+                        {renderEye(0, 0)}
+                        {renderEye(count - 7, 0)}
+                        {renderEye(0, count - 7)}
+                        {modules.map((m, i) => (
+                            <circle key={i} cx={m.c + 0.5} cy={m.r + 0.5} r="0.43" fill={safeColor} />
+                        ))}
+                    </svg>
+                    {logoOk && logoSrc && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="w-9 h-9 rounded-full bg-white shadow-sm border border-[#D4AF37]/60 p-1 flex items-center justify-center">
+                                <img src={logoSrc} alt="Monograma" crossOrigin="anonymous" className="w-full h-full object-contain" onError={() => setLogoOk(false)} />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
         const App = () => {
             const [language, setLanguage] = useState('ES');
             const [isPlaying, setIsPlaying] = useState(false);
             const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
             
-            // FASE 4: Nuevos Estados Multi-Modal
+            // FASE 4: Nuevos Estados Multi-Modal + Faro de Brillo Óptico QR
             const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
             const [confirmedData, setConfirmedData] = useState(null);
+            const [isQrBright, setIsQrBright] = useState(false);
+            const [iframeVer] = useState(() => Date.now());
+            const qrSectionRef = useRef(null);
+
+            useEffect(() => {
+                if (!confirmedData || !confirmedData.subGuests || !qrSectionRef.current) return;
+                let wakeLock = null;
+                const activarWakeLock = async () => {
+                    try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+                };
+                const liberarWakeLock = async () => {
+                    try { if (wakeLock) { await wakeLock.release(); wakeLock = null; } } catch (e) {}
+                };
+                const observer = new IntersectionObserver((entries) => {
+                    const visible = entries[0].isIntersecting;
+                    setIsQrBright(visible);
+                    if (visible) activarWakeLock();
+                    else liberarWakeLock();
+                }, { threshold: 0.35 });
+
+                observer.observe(qrSectionRef.current);
+                return () => { observer.disconnect(); liberarWakeLock(); };
+            }, [confirmedData]);
             
             const [guestName, setGuestName] = useState('');
             const eventIdStr = "diamante-6a0u"; 
@@ -467,8 +635,8 @@
                         {/* 🔴 FASE 4: EL CEREBRO MULTI-MODAL REPARADO */}
                         <RevealOnScroll className="w-full max-w-2xl pb-10 mt-10">
                             
-                            {/* EL VIGILANTE INVISIBLE (Oculto) */}
-                            <iframe src={`https://panel.baulia.com/?modo=invitacion&e=${eventIdStr}&u=${guestUid || ''}&iframe=true&bg=transparent&card=FDFBF7&btn=F76C82&txt=2A2A2A&font=Montserrat&v=${Date.now()}`} style={{ display: 'none' }}></iframe>
+                            {/* EL VIGILANTE INVISIBLE (Oculto y con versión fija para no recargarse con el reloj) */}
+                            <iframe src={`https://panel.baulia.com/?modo=invitacion&e=${eventIdStr}&u=${guestUid || ''}&iframe=true&bg=transparent&card=FDFBF7&btn=F76C82&txt=2A2A2A&font=Montserrat&v=${iframeVer}`} style={{ display: 'none' }}></iframe>
 
                             {!confirmedData ? (
                                 /* ESTADO 1: AÚN NO CONFIRMA */
@@ -488,48 +656,77 @@
                                     <p className="mt-8 font-script text-3xl md:text-4xl text-gold-warm">Maricela espera tu confirmación</p>
                                 </div>
                             ) : confirmedData.subGuests && confirmedData.subGuests.length > 0 ? (
-                                /* 🔴 ESTADO 2: CONFIRMÓ Y TIENE QRS (ACTUALIZADO CON NOMBRES AUTOMÁTICOS Y LOGO SEGURO) */
-                                <div className="w-full max-w-2xl mx-auto mt-12 animate-fade-in-up mb-10">
-                                    <h3 className="text-center font-bold text-2xl mb-2 text-spring-dark tracking-widest uppercase">Mis Pases VIP</h3>
-                                    <p className="text-center text-xs opacity-70 mb-2 text-gray-600">Presenta estos códigos en la entrada.</p>
-                                    {confirmedData.subGuests.length > 1 && <p className="text-center text-[10px] uppercase tracking-widest text-gold-dark mb-6 animate-pulse md:hidden">← Desliza para ver más →</p>}
-                                    
-                                    <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 px-4 hide-scrollbar md:justify-center md:[mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
-                                        {confirmedData.subGuests.map(sg => (
-                                            <div key={sg.id} className="w-80 md:w-64 flex-shrink-0 snap-center flex flex-col items-center">
-                                                <div id={`ticket_${sg.id}`} style={{ backgroundColor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(15px)', borderColor: `${confirmedData.theme?.txtRgb || '42,42,42'}20`, color: confirmedData.theme?.txt || '#2A2A2A' }} className="w-full p-6 rounded-3xl border relative overflow-hidden shadow-2xl">
-                                                    <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: confirmedData.theme?.btn || '#F76C82' }}></div>
-                                                    
-                                                    <div className="text-center pb-4 mb-4 border-b border-gray-300 border-dashed flex flex-col items-center">
-                                                        {/* Logo con crossOrigin para forzar a html2canvas a tomarlo */}
-                                                        <img src="/primavera-vibrante/monograma.svg" alt="Logo Evento" crossOrigin="anonymous" className="h-12 mx-auto mb-2 object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+                                /* 🔴 ESTADO 2: CONFIRMÓ Y TIENE QRS (CON SELLO QR BAULIA, PAPEL TORNASOL DORADO Y BRILLO ÓPTICO) */
+                                <div ref={qrSectionRef} className="w-full max-w-2xl mx-auto mt-12 animate-fade-in-up mb-10 relative">
+                                    {/* Faro Óptico OLED: se enciende al máximo cuando el QR aparece en pantalla */}
+                                    <div className={`pointer-events-none fixed inset-0 z-0 transition-opacity duration-700 ${isQrBright ? 'opacity-100' : 'opacity-0'}`} style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.4) 55%, transparent 100%)' }}></div>
+
+                                    <div className="relative z-10">
+                                        <h3 className="text-center font-bold text-2xl mb-1 text-spring-dark tracking-widest uppercase">Mis Pases VIP</h3>
+                                        <div className="flex items-center justify-center gap-1.5 mb-3">
+                                            <span className={`w-2 h-2 rounded-full transition-colors ${isQrBright ? 'bg-amber-500 animate-ping' : 'bg-gray-400'}`}></span>
+                                            <p className="text-center text-[10px] uppercase tracking-widest font-bold text-amber-700">
+                                                {isQrBright ? '☀️ Brillo Óptico Activado para Escáner' : 'Presenta estos códigos en la entrada'}
+                                            </p>
+                                        </div>
+                                        {confirmedData.subGuests.length > 1 && <p className="text-center text-[10px] uppercase tracking-widest text-gold-dark mb-6 animate-pulse md:hidden">← Desliza para ver más →</p>}
+                                        
+                                        <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 px-4 hide-scrollbar md:justify-center md:[mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
+                                            {confirmedData.subGuests.map(sg => (
+                                                <div key={sg.id} className="w-80 md:w-64 flex-shrink-0 snap-center flex flex-col items-center">
+                                                    <div id={`ticket_${sg.id}`} style={{ backgroundColor: isQrBright ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.65)', backdropFilter: 'blur(15px)', borderColor: `${confirmedData.theme?.txtRgb || '42,42,42'}20`, color: confirmedData.theme?.txt || '#2A2A2A' }} className={`w-full p-6 rounded-3xl border relative overflow-hidden transition-all duration-700 ${isQrBright ? 'shadow-[0_0_70px_rgba(255,255,255,1),0_20px_50px_rgba(212,175,55,0.35)] scale-[1.02]' : 'shadow-2xl'}`}>
+                                                        <div className="absolute top-0 left-0 w-full h-2 baulia-gold-tornasol-border"></div>
                                                         
-                                                        <h3 className="font-serif font-bold text-lg uppercase tracking-widest mb-3 text-balance" style={{ color: confirmedData.theme?.txt || '#2A2A2A' }}>
-                                                            {sg.eventNames || 'Maricela'}
-                                                        </h3>
+                                                        <div className="text-center pb-4 mb-4 border-b border-gray-300 border-dashed flex flex-col items-center">
+                                                            <img src="/primavera-vibrante/monograma.svg" alt="Logo Evento" crossOrigin="anonymous" className="h-12 mx-auto mb-2 object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+                                                            
+                                                            <h3 className="font-serif font-bold text-lg uppercase tracking-widest mb-3 text-balance" style={{ color: confirmedData.theme?.txt || '#2A2A2A' }}>
+                                                                {sg.eventNames || 'Maricela'}
+                                                            </h3>
+                                                            
+                                                            <p className="text-[8px] font-bold uppercase tracking-widest opacity-60 mb-1">Entrada Personal</p>
+                                                            <h4 className="text-2xl font-bold leading-tight text-spring-dark">{sg.name || 'Acompañante VIP'}</h4>
+                                                            {sg.isChild && <span style={{ backgroundColor: `${confirmedData.theme?.btn || '#F76C82'}30`, color: confirmedData.theme?.btn || '#F76C82' }} className="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mt-3 inline-block">Pase Infantil</span>}
+                                                        </div>
                                                         
-                                                        <p className="text-[8px] font-bold uppercase tracking-widest opacity-60 mb-1">Entrada Personal</p>
-                                                        <h4 className="text-2xl font-bold leading-tight text-spring-dark">{sg.name || 'Acompañante VIP'}</h4>
-                                                        {sg.isChild && <span style={{ backgroundColor: `${confirmedData.theme?.btn || '#F76C82'}30`, color: confirmedData.theme?.btn || '#F76C82' }} className="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mt-3 inline-block">Pase Infantil</span>}
+                                                        {/* MARCO EXTERIOR TORNASOL DORADO E INTERIOR BLANCO CON BRILLO TORNASOL POR ENCIMA */}
+                                                        <div className="baulia-gold-tornasol-border p-[6px] rounded-[1.9rem] mx-auto w-max mb-4 shadow-[0_10px_30px_rgba(212,175,55,0.4)] relative overflow-hidden">
+                                                            <div className="bg-white p-3.5 rounded-[1.55rem] relative overflow-hidden">
+                                                                {/* 1. Código QR Sello Baulia sobre Blanco Puro */}
+                                                                <div className="relative z-10 bg-white">
+                                                                    <BauliaSignatureQR qrUrl={sg.qrUrl} color={confirmedData.theme?.btn || '#F76C82'} logoSrc="/primavera-vibrante/monograma.svg" />
+                                                                </div>
+
+                                                                {/* 2. Velo Tornasol Dorado en Movimiento pasando POR ENCIMA del QR (Cero negro) */}
+                                                                <div data-html2canvas-ignore="true" className="pointer-events-none absolute inset-0 baulia-gold-tornasol-surface opacity-85 z-20"></div>
+
+                                                                {/* 3. Destello Diagonal de Hoja de Oro pasando por encima */}
+                                                                <div data-html2canvas-ignore="true" className="pointer-events-none absolute -inset-full w-[220%] h-[220%] z-20" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(212,175,55,0.0) 35%, rgba(253,241,169,0.75) 46%, rgba(212,175,55,0.55) 50%, rgba(247,108,130,0.30) 54%, rgba(212,175,55,0.0) 65%, transparent 100%)', animation: 'bauliaFoilGlint 3.8s ease-in-out infinite' }}></div>
+
+                                                                {/* 4. Cintillo Metálico Tornasol Inferior */}
+                                                                <div className="relative z-30 mt-2.5 pt-1.5 border-t border-[#D4AF37]/40 flex items-center justify-center gap-1.5">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse"></span>
+                                                                    <span className="text-[7px] font-black uppercase tracking-[0.24em] text-[#8B6508]">
+                                                                        Sello Tornasol Auténtico
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="text-center space-y-1.5 text-gray-700">
+                                                            <p className="text-[9px] uppercase tracking-widest opacity-80">23 MAYO 2026 | 15:00 HRS</p>
+                                                            <p className="text-[9px] font-bold uppercase tracking-widest opacity-50 pt-1">Asiento Asignado</p>
+                                                            <p className="text-sm font-black uppercase tracking-widest" style={{ color: confirmedData.theme?.btn || '#F76C82' }}>
+                                                                {sg.tableId ? `Mesa: ${sg.tableId}` : 'Recepción General'}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    
-                                                    <div className="bg-white p-3 rounded-3xl mx-auto w-max mb-4 shadow-inner">
-                                                        <img src={sg.qrUrl} alt="QR" crossOrigin="anonymous" className="w-40 h-40 mix-blend-multiply" />
-                                                    </div>
-                                                    
-                                                    <div className="text-center space-y-1.5 text-gray-700">
-                                                        <p className="text-[9px] uppercase tracking-widest opacity-80">23 MAYO 2026 | 15:00 HRS</p>
-                                                        <p className="text-[9px] font-bold uppercase tracking-widest opacity-50 pt-1">Asiento Asignado</p>
-                                                        <p className="text-sm font-black uppercase tracking-widest" style={{ color: confirmedData.theme?.btn || '#F76C82' }}>
-                                                            {sg.tableId ? `Mesa: ${sg.tableId}` : 'Recepción General'}
-                                                        </p>
-                                                    </div>
+                                                    <button onClick={() => descargarPase(sg.id, sg.name)} style={{ backgroundColor: confirmedData.theme?.btn || '#F76C82' }} className="w-[85%] py-3.5 rounded-b-2xl font-bold text-[10px] text-white shadow-xl -mt-2 relative z-0 uppercase tracking-widest hover:scale-105 transition-transform flex justify-center items-center gap-2">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Guardar Pase VIP
+                                                    </button>
                                                 </div>
-                                                <button onClick={() => descargarPase(sg.id, sg.name)} style={{ backgroundColor: confirmedData.theme?.btn || '#F76C82' }} className="w-[85%] py-3.5 rounded-b-2xl font-bold text-[10px] text-white shadow-xl -mt-2 relative z-0 uppercase tracking-widest hover:scale-105 transition-transform flex justify-center items-center gap-2">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Guardar Pase VIP
-                                                </button>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             ) : (

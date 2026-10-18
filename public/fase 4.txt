@@ -1,0 +1,228 @@
+FASE 4: El Motor Cuántico Integrado y Multi-Modal (RSVP, Baulia y Pases de Acceso VIP) Esta es la fase final, el candado de oro de la invitación en producción. La arquitectura de Baulia exige que este HTML funcione como "Pintor", comunicándose nativamente con el Iframe Maestro sin llamar a Firebase desde aquí. El sistema debe ser "Multi-Modal", capaz de detectar si el evento usa RSVP estricto con QRs o un RSVP simple sin pases.
+Sigue estas reglas estrictas al pie de la letra usando React y Tailwind (CERO scripts crudos y CERO Firebase en esta fase):
+
+1. Dependencias: Asegúrate de incluir estos dos CDNs en el <head> del HTML (html2canvas para descargas y qrcode-generator para el motor vectorial del QR):
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+
+2. Componente Sello QR Baulia, Estados y Escucha (Lógica React): Justo arriba de tu componente App, declara este componente vectorial que dibuja el QR con perlas circulares, esquinas squircle, monograma central y validador matemático HSL de contraste (>45% sobre fondo blanco):
+JavaScript
+
+const BauliaSignatureQR = ({ qrUrl, color = '#1C1917', logoSrc = 'monograma.svg' }) => {
+  const [logoOk, setLogoOk] = React.useState(true);
+  const { modules, count, safeColor, eyeColor } = React.useMemo(() => {
+    const ensureVibrantContrast = (hex) => {
+      let clean = String(hex || '#1C1917').replace('#', '').trim();
+      if (clean.length === 3) clean = clean.split('').map(c => c + c).join('');
+      let r = parseInt(clean.substring(0, 2), 16) / 255, g = parseInt(clean.substring(2, 4), 16) / 255, b = parseInt(clean.substring(4, 6), 16) / 255;
+      if (isNaN(r) || isNaN(g) || isNaN(b)) return { main: '#1C1917', eye: '#1C1917' };
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h = 0, s = 0, l = (max + min) / 2;
+      if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) { case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break; case g: h = ((b - r) / d + 2) / 6; break; case b: h = ((r - g) / d + 4) / 6; break; }
+      }
+      let hDeg = h * 360;
+      if ((hDeg >= 342 || hDeg <= 12) && s > 0.25) hDeg = 338;
+      const finalS = s < 0.12 ? s : Math.max(s, 0.85), finalL = Math.min(l, 0.44), eyeL = Math.min(l, 0.36);
+      const hslToHex = (hue, sat, light) => {
+        const c = (1 - Math.abs(2 * light - 1)) * sat, x = c * (1 - Math.abs(((hue / 60) % 2) - 1)), m = light - c / 2;
+        let r1 = 0, g1 = 0, b1 = 0;
+        if (hue < 60) { r1 = c; g1 = x; } else if (hue < 120) { r1 = x; g1 = c; } else if (hue < 180) { g1 = c; b1 = x; } else if (hue < 240) { g1 = x; b1 = c; } else if (hue < 300) { r1 = x; b1 = c; } else { r1 = c; b1 = x; }
+        const toHex = (n) => Math.round((n + m) * 255).toString(16).padStart(2, '0');
+        return `#${toHex(r1)}${toHex(g1)}${toHex(b1)}`;
+      };
+      return { main: hslToHex(hDeg, finalS, finalL), eye: hslToHex(hDeg, finalS, eyeL) };
+    };
+    const colors = ensureVibrantContrast(color);
+    let payload = qrUrl || 'https://baulia.com';
+    try { if (payload.includes('data=')) payload = decodeURIComponent(payload.split('data=')[1].split('&')[0]); } catch (e) {}
+    if (typeof window.qrcode !== 'function') return { modules: [], count: 0, safeColor: colors.main, eyeColor: colors.eye };
+    const qr = window.qrcode(0, 'H'); qr.addData(payload); qr.make();
+    const n = qr.getModuleCount(), dots = [], center = n / 2, clearRadius = n * 0.14;
+    for (let row = 0; row < n; row++) {
+      for (let col = 0; col < n; col++) {
+        if ((row < 7 && col < 7) || (row < 7 && col >= n - 7) || (row >= n - 7 && col < 7)) continue;
+        if (logoOk && logoSrc && Math.abs(row + 0.5 - center) < clearRadius && Math.abs(col + 0.5 - center) < clearRadius) continue;
+        if (qr.isDark(row, col)) dots.push({ r: row, c: col });
+      }
+    }
+    return { modules: dots, count: n, safeColor: colors.main, eyeColor: colors.eye };
+  }, [qrUrl, color, logoOk, logoSrc]);
+  if (!count) return <img src={qrUrl} alt="QR" crossOrigin="anonymous" className="w-40 h-40 block bg-white" />;
+  const renderEye = (x, y) => (<g key={`${x}-${y}`}><rect x={x + 0.5} y={y + 0.5} width="6" height="6" rx="1.85" fill="none" stroke={eyeColor} strokeWidth="1.05" /><circle cx={x + 3.5} cy={y + 3.5} r="1.55" fill={safeColor} /></g>);
+  return (
+    <div className="relative w-40 h-40 bg-white rounded-xl flex items-center justify-center select-none">
+      <svg viewBox={`0 0 ${count} ${count}`} width="160" height="160" className="w-full h-full block bg-white rounded-xl"><rect width={count} height={count} fill="#FFFFFF" />{renderEye(0, 0)}{renderEye(count - 7, 0)}{renderEye(0, count - 7)}{modules.map((m, i) => (<circle key={i} cx={m.c + 0.5} cy={m.r + 0.5} r="0.43" fill={safeColor} />))}</svg>
+      {logoOk && logoSrc && (<div className="absolute inset-0 flex items-center justify-center pointer-events-none"><div className="w-9 h-9 rounded-full bg-white shadow-sm border border-[#D4AF37]/60 p-1 flex items-center justify-center"><img src={logoSrc} alt="Monograma" crossOrigin="anonymous" className="w-full h-full object-contain" onError={() => setLogoOk(false)} /></div></div>)}
+    </div>
+  );
+};
+
+Además, dentro de tu componente App, agrega estos estados y estos dos useEffect (uno para escuchar al Iframe Maestro y otro para encender el Faro de Brillo Óptico + WakeLock cuando el QR aparece en pantalla):
+JavaScript
+
+const [confirmedData, setConfirmedData] = useState(null);
+const [isQrBright, setIsQrBright] = useState(false);
+const [iframeVer] = useState(() => Date.now());
+const qrSectionRef = useRef(null);
+
+useEffect(() => {
+  const handleMessage = (event) => {
+    if (!event.origin.includes('baulia.com')) return;
+    if (event.data && event.data.action === 'RSVP_SUCCESS_DATA') {
+      setConfirmedData(event.data);
+      setIsRsvpModalOpen(false); 
+    }
+  };
+  window.addEventListener('message', handleMessage);
+  return () => window.removeEventListener('message', handleMessage);
+}, []);
+
+useEffect(() => {
+  if (!confirmedData || !confirmedData.subGuests || !qrSectionRef.current) return;
+  let wakeLock = null;
+  const activarWakeLock = async () => { try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} };
+  const liberarWakeLock = async () => { try { if (wakeLock) { await wakeLock.release(); wakeLock = null; } } catch (e) {} };
+  const observer = new IntersectionObserver((entries) => {
+    const visible = entries[0].isIntersecting;
+    setIsQrBright(visible);
+    if (visible) activarWakeLock(); else liberarWakeLock();
+  }, { threshold: 0.35 });
+  observer.observe(qrSectionRef.current);
+  return () => { observer.disconnect(); liberarWakeLock(); };
+}, [confirmedData]);
+
+3. Función de Descarga VIP (Móvil y PC): Agrega esta función dentro de App para capturar la tarjeta completa (incluyendo logo y diseño) y guardarla en la galería del usuario:
+JavaScript
+
+const descargarPase = async (id, name) => {
+  try {
+    const html2canvas = window.html2canvas;
+    const element = document.getElementById(`ticket_${id}`);
+    const canvas = await html2canvas(element, { scale: 3, useCORS: true, backgroundColor: null });
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob], `Pase_${name.replace(/ /g, '_')}.png`, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Mi Pase VIP' });
+      } else {
+        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = file.name; link.click();
+      }
+    }, 'image/png');
+  } catch (e) { console.error("Error al descargar:", e); }
+};
+
+4. El Cerebro Multi-Modal (Vigilante, Carrusel o Mensaje Simple): Al final de la página principal, implementa este bloque que alterna entre el Botón RSVP, el Carrusel (si hay QRs) o un Mensaje de Éxito (si es un plan simple sin QRs). Aplica la clase de mask-image en escritorio para el difuminado del carrusel:
+JavaScript
+
+{/* EL VIGILANTE INVISIBLE (Oculto y con versión fija iframeVer) */}
+<iframe src={`https://panel.baulia.com/?modo=invitacion&e=[ID_DEL_EVENTO_EN_BD]&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=[HEX_BOTON_SIN_#]&txt=[HEX_TEXTO_SIN_#]&font=[FUENTE]&v=${iframeVer}`} style={{ display: 'none' }}></iframe>
+
+{!confirmedData ? (
+  /* ESTADO 1: AÚN NO CONFIRMA - BOTÓN RSVP ORIGINAL */
+  <div className="text-center w-full mt-10 mb-10">
+      <button onClick={() => setIsRsvpModalOpen(true)} className="px-10 py-5 rounded-full font-bold uppercase tracking-widest bg-white/10 border text-white backdrop-blur-sm hover:scale-105 transition-transform">
+          CONFIRMAR ASISTENCIA
+      </button>
+  </div>
+) : confirmedData.subGuests && confirmedData.subGuests.length > 0 ? (
+  /* ESTADO 2: CONFIRMÓ Y TIENE QRS CON SELLO BAULIA, PAPEL TORNASOL DORADO Y BRILLO ÓPTICO */
+  <div ref={qrSectionRef} className="w-full max-w-2xl mx-auto mt-12 animate-fade-in mb-10 relative">
+    <style>{`
+      @keyframes bauliaGoldFoilWave { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } 100% { background-position: 0% 0%; } }
+      @keyframes bauliaFoilGlint { 0% { transform: translate(-130%, -130%) rotate(35deg); } 45%, 100% { transform: translate(130%, 130%) rotate(35deg); } }
+      .baulia-gold-tornasol-border { background: linear-gradient(125deg, #AA771C 0%, #D4AF37 15%, #FFF8D6 30%, #F9D5E5 45%, #D4AF37 60%, #E2F3EC 75%, #FDF1A9 90%, #AA771C 100%); background-size: 300% 300%; animation: bauliaGoldFoilWave 6s ease-in-out infinite; }
+      .baulia-gold-tornasol-surface { background: linear-gradient(115deg, rgba(255,255,255,0) 0%, rgba(253,241,169,0.35) 22%, rgba(247,108,130,0.22) 36%, rgba(212,175,55,0.42) 50%, rgba(163,198,151,0.22) 64%, rgba(255,248,214,0.45) 78%, rgba(255,255,255,0) 100%); background-size: 280% 280%; animation: bauliaGoldFoilWave 5s ease-in-out infinite; }
+    `}</style>
+    <div className={`pointer-events-none fixed inset-0 z-0 transition-opacity duration-700 ${isQrBright ? 'opacity-100' : 'opacity-0'}`} style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.35) 55%, transparent 100%)' }}></div>
+    
+    <div className="relative z-10">
+      <h3 className="text-center font-bold text-2xl mb-1 text-white tracking-widest uppercase">Mis Pases VIP</h3>
+      <p className="text-center text-[10px] font-bold uppercase tracking-widest mb-3 text-[#D4AF37]">{isQrBright ? '☀️ Brillo Óptico Activado para Escáner' : 'Presenta estos códigos en la entrada'}</p>
+      {confirmedData.subGuests.length > 1 && <p className="text-center text-[10px] uppercase tracking-widest text-white/50 mb-6 animate-pulse md:hidden">← Desliza para ver más →</p>}
+      
+      <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 px-4 hide-scrollbar md:justify-center md:[mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
+        {confirmedData.subGuests.map(sg => (
+          <div key={sg.id} className="w-80 md:w-64 flex-shrink-0 snap-center flex flex-col items-center">
+            <div id={`ticket_${sg.id}`} style={{ backgroundColor: isQrBright ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.08)', backdropFilter: 'blur(15px)', borderColor: `${confirmedData.theme?.txtRgb || '255,255,255'}20`, color: confirmedData.theme?.txt || '#ffffff' }} className="w-full p-6 rounded-3xl border relative overflow-hidden shadow-2xl transition-all duration-700">
+              <div className="absolute top-0 left-0 w-full h-2 baulia-gold-tornasol-border"></div>
+              
+              <div className="text-center pb-4 mb-4 border-b border-white/20 border-dashed flex flex-col items-center">
+                  <img src="logoevento.svg" alt="Logo Evento" className="h-14 mx-auto mb-3 object-contain" onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'block'; }} />
+                  <h3 style={{display: 'none', color: confirmedData.theme?.btn || '#ffffff'}} className="font-bold text-xl uppercase mb-3">{confirmedData.theme?.eventNames || 'Evento Especial'}</h3>
+                  
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">Entrada Personal</p>
+                  <h4 className="text-2xl font-bold leading-tight">{sg.name || 'Acompañante VIP'}</h4>
+                  {sg.isChild && <span style={{ backgroundColor: `${confirmedData.theme?.btn || '#ffffff'}30`, color: confirmedData.theme?.btn || '#ffffff' }} className="text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mt-3 inline-block">Pase Infantil</span>}
+              </div>
+              
+              {/* MARCO EXTERIOR TORNASOL DORADO E INTERIOR BLANCO CON BRILLO TORNASOL POR ENCIMA */}
+              <div className="baulia-gold-tornasol-border p-[6px] rounded-[1.9rem] mx-auto w-max mb-4 shadow-[0_10px_30px_rgba(212,175,55,0.4)] relative overflow-hidden">
+                  <div className="bg-white p-3.5 rounded-[1.55rem] relative overflow-hidden">
+                      <div className="relative z-10 bg-white">
+                          <BauliaSignatureQR qrUrl={sg.qrUrl} color={confirmedData.theme?.btn || '#1C1917'} logoSrc="monograma.svg" />
+                      </div>
+                      <div data-html2canvas-ignore="true" className="pointer-events-none absolute inset-0 baulia-gold-tornasol-surface opacity-85 z-20"></div>
+                      <div data-html2canvas-ignore="true" className="pointer-events-none absolute -inset-full w-[220%] h-[220%] z-20" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(212,175,55,0.0) 35%, rgba(253,241,169,0.75) 46%, rgba(212,175,55,0.55) 50%, rgba(247,108,130,0.30) 54%, rgba(212,175,55,0.0) 65%, transparent 100%)', animation: 'bauliaFoilGlint 3.8s ease-in-out infinite' }}></div>
+                      <div className="relative z-30 mt-2.5 pt-1.5 border-t border-[#D4AF37]/40 flex items-center justify-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse"></span>
+                          <span className="text-[7px] font-black uppercase tracking-[0.24em] text-[#8B6508]">Sello Tornasol Auténtico</span>
+                      </div>
+                  </div>
+              </div>
+              
+              <div className="text-center space-y-1.5">
+                  <p className="text-[10px] uppercase tracking-widest opacity-80">[INSERTA_FECHA_DEL_EVENTO] | [HORA_RECEPCION]</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 pt-1">Asiento Asignado</p>
+                  <p className="text-sm font-black uppercase tracking-widest" style={{ color: confirmedData.theme?.btn || '#ffffff' }}>{sg.tableId ? `Mesa Asignada` : 'Pendiente Recepción'}</p>
+              </div>
+            </div>
+            <button onClick={() => descargarPase(sg.id, sg.name)} style={{ backgroundColor: confirmedData.theme?.btn || '#ffffff' }} className="w-[85%] py-3.5 rounded-b-2xl font-bold text-[10px] text-white shadow-xl -mt-2 relative z-0 uppercase tracking-widest hover:scale-105 transition-transform">
+                Guardar Tarjeta VIP
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+) : (
+  /* ESTADO 3: CONFIRMÓ PLAN SIMPLE SIN QRS - MENSAJE DE ÉXITO */
+  <div className="w-full max-w-lg mx-auto mt-12 animate-fade-in pb-10 px-4">
+      <div className="p-10 rounded-3xl border border-white/20 flex flex-col items-center justify-center text-center shadow-2xl" style={{ backgroundColor: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(12px)' }}>
+          <div className="w-16 h-16 rounded-full mb-6 flex items-center justify-center animate-pulse" style={{ backgroundColor: `${confirmedData.theme?.btn || '#ffffff'}20`, border: `2px solid ${confirmedData.theme?.btn || '#ffffff'}` }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={confirmedData.theme?.btn || '#ffffff'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <h3 className="font-bold text-3xl mb-4 text-white uppercase tracking-widest">¡Asistencia Confirmada!</h3>
+          <p className="text-lg opacity-80 text-white leading-relaxed">Tu lugar está asegurado. Gracias por confirmar tu presencia en este gran evento.</p>
+          <p className="mt-6 font-bold tracking-widest text-xs uppercase" style={{ color: confirmedData.theme?.btn || '#ffffff' }}>¡Te esperamos!</p>
+      </div>
+  </div>
+)}
+
+5. El Modal Transparente (Cero cajas anidadas y Botón Fijo): Agrega el Modal al final de tu componente. REGLA ESTRICTA: El contenedor del modal debe ser un div transparente con un ligero desenfoque cristalino (bg-black/20 backdrop-blur-md). NO agregues tarjetas con fondo de color adentro. El botón de cerrar debe ir fijo en la pantalla, no dentro del contenedor del iframe para evitar que se desborde en móviles.
+JavaScript
+
+{isRsvpModalOpen && (
+  <div className="fixed inset-0 z-[100] flex flex-col justify-center items-center p-4 bg-transparent backdrop-blur-md">
+      <button onClick={() => setIsRsvpModalOpen(false)} className="absolute top-6 right-6 md:top-8 md:right-8 w-10 h-10 bg-white/80 border border-white/50 rounded-full flex items-center justify-center text-white hover:bg-white hover:text-black transition-colors z-[150]">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      <div className="relative w-full max-w-md mx-auto flex flex-col items-center justify-center z-10 h-[85vh] mt-10">
+        <iframe src={`https://panel.baulia.com/?modo=invitacion&e=[ID_DEL_EVENTO_EN_BD]&u=${guestUid || ''}&iframe=true&bg=transparent&card=transparent&btn=[HEX_BOTON_SIN_#]&txt=[HEX_TEXTO_SIN_#]&font=[FUENTE]&v=${Date.now()}`} allowTransparency="true" style={{ backgroundColor: 'transparent', border: 'none' }} className="w-full h-full relative z-10"></iframe>
+      </div>
+  </div>
+)}
+
+6. El Motor Viral y Footer Minimalista: Al final de la página (fuera de cualquier modal), crea un footer minimalista y de Alta Costura. Debe contener EXACTAMENTE esta estructura: En el pie de página, agrega un texto muy sutil con baja opacidad que diga: "¿Eres el anfitrión? Iniciar Sesión" que dirija a https://panel.baulia.com (Ocúltalo si existe guestUid en la URL). Un bloque central sutil que diga: "¿Te gustó esta invitación?" en texto pequeño y opacidad baja. Debajo, un botón o enlace hermoso (usando el color principal de la invitación) que diga "Crea la tuya" y dirija a https://baulia.com?utm_source=invitacion.
+
+7. Firma Baulia y Logotipo Oficial: Debajo de eso, agrega la tarjeta publicitaria elegante de Baulia con el enlace a https://baulia.com. Dentro de la tarjeta publicitaria, inyecta exactamente este código SVG (usa las clases de Tailwind necesarias para que se vea de unos 40px de alto y centrado). Nota para la IA: Adapta el fill de .baulia-text a #ffffff o #1C1917 según el fondo y nunca encierres el logo en una caja.
+HTML
+
+<svg viewBox="0 0 915 201" fill="none" xmlns="http://www.w3.org/2000/svg" style="height: 40px; width: auto; overflow: visible; display: inline-block;"><style>.baulia-text { fill: #ffffff; transition: fill 0.5s ease; } .baulia-diamond-animator { transform-origin: 100px 100px; transform: rotate(45deg) scale(0.8); transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); } .baulia-diamond-shape { fill: transparent; stroke: #D4AF37; stroke-width: 1.72px; transition: fill 0.5s ease, stroke-width 0.3s ease; } .baulia-b { fill: #D4AF37; transition: all 0.6s ease; transform-origin: 100px 100px; } svg:hover .baulia-diamond-animator { transform: rotate(135deg) scale(0.85); } svg:hover .baulia-diamond-shape { stroke-width: 3px; } svg:hover .baulia-b { transform: scale(1.05); fill: #FDF1A9; }</style><g class="baulia-text"><path d="M265.12,78.58h-.35c0-2.04-.75-3.8-2.24-5.25-1.5-1.46-3.27-2.18-5.31-2.18h-1.42l-.12-1.18h9.44v8.62ZM265.12,143.97v8.62h-9.44l.12-1.18h1.42c2.05,0,3.82-.73,5.31-2.18,1.49-1.46,2.24-3.21,2.24-5.25h.35ZM272.44,69.96v82.62h-7.67v-82.62h7.67ZM279.17,69.96c5.51,0,10.17.83,13.99,2.48,3.82,1.65,6.71,3.95,8.68,6.91,1.97,2.95,2.95,6.39,2.95,10.33,0,3.3-.63,6.2-1.89,8.68-1.26,2.48-2.87,4.49-4.84,6.02-1.97,1.53-4.05,2.62-6.26,3.25,4.17.63,7.77,2.01,10.8,4.13,3.03,2.12,5.35,4.78,6.96,7.97,1.61,3.19,2.42,6.75,2.42,10.68,0,4.41-1.06,8.28-3.19,11.63-2.12,3.35-5.25,5.94-9.38,7.79-4.13,1.85-9.11,2.77-14.93,2.77h-13.1c.08-1.42.12-2.83.12-4.25h12.51c4.09,0,7.55-.73,10.39-2.18,2.83-1.46,5-3.6,6.49-6.43,1.49-2.83,2.24-6.22,2.24-10.15,0-4.41-.85-7.99-2.54-10.74-1.69-2.75-3.88-4.84-6.55-6.26-2.68-1.42-5.57-2.38-8.68-2.89-3.11-.51-6.08-.77-8.91-.77v-1.06c1.81,0,3.82-.2,6.02-.59,2.2-.39,4.33-1.18,6.37-2.36,2.04-1.18,3.74-2.93,5.08-5.25,1.34-2.32,2.01-5.37,2.01-9.15,0-3.54-.65-6.57-1.95-9.09-1.3-2.52-3.23-4.43-5.78-5.72-2.56-1.3-5.72-1.95-9.5-1.95h-10.86c0-.08-.1-.41-.29-1-.2-.59-.49-1.51-.89-2.77h12.51Z"/><path d="M381.98,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM407.36,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.86-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM424,120.36v3.54h-36.95v-3.54h36.95ZM407.36,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM429.31,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95,1.18-1.3,1.34-3.13.47-5.49Z"/><path d="M506.51,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM513.83,69.96v51.94c0,5.67,1.04,10.66,3.13,14.99,2.08,4.33,5.02,7.69,8.79,10.09,3.78,2.4,8.14,3.6,13.1,3.6,5.27,0,9.87-1.14,13.81-3.42,3.93-2.28,7-5.45,9.21-9.5,2.2-4.05,3.31-8.79,3.31-14.22v-53.47h5.55v53.47c0,6.14-1.32,11.51-3.95,16.11-2.64,4.6-6.36,8.2-11.15,10.8-4.8,2.6-10.39,3.9-16.76,3.9s-12.26-1.28-17.17-3.84c-4.92-2.56-8.73-6.14-11.45-10.74-2.71-4.6-4.07-9.97-4.07-16.11v-53.59h7.67ZM521.97,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38ZM538.73,61.58c1.65-1.81,3.31-3.6,4.96-5.37,1.65-1.77,3.32-3.5,5.02-5.19s3.36-3.32,5.02-4.9c.87.94,1.73,1.93,2.6,2.95.87,1.02,1.61,2.12,2.24,3.31-2.12,1.18-4.25,2.36-6.37,3.54-2.12,1.18-4.23,2.3-6.31,3.36-2.09,1.06-4.19,2.11-6.31,3.13l-.83-.83ZM565.53,69.96v7.08h-.35c0-1.73-.61-3.15-1.83-4.25-1.22-1.1-2.7-1.65-4.43-1.65h-1.89v-1.18h8.5ZM578.86,69.96v1.18h-1.89c-1.73,0-3.21.55-4.43,1.65-1.22,1.1-1.83,2.52-1.83,4.25h-.24v-7.08h8.38Z"/><path d="M646.97,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM646.97,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM654.29,69.96v82.62h-7.67v-82.62h7.67ZM653.94,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18s-2.22,3.21-2.3,5.25h-.35ZM686.16,148.93v3.66h-32.22v-3.66h32.22ZM693.36,133.46l-6.85,19.12h-19.59l4.25-3.66c4.17,0,7.57-.65,10.21-1.95,2.64-1.3,4.78-3.13,6.43-5.49,1.65-2.36,3.11-5.04,4.37-8.03h1.18Z"/><path d="M758.75,78.58h-.35c-.08-2.04-.85-3.8-2.3-5.25-1.46-1.46-3.21-2.18-5.25-2.18h-1.53v-1.18h9.44v8.62ZM758.75,143.97v8.62h-9.44v-1.18h1.53c2.05,0,3.8-.73,5.25-2.18s2.22-3.21,2.3-5.25h.35ZM766.07,69.96v82.62h-7.67v-82.62h7.67ZM765.72,78.58v-8.62h9.44v1.18h-1.53c-2.05,0-3.8.73-5.25,2.18-1.46,1.46-2.22,3.21-2.3,5.25h-.35ZM765.72,143.97h.35c.08,2.05.84,3.8,2.3,5.25,1.46,1.46,3.21,2.18,5.25,2.18h1.53v1.18h-9.44v-8.62Z"/><path d="M846.33,143.97c-.55,1.58-.63,2.91-.24,4.01.39,1.1,1.04,1.95,1.95,2.54.9.59,1.83.89,2.77.89h1.06v1.18h-23.73v-1.18h1.06c1.81,0,3.68-.57,5.61-1.71,1.93-1.14,3.52-3.05,4.78-5.72h6.73ZM871.71,68.31l1.06,8.26-29.63,75.66h-7.08l30.22-71.77c.87-1.97,1.59-3.66,2.18-5.08.59-1.42,1.1-2.79,1.53-4.13.43-1.34.65-2.32.65-2.95h1.06ZM888.35,120.36v3.54h-36.95v-3.54h36.95ZM871.71,68.31l34.94,83.57h-10.03l-27.27-72.36,2.36-11.21ZM893.67,143.97h9.68c1.18,2.68,2.75,4.58,4.72,5.72,1.97,1.14,3.85,1.71,5.67,1.71h.94v1.18h-26.56v-1.18h1.06c1.49,0,2.83-.65,4.01-1.95s1.34-3.13.47-5.49Z"/></g><g className="baulia-diamond-animator"><rect className="baulia-diamond-shape" x=".86" y=".86" width="198.64" height="198.64" transform="translate(0 200.36) rotate(-90)" strokeMiterlimit="10" /></g><path className="baulia-b" d="M116.87,94.54l6.01-.41c6.47,0,11.27,1.21,14.42,3.62,3.14,2.42,4.72,5.83,4.72,10.25s-2.01,9.59-6.01,15.51c-4.01,5.92-9.2,11.3-15.58,16.13h7.79c3.19,0,5.42-.14,6.7-.41,1.27-.27,2-.41,2.19-.41,1.27,0,1.91.68,1.91,2.05s-.91,2.1-2.73,2.19c-7.02,0-13.76-.09-20.23-.27-10.2,6.47-20.23,9.7-30.07,9.7-4.65,0-8.34-.87-11.07-2.6s-4.1-3.48-4.1-5.26.75-3.16,2.25-4.17c1.5-1,3.62-1.5,6.36-1.5,10.66,0,22.59.23,35.81.68,5.47-4.46,9.84-9.64,13.12-15.51,3.28-5.88,4.92-11.18,4.92-15.92,0-7.56-4.06-11.34-12.16-11.34-3.19,0-6.49.5-9.91,1.5-3.42,1-5.47,1.71-6.15,2.12s-1.12.61-1.3.61c-.55,0-.82-.39-.82-1.16s1.18-1.71,3.55-2.8c10.39-5.01,20.54-11.68,30.48-20.02,9.93-8.34,14.9-14.28,14.9-17.83,0-1.64-1.28-2.46-3.83-2.46-10.39.09-24.65,7.88-42.78,23.37-3.65,9.38-9.64,20.91-17.97,34.58-8.34,13.67-17.06,25.9-26.17,36.69-9.11,10.8-15.9,16.19-20.36,16.19-2.73,0-4.1-1.41-4.1-4.24,0-6.47,6.13-17.99,18.38-34.58,12.25-16.58,26.12-31.84,41.61-45.78,2.73-6.65,4.1-11.5,4.1-14.56s-.73-5.47-2.19-7.24c-1.46-1.78-3.6-3.08-6.42-3.9-4.46-1.18-9.18-1.78-14.14-1.78s-8.77.12-11.41.34c-2.64.23-5.86.68-9.64,1.37-3.78.68-6.86,1.87-9.22,3.55-2.37,1.69-3.55,3.83-3.55,6.42s1.27,4.6,3.83,6.01c2.55,1.41,5.67,2.39,9.36,2.94s7.36,1.14,11,1.78c3.64.64,6.74,1.89,9.29,3.76,2.55,1.87,3.83,4.49,3.83,7.86,0,.91-.2,1.37-.61,1.37s-.73-.14-.96-.41c-.23-.27-.62-.82-1.16-1.64-.82-1.18-2.03-2.1-3.62-2.73-1.59-.64-4.06-1.25-7.38-1.84-3.33-.59-6.47-1.23-9.43-1.91-2.96-.68-5.94-1.57-8.95-2.66-3.01-1.09-5.42-2.64-7.24-4.65-1.82-2-2.73-4.35-2.73-7.04s1.14-5.08,3.42-7.17c2.28-2.1,5.28-3.74,9.02-4.92,7.65-2.28,15.63-3.42,23.92-3.42,21.5,0,32.25,5.65,32.25,16.95,0,1-.23,2.51-.68,4.51,18.4-14.85,33.35-22.28,44.83-22.28,5.1,0,7.65,1.55,7.65,4.65,0,4.46-4.67,10.8-14.01,19-9.34,8.2-18.98,14.58-28.9,19.13ZM44.17,163.69c2.64,0,9.73-8.45,21.25-25.35,11.52-16.9,20.75-32.64,27.68-47.22-13.67,13.03-25.76,26.58-36.29,40.66-10.52,14.08-15.78,23.66-15.78,28.77,0,2.09,1.05,3.14,3.14,3.14ZM111,142.64l-24.74-.55c-7.02,0-10.52,1.05-10.52,3.14,0,1.18,1.18,2.3,3.55,3.35,2.37,1.05,5.1,1.57,8.2,1.57,8.11,0,15.94-2.5,23.51-7.52Z"/></svg>
+
+8. Enlaces Nativos a Mapas: Cuando agregues tarjetas de ubicación, los enlaces de "Rastrear Ubicación" deben usar protocolos nativos (detectando si es iOS para usar maps:// o Android para geo:0,0?q=).
+
+9. Protección Anti-Robo: En un useEffect bloquea el contextmenu (clic derecho), selectstart y dragstart.
+
+FINALIZACIÓN: Dame el código final renderizado aplicando toda esta fase.
