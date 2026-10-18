@@ -9356,8 +9356,8 @@ const AtelierPhygitalModal = ({
             <Eye size={13} className="text-[#D4AF37]"/>
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-200">
               {isSocialWall
-                ? `Vista Previa Real • Caballete 9.5 x 12.4 cm (${activePaper.name})`
-                : `Vista Previa Real • Pulsera Tyvek 25 x 1.9 cm (${activeWristband.name})`}
+                ? `Vista Previa Real • Inserto para Portarretrato de Vidrio (2 por Hoja Carta • ${activePaper.name})`
+                : `Vista Previa Real • Pulsera Tyvek 25.4 x 2.54 cm • QR 2x2 cm (${activeWristband.name})`}
             </span>
           </div>
 
@@ -9748,6 +9748,11 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
     accentColor: '#B45309'
   });
   const [socialWallStatus, setSocialWallStatus] = useState('pendiente');
+  const [mesasEvento, setMesasEvento] = useState([]);
+  const [sentTableIds, setSentTableIds] = useState([]);
+  const [showExtraCaballetesModal, setShowExtraCaballetesModal] = useState(false);
+  const [extraCaballetesMode, setExtraCaballetesMode] = useState('nuevas'); // 'nuevas' | 'manual'
+  const [manualExtraTablesCount, setManualExtraTablesCount] = useState(1);
   const [showShippingModal, setShowShippingModal] = useState(false);
   const [shippingForm, setShippingForm] = useState({
     recipient: '',
@@ -9780,6 +9785,7 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
         setEventoRawData(data);
         if (data.galeriaConfig) setConfig(data.galeriaConfig);
         if (data.socialWallStatus) setSocialWallStatus(data.socialWallStatus);
+        if (data.socialWallSentTableIds) setSentTableIds(data.socialWallSentTableIds);
         if (data.socialWallCardConfig) {
           setCardConfig(prev => ({ ...prev, ...data.socialWallCardConfig }));
         } else if (data.nombres) {
@@ -9796,7 +9802,20 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
         }
       }
     });
-    return () => unsub();
+
+    const unsubMesas = onSnapshot(collection(db, "eventos", idReal, "mesas"), (snap) => {
+      const listaMesas = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => {
+        const numA = parseInt(String(a.name || '').replace(/\D/g, '')) || 0;
+        const numB = parseInt(String(b.name || '').replace(/\D/g, '')) || 0;
+        return numA - numB;
+      });
+      setMesasEvento(listaMesas);
+      if (listaMesas.length > 0) {
+        setCardConfig(prev => ({ ...prev, cantidadTarjetas: listaMesas.length }));
+      }
+    });
+
+    return () => { unsub(); unsubMesas(); };
   }, [idReal]);
 
   const updateConfig = async (key, value) => {
@@ -9826,20 +9845,156 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
   const handleSendCardOrderToWorkshop = async (e) => {
     e.preventDefault();
     if (!idReal || idReal === 'demo_id') return;
+    const currentTableIds = mesasEvento.map(m => m.id);
+    const updatedCardConfig = {
+      ...cardConfig,
+      cantidadTarjetas: mesasEvento.length > 0 ? mesasEvento.length : cardConfig.cantidadTarjetas
+    };
     try {
       await updateDoc(doc(db, "eventos", idReal), {
-        socialWallCardConfig: cardConfig,
+        socialWallCardConfig: updatedCardConfig,
         socialWallStatus: 'enviado',
+        socialWallSentTableIds: currentTableIds,
         fechaEnvioSocialWall: new Date().toISOString(),
         direccionEnvioSocialWall: shippingForm
       });
+      setSentTableIds(currentTableIds);
       setSocialWallStatus('enviado');
       setShowShippingModal(false);
       setShowCardStudio(false);
-      if(addNotification) addNotification('¡Orden Enviada a Taller!', 'Tus tarjetas de mesa han entrado a fila de producción.', 'success');
+      if(addNotification) addNotification('¡Orden Enviada a Taller!', 'Tus caballetes de mesa han entrado a producción.', 'success');
     } catch (err) {
       if(addNotification) addNotification('Error', 'No se pudo enviar la orden al taller.', 'error');
     }
+  };
+
+  const mesasNuevasPostTaller = (socialWallStatus === 'enviado' || socialWallStatus === 'impreso')
+    ? mesasEvento.filter(m => !sentTableIds.includes(m.id))
+    : [];
+
+  const handlePrintCaballetesPDF = (tablesToPrint) => {
+    if (!tablesToPrint || tablesToPrint.length === 0) {
+      if (addNotification) addNotification('Sin mesas para imprimir', 'No hay mesas seleccionadas para generar el PDF.', 'warning');
+      return;
+    }
+    const FONT_MAP = {
+      editorial: "'Cormorant Garamond', serif",
+      caligrafia: "'Great Vibes', cursive",
+      alta_moda: "'Cinzel', serif",
+      minimal: "'Montserrat', sans-serif"
+    };
+    const chosenFont = FONT_MAP[cardConfig.fontId] || FONT_MAP.editorial;
+    const printWin = window.open('', '_blank', 'width=1000,height=800');
+    if (!printWin) {
+      alert('Por favor permite las ventanas emergentes para generar el PDF.');
+      return;
+    }
+
+    const pagesHtml = tablesToPrint.map((mesaObj) => {
+      const tableName = (mesaObj.name || 'MESA').toUpperCase();
+      const renderSingleCaballete = () => `
+        <div class="caballete-card">
+          <div class="crop-tl"></div><div class="crop-tr"></div><div class="crop-bl"></div><div class="crop-br"></div>
+          <div class="card-inner">
+            ${cardConfig.logoUrl ? `<img src="${cardConfig.logoUrl}" class="logo-img" crossorigin="anonymous" />` : ''}
+            <div class="pre-title">${cardConfig.preTitle || 'SOCIAL WALL EN VIVO'}</div>
+            <div class="event-name">${cardConfig.eventName || 'Nuestro Evento'}</div>
+            <div class="subtitle">${cardConfig.subtitle || 'Escanea, sube tus fotos y comparte en pantalla'}</div>
+            <div class="qr-box">
+              <img src="${qrUrl}" class="qr-img" crossorigin="anonymous" />
+            </div>
+            <div class="hashtag-row">${config.hashtag || '#MiEvento'} • ${tableName}</div>
+            <div class="brand-row">by BAULIA.COM</div>
+          </div>
+        </div>
+      `;
+      return `
+        <div class="letter-page">
+          <div class="sheet-header">HOJA DE PRODUCCIÓN BAULIA • ${tableName} (2 CABALLETES PARA VIDRIO EN ESTA HOJA)</div>
+          <div class="cards-grid">
+            ${renderSingleCaballete()}
+            ${renderSingleCaballete()}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    printWin.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Caballetes_SocialWall_${cardConfig.eventName || 'Baulia'}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Great+Vibes&family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+        <style>
+          @page { size: letter landscape; margin: 0; }
+          * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          body { margin: 0; padding: 0; background: #ffffff; font-family: 'Montserrat', sans-serif; color: #000000; }
+          .letter-page {
+            width: 27.94cm;
+            height: 21.59cm;
+            page-break-after: always;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: #ffffff;
+          }
+          .letter-page:last-child { page-break-after: auto; }
+          .sheet-header {
+            position: absolute;
+            top: 0.6cm;
+            font-size: 8px;
+            letter-spacing: 0.25em;
+            color: #94a3b8;
+            font-weight: 700;
+            text-transform: uppercase;
+          }
+          .cards-grid {
+            display: flex;
+            gap: 1.5cm;
+            align-items: center;
+            justify-content: center;
+          }
+          .caballete-card {
+            width: 11.5cm;
+            height: 16.5cm;
+            border: 0.5pt dashed #cbd5e1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1cm;
+            background: #ffffff;
+          }
+          .crop-tl, .crop-tr, .crop-bl, .crop-br { position: absolute; width: 10px; height: 10px; border-color: #64748b; border-style: solid; }
+          .crop-tl { top: -1px; left: -1px; border-width: 1.5px 0 0 1.5px; }
+          .crop-tr { top: -1px; right: -1px; border-width: 1.5px 1.5px 0 0; }
+          .crop-bl { bottom: -1px; left: -1px; border-width: 0 0 1.5px 1.5px; }
+          .crop-br { bottom: -1px; right: -1px; border-width: 0 1.5px 1.5px 0; }
+          .card-inner { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
+          .logo-img { height: 1.6cm; object-fit: contain; margin-bottom: 0.35cm; }
+          .pre-title { font-size: 8pt; font-weight: 900; letter-spacing: 0.28em; text-transform: uppercase; color: #000000; margin-bottom: 0.25cm; }
+          .event-name { font-family: ${chosenFont}; font-size: ${cardConfig.fontId === 'caligrafia' ? '28pt' : '21pt'}; font-weight: 700; color: #000000; line-height: 1.15; margin-bottom: 0.3cm; }
+          .subtitle { font-size: 8.5pt; font-weight: 600; color: #334155; max-width: 7.5cm; line-height: 1.35; margin-bottom: 0.55cm; }
+          .qr-box { padding: 0.3cm; border: 1px solid #e2e8f0; border-radius: 14px; margin-bottom: 0.45cm; background: #ffffff; }
+          .qr-img { width: 4.6cm; height: 4.6cm; object-fit: contain; display: block; }
+          .hashtag-row { font-size: 9.5pt; font-weight: 900; letter-spacing: 0.2em; text-transform: uppercase; color: #000000; }
+          .brand-row { font-size: 6.5pt; font-weight: 800; letter-spacing: 0.28em; text-transform: uppercase; color: #64748b; margin-top: 0.25cm; }
+        </style>
+      </head>
+      <body>
+        ${pagesHtml}
+        <script>
+          window.onload = function() {
+            setTimeout(function() { window.print(); }, 500);
+          };
+        </script>
+      </body>
+      </html>
+    `);
+    printWin.document.close();
   };
 
   const handleFrameUpload = async (e) => {
@@ -9973,9 +10128,128 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
               {isLockedInWorkshop ? (
                 <><Lock size={14} className="mr-2"/> {socialWallStatus === 'impreso' ? 'Tarjetas Despachadas (Ver Diseño)' : 'Tarjetas en Taller (Ver Diseño)'}</>
               ) : (
-                <><Sparkles size={14} className="mr-2"/> Abrir Atelier de Tarjetas de Mesa</>
+                <><Sparkles size={14} className="mr-2"/> Abrir Atelier de Tarjetas de Mesa ({mesasEvento.length || cardConfig.cantidadTarjetas} Mesas)</>
               )}
             </button>
+
+            {isLockedInWorkshop && (
+              <button
+                type="button"
+                onClick={() => {
+                  setExtraCaballetesMode(mesasNuevasPostTaller.length > 0 ? 'nuevas' : 'manual');
+                  setShowExtraCaballetesModal(true);
+                }}
+                className="flex items-center justify-center px-5 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg"
+              >
+                <Download size={14} className="mr-2"/>
+                Generar Caballetes Extra (PDF)
+                {mesasNuevasPostTaller.length > 0 && (
+                  <span className="ml-2 px-2 py-0.5 rounded-full bg-slate-950 text-amber-400 text-[9px]">
+                    +{mesasNuevasPostTaller.length} {mesasNuevasPostTaller.length === 1 ? 'Mesa Nueva' : 'Mesas Nuevas'}
+                  </span>
+                )}
+              </button>
+            )}
+
+            {showExtraCaballetesModal && createPortal(
+              <div className="fixed inset-0 z-[999999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+                <div className="bg-[#0d0d0d] border border-white/10 rounded-[2rem] w-full max-w-md p-6 sm:p-8 shadow-2xl text-white space-y-5">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-amber-500">Impresión de Emergencia • Social Wall</span>
+                      <h3 className="text-xl font-bold text-white mt-1">Generar Caballetes Extra (PDF)</h3>
+                    </div>
+                    <button type="button" onClick={() => setShowExtraCaballetesModal(false)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-400"><X size={18}/></button>
+                  </div>
+
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    Cada hoja tamaño Carta imprime <b>2 caballetes idénticos para la misma mesa</b> (listos para recortar y colocar en portarretrato de vidrio).
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setExtraCaballetesMode('nuevas')}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${extraCaballetesMode === 'nuevas' ? 'border-amber-500 bg-amber-500/10 text-white' : 'border-white/10 bg-white/5 text-slate-400'}`}
+                    >
+                      <span className="text-[10px] font-black uppercase tracking-wider block text-amber-400">Mesas Nuevas ({mesasNuevasPostTaller.length})</span>
+                      <span className="text-[10px] text-slate-300 mt-1 block">Detectadas después del envío a taller</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setExtraCaballetesMode('manual')}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${extraCaballetesMode === 'manual' ? 'border-amber-500 bg-amber-500/10 text-white' : 'border-white/10 bg-white/5 text-slate-400'}`}
+                    >
+                      <span className="text-[10px] font-black uppercase tracking-wider block text-amber-400">Cantidad Manual</span>
+                      <span className="text-[10px] text-slate-300 mt-1 block">Elegir cuántas mesas/hojas imprimir</span>
+                    </button>
+                  </div>
+
+                  {extraCaballetesMode === 'nuevas' ? (
+                    <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                      {mesasNuevasPostTaller.length === 0 ? (
+                        <p className="text-xs text-slate-400 text-center">No has agregado mesas nuevas en el Gestor de Mesas después de enviar a taller. Usa el modo "Cantidad Manual" si necesitas reposiciones.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                            Se imprimirán {mesasNuevasPostTaller.length} hojas ({mesasNuevasPostTaller.length * 2} caballetes):
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {mesasNuevasPostTaller.map(m => (
+                              <span key={m.id} className="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold">
+                                {m.name} (2 caballetes)
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-slate-300">
+                        ¿Cuántas mesas extra necesitas imprimir? (2 caballetes por hoja)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={manualExtraTablesCount}
+                        onChange={e => setManualExtraTablesCount(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-full p-3 rounded-xl bg-black border border-white/15 text-center text-lg font-black text-amber-400 outline-none focus:border-amber-500"
+                      />
+                      <p className="text-[11px] text-slate-400 text-center">
+                        Se generarán <b>{manualExtraTablesCount} hojas Carta</b> ({manualExtraTablesCount * 2} caballetes en total).
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-2">
+                    <button type="button" onClick={() => setShowExtraCaballetesModal(false)} className="flex-1 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold uppercase tracking-widest text-slate-300">
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      disabled={extraCaballetesMode === 'nuevas' && mesasNuevasPostTaller.length === 0}
+                      onClick={() => {
+                        const baseNum = sentTableIds.length || mesasEvento.length || 0;
+                        const targetTables = extraCaballetesMode === 'nuevas'
+                          ? mesasNuevasPostTaller
+                          : Array.from({ length: manualExtraTablesCount }, (_, i) => ({
+                              id: `extra_${i}`,
+                              name: `Mesa ${baseNum + i + 1}`
+                            }));
+                        handlePrintCaballetesPDF(targetTables);
+                        setShowExtraCaballetesModal(false);
+                      }}
+                      className="flex-1 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg"
+                    >
+                      <Download size={15}/> Descargar / Imprimir PDF
+                    </button>
+                  </div>
+                </div>
+              </div>,
+              document.body
+            )}
 
             <button onClick={downloadAllPhotos} disabled={isZipping || photos.length === 0} className={`flex items-center justify-center px-6 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all shadow-sm ${isZipping ? 'bg-slate-400 dark:bg-slate-700 text-white' : photos.length === 0 ? 'bg-slate-100 dark:bg-white/5 text-slate-400 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600 text-white hover:scale-105 shadow-emerald-500/20'}`}>
               {isZipping ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
