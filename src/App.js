@@ -10101,16 +10101,16 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
   return (
     <div className="h-full flex flex-col space-y-4 pb-6 relative z-10 transition-colors duration-500 max-w-[1200px] mx-auto w-full">
       
-      <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm p-6 shrink-0 transition-colors">
+      <div className="bg-[#1C1917] rounded-[2rem] border border-[#D4AF37]/25 shadow-xl p-6 shrink-0 transition-colors text-white">
         
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 border-b border-slate-100 dark:border-white/5 pb-4">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 border-b border-[#D4AF37]/15 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-amber-500/10 flex items-center justify-center text-indigo-600 dark:text-amber-500">
+            <div className="w-11 h-11 rounded-xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
               <Camera size={20} />
             </div>
             <div>
-              <h2 className="text-xl font-editorial font-bold text-slate-900 dark:text-white leading-tight">Social Wall</h2>
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Pantallas en Vivo</p>
+              <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block">Baulia Social Wall</span>
+              <h2 className="text-xl font-editorial font-bold text-white leading-tight">Muro Social y Caballetes en Vivo</h2>
             </div>
           </div>
           
@@ -10121,8 +10121,8 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
               onClick={() => setShowCardStudio(true)}
               className={`flex items-center justify-center px-5 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all border ${
                 isLockedInWorkshop
-                  ? 'bg-[#1C1917] text-[#D4AF37] border-[#D4AF37]/50 shadow-[0_0_15px_rgba(212,175,55,0.15)]'
-                  : 'bg-[#D4AF37] hover:bg-[#c5a028] text-[#1C1917] border-[#D4AF37] shadow-lg'
+                  ? 'bg-[#141210] text-[#D4AF37] border-[#D4AF37]/50 shadow-[0_0_15px_rgba(212,175,55,0.15)]'
+                  : 'bg-[#D4AF37] hover:bg-[#c5a028] text-[#1C1917] border-[#D4AF37] shadow-[0_10px_25px_rgba(212,175,55,0.25)]'
               }`}
             >
               {isLockedInWorkshop ? (
@@ -10139,12 +10139,12 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
                   setExtraCaballetesMode(mesasNuevasPostTaller.length > 0 ? 'nuevas' : 'manual');
                   setShowExtraCaballetesModal(true);
                 }}
-                className="flex items-center justify-center px-5 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg"
+                className="flex items-center justify-center px-5 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all bg-[#D4AF37] hover:bg-[#c5a028] text-[#1C1917] shadow-[0_10px_25px_rgba(212,175,55,0.25)]"
               >
                 <Download size={14} className="mr-2"/>
                 Generar Caballetes Extra (PDF)
                 {mesasNuevasPostTaller.length > 0 && (
-                  <span className="ml-2 px-2 py-0.5 rounded-full bg-slate-950 text-amber-400 text-[9px]">
+                  <span className="ml-2 px-2 py-0.5 rounded-full bg-[#1C1917] text-[#D4AF37] text-[9px]">
                     +{mesasNuevasPostTaller.length} {mesasNuevasPostTaller.length === 1 ? 'Mesa Nueva' : 'Mesas Nuevas'}
                   </span>
                 )}
@@ -10152,17 +10152,17 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
             )}
 
             {showExtraCaballetesModal && createPortal(
-              <div className="fixed inset-0 z-[999999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
-                <div className="bg-[#0d0d0d] border border-white/10 rounded-[2rem] w-full max-w-md p-6 sm:p-8 shadow-2xl text-white space-y-5">
+              <div className="fixed inset-0 z-[999999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+                <div className="bg-[#1C1917] border border-[#D4AF37]/30 rounded-[2rem] w-full max-w-md p-6 sm:p-8 shadow-2xl text-white space-y-5">
                   <div className="flex justify-between items-start">
                     <div>
-                      <span className="text-[9px] font-black uppercase tracking-widest text-amber-500">Impresión de Emergencia • Social Wall</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-[#D4AF37]">Impresión de Emergencia • Social Wall</span>
                       <h3 className="text-xl font-bold text-white mt-1">Generar Caballetes Extra (PDF)</h3>
                     </div>
                     <button type="button" onClick={() => setShowExtraCaballetesModal(false)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-400"><X size={18}/></button>
                   </div>
 
-                  <p className="text-xs text-slate-400 leading-relaxed">
+                  <p className="text-xs text-slate-300 leading-relaxed">
                     Cada hoja tamaño Carta imprime <b>2 caballetes idénticos para la misma mesa</b> (listos para recortar y colocar en portarretrato de vidrio).
                   </p>
 
@@ -10170,33 +10170,33 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
                     <button
                       type="button"
                       onClick={() => setExtraCaballetesMode('nuevas')}
-                      className={`p-3.5 rounded-xl border text-left transition-all ${extraCaballetesMode === 'nuevas' ? 'border-amber-500 bg-amber-500/10 text-white' : 'border-white/10 bg-white/5 text-slate-400'}`}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${extraCaballetesMode === 'nuevas' ? 'border-[#D4AF37] bg-[#D4AF37]/15 text-white' : 'border-white/10 bg-[#141210] text-slate-400'}`}
                     >
-                      <span className="text-[10px] font-black uppercase tracking-wider block text-amber-400">Mesas Nuevas ({mesasNuevasPostTaller.length})</span>
+                      <span className="text-[10px] font-black uppercase tracking-wider block text-[#D4AF37]">Mesas Nuevas ({mesasNuevasPostTaller.length})</span>
                       <span className="text-[10px] text-slate-300 mt-1 block">Detectadas después del envío a taller</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setExtraCaballetesMode('manual')}
-                      className={`p-3.5 rounded-xl border text-left transition-all ${extraCaballetesMode === 'manual' ? 'border-amber-500 bg-amber-500/10 text-white' : 'border-white/10 bg-white/5 text-slate-400'}`}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${extraCaballetesMode === 'manual' ? 'border-[#D4AF37] bg-[#D4AF37]/15 text-white' : 'border-white/10 bg-[#141210] text-slate-400'}`}
                     >
-                      <span className="text-[10px] font-black uppercase tracking-wider block text-amber-400">Cantidad Manual</span>
+                      <span className="text-[10px] font-black uppercase tracking-wider block text-[#D4AF37]">Cantidad Manual</span>
                       <span className="text-[10px] text-slate-300 mt-1 block">Elegir cuántas mesas/hojas imprimir</span>
                     </button>
                   </div>
 
                   {extraCaballetesMode === 'nuevas' ? (
-                    <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div className="p-4 rounded-xl bg-[#141210] border border-[#D4AF37]/20">
                       {mesasNuevasPostTaller.length === 0 ? (
                         <p className="text-xs text-slate-400 text-center">No has agregado mesas nuevas en el Gestor de Mesas después de enviar a taller. Usa el modo "Cantidad Manual" si necesitas reposiciones.</p>
                       ) : (
                         <div className="space-y-2">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37]">
                             Se imprimirán {mesasNuevasPostTaller.length} hojas ({mesasNuevasPostTaller.length * 2} caballetes):
                           </p>
                           <div className="flex flex-wrap gap-1.5">
                             {mesasNuevasPostTaller.map(m => (
-                              <span key={m.id} className="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold">
+                              <span key={m.id} className="px-2.5 py-1 rounded-lg bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] text-xs font-bold">
                                 {m.name} (2 caballetes)
                               </span>
                             ))}
@@ -10205,7 +10205,7 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
                       )}
                     </div>
                   ) : (
-                    <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
+                    <div className="p-4 rounded-xl bg-[#141210] border border-[#D4AF37]/20 space-y-3">
                       <label className="block text-[10px] font-black uppercase tracking-widest text-slate-300">
                         ¿Cuántas mesas extra necesitas imprimir? (2 caballetes por hoja)
                       </label>
@@ -10215,7 +10215,7 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
                         max="100"
                         value={manualExtraTablesCount}
                         onChange={e => setManualExtraTablesCount(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-full p-3 rounded-xl bg-black border border-white/15 text-center text-lg font-black text-amber-400 outline-none focus:border-amber-500"
+                        className="w-full p-3 rounded-xl bg-[#1C1917] border border-[#D4AF37]/40 text-center text-lg font-black text-[#D4AF37] outline-none focus:border-[#D4AF37]"
                       />
                       <p className="text-[11px] text-slate-400 text-center">
                         Se generarán <b>{manualExtraTablesCount} hojas Carta</b> ({manualExtraTablesCount * 2} caballetes en total).
@@ -10241,7 +10241,7 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
                         handlePrintCaballetesPDF(targetTables);
                         setShowExtraCaballetesModal(false);
                       }}
-                      className="flex-1 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg"
+                      className="flex-1 py-3.5 rounded-xl bg-[#D4AF37] hover:bg-[#c5a028] disabled:opacity-40 text-[#1C1917] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg"
                     >
                       <Download size={15}/> Descargar / Imprimir PDF
                     </button>
@@ -10251,7 +10251,7 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
               document.body
             )}
 
-            <button onClick={downloadAllPhotos} disabled={isZipping || photos.length === 0} className={`flex items-center justify-center px-6 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all shadow-sm ${isZipping ? 'bg-slate-400 dark:bg-slate-700 text-white' : photos.length === 0 ? 'bg-slate-100 dark:bg-white/5 text-slate-400 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600 text-white hover:scale-105 shadow-emerald-500/20'}`}>
+            <button onClick={downloadAllPhotos} disabled={isZipping || photos.length === 0} className={`flex items-center justify-center px-6 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all border ${isZipping ? 'bg-white/10 text-white border-white/20' : photos.length === 0 ? 'bg-white/5 text-slate-500 border-white/10 cursor-not-allowed' : 'bg-[#141210] hover:bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/40 hover:scale-105'}`}>
               {isZipping ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} 
               {isZipping ? 'Empaquetando...' : 'Descargar Álbum (.ZIP)'}
             </button>
@@ -10259,56 +10259,56 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
+          <div className="bg-[#141210] border border-[#D4AF37]/20 rounded-2xl p-4 flex flex-col justify-between">
             <div className="mb-4">
-               <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><MonitorPlay size={16} className="text-indigo-500 dark:text-amber-500"/> Proyección y Acceso</h4>
-               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">QR para las mesas e interfaz para la pantalla gigante del salón.</p>
+               <h4 className="font-bold text-sm text-white flex items-center gap-1.5"><MonitorPlay size={16} className="text-[#D4AF37]"/> Proyección y Acceso</h4>
+               <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">QR para las mesas e interfaz para la pantalla gigante del salón.</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
-               <button onClick={() => setShowQR(true)} className="flex items-center justify-center px-2 py-2 bg-white dark:bg-[#050505] text-slate-700 dark:text-white rounded-lg border border-slate-200 dark:border-white/10 hover:border-indigo-400 dark:hover:border-amber-500/50 text-[9px] font-bold uppercase tracking-wider transition-colors shadow-sm">
+               <button onClick={() => setShowQR(true)} className="flex items-center justify-center px-2 py-2.5 bg-[#1C1917] text-[#D4AF37] rounded-lg border border-[#D4AF37]/30 hover:bg-[#D4AF37]/15 text-[9px] font-black uppercase tracking-wider transition-colors">
                  <QrCode size={14} className="mr-1.5"/> QR Mesas
                </button>
-               <button onClick={() => setShowProyectorModal(true)} className="flex items-center justify-center px-2 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-[9px] font-bold uppercase tracking-wider transition-colors shadow-sm shadow-indigo-500/20">
+               <button onClick={() => setShowProyectorModal(true)} className="flex items-center justify-center px-2 py-2.5 bg-[#D4AF37] text-[#1C1917] rounded-lg hover:bg-[#c5a028] text-[9px] font-black uppercase tracking-wider transition-colors shadow-md">
                  <PlayCircle size={14} className="mr-1.5"/> Proyector
                </button>
             </div>
           </div>
 
-          <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
+          <div className="bg-[#141210] border border-[#D4AF37]/20 rounded-2xl p-4 flex flex-col justify-between">
             <div className="mb-4">
-               <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><ShieldCheck size={16} className="text-rose-500"/> Seguridad y Filtros</h4>
-               <p className="text-[9px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">
-                 <b className="text-slate-700 dark:text-slate-300">Público:</b> Escaneo QR general + Nombre.<br/>
-                 <b className="text-slate-700 dark:text-slate-300">Privado:</b> Solo con Pase QR personal.<br/>
-                 <b className="text-slate-700 dark:text-slate-300">Moderador:</b> Actívalo para aprobar las fotos manualmente antes de que salgan en la pantalla.
+               <h4 className="font-bold text-sm text-white flex items-center gap-1.5"><ShieldCheck size={16} className="text-[#D4AF37]"/> Seguridad y Filtros</h4>
+               <p className="text-[9px] text-slate-400 mt-1 leading-tight">
+                 <b className="text-[#D4AF37]">Público:</b> Escaneo QR general + Nombre.<br/>
+                 <b className="text-[#D4AF37]">Privado:</b> Solo con Pase QR personal.<br/>
+                 <b className="text-[#D4AF37]">Moderador:</b> Aprobar fotos antes de proyectar.
                </p>
             </div>
             <div className="flex gap-2 items-center">
-               <div className="flex items-center bg-white dark:bg-[#050505] p-0.5 rounded-md border border-slate-200 dark:border-white/10 shadow-sm shrink-0">
-                  <button onClick={() => updateConfig('modoPublico', true)} className={`text-[8px] font-black uppercase tracking-widest px-2 py-1.5 rounded transition-all ${config.modoPublico ? 'bg-emerald-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Público</button>
-                  <button onClick={() => updateConfig('modoPublico', false)} className={`text-[8px] font-black uppercase tracking-widest px-2 py-1.5 rounded transition-all ${!config.modoPublico ? 'bg-rose-500 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'}`}>Privado</button>
+               <div className="flex items-center bg-[#1C1917] p-0.5 rounded-lg border border-[#D4AF37]/25 shrink-0">
+                  <button onClick={() => updateConfig('modoPublico', true)} className={`text-[8px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-md transition-all ${config.modoPublico ? 'bg-[#D4AF37] text-[#1C1917]' : 'text-slate-400 hover:text-white'}`}>Público</button>
+                  <button onClick={() => updateConfig('modoPublico', false)} className={`text-[8px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-md transition-all ${!config.modoPublico ? 'bg-[#D4AF37] text-[#1C1917]' : 'text-slate-400 hover:text-white'}`}>Privado</button>
                </div>
-               <div className="flex items-center bg-white dark:bg-[#050505] px-2 py-1.5 rounded-md border border-slate-200 dark:border-white/10 shadow-sm flex-1 justify-between gap-1">
-                  <span className="text-[8px] font-black uppercase text-slate-500 tracking-widest truncate">Moderador</span>
-                  <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-7 h-3.5 rounded-full transition-colors shrink-0 ${config.moderacion ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`} title="Activar/Desactivar Moderador">
-                    <div className={`absolute top-[2px] left-[2px] w-2.5 h-2.5 bg-white rounded-full transition-transform ${config.moderacion ? 'translate-x-3.5' : 'translate-x-0'}`}></div>
+               <div className="flex items-center bg-[#1C1917] px-2.5 py-1.5 rounded-lg border border-[#D4AF37]/25 flex-1 justify-between gap-1">
+                  <span className="text-[8px] font-black uppercase text-slate-300 tracking-widest truncate">Moderador</span>
+                  <button onClick={() => updateConfig('moderacion', !config.moderacion)} className={`relative w-7 h-3.5 rounded-full transition-colors shrink-0 ${config.moderacion ? 'bg-[#D4AF37]' : 'bg-white/15'}`} title="Activar/Desactivar Moderador">
+                    <div className={`absolute top-[2px] left-[2px] w-2.5 h-2.5 rounded-full transition-transform ${config.moderacion ? 'translate-x-3.5 bg-[#1C1917]' : 'translate-x-0 bg-white'}`}></div>
                   </button>
                </div>
             </div>
           </div>
 
-          <div className="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between transition-colors">
+          <div className="bg-[#141210] border border-[#D4AF37]/20 rounded-2xl p-4 flex flex-col justify-between">
             <div className="mb-4">
-               <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5"><Palette size={16} className="text-sky-500"/> Personalización</h4>
-               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Agrega un marco a las fotos (PNG transparente) y un hashtag al muro.</p>
+               <h4 className="font-bold text-sm text-white flex items-center gap-1.5"><Palette size={16} className="text-[#D4AF37]"/> Personalización</h4>
+               <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">Agrega un marco a las fotos (PNG transparente) y un hashtag al muro.</p>
             </div>
             <div className="flex gap-2">
-               <div className="flex items-center bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-1.5 flex-1 shadow-sm focus-within:border-sky-500 transition-colors">
-                 <span className="text-slate-400 font-bold mr-1 text-[10px]">#</span>
-                 <input type="text" value={config.hashtag?.replace('#', '') || ''} onChange={(e) => setConfig({...config, hashtag: '#' + e.target.value.replace(/\s+/g, '')})} onBlur={() => updateConfig('hashtag', config.hashtag)} placeholder="Boda" className="bg-transparent text-slate-800 dark:text-white font-bold text-[10px] uppercase outline-none w-full placeholder:text-slate-400"/>
+               <div className="flex items-center bg-[#1C1917] border border-[#D4AF37]/30 rounded-lg px-3 py-1.5 flex-1 focus-within:border-[#D4AF37] transition-colors">
+                 <span className="text-[#D4AF37] font-bold mr-1 text-[10px]">#</span>
+                 <input type="text" value={config.hashtag?.replace('#', '') || ''} onChange={(e) => setConfig({...config, hashtag: '#' + e.target.value.replace(/\s+/g, '')})} onBlur={() => updateConfig('hashtag', config.hashtag)} placeholder="Boda" className="bg-transparent text-white font-bold text-[10px] uppercase outline-none w-full placeholder:text-slate-500"/>
                </div>
                <input type="file" accept="image/png" ref={fileInputRef} onChange={handleFrameUpload} className="hidden" />
-               <button onClick={() => fileInputRef.current.click()} className="flex items-center justify-center px-3 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-lg text-[9px] uppercase tracking-widest font-bold hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 transition-all shadow-sm shrink-0">
+               <button onClick={() => fileInputRef.current.click()} className="flex items-center justify-center px-3 bg-[#D4AF37]/15 text-[#D4AF37] rounded-lg text-[9px] uppercase tracking-widest font-black hover:bg-[#D4AF37]/25 border border-[#D4AF37]/40 transition-all shrink-0">
                  <ImageIcon size={14} className="mr-1.5" /> {config.marcoUrl ? 'Cambiar' : 'Marco'}
                </button>
             </div>
@@ -10407,14 +10407,14 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
         document.body
       )}
 
-      <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl p-6 overflow-y-auto bg-slate-50/50 dark:bg-transparent custom-scrollbar transition-colors">
+      <div className="flex-1 bg-[#1C1917] rounded-[2.5rem] border border-[#D4AF37]/25 shadow-2xl p-6 overflow-y-auto custom-scrollbar transition-colors">
         {photos.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 min-h-[300px]">
-            <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center mb-6">
-              <ImageIcon size={40} className="opacity-50" />
+          <div className="h-full flex flex-col items-center justify-center text-slate-400 min-h-[300px]">
+            <div className="w-24 h-24 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center mb-6 text-[#D4AF37]">
+              <ImageIcon size={40} />
             </div>
-            <h3 className="text-2xl font-bold text-slate-700 dark:text-white font-editorial tracking-wide mb-2">Aún no hay fotos</h3>
-            <p className="text-sm font-medium">Invita a tus asistentes a escanear el QR de las mesas.</p>
+            <h3 className="text-2xl font-bold text-white font-editorial tracking-wide mb-2">Aún no hay fotos</h3>
+            <p className="text-sm font-medium text-slate-400">Invita a tus asistentes a escanear el QR de las mesas.</p>
           </div>
         ) : (
           <div className="columns-2 md:columns-4 gap-4 pb-10">
@@ -10539,26 +10539,26 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
       )}
 
       {showProyectorModal && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-10 relative animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
-             <button onClick={() => setShowProyectorModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-rose-500 bg-slate-100 dark:bg-white/10 p-2 rounded-full transition-colors"><X size={20}/></button>
+        <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-[#1C1917] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-10 relative animate-in zoom-in-95 border border-[#D4AF37]/30 text-white">
+             <button onClick={() => setShowProyectorModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-[#D4AF37] bg-white/5 p-2 rounded-full transition-colors"><X size={20}/></button>
              
-             <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-indigo-100 dark:border-indigo-500/30 shadow-inner">
+             <div className="w-20 h-20 bg-[#D4AF37]/15 text-[#D4AF37] rounded-2xl flex items-center justify-center mx-auto mb-6 border border-[#D4AF37]/40 shadow-inner">
                <PlayCircle size={40}/>
              </div>
              
-             <h3 className="font-editorial font-black text-3xl text-slate-900 dark:text-white mb-2 text-center transition-colors">Modo Proyector</h3>
-             <p className="text-xs text-slate-500 dark:text-slate-400 text-center mb-8">Este es el enlace que debe abrirse en la computadora conectada a las pantallas de tu salón.</p>
+             <h3 className="font-editorial font-black text-3xl text-white mb-2 text-center">Modo Proyector</h3>
+             <p className="text-xs text-slate-400 text-center mb-8">Este es el enlace que debe abrirse en la computadora conectada a las pantallas de tu salón.</p>
              
-             <button onClick={() => {navigator.clipboard.writeText(proyectorLink); if(addNotification) addNotification('Copiado', 'Enlace copiado al portapapeles', 'success');}} className="w-full py-4 mb-8 bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors uppercase tracking-widest text-[10px] shadow-sm">
+             <button onClick={() => {navigator.clipboard.writeText(proyectorLink); if(addNotification) addNotification('Copiado', 'Enlace copiado al portapapeles', 'success');}} className="w-full py-4 mb-8 bg-[#141210] text-[#D4AF37] border border-[#D4AF37]/30 rounded-xl font-black hover:bg-[#D4AF37]/15 flex items-center justify-center transition-colors uppercase tracking-widest text-[10px]">
                <Link size={16} className="mr-2"/> Copiar enlace directo
              </button>
              
-             <div className="border-t border-slate-200 dark:border-white/10 pt-8 transition-colors">
-                <label className="block text-[10px] font-black mb-4 text-slate-500 dark:text-slate-400 text-center uppercase tracking-widest">Enviar por WhatsApp al DJ</label>
+             <div className="border-t border-[#D4AF37]/20 pt-8">
+                <label className="block text-[10px] font-black mb-4 text-[#D4AF37] text-center uppercase tracking-widest">Enviar por WhatsApp al DJ</label>
                 <div className="flex gap-3">
-                  <input type="text" placeholder="10 dígitos del celular..." value={djPhone} onChange={e=>setDjPhone(e.target.value)} className="w-full px-5 py-4 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors placeholder:text-slate-400 shadow-inner" />
-                  <button onClick={sendProyectorWhatsApp} className="px-6 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/30 flex items-center justify-center shrink-0">
+                  <input type="text" placeholder="10 dígitos del celular..." value={djPhone} onChange={e=>setDjPhone(e.target.value)} className="w-full px-5 py-4 border border-white/10 bg-[#141210] rounded-xl font-bold text-white outline-none focus:border-[#D4AF37] transition-colors placeholder:text-slate-500" />
+                  <button onClick={sendProyectorWhatsApp} className="px-6 bg-[#D4AF37] text-[#1C1917] rounded-xl hover:bg-[#c5a028] transition-colors shadow-lg flex items-center justify-center shrink-0">
                     <Send size={20}/>
                   </button>
                 </div>
@@ -10568,23 +10568,23 @@ const GaleriaView = ({ photos, addNotification, eventoId }) => {
       )}
 
       {showQR && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl p-10 text-center relative animate-in zoom-in-95 border border-transparent dark:border-white/10 transition-colors">
-            <button onClick={() => setShowQR(false)} className="absolute top-5 right-5 text-slate-400 hover:text-slate-800 dark:hover:text-white bg-slate-100 dark:bg-white/10 p-2 rounded-full transition-colors"><X size={20}/></button>
+        <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-[#1C1917] rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl p-10 text-center relative animate-in zoom-in-95 border border-[#D4AF37]/30 text-white">
+            <button onClick={() => setShowQR(false)} className="absolute top-5 right-5 text-slate-400 hover:text-[#D4AF37] bg-white/5 p-2 rounded-full transition-colors"><X size={20}/></button>
             
-            <h3 className="font-editorial font-black text-3xl text-slate-900 dark:text-white mb-2 transition-colors">Tu Código QR</h3>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-8 font-bold">Imprime y ponlo en las mesas</p>
+            <h3 className="font-editorial font-black text-3xl text-white mb-2">Tu Código QR</h3>
+            <p className="text-[10px] text-[#D4AF37] uppercase tracking-widest mb-8 font-bold">Imprime y ponlo en las mesas</p>
             
-            <div className="bg-white p-4 rounded-3xl border-8 border-slate-100 dark:border-[#111] inline-block mb-10 shadow-lg transform hover:scale-105 transition-transform">
+            <div className="bg-white p-4 rounded-3xl border-4 border-[#D4AF37]/50 inline-block mb-10 shadow-lg transform hover:scale-105 transition-transform">
               <img src={qrUrl} alt="QR Code" className="w-56 h-56 mx-auto mix-blend-multiply" />
             </div>
             
             <div className="flex flex-col gap-3">
-              <button onClick={forceDownloadQR} className="w-full py-4 bg-indigo-600 dark:bg-amber-500 hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors text-white dark:text-slate-900 rounded-xl font-black shadow-lg dark:shadow-[0_0_20px_rgba(245,158,11,0.3)] uppercase tracking-widest text-[10px]">
+              <button onClick={forceDownloadQR} className="w-full py-4 bg-[#D4AF37] hover:bg-[#c5a028] transition-colors text-[#1C1917] rounded-xl font-black shadow-[0_10px_25px_rgba(212,175,55,0.25)] uppercase tracking-widest text-[10px]">
                 <Download size={16} className="inline mr-2"/> Descargar PNG
               </button>
-              <button onClick={() => {navigator.clipboard.writeText(guestLink); if(addNotification) addNotification('Copiado', 'Link manual copiado al portapapeles', 'success');}} className="w-full py-4 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors uppercase tracking-widest text-[10px]">
-                <Link size={16} className="mr-2"/> Copiar enlace manual
+              <button onClick={() => {navigator.clipboard.writeText(guestLink); if(addNotification) addNotification('Copiado', 'Link manual copiado al portapapeles', 'success');}} className="w-full py-4 bg-[#141210] border border-[#D4AF37]/30 text-slate-200 rounded-xl font-bold hover:bg-white/5 flex items-center justify-center transition-colors uppercase tracking-widest text-[10px]">
+                <Link size={16} className="mr-2 text-[#D4AF37]"/> Copiar enlace manual
               </button>
             </div>
           </div>
@@ -17301,85 +17301,176 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   };
 
   const generarPDFNativo = () => {
-    const printWindow = window.open('', '_blank');
-    const evtName = ordenActiva.config.eventName || 'Evento VIP';
-    const preTitle = ordenActiva.config.preTitle || '';
+    const printWindow = window.open('', '_blank', 'width=1100,height=850');
+    if (!printWindow) return;
+    const cfg = ordenActiva.config || {};
+    const evtName = cfg.eventName || 'Evento VIP';
+    const preTitle = cfg.preTitle || '';
     const dateStr = ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : '';
-    const logo = ordenActiva.config.logoBase64 || '';
+    const logo = cfg.logoBase64 || '';
 
-    let content = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Producción - ${evtName}</title>
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
-            body, html { margin: 0; padding: 0; background: white; font-family: Arial, sans-serif; }
-            @page { size: letter landscape; margin: 0; }
-            .sheet { 
-                width: 279mm; 
-                height: 215.9mm; 
-                page-break-after: always; 
-                display: flex; 
-                flex-direction: column; 
-                align-items: center;
-                justify-content: flex-start; 
-                margin: 0 auto; 
-                box-sizing: border-box;
-            }
-            .sheet:last-child { page-break-after: auto; }
-            .wristband { width: 250mm; height: 19mm; display: flex; align-items: center; box-sizing: border-box; overflow: hidden; page-break-inside: avoid; }
-            .zone-glue { width: 25mm; height: 100%; display: flex; align-items: center; justify-content: center; }
-            .zone-brand { width: 30mm; height: 100%; display: flex; align-items: center; justify-content: center; }
-            .zone-brand span { transform: rotate(-90deg); font-size: 6px; color: #000; font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
-            .zone-design { width: 95mm; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 10px; }
-            .z-pre { font-size: 6px; font-weight: 900; color: #000; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2px; }
-            .z-name { font-family: 'Great Vibes', cursive; font-size: 24px; color: #000; line-height: 1; margin-bottom: 2px; }
-            .z-logo { max-height: 14mm; max-width: 80mm; object-fit: contain; margin-bottom: 2px; }
-            .z-date { font-size: 6px; font-weight: 900; color: #000; text-transform: uppercase; letter-spacing: 1px; }
-            .zone-guest { width: 62.5mm; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0 10px; }
-            .g-name { font-size: 12px; font-weight: bold; color: #000; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .g-type { font-size: 8px; font-weight: bold; color: #000; text-transform: uppercase; margin-top: 2px; }
-            .zone-qr { width: 37.5mm; height: 100%; display: flex; align-items: center; justify-content: center; }
-        </style>
-    </head>
-    <body onload="setTimeout(function(){ window.print(); }, 1000)">
-    `;
+    const FONT_MAP = {
+      caligrafia: "'Great Vibes', cursive",
+      editorial: "'Cormorant Garamond', serif",
+      alta_moda: "'Cinzel', serif",
+      minimal: "'Montserrat', sans-serif"
+    };
+    const chosenFont = FONT_MAP[cfg.fontId] || FONT_MAP.caligrafia;
 
-    const chunked = [];
-    for (let i = 0; i < ordenActiva.listaImpresion.length; i += 10) {
-        chunked.push(ordenActiva.listaImpresion.slice(i, i + 10));
+    const BANDS_PER_SHEET = 10;
+    const sheets = [];
+    for (let i = 0; i < ordenActiva.listaImpresion.length; i += BANDS_PER_SHEET) {
+      sheets.push(ordenActiva.listaImpresion.slice(i, i + BANDS_PER_SHEET));
     }
 
-    chunked.forEach(page => {
-        content += `<div class="sheet">`;
-        page.forEach(item => {
-            let designHtml = '';
-            if (preTitle) designHtml += `<div class="z-pre">${preTitle}</div>`;
-            if (logo) designHtml += `<img class="z-logo" src="${logo}" />`;
-            else designHtml += `<div class="z-name">${evtName}</div>`;
-            if (dateStr) designHtml += `<div class="z-date">${dateStr}</div>`;
-
-            content += `
-            <div class="wristband">
-                <div class="zone-glue"></div>
-                <div class="zone-brand"><span>by BAULIA.COM</span></div>
-                <div class="zone-design">${designHtml}</div>
-                <div class="zone-guest">
-                    <div class="g-name">${item.nombreAImprimir}</div>
-                    <div class="g-type">${item.esNino ? 'Pase Niño' : 'Pase VIP'}</div>
-                </div>
-                <div class="zone-qr">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(item.qrDataUrl)}" style="width:14mm; height:14mm;" />
-                </div>
+    const pagesHtml = sheets.map((sheetRows) => {
+      const slots = Array.from({ length: BANDS_PER_SHEET }, (_, idx) => sheetRows[idx] || null);
+      const bandsHtml = slots.map((item) => {
+        if (!item) {
+          return `<div class="tyvek-band empty-band"></div>`;
+        }
+        const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(item.qrDataUrl)}&margin=0`;
+        return `
+          <div class="tyvek-band">
+            <div class="zone-glue"></div>
+            <div class="zone-safe">
+              <div class="qr-block">
+                <img src="${qrImgUrl}" class="qr-2cm" crossorigin="anonymous" />
+              </div>
+              <div class="guest-block">
+                <div class="guest-name">${item.nombreAImprimir}</div>
+                <div class="guest-type">${item.esNino ? 'PASE NIÑO VIP' : 'PASE ADULTO VIP'}</div>
+              </div>
+              <div class="event-center-block">
+                ${preTitle ? `<div class="event-pre">${preTitle}</div>` : ''}
+                ${logo
+                  ? `<img src="${logo}" class="event-logo" crossorigin="anonymous" />`
+                  : `<div class="event-title">${evtName}</div>`
+                }
+                ${dateStr ? `<div class="event-date">${dateStr}</div>` : ''}
+              </div>
+              <div class="brand-block">
+                <span>by baulia.com</span>
+              </div>
             </div>
-            `;
-        });
-        content += `</div>`;
-    });
+            <div class="zone-overlap"></div>
+          </div>
+        `;
+      }).join('');
 
-    content += `</body></html>`;
-    printWindow.document.write(content);
+      return `<div class="tyvek-sheet">${bandsHtml}</div>`;
+    }).join('');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Producción_Tyvek_${evtName}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Great+Vibes&family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+        <style>
+          @page { size: letter landscape; margin: 0; }
+          * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Montserrat', sans-serif; color: #000000; }
+          .tyvek-sheet {
+            width: 27.94cm;
+            min-height: 21.59cm;
+            page-break-after: always;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            margin: 0 auto;
+            background: #ffffff;
+          }
+          .tyvek-sheet:last-child { page-break-after: auto; }
+          /* Pulsera acostada horizontalmente a lo largo de la hoja (25.4 cm de largo x 2.54 cm de ancho) */
+          .tyvek-band {
+            width: 25.4cm;
+            height: 2.54cm;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            border-bottom: 0.25pt dashed #e2e8f0;
+            position: relative;
+            overflow: hidden;
+            page-break-inside: avoid;
+          }
+          .empty-band { border-bottom: 0.25pt dashed #f1f5f9; }
+          /* 3.0 cm pegamento + 17.4 cm área segura centrada + 5.0 cm cierre libre = 25.4 cm */
+          .zone-glue { width: 3.0cm; height: 2.54cm; flex-shrink: 0; }
+          .zone-safe {
+            width: 17.4cm;
+            height: 2.54cm;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 0.35cm;
+          }
+          .zone-overlap { width: 5.0cm; height: 2.54cm; flex-shrink: 0; }
+          .qr-block {
+            width: 2.16cm;
+            height: 2.16cm;
+            background: #ffffff;
+            padding: 0.08cm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+          .qr-2cm { width: 2.0cm; height: 2.0cm; object-fit: contain; display: block; image-rendering: pixelated; }
+          .guest-block {
+            width: 4.4cm;
+            padding-left: 0.3cm;
+            padding-right: 0.2cm;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+          .guest-name { font-size: 8.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.15; word-break: break-word; }
+          .guest-type { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; margin-top: 2px; opacity: 0.8; }
+          .event-center-block {
+            flex: 1;
+            height: 2.54cm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 0.3cm;
+            border-left: 0.5pt solid #cbd5e1;
+            border-right: 0.5pt solid #cbd5e1;
+          }
+          .event-pre { font-size: 5.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: 0.25em; margin-bottom: 1px; }
+          .event-logo { height: 1.1cm; max-width: 5.5cm; object-fit: contain; margin: 1px 0; }
+          .event-title { font-family: ${chosenFont}; font-size: ${cfg.fontId === 'caligrafia' || !cfg.fontId ? '17pt' : '12.5pt'}; font-weight: 700; line-height: 1.05; margin: 1px 0; }
+          .event-date { font-size: 5.5pt; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 1px; }
+          .brand-block {
+            width: 1.8cm;
+            height: 2.54cm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+          .brand-block span {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-size: 6pt;
+            font-weight: 900;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+          }
+        </style>
+      </head>
+      <body onload="setTimeout(function(){ window.print(); }, 800)">
+        ${pagesHtml}
+      </body>
+      </html>
+    `);
     printWindow.document.close();
   };
 
@@ -17540,23 +17631,19 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       <body onload="setTimeout(function(){ window.print(); }, 1000)">
     `;
 
-    let cardIndex = 1;
-    for (let s = 0; s < sheetsCount; s++) {
+    for (let mesaNum = 1; mesaNum <= total; mesaNum++) {
       html += `<div class="sheet">`;
       for (let col = 0; col < 2; col++) {
-        if (cardIndex <= total) {
-          html += `
-            <div class="tent-wrapper">
-              <div class="crop-tl"></div><div class="crop-tr"></div><div class="crop-bl"></div><div class="crop-br"></div>
-              <div class="tent-card">
-                <div class="tent-face upside-down">${renderFaceHTML(cardIndex)}</div>
-                <div class="tent-face">${renderFaceHTML(cardIndex)}</div>
-                <div class="tent-tab">▲ Doblar aquí • Pestaña de base para parar en triángulo ▲</div>
-              </div>
+        html += `
+          <div class="tent-wrapper">
+            <div class="crop-tl"></div><div class="crop-tr"></div><div class="crop-bl"></div><div class="crop-br"></div>
+            <div class="tent-card">
+              <div class="tent-face upside-down">${renderFaceHTML(mesaNum)}</div>
+              <div class="tent-face">${renderFaceHTML(mesaNum)}</div>
+              <div class="tent-tab">▲ Mesa ${mesaNum} (Caballete ${col + 1} de 2) ▲</div>
             </div>
-          `;
-          cardIndex++;
-        }
+          </div>
+        `;
       }
       html += `</div>`;
     }

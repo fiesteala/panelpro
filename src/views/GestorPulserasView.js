@@ -324,15 +324,18 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         <title>Pulseras_Extra_Tyvek_${designConfig.eventName || 'Baulia'}</title>
         <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Great+Vibes&family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
         <style>
-          @page { size: 25.4cm 25.4cm; margin: 0; }
+          @page { size: letter landscape; margin: 0; }
           * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          body { margin: 0; padding: 0; background: #ffffff; font-family: 'Montserrat', sans-serif; color: #000000; }
+          body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Montserrat', sans-serif; color: #000000; }
           .tyvek-sheet {
-            width: 25.4cm;
-            height: 25.4cm;
+            width: 27.94cm;
+            min-height: 21.59cm;
             page-break-after: always;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            margin: 0 auto;
             background: #ffffff;
           }
           .tyvek-sheet:last-child { page-break-after: auto; }
@@ -444,87 +447,85 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
   return (
     <div className="space-y-6 pb-10 animate-in fade-in duration-500 relative">
       
-      {/* 🔴 MODAL DE DATOS DE ENVÍO LOGÍSTICO */}
+      {/* 🔴 MODAL DE DATOS DE ENVÍO LOGÍSTICO (PALETA #1C1917 + #D4AF37) */}
       {confirmModal && createPortal(
-        <div className="fixed inset-0 z-[999999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-all overflow-y-auto">
-            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-xl shadow-2xl p-8 border border-transparent dark:border-white/10 animate-in zoom-in-95 transition-colors my-8">
+        <div className="fixed inset-0 z-[999999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 transition-all overflow-y-auto">
+            <div className="bg-[#1C1917] rounded-3xl w-full max-w-xl shadow-[0_25px_70px_rgba(0,0,0,0.9)] p-8 border border-[#D4AF37]/30 animate-in zoom-in-95 transition-colors my-8 text-white">
                 
                 <div className="flex justify-between items-start mb-6">
                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-indigo-100 dark:bg-amber-500/20 text-indigo-600 dark:text-amber-500 rounded-full flex items-center justify-center shadow-inner">
+                        <div className="w-14 h-14 bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] rounded-full flex items-center justify-center shadow-inner">
                             <Truck size={28} />
                         </div>
                         <div>
-                            <h3 className="text-2xl font-editorial font-black text-slate-800 dark:text-white leading-tight">Envío de Producción</h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Completa los datos para la paquetería.</p>
+                            <h3 className="text-2xl font-editorial font-black text-white leading-tight">Envío de Producción</h3>
+                            <p className="text-xs text-slate-400 mt-1">Completa los datos para la paquetería VIP.</p>
                         </div>
                     </div>
-                    <button onClick={() => setConfirmModal(false)} className="text-slate-400 hover:text-rose-500 transition-colors bg-slate-100 dark:bg-white/5 p-2 rounded-full"><X size={20}/></button>
+                    <button onClick={() => setConfirmModal(false)} className="text-slate-400 hover:text-[#D4AF37] transition-colors bg-white/5 p-2 rounded-full"><X size={20}/></button>
                 </div>
                 
-                <div className="space-y-4 mb-8 bg-slate-50 dark:bg-[#111] p-5 rounded-2xl border border-slate-100 dark:border-white/5">
-                    
+                <div className="space-y-4 mb-8 bg-[#141210] p-5 rounded-2xl border border-[#D4AF37]/20">
                     <div>
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Quien Recibe (Nombre Completo)</label>
-                        <input type="text" required value={shippingInfo.recipient} onChange={e=>setShippingInfo({...shippingInfo, recipient: e.target.value})} placeholder="Ej. Juan Pérez Garza" className="w-full p-3 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sm font-bold text-slate-800 dark:text-white transition-colors" />
+                        <label className="block text-[9px] font-bold text-[#D4AF37] uppercase tracking-widest mb-1.5 ml-1">Quien Recibe (Nombre Completo)</label>
+                        <input type="text" required value={shippingInfo.recipient} onChange={e=>setShippingInfo({...shippingInfo, recipient: e.target.value})} placeholder="Ej. Juan Pérez Garza" className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-sm font-bold text-white transition-colors" />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">País</label>
-                            <input type="text" required value={shippingInfo.country} onChange={e=>setShippingInfo({...shippingInfo, country: e.target.value})} className="w-full p-3 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sm font-bold text-slate-800 dark:text-white transition-colors" />
+                            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">País</label>
+                            <input type="text" required value={shippingInfo.country} onChange={e=>setShippingInfo({...shippingInfo, country: e.target.value})} className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-sm font-bold text-white transition-colors" />
                         </div>
                         <div>
-                            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Estado / Provincia</label>
-                            <input type="text" required value={shippingInfo.state} onChange={e=>setShippingInfo({...shippingInfo, state: e.target.value})} placeholder="Ej. Nuevo León" className="w-full p-3 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sm font-bold text-slate-800 dark:text-white transition-colors" />
+                            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Estado / Provincia</label>
+                            <input type="text" required value={shippingInfo.state} onChange={e=>setShippingInfo({...shippingInfo, state: e.target.value})} placeholder="Ej. Nuevo León" className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-sm font-bold text-white transition-colors" />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Ciudad / Municipio</label>
-                            <input type="text" required value={shippingInfo.city} onChange={e=>setShippingInfo({...shippingInfo, city: e.target.value})} placeholder="Ej. Monterrey" className="w-full p-3 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sm font-bold text-slate-800 dark:text-white transition-colors" />
+                            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Ciudad / Municipio</label>
+                            <input type="text" required value={shippingInfo.city} onChange={e=>setShippingInfo({...shippingInfo, city: e.target.value})} placeholder="Ej. Monterrey" className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-sm font-bold text-white transition-colors" />
                         </div>
                         <div>
-                            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Código Postal</label>
-                            <input type="text" required value={shippingInfo.zipCode} onChange={e=>setShippingInfo({...shippingInfo, zipCode: e.target.value})} placeholder="Ej. 64000" className="w-full p-3 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sm font-bold text-slate-800 dark:text-white transition-colors" />
+                            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Código Postal</label>
+                            <input type="text" required value={shippingInfo.zipCode} onChange={e=>setShippingInfo({...shippingInfo, zipCode: e.target.value})} placeholder="Ej. 64000" className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-sm font-bold text-white transition-colors" />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Calle y Número</label>
-                        <input type="text" required value={shippingInfo.address} onChange={e=>setShippingInfo({...shippingInfo, address: e.target.value})} placeholder="Ej. Av. Juárez #123, Col. Centro" className="w-full p-3 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sm font-bold text-slate-800 dark:text-white transition-colors" />
+                        <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Calle y Número</label>
+                        <input type="text" required value={shippingInfo.address} onChange={e=>setShippingInfo({...shippingInfo, address: e.target.value})} placeholder="Ej. Av. Juárez #123, Col. Centro" className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-sm font-bold text-white transition-colors" />
                     </div>
 
                     <div>
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Referencias de Entrega (Opcional)</label>
-                        <input type="text" value={shippingInfo.references} onChange={e=>setShippingInfo({...shippingInfo, references: e.target.value})} placeholder="Ej. Casa blanca con portón negro, frente a parque" className="w-full p-3 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sm font-bold text-slate-800 dark:text-white transition-colors" />
+                        <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Referencias de Entrega (Opcional)</label>
+                        <input type="text" value={shippingInfo.references} onChange={e=>setShippingInfo({...shippingInfo, references: e.target.value})} placeholder="Ej. Casa blanca con portón negro, frente a parque" className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-sm font-bold text-white transition-colors" />
                     </div>
 
                     <div className="flex gap-4">
                         <div className="w-1/3">
-                            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Lada</label>
-                            <input type="text" required value={shippingInfo.phoneCode} onChange={e=>setShippingInfo({...shippingInfo, phoneCode: e.target.value})} placeholder="+52" className="w-full p-3 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sm font-bold text-center text-slate-800 dark:text-white transition-colors" />
+                            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Lada</label>
+                            <input type="text" required value={shippingInfo.phoneCode} onChange={e=>setShippingInfo({...shippingInfo, phoneCode: e.target.value})} placeholder="+52" className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-sm font-bold text-center text-white transition-colors" />
                         </div>
                         <div className="w-2/3">
-                            <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Teléfono Móvil</label>
-                            <input type="text" required value={shippingInfo.phone} onChange={e=>setShippingInfo({...shippingInfo, phone: e.target.value})} placeholder="10 dígitos" className="w-full p-3 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sm font-bold text-slate-800 dark:text-white transition-colors" />
+                            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Teléfono Móvil</label>
+                            <input type="text" required value={shippingInfo.phone} onChange={e=>setShippingInfo({...shippingInfo, phone: e.target.value})} placeholder="10 dígitos" className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-sm font-bold text-white transition-colors" />
                         </div>
                     </div>
-
                 </div>
 
-                <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 p-4 rounded-xl mb-6 flex items-start gap-3">
-                    <AlertTriangle size={20} className="text-rose-500 shrink-0 mt-0.5" />
-                    <p className="text-xs text-rose-700 dark:text-rose-400 leading-relaxed font-medium">Una vez enviada la orden a taller, <strong>NO podrás editar la lista de invitados ni el diseño.</strong> Verifica que todo esté perfecto antes de continuar.</p>
+                <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl mb-6 flex items-start gap-3">
+                    <AlertTriangle size={20} className="text-rose-400 shrink-0 mt-0.5" />
+                    <p className="text-xs text-rose-300 leading-relaxed font-medium">Una vez enviada la orden a taller, <strong>el lote enviado quedará sellado.</strong> Los invitados que confirmen después podrás imprimirlos en el PDF de Pulseras Extra.</p>
                 </div>
 
                 <div className="flex gap-3">
-                    <button onClick={() => setConfirmModal(false)} className="flex-1 py-4 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors uppercase tracking-widest text-[10px]">Revisar Lista</button>
+                    <button onClick={() => setConfirmModal(false)} className="flex-1 py-4 bg-white/5 text-slate-300 rounded-xl font-bold hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Revisar Lista</button>
                     <button 
                         disabled={!isShippingValid} 
                         onClick={() => { setConfirmModal(false); executeSendToWorkshop(); }} 
-                        className="flex-1 py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black shadow-lg hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center uppercase tracking-widest text-[10px]">
+                        className="flex-1 py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center uppercase tracking-widest text-[10px]">
                         <Send size={16} className="mr-2"/> Enviar Orden Definitiva
                     </button>
                 </div>
@@ -818,19 +819,24 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         .font-firma { font-family: 'Great Vibes', cursive; }
       `}</style>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
-          <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide transition-colors">Gestor de Pulseras VIP</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Sube el logo, elige el color de pulsera en el Atelier y carga tu lista de accesos.</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 bg-[#1C1917] p-6 rounded-3xl border border-[#D4AF37]/25 shadow-xl">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+            <Sparkles size={20} />
+          </div>
+          <div>
+            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block">Baulia Black Label • Tyvek 2.54 cm</span>
+            <h2 className="text-2xl sm:text-3xl font-editorial text-white tracking-wide">Gestor de Pulseras VIP</h2>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full md:w-auto">
           <button
             type="button"
             onClick={() => setShowAtelierModal(true)}
-            className={`px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-all border ${
+            className={`w-full md:w-auto justify-center px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-all border ${
               isLocked
-                ? 'bg-[#1C1917] text-[#D4AF37] border-[#D4AF37]/50 shadow-[0_0_15px_rgba(212,175,55,0.15)]'
-                : 'bg-[#D4AF37] hover:bg-[#c5a028] text-[#1C1917] border-[#D4AF37] shadow-lg'
+                ? 'bg-[#141210] text-[#D4AF37] border-[#D4AF37]/50 shadow-[0_0_15px_rgba(212,175,55,0.15)]'
+                : 'bg-[#D4AF37] hover:bg-[#c5a028] text-[#1C1917] border-[#D4AF37] shadow-[0_10px_25px_rgba(212,175,55,0.25)]'
             }`}
           >
             {isLocked ? (
@@ -844,91 +850,96 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-5 flex flex-col space-y-6">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col transition-colors">
-            <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex items-center justify-between transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl border border-[#D4AF37]/25 shadow-xl overflow-hidden flex flex-col">
+            <div className="p-5 border-b border-[#D4AF37]/15 bg-[#141210] flex items-center justify-between">
                <div className="flex items-center">
-                 <Palette size={18} className="text-indigo-500 mr-2" />
-                 <h3 className="font-bold text-slate-800 dark:text-white text-sm transition-colors">Personalización del Brazalete</h3>
+                 <Palette size={18} className="text-[#D4AF37] mr-2" />
+                 <h3 className="font-bold text-white text-sm">Personalización del Brazalete</h3>
                </div>
                <button
                  type="button"
                  onClick={() => setShowAtelierModal(true)}
-                 className="text-[10px] font-black uppercase tracking-widest text-amber-500 hover:underline flex items-center gap-1"
+                 className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] hover:underline flex items-center gap-1"
                >
                  <Sparkles size={12}/> Elegir Color / Papel
                </button>
             </div>
             <div className="p-6 space-y-4">
-              <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-2xl border border-slate-100 dark:border-white/5 space-y-3 shadow-inner">
-                <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-white/5">
-                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Base / Papel</span>
-                  <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase">{activeWristband.name}</span>
+              <div className="bg-[#141210] p-4 rounded-2xl border border-[#D4AF37]/15 space-y-3 shadow-inner">
+                <div className="flex justify-between items-center pb-2 border-b border-white/10">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Base / Papel</span>
+                  <span className="text-[10px] font-black text-white uppercase">{activeWristband.name}</span>
                 </div>
-                <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-white/5">
-                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Tinta</span>
+                <div className="flex justify-between items-center pb-2 border-b border-white/10">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Tinta</span>
                   <div className="flex items-center gap-1.5">
-                     <span style={{ backgroundColor: effectiveInk }} className="w-2.5 h-2.5 rounded-full border border-slate-300 shadow-sm"></span>
-                     <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase">{designConfig.pulseraInkColor === '#D4AF37' ? 'Dorado' : designConfig.pulseraInkColor === '#CBD5E1' ? 'Plata' : designConfig.pulseraColorId === 'blanca_atelier' ? 'Tinta Negra' : 'Blanco'}</span>
+                     <span style={{ backgroundColor: effectiveInk }} className="w-2.5 h-2.5 rounded-full border border-white/30 shadow-sm"></span>
+                     <span className="text-[10px] font-black text-[#D4AF37] uppercase">{designConfig.pulseraInkColor === '#D4AF37' ? 'Dorado' : designConfig.pulseraInkColor === '#CBD5E1' ? 'Plata' : designConfig.pulseraColorId === 'blanca_atelier' ? 'Tinta Negra' : 'Blanco'}</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-white/5">
-                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Tipografía</span>
-                  <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase truncate max-w-[120px]">{activeFont.name}</span>
+                <div className="flex justify-between items-center pb-2 border-b border-white/10">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Tipografía</span>
+                  <span className="text-[10px] font-black text-white uppercase truncate max-w-[120px]">{activeFont.name}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Textos Impresos</span>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Textos Impresos</span>
                   <div className="text-right flex flex-col items-end">
-                     <span className="text-[8px] text-slate-500 uppercase tracking-widest">{designConfig.preTitle || 'SIN PRE-TÍTULO'}</span>
-                     <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase truncate max-w-[130px]">{designConfig.eventName || 'SIN NOMBRE'}</span>
+                     <span className="text-[8px] text-[#D4AF37] uppercase tracking-widest">{designConfig.preTitle || 'SIN PRE-TÍTULO'}</span>
+                     <span className="text-[10px] font-black text-white uppercase truncate max-w-[130px]">{designConfig.eventName || 'SIN NOMBRE'}</span>
                   </div>
                 </div>
               </div>
-              <button type="button" onClick={() => setShowAtelierModal(true)} disabled={isLocked} className="w-full py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-md hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors disabled:opacity-30 flex justify-center items-center gap-2">
+              <button type="button" onClick={() => setShowAtelierModal(true)} disabled={isLocked} className="w-full py-3.5 bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 border border-[#D4AF37]/40 text-[#D4AF37] rounded-xl font-black text-[10px] uppercase tracking-widest shadow-md transition-colors disabled:opacity-30 flex justify-center items-center gap-2">
                  <Sparkles size={14}/> {isLocked ? 'Diseño Bloqueado' : 'Modificar en Atelier'}
               </button>
             </div>
           </div>
 
-          <div className="bg-slate-100 dark:bg-[#111] rounded-3xl p-5 border border-slate-200 dark:border-white/5 shadow-inner transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl p-5 border border-[#D4AF37]/25 shadow-xl">
              <div className="flex items-center justify-between mb-3">
-               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center transition-colors"><Eye size={12} className="mr-1.5" /> Vista Previa ({activeWristband.name})</h4>
-               <button type="button" onClick={() => setShowAtelierModal(true)} className="text-[9px] font-bold text-amber-500 hover:underline">Ampliar en Atelier</button>
+               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-300 flex items-center"><Eye size={12} className="mr-1.5 text-[#D4AF37]" /> Vista Previa 25.4 x 2.54 cm ({activeWristband.name})</h4>
+               <button type="button" onClick={() => setShowAtelierModal(true)} className="text-[9px] font-bold text-[#D4AF37] hover:underline">Ampliar en Atelier</button>
              </div>
              <div
                style={{ backgroundColor: activeWristband.bg, color: effectiveInk, borderColor: activeWristband.border }}
-               className="w-full h-20 rounded shadow-md border overflow-hidden flex items-stretch transition-colors"
+               className="w-full h-20 rounded-xl shadow-md border overflow-hidden flex items-stretch transition-colors"
              >
-                <div className="w-[10%] bg-black/5 border-r border-dashed border-current/20 flex items-center justify-center"><span className="text-[6px] opacity-60 font-bold -rotate-90 tracking-widest">PEGAMENTO</span></div>
-                <div className="w-[12%] flex items-center justify-center border-r border-current/10"><span className="text-[5px] opacity-60 font-bold -rotate-90 tracking-widest">by BAULIA</span></div>
-                <div className="w-[38%] flex flex-col items-center justify-center border-r border-current/10 p-1 relative overflow-hidden">
-                    {designConfig.preTitle && <span className="text-[5px] font-black opacity-75 uppercase tracking-widest mb-0.5">{designConfig.preTitle}</span>}
-                    {designConfig.logoBase64 ? ( <img src={designConfig.logoBase64} alt="Logo" className="h-7 object-contain mb-1" /> ) : ( <div style={{ fontFamily: activeFont.family }} className="text-xl leading-none mb-1 truncate w-full text-center px-1">{designConfig.eventName || 'Evento VIP'}</div> )}
-                    <span className="text-[5px] font-black opacity-60 uppercase tracking-widest">{eventDateStr ? new Date(eventDateStr).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : 'Fecha de Evento'}</span>
+                <div style={{ width: '11.8%' }} className="bg-black/10 border-r border-dashed border-current/25 flex items-center justify-center"><span className="text-[5.5px] opacity-60 font-bold -rotate-90 tracking-widest">3CM PEG.</span></div>
+                <div style={{ width: '68.5%' }} className="flex items-center justify-between px-2 border-r border-dashed border-current/25">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="w-12 h-12 bg-white text-black rounded flex items-center justify-center p-0.5"><QrCode size={32} className="text-black" strokeWidth={1.8} /></div>
+                    <div className="flex flex-col justify-center max-w-[70px]"><span className="text-[7.5px] font-black uppercase truncate">{flattenedList[0]?.displayName || 'Juan Pérez'}</span><span className="text-[5.5px] font-bold opacity-75">PASE VIP</span></div>
+                  </div>
+                  <div className="flex-1 flex flex-col items-center justify-center border-x border-current/15 px-1.5 overflow-hidden text-center">
+                    {designConfig.preTitle && <span className="text-[5px] font-black opacity-80 uppercase tracking-widest mb-0.5">{designConfig.preTitle}</span>}
+                    {designConfig.logoBase64 ? ( <img src={designConfig.logoBase64} alt="Logo" className="h-6 object-contain my-0.5" /> ) : ( <div style={{ fontFamily: activeFont.family }} className="text-base leading-none my-0.5 truncate w-full">{designConfig.eventName || 'Evento VIP'}</div> )}
+                    <span className="text-[5px] font-black opacity-65 uppercase tracking-widest">{eventDateStr ? new Date(eventDateStr).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : 'Fecha'}</span>
+                  </div>
+                  <div className="w-4 flex items-center justify-center"><span className="text-[5px] opacity-70 font-black -rotate-90 tracking-widest whitespace-nowrap">by baulia</span></div>
                 </div>
-                <div className="w-[25%] flex flex-col justify-center px-2"><span className="text-[8px] font-black uppercase truncate">Juan Pérez</span><span className="text-[6px] font-bold opacity-70 mt-0.5">Pase VIP</span></div>
-                <div className="w-[15%] bg-white text-black flex items-center justify-center pr-1"><QrCode size={24} className="text-slate-900" strokeWidth={1.5} /></div>
+                <div style={{ width: '19.7%' }} className="bg-black/5 flex items-center justify-center"><span className="text-[5.5px] opacity-40 font-black tracking-widest text-center">5CM LIBRE</span></div>
              </div>
           </div>
 
-          <div className="bg-indigo-600 dark:bg-amber-500 rounded-3xl p-6 text-white dark:text-slate-900 shadow-xl flex flex-col items-center text-center gap-4 transition-colors">
+          <div className="bg-gradient-to-br from-[#1C1917] to-[#141210] rounded-3xl p-6 text-white border border-[#D4AF37]/40 shadow-[0_15px_40px_rgba(0,0,0,0.6)] flex flex-col items-center text-center gap-4">
              <div>
-               <p className="text-[10px] font-black uppercase tracking-widest mb-1 opacity-80">Total en Lista</p>
-               <h3 className="text-5xl font-editorial font-black">{totalPulserasSolicitadas} <span className="text-base font-sans font-medium opacity-80">pulseras</span></h3>
+               <p className="text-[10px] font-black uppercase tracking-[0.25em] mb-1 text-[#D4AF37]">Total en Lista</p>
+               <h3 className="text-5xl font-editorial font-black text-white">{totalPulserasSolicitadas} <span className="text-base font-sans font-medium text-slate-400">pulseras</span></h3>
              </div>
-             <button onClick={() => { if (validWristbandList.length === 0) return; setConfirmModal(true); }} disabled={isLocked || validWristbandList.length === 0} className="w-full py-4 px-8 bg-white text-indigo-700 dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center">
-               <Send size={16} className="mr-2" /> {isLocked ? `Lote Taller (${sentWristbandIds.length})` : 'Enviar a Taller'}
+             <button onClick={() => { if (validWristbandList.length === 0) return; setConfirmModal(true); }} disabled={isLocked || validWristbandList.length === 0} className="w-full py-4 px-8 bg-[#D4AF37] hover:bg-[#c5a028] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:scale-[1.02] transition-all disabled:opacity-40 disabled:hover:scale-100 flex items-center justify-center">
+               <Send size={16} className="mr-2" /> {isLocked ? `Lote Enviado a Taller (${sentWristbandIds.length})` : 'Enviar a Taller Baulia'}
              </button>
 
              {isLocked && (
-               <div className="w-full pt-3 border-t border-white/20 dark:border-slate-900/15 space-y-2">
-                 <p className="text-[10px] font-black uppercase tracking-widest">
-                   Confirmados Tardíos Post-Taller: <span className="underline">{lateExtrasList.length} pulseras</span>
+               <div className="w-full pt-4 border-t border-[#D4AF37]/25 space-y-2.5">
+                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-300">
+                   Confirmados Tardíos Post-Taller: <span className="text-[#D4AF37] underline">{lateExtrasList.length} pulseras</span>
                  </p>
                  <button
                    type="button"
                    disabled={lateExtrasList.length === 0}
                    onClick={() => handlePrintExtraWristbandsPDF(lateExtrasList)}
-                   className="w-full py-3.5 px-6 bg-slate-950 text-amber-400 hover:bg-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+                   className="w-full py-3.5 px-6 bg-[#D4AF37] hover:bg-[#c5a028] text-[#1C1917] rounded-xl font-black text-[10px] uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.25)] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
                  >
                    <Download size={15} /> Imprimir Pulseras Extra ({lateExtrasList.length})
                  </button>
@@ -938,32 +949,32 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
         </div>
 
         <div className="lg:col-span-7 flex flex-col h-full min-h-[600px]">
-          <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col h-full transition-colors">
-            <div className="bg-sky-50 dark:bg-sky-900/20 border-b border-sky-100 dark:border-sky-800/30 p-4 flex items-start gap-3 transition-colors">
-               <Info size={20} className="text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
-               <div className="text-xs text-sky-800 dark:text-sky-200 leading-relaxed transition-colors">
-                  <strong className="block mb-1">¿Cómo funciona esta lista?</strong>
+          <div className="flex-1 bg-[#1C1917] rounded-3xl border border-[#D4AF37]/25 shadow-xl overflow-hidden flex flex-col h-full">
+            <div className="bg-[#141210] border-b border-[#D4AF37]/20 p-4 flex items-start gap-3">
+               <Info size={20} className="text-[#D4AF37] shrink-0 mt-0.5" />
+               <div className="text-xs text-slate-300 leading-relaxed">
+                  <strong className="block mb-1 text-[#D4AF37] uppercase tracking-wider text-[10px]">¿Cómo funciona esta lista?</strong>
                   {isStandalone ? (
-                      <>1. El nombre <b>Titular</b> genera automáticamente <span className="underline">1 pulsera</span>.<br/>2. Si agregas personas después de enviar a taller, se marcarán como <b>EXTRA</b> para imprimirlas en tus pulseras de reserva.</>
+                      <>1. El nombre <b>Titular</b> genera automáticamente <span className="underline text-[#D4AF37]">1 pulsera</span>.<br/>2. Si agregas personas después de enviar a taller, se marcarán como <b className="text-[#D4AF37]">EXTRA PDF</b> para imprimirlas en tus pulseras de reserva.</>
                   ) : (
-                      <>1. <b>Sincronización Automática:</b> Tus invitados confirmados aparecen aquí al instante.<br/>2. <b>Modo Emergencia Post-Taller:</b> Los invitados que confirmen después de haber enviado tu orden a taller se marcarán como <b>EXTRA</b> para que imprimas únicamente esas pulseras de reserva en PDF.</>
+                      <>1. <b className="text-white">Sincronización Automática:</b> Tus invitados confirmados aparecen aquí al instante.<br/>2. <b className="text-[#D4AF37]">Modo Emergencia Post-Taller:</b> Los invitados que confirmen después de haber enviado tu orden a taller se marcarán como <b className="text-[#D4AF37]">EXTRA PDF</b> para que imprimas únicamente esas pulseras en horizontal.</>
                   )}
                </div>
             </div>
 
-            <div className="p-5 border-b border-slate-100 dark:border-white/5 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 shrink-0 transition-colors">
+            <div className="p-5 border-b border-white/10 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 shrink-0">
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-slate-800 dark:text-white text-sm flex items-center transition-colors"><Sparkles size={16} className="mr-2 text-indigo-500" /> Lista de Producción</h3>
+                <h3 className="font-bold text-white text-sm flex items-center"><Sparkles size={16} className="mr-2 text-[#D4AF37]" /> Lista de Producción</h3>
                 {isLocked && lateExtrasList.length > 0 && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] text-[9px] font-black uppercase tracking-widest">
                     +{lateExtrasList.length} Extras por imprimir
                   </span>
                 )}
               </div>
               {!isLocked && isStandalone && (
                   <div className="flex gap-2 w-full xl:w-auto">
-                    <button onClick={downloadTemplate} className="flex-1 xl:flex-none px-3 py-2 bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-slate-300 dark:hover:bg-white/20 transition-colors flex items-center justify-center border border-slate-200 dark:border-transparent"><Download size={14} className="mr-1.5"/> Plantilla CSV</button>
-                    <label className="cursor-pointer flex-1 xl:flex-none px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors flex items-center justify-center">
+                    <button onClick={downloadTemplate} className="flex-1 xl:flex-none px-3 py-2 bg-white/5 text-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors flex items-center justify-center border border-white/10"><Download size={14} className="mr-1.5 text-[#D4AF37]"/> Plantilla CSV</button>
+                    <label className="cursor-pointer flex-1 xl:flex-none px-4 py-2 bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/40 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-[#D4AF37]/25 transition-colors flex items-center justify-center">
                         <FileSpreadsheet size={14} className="mr-1.5" /> Subir CSV
                         <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" />
                     </label>
@@ -972,24 +983,24 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
             </div>
             
             {isStandalone && (
-                <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-white dark:bg-transparent shrink-0 transition-colors">
+                <div className="p-4 border-b border-white/10 bg-[#141210] shrink-0">
                     <form onSubmit={handleAddEntry} className="flex flex-col sm:flex-row w-full gap-3 items-end">
                         <div className="flex-1 w-full">
-                           <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block transition-colors">
+                           <span className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-widest ml-1 mb-1 block">
                              {isLocked ? 'Agregar Invitado Tardío (Pulsera Extra)' : 'Titular (Manual)'}
                            </span>
-                           <input type="text" required placeholder="Ej. Familia Garza" value={newEntry.name} onChange={e=>setNewEntry({...newEntry, name: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-800 dark:text-white outline-none focus:border-indigo-500 dark:focus:border-amber-500 transition-colors" />
+                           <input type="text" required placeholder="Ej. Familia Garza" value={newEntry.name} onChange={e=>setNewEntry({...newEntry, name: e.target.value})} className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl text-sm font-bold text-white outline-none focus:border-[#D4AF37] transition-colors" />
                         </div>
                         <div className="flex gap-2 w-full sm:w-auto items-end">
                           <div className="flex flex-col w-full sm:w-24">
-                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block transition-colors">Adultos</span>
-                            <input type="number" min="0" value={newEntry.extraAdults} onChange={e=>setNewEntry({...newEntry, extraAdults: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-indigo-600 dark:text-amber-500 outline-none focus:border-indigo-500 dark:focus:border-amber-500 transition-colors" />
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1 block">Adultos</span>
+                            <input type="number" min="0" value={newEntry.extraAdults} onChange={e=>setNewEntry({...newEntry, extraAdults: e.target.value})} className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl text-sm font-black text-center text-[#D4AF37] outline-none focus:border-[#D4AF37] transition-colors" />
                           </div>
                           <div className="flex flex-col w-full sm:w-24">
-                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1 block transition-colors">Niños</span>
-                            <input type="number" min="0" value={newEntry.extraChildren} onChange={e=>setNewEntry({...newEntry, extraChildren: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-black text-center text-sky-600 dark:text-sky-400 outline-none focus:border-indigo-500 dark:focus:border-amber-500 transition-colors" />
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1 block">Niños</span>
+                            <input type="number" min="0" value={newEntry.extraChildren} onChange={e=>setNewEntry({...newEntry, extraChildren: e.target.value})} className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl text-sm font-black text-center text-amber-200 outline-none focus:border-[#D4AF37] transition-colors" />
                           </div>
-                          <button type="submit" className="px-4 w-full sm:w-auto bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-slate-800 dark:hover:bg-slate-200 flex items-center justify-center font-bold text-xs h-[46px] transition-colors"><Plus size={18} className="md:mr-1" /> <span className="hidden md:inline">Agregar</span></button>
+                          <button type="submit" className="px-4 w-full sm:w-auto bg-[#D4AF37] text-[#1C1917] rounded-xl hover:bg-[#c5a028] flex items-center justify-center font-black text-xs h-[46px] transition-colors uppercase tracking-wider"><Plus size={18} className="md:mr-1" /> <span className="hidden md:inline">Agregar</span></button>
                         </div>
                     </form>
                 </div>
@@ -997,41 +1008,41 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
 
             <div className="overflow-y-auto custom-scrollbar flex-1 max-h-[700px]">
               {flattenedList.length === 0 ? (
-                <div className="h-full min-h-[250px] flex flex-col items-center justify-center text-slate-400 p-8 text-center transition-colors">
-                  <ListTodo size={40} className="mb-3 opacity-20" />
-                  <p className="text-sm font-bold text-slate-600 dark:text-slate-300 transition-colors">La tabla está vacía.</p>
-                  {!isStandalone && <p className="text-xs text-slate-500 mt-2 max-w-sm transition-colors">Los invitados que tengan estatus <strong className="text-emerald-600 dark:text-emerald-500">CONFIRMADO</strong> en tu Lista principal aparecerán aquí mágicamente al instante.</p>}
+                <div className="h-full min-h-[250px] flex flex-col items-center justify-center text-slate-400 p-8 text-center">
+                  <ListTodo size={40} className="mb-3 text-[#D4AF37]/30" />
+                  <p className="text-sm font-bold text-white">La tabla está vacía.</p>
+                  {!isStandalone && <p className="text-xs text-slate-400 mt-2 max-w-sm">Los invitados que tengan estatus <strong className="text-[#D4AF37]">CONFIRMADO</strong> en tu Lista principal aparecerán aquí mágicamente al instante.</p>}
                 </div>
               ) : (
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 dark:bg-[#111] text-[10px] uppercase font-black text-slate-400 tracking-widest sticky top-0 border-b border-slate-200 dark:border-white/5 z-10 transition-colors">
+                  <thead className="bg-[#141210] text-[10px] uppercase font-black text-[#D4AF37] tracking-widest sticky top-0 border-b border-[#D4AF37]/20 z-10">
                     <tr>
                       <th className="px-6 py-3">Nombre en Brazalete (Clic para editar)</th>
                       <th className="px-4 py-3 text-center">Tipo</th>
                       <th className="px-4 py-3 text-right">Lote / Controles</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-white/5 transition-colors">
+                  <tbody className="divide-y divide-white/5">
                     {flattenedList.map((row) => (
-                      <tr key={row._rowId} className={`transition-colors hover:bg-slate-50 dark:hover:bg-white/5 ${row.isMain ? 'bg-white dark:bg-transparent border-t-[3px] border-slate-200 dark:border-white/10' : 'bg-slate-50/50 dark:bg-white/[0.02]'}`}>
+                      <tr key={row._rowId} className={`transition-colors hover:bg-white/5 ${row.isMain ? 'bg-[#1C1917] border-t-2 border-[#D4AF37]/20' : 'bg-[#141210]/60'}`}>
                         <td className="px-6 py-3 flex items-center">
-                          <div className="relative w-full group flex items-center bg-transparent hover:bg-slate-100 dark:hover:bg-white/5 rounded transition-colors p-1 -ml-1">
-                              {!row.isAlreadyInWorkshop && <Edit3 size={12} className="absolute -left-3 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" />}
-                              <input type="text" defaultValue={row.displayName} disabled={row.isAlreadyInWorkshop} onBlur={(e) => handleUpdateNameInline(row.parentGuest.id, row.pin, e.target.value, row.currentSubGuests)} className={`w-full bg-transparent outline-none border-b border-transparent focus:border-indigo-500 dark:focus:border-amber-500 transition-colors ${row.isMain ? 'font-bold text-slate-800 dark:text-white' : 'font-medium text-slate-500 dark:text-slate-400'} disabled:opacity-80`} />
+                          <div className="relative w-full group flex items-center bg-transparent hover:bg-white/5 rounded transition-colors p-1 -ml-1">
+                              {!row.isAlreadyInWorkshop && <Edit3 size={12} className="absolute -left-3 text-[#D4AF37] opacity-0 group-hover:opacity-100 transition-opacity" />}
+                              <input type="text" defaultValue={row.displayName} disabled={row.isAlreadyInWorkshop} onBlur={(e) => handleUpdateNameInline(row.parentGuest.id, row.pin, e.target.value, row.currentSubGuests)} className={`w-full bg-transparent outline-none border-b border-transparent focus:border-[#D4AF37] transition-colors ${row.isMain ? 'font-bold text-white' : 'font-medium text-slate-300'} disabled:opacity-75`} />
                           </div>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          {row.isChild ? ( <span className="text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 px-2 py-0.5 rounded text-[8px] uppercase font-black tracking-widest transition-colors">Niño</span> ) : ( <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest transition-colors">Adulto</span> )}
+                          {row.isChild ? ( <span className="text-[#D4AF37] bg-[#D4AF37]/15 border border-[#D4AF37]/30 px-2 py-0.5 rounded text-[8px] uppercase font-black tracking-widest">Niño</span> ) : ( <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Adulto</span> )}
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-2">
                             {row.isAlreadyInWorkshop && (
-                              <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 text-[8px] font-black uppercase tracking-widest">En Taller</span>
+                              <span className="px-2 py-0.5 rounded bg-white/10 text-slate-300 text-[8px] font-black uppercase tracking-widest">En Taller</span>
                             )}
                             {row.isLateExtra && (
-                              <span className="px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[8px] font-black uppercase tracking-widest">Extra PDF</span>
+                              <span className="px-2 py-0.5 rounded bg-[#D4AF37]/20 border border-[#D4AF37]/50 text-[#D4AF37] text-[8px] font-black uppercase tracking-widest">Extra PDF</span>
                             )}
-                            {row.isMain && !row.isAlreadyInWorkshop && isStandalone && ( <button onClick={() => handleRemoveEntry(row.parentGuest.id, row.isAlreadyInWorkshop)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors"><Trash2 size={16} /></button> )}
+                            {row.isMain && !row.isAlreadyInWorkshop && isStandalone && ( <button onClick={() => handleRemoveEntry(row.parentGuest.id, row.isAlreadyInWorkshop)} className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"><Trash2 size={16} /></button> )}
                           </div>
                         </td>
                       </tr>
