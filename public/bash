@@ -1,5 +1,5 @@
 git add .
-git commit -m "PDF emergencias restaurado y paleta premium"
+git commit -m "restaurar switch modo boda"
 git push origin main
 
 maquina del tiempo

@@ -1959,18 +1959,16 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
             <button onClick={() => setExportViewOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center px-4 py-2.5 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-[10px] sm:text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors uppercase tracking-widest"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Exportar</button>
             
-            {isBodaType && (
-              <div className="flex items-center bg-white dark:bg-[#0a0a0a] px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors shrink-0">
-                <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-2">Boda</span>
-                <button onClick={async () => {
-                  const newVal = !isWeddingMode;
-                  setIsWeddingMode(newVal);
-                  try { await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' }); } catch(e) {}
-                }} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
-                  <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
-                </button>
-              </div>
-            )}
+            <div className="flex items-center bg-white dark:bg-[#0a0a0a] px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors shrink-0">
+              <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-2">Boda</span>
+              <button onClick={async () => {
+                const newVal = !isWeddingMode;
+                setIsWeddingMode(newVal);
+                try { await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' }); } catch(e) {}
+              }} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
+              </button>
+            </div>
           </div>
 
           <div className="flex w-full sm:w-auto gap-2">
