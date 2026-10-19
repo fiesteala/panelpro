@@ -19087,12 +19087,15 @@ const InvitacionPublicaView = ({ eventId, guestUid }) => {
   }, [eventId, isIframe, eventoInfo, t_btn, t_txt, textRgb, dataSent, qrEnabled]);
 
   useEffect(() => {
-    const getColOnce = (colRef) => new Promise((resolve) => {
-      const unsub = onSnapshot(colRef, (snap) => {
-        unsub();
-        resolve(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      }, () => resolve([]));
-    });
+    const getColOnce = async (colRef) => {
+      try {
+        const snap = await getDocs(colRef);
+        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch (error) {
+        console.error("Error descargando datos:", error);
+        return [];
+      }
+    };
 
     const fetchData = async () => {
       try {
