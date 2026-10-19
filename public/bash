@@ -1,5 +1,5 @@
 git add .
-git commit -m "bug formulario generico"
+git commit -m "black label paleta premium"
 git push origin main
 
 maquina del tiempo
