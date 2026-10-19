@@ -430,7 +430,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
     printWin.document.close();
   };
 
-  if (isLoading) return <div className="p-10 text-center text-[#D4AF37] bg-[#141210] rounded-3xl border border-[#D4AF37]/20 font-bold uppercase tracking-widest text-xs">Cargando Atelier Black Label...</div>;
+  if (isLoading) return <div className="p-10 text-center text-slate-500">Cargando plataforma...</div>;
 
   const totalPulserasSolicitadas = validWristbandList.reduce((sum, item) => sum + (Number(item.passes) || 0), 0);
   const isShippingValid = shippingInfo.recipient && shippingInfo.country && shippingInfo.state && shippingInfo.city && shippingInfo.zipCode && shippingInfo.address && shippingInfo.phone;
@@ -445,7 +445,7 @@ const GestorPulserasView = ({ addNotification, eventId }) => {
       : activeWristband.ink;
 
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in duration-500 relative bg-[radial-gradient(circle_at_center,#292421_0%,#141210_75%)] text-white p-6 sm:p-8 rounded-[2.5rem] border border-[#D4AF37]/25 shadow-[0_25px_70px_rgba(0,0,0,0.85)] min-h-screen">
+    <div className="space-y-6 pb-10 animate-in fade-in duration-500 relative">
       
       {/* 🔴 MODAL DE DATOS DE ENVÍO LOGÍSTICO (PALETA #1C1917 + #D4AF37) */}
       {confirmModal && createPortal(
