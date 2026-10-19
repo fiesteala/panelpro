@@ -54,18 +54,16 @@ const BauliaLogo = ({ className = "h-10", forceWhite = false }) => (
     <style>
       {`
         .baulia-text { 
-          fill: ${forceWhite ? '#FFFFFF' : '#1C1917'}; 
+          fill: #FFFFFF; 
           transition: fill 0.5s ease; 
         }
-        /* El animador invisible: ESTADO NATURAL EN ROMBO (45 grados) */
         .baulia-diamond-animator {
           transform-origin: 100px 100px;
           transform: rotate(45deg) scale(0.8); 
           transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
-        /* El color del diamante */
         .baulia-diamond-shape { 
-          fill: ${forceWhite ? 'transparent' : '#1C1917'}; 
+          fill: transparent; 
           stroke: #D4AF37; 
           stroke-width: 1.72px;
           transition: fill 0.5s ease, stroke-width 0.3s ease;
@@ -75,15 +73,9 @@ const BauliaLogo = ({ className = "h-10", forceWhite = false }) => (
           transition: all 0.6s ease; 
           transform-origin: 100px 100px; 
         }
-        
-        /* HOVERS: Gira 90 grados adicionales (45 + 90 = 135) */
         svg:hover .baulia-diamond-animator { transform: rotate(135deg) scale(0.85); }
         svg:hover .baulia-diamond-shape { stroke-width: 3px; }
         svg:hover .baulia-b { transform: scale(1.05); fill: #FDF1A9; }
-        
-        /* DARK MODE */
-        .dark .baulia-text { fill: #FFFFFF !important; }
-        .dark .baulia-diamond-shape { fill: transparent !important; }
       `}
     </style>
     
@@ -231,25 +223,25 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
   return (
     <>
       {isOpen && <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm z-20 xl:hidden" onClick={() => setIsOpen(false)} />}
-      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-white/50 dark:bg-[#050505]/40 backdrop-blur-3xl text-slate-600 dark:text-slate-400 transition-colors duration-700 ease-in-out flex flex-col border-r border-slate-200/50 dark:border-white/10 shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
-        <div className="flex items-center justify-between p-6 border-b border-slate-200/50 dark:border-white/10 shrink-0 min-h-[88px] relative overflow-hidden bg-white/30 dark:bg-white/5">
+      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-[#141210] text-slate-300 transition-colors duration-700 ease-in-out flex flex-col border-r border-[#D4AF37]/20 shadow-[10px_0_30px_rgba(0,0,0,0.5)] ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
+        <div className="flex items-center justify-between px-6 h-16 shrink-0 relative overflow-hidden bg-transparent">
           <div className="relative z-10 w-full flex items-center gap-3">
             {agencyConfig?.logoUrl && userRole !== 'superadmin' ? (
-              <img src={agencyConfig.logoUrl} alt="Agency Logo" className="h-10 object-contain drop-shadow-md mb-1" />
+              <img src={agencyConfig.logoUrl} alt="Agency Logo" className="h-7 object-contain drop-shadow-md" />
             ) : (
-              <div className="flex flex-col justify-center">
+              <div className="flex flex-col justify-center pt-1">
                  {userRole === 'superadmin' || agencyName === 'BAULIA' || agencyName === 'EVENT MASTER' ? (
-                   <BauliaLogo className="h-8 w-auto mb-1" forceWhite={isDarkMode} />
+                   <BauliaLogo className="h-6 w-auto" />
                  ) : (
-                   <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-widest uppercase font-editorial">{agencyName}</h1>
+                   <h1 className="text-xl font-black text-[#D4AF37] tracking-widest uppercase font-editorial">{agencyName}</h1>
                  )}
-                 <p className="text-[8px] text-amber-600 dark:text-amber-500 uppercase tracking-widest mt-0.5 font-bold">
+                 <p className="text-[7px] text-slate-500 uppercase tracking-widest mt-1 font-bold">
                    {userRole === 'superadmin' ? 'God Mode' : userRole === 'planner' ? 'Planner Workspace' : 'Bóveda Premium'}
                  </p>
               </div>
             )}
           </div>
-          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 hover:bg-slate-200/50 dark:hover:bg-white/10 rounded-lg relative z-10"><X size={20} /></button>
+          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 text-[#D4AF37] hover:bg-white/5 rounded-lg relative z-10"><X size={20} /></button>
         </div>
         
         <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-6 custom-scrollbar">
@@ -276,7 +268,7 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
                   return (
-                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-emerald-500 text-white dark:text-slate-900 font-black shadow-lg' : `${activeTheme} font-bold` : 'text-slate-700 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-white/10 hover:text-amber-600 dark:hover:text-white'}`}>
+                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-[#D4AF37] text-[#1C1917] font-black shadow-[0_0_15px_rgba(212,175,55,0.4)]' : `bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 font-bold shadow-md` : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
                       <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
                       <span className="text-sm tracking-wide font-medium">{item.label}</span>
                     </button>
@@ -404,17 +396,17 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Centro de Mando</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Monitoreo en tiempo real de tu evento.</p>
+          <h2 className="text-2xl font-black text-[#D4AF37] tracking-tight transition-colors">Centro de Mando</h2>
+          <p className="text-slate-400 text-sm mt-1 transition-colors">Monitoreo en tiempo real de tu evento.</p>
         </div>
         
         <div className="flex w-full sm:w-auto gap-2">
-          <button onClick={() => setPassModal({ ...passModal, open: true })} className="flex-1 sm:flex-none justify-center px-2 py-2.5 sm:px-4 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-[10px] sm:text-xs font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center">
-            <Key size={14} className="mr-1.5 sm:mr-2 text-amber-500" /> <span className="hidden sm:inline">Cambiar</span> Contraseña
+          <button onClick={() => setPassModal({ ...passModal, open: true })} className="flex-1 sm:flex-none justify-center px-2 py-2.5 sm:px-4 bg-[#1C1917] border border-[#D4AF37]/30 text-white rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#D4AF37]/10 transition-colors shadow-sm flex items-center">
+            <Key size={14} className="mr-1.5 sm:mr-2 text-[#D4AF37]" /> <span className="hidden sm:inline">Cambiar</span> Contraseña
           </button>
           {/* El botón de PDF se oculta si es Social Wall porque no hay mesas ni invitados que imprimir */}
           {plan !== 'social_wall' && (
-            <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="flex-1 sm:flex-none justify-center px-2 py-2.5 sm:px-5 bg-slate-900 dark:bg-white/10 border border-transparent dark:border-white/20 text-white rounded-xl text-[10px] sm:text-sm font-bold hover:bg-slate-800 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center disabled:opacity-50">
+            <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="flex-1 sm:flex-none justify-center px-2 py-2.5 sm:px-5 bg-[#D4AF37] border border-[#D4AF37] text-[#141210] rounded-xl text-[10px] sm:text-sm font-bold hover:bg-[#c5a028] transition-colors shadow-[0_5px_15px_rgba(212,175,55,0.2)] flex items-center disabled:opacity-50">
               {isPreparingPrint ? <RefreshCw size={14} className="mr-1.5 sm:mr-2 animate-spin"/> : <Download size={14} className="mr-1.5 sm:mr-2"/>} 
               {isPreparingPrint ? 'Generando...' : <><span className="hidden sm:inline">Descargar</span> Reporte</>}
             </button>
@@ -445,78 +437,78 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
         <>
           {/* VISTA NORMAL (ORO/DIAMANTE) - GRÁFICAS DE MESAS, DINERO, ETC. */}
           <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-6 mt-6">
-            <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
+            <div className="bg-[#1C1917] p-4 sm:p-6 rounded-3xl border border-[#D4AF37]/30 shadow-xl relative overflow-hidden group">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-slate-500 dark:text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-colors">Asignados</p>
-                  <h3 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{totalPasses}</h3>
+                  <p className="text-[#D4AF37] text-[9px] sm:text-[10px] font-black uppercase tracking-widest">Asignados</p>
+                  <h3 className="text-2xl sm:text-4xl font-black text-white mt-1">{totalPasses}</h3>
                 </div>
-                <div className="p-2 sm:p-3 bg-indigo-100 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-lg sm:rounded-xl group-hover:scale-110 transition-transform"><Users className="w-4 h-4 sm:w-6 sm:h-6" /></div>
+                <div className="p-2 sm:p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-xl group-hover:scale-110 transition-transform"><Users className="w-4 h-4 sm:w-6 sm:h-6" /></div>
               </div>
               <div className="mt-3 sm:mt-4 flex items-center text-sm">
-                <span className="text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-2 py-0.5 rounded text-[8px] sm:text-[10px] uppercase tracking-widest transition-colors">{confirmationPercentage}% Confirmado</span>
+                <span className="text-[#1C1917] font-black bg-[#D4AF37] px-2 py-0.5 rounded text-[8px] sm:text-[10px] uppercase tracking-widest">{confirmationPercentage}% Confirmado</span>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
+            <div className="bg-[#1C1917] p-4 sm:p-6 rounded-3xl border border-[#D4AF37]/30 shadow-xl relative overflow-hidden group">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-slate-500 dark:text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-colors">Mesas</p>
-                  <h3 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{totalMesas}</h3>
+                  <p className="text-[#D4AF37] text-[9px] sm:text-[10px] font-black uppercase tracking-widest">Mesas</p>
+                  <h3 className="text-2xl sm:text-4xl font-black text-white mt-1">{totalMesas}</h3>
                 </div>
-                <div className="p-2 sm:p-3 bg-purple-100 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 text-purple-600 dark:text-purple-400 rounded-lg sm:rounded-xl group-hover:scale-110 transition-transform"><Layers className="w-4 h-4 sm:w-6 sm:h-6" /></div>
+                <div className="p-2 sm:p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-xl group-hover:scale-110 transition-transform"><Layers className="w-4 h-4 sm:w-6 sm:h-6" /></div>
               </div>
-              <div className="mt-3 sm:mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
-                <div className="bg-purple-500 h-full rounded-full transition-all duration-500" style={{ width: `${ocupacionPorcentaje}%` }}></div>
+              <div className="mt-3 sm:mt-5 w-full bg-black/40 rounded-full h-1.5 overflow-hidden">
+                <div className="bg-[#D4AF37] h-full rounded-full transition-all duration-500" style={{ width: `${ocupacionPorcentaje}%` }}></div>
               </div>
-              <p className="text-[8px] sm:text-[10px] text-slate-500 mt-2 sm:mt-3 font-bold uppercase tracking-widest transition-colors">
-                <span className="text-purple-600 dark:text-purple-400 transition-colors">{capacidadTotalSillas} Sillas</span> • {ocupacionPorcentaje}%
+              <p className="text-[8px] sm:text-[10px] text-slate-400 mt-2 sm:mt-3 font-bold uppercase tracking-widest">
+                <span className="text-white">{capacidadTotalSillas} Sillas</span> • {ocupacionPorcentaje}%
               </p>
             </div>
 
-            <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
+            <div className="bg-[#1C1917] p-4 sm:p-6 rounded-3xl border border-[#D4AF37]/30 shadow-xl relative overflow-hidden group">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-slate-500 dark:text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-colors">Estimado</p>
-                  <h3 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">${(totalEstimado / 1000).toFixed(0)}k</h3>
+                  <p className="text-[#D4AF37] text-[9px] sm:text-[10px] font-black uppercase tracking-widest">Estimado</p>
+                  <h3 className="text-2xl sm:text-4xl font-black text-white mt-1">${(totalEstimado / 1000).toFixed(0)}k</h3>
                 </div>
-                <div className="p-2 sm:p-3 bg-amber-100 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-lg sm:rounded-xl group-hover:scale-110 transition-transform"><Wallet className="w-4 h-4 sm:w-6 sm:h-6" /></div>
+                <div className="p-2 sm:p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-xl group-hover:scale-110 transition-transform"><Wallet className="w-4 h-4 sm:w-6 sm:h-6" /></div>
               </div>
-              <div className="mt-3 sm:mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
-                <div className={`h-full rounded-full transition-colors ${budgetPercentage > 100 ? 'bg-rose-500' : 'bg-amber-500'}`} style={{ width: `${Math.min(budgetPercentage, 100)}%` }}></div>
+              <div className="mt-3 sm:mt-5 w-full bg-black/40 rounded-full h-1.5 overflow-hidden">
+                <div className={`h-full rounded-full transition-colors ${budgetPercentage > 100 ? 'bg-rose-500' : 'bg-[#D4AF37]'}`} style={{ width: `${Math.min(budgetPercentage, 100)}%` }}></div>
               </div>
-              <p className="text-[8px] sm:text-[10px] text-slate-500 mt-2 sm:mt-3 font-bold uppercase tracking-widest flex flex-col sm:flex-row sm:justify-between transition-colors">
+              <p className="text-[8px] sm:text-[10px] text-slate-400 mt-2 sm:mt-3 font-bold uppercase tracking-widest flex flex-col sm:flex-row sm:justify-between">
                 <span>Pagado: ${(totalPagado/1000).toFixed(1)}k</span>
               </p>
             </div>
 
-            <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl relative overflow-hidden group transition-colors">
+            <div className="bg-[#1C1917] p-4 sm:p-6 rounded-3xl border border-[#D4AF37]/30 shadow-xl relative overflow-hidden group">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-slate-500 dark:text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-colors">Avance</p>
-                  <h3 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1 transition-colors">{tareasPorcentaje}%</h3>
+                  <p className="text-[#D4AF37] text-[9px] sm:text-[10px] font-black uppercase tracking-widest">Avance</p>
+                  <h3 className="text-2xl sm:text-4xl font-black text-white mt-1">{tareasPorcentaje}%</h3>
                 </div>
-                <div className="p-2 sm:p-3 bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg sm:rounded-xl group-hover:scale-110 transition-transform"><CheckSquare className="w-4 h-4 sm:w-6 sm:h-6" /></div>
+                <div className="p-2 sm:p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-xl group-hover:scale-110 transition-transform"><CheckSquare className="w-4 h-4 sm:w-6 sm:h-6" /></div>
               </div>
-              <div className="mt-3 sm:mt-5 w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden transition-colors">
-                <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${tareasPorcentaje}%` }}></div>
+              <div className="mt-3 sm:mt-5 w-full bg-black/40 rounded-full h-1.5 overflow-hidden">
+                <div className="bg-[#D4AF37] h-full rounded-full" style={{ width: `${tareasPorcentaje}%` }}></div>
               </div>
-              <p className="text-[8px] sm:text-[10px] text-slate-500 mt-2 sm:mt-3 font-bold uppercase tracking-widest transition-colors">
-                <span className="text-emerald-600 dark:text-emerald-400 transition-colors">{tareasCompletadas}</span> de {tareasTotal}
+              <p className="text-[8px] sm:text-[10px] text-slate-400 mt-2 sm:mt-3 font-bold uppercase tracking-widest">
+                <span className="text-white">{tareasCompletadas}</span> de {tareasTotal}
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <div className="bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col transition-colors">
-              <div className="p-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 rounded-t-2xl transition-colors">
-                <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-sm transition-colors"><ListTodo size={16} className="mr-2 text-indigo-500 dark:text-indigo-400"/> Prioridades Logísticas</h3>
-                {setActiveTab && <button onClick={() => setActiveTab('tareas')} className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 uppercase tracking-widest print:hidden transition-colors">Ver Tablero</button>}
+            <div className="bg-[#1C1917] rounded-3xl border border-[#D4AF37]/30 shadow-xl flex flex-col overflow-hidden">
+              <div className="p-5 border-b border-[#D4AF37]/15 bg-[#141210] flex justify-between items-center">
+                <h3 className="font-bold text-white flex items-center text-sm"><ListTodo size={16} className="mr-2 text-[#D4AF37]"/> Prioridades Logísticas</h3>
+                {setActiveTab && <button onClick={() => setActiveTab('tareas')} className="text-[10px] font-black text-[#D4AF37] hover:text-white uppercase tracking-widest print:hidden">Ver Tablero</button>}
               </div>
               <div className="p-5 flex-1">
                 {tareasPendientes.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-slate-500 py-6 transition-colors">
-                    <CheckCircle size={40} className="mb-3 text-emerald-500/30"/>
+                  <div className="h-full flex flex-col items-center justify-center text-slate-500 py-6">
+                    <CheckCircle size={40} className="mb-3 text-[#D4AF37]/30"/>
                     <p className="text-xs font-bold uppercase tracking-widest">Sin tareas urgentes.</p>
                   </div>
                 ) : (
@@ -524,13 +516,13 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
                     {tareasPendientes.map(tarea => {
                       const vencida = isOverdue(tarea.fechaLimite);
                       return (
-                        <div key={tarea.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
-                          <div className={`mt-1 w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] shrink-0 ${vencida ? 'bg-rose-500 text-rose-500 animate-pulse' : 'bg-amber-400 text-amber-400'}`}></div>
+                        <div key={tarea.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                          <div className={`mt-1 w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] shrink-0 ${vencida ? 'bg-rose-500 text-rose-500 animate-pulse' : 'bg-[#D4AF37] text-[#D4AF37]'}`}></div>
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-bold truncate transition-colors ${vencida ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-slate-200'}`}>{tarea.titulo}</p>
+                            <p className={`text-sm font-bold truncate ${vencida ? 'text-rose-400' : 'text-slate-200'}`}>{tarea.titulo}</p>
                             <div className="flex items-center gap-2 mt-1.5">
-                              <span className="text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-black/50 px-2 py-0.5 rounded border border-slate-300 dark:border-white/10 transition-colors">{tarea.categoria}</span>
-                              {tarea.fechaLimite && <span className={`text-[9px] font-bold tracking-widest transition-colors ${vencida ? 'text-rose-600 dark:text-rose-500' : 'text-slate-500 dark:text-slate-500'}`}><Calendar size={10} className="inline mr-0.5"/> {tarea.fechaLimite}</span>}
+                              <span className="text-[8px] font-black uppercase tracking-widest text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded border border-[#D4AF37]/20">{tarea.categoria}</span>
+                              {tarea.fechaLimite && <span className={`text-[9px] font-bold tracking-widest ${vencida ? 'text-rose-500' : 'text-slate-400'}`}><Calendar size={10} className="inline mr-0.5"/> {tarea.fechaLimite}</span>}
                             </div>
                           </div>
                         </div>
@@ -541,15 +533,15 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col transition-colors">
-              <div className="p-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 rounded-t-2xl transition-colors">
-                <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-sm transition-colors"><AlertTriangle size={16} className="mr-2 text-amber-500"/> Alertas Financieras</h3>
-                {setActiveTab && <button onClick={() => setActiveTab('presupuesto')} className="text-[10px] font-bold text-amber-600 dark:text-amber-500 hover:text-amber-800 dark:hover:text-amber-400 uppercase tracking-widest print:hidden transition-colors">Abrir Bóveda</button>}
+            <div className="bg-[#1C1917] rounded-3xl border border-[#D4AF37]/30 shadow-xl flex flex-col overflow-hidden">
+              <div className="p-5 border-b border-[#D4AF37]/15 bg-[#141210] flex justify-between items-center">
+                <h3 className="font-bold text-white flex items-center text-sm"><AlertTriangle size={16} className="mr-2 text-[#D4AF37]"/> Alertas Financieras</h3>
+                {setActiveTab && <button onClick={() => setActiveTab('presupuesto')} className="text-[10px] font-black text-[#D4AF37] hover:text-white uppercase tracking-widest print:hidden">Abrir Bóveda</button>}
               </div>
               <div className="p-5 flex-1">
                 {pagosPendientes.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-slate-500 py-6 transition-colors">
-                    <CheckCircle size={40} className="mb-3 text-emerald-500/30"/>
+                  <div className="h-full flex flex-col items-center justify-center text-slate-500 py-6">
+                    <CheckCircle size={40} className="mb-3 text-[#D4AF37]/30"/>
                     <p className="text-xs font-bold uppercase tracking-widest">Finanzas Sanas.</p>
                   </div>
                 ) : (
@@ -558,16 +550,16 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
                       const deuda = pago.estimado - pago.pagado;
                       const vencido = isOverdue(pago.fechaLimite);
                       return (
-                        <div key={pago.id} className="flex justify-between items-center bg-slate-50 dark:bg-white/5 p-3 rounded-xl border border-slate-100 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                        <div key={pago.id} className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
                           <div className="min-w-0 flex-1 mr-3">
-                            <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate transition-colors">{pago.concepto}</p>
-                            <p className={`text-[9px] font-bold mt-1 uppercase tracking-widest flex items-center transition-colors ${vencido ? 'text-rose-600 dark:text-rose-500' : 'text-slate-500 dark:text-slate-500'}`}>
+                            <p className="text-sm font-bold text-slate-200 truncate">{pago.concepto}</p>
+                            <p className={`text-[9px] font-bold mt-1 uppercase tracking-widest flex items-center ${vencido ? 'text-rose-500' : 'text-slate-400'}`}>
                               <Clock size={10} className="mr-1"/> {pago.fechaLimite ? `Límite: ${pago.fechaLimite}` : 'Sin plazo'}
                             </p>
                           </div>
                           <div className="text-right flex-shrink-0">
-                            <p className="text-[9px] text-slate-500 dark:text-slate-500 font-bold uppercase tracking-widest mb-0.5 transition-colors">Pendiente</p>
-                            <p className={`text-base font-black transition-colors ${vencido ? 'text-rose-600 dark:text-rose-500' : 'text-amber-600 dark:text-amber-500'}`}>{formatMoney(deuda)}</p>
+                            <p className="text-[9px] text-[#D4AF37] font-black uppercase tracking-widest mb-0.5">Pendiente</p>
+                            <p className={`text-base font-black ${vencido ? 'text-rose-500' : 'text-white'}`}>{formatMoney(deuda)}</p>
                           </div>
                         </div>
                       )
@@ -1809,7 +1801,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   );
 
   return (
-    <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500">
+    <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-100 bg-[#141210] min-h-[100vh] p-4 rounded-3xl transition-colors duration-500">
       
       {/* VISTA PREVIA PROFESIONAL (PDF/EXCEL) */}
       {exportViewOpen && (() => {
@@ -1942,30 +1934,35 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           );
       })()}
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Gestión de Invitados</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Control de asistencia, pases, etiquetas de afinidad y credenciales.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#1C1917] p-6 rounded-3xl border border-[#D4AF37]/25 shadow-xl">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+            <Users size={20} />
+          </div>
+          <div>
+            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block">Control de asistencia, pases, etiquetas de afinidad y credenciales.</span>
+            <h2 className="text-2xl sm:text-3xl font-editorial text-white tracking-wide">Gestión de Invitados</h2>
+          </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto mt-4 sm:mt-0">
           <div className="flex w-full sm:w-auto gap-2">
             {/* 🟢 BOTÓN BANCO DE ETIQUETAS */}
             {isPremium && (
-              <button onClick={() => setIsTagManagerOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center px-4 py-2.5 bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/20 text-indigo-700 dark:text-amber-400 rounded-xl text-[10px] sm:text-xs font-bold hover:bg-indigo-100 dark:hover:bg-amber-500/20 shadow-sm transition-colors uppercase tracking-widest">
+              <button onClick={() => setIsTagManagerOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center px-4 py-2.5 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#D4AF37]/10 shadow-sm transition-colors uppercase tracking-widest h-10">
                 <Layers size={14} className="mr-1.5"/> Etiquetas ({globalTags.length})
               </button>
             )}
 
-            <button onClick={() => setExportViewOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center px-4 py-2.5 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-[10px] sm:text-xs font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors uppercase tracking-widest"><FileSpreadsheet size={14} className="mr-1.5 text-emerald-600 dark:text-emerald-400"/> Exportar</button>
+            <button onClick={() => setExportViewOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center px-4 py-2.5 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#D4AF37]/10 shadow-sm transition-colors uppercase tracking-widest h-10"><FileSpreadsheet size={14} className="mr-1.5"/> Exportar</button>
             
-            <div className="flex items-center bg-white dark:bg-[#0a0a0a] px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors shrink-0">
-              <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-2">Boda</span>
+            <div className="flex items-center bg-transparent px-3 py-2 rounded-xl border border-[#D4AF37]/30 shadow-sm transition-colors shrink-0 h-10">
+              <span className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-wider mr-2">Boda</span>
               <button onClick={async () => {
                 const newVal = !isWeddingMode;
                 setIsWeddingMode(newVal);
                 try { await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' }); } catch(e) {}
-              }} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+              }} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-[#D4AF37]' : 'bg-white/10'}`}>
                 <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
               </button>
             </div>
@@ -1974,65 +1971,71 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           <div className="flex w-full sm:w-auto gap-2">
             {isWeddingMode ? (
               <>
-                <button onClick={() => handleOpenAdd('novia')} className="flex-1 sm:flex-none flex items-center justify-center px-3 py-2.5 bg-rose-500 text-white rounded-xl text-[10px] sm:text-xs font-bold hover:bg-rose-600 shadow-md transition-colors uppercase tracking-widest"><UserPlus size={14} className="mr-1.5"/> Novia</button>
-                <button onClick={() => handleOpenAdd('novio')} className="flex-1 sm:flex-none flex items-center justify-center px-3 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] sm:text-xs font-bold hover:bg-indigo-700 shadow-md transition-colors uppercase tracking-widest"><UserPlus size={14} className="mr-1.5"/> Novio</button>
+                <button onClick={() => handleOpenAdd('novia')} className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#D4AF37]/10 shadow-sm transition-colors uppercase tracking-widest h-10">
+                  <UserPlus size={14} className="mr-1.5 text-rose-400"/> Novia
+                </button>
+                <button onClick={() => handleOpenAdd('novio')} className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#D4AF37]/10 shadow-sm transition-colors uppercase tracking-widest h-10">
+                  <UserPlus size={14} className="mr-1.5 text-sky-400"/> Novio
+                </button>
               </>
             ) : (
-              <button onClick={() => handleOpenAdd('general')} className="w-full sm:w-auto flex items-center justify-center px-5 py-2.5 bg-amber-500 text-slate-900 rounded-xl text-[10px] sm:text-xs font-black shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-colors uppercase tracking-widest"><UserPlus size={14} className="mr-1.5"/> Nuevo Invitado</button>
+              <button onClick={() => handleOpenAdd('general')} className="flex-1 sm:flex-none flex items-center justify-center px-5 py-2.5 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#D4AF37]/10 shadow-sm transition-colors uppercase tracking-widest h-10">
+                <UserPlus size={14} className="mr-1.5"/> Nuevo Invitado
+              </button>
             )}
           </div>
         </div>
       </div>
 
-      <div className={`grid grid-cols-3 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-2 sm:gap-4`}>
-        <div className="bg-white dark:bg-[#0a0a0a] p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col transition-colors">
-          <div className="text-slate-500 dark:text-slate-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0 text-slate-400 dark:text-slate-500"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
-          <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-none mt-0.5">{passCountEnabled ? totalPases : safeGuests.length}</h3>
+      <div className={`grid grid-cols-2 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-2 sm:gap-3`}>
+        <div className="bg-transparent px-4 py-3 rounded-2xl border border-[#D4AF37]/20 flex items-center justify-between transition-colors">
+          <div className="text-[#D4AF37] font-bold text-[9px] uppercase tracking-widest flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0 text-[#D4AF37]"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
+          <h3 className="text-lg font-black text-white">{passCountEnabled ? totalPases : safeGuests.length}</h3>
         </div>
         
         {isPremium && passCountEnabled && (
-        <div className="bg-sky-50 dark:bg-sky-500/10 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-sky-200 dark:border-sky-500/20 shadow-sm flex flex-col transition-colors">
-          <div className="text-sky-600 dark:text-sky-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Niños</div>
-          <h3 className="text-xl sm:text-2xl font-black text-sky-600 dark:text-sky-400 leading-none mt-0.5">{totalNinos}</h3>
+        <div className="bg-transparent px-4 py-3 rounded-2xl border border-sky-500/20 flex items-center justify-between transition-colors">
+          <div className="text-sky-400 font-bold text-[9px] uppercase tracking-widest flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Niños</div>
+          <h3 className="text-lg font-black text-sky-400">{totalNinos}</h3>
         </div>
         )}
         
-        <div className="bg-amber-50 dark:bg-amber-500/10 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex flex-col transition-colors">
-          <div className="text-amber-600 dark:text-amber-500 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Confirmados</div>
-          <h3 className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-500 leading-none mt-0.5">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3>
+        <div className="bg-transparent px-4 py-3 rounded-2xl border border-amber-500/20 flex items-center justify-between transition-colors">
+          <div className="text-amber-500 font-bold text-[9px] uppercase tracking-widest flex items-center truncate"><CheckCircle className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Confirmados</div>
+          <h3 className="text-lg font-black text-amber-500">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3>
         </div>
         
-        <div className="bg-slate-50 dark:bg-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col transition-colors">
-          <div className="text-slate-500 dark:text-slate-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Pendientes</div>
-          <h3 className="text-xl sm:text-2xl font-black text-slate-600 dark:text-slate-300 leading-none mt-0.5">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
+        <div className="bg-transparent px-4 py-3 rounded-2xl border border-white/10 flex items-center justify-between transition-colors">
+          <div className="text-slate-400 font-bold text-[9px] uppercase tracking-widest flex items-center truncate"><Clock className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Pendientes</div>
+          <h3 className="text-lg font-black text-slate-300">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
         </div>
         
-        <div className="bg-rose-50 dark:bg-rose-500/10 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-rose-200 dark:border-rose-500/20 shadow-sm flex flex-col transition-colors">
-          <div className="text-rose-600 dark:text-rose-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><X className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Cancelados</div>
-          <h3 className="text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-400 leading-none mt-0.5">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
+        <div className="bg-transparent px-4 py-3 rounded-2xl border border-rose-500/20 flex items-center justify-between transition-colors">
+          <div className="text-rose-400 font-bold text-[9px] uppercase tracking-widest flex items-center truncate"><X className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Cancelados</div>
+          <h3 className="text-lg font-black text-rose-400">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
         </div>
         
         {isPremium && qrEnabled && (
-        <div className="bg-emerald-50 dark:bg-emerald-500/10 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm flex flex-col transition-colors">
-          <div className="text-emerald-600 dark:text-emerald-400 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1 flex items-center truncate"><Scan className="w-3 h-3 sm:w-3.5 sm:h-3.5 inline mr-1.5 shrink-0"/> Ingresaron</div>
-          <h3 className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 leading-none mt-0.5">{totalIngresos}</h3>
+        <div className="bg-transparent px-4 py-3 rounded-2xl border border-emerald-500/20 flex items-center justify-between transition-colors">
+          <div className="text-emerald-400 font-bold text-[9px] uppercase tracking-widest flex items-center truncate"><Scan className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Ingresaron</div>
+          <h3 className="text-lg font-black text-emerald-400">{totalIngresos}</h3>
         </div>
         )}
       </div>
 
       {isWeddingMode && passCountEnabled && (
-        <div className="bg-gradient-to-r from-rose-50 to-indigo-50 dark:from-rose-500/10 dark:to-indigo-500/10 py-3 px-6 rounded-2xl border border-indigo-100 dark:border-white/5 flex items-center justify-around shadow-sm transition-colors">
-          <div className="text-center flex items-center gap-3"><p className="text-[10px] font-bold text-rose-500 dark:text-rose-400 uppercase tracking-widest">Pases Novia</p><p className="text-lg font-editorial text-rose-600 dark:text-rose-300">{pasesNovia}</p></div>
-          <div className="h-8 w-px bg-indigo-200 dark:bg-white/10"></div>
-          <div className="text-center flex items-center gap-3"><p className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">Pases Novio</p><p className="text-lg font-editorial text-indigo-600 dark:text-indigo-300">{pasesNovio}</p></div>
+        <div className="bg-transparent py-2.5 px-6 rounded-2xl border border-[#D4AF37]/20 flex items-center justify-around transition-colors">
+          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest">Pases Novia</p><p className="text-base font-black text-rose-300">{pasesNovia}</p></div>
+          <div className="h-4 w-px bg-white/10"></div>
+          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">Pases Novio</p><p className="text-base font-black text-indigo-300">{pasesNovio}</p></div>
         </div>
       )}
 
-      <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl overflow-hidden flex flex-col transition-colors duration-500 z-10 relative">
-        <div className="p-3 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex transition-colors shrink-0">
+      <div className="flex-1 bg-[#1C1917] rounded-3xl border border-[#D4AF37]/30 shadow-2xl overflow-hidden flex flex-col transition-colors duration-500 z-10 relative">
+        <div className="p-3 border-b border-[#D4AF37]/20 bg-[#141210] flex transition-colors shrink-0">
           <div className="relative flex-1">
-            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={16} />
-            <input type="text" placeholder="Buscar por nombre, estatus o mesa..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-400 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors" />
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+            <input type="text" placeholder="Buscar por nombre, estatus o mesa..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white placeholder-slate-500 transition-colors" />
           </div>
         </div>
 
@@ -2040,7 +2043,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           
           <div className="hidden md:block">
             <table className="w-full text-left text-xs whitespace-nowrap">
-              <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-400 sticky top-0 z-10 transition-colors">
+              <thead className="bg-[#141210] border-b border-[#D4AF37]/20 text-[#D4AF37] sticky top-0 z-10 transition-colors">
                 <tr>
                   <th className="px-5 py-3 font-bold uppercase tracking-wider text-[10px]">Nombre</th>
                   {isPremium && passCountEnabled && <th className="px-3 py-3 font-bold uppercase tracking-wider text-[10px] text-center">Tipo / Etiquetas</th>}
@@ -2051,9 +2054,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   <th className="px-5 py-3 font-bold uppercase tracking-wider text-[10px] text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+              <tbody className="divide-y divide-white/10">
                 {flattenedList.map((row) => (
-                  <tr key={`desktop_${row._rowId}`} className={`transition-colors hover:bg-slate-50 dark:hover:bg-white/5 ${row.parentGuest.status === 'cancelado' ? 'bg-rose-50/40 dark:bg-rose-500/5 opacity-70' : row.isMain ? 'bg-white dark:bg-transparent border-t-2 border-slate-100 dark:border-white/5' : 'bg-slate-50/30 dark:bg-white/[0.02]'}`}>
+                  <tr key={`desktop_${row._rowId}`} className={`transition-colors hover:bg-white/5 ${row.parentGuest.status === 'cancelado' ? 'bg-rose-500/10 opacity-70' : row.isMain ? 'bg-[#1C1917] border-t-2 border-[#D4AF37]/20' : 'bg-[#141210]/60'}`}>
                     <td className="px-5 py-3">
                       <div className="flex flex-col">
                         <div className="flex items-center gap-1.5">
@@ -2119,10 +2122,10 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     {isPremium && qrEnabled && (
                        <td className="px-3 py-3 text-center">
                          {row.pin && row.parentGuest.status !== 'cancelado' ? (
-                           <button onClick={() => setQrModal(row)} className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-white hover:bg-indigo-50 dark:hover:bg-white/10 p-2 rounded-lg transition-colors border border-transparent dark:hover:border-white/10" title="Ver Pase Individual">
+                           <button onClick={() => setQrModal(row)} className="text-[#D4AF37] hover:text-white bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 p-2 rounded-lg transition-colors border border-[#D4AF37]/20" title="Ver Pase Individual">
                              <QrCode size={16} />
                            </button>
-                         ) : <span className="text-slate-300 dark:text-slate-600">-</span>}
+                         ) : <span className="text-slate-600">-</span>}
                        </td>
                     )}
                     
@@ -2143,7 +2146,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     <td className="px-5 py-3 text-right">
                       {row.isMain || !qrEnabled ? (
                         <div className="flex justify-end space-x-1.5">
-                          <button onClick={() => handleSendWhatsApp(row.parentGuest)} className={`p-2 rounded-lg transition-colors border ${row.parentGuest.sent ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'text-slate-400 bg-white border-slate-200 hover:bg-slate-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5'}`} title="Enviar por WhatsApp"><MessageCircle size={14}/></button>
+                          <button onClick={() => handleSendWhatsApp(row.parentGuest)} className={`p-2 rounded-lg transition-colors border ${row.parentGuest.sent ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/30' : 'bg-transparent text-slate-400 border-white/10 hover:bg-white/5 hover:text-white'}`} title="Enviar por WhatsApp"><MessageCircle size={14}/></button>
                           <button onClick={() => handleOpenEdit(row.parentGuest)} className="p-2 text-slate-400 bg-white border border-slate-200 hover:text-indigo-600 hover:bg-indigo-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5 rounded-lg transition-colors" title="Editar Familia y Etiquetas"><Edit2 size={14} /></button>
                           <button onClick={() => setDeleteModal(row.parentGuest)} className="p-2 text-slate-400 bg-white border border-slate-200 hover:text-rose-600 hover:bg-rose-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:text-rose-500 dark:hover:bg-white/5 rounded-lg transition-colors"><Trash2 size={14} /></button>
                         </div>
@@ -2207,7 +2210,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     {isExpanded && (
                       <div className="px-3 pb-3 pt-1 border-t border-slate-100 dark:border-white/5 animate-in slide-in-from-top-2 fade-in duration-300">
                         <div className="flex justify-between gap-1.5 mt-2">
-                          <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-[1.5] py-2 ${row.parentGuest.sent ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' : 'bg-white dark:bg-transparent text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10'} rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border transition-colors shadow-sm`}>
+                          <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-[1.5] py-2 ${row.parentGuest.sent ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/30' : 'bg-transparent text-slate-300 border-white/10'} rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border transition-colors shadow-sm`}>
                             <MessageCircle size={14} className="mr-1"/> Enviar
                           </button>
                           <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-1 py-2 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-500 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border border-indigo-200 dark:border-amber-500/20 transition-colors shadow-sm">
@@ -8924,13 +8927,13 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
         .animate-spin-slow { animation: spin-slow 4s linear infinite; }
       `}</style>
 
-      <header ref={headerRef} className="bg-white/60 dark:bg-[#050505]/60 backdrop-blur-2xl border-b border-slate-200/50 dark:border-white/5 h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden transition-colors duration-700">
+      <header ref={headerRef} className="bg-[#141210]/80 backdrop-blur-2xl h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden transition-colors duration-700">
         <div className="flex items-center flex-1">
-          <button onClick={() => setIsOpen(true)} className="xl:hidden text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-white mr-4 transition-colors"><Menu size={24} /></button>
+          <button onClick={() => setIsOpen(true)} className="xl:hidden text-[#D4AF37] mr-4 transition-colors"><Menu size={24} /></button>
           
-          <div className="relative w-full max-w-md hidden sm:block">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
-            <input type="text" placeholder="Buscar en la bóveda..." value={globalSearch} onChange={(e) => {setGlobalSearch(e.target.value); setShowResults(true);}} className="w-full pl-10 pr-4 py-2 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 rounded-full text-sm text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-amber-300 dark:focus:border-amber-500/50 focus:bg-white dark:focus:bg-white/10 transition-all shadow-sm dark:shadow-none"/>
+          <div className="relative w-full max-w-md hidden sm:block ml-10 lg:ml-20">
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+            <input type="text" placeholder="Buscar en la bóveda..." value={globalSearch} onChange={(e) => {setGlobalSearch(e.target.value); setShowResults(true);}} className="w-full pl-10 pr-4 py-2 bg-[#1C1917] border border-white/10 rounded-full text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#D4AF37] transition-all"/>
             
             {showResults && globalSearch.length > 1 && (
               <div className="absolute top-full left-0 mt-2 w-full bg-white dark:bg-[#0a0a0a] shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 py-2 max-h-80 overflow-y-auto z-[100] animate-in fade-in transition-colors">
@@ -8950,28 +8953,18 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
           
           {/* 🔴 OCULTAMOS LOS CONTADORES SI ERES EL SUPERADMIN */}
           {!isSuperAdminMode && (
-            <div className="hidden md:flex items-center bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 backdrop-blur-md rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 shadow-sm transition-colors">
-              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-600 dark:text-slate-400" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
-              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-amber-600 dark:text-amber-500 bg-amber-100/50 dark:bg-amber-500/10" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countConfirmados}</span></div>
-              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-rose-600 dark:text-rose-400 bg-rose-100/50 dark:bg-rose-500/10" title="Cancelaron"><X size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countCancelados}</span></div>
-              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-emerald-600 dark:text-emerald-400 bg-emerald-100/50 dark:bg-emerald-500/10" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countIngresos}</span></div>
+            <div className="hidden md:flex items-center bg-transparent border border-[#D4AF37]/30 rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 transition-colors">
+              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-300" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
+              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-amber-500 bg-amber-500/10 border border-amber-500/20" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countConfirmados}</span></div>
+              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-rose-500 bg-rose-500/10 border border-rose-500/20" title="Cancelaron"><X size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countCancelados}</span></div>
+              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-emerald-400 bg-emerald-500/10 border border-emerald-500/20" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countIngresos}</span></div>
             </div>
           )}
 
-          <button onClick={(e) => { e.preventDefault(); cycleTheme(); }} className="p-2 text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-all rounded-full hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95" title={`Modo actual: ${themeSetting.toUpperCase()}`}>
-            {themeSetting === 'auto' ? (
-              <svg className="pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            ) : themeSetting === 'dark' ? (
-              <Moon className="pointer-events-none" size={20} />
-            ) : (
-              <svg className="pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 5.64l1.42-1.42"/></svg>
-            )}
-          </button>
-
           <div className="relative">
-            <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors rounded-full hover:bg-slate-200/50 dark:hover:bg-white/5">
+            <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-[#D4AF37] transition-colors rounded-full hover:bg-white/5">
               <Bell size={20} />
-              {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-white dark:border-[#050505] rounded-full text-[9px] font-bold text-white flex items-center justify-center animate-in zoom-in">{unreadCount}</span>}
+              {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-[#141210] rounded-full text-[9px] font-bold text-white flex items-center justify-center animate-in zoom-in">{unreadCount}</span>}
             </button>
             
             {showBellMenu && (
@@ -19696,7 +19689,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   };
 
   return (
-    <div className="flex h-screen bg-[#FAFAFA] dark:bg-[#050505] font-sans overflow-hidden text-slate-900 dark:text-slate-200 transition-colors duration-700 selection:bg-amber-500 selection:text-white relative">
+    <div className="flex h-screen bg-[#141210] font-sans overflow-hidden text-slate-200 selection:bg-[#D4AF37] selection:text-[#1C1917] relative">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap'); 
         .font-editorial { font-family: 'Playfair Display', serif; }
@@ -19712,9 +19705,6 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
         </div>
       )}
 
-      <div className="absolute top-[-10%] left-[-5%] w-[50vw] h-[50vw] bg-amber-500/15 dark:bg-amber-600/20 hidden md:block blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
-      <div className="absolute bottom-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-indigo-500/10 dark:bg-indigo-600/15 hidden md:block blur-[120px] rounded-full pointer-events-none z-0 transition-colors duration-700"></div>
-      
       <div className="fixed top-4 right-4 z-[999] hidden sm:flex flex-col space-y-2 pointer-events-none">
         {notifications.map(notif => (
           <div key={notif.id} onClick={() => { if(notif.tab) setActiveTab(notif.tab); setNotifications(prev => prev.filter(n => n.id !== notif.id)); }} className={`w-80 bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-xl shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-4 flex items-start transform transition-all duration-300 animate-in slide-in-from-right-8 pointer-events-auto ${notif.tab ? 'cursor-pointer hover:scale-[1.02]' : ''}`}>
