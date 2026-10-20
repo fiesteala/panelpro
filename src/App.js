@@ -18071,8 +18071,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   };
 
   const toggleStatus = (lic) => {
-    const nuevoEstatus = lic.status === 'suspendido' ? 'activo' : 'suspendido';
-    const accionText = nuevoEstatus === 'suspendido' ? 'SUSPENDER' : 'ACTIVAR';
+    const isSuspended = lic.status === 'suspendido';
+    const nuevoEstatus = isSuspended ? 'activo' : 'suspendido';
+    const accionText = isSuspended ? 'ACTIVAR' : 'SUSPENDER';
     
     setDialog({ 
       isOpen: true, 
@@ -18080,30 +18081,39 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       title: `${accionText === 'SUSPENDER' ? 'Suspender' : 'Activar'} Licencia`, 
       message: `¿Estás seguro que deseas ${accionText.toLowerCase()} la plataforma de ${lic.nombres}?`, 
       onConfirm: async () => { 
-        // 1. Cerramos el diálogo usando una función previa segura para evitar bugs de React
+        // 1. Cerramos el modal de forma segura para no trabar React
         setDialog(prev => ({ ...prev, isOpen: false })); 
         
         try {
-          // 2. Actualizamos la colección de usuarios
-          await updateDoc(doc(db, "usuarios", lic.id), { status: nuevoEstatus });
+          const targetId = lic.id;
+          const eventIdTarget = lic.eventId || lic.id; // Blindaje: Si falta eventId, usamos su ID base
           
-          // 3. 🔴 PARCHE: Forzamos la actualización en la colección de eventos para que la bóveda del cliente se entere del desbloqueo
-          await updateDoc(doc(db, "eventos", lic.eventId), { status: nuevoEstatus }).catch(() => {});
+          // 2. Actualizamos el panel de control de usuarios
+          await updateDoc(doc(db, "usuarios", targetId), { status: nuevoEstatus });
           
-          // 4. Lanzamos una alerta de confirmación en pantalla
+          // 3. Actualizamos la BÓVEDA real del cliente de forma aislada para evitar "crashes"
+          if (eventIdTarget) {
+              try {
+                  await updateDoc(doc(db, "eventos", eventIdTarget), { status: nuevoEstatus });
+              } catch (e) {
+                  console.warn("Advertencia: No se encontró la colección de eventos para este ID", e);
+              }
+          }
+          
+          // 4. Lanzamos la notificación de confirmación
           setTimeout(() => {
             setDialog({ 
               isOpen: true, 
               type: 'alert', 
               title: nuevoEstatus === 'activo' ? 'Bóveda Reactivada' : 'Bóveda Suspendida', 
-              message: `El estatus de ${lic.nombres} ahora es: ${nuevoEstatus.toUpperCase()}.` 
+              message: `El estatus de ${lic.nombres} ahora es: ${nuevoEstatus.toUpperCase()}. El cliente ya puede entrar.` 
             });
           }, 400);
 
         } catch (error) {
           console.error("Error al cambiar estatus:", error);
           setTimeout(() => {
-            setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'No se pudo actualizar el estatus en la base de datos.' });
+            setDialog({ isOpen: true, type: 'alert', title: 'Error del Sistema', message: 'No se pudo sincronizar el estatus en la base de datos.' });
           }, 400);
         }
       } 
