@@ -184,33 +184,33 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
     { 
       title: 'Planeación y Finanzas', 
       items: [ 
-        { id: 'dashboard', icon: LayoutDashboard, label: 'Resumen', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] }, 
+        { id: 'dashboard', icon: LayoutDashboard, label: 'Centro de Mando', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] }, 
         { id: 'tareas', icon: CheckSquare, label: 'Checklist', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] }, 
-        { id: 'presupuesto', icon: Wallet, label: 'Presupuesto', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] }, 
-        { id: 'proveedores', icon: Store, label: 'Proveedores', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] } 
+        { id: 'presupuesto', icon: Wallet, label: 'Control Financiero', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] }, 
+        { id: 'proveedores', icon: Store, label: 'Directorio de Proveedores', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] } 
       ] 
     },
     { 
-      title: 'Gestión de Asistentes', 
+      title: 'Logística de Invitados', 
       items: [ 
-        { id: 'invitacion', icon: Smartphone, label: 'Ver Invitación App', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] }, 
         { id: 'invitados', icon: Users, label: 'Lista de Invitados', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] }, 
-        { id: 'mesas', icon: LayoutGrid, label: 'Gestión de Mesas', minLevel: 2, allowedPlans: ['oro', 'diamante'] } 
+        { id: 'invitacion', icon: Smartphone, label: 'Invitación Digital', minLevel: 1, allowedPlans: ['basico', 'esencial', 'plata', 'oro', 'diamante'] }, 
+        { id: 'mesas', icon: LayoutGrid, label: 'Gestión de Mesas', minLevel: 2, allowedPlans: ['oro', 'diamante'] },
+        { id: 'mapa', icon: MapIcon, label: 'Croquis del Salón', minLevel: 2, allowedPlans: ['diamante'] }
       ] 
     },
     { 
-      title: 'Diseño Espacial', 
-      items: [ 
-        { id: 'mapa', icon: MapIcon, label: 'Croquis del Salón', minLevel: 2, allowedPlans: ['diamante'] } 
-      ] 
-    },
-    { 
-      title: 'El Día del Evento', 
+      title: 'Operación del Evento', 
       items: [ 
         { id: 'timing', icon: Clock, label: 'El Minuto a Minuto', minLevel: 1, allowedPlans: ['plata', 'oro', 'diamante'] }, 
-        { id: 'pulseras', icon: Ticket, label: 'Taller Black Label', minLevel: 2, allowedPlans: ['diamante', 'security_kit'], extraCondition: hasBlackLabel }, 
         { id: 'escaner', icon: Scan, label: 'Control Puerta (QR)', minLevel: 2, allowedPlans: ['oro', 'diamante', 'security_kit'], extraCondition: hasBlackLabel }, 
-        { id: 'monitor', icon: Activity, label: 'Monitor en Vivo', minLevel: 2, allowedPlans: ['diamante', 'security_kit'], extraCondition: hasBlackLabel }, 
+        { id: 'monitor', icon: Activity, label: 'Monitor en Vivo', minLevel: 2, allowedPlans: ['diamante', 'security_kit'], extraCondition: hasBlackLabel } 
+      ] 
+    },
+    { 
+      title: 'Add-Ons', 
+      items: [ 
+        { id: 'pulseras', icon: Ticket, label: 'Taller Black Label', minLevel: 2, allowedPlans: ['diamante', 'security_kit'], extraCondition: hasBlackLabel }, 
         { id: 'galeria', icon: Camera, label: 'Muro Social (Vivo)', minLevel: 1, allowedPlans: ['diamante', 'social_wall'], extraCondition: hasSocialWall } 
       ] 
     }
@@ -222,33 +222,33 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
 
   return (
     <>
-      {isOpen && <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm z-20 xl:hidden" onClick={() => setIsOpen(false)} />}
-      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-[#141210] text-slate-300 transition-colors duration-700 ease-in-out flex flex-col border-r border-[#D4AF37]/20 shadow-[10px_0_30px_rgba(0,0,0,0.5)] ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
-        <div className="flex items-center justify-between px-6 h-16 shrink-0 relative overflow-hidden bg-transparent">
+      {isOpen && <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-20 xl:hidden" onClick={() => setIsOpen(false)} />}
+      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-[#141210] text-slate-300 transition-transform duration-500 ease-in-out flex flex-col border-r border-[#D4AF37]/20 shadow-[10px_0_30px_rgba(0,0,0,0.5)] ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
+        <div className="flex items-center justify-between px-6 h-[88px] shrink-0 relative overflow-hidden bg-transparent border-b border-[#D4AF37]/10">
           <div className="relative z-10 w-full flex items-center gap-3">
             {agencyConfig?.logoUrl && userRole !== 'superadmin' ? (
-              <img src={agencyConfig.logoUrl} alt="Agency Logo" className="h-7 object-contain drop-shadow-md" />
+              <img src={agencyConfig.logoUrl} alt="Agency Logo" className="h-8 object-contain drop-shadow-[0_0_10px_rgba(212,175,55,0.2)]" />
             ) : (
               <div className="flex flex-col justify-center pt-1">
                  {userRole === 'superadmin' || agencyName === 'BAULIA' || agencyName === 'EVENT MASTER' ? (
-                   <BauliaLogo className="h-6 w-auto" />
+                   <BauliaLogo className="h-7 w-auto drop-shadow-md" forceWhite={true} />
                  ) : (
-                   <h1 className="text-xl font-black text-[#D4AF37] tracking-widest uppercase font-editorial">{agencyName}</h1>
+                   <h1 className="text-2xl font-black text-[#D4AF37] tracking-widest uppercase font-editorial">{agencyName}</h1>
                  )}
-                 <p className="text-[7px] text-slate-500 uppercase tracking-widest mt-1 font-bold">
+                 <p className="text-[8px] text-slate-500 uppercase tracking-widest mt-1.5 font-bold">
                    {userRole === 'superadmin' ? 'God Mode' : userRole === 'planner' ? 'Planner Workspace' : 'Bóveda Premium'}
                  </p>
               </div>
             )}
           </div>
-          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 text-[#D4AF37] hover:bg-white/5 rounded-lg relative z-10"><X size={20} /></button>
+          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 text-slate-400 hover:text-[#D4AF37] hover:bg-white/5 rounded-lg relative z-10 transition-colors"><X size={20} /></button>
         </div>
         
-        <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-6 custom-scrollbar">
+        <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-7 custom-scrollbar">
           {userRole === 'superadmin' && (
              <div className="space-y-1">
-               <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-black ml-4 mb-3">SISTEMA</p>
-               <button onClick={() => { setActiveTab('licencias'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'licencias' ? 'bg-amber-500 text-slate-900 font-black shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'hover:bg-slate-100/50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-400 dark:hover:text-white'}`}>
+               <p className="text-[10px] text-[#D4AF37] uppercase tracking-[0.2em] font-black ml-4 mb-3">SISTEMA</p>
+               <button onClick={() => { setActiveTab('licencias'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'licencias' ? 'bg-[#D4AF37] text-[#1C1917] font-black shadow-[0_5px_15px_rgba(212,175,55,0.25)]' : 'hover:bg-white/5 text-slate-400 hover:text-white'}`}>
                  <Building size={18} /><span>Centro de Licencias</span>
                </button>
              </div>
@@ -263,14 +263,14 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
             if (visibleItems.length === 0) return null;
             return (
               <div key={gIdx} className="space-y-1">
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-black ml-4 mb-3">{group.title}</p>
+                <p className="text-[9px] text-slate-500 uppercase tracking-[0.2em] font-black ml-4 mb-3">{group.title}</p>
                 {visibleItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
                   return (
-                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-[#D4AF37] text-[#1C1917] font-black shadow-[0_0_15px_rgba(212,175,55,0.4)]' : `bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 font-bold shadow-md` : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-[#D4AF37] text-[#1C1917] font-black shadow-[0_5px_15px_rgba(212,175,55,0.3)]' : `bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 font-bold shadow-md` : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
                       <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-                      <span className="text-sm tracking-wide font-medium">{item.label}</span>
+                      <span className="text-xs tracking-wide font-medium">{item.label}</span>
                     </button>
                   );
                 })}
@@ -394,20 +394,25 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-black text-[#D4AF37] tracking-tight transition-colors">Centro de Mando</h2>
-          <p className="text-slate-400 text-sm mt-1 transition-colors">Monitoreo en tiempo real de tu evento.</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#1C1917] p-5 sm:p-6 rounded-3xl border border-[#D4AF37]/25 shadow-xl">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
+            <Activity size={20} />
+          </div>
+          <div>
+            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block mb-0.5">Monitoreo en tiempo real de tu evento.</span>
+            <h2 className="text-2xl sm:text-3xl font-editorial text-white tracking-wide leading-none">Centro de Mando</h2>
+          </div>
         </div>
         
-        <div className="flex w-full sm:w-auto gap-2">
-          <button onClick={() => setPassModal({ ...passModal, open: true })} className="flex-1 sm:flex-none justify-center px-2 py-2.5 sm:px-4 bg-[#1C1917] border border-[#D4AF37]/30 text-white rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#D4AF37]/10 transition-colors shadow-sm flex items-center">
-            <Key size={14} className="mr-1.5 sm:mr-2 text-[#D4AF37]" /> <span className="hidden sm:inline">Cambiar</span> Contraseña
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-start md:justify-end">
+          <button onClick={() => setPassModal({ ...passModal, open: true })} className="flex-1 md:flex-none flex items-center justify-center px-4 h-9 bg-transparent border border-white/10 text-slate-300 rounded-lg text-[10px] font-bold hover:bg-white/5 hover:text-white transition-colors uppercase tracking-widest shrink-0">
+            <Key size={14} className="mr-1.5 text-[#D4AF37]" /> <span className="hidden sm:inline">Cambiar</span> Contraseña
           </button>
           {/* El botón de PDF se oculta si es Social Wall porque no hay mesas ni invitados que imprimir */}
           {plan !== 'social_wall' && (
-            <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="flex-1 sm:flex-none justify-center px-2 py-2.5 sm:px-5 bg-[#D4AF37] border border-[#D4AF37] text-[#141210] rounded-xl text-[10px] sm:text-sm font-bold hover:bg-[#c5a028] transition-colors shadow-[0_5px_15px_rgba(212,175,55,0.2)] flex items-center disabled:opacity-50">
-              {isPreparingPrint ? <RefreshCw size={14} className="mr-1.5 sm:mr-2 animate-spin"/> : <Download size={14} className="mr-1.5 sm:mr-2"/>} 
+            <button onClick={triggerDashboardPdf} disabled={isPreparingPrint} className="flex-1 md:flex-none flex items-center justify-center px-5 h-9 bg-[#D4AF37] text-[#1C1917] rounded-lg text-[10px] font-black hover:bg-[#c5a028] transition-colors shadow-[0_10px_25px_rgba(212,175,55,0.25)] uppercase tracking-widest shrink-0 disabled:opacity-50">
+              {isPreparingPrint ? <RefreshCw size={14} className="mr-1.5 animate-spin"/> : <Download size={14} className="mr-1.5"/>} 
               {isPreparingPrint ? 'Generando...' : <><span className="hidden sm:inline">Descargar</span> Reporte</>}
             </button>
           )}
@@ -661,32 +666,32 @@ const DashboardView = ({ authData, guests, tables, gastos, presupuestoTotal, tar
 
       {/* MODAL DE CAMBIO DE CONTRASEÑA */}
       {passModal.open && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95">
-            <div className="p-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-[#111]">
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center"><Key size={18} className="mr-2 text-amber-500"/> Seguridad</h3>
-              <button onClick={() => setPassModal({ open: false, newPass: '', loading: false, msg: '', type: '' })} className="text-slate-400 hover:text-rose-500 transition-colors"><X size={20}/></button>
+        <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-sm overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 animate-in zoom-in-95 text-white">
+            <div className="px-6 py-5 border-b border-[#D4AF37]/20 flex justify-between items-center bg-[#141210]">
+              <h3 className="font-editorial font-black text-xl text-[#D4AF37] flex items-center tracking-wide"><Key size={20} className="mr-2.5"/> Seguridad</h3>
+              <button onClick={() => setPassModal({ open: false, newPass: '', loading: false, msg: '', type: '' })} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button>
             </div>
-            <form onSubmit={handleChangePassword} className="p-6 space-y-4">
+            <form onSubmit={handleChangePassword} className="p-6 space-y-5">
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Nueva Contraseña</label>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Nueva Contraseña</label>
                 <input 
                   type="password" 
                   required 
                   value={passModal.newPass} 
                   onChange={e => setPassModal({...passModal, newPass: e.target.value})} 
-                  className="w-full p-4 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors"
+                  className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] text-white font-bold transition-colors"
                   placeholder="Mínimo 6 caracteres..."
                 />
               </div>
               
               {passModal.msg && (
-                <div className={`p-3 rounded-xl text-xs font-bold ${passModal.type === 'error' ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'}`}>
+                <div className={`p-4 rounded-xl text-xs font-bold border ${passModal.type === 'error' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/30'}`}>
                   {passModal.msg}
                 </div>
               )}
 
-              <button type="submit" disabled={passModal.loading} className="w-full py-4 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-2 shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 transition-colors disabled:opacity-50">
+              <button type="submit" disabled={passModal.loading} className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest mt-2 shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-colors disabled:opacity-50">
                 {passModal.loading ? 'Actualizando...' : 'Guardar Contraseña'}
               </button>
             </form>
@@ -951,28 +956,28 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
   if (showDesktopPlaceholder) {
      return (
         <div className="h-full flex flex-col items-center justify-center p-6 animate-in fade-in">
-           <div className="bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-xl max-w-lg w-full text-center border border-slate-200 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-3 bg-emerald-500"></div>
-              <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-emerald-100">
+           <div className="bg-[#1C1917] p-8 sm:p-10 rounded-[2.5rem] shadow-[0_25px_70px_rgba(0,0,0,0.9)] max-w-lg w-full text-center border border-[#D4AF37]/30 relative overflow-hidden text-white">
+              <div className="absolute top-0 left-0 w-full h-3 bg-[#D4AF37]"></div>
+              <div className="w-24 h-24 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                  <Smartphone size={48} />
               </div>
-              <h2 className="text-3xl font-black text-slate-800 mb-3 tracking-tight">Escáner Móvil</h2>
-              <p className="text-slate-500 mb-8 text-sm leading-relaxed">
+              <h2 className="text-3xl font-editorial font-black text-white mb-3 tracking-tight">Escáner Móvil</h2>
+              <p className="text-slate-400 mb-8 text-sm leading-relaxed">
                  Esta herramienta está diseñada para usarse en la puerta del evento usando la cámara de un celular o tablet.
               </p>
               
-              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-left mb-6 shadow-inner">
-                 <label className="block text-xs font-black text-slate-700 uppercase tracking-widest mb-3 flex items-center"><ShieldCheck size={16} className="mr-2 text-emerald-500"/> Enviar acceso al Staff</label>
-                 <div className="flex gap-2 mb-3">
-                    <input type="tel" placeholder="WhatsApp (10 dígitos)..." value={staffPhone} onChange={e=>setStaffPhone(e.target.value)} className="w-full p-3 border border-slate-200 rounded-xl font-bold outline-none focus:border-emerald-500 bg-white shadow-sm" />
-                    <button onClick={shareStaffLinkWhatsApp} className="px-5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-md transition-colors active:scale-95"><Send size={18}/></button>
+              <div className="bg-[#141210] p-6 rounded-2xl border border-white/10 text-left mb-6 shadow-inner">
+                 <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center"><ShieldCheck size={16} className="mr-2 text-[#D4AF37]"/> Enviar acceso al Staff</label>
+                 <div className="flex gap-3 mb-4">
+                    <input type="tel" placeholder="WhatsApp (10 dígitos)..." value={staffPhone} onChange={e=>setStaffPhone(e.target.value)} className="w-full p-3 border border-white/10 rounded-xl font-bold outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors" />
+                    <button onClick={shareStaffLinkWhatsApp} className="px-5 bg-[#D4AF37] text-[#1C1917] rounded-xl hover:bg-[#c5a028] shadow-[0_5px_15px_rgba(212,175,55,0.25)] transition-colors active:scale-95"><Send size={18}/></button>
                  </div>
-                 <button onClick={copyStaffLink} className="w-full py-3.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-colors flex items-center justify-center shadow-sm active:scale-95">
-                    <Link size={18} className="mr-2"/> Copiar enlace manual
+                 <button onClick={copyStaffLink} className="w-full py-4 bg-white/5 border border-white/10 text-slate-300 rounded-xl font-bold hover:bg-white/10 transition-colors flex items-center justify-center shadow-sm active:scale-95 uppercase tracking-widest text-[10px]">
+                    <Link size={16} className="mr-2"/> Copiar enlace manual
                  </button>
               </div>
               
-              <button onClick={() => setForceMobile(true)} className="text-[10px] font-bold text-slate-400 hover:text-emerald-600 underline">Forzar vista de escáner aquí en la computadora</button>
+              <button onClick={() => setForceMobile(true)} className="text-[10px] font-bold text-slate-500 hover:text-[#D4AF37] underline transition-colors">Forzar vista de escáner aquí en la computadora</button>
            </div>
         </div>
      );
@@ -982,32 +987,32 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
     <div className={`h-full flex flex-col space-y-4 pb-6 ${isSharedMode ? 'max-w-lg mx-auto' : 'max-w-4xl'}`}>
       
       {/* 🔴 SEMÁFORO DE CONEXIÓN INTELIGENTE */}
-      <div className={`p-3 rounded-2xl shadow-lg flex items-center justify-between transition-colors duration-500 animate-in slide-in-from-top-4 mb-2 border ${isOffline ? 'bg-amber-500 border-amber-600' : 'bg-slate-900 border-slate-700'}`}>
+      <div className={`p-3 rounded-2xl shadow-lg flex items-center justify-between transition-colors duration-500 animate-in slide-in-from-top-4 mb-3 border ${isOffline ? 'bg-amber-500 border-amber-600' : 'bg-[#1C1917] border-[#D4AF37]/30'}`}>
         <div className="flex items-center">
           {isOffline ? (
-            <WifiOff size={18} className="mr-2.5 text-white animate-pulse" />
+            <WifiOff size={18} className="mr-2.5 text-[#141210] animate-pulse" />
           ) : (
             <div className="relative mr-2.5 flex items-center justify-center w-5 h-5">
               <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-30 animate-ping"></span>
               <div className="relative w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_8px_#10b981]"></div>
             </div>
           )}
-          <span className="font-bold text-white text-xs uppercase tracking-widest">
+          <span className={`font-bold text-xs uppercase tracking-widest ${isOffline ? 'text-[#141210]' : 'text-[#D4AF37]'}`}>
             {isOffline ? 'Modo Supervivencia' : 'En Línea'}
           </span>
         </div>
-        <span className="text-[9px] text-white/80 font-medium">
-          {isOffline ? 'Guardando en celular' : 'Sincronizado'}
+        <span className={`text-[9px] font-medium ${isOffline ? 'text-[#141210]/80' : 'text-slate-400'}`}>
+          {isOffline ? 'Guardando localmente' : 'Sincronizado'}
         </span>
       </div>
 
-      <div className="flex justify-between items-center gap-4 px-2">
+      <div className="flex justify-between items-center gap-4 px-2 mb-2">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">{isSharedMode ? 'Recepción VIP' : 'Control de Accesos'}</h2>
-          <p className="text-slate-500 text-sm mt-1">Escaneo continuo automático.</p>
+          <h2 className="text-3xl font-editorial font-black text-white tracking-wide">{isSharedMode ? 'Recepción VIP' : 'Control de Accesos'}</h2>
+          <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-widest mt-1">Escaneo continuo automático.</p>
         </div>
         {!isSharedMode && (
-          <button onClick={() => setShowShareModal(true)} className="p-3 bg-emerald-100 text-emerald-700 rounded-full hover:bg-emerald-200 transition-colors shadow-sm" title="Compartir a Staff">
+          <button onClick={() => setShowShareModal(true)} className="p-3 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full hover:bg-[#D4AF37]/20 transition-colors shadow-sm" title="Compartir a Staff">
             <Link size={20} /> 
           </button>
         )}
@@ -1023,9 +1028,9 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
         `}</style>
 
         {/* 🔴 ESCÁNER CUADRADO PERFECTO */}
-        <div className="w-full max-w-[350px] mx-auto bg-slate-900 rounded-3xl overflow-hidden relative shadow-2xl flex-shrink-0 aspect-square">
+        <div className="w-full max-w-[350px] mx-auto bg-[#141210] rounded-3xl overflow-hidden relative shadow-[0_15px_40px_rgba(0,0,0,0.6)] border border-[#D4AF37]/30 flex-shrink-0 aspect-square">
           {camError ? (
-            <button onClick={() => window.location.reload()} className="absolute inset-0 flex flex-col items-center justify-center text-white bg-slate-800 p-6 text-center z-50">
+            <button onClick={() => window.location.reload()} className="absolute inset-0 flex flex-col items-center justify-center text-white bg-[#1C1917] p-6 text-center z-50">
               <Camera size={48} className="text-rose-500 mb-4"/>
               <span className="font-bold text-lg mb-2">Permiso de cámara requerido</span>
               <span className="text-sm text-slate-400">{camError}</span>
@@ -1034,8 +1039,8 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
             <>
                <div id="qr-reader-puerta"></div>
                {/* Marcos y Laser */}
-               <div className="absolute inset-0 border-[30px] border-black/40 pointer-events-none z-10"></div>
-               <div className="absolute inset-0 border-2 border-emerald-400 m-[30px] pointer-events-none z-10 opacity-70">
+               <div className="absolute inset-0 border-[30px] border-[#1C1917]/70 pointer-events-none z-10"></div>
+               <div className="absolute inset-0 border-2 border-emerald-400 m-[30px] pointer-events-none z-10 opacity-70 rounded-xl">
                  <div className="w-full h-0.5 bg-emerald-400 shadow-[0_0_15px_#34d399] absolute top-1/2 -translate-y-1/2 opacity-60 animate-pulse"></div>
                </div>
             </>
@@ -1043,25 +1048,25 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
         </div>
 
         {/* 🔴 FICHA INTELIGENTE */}
-        <div className={`w-full p-6 rounded-3xl shadow-lg border-2 transition-all flex flex-col justify-center min-h-[140px] flex-shrink-0 relative overflow-hidden
-            ${cardData.status === 'idle' ? 'bg-white border-slate-200' : ''}
-            ${cardData.status === 'success' ? 'bg-emerald-50 border-emerald-400 shadow-emerald-500/20 scale-[1.02]' : ''}
-            ${cardData.status === 'warning' ? 'bg-amber-50 border-amber-400 shadow-amber-500/20 scale-[1.02]' : ''}
-            ${cardData.status === 'error' ? 'bg-rose-50 border-rose-400 shadow-rose-500/20' : ''}
+        <div className={`w-full p-6 rounded-3xl shadow-xl border-2 transition-all flex flex-col justify-center min-h-[140px] flex-shrink-0 relative overflow-hidden
+            ${cardData.status === 'idle' ? 'bg-[#1C1917] border-[#D4AF37]/30' : ''}
+            ${cardData.status === 'success' ? 'bg-emerald-50 border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)] scale-[1.02]' : ''}
+            ${cardData.status === 'warning' ? 'bg-amber-50 border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.3)] scale-[1.02]' : ''}
+            ${cardData.status === 'error' ? 'bg-rose-50 border-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.3)]' : ''}
         `}>
            <div className="relative z-10 text-center">
-              <p className={`text-xs font-black uppercase tracking-widest mb-1
-                ${cardData.status === 'idle' ? 'text-slate-400' : ''}
+              <p className={`text-[10px] font-black uppercase tracking-widest mb-2
+                ${cardData.status === 'idle' ? 'text-[#D4AF37]' : ''}
                 ${cardData.status === 'success' ? 'text-emerald-600' : ''}
                 ${cardData.status === 'warning' ? 'text-amber-600' : ''}
                 ${cardData.status === 'error' ? 'text-rose-600' : ''}
               `}>
                  {cardData.status === 'idle' ? 'ESTADO: LISTO' : cardData.status === 'success' ? 'ACCESO APROBADO' : cardData.status === 'warning' ? '¡YA INGRESÓ!' : 'ERROR'}
               </p>
-              <h3 className={`text-2xl sm:text-3xl font-black leading-tight mb-2 ${cardData.status === 'idle' ? 'text-slate-700' : 'text-slate-900'}`}>
+              <h3 className={`text-2xl sm:text-3xl font-black leading-tight mb-2 ${cardData.status === 'idle' ? 'text-white font-editorial' : 'text-slate-900'}`}>
                 {cardData.title}
               </h3>
-              <p className={`text-lg font-bold ${cardData.status === 'success' ? 'text-emerald-700' : cardData.status === 'warning' ? 'text-amber-700' : 'text-slate-500'}`}>
+              <p className={`text-sm sm:text-lg font-bold ${cardData.status === 'idle' ? 'text-slate-400' : cardData.status === 'success' ? 'text-emerald-700' : cardData.status === 'warning' ? 'text-amber-700' : 'text-slate-500'}`}>
                 {cardData.subtitle}
               </p>
            </div>
@@ -1072,108 +1077,108 @@ const EscanerView = ({ guests, setGuests, tables, isSharedMode, exitSharedMode, 
            {cardData.status === 'error' && <X size={100} className="absolute -right-4 -bottom-4 text-rose-500/10 pointer-events-none"/>}
         </div>
 
-        <button onClick={() => setIsListOpen(true)} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold shadow-lg hover:bg-slate-800 transition-colors flex items-center justify-center text-lg flex-shrink-0 mt-2">
-          <Users size={22} className="mr-3 text-emerald-400" /> Abrir Directorio Manual
+        <button onClick={() => setIsListOpen(true)} className="w-full py-5 bg-[#D4AF37] text-[#141210] rounded-2xl font-black shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-colors flex items-center justify-center text-sm uppercase tracking-widest flex-shrink-0 mt-2">
+          <Users size={20} className="mr-3 text-[#141210]" /> Abrir Directorio Manual
         </button>
       </div>
 
       {/* MODAL DIRECTORIO MANUAL */}
       {isListOpen && (
-         <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex flex-col justify-end sm:justify-center sm:p-6 animate-in fade-in duration-200">
-             <div className="bg-white w-full sm:max-w-2xl mx-auto sm:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col h-[90vh] sm:h-[80vh] overflow-hidden">
-                <div className="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
+         <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex flex-col justify-end sm:justify-center sm:p-6 animate-in fade-in duration-200">
+             <div className="bg-[#1C1917] w-full sm:max-w-2xl mx-auto sm:rounded-3xl rounded-t-3xl shadow-[0_25px_70px_rgba(0,0,0,0.9)] flex flex-col h-[90vh] sm:h-[80vh] overflow-hidden border border-[#D4AF37]/30">
+                <div className="p-5 border-b border-[#D4AF37]/20 bg-[#141210] flex items-center justify-between shrink-0">
                    <div>
-                     <h3 className="text-xl font-bold text-slate-800 flex items-center"><Users size={20} className="mr-2 text-emerald-600" /> Ingreso Manual</h3>
-                     <p className="text-xs text-slate-500">Busca por nombre si no traen pulsera.</p>
+                     <h3 className="text-xl font-editorial font-black text-[#D4AF37] flex items-center tracking-wide"><Users size={20} className="mr-2.5" /> Ingreso Manual</h3>
+                     <p className="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Busca por nombre si no traen pulsera.</p>
                    </div>
-                   <button onClick={() => setIsListOpen(false)} className="p-2 bg-slate-200 rounded-full hover:bg-slate-300 text-slate-600 transition-colors"><X size={20}/></button>
+                   <button onClick={() => setIsListOpen(false)} className="p-2 bg-white/5 rounded-full hover:bg-white/10 text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button>
                 </div>
                 
-                <div className="bg-white border-b border-slate-100 shadow-sm z-10 shrink-0">
-                   <div className="flex p-2 gap-2 bg-slate-100">
-                      <button onClick={()=>setListTab('todos')} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${listTab==='todos' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>Todos</button>
-                      <button onClick={()=>setListTab('adentro')} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${listTab==='adentro' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500'}`}>Adentro</button>
-                      <button onClick={()=>setListTab('faltan')} className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${listTab==='faltan' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500'}`}>Faltan</button>
+                <div className="bg-[#1C1917] border-b border-white/10 shadow-sm z-10 shrink-0">
+                   <div className="flex p-3 gap-2 bg-[#141210]">
+                      <button onClick={()=>setListTab('todos')} className={`flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all border ${listTab==='todos' ? 'bg-[#D4AF37] text-[#141210] border-[#D4AF37] shadow-sm' : 'bg-transparent text-slate-400 border-white/10 hover:border-white/30'}`}>Todos</button>
+                      <button onClick={()=>setListTab('adentro')} className={`flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all border ${listTab==='adentro' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-transparent text-slate-400 border-white/10 hover:border-white/30'}`}>Adentro</button>
+                      <button onClick={()=>setListTab('faltan')} className={`flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all border ${listTab==='faltan' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 'bg-transparent text-slate-400 border-white/10 hover:border-white/30'}`}>Faltan</button>
                    </div>
                    <div className="relative p-4">
-                     <SearchIcon className="absolute left-7 top-1/2 -translate-y-1/2 text-slate-400" size={18}/>
-                     <input type="text" autoFocus placeholder="Buscar por nombre o familia..." value={listSearchTerm} onChange={(e) => setListSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all font-bold text-lg" />
+                     <SearchIcon className="absolute left-7 top-1/2 -translate-y-1/2 text-slate-500" size={18}/>
+                     <input type="text" autoFocus placeholder="Buscar por nombre o familia..." value={listSearchTerm} onChange={(e) => setListSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none transition-colors font-bold text-white placeholder-slate-500" />
                    </div>
                 </div>
                 
-                <div className="overflow-y-auto flex-1 p-4 bg-slate-50 custom-scrollbar space-y-3">
+                <div className="overflow-y-auto flex-1 p-4 bg-[#1C1917] custom-scrollbar space-y-3">
                    {filteredList.map(item => {
                       const { parent, sub } = item;
                       const mesaName = tables.find(t => String(t.id) === String(parent.tableId))?.name || 'Sin Mesa Asignada';
                       
                       return (
-                        <div key={sub.id} className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-white border rounded-2xl transition-all shadow-sm ${sub.entered ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200'}`}>
+                        <div key={sub.id} className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border rounded-2xl transition-all shadow-sm ${sub.entered ? 'border-emerald-500/30 bg-emerald-500/10' : 'bg-[#141210] border-white/10 hover:border-[#D4AF37]/40'}`}>
                            <div className="mb-3 sm:mb-0 w-full sm:w-auto">
-                              <p className={`font-bold text-lg leading-tight ${sub.entered ? 'text-slate-500' : 'text-slate-800'}`}>{sub.name}</p>
-                              <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                                 <span className="text-[10px] font-black uppercase text-slate-500 bg-slate-100 px-2 py-1 rounded">{parent.name}</span>
-                                 <span className="text-[11px] font-bold text-slate-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded">Mesa: {mesaName}</span>
+                              <p className={`font-bold text-lg leading-tight ${sub.entered ? 'text-emerald-400' : 'text-white'}`}>{sub.name}</p>
+                              <div className="flex flex-wrap items-center gap-2 mt-2">
+                                 <span className="text-[9px] font-black uppercase text-slate-400 bg-white/5 px-2 py-1 rounded border border-white/10">{parent.name}</span>
+                                 <span className="text-[9px] font-black uppercase text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/20 px-2 py-1 rounded">Mesa: {mesaName}</span>
                               </div>
                            </div>
                            
                            <div className="w-full sm:w-auto text-right">
                              {sub.entered ? (
-                                <div className="px-5 py-3 rounded-xl text-sm font-black bg-emerald-100 text-emerald-700 flex items-center justify-center sm:justify-start"><CheckCircle size={18} className="mr-2"/> Ya Ingresó</div>
+                                <div className="px-5 py-3 rounded-xl text-sm font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center sm:justify-start"><CheckCircle size={18} className="mr-2"/> Ya Ingresó</div>
                              ) : (
-                                <button onClick={() => handleManualEntryFromList(parent, sub)} className="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold bg-slate-900 text-white hover:bg-slate-800 shadow-md transition-transform active:scale-95 flex items-center justify-center">
-                                  Dar Acceso <ArrowRight size={16} className="ml-2" />
+                                <button onClick={() => handleManualEntryFromList(parent, sub)} className="w-full sm:w-auto px-6 py-3.5 rounded-xl text-[10px] uppercase tracking-widest font-black bg-[#D4AF37] border border-[#D4AF37] text-[#1C1917] hover:bg-[#c5a028] shadow-[0_5px_15px_rgba(212,175,55,0.25)] transition-all active:scale-95 flex items-center justify-center">
+                                  Dar Acceso <ArrowRight size={14} className="ml-2" />
                                 </button>
                              )}
                            </div>
                         </div>
                       )
                    })}
-                   {filteredList.length === 0 && <div className="text-center p-12 text-slate-400 font-bold text-lg border-2 border-dashed border-slate-200 rounded-2xl">No se encontraron invitados.</div>}
+                   {filteredList.length === 0 && <div className="text-center p-12 text-slate-500 font-bold text-sm border-2 border-dashed border-white/10 rounded-2xl bg-[#141210]">No se encontraron invitados.</div>}
                 </div>
              </div>
          </div>
       )}
 
       {showShareModal && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl animate-in zoom-in-95">
-            <button onClick={() => setShowShareModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-rose-500"><X size={20}/></button>
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4"><ShieldCheck size={32}/></div>
-            <h3 className="font-black text-xl text-slate-800 mb-2">Acceso de Staff</h3>
-            <p className="text-sm text-slate-500 mb-6">Envía este link a las personas encargadas de la entrada del evento.</p>
+        <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 animate-in zoom-in-95 text-white">
+            <button onClick={() => setShowShareModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button>
+            <div className="w-16 h-16 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 rounded-full flex items-center justify-center mx-auto mb-4"><ShieldCheck size={32}/></div>
+            <h3 className="font-editorial font-black text-2xl text-white mb-2">Acceso de Staff</h3>
+            <p className="text-[10px] text-slate-400 mb-6 uppercase tracking-widest">Envía este link al personal en puerta.</p>
             <div className="flex gap-2 mb-4">
-              <input type="tel" placeholder="Número WhatsApp..." value={staffPhone} onChange={e=>setStaffPhone(e.target.value)} className="w-full p-3 border border-slate-200 rounded-xl font-bold outline-none focus:border-emerald-500" />
-              <button onClick={shareStaffLinkWhatsApp} className="px-5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600"><Send size={18}/></button>
+              <input type="tel" placeholder="Número WhatsApp..." value={staffPhone} onChange={e=>setStaffPhone(e.target.value)} className="w-full p-3 bg-[#141210] border border-white/10 rounded-xl text-white font-bold outline-none focus:border-[#D4AF37]" />
+              <button onClick={shareStaffLinkWhatsApp} className="px-5 bg-[#D4AF37] text-[#1C1917] rounded-xl hover:bg-[#c5a028] shadow-[0_5px_15px_rgba(212,175,55,0.2)]"><Send size={18}/></button>
             </div>
-            <button onClick={() => { setShowShareModal(false); setForceMobile(true); }} className="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors mb-2">Simular en esta pantalla</button>
+            <button onClick={() => { setShowShareModal(false); setForceMobile(true); }} className="w-full py-3 bg-white/5 border border-white/10 text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors mb-2">Simular en esta pantalla</button>
           </div>
         </div>
       )}
       {/* 🔴 MODAL DE PROTOCOLO OFFLINE PARA EL STAFF */}
       {showProtocol && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2rem] w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-white/10 flex flex-col relative">
-            <div className="bg-amber-500 p-8 text-center text-slate-900 relative overflow-hidden">
+        <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
+          <div className="bg-[#1C1917] rounded-[2rem] w-full max-w-sm overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 flex flex-col relative text-white">
+            <div className="bg-[#D4AF37] p-8 text-center text-[#1C1917] relative overflow-hidden">
               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
               <ShieldCheck size={48} className="mx-auto mb-3 opacity-90 relative z-10"/>
               <h3 className="text-xl font-black uppercase tracking-widest relative z-10">Protocolo de Puerta</h3>
             </div>
-            <div className="p-6 sm:p-8 space-y-5 text-slate-600 dark:text-slate-300 text-sm font-medium leading-relaxed">
-              <p>Para garantizar que el escáner funcione a la perfección, <b className="text-slate-900 dark:text-white">incluso si se cae el internet</b> en la locación, sigue estas dos reglas de oro:</p>
+            <div className="p-6 sm:p-8 space-y-5 text-slate-300 text-sm font-medium leading-relaxed">
+              <p>Para garantizar que el escáner funcione a la perfección, <b className="text-white">incluso si se cae el internet</b>, sigue estas reglas de oro:</p>
               
-              <div className="bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 p-4 rounded-xl space-y-4 shadow-inner">
+              <div className="bg-[#141210] border border-white/10 p-4 rounded-xl space-y-4 shadow-inner">
                 <div className="flex items-start">
-                  <span className="bg-amber-100 text-amber-600 w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 mr-3 mt-0.5">1</span> 
+                  <span className="bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 mr-3 mt-0.5">1</span> 
                   <p><b>No cierres esta pestaña.</b> Puedes bloquear la pantalla de tu celular y guardarlo, pero no cierres el navegador.</p>
                 </div>
                 <div className="flex items-start">
-                  <span className="bg-amber-100 text-amber-600 w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 mr-3 mt-0.5">2</span> 
-                  <p><b>Evita abrir otras Apps.</b> Usar Instagram o la cámara normal de tu celular consume memoria y podría reiniciar este escáner.</p>
+                  <span className="bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 mr-3 mt-0.5">2</span> 
+                  <p><b>Evita abrir otras Apps.</b> Usar la cámara normal de tu celular consume memoria y podría reiniciar este escáner.</p>
                 </div>
               </div>
             </div>
             <div className="p-6 pt-0 mt-2">
-              <button onClick={() => setShowProtocol(false)} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-transform shadow-xl">
+              <button onClick={() => setShowProtocol(false)} className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-transform shadow-[0_10px_25px_rgba(212,175,55,0.25)]">
                 Entendido, Iniciar Escáner
               </button>
             </div>
@@ -1788,12 +1793,12 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         onChange={e => setNewTagInput(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleCreateGlobalTag(); } }}
         placeholder="Nueva etiqueta (ej. Primos, VIP)..." 
-        className="flex-1 px-3 py-1.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-lg text-xs outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white"
+        className="flex-1 px-3 py-1.5 bg-[#141210] border border-white/10 rounded-lg text-xs outline-none focus:border-[#D4AF37] text-white transition-colors"
       />
       <button 
         type="button" 
         onClick={handleCreateGlobalTag}
-        className="px-3 py-1.5 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-400 border border-indigo-200 dark:border-amber-500/20 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-colors shrink-0"
+        className="px-3 py-1.5 bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-[#D4AF37]/25 transition-colors shrink-0"
       >
         + Crear
       </button>
@@ -1934,100 +1939,96 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           );
       })()}
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#1C1917] p-6 rounded-3xl border border-[#D4AF37]/25 shadow-xl">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#1C1917] p-5 sm:p-6 rounded-3xl border border-[#D4AF37]/25 shadow-xl">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
             <Users size={20} />
           </div>
           <div>
-            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block">Control de asistencia, pases, etiquetas de afinidad y credenciales.</span>
-            <h2 className="text-2xl sm:text-3xl font-editorial text-white tracking-wide">Gestión de Invitados</h2>
+            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block mb-0.5">Control de asistencia, pases y credenciales.</span>
+            <h2 className="text-2xl sm:text-3xl font-editorial text-white tracking-wide leading-none">Gestión de Invitados</h2>
           </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto mt-4 sm:mt-0">
-          <div className="flex w-full sm:w-auto gap-2">
-            {/* 🟢 BOTÓN BANCO DE ETIQUETAS */}
-            {isPremium && (
-              <button onClick={() => setIsTagManagerOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center px-4 py-2.5 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#D4AF37]/10 shadow-sm transition-colors uppercase tracking-widest h-10">
-                <Layers size={14} className="mr-1.5"/> Etiquetas ({globalTags.length})
-              </button>
-            )}
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto mt-4 md:mt-0 justify-start md:justify-end">
+          {isPremium && (
+            <button onClick={() => setIsTagManagerOpen(true)} className="flex items-center justify-center px-4 h-9 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-[10px] font-bold hover:bg-[#D4AF37]/10 transition-colors uppercase tracking-widest shrink-0">
+              <Layers size={14} className="mr-1.5"/> Etiquetas ({globalTags.length})
+            </button>
+          )}
+          <button onClick={() => setExportViewOpen(true)} className="flex items-center justify-center px-4 h-9 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-[10px] font-bold hover:bg-[#D4AF37]/10 transition-colors uppercase tracking-widest shrink-0">
+            <FileSpreadsheet size={14} className="mr-1.5"/> Exportar
+          </button>
+          
+          <div className="flex items-center bg-transparent px-3 h-9 rounded-lg border border-[#D4AF37]/30 transition-colors shrink-0">
+            <span className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-wider mr-2">Boda</span>
+            <button onClick={async () => {
+              const newVal = !isWeddingMode;
+              setIsWeddingMode(newVal);
+              try { await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' }); } catch(e) {}
+            }} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-[#D4AF37]' : 'bg-white/10'}`}>
+              <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
+            </button>
+          </div>
 
-            <button onClick={() => setExportViewOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center px-4 py-2.5 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#D4AF37]/10 shadow-sm transition-colors uppercase tracking-widest h-10"><FileSpreadsheet size={14} className="mr-1.5"/> Exportar</button>
-            
-            <div className="flex items-center bg-transparent px-3 py-2 rounded-xl border border-[#D4AF37]/30 shadow-sm transition-colors shrink-0 h-10">
-              <span className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-wider mr-2">Boda</span>
-              <button onClick={async () => {
-                const newVal = !isWeddingMode;
-                setIsWeddingMode(newVal);
-                try { await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' }); } catch(e) {}
-              }} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-[#D4AF37]' : 'bg-white/10'}`}>
-                <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
+          {isWeddingMode ? (
+            <div className="flex gap-2 shrink-0">
+              <button onClick={() => handleOpenAdd('novia')} className="flex items-center justify-center px-4 h-9 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-lg text-[10px] font-bold hover:bg-rose-500/20 transition-colors uppercase tracking-widest">
+                <UserPlus size={14} className="mr-1.5"/> Novia
+              </button>
+              <button onClick={() => handleOpenAdd('novio')} className="flex items-center justify-center px-4 h-9 bg-sky-500/10 border border-sky-500/30 text-sky-400 rounded-lg text-[10px] font-bold hover:bg-sky-500/20 transition-colors uppercase tracking-widest">
+                <UserPlus size={14} className="mr-1.5"/> Novio
               </button>
             </div>
-          </div>
-
-          <div className="flex w-full sm:w-auto gap-2">
-            {isWeddingMode ? (
-              <>
-                <button onClick={() => handleOpenAdd('novia')} className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#D4AF37]/10 shadow-sm transition-colors uppercase tracking-widest h-10">
-                  <UserPlus size={14} className="mr-1.5 text-rose-400"/> Novia
-                </button>
-                <button onClick={() => handleOpenAdd('novio')} className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#D4AF37]/10 shadow-sm transition-colors uppercase tracking-widest h-10">
-                  <UserPlus size={14} className="mr-1.5 text-sky-400"/> Novio
-                </button>
-              </>
-            ) : (
-              <button onClick={() => handleOpenAdd('general')} className="flex-1 sm:flex-none flex items-center justify-center px-5 py-2.5 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#D4AF37]/10 shadow-sm transition-colors uppercase tracking-widest h-10">
-                <UserPlus size={14} className="mr-1.5"/> Nuevo Invitado
-              </button>
-            )}
-          </div>
+          ) : (
+            <button onClick={() => handleOpenAdd('general')} className="flex items-center justify-center px-5 h-9 bg-[#D4AF37] text-[#1C1917] rounded-lg text-[10px] font-black hover:bg-[#c5a028] transition-colors uppercase tracking-widest shrink-0">
+              <UserPlus size={14} className="mr-1.5"/> Nuevo Invitado
+            </button>
+          )}
         </div>
       </div>
 
       <div className={`grid grid-cols-2 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-2 sm:gap-3`}>
-        <div className="bg-transparent px-4 py-3 rounded-2xl border border-[#D4AF37]/20 flex items-center justify-between transition-colors">
-          <div className="text-[#D4AF37] font-bold text-[9px] uppercase tracking-widest flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0 text-[#D4AF37]"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
-          <h3 className="text-lg font-black text-white">{passCountEnabled ? totalPases : safeGuests.length}</h3>
+        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-[#D4AF37]/30 flex items-center justify-between transition-all hover:border-[#D4AF37]/60 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+          <div className="text-[#D4AF37] font-black text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
+          <h3 className="text-sm font-black text-white">{passCountEnabled ? totalPases : safeGuests.length}</h3>
         </div>
         
         {isPremium && passCountEnabled && (
-        <div className="bg-transparent px-4 py-3 rounded-2xl border border-sky-500/20 flex items-center justify-between transition-colors">
-          <div className="text-sky-400 font-bold text-[9px] uppercase tracking-widest flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Niños</div>
-          <h3 className="text-lg font-black text-sky-400">{totalNinos}</h3>
+        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-white/10 flex items-center justify-between transition-all hover:border-sky-500/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+          <div className="text-sky-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Niños</div>
+          <h3 className="text-sm font-black text-sky-400">{totalNinos}</h3>
         </div>
         )}
         
-        <div className="bg-transparent px-4 py-3 rounded-2xl border border-amber-500/20 flex items-center justify-between transition-colors">
-          <div className="text-amber-500 font-bold text-[9px] uppercase tracking-widest flex items-center truncate"><CheckCircle className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Confirmados</div>
-          <h3 className="text-lg font-black text-amber-500">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3>
+        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-[#D4AF37]/15 flex items-center justify-between transition-all hover:border-[#D4AF37]/50 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+          <div className="text-[#D4AF37] font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><CheckCircle className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Confirmados</div>
+          <h3 className="text-sm font-black text-white">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3>
         </div>
         
-        <div className="bg-transparent px-4 py-3 rounded-2xl border border-white/10 flex items-center justify-between transition-colors">
-          <div className="text-slate-400 font-bold text-[9px] uppercase tracking-widest flex items-center truncate"><Clock className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Pendientes</div>
-          <h3 className="text-lg font-black text-slate-300">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
+        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-white/10 flex items-center justify-between transition-all hover:border-white/30 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+          <div className="text-slate-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Clock className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Pendientes</div>
+          <h3 className="text-sm font-black text-slate-300">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
         </div>
         
-        <div className="bg-transparent px-4 py-3 rounded-2xl border border-rose-500/20 flex items-center justify-between transition-colors">
-          <div className="text-rose-400 font-bold text-[9px] uppercase tracking-widest flex items-center truncate"><X className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Cancelados</div>
-          <h3 className="text-lg font-black text-rose-400">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
+        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-white/10 flex items-center justify-between transition-all hover:border-rose-500/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+          <div className="text-rose-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><X className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Cancelados</div>
+          <h3 className="text-sm font-black text-rose-400">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
         </div>
         
         {isPremium && qrEnabled && (
-        <div className="bg-transparent px-4 py-3 rounded-2xl border border-emerald-500/20 flex items-center justify-between transition-colors">
-          <div className="text-emerald-400 font-bold text-[9px] uppercase tracking-widest flex items-center truncate"><Scan className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Ingresaron</div>
-          <h3 className="text-lg font-black text-emerald-400">{totalIngresos}</h3>
+        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-[#D4AF37]/15 flex items-center justify-between transition-all hover:border-emerald-500/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+          <div className="text-emerald-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Scan className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Ingresaron</div>
+          <h3 className="text-sm font-black text-emerald-400">{totalIngresos}</h3>
         </div>
         )}
       </div>
 
       {isWeddingMode && passCountEnabled && (
-        <div className="bg-transparent py-2.5 px-6 rounded-2xl border border-[#D4AF37]/20 flex items-center justify-around transition-colors">
-          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest">Pases Novia</p><p className="text-base font-black text-rose-300">{pasesNovia}</p></div>
+        <div className="bg-[#1C1917] py-2.5 px-6 rounded-xl border border-[#D4AF37]/20 flex items-center justify-around transition-colors shadow-sm">
+          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest">Pases Novia</p><p className="text-sm font-black text-rose-400">{pasesNovia}</p></div>
           <div className="h-4 w-px bg-white/10"></div>
-          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">Pases Novio</p><p className="text-base font-black text-indigo-300">{pasesNovio}</p></div>
+          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-sky-400 uppercase tracking-widest">Pases Novio</p><p className="text-sm font-black text-sky-400">{pasesNovio}</p></div>
         </div>
       )}
 
@@ -2060,16 +2061,16 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     <td className="px-5 py-3">
                       <div className="flex flex-col">
                         <div className="flex items-center gap-1.5">
-                          <span className={`${row.isMain ? 'font-bold text-slate-800 dark:text-white' : 'font-normal text-slate-600 dark:text-slate-300'} ${row.isMissing || row.isEmptyName ? 'text-amber-500 italic' : ''} ${row.parentGuest.status === 'cancelado' ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>
+                          <span className={`${row.isMain ? 'font-bold text-white' : 'font-normal text-slate-400'} ${row.isMissing || row.isEmptyName ? 'text-[#D4AF37] italic' : ''} ${row.parentGuest.status === 'cancelado' ? 'line-through text-slate-600' : ''}`}>
                             {row.displayName}
                           </span>
                           {row.isMain && row.parentGuest.todasMesasNombre?.length > 1 && (
-                            <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20" title={`Distribuidos en: ${row.parentGuest.todasMesasNombre.join(', ')}`}>
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border bg-amber-500/10 text-amber-400 border-amber-500/20" title={`Distribuidos en: ${row.parentGuest.todasMesasNombre.join(', ')}`}>
                               Dividida
                             </span>
                           )}
                           {isWeddingMode && !row.isMissing && row.parentGuest.side && row.parentGuest.side !== 'general' && (
-                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${row.parentGuest.side === 'novia' ? 'bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : 'bg-indigo-100 text-indigo-600 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20'}`}>
+                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${row.parentGuest.side === 'novia' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-sky-500/10 text-sky-400 border-sky-500/20'}`}>
                               {row.parentGuest.side}
                             </span>
                           )}
@@ -2080,19 +2081,19 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     {isPremium && passCountEnabled && (
                       <td className="px-3 py-3 text-center">
                         {row.isMissing ? (
-                          <span className="text-slate-300 dark:text-slate-600">-</span>
+                          <span className="text-slate-600">-</span>
                         ) : (
                           <div className="flex items-center justify-center gap-1 flex-wrap max-w-[220px] mx-auto">
                             {row.isChild && (
-                              <span className="text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 px-2 py-0.5 rounded text-[8px] uppercase font-black tracking-widest">Niño</span>
+                              <span className="text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded text-[8px] uppercase font-black tracking-widest">Niño</span>
                             )}
                             {row.rowTags && row.rowTags.map(t => (
-                              <span key={t} className="text-indigo-600 dark:text-amber-400 bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/20 px-2 py-0.5 rounded text-[8px] uppercase font-bold tracking-wider">
+                              <span key={t} className="text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/20 px-2 py-0.5 rounded text-[8px] uppercase font-bold tracking-wider">
                                 {t}
                               </span>
                             ))}
                             {!row.isChild && (!row.rowTags || row.rowTags.length === 0) && (
-                              <span className="text-slate-300 dark:text-slate-600">-</span>
+                              <span className="text-slate-600">-</span>
                             )}
                           </div>
                         )}
@@ -2101,18 +2102,18 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     
                     {passCountEnabled && (
                        <td className="px-3 py-3 text-center">
-                          {row.isMain || row.isMissing ? <span className="font-black text-indigo-600 dark:text-amber-500 text-sm">{row.parentGuest.displayPasses || row.passes}</span> : <span className="text-slate-300 dark:text-slate-600">-</span>}
+                          {row.isMain || row.isMissing ? <span className="font-black text-[#D4AF37] text-sm">{row.parentGuest.displayPasses || row.passes}</span> : <span className="text-slate-600">-</span>}
                        </td>
                     )}
 
                     {isPremium && (
                       <td className="px-4 py-3 text-center">
                         {row.specificTableName ? (
-                           <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold border border-slate-200 dark:border-white/10 shadow-sm whitespace-nowrap">
+                           <span className="px-3 py-1 bg-white/5 text-slate-300 rounded-lg text-[10px] font-bold border border-white/10 shadow-sm whitespace-nowrap">
                              {row.specificTableName}
                            </span>
                         ) : (
-                           <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">
+                           <span className="text-[10px] text-slate-600 italic">
                              {row.isMissing ? '-' : 'No asignado'}
                            </span>
                         )}
@@ -2131,14 +2132,14 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     
                     <td className="px-4 py-3 text-center">
                       {row.isMissing ? (
-                        <span className="text-slate-300 dark:text-slate-600">-</span>
+                        <span className="text-slate-600">-</span>
                       ) : row.entered && !row.isMain && qrEnabled ? (
-                        <span className="px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+                        <span className="px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
                            EN EL EVENTO
                         </span>
                       ) : (
-                        <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'nuevo' ? 'bg-rose-500 text-white border-rose-600 animate-pulse shadow-md' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-400 text-amber-900 border-amber-500 shadow-md' : row.parentGuest.status === 'ingreso' ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : row.parentGuest.status === 'confirmado' ? 'bg-emerald-500 text-white border-emerald-600 dark:bg-emerald-600 dark:border-emerald-700' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-white/10 dark:text-slate-300 dark:border-white/20' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
-                          {row.parentGuest.status === 'ingreso' ? `EN EL EVENTO` : row.parentGuest.status === 'nuevo' ? '¡NUEVO!' : (row.parentGuest.status ? row.parentGuest.status.replace('_', ' ') : 'PENDIENTE')}
+                        <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'nuevo' ? 'bg-[#D4AF37] text-[#141210] border-[#D4AF37] animate-pulse shadow-md' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : row.parentGuest.status === 'ingreso' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : row.parentGuest.status === 'confirmado' ? 'bg-[#D4AF37]/15 text-[#D4AF37] border-[#D4AF37]/40 shadow-[0_0_10px_rgba(212,175,55,0.1)]' : row.parentGuest.status === 'cancelado' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : row.parentGuest.status === 'por_invitar' ? 'bg-white/5 text-slate-400 border-white/10' : 'bg-transparent text-slate-500 border-white/5'}`}>
+                          {row.parentGuest.status === 'ingreso' ? `EN EVENTO` : row.parentGuest.status === 'nuevo' ? 'NUEVO' : (row.parentGuest.status ? row.parentGuest.status.replace('_', ' ') : 'PENDIENTE')}
                         </span>
                       )}
                     </td>
@@ -2147,11 +2148,11 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                       {row.isMain || !qrEnabled ? (
                         <div className="flex justify-end space-x-1.5">
                           <button onClick={() => handleSendWhatsApp(row.parentGuest)} className={`p-2 rounded-lg transition-colors border ${row.parentGuest.sent ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/30' : 'bg-transparent text-slate-400 border-white/10 hover:bg-white/5 hover:text-white'}`} title="Enviar por WhatsApp"><MessageCircle size={14}/></button>
-                          <button onClick={() => handleOpenEdit(row.parentGuest)} className="p-2 text-slate-400 bg-white border border-slate-200 hover:text-indigo-600 hover:bg-indigo-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5 rounded-lg transition-colors" title="Editar Familia y Etiquetas"><Edit2 size={14} /></button>
-                          <button onClick={() => setDeleteModal(row.parentGuest)} className="p-2 text-slate-400 bg-white border border-slate-200 hover:text-rose-600 hover:bg-rose-50 dark:bg-transparent dark:border-white/10 dark:text-slate-400 dark:hover:text-rose-500 dark:hover:bg-white/5 rounded-lg transition-colors"><Trash2 size={14} /></button>
+                          <button onClick={() => handleOpenEdit(row.parentGuest)} className="p-2 text-slate-400 bg-transparent border border-white/10 hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Editar Familia y Etiquetas"><Edit2 size={14} /></button>
+                          <button onClick={() => setDeleteModal(row.parentGuest)} className="p-2 text-slate-400 bg-transparent border border-white/10 hover:text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/20 rounded-lg transition-colors"><Trash2 size={14} /></button>
                         </div>
                       ) : (
-                        <button onClick={() => handleOpenEdit(row.parentGuest)} className="text-[9px] text-indigo-500 dark:text-amber-500 hover:underline uppercase tracking-widest font-bold">
+                        <button onClick={() => handleOpenEdit(row.parentGuest)} className="text-[9px] text-[#D4AF37] hover:underline uppercase tracking-widest font-bold">
                           Etiquetar
                         </button>
                       )}
@@ -2213,11 +2214,11 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                           <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-[1.5] py-2 ${row.parentGuest.sent ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/30' : 'bg-transparent text-slate-300 border-white/10'} rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border transition-colors shadow-sm`}>
                             <MessageCircle size={14} className="mr-1"/> Enviar
                           </button>
-                          <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-1 py-2 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-500 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border border-indigo-200 dark:border-amber-500/20 transition-colors shadow-sm">
+                          <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-1 py-2 bg-transparent text-slate-300 hover:text-white hover:bg-white/5 border border-white/10 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm">
                             <Edit2 size={14}/>
                           </button>
                           {row.isMain && (
-                            <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="flex-1 py-2 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border border-rose-200 dark:border-rose-500/20 transition-colors shadow-sm hover:bg-rose-100 dark:hover:bg-rose-500/20">
+                            <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="flex-1 py-2 bg-transparent text-rose-400 hover:text-rose-500 hover:bg-rose-500/10 border border-white/10 hover:border-rose-500/20 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm">
                               <Trash2 size={14}/>
                             </button>
                           )}
@@ -2234,14 +2235,14 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
       {/* 🟢 MODAL GESTOR DEL BANCO DE ETIQUETAS */}
       {isTagManagerOpen && (
-        <div className="fixed inset-0 z-[250] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5">
+        <div className="fixed inset-0 z-[250] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 animate-in zoom-in-95 duration-200 text-white">
+            <div className="px-6 py-5 border-b border-[#D4AF37]/20 flex justify-between items-center bg-[#141210]">
               <div>
-                <h3 className="font-bold text-lg text-slate-900 dark:text-white">Banco de Etiquetas</h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">Crea grupos para el acomodo inteligente por afinidad.</p>
+                <h3 className="font-editorial font-black text-xl text-[#D4AF37]">Banco de Etiquetas</h3>
+                <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-1">Crea grupos para el acomodo inteligente.</p>
               </div>
-              <button onClick={() => setIsTagManagerOpen(false)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white"><X size={20}/></button>
+              <button onClick={() => setIsTagManagerOpen(false)} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button>
             </div>
             <div className="p-6 space-y-5">
               <form onSubmit={handleCreateGlobalTag} className="flex gap-2">
@@ -2250,9 +2251,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   value={newTagInput} 
                   onChange={e => setNewTagInput(e.target.value)} 
                   placeholder="Ej. Amigos Novio, Primos, Universidad..." 
-                  className="flex-1 p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold"
+                  className="flex-1 p-3.5 bg-[#141210] border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] text-white font-bold transition-colors"
                 />
-                <button type="submit" className="px-5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors shrink-0">
+                <button type="submit" className="px-5 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#c5a028] transition-colors shrink-0 shadow-[0_5px_15px_rgba(212,175,55,0.2)]">
                   Agregar
                 </button>
               </form>
@@ -2260,21 +2261,21 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               <div>
                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Etiquetas Activas ({globalTags.length})</label>
                 {globalTags.length === 0 ? (
-                  <div className="text-center p-6 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl text-xs text-slate-400">
+                  <div className="text-center p-6 border border-dashed border-white/10 rounded-2xl text-xs text-slate-500 bg-[#141210]">
                     Aún no has creado etiquetas. Escribe arriba para comenzar.
                   </div>
                 ) : (
                   <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto custom-scrollbar p-1">
                     {globalTags.map(tag => (
-                      <div key={tag} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#111] border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-200">
+                      <div key={tag} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#141210] border border-[#D4AF37]/40 text-xs font-bold text-[#D4AF37] shadow-sm">
                         <span>#{tag}</span>
-                        <button onClick={() => handleDeleteGlobalTag(tag)} className="text-slate-400 hover:text-rose-500 transition-colors"><X size={14}/></button>
+                        <button onClick={() => handleDeleteGlobalTag(tag)} className="text-[#D4AF37]/60 hover:text-rose-400 transition-colors"><X size={14}/></button>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-              <button onClick={() => setIsTagManagerOpen(false)} className="w-full py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest">Listo</button>
+              <button onClick={() => setIsTagManagerOpen(false)} className="w-full py-3.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-colors">Listo</button>
             </div>
           </div>
         </div>
@@ -2282,25 +2283,25 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
       {/* 🟢 MODAL NUEVO INVITADO CON CHIPS DE ETIQUETAS */}
       {addModal.open && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors flex flex-col max-h-[90vh]">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 transition-colors shrink-0"><h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-wide">Nuevo Invitado</h3><button onClick={() => setAddModal({ open: false, side: 'general' })} className="text-slate-400 hover:text-slate-800 dark:hover:text-white"><X size={20}/></button></div>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 animate-in zoom-in-95 duration-200 transition-colors flex flex-col max-h-[90vh] text-white">
+            <div className="px-6 py-5 border-b border-[#D4AF37]/20 flex justify-between items-center bg-[#141210] transition-colors shrink-0"><h3 className="font-editorial font-black text-2xl text-[#D4AF37] tracking-wide">Nuevo Invitado</h3><button type="button" onClick={() => setAddModal({ open: false, side: 'general' })} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button></div>
             <form onSubmit={handleSaveGuest} className="p-6 overflow-y-auto custom-scrollbar space-y-5">
-              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre del Titular o Familia</label><input type="text" required value={newGuest.name} onChange={e=>setNewGuest({...newGuest, name: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
-              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" value={newGuest.phone} onChange={e=>setNewGuest({...newGuest, phone: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" placeholder="10 dígitos" /></div>
+              <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Nombre del Titular o Familia</label><input type="text" required value={newGuest.name} onChange={e=>setNewGuest({...newGuest, name: e.target.value})} className="w-full p-3.5 bg-[#141210] border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] text-white font-bold transition-colors" /></div>
+              <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" value={newGuest.phone} onChange={e=>setNewGuest({...newGuest, phone: e.target.value})} className="w-full p-3.5 bg-[#141210] border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] text-white font-bold transition-colors" placeholder="10 dígitos" /></div>
               {passCountEnabled && (
                 <div className={`grid ${isPremium ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
-                  <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases {isPremium ? 'Adultos' : 'Totales'}</label><input type="number" min="1" required value={newGuest.adultPasses} onChange={e=>setNewGuest({...newGuest, adultPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-indigo-600 dark:text-amber-500 font-black text-center transition-colors" /></div>
+                  <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Pases {isPremium ? 'Adultos' : 'Totales'}</label><input type="number" min="1" required value={newGuest.adultPasses} onChange={e=>setNewGuest({...newGuest, adultPasses: e.target.value})} className="w-full p-3.5 bg-[#141210] border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] text-[#D4AF37] font-black text-center transition-colors" /></div>
                   {isPremium && (
-                    <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Pases Niños</label><input type="number" min="0" required value={newGuest.childrenPasses} onChange={e=>setNewGuest({...newGuest, childrenPasses: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-sky-600 dark:text-sky-400 font-black text-center transition-colors" /></div>
+                    <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Pases Niños</label><input type="number" min="0" required value={newGuest.childrenPasses} onChange={e=>setNewGuest({...newGuest, childrenPasses: e.target.value})} className="w-full p-3.5 bg-[#141210] border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] text-sky-400 font-black text-center transition-colors" /></div>
                   )}
                 </div>
               )}
 
               {/* 🟢 SELECTOR DE ETIQUETAS (TOCAR PARA SELECCIONAR) */}
               {isPremium && (
-                <div className="pt-2 border-t border-slate-100 dark:border-white/5">
-                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Etiquetas de Afinidad (Toca para asignar)</label>
+                <div className="pt-2 border-t border-white/5">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Etiquetas de Afinidad (Toca para asignar)</label>
                   {globalTags.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5 mb-2">
                       {globalTags.map(tag => {
@@ -2310,7 +2311,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                             type="button"
                             key={tag}
                             onClick={() => toggleNewGuestTag(tag)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${isSelected ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-600 dark:border-amber-500 shadow-sm scale-[1.02]' : 'bg-slate-50 dark:bg-[#111] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:border-indigo-300'}`}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${isSelected ? 'bg-[#D4AF37] text-[#1C1917] border-[#D4AF37] shadow-sm scale-[1.02]' : 'bg-[#141210] text-slate-400 border-white/10 hover:border-[#D4AF37]/50'}`}
                           >
                             #{tag}
                           </button>
@@ -2324,7 +2325,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 </div>
               )}
 
-              <button type="submit" className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-6 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors">Guardar Invitado</button>
+              <button type="submit" className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest mt-6 shadow-[0_10px_25px_rgba(212,175,55,0.2)] hover:bg-[#c5a028] transition-colors">Guardar Invitado</button>
             </form>
           </div>
         </div>
@@ -2339,7 +2340,111 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Nombre Titular</label><input type="text" required value={editModal.guest.name} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, name: e.target.value }})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
                 <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" value={editModal.guest.phone || ''} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, phone: e.target.value }})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-800 dark:text-white font-bold transition-colors" /></div>
+       {/* 🟢 MODAL EDITAR FAMILIA + MICRO-ETIQUETADO POR INTEGRANTE */}
+      {editModal.open && (
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-lg overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 animate-in zoom-in-95 duration-200 transition-colors flex flex-col max-h-[92vh] text-white">
+            <div className="px-6 py-5 border-b border-[#D4AF37]/20 flex justify-between items-center bg-[#141210] transition-colors shrink-0"><h3 className="font-editorial font-black text-xl text-[#D4AF37] tracking-wide">Editar Familia y Etiquetas</h3><button type="button" onClick={() => setEditModal({ open: false, guest: null })} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button></div>
+            <form onSubmit={handleSaveEdit} className="p-6 space-y-5 overflow-y-auto custom-scrollbar flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Nombre Titular</label><input type="text" required value={editModal.guest.name} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, name: e.target.value }})} className="w-full p-3 bg-[#141210] border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] text-white font-bold transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Teléfono (WhatsApp)</label><input type="text" value={editModal.guest.phone || ''} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, phone: e.target.value }})} className="w-full p-3 bg-[#141210] border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] text-white font-bold transition-colors" /></div>
               </div>
+
+              <div className={`grid ${isPremium ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
+                {isPremium && (
+                  <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Asignar Mesa</label>
+                    <select value={editModal.guest.tableId || ''} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, tableId: e.target.value || null }})} className="w-full p-3 bg-[#141210] border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] text-white font-bold transition-colors appearance-none">
+                      <option value="">Sin Mesa</option>
+                      {tables?.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    </select>
+                  </div>
+                )}
+                <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Estatus</label>
+                  <select value={editModal.guest.status} onChange={e=>setEditModal({ ...editModal, guest: { ...editModal.guest, status: e.target.value }})} className="w-full p-3 bg-[#141210] border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] text-white font-bold transition-colors appearance-none">
+                    <option value="por_invitar">Por Invitar</option><option value="pendiente">Pendiente</option><option value="confirmado">Confirmado</option><option value="cancelado">Canceló</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* 🟢 ETIQUETAS DE TODA LA FAMILIA */}
+              {isPremium && (
+                <div className="pt-3 border-t border-white/5">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Etiqueta Familiar General (Aplica a todos)</label>
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {globalTags.map(tag => {
+                      const isSelected = (editModal.guest.tags || []).includes(tag);
+                      return (
+                        <button
+                          type="button"
+                          key={tag}
+                          onClick={() => toggleEditGuestFamilyTag(tag)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${isSelected ? 'bg-[#D4AF37] text-[#1C1917] border-[#D4AF37] shadow-sm' : 'bg-[#141210] text-slate-400 border-white/10 hover:border-[#D4AF37]/50'}`}
+                        >
+                          #{tag}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {quickTagCreatorJSX}
+                </div>
+              )}
+
+              {/* 🟢 MICRO-ETIQUETADO POR INTEGRANTE INDIVIDUAL (IDEAL PARA SEPARAR PRIMOS EN FAMILIAS GRANDES) */}
+              {isPremium && editModal.guest.subGuests && editModal.guest.subGuests.length > 1 && (
+                <div className="pt-3 border-t border-white/5">
+                  <div className="mb-3">
+                    <label className="block text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest">Integrantes Individuales ({editModal.guest.subGuests.length})</label>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Si etiquetas solo a algunos integrantes (ej. #Primos), el Modo Afinidad los separará automáticamente para sentarlos con su grupo.</p>
+                  </div>
+                  <div className="space-y-2.5 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                    {editModal.guest.subGuests.map((sg, idx) => (
+                      <div key={sg.id || idx} className="p-3 rounded-2xl bg-[#141210] border border-white/10 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-black text-slate-500 w-5">#{idx + 1}</span>
+                          <input 
+                            type="text" 
+                            value={sg.name || ''} 
+                            placeholder={`Integrante ${idx + 1}`}
+                            onChange={e => handleSubGuestEditChange(idx, 'name', e.target.value)}
+                            className="flex-1 px-2.5 py-1.5 bg-[#1C1917] border border-white/10 rounded-lg text-xs font-bold text-white outline-none focus:border-[#D4AF37]"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleSubGuestEditChange(idx, 'isChild', !sg.isChild)}
+                            className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-colors ${sg.isChild ? 'bg-sky-500/20 text-sky-400 border-sky-500/30' : 'bg-[#1C1917] text-slate-500 border-white/10'}`}
+                          >
+                            Niño
+                          </button>
+                        </div>
+                        {globalTags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 pl-5">
+                            {globalTags.map(tag => {
+                              const hasTag = (sg.tags || []).includes(tag);
+                              return (
+                                <button
+                                  type="button"
+                                  key={tag}
+                                  onClick={() => toggleSubGuestTag(idx, tag)}
+                                  className={`px-2 py-0.5 rounded-md text-[9px] font-bold transition-all border ${hasTag ? 'bg-[#D4AF37] text-[#1C1917] border-[#D4AF37]' : 'bg-[#1C1917] text-slate-400 border-white/10 hover:border-[#D4AF37]/50'}`}
+                                >
+                                  #{tag}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button type="submit" className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest mt-4 shadow-[0_10px_25px_rgba(212,175,55,0.2)] hover:bg-[#c5a028] transition-colors">Guardar Cambios</button>
+            </form>
+          </div>
+        </div>
+      )}       </div>
 
               <div className={`grid ${isPremium ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
                 {isPremium && (
@@ -2437,18 +2542,18 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
       )}
 
       {deleteModal && (
-        <div className="fixed inset-0 z-[300] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-rose-500/20 animate-in zoom-in-95 duration-200 transition-colors text-center p-8">
-            <div className="w-20 h-20 bg-rose-50 dark:bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+        <div className="fixed inset-0 z-[300] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-sm overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-rose-500/20 animate-in zoom-in-95 duration-200 transition-colors text-center p-8">
+            <div className="w-20 h-20 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
               <Trash2 size={32} />
             </div>
-            <h3 className="font-editorial font-bold text-2xl text-slate-900 dark:text-white mb-2">¿Eliminar Invitado?</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-8 font-light leading-relaxed">
-              Estás a punto de eliminar a <strong className="text-slate-800 dark:text-slate-200">{deleteModal.name}</strong>. Sus pases y códigos QR quedarán invalidados. Esta acción no se puede deshacer.
+            <h3 className="font-editorial font-black text-2xl text-white mb-2">¿Eliminar Invitado?</h3>
+            <p className="text-sm text-slate-400 mb-8 font-light leading-relaxed">
+              Estás a punto de eliminar a <strong className="text-white">{deleteModal.name}</strong>. Sus pases y códigos QR quedarán invalidados. Esta acción no se puede deshacer.
             </p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteModal(null)} className="flex-1 py-3.5 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Cancelar</button>
-              <button onClick={executeDeleteGuest} className="flex-1 py-3.5 bg-rose-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-rose-600 transition-colors shadow-md shadow-rose-500/20">Sí, Eliminar</button>
+              <button onClick={() => setDeleteModal(null)} className="flex-1 py-3.5 bg-white/5 text-slate-300 border border-white/10 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-colors">Cancelar</button>
+              <button onClick={executeDeleteGuest} className="flex-1 py-3.5 bg-rose-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-rose-600 transition-colors shadow-[0_5px_15px_rgba(244,63,94,0.3)]">Sí, Eliminar</button>
             </div>
           </div>
         </div>
@@ -2456,37 +2561,37 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
       {/* 🟢 LA MAGIA DE LA PORTADA DEL PASE (REDISEÑO PREMIUM MANUAL) */}
       {qrModal && (
-        <div className="fixed inset-0 z-[400] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-300 flex flex-col relative max-h-[95vh]">
+        <div className="fixed inset-0 z-[400] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-sm overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 animate-in zoom-in-95 duration-300 flex flex-col relative max-h-[95vh]">
             
-            <div className="px-6 py-4 border-b border-slate-100 dark:bg-white/5 flex justify-between items-center z-10 shrink-0 bg-slate-50">
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white tracking-wide">Diseño del Pase</h3>
+            <div className="px-6 py-4 border-b border-[#D4AF37]/20 flex justify-between items-center z-10 shrink-0 bg-[#141210]">
+              <h3 className="font-editorial font-bold text-lg text-[#D4AF37] tracking-wide">Diseño del Pase</h3>
               
               <div className="flex gap-2 print:hidden items-center">
                  <div className="flex items-center gap-1">
-                     <label className="cursor-pointer text-amber-600 bg-amber-50 dark:bg-amber-500/10 px-3 py-1.5 rounded-full hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center shadow-sm border border-amber-200 dark:border-amber-500/20" title="Subir Logo Manual">
+                     <label className="cursor-pointer text-[#D4AF37] bg-[#D4AF37]/10 px-3 py-1.5 rounded-full hover:bg-[#D4AF37]/20 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center shadow-sm border border-[#D4AF37]/20" title="Subir Logo Manual">
                         {isUploadingLogo ? <RefreshCw size={14} className="animate-spin"/> : <><ImageIcon size={14} className="mr-1"/> Logo</>}
                         <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload}/>
                      </label>
                      {hasManualLogo && (
-                       <button onClick={handleRemoveManualLogo} className="text-rose-500 bg-rose-50 dark:bg-rose-500/10 p-1.5 rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors shadow-sm" title="Quitar logo manual"><Trash size={14}/></button>
+                       <button onClick={handleRemoveManualLogo} className="text-rose-400 bg-rose-500/10 p-1.5 rounded-full hover:bg-rose-500/20 transition-colors shadow-sm" title="Quitar logo manual"><Trash size={14}/></button>
                      )}
                  </div>
 
-                 <label className="cursor-pointer text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center shadow-sm border border-indigo-200 dark:border-indigo-500/20" title="Subir foto de fondo">
+                 <label className="cursor-pointer text-[#D4AF37] bg-[#D4AF37]/10 px-3 py-1.5 rounded-full hover:bg-[#D4AF37]/20 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center shadow-sm border border-[#D4AF37]/20" title="Subir foto de fondo">
                     {isUploadingCover ? <RefreshCw size={14} className="animate-spin"/> : <><ImageIcon size={14} className="mr-1"/> Fondo</>}
                     <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload}/>
                  </label>
                  
-                 {qrCover && <button onClick={handleRemoveCover} className="text-rose-500 bg-rose-50 dark:bg-rose-500/10 p-1.5 rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors shadow-sm" title="Quitar portada"><Trash size={14}/></button>}
+                 {qrCover && <button onClick={handleRemoveCover} className="text-rose-400 bg-rose-500/10 p-1.5 rounded-full hover:bg-rose-500/20 transition-colors shadow-sm" title="Quitar portada"><Trash size={14}/></button>}
                  
-                 <div className="w-px h-4 bg-slate-300 mx-1"></div>
+                 <div className="w-px h-4 bg-white/20 mx-1"></div>
                  
-                 <button onClick={() => setQrModal(null)} className="text-slate-400 hover:text-slate-800 bg-white dark:bg-[#111] p-1.5 rounded-full shadow-sm border border-slate-200 dark:border-white/10 transition-colors"><X size={16}/></button>
+                 <button onClick={() => setQrModal(null)} className="text-slate-400 hover:text-[#D4AF37] bg-white/5 p-1.5 rounded-full shadow-sm border border-white/10 transition-colors"><X size={16}/></button>
               </div>
             </div>
             
-            <div className="overflow-y-auto custom-scrollbar bg-slate-200 dark:bg-[#050505] p-4 sm:p-6 flex-1 flex justify-center items-center">
+            <div className="overflow-y-auto custom-scrollbar bg-[#141210] p-4 sm:p-6 flex-1 flex justify-center items-center">
                <div id={`qr-container-${qrModal.pin}`} className="bg-white relative rounded-2xl overflow-hidden shadow-xl w-full max-w-[300px] mx-auto flex flex-col" style={{ aspectRatio: '9/16' }}>
                   
                   <div className="absolute inset-0 w-full h-[60%] bg-slate-50 flex items-center justify-center overflow-hidden">
@@ -2520,13 +2625,13 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                      </h2>
 
                      {isPremium && qrModal.parentGuest.tableId && (
-                       <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-3">
+                       <p className="text-[10px] font-bold text-slate-800 uppercase tracking-widest mb-3">
                          {tables?.find(t => String(t.id) === String(qrModal.parentGuest.tableId))?.name || qrModal.parentGuest.tableId}
                        </p>
                      )}
                      {(!isPremium || !qrModal.parentGuest.tableId) && <div className="h-3 mb-3"></div>}
 
-                     <div className="bg-white p-2 rounded-xl shadow-[0_5px_15px_rgba(0,0,0,0.08)] border border-slate-100 mb-3">
+                     <div className="bg-white p-2 rounded-xl shadow-[0_5px_15px_rgba(0,0,0,0.08)] border border-slate-200 mb-3">
                         <img 
                            src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${qrModal.pin}&margin=1`} 
                            alt="QR" 
@@ -2535,8 +2640,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                         />
                      </div>
 
-                     <p className="font-mono text-[9px] text-slate-700 tracking-widest bg-slate-50 py-1.5 px-3 rounded-lg border border-slate-200 mb-2">
-                       PIN: <strong className="text-slate-900 font-bold break-all">{qrModal.pin}</strong>
+                     <p className="font-mono text-[9px] text-slate-700 tracking-widest bg-slate-100 py-1.5 px-3 rounded-lg border border-slate-200 mb-2">
+                        PIN: <strong className="text-slate-900 font-bold break-all">{qrModal.pin}</strong>
                      </p>
 
                      <p className="text-[8px] uppercase tracking-[0.15em] text-slate-500 font-bold">Pase Personal • Intransferible</p>
@@ -2544,7 +2649,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                </div>
             </div>
 
-            <div className="p-4 border-t border-slate-100 dark:bg-[#0a0a0a] shrink-0 bg-white">
+            <div className="p-4 border-t border-[#D4AF37]/20 shrink-0 bg-[#1C1917]">
               <button 
                 disabled={isPreparingQRPrint}
                 onClick={async () => {
@@ -2566,7 +2671,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                   }
                   setIsPreparingQRPrint(false);
                 }} 
-                className="w-full py-4 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-colors shadow-md flex items-center justify-center disabled:opacity-50"
+                className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#c5a028] transition-colors shadow-[0_10px_25px_rgba(212,175,55,0.2)] flex items-center justify-center disabled:opacity-50"
               >
                 {isPreparingQRPrint ? <RefreshCw size={16} className="mr-2 animate-spin"/> : <Download size={16} className="mr-2"/>} Descargar Imagen
               </button>
@@ -2687,21 +2792,21 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
   const SimulatorContent = () => (
     <>
       {!urlInvitacion ? (
-        <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
-           <Link size={56} className="text-slate-300 dark:text-slate-600 mb-6"/>
-           <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 font-editorial">Falta el Enlace</h3>
-           <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-[250px]">No se ha guardado el enlace de la invitación web para este evento.</p>
-           <div className="mt-8 border border-slate-200 dark:border-white/10 p-4 rounded-xl bg-slate-50 dark:bg-white/5 text-xs text-slate-500 dark:text-slate-400 text-left flex items-start transition-colors">
-              <Info size={16} className="mr-2.5 shrink-0 mt-0.5 text-indigo-400 dark:text-amber-500"/>
+        <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-[#1C1917] rounded-3xl border border-[#D4AF37]/30 shadow-xl transition-colors text-white">
+           <Link size={56} className="text-[#D4AF37] mb-6 opacity-80"/>
+           <h3 className="text-2xl font-editorial font-black text-white mb-2">Falta el Enlace</h3>
+           <p className="text-slate-400 text-sm leading-relaxed max-w-[250px]">No se ha guardado el enlace de la invitación web para este evento.</p>
+           <div className="mt-8 border border-white/10 p-4 rounded-xl bg-[#141210] text-xs text-slate-400 text-left flex items-start transition-colors shadow-inner">
+              <Info size={16} className="mr-2.5 shrink-0 mt-0.5 text-[#D4AF37]"/>
               <p>Ve a "Centro de Operaciones" y edita la licencia del cliente para agregar la URL.</p>
            </div>
         </div>
       ) : (
-        <div className="w-full flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden transition-colors">
+        <div className="w-full flex-1 bg-[#141210] rounded-3xl border border-[#D4AF37]/30 shadow-[0_25px_70px_rgba(0,0,0,0.9)] relative overflow-hidden transition-colors ring-4 ring-[#1C1917]">
            
            {/* 🔴 Badge de seguridad superior */}
            <div className="absolute top-0 inset-x-0 flex justify-center z-30 pointer-events-none">
-              <span className="bg-rose-500 text-white text-[9px] font-black uppercase tracking-widest py-1 px-4 rounded-b-lg shadow-md flex items-center">
+              <span className="bg-rose-500/90 backdrop-blur text-white text-[9px] font-black uppercase tracking-widest py-1.5 px-5 rounded-b-xl shadow-[0_5px_15px_rgba(244,63,94,0.3)] flex items-center border-x border-b border-rose-600/50">
                  <Lock size={10} className="mr-1.5"/> Simulación Segura
               </span>
            </div>
@@ -2710,13 +2815,13 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
               <iframe 
                  key={iframeUrl}
                  src={iframeUrl} 
-                 className="absolute inset-0 w-full h-full border-none rounded-[2rem] z-10" 
+                 className="absolute inset-0 w-full h-full border-none rounded-3xl z-10" 
                  title="Invitacion Simulada"
               ></iframe>
            ) : (
-             <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 transition-colors z-10 relative">
-               <Users size={32} className="mb-3 opacity-20"/>
-               <span className="text-xs font-bold uppercase tracking-widest">Selecciona un invitado</span>
+             <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 transition-colors z-10 relative">
+               <Users size={36} className="mb-4 text-[#D4AF37] opacity-40"/>
+               <span className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37]/70">Selecciona un invitado</span>
              </div>
            )}
         </div>
@@ -2728,35 +2833,35 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
     <div className="h-full flex flex-col lg:flex-row gap-6 pb-6 relative overflow-hidden transition-colors items-stretch">
       
       {/* PANEL IZQUIERDO: LISTA DE INVITADOS */}
-      <div className="flex-1 flex flex-col h-full min-h-0 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
-        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] transition-colors shrink-0">
-          <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white flex items-center"><Smartphone size={18} className="mr-2 text-indigo-500 dark:text-amber-500"/> Simulador en Vivo</h2>
-          <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">Selecciona una familia para ver cómo funciona su pase en tu diseño real.</p>
-          <div className="mt-4 relative">
-            <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input type="text" placeholder="Buscar familia para simular..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050505] text-slate-800 dark:text-white rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-amber-500/20 focus:border-indigo-400 dark:focus:border-amber-500 transition-colors shadow-sm" />
+      <div className="flex-1 flex flex-col h-full min-h-0 bg-[#1C1917] rounded-3xl border border-[#D4AF37]/25 shadow-xl overflow-hidden transition-colors">
+        <div className="p-5 border-b border-[#D4AF37]/20 bg-[#141210] transition-colors shrink-0">
+          <h2 className="text-xl font-editorial font-black text-[#D4AF37] flex items-center tracking-wide"><Smartphone size={20} className="mr-2"/> Simulador en Vivo</h2>
+          <p className="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Selecciona un pase para probarlo en el diseño real.</p>
+          <div className="mt-5 relative">
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+            <input type="text" placeholder="Buscar familia para simular..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-[#1C1917] border border-white/10 text-white rounded-xl text-xs outline-none focus:border-[#D4AF37] transition-colors font-bold placeholder-slate-500" />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2 sm:p-3 custom-scrollbar bg-slate-50/50 dark:bg-transparent">
+        <div className="flex-1 overflow-y-auto p-3 custom-scrollbar bg-transparent">
           {filteredGuests.length > 0 ? (
-            <ul className="space-y-1.5 pb-12 lg:pb-0">
+            <ul className="space-y-2 pb-12 lg:pb-0">
               {filteredGuests.map(g => (
                 <li key={g.id}>
                   {/* 🔴 EN MÓVIL ABRIMOS EL MODAL, EN ESCRITORIO SOLO CAMBIAMOS EL ID */}
-                  <button onClick={() => { setSelectedGuestId(g.id); setIsMobileSimulatorOpen(true); }} className={`w-full text-left p-3 sm:p-3.5 rounded-xl transition-all flex items-center justify-between shadow-sm ${selectedGuestId === g.id ? 'bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/30' : 'bg-white dark:bg-[#111] hover:bg-slate-50 dark:hover:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'}`}>
+                  <button onClick={() => { setSelectedGuestId(g.id); setIsMobileSimulatorOpen(true); }} className={`w-full text-left p-4 rounded-2xl transition-all flex items-center justify-between shadow-sm border ${selectedGuestId === g.id ? 'bg-[#D4AF37]/15 border-[#D4AF37] shadow-[0_5px_15px_rgba(212,175,55,0.15)] scale-[1.01]' : 'bg-[#141210] border-white/10 hover:border-[#D4AF37]/50 hover:bg-[#D4AF37]/5'}`}>
                     <div className="min-w-0 pr-3">
-                      <p className={`font-bold text-sm truncate ${selectedGuestId === g.id ? 'text-indigo-900 dark:text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>{g.name}</p>
-                      <p className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 mt-1 truncate">{g.originalPasses || g.passes} Pases | <span className={`uppercase font-bold tracking-wider ${g.status === 'cancelado' ? 'text-rose-500' : g.status === 'confirmado' ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`}>{g.status.replace('_', ' ')}</span></p>
+                      <p className={`font-bold text-sm truncate ${selectedGuestId === g.id ? 'text-white' : 'text-slate-300'}`}>{g.name}</p>
+                      <p className="text-[10px] text-slate-500 font-bold mt-1 truncate"><span className="text-[#D4AF37]">{g.originalPasses || g.passes}</span> Pases | <span className={`uppercase tracking-widest ${g.status === 'cancelado' ? 'text-rose-500' : g.status === 'confirmado' ? 'text-emerald-400' : 'text-slate-400'}`}>{g.status.replace('_', ' ')}</span></p>
                     </div>
-                    <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 dark:bg-black/20 border border-slate-100 dark:border-white/5">
-                      <Smartphone size={14} className={selectedGuestId === g.id ? 'text-indigo-500 dark:text-amber-500' : 'text-slate-400'}/>
+                    <div className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-full border transition-colors ${selectedGuestId === g.id ? 'bg-[#D4AF37] border-[#D4AF37] text-[#141210]' : 'bg-white/5 border-white/10 text-slate-400'}`}>
+                      <Smartphone size={16}/>
                     </div>
                   </button>
                 </li>
               ))}
             </ul>
-          ) : <div className="p-10 text-center text-slate-400 text-sm border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl m-2">No se encontraron invitados.</div>}
+          ) : <div className="p-10 text-center text-slate-500 text-sm border border-dashed border-white/10 bg-white/5 rounded-2xl m-2 font-medium">No se encontraron invitados.</div>}
         </div>
       </div>
 
@@ -2767,15 +2872,15 @@ const InvitacionView = ({ guests, urlInvitacion }) => {
 
       {/* 🔴 MODAL MÓVIL: SIMULADOR A PANTALLA COMPLETA */}
       {isMobileSimulatorOpen && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/90 backdrop-blur-md flex flex-col pt-10 sm:p-4 animate-in slide-in-from-bottom-full duration-300 lg:hidden">
-          <div className="flex justify-between items-center bg-white dark:bg-[#0a0a0a] rounded-t-3xl p-4 shrink-0 border-b border-slate-200 dark:border-white/10 shadow-lg relative z-20">
+        <div className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col pt-10 sm:p-4 animate-in slide-in-from-bottom-full duration-300 lg:hidden">
+          <div className="flex justify-between items-center bg-[#1C1917] rounded-t-3xl p-5 shrink-0 border-b border-[#D4AF37]/30 shadow-[0_10px_20px_rgba(0,0,0,0.5)] relative z-20">
             <div className="min-w-0 pr-4">
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">Viendo: {guest.name}</h3>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Modo Seguro Activado</p>
+              <h3 className="font-bold text-sm text-white truncate">Viendo: {guest.name}</h3>
+              <p className="text-[10px] text-[#D4AF37] font-bold uppercase tracking-widest mt-0.5">Modo Seguro Activado</p>
             </div>
-            <button onClick={() => setIsMobileSimulatorOpen(false)} className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-500 hover:text-rose-500 shrink-0 shadow-sm border border-slate-200 dark:border-white/5"><X size={20}/></button>
+            <button onClick={() => setIsMobileSimulatorOpen(false)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-[#D4AF37] shrink-0 shadow-sm border border-white/10 transition-colors"><X size={20}/></button>
           </div>
-          <div className="flex-1 w-full bg-white dark:bg-[#0a0a0a] relative overflow-hidden flex flex-col pb-4 px-2">
+          <div className="flex-1 w-full bg-[#1C1917] relative overflow-hidden flex flex-col pb-4 px-3 pt-3">
              <SimulatorContent />
           </div>
         </div>
@@ -3555,68 +3660,68 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
     switch (configActual.tipo) {
       case 'redonda':
         return (
-          <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-4 animate-in fade-in transition-colors">
-            <label className="block text-xs font-bold mb-2 text-slate-700 dark:text-slate-300">Sillas por Mesa Redonda (Máx. 10)</label>
-            <input type="number" min="1" max="10" value={configActual.capacidadRedonda} onChange={(e) => handleConfigChange('general', 'capacidadRedonda', e.target.value, 10)} className="w-full p-2.5 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm font-bold transition-colors" />
+          <div className="bg-[#141210] p-5 rounded-2xl border border-white/10 mb-4 animate-in fade-in transition-colors">
+            <label className="block text-xs font-bold mb-3 text-slate-400">Sillas por Mesa Redonda (Máx. 10)</label>
+            <input type="number" min="1" max="10" value={configActual.capacidadRedonda} onChange={(e) => handleConfigChange('general', 'capacidadRedonda', e.target.value, 10)} className="w-full p-3 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white shadow-sm font-bold transition-colors" />
           </div>
         );
       case 'cuadrada':
         return (
-          <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-4 animate-in fade-in transition-colors">
-            <label className="block text-xs font-bold mb-3 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 pb-2">Distribución de Sillas (Máx. 3 por lado)</label>
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Arriba</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.top} onChange={(e) => handleConfigChange('ladosCuadrada', 'top', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Abajo</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.bottom} onChange={(e) => handleConfigChange('ladosCuadrada', 'bottom', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Izquierdo</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.left} onChange={(e) => handleConfigChange('ladosCuadrada', 'left', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Derecho</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.right} onChange={(e) => handleConfigChange('ladosCuadrada', 'right', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+          <div className="bg-[#141210] p-5 rounded-2xl border border-white/10 mb-4 animate-in fade-in transition-colors">
+            <label className="block text-xs font-bold mb-4 text-slate-400 border-b border-white/10 pb-3">Distribución de Sillas (Máx. 3 por lado)</label>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Arriba</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.top} onChange={(e) => handleConfigChange('ladosCuadrada', 'top', e.target.value, 3)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Abajo</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.bottom} onChange={(e) => handleConfigChange('ladosCuadrada', 'bottom', e.target.value, 3)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Izquierdo</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.left} onChange={(e) => handleConfigChange('ladosCuadrada', 'left', e.target.value, 3)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Derecho</label><input type="number" min="0" max="3" value={configActual.ladosCuadrada.right} onChange={(e) => handleConfigChange('ladosCuadrada', 'right', e.target.value, 3)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
             </div>
           </div>
         );
       case 'tablon':
         return (
-          <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-4 animate-in fade-in transition-colors">
-            <label className="block text-xs font-bold mb-3 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 pb-2">Distribución de Sillas (Tablón)</label>
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Largo 1</label><input type="number" min="0" max="5" value={configActual.ladosTablon.top} onChange={(e) => handleConfigChange('ladosTablon', 'top', e.target.value, 5)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Largo 2</label><input type="number" min="0" max="5" value={configActual.ladosTablon.bottom} onChange={(e) => handleConfigChange('ladosTablon', 'bottom', e.target.value, 5)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Cabecera 1</label><input type="number" min="0" max="1" value={configActual.ladosTablon.left} onChange={(e) => handleConfigChange('ladosTablon', 'left', e.target.value, 1)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Cabecera 2</label><input type="number" min="0" max="1" value={configActual.ladosTablon.right} onChange={(e) => handleConfigChange('ladosTablon', 'right', e.target.value, 1)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+          <div className="bg-[#141210] p-5 rounded-2xl border border-white/10 mb-4 animate-in fade-in transition-colors">
+            <label className="block text-xs font-bold mb-4 text-slate-400 border-b border-white/10 pb-3">Distribución de Sillas (Tablón)</label>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Largo 1</label><input type="number" min="0" max="5" value={configActual.ladosTablon.top} onChange={(e) => handleConfigChange('ladosTablon', 'top', e.target.value, 5)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Largo 2</label><input type="number" min="0" max="5" value={configActual.ladosTablon.bottom} onChange={(e) => handleConfigChange('ladosTablon', 'bottom', e.target.value, 5)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Cabecera 1</label><input type="number" min="0" max="1" value={configActual.ladosTablon.left} onChange={(e) => handleConfigChange('ladosTablon', 'left', e.target.value, 1)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Cabecera 2</label><input type="number" min="0" max="1" value={configActual.ladosTablon.right} onChange={(e) => handleConfigChange('ladosTablon', 'right', e.target.value, 1)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
             </div>
           </div>
         );
       case 'ovalada':
         return (
-          <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-4 animate-in fade-in transition-colors">
-            <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 p-2.5 rounded-lg mb-3 text-[10px] text-indigo-700 dark:text-indigo-400 flex items-start transition-colors">
-              <Info size={14} className="mr-1.5 flex-shrink-0 mt-0.5"/>
+          <div className="bg-[#141210] p-5 rounded-2xl border border-white/10 mb-4 animate-in fade-in transition-colors">
+            <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/20 p-3 rounded-xl mb-4 text-[10px] text-[#D4AF37] flex items-start transition-colors">
+              <Info size={14} className="mr-2 flex-shrink-0 mt-0.5"/>
               <span>Mesa de 3.05m x 1.22m (Capacidad máxima: 14).</span>
             </div>
-            <label className="block text-xs font-bold mb-3 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 pb-2">Distribución (Ovalada)</label>
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Recto 1</label><input type="number" min="0" max="4" value={configActual.ladosOvalada.top} onChange={(e) => handleConfigChange('ladosOvalada', 'top', e.target.value, 4)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Recto 2</label><input type="number" min="0" max="4" value={configActual.ladosOvalada.bottom} onChange={(e) => handleConfigChange('ladosOvalada', 'bottom', e.target.value, 4)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Curva Izq.</label><input type="number" min="0" max="3" value={configActual.ladosOvalada.left} onChange={(e) => handleConfigChange('ladosOvalada', 'left', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Curva Der.</label><input type="number" min="0" max="3" value={configActual.ladosOvalada.right} onChange={(e) => handleConfigChange('ladosOvalada', 'right', e.target.value, 3)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+            <label className="block text-xs font-bold mb-4 text-slate-400 border-b border-white/10 pb-3">Distribución (Ovalada)</label>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Recto 1</label><input type="number" min="0" max="4" value={configActual.ladosOvalada.top} onChange={(e) => handleConfigChange('ladosOvalada', 'top', e.target.value, 4)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Recto 2</label><input type="number" min="0" max="4" value={configActual.ladosOvalada.bottom} onChange={(e) => handleConfigChange('ladosOvalada', 'bottom', e.target.value, 4)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Curva Izq.</label><input type="number" min="0" max="3" value={configActual.ladosOvalada.left} onChange={(e) => handleConfigChange('ladosOvalada', 'left', e.target.value, 3)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Curva Der.</label><input type="number" min="0" max="3" value={configActual.ladosOvalada.right} onChange={(e) => handleConfigChange('ladosOvalada', 'right', e.target.value, 3)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
             </div>
           </div>
         );
       case 'serpentina':
         const maxS = modelosSerpentina[configActual.modeloSerpentina].max;
         return (
-          <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-4 animate-in fade-in transition-colors">
-            <label className="block text-xs font-bold mb-2 text-slate-700 dark:text-slate-300">Modelo de Serpentina (1/4 Círculo)</label>
-            <select value={configActual.modeloSerpentina} onChange={(e) => handleConfigChange('serpentina_modelo', null, e.target.value)} className="w-full p-2.5 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] shadow-sm font-bold text-sm mb-4 text-indigo-600 dark:text-amber-500 transition-colors">
+          <div className="bg-[#141210] p-5 rounded-2xl border border-white/10 mb-4 animate-in fade-in transition-colors">
+            <label className="block text-xs font-bold mb-2 text-slate-400">Modelo de Serpentina (1/4 Círculo)</label>
+            <select value={configActual.modeloSerpentina} onChange={(e) => handleConfigChange('serpentina_modelo', null, e.target.value)} className="w-full p-3 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] shadow-sm font-bold text-sm mb-5 text-[#D4AF37] transition-colors appearance-none">
               {Object.entries(modelosSerpentina).map(([key, val]) => (
                 <option key={key} value={key}>{val.nombre} (Máx. {val.max.ext + val.max.int + val.max.izq + val.max.der} sillas)</option>
               ))}
             </select>
 
-            <label className="block text-xs font-bold mb-3 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 pb-2">Distribución de Sillas</label>
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Arco Exterior (Máx. {maxS.ext})</label><input type="number" min="0" max={maxS.ext} value={configActual.ladosSerpentina.ext} onChange={(e) => handleConfigChange('ladosSerpentina', 'ext', e.target.value, maxS.ext)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Arco Interior (Máx. {maxS.int})</label><input type="number" min="0" max={maxS.int} value={configActual.ladosSerpentina.int} onChange={(e) => handleConfigChange('ladosSerpentina', 'int', e.target.value, maxS.int)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Ancho Izq. (Máx. {maxS.izq})</label><input type="number" min="0" max={maxS.izq} value={configActual.ladosSerpentina.izq} onChange={(e) => handleConfigChange('ladosSerpentina', 'izq', e.target.value, maxS.izq)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Ancho Der. (Máx. {maxS.der})</label><input type="number" min="0" max={maxS.der} value={configActual.ladosSerpentina.der} onChange={(e) => handleConfigChange('ladosSerpentina', 'der', e.target.value, maxS.der)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+            <label className="block text-xs font-bold mb-4 text-slate-400 border-b border-white/10 pb-3">Distribución de Sillas</label>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Arco Exterior (Máx. {maxS.ext})</label><input type="number" min="0" max={maxS.ext} value={configActual.ladosSerpentina.ext} onChange={(e) => handleConfigChange('ladosSerpentina', 'ext', e.target.value, maxS.ext)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Arco Interior (Máx. {maxS.int})</label><input type="number" min="0" max={maxS.int} value={configActual.ladosSerpentina.int} onChange={(e) => handleConfigChange('ladosSerpentina', 'int', e.target.value, maxS.int)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Ancho Izq. (Máx. {maxS.izq})</label><input type="number" min="0" max={maxS.izq} value={configActual.ladosSerpentina.izq} onChange={(e) => handleConfigChange('ladosSerpentina', 'izq', e.target.value, maxS.izq)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Ancho Der. (Máx. {maxS.der})</label><input type="number" min="0" max={maxS.der} value={configActual.ladosSerpentina.der} onChange={(e) => handleConfigChange('ladosSerpentina', 'der', e.target.value, maxS.der)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
             </div>
           </div>
         );
@@ -3632,37 +3737,37 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         const lRight = configActual.ladosLibre?.right || 0;
 
         return (
-          <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/10 mb-4 animate-in fade-in transition-colors">
-            <div className="bg-indigo-50 dark:bg-amber-500/10 border border-indigo-100 dark:border-amber-500/20 p-2.5 rounded-lg mb-4 text-[10px] text-indigo-700 dark:text-amber-400 flex items-start transition-colors">
-              <Info size={14} className="mr-1.5 flex-shrink-0 mt-0.5"/>
+          <div className="bg-[#141210] p-5 rounded-2xl border border-white/10 mb-4 animate-in fade-in transition-colors">
+            <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/20 p-3 rounded-xl mb-5 text-[10px] text-[#D4AF37] flex items-start transition-colors">
+              <Info size={14} className="mr-2 flex-shrink-0 mt-0.5"/>
               <span><b>Regla estricta:</b> Cada silla requiere mínimo <b>0.5 metros lineales</b>. Ajusta las dimensiones de la mesa y el sistema calculará el límite físico.</span>
             </div>
 
-            <label className="block text-xs font-bold mb-3 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 pb-2">1. Dimensiones de la Mesa Fija (Metros)</label>
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <label className="block text-xs font-bold mb-4 text-slate-400 border-b border-white/10 pb-3">1. Dimensiones de la Mesa Fija (Metros)</label>
+            <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Largo (m)</label>
-                <input type="number" step="0.5" min="0.5" value={largoVal} onChange={(e) => handleConfigChange('medidas_libre', 'largo', e.target.value)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] shadow-sm font-bold text-indigo-600 dark:text-amber-500 transition-colors" />
-                <p className="text-[9px] text-slate-400 mt-1">Máx. {maxLargo} sillas por lado largo.</p>
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Largo (m)</label>
+                <input type="number" step="0.5" min="0.5" value={largoVal} onChange={(e) => handleConfigChange('medidas_libre', 'largo', e.target.value)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] shadow-sm font-bold text-[#D4AF37] transition-colors mt-1" />
+                <p className="text-[9px] text-slate-500 mt-1.5">Máx. {maxLargo} sillas por lado largo.</p>
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Ancho / Cabecera (m)</label>
-                <input type="number" step="0.5" min="0.5" value={anchoVal} onChange={(e) => handleConfigChange('medidas_libre', 'ancho', e.target.value)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] shadow-sm font-bold text-indigo-600 dark:text-amber-500 transition-colors" />
-                <p className="text-[9px] text-slate-400 mt-1">Máx. {maxAncho} sillas por cabecera.</p>
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Ancho / Cabecera (m)</label>
+                <input type="number" step="0.5" min="0.5" value={anchoVal} onChange={(e) => handleConfigChange('medidas_libre', 'ancho', e.target.value)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] shadow-sm font-bold text-[#D4AF37] transition-colors mt-1" />
+                <p className="text-[9px] text-slate-500 mt-1.5">Máx. {maxAncho} sillas por cabecera.</p>
               </div>
             </div>
 
-            <label className="block text-xs font-bold mb-3 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 pb-2">2. Distribución Exacta</label>
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Largo Arriba</label><input type="number" min="0" max={maxLargo} value={lTop} onChange={(e) => handleConfigChange('ladosLibre', 'top', e.target.value, maxLargo)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lado Largo Abajo</label><input type="number" min="0" max={maxLargo} value={lBot} onChange={(e) => handleConfigChange('ladosLibre', 'bottom', e.target.value, maxLargo)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Cabecera Izquierda</label><input type="number" min="0" max={maxAncho} value={lLeft} onChange={(e) => handleConfigChange('ladosLibre', 'left', e.target.value, maxAncho)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
-              <div><label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Cabecera Derecha</label><input type="number" min="0" max={maxAncho} value={lRight} onChange={(e) => handleConfigChange('ladosLibre', 'right', e.target.value, maxAncho)} className="w-full p-2 border border-slate-200 dark:border-white/10 rounded-lg outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-white dark:bg-[#050505] text-slate-900 dark:text-white shadow-sm transition-colors" /></div>
+            <label className="block text-xs font-bold mb-4 text-slate-400 border-b border-white/10 pb-3">2. Distribución Exacta</label>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Largo Arriba</label><input type="number" min="0" max={maxLargo} value={lTop} onChange={(e) => handleConfigChange('ladosLibre', 'top', e.target.value, maxLargo)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Lado Largo Abajo</label><input type="number" min="0" max={maxLargo} value={lBot} onChange={(e) => handleConfigChange('ladosLibre', 'bottom', e.target.value, maxLargo)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Cabecera Izquierda</label><input type="number" min="0" max={maxAncho} value={lLeft} onChange={(e) => handleConfigChange('ladosLibre', 'left', e.target.value, maxAncho)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
+              <div><label className="text-[10px] font-bold text-slate-500 uppercase">Cabecera Derecha</label><input type="number" min="0" max={maxAncho} value={lRight} onChange={(e) => handleConfigChange('ladosLibre', 'right', e.target.value, maxAncho)} className="w-full p-2.5 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white transition-colors mt-1" /></div>
             </div>
             
-            <div className="mt-4 pt-3 border-t border-slate-200 dark:border-white/10 flex justify-between items-center bg-white dark:bg-[#050505] p-3 rounded-lg transition-colors">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Capacidad Resultante:</span>
-              <span className="font-black text-lg text-emerald-600 dark:text-emerald-400">{lTop + lBot + lLeft + lRight} pases</span>
+            <div className="mt-5 pt-4 border-t border-white/10 flex justify-between items-center bg-[#1C1917] p-4 rounded-xl transition-colors">
+              <span className="text-xs font-bold text-slate-400">Capacidad Resultante:</span>
+              <span className="font-black text-lg text-[#D4AF37]">{lTop + lBot + lLeft + lRight} pases</span>
             </div>
           </div>
         );
@@ -3672,31 +3777,36 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
   };
 
   return (
-    <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500">
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-        <div className="shrink-0">
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Gestión de Mesas y Acomodo</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Arrastra invitados a las mesas, o tócalos para seleccionarlos.</p>
+    <div className="h-full flex flex-col space-y-6 pb-6 relative text-white bg-[#141210] min-h-[100vh] p-4 rounded-3xl transition-colors duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#1C1917] p-5 sm:p-6 rounded-3xl border border-[#D4AF37]/25 shadow-xl">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
+            <LayoutGrid size={20} />
+          </div>
+          <div>
+            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block mb-0.5">Control de distribución espacial.</span>
+            <h2 className="text-2xl sm:text-3xl font-editorial text-white tracking-wide leading-none">Gestión de Mesas</h2>
+          </div>
         </div>
         
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full xl:w-auto justify-start xl:justify-end">
-           <div className="flex-1 sm:flex-none flex items-center bg-white dark:bg-[#0a0a0a] px-2.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm justify-between sm:justify-start whitespace-nowrap shrink-0">
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-2">Modo Separador</span>
-              <button onClick={() => setModoSeparador(!modoSeparador)} className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${modoSeparador ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
-                <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${modoSeparador ? 'translate-x-4' : 'translate-x-0'}`}></div>
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full xl:w-auto justify-start xl:justify-end">
+           <div className="flex-1 sm:flex-none flex items-center bg-[#141210] px-3 py-2 rounded-xl border border-white/10 shadow-sm justify-between sm:justify-start whitespace-nowrap shrink-0 hover:border-[#D4AF37]/40 transition-colors">
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mr-2">Modo Separador</span>
+              <button onClick={() => setModoSeparador(!modoSeparador)} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${modoSeparador ? 'bg-[#D4AF37]' : 'bg-white/10'}`}>
+                <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${modoSeparador ? 'translate-x-4' : 'translate-x-0'}`}></div>
               </button>
            </div>
-           <button onClick={handleOpenAutoAssign} className="flex-1 sm:flex-none flex items-center justify-center px-3.5 py-2.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-xs sm:text-sm font-bold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors shadow-sm whitespace-nowrap shrink-0">
-              <Wand2 size={15} className="mr-1.5 shrink-0" /> Auto-Acomodar
+           <button onClick={handleOpenAutoAssign} className="flex-1 sm:flex-none flex items-center justify-center px-4 h-9 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg text-[10px] font-bold hover:bg-[#D4AF37]/20 transition-colors uppercase tracking-widest shrink-0">
+              <Wand2 size={14} className="mr-1.5 shrink-0" /> Auto-Acomodar
            </button>
-           <button onClick={emptyAllTables} className="flex-1 sm:flex-none px-3.5 py-2.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 rounded-xl text-xs sm:text-sm font-bold hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors whitespace-nowrap shrink-0">
+           <button onClick={emptyAllTables} className="flex-1 sm:flex-none flex items-center justify-center px-4 h-9 bg-transparent border border-white/10 text-slate-300 rounded-lg text-[10px] font-bold hover:bg-white/5 hover:text-white transition-colors uppercase tracking-widest shrink-0">
               Vaciar
            </button>
-           <button onClick={deleteAllTables} className="flex-1 sm:flex-none px-3.5 py-2.5 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 rounded-xl text-xs sm:text-sm font-bold hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors whitespace-nowrap shrink-0">
+           <button onClick={deleteAllTables} className="flex-1 sm:flex-none flex items-center justify-center px-4 h-9 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-[10px] font-bold hover:bg-rose-500/20 transition-colors uppercase tracking-widest shrink-0">
               Borrar Mesas
            </button>
-           <button onClick={() => { setTableToEdit(null); setTableTags([]); setCreationMode('iguales'); setIsAddModalOpen(true); }} className="w-full sm:w-auto flex items-center justify-center px-4 py-2.5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl text-xs sm:text-sm font-bold shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors whitespace-nowrap shrink-0">
-              <Plus size={16} className="mr-1.5 shrink-0" /> Nuevas Mesas
+           <button onClick={() => { setTableToEdit(null); setTableTags([]); setCreationMode('iguales'); setIsAddModalOpen(true); }} className="w-full sm:w-auto flex items-center justify-center px-5 h-9 bg-[#D4AF37] text-[#1C1917] rounded-lg text-[10px] font-black hover:bg-[#c5a028] transition-colors shadow-[0_10px_25px_rgba(212,175,55,0.25)] uppercase tracking-widest shrink-0">
+              <Plus size={14} className="mr-1.5 shrink-0" /> Nuevas Mesas
            </button>
         </div>
       </div>
@@ -3706,17 +3816,17 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         
         {/* PANEL: INVITADOS SIN MESA */}
         <div 
-          className={`w-full lg:w-72 bg-white dark:bg-[#0a0a0a] rounded-2xl lg:rounded-3xl border flex flex-col transition-all duration-300 shadow-sm dark:shadow-2xl ${guestSeleccionado ? 'border-indigo-400 dark:border-amber-500 ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10'} max-h-[30vh] lg:max-h-none shrink-0`}
+          className={`w-full lg:w-72 bg-[#1C1917] rounded-3xl border flex flex-col transition-all duration-300 shadow-xl overflow-hidden shrink-0 ${guestSeleccionado ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20 shadow-[0_0_20px_rgba(212,175,55,0.15)]' : 'border-[#D4AF37]/25'} max-h-[30vh] lg:max-h-none`}
           onDragOver={handleDragOver}
           onDrop={(e) => handleDrop(e, null)}
           onClick={() => { if(guestSeleccionado) moverInvitado(guestSeleccionado.id, null); }}
         >
-          <div className="p-3 lg:p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] rounded-t-2xl lg:rounded-t-3xl transition-colors shrink-0">
-            <h3 className="font-bold text-slate-800 dark:text-white flex items-center text-xs lg:text-sm uppercase tracking-widest"><Users size={16} className="mr-2 text-indigo-500 dark:text-amber-500"/> No Asignados <span className="ml-auto bg-slate-200 dark:bg-white/10 px-2 py-0.5 rounded-md">{invitadosSinMesa.length}</span></h3>
-            <p className="text-[9px] lg:text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 font-medium leading-tight">Toca un invitado para seleccionarlo, luego toca la mesa.</p>
+          <div className="p-4 lg:p-5 border-b border-[#D4AF37]/15 bg-[#141210] transition-colors shrink-0">
+            <h3 className="font-bold text-white flex items-center text-xs uppercase tracking-widest"><Users size={16} className="mr-2 text-[#D4AF37]"/> No Asignados <span className="ml-auto bg-white/5 text-[#D4AF37] border border-[#D4AF37]/30 px-2 py-0.5 rounded-md font-black">{invitadosSinMesa.length}</span></h3>
+            <p className="text-[9px] text-slate-400 mt-2 font-medium leading-tight">Toca un invitado para seleccionarlo, luego toca la mesa.</p>
           </div>
           
-          <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-4 flex flex-row lg:flex-col gap-2.5 custom-scrollbar bg-slate-50/50 dark:bg-transparent flex-wrap lg:flex-nowrap content-start">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-4 flex flex-row lg:flex-col gap-2.5 custom-scrollbar bg-transparent flex-wrap lg:flex-nowrap content-start">
             {invitadosSinMesa.map(g => {
               const gTags = Array.from(new Set([...(g.tags || []), ...(g.subGuests || []).flatMap(sg => sg.tags || [])]));
               return (
@@ -3725,21 +3835,21 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                   draggable
                   onDragStart={(e) => handleDragStart(e, g.id)}
                   onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
-                  className={`px-3 py-2 lg:p-3.5 rounded-xl border flex flex-col cursor-pointer transition-all shadow-sm w-auto lg:w-full flex-grow-0 ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 border-indigo-700 dark:border-amber-400 text-white dark:text-slate-900 transform scale-[1.02]' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-amber-500/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'}`}
+                  className={`px-3 py-2 lg:p-3.5 rounded-xl border flex flex-col cursor-pointer transition-all shadow-sm w-auto lg:w-full flex-grow-0 ${guestSeleccionado?.id === g.id ? 'bg-[#D4AF37]/15 border-[#D4AF37] text-white transform scale-[1.02] shadow-[0_0_15px_rgba(212,175,55,0.2)]' : 'bg-[#141210] border-white/10 hover:border-[#D4AF37]/40 text-slate-200 hover:bg-white/5'}`}
                 >
                   <div className="flex items-center justify-between w-full">
                     <div className="flex items-center truncate max-w-[140px] lg:max-w-none">
-                      <GripVertical size={14} className={`mr-2 hidden lg:block ${guestSeleccionado?.id === g.id ? 'text-white/50 dark:text-slate-900/50' : 'text-slate-400 cursor-grab'}`} />
+                      <GripVertical size={14} className={`mr-2 hidden lg:block ${guestSeleccionado?.id === g.id ? 'text-[#D4AF37]/70' : 'text-slate-500 cursor-grab'}`} />
                       <span className="font-bold text-xs lg:text-sm truncate">{g.name}</span>
                     </div>
-                    <span className={`text-[9px] lg:text-[10px] font-black px-2 py-0.5 rounded-md ml-2 shrink-0 ${guestSeleccionado?.id === g.id ? 'bg-white/20 dark:bg-slate-900/20 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5'}`}>
+                    <span className={`text-[9px] lg:text-[10px] font-black px-2 py-0.5 rounded-md ml-2 shrink-0 ${guestSeleccionado?.id === g.id ? 'bg-[#D4AF37] text-[#141210]' : 'bg-white/5 text-slate-300 border border-white/10'}`}>
                       {g.passes}p
                     </span>
                   </div>
                   {gTags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1.5 lg:pl-5">
                       {gTags.map(t => (
-                        <span key={t} className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded ${guestSeleccionado?.id === g.id ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900' : 'bg-indigo-50 text-indigo-600 dark:bg-amber-500/10 dark:text-amber-400'}`}>
+                        <span key={t} className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded ${guestSeleccionado?.id === g.id ? 'bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30' : 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20'}`}>
                           #{t}
                         </span>
                       ))}
@@ -3749,7 +3859,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
               );
             })}
             {invitadosSinMesa.length === 0 && (
-              <div className="text-center p-4 lg:p-8 text-slate-400 dark:text-slate-500 text-xs lg:text-sm border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl font-medium w-full mt-2">Todos están asignados.</div>
+              <div className="text-center p-4 lg:p-8 text-slate-500 text-xs border border-dashed border-white/10 bg-white/5 rounded-xl font-medium w-full mt-2">Todos están asignados.</div>
             )}
           </div>
         </div>
@@ -3757,11 +3867,11 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
         {/* PANEL DERECHO: GRID DE MESAS */}
         <div className="flex-1 overflow-y-auto custom-scrollbar lg:pr-2 pb-6">
           {safeTables.length === 0 ? (
-            <div className="text-center py-16 lg:py-20 bg-white dark:bg-[#0a0a0a] rounded-2xl lg:rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10 h-full flex flex-col items-center justify-center transition-colors px-4">
-              <LayoutGrid size={40} className="mx-auto mb-4 text-slate-300 dark:text-slate-600"/>
-              <h3 className="text-xl lg:text-2xl font-editorial font-bold text-slate-800 dark:text-white mb-2">Aún no hay mesas</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-xs lg:text-sm mb-6 max-w-md">Puedes agregarlas manualmente o usar el asistente mágico.</p>
-              <button onClick={() => setIsAddModalOpen(true)} className="px-6 py-3 bg-indigo-50 dark:bg-amber-500/10 text-indigo-600 dark:text-amber-500 font-black uppercase tracking-widest text-[10px] rounded-xl border border-indigo-200 dark:border-amber-500/20 hover:bg-indigo-100 transition-colors">Crear Mesas</button>
+            <div className="text-center py-16 lg:py-20 bg-[#1C1917] rounded-3xl border border-[#D4AF37]/25 shadow-xl h-full flex flex-col items-center justify-center transition-colors px-4">
+              <LayoutGrid size={40} className="mx-auto mb-4 text-slate-600"/>
+              <h3 className="text-xl lg:text-2xl font-editorial font-bold text-white mb-2">Aún no hay mesas</h3>
+              <p className="text-slate-400 text-xs lg:text-sm mb-6 max-w-md">Puedes agregarlas manualmente o usar el asistente mágico.</p>
+              <button onClick={() => setIsAddModalOpen(true)} className="px-6 py-3 bg-[#D4AF37]/15 text-[#D4AF37] font-black uppercase tracking-widest text-[10px] rounded-xl border border-[#D4AF37]/30 hover:bg-[#D4AF37]/25 transition-colors">Crear Mesas</button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5">
@@ -3776,21 +3886,21 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, table.id)}
                     onClick={() => handleTableClick(table.id)}
-                    className={`bg-white dark:bg-[#111] p-4 lg:p-5 rounded-2xl lg:rounded-3xl border shadow-sm flex flex-col relative group transition-all duration-300 ${guestSeleccionado && !isFull ? 'border-indigo-400 dark:border-amber-500 bg-indigo-50/50 dark:bg-amber-500/10 cursor-pointer shadow-md ring-2 ring-indigo-100 dark:ring-amber-500/20' : 'border-slate-200 dark:border-white/10 hover:border-indigo-200 dark:hover:border-white/30'}`}
+                    className={`bg-[#1C1917] p-4 lg:p-5 rounded-3xl border shadow-xl flex flex-col relative group transition-all duration-300 ${guestSeleccionado && !isFull ? 'border-[#D4AF37] bg-[#D4AF37]/5 cursor-pointer shadow-[0_0_20px_rgba(212,175,55,0.15)] ring-2 ring-[#D4AF37]/20' : 'border-[#D4AF37]/25 hover:border-[#D4AF37]/50'}`}
                   >
                     <div className="absolute top-3 lg:top-4 right-3 lg:right-4 flex opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity space-x-1.5 z-50">
-                       <button onClick={(e) => { e.stopPropagation(); setTableToEdit(table); setTableTags(table.tags || []); setCurrentConfig(table.configDetalle || configActual); setCreationMode('edit'); setIsAddModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-indigo-600 dark:text-slate-500 dark:hover:text-white bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors" title="Editar Mesa y Etiquetas"><Edit2 size={14}/></button>
-                       <button onClick={(e) => { e.stopPropagation(); emptyTable(table.id); }} className="p-1.5 text-slate-400 hover:text-amber-500 dark:text-slate-500 dark:hover:text-amber-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors" title="Vaciar Mesa"><Users size={14}/></button>
-                       <button onClick={(e) => { e.stopPropagation(); deleteTable(table.id); }} className="p-1.5 text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors" title="Borrar Mesa"><Trash2 size={14}/></button>
+                       <button onClick={(e) => { e.stopPropagation(); setTableToEdit(table); setTableTags(table.tags || []); setCurrentConfig(table.configDetalle || configActual); setCreationMode('edit'); setIsAddModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-white bg-[#141210] border border-white/10 rounded-lg transition-colors" title="Editar Mesa y Etiquetas"><Edit2 size={14}/></button>
+                       <button onClick={(e) => { e.stopPropagation(); emptyTable(table.id); }} className="p-1.5 text-slate-400 hover:text-white bg-[#141210] border border-white/10 rounded-lg transition-colors" title="Vaciar Mesa"><Users size={14}/></button>
+                       <button onClick={(e) => { e.stopPropagation(); deleteTable(table.id); }} className="p-1.5 text-slate-400 hover:text-rose-400 bg-[#141210] border border-white/10 rounded-lg transition-colors" title="Borrar Mesa"><Trash2 size={14}/></button>
                     </div>
                     
                     <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 lg:w-12 lg:h-12 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mr-3 border border-slate-100 dark:border-white/10 shrink-0">
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 bg-white/5 rounded-full flex items-center justify-center mr-3 border border-white/10 shrink-0">
                         {getTipoIcon(table.tipo, table.configDetalle?.formaPersonalizada)}
                       </div>
                       <div className="flex-1 min-w-0 pr-24 lg:pr-20">
-                        <h4 className="font-bold text-slate-800 dark:text-white text-base lg:text-lg leading-tight truncate">{table.name}</h4>
-                        <p className="text-[8px] lg:text-[9px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-widest mt-0.5">
+                        <h4 className="font-editorial font-bold text-white text-base lg:text-lg leading-tight truncate">{table.name}</h4>
+                        <p className="text-[8px] lg:text-[9px] uppercase font-black text-slate-400 tracking-widest mt-0.5">
                            {table.tipo === 'libre' ? 'Diseño Libre' : table.tipo}
                         </p>
                       </div>
@@ -3800,33 +3910,33 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                     {table.tags && table.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
                         {table.tags.map(tag => (
-                          <span key={tag} className="px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-600 border border-indigo-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20 flex items-center">
+                          <span key={tag} className="px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 flex items-center">
                             <Magnet size={9} className="mr-1"/> {tag}
                           </span>
                         ))}
                       </div>
                     )}
 
-                    <div className="mb-4 bg-slate-50 dark:bg-[#050505] rounded-xl p-2.5 lg:p-3 border border-slate-100 dark:border-white/5 flex items-center justify-between transition-colors">
-                      <div className="flex items-center text-xs font-bold text-slate-700 dark:text-slate-300">
-                        <Users size={14} className="mr-2 text-indigo-500 dark:text-amber-500"/> {usedChairs} / {table.capacity}
+                    <div className="mb-4 bg-[#141210] rounded-xl p-2.5 lg:p-3 border border-white/5 flex items-center justify-between transition-colors">
+                      <div className="flex items-center text-xs font-bold text-slate-300">
+                        <Users size={14} className="mr-2 text-[#D4AF37]"/> {usedChairs} / {table.capacity}
                       </div>
-                      {isFull ? <span className="text-[8px] lg:text-[9px] bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 px-2 py-1 rounded-md font-black uppercase tracking-widest border border-rose-200 dark:border-rose-500/20">Llena</span> : <span className={`text-[8px] lg:text-[9px] font-bold uppercase tracking-widest ${guestSeleccionado ? 'text-indigo-600 dark:text-amber-500 animate-pulse' : 'text-slate-400'}`}>{guestSeleccionado ? 'Toca para soltar' : 'Sillas libres'}</span>}
+                      {isFull ? <span className="text-[8px] lg:text-[9px] bg-rose-500/10 text-rose-400 px-2 py-1 rounded-md font-black uppercase tracking-widest border border-rose-500/20">Llena</span> : <span className={`text-[8px] lg:text-[9px] font-bold uppercase tracking-widest ${guestSeleccionado ? 'text-[#D4AF37] animate-pulse' : 'text-slate-500'}`}>{guestSeleccionado ? 'Toca para soltar' : 'Sillas libres'}</span>}
                     </div>
 
-                    <div className="mt-auto border-t border-slate-100 dark:border-white/5 pt-3 min-h-[60px] flex flex-wrap gap-1.5 content-start transition-colors">
+                    <div className="mt-auto border-t border-white/10 pt-3 min-h-[60px] flex flex-wrap gap-1.5 content-start transition-colors">
                       {assignedGuests.map(g => (
                         <div 
                           key={g.id} 
                           draggable
                           onDragStart={(e) => handleDragStart(e, g.id)}
                           onClick={(e) => { e.stopPropagation(); handleGuestClick(g); }}
-                          className={`text-[9px] lg:text-[10px] px-2.5 py-1.5 rounded-lg font-bold truncate flex items-center cursor-pointer lg:cursor-grab shadow-sm border transition-colors max-w-full ${guestSeleccionado?.id === g.id ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-700 dark:border-amber-400' : 'bg-white dark:bg-[#0a0a0a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-indigo-300'}`}
+                          className={`text-[9px] lg:text-[10px] px-2.5 py-1.5 rounded-lg font-bold truncate flex items-center cursor-pointer lg:cursor-grab shadow-sm border transition-colors max-w-full ${guestSeleccionado?.id === g.id ? 'bg-[#D4AF37] text-[#141210] border-[#D4AF37]' : 'bg-white/5 text-slate-300 border-white/10 hover:border-[#D4AF37]/40'}`}
                         >
                           <span className="truncate">{g.name}</span> <span className="ml-1.5 opacity-50 font-black shrink-0">({g.passes})</span>
                         </div>
                       ))}
-                      {assignedGuests.length === 0 && <span className="text-[10px] lg:text-xs text-slate-300 dark:text-slate-600 font-medium italic w-full text-center mt-2">Mesa vacía</span>}
+                      {assignedGuests.length === 0 && <span className="text-[10px] lg:text-xs text-slate-500 font-medium italic w-full text-center mt-2">Mesa vacía</span>}
                     </div>
                   </div>
                 );
@@ -3838,19 +3948,19 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
       {/* 🟢 MODAL DEL MOTOR DUAL: CLÁSICO VS AFINIDAD */}
       {autoAssignModal && (
-        <div className="fixed inset-0 z-[300] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
-            <div className="px-8 py-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 shrink-0">
+        <div className="fixed inset-0 z-[300] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] text-white">
+            <div className="px-8 py-6 border-b border-[#D4AF37]/20 flex justify-between items-center bg-[#141210] shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20">
+                <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center border border-[#D4AF37]/30 shadow-inner">
                   <Wand2 size={20}/>
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-slate-900 dark:text-white">Motor de Auto-Acomodo</h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Las mesas ya asignadas manualmente no se moverán.</p>
+                  <h3 className="font-editorial font-black text-xl text-[#D4AF37]">Motor de Auto-Acomodo</h3>
+                  <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-1">Las mesas ya asignadas manualmente no se moverán.</p>
                 </div>
               </div>
-              <button onClick={() => setAutoAssignModal(false)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white"><X size={22}/></button>
+              <button onClick={() => setAutoAssignModal(false)} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={22}/></button>
             </div>
 
             <div className="p-8 overflow-y-auto custom-scrollbar space-y-6">
@@ -3859,52 +3969,52 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                 <button
                   type="button"
                   onClick={() => setAssignMode('afinidad')}
-                  className={`p-4 rounded-2xl border-2 text-left transition-all ${assignMode === 'afinidad' ? 'border-indigo-600 dark:border-amber-500 bg-indigo-50/60 dark:bg-amber-500/10 shadow-md' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] opacity-70 hover:opacity-100'}`}
+                  className={`p-4 rounded-2xl border text-left transition-all ${assignMode === 'afinidad' ? 'border-[#D4AF37] bg-[#D4AF37]/10 shadow-[0_0_15px_rgba(212,175,55,0.15)]' : 'border-white/10 bg-[#141210] opacity-70 hover:opacity-100 hover:border-white/30'}`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-black text-xs uppercase tracking-widest text-indigo-600 dark:text-amber-400">Modo Afinidad</span>
-                    <Magnet size={16} className="text-indigo-600 dark:text-amber-400"/>
+                    <span className="font-black text-xs uppercase tracking-widest text-[#D4AF37]">Modo Afinidad</span>
+                    <Magnet size={16} className="text-[#D4AF37]"/>
                   </div>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">Agrupa por las etiquetas que elijas, separa primos automáticamente y rellena huecos al final.</p>
+                  <p className="text-[10px] text-slate-400 leading-relaxed">Agrupa por las etiquetas que elijas, separa primos automáticamente y rellena huecos al final.</p>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setAssignMode('clasico')}
-                  className={`p-4 rounded-2xl border-2 text-left transition-all ${assignMode === 'clasico' ? 'border-indigo-600 dark:border-amber-500 bg-indigo-50/60 dark:bg-amber-500/10 shadow-md' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#111] opacity-70 hover:opacity-100'}`}
+                  className={`p-4 rounded-2xl border text-left transition-all ${assignMode === 'clasico' ? 'border-emerald-500 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'border-white/10 bg-[#141210] opacity-70 hover:opacity-100 hover:border-white/30'}`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-black text-xs uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Modo Clásico</span>
-                    <LayoutGrid size={16} className="text-emerald-600 dark:text-emerald-400"/>
+                    <span className="font-black text-xs uppercase tracking-widest text-emerald-400">Modo Clásico</span>
+                    <LayoutGrid size={16} className="text-emerald-400"/>
                   </div>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">Tetris matemático puro. Prioriza familias completas optimizando cada silla e ignora etiquetas.</p>
+                  <p className="text-[10px] text-slate-400 leading-relaxed">Tetris matemático puro. Prioriza familias completas optimizando cada silla e ignora etiquetas.</p>
                 </button>
               </div>
 
               {/* CHIPS DE ETIQUETAS A CONSIDERAR EN MODO AFINIDAD */}
               {assignMode === 'afinidad' && (
-                <div className="bg-slate-50 dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 space-y-4 animate-in fade-in">
+                <div className="bg-[#141210] p-5 rounded-2xl border border-white/5 space-y-4 animate-in fade-in">
                   <div className="space-y-1">
                     <div className="flex items-center justify-between gap-4">
-                      <h4 className="text-xs font-black uppercase tracking-widest text-slate-800 dark:text-white">Etiquetas a agrupar hoy</h4>
+                      <h4 className="text-xs font-black uppercase tracking-widest text-white">Etiquetas a agrupar hoy</h4>
                       <button
                         type="button"
                         onClick={() => {
                           if (selectedAffinityTags.length === allAvailableTags.length) setSelectedAffinityTags([]);
                           else setSelectedAffinityTags([...allAvailableTags]);
                         }}
-                        className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-amber-400 hover:underline shrink-0"
+                        className="text-[9px] font-black uppercase tracking-widest text-[#D4AF37] hover:underline shrink-0"
                       >
                         {selectedAffinityTags.length === allAvailableTags.length ? 'Desmarcar todas' : 'Seleccionar todas'}
                       </button>
                     </div>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400">Toca las etiquetas que quieres que el algoritmo junte en las mesas.</p>
+                    <p className="text-[10px] text-slate-400">Toca las etiquetas que quieres que el algoritmo junte en las mesas.</p>
                   </div>
 
                   {/* CHIP INAMOVIBLE DE NÚCLEO FAMILIAR */}
                   <div className="flex flex-wrap gap-2">
-                    <div className="px-3 py-2 rounded-xl text-xs font-black bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5 cursor-default">
-                      <CheckCircle size={13}/> Familia / Grupo Original (Base)
+                    <div className="px-3 py-2 rounded-xl text-[10px] uppercase tracking-widest font-black bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 cursor-default">
+                      <CheckCircle size={13}/> Grupo Original
                     </div>
                     {allAvailableTags.map(tag => {
                       const active = selectedAffinityTags.includes(tag);
@@ -3915,7 +4025,7 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
                           onClick={() => {
                             setSelectedAffinityTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
                           }}
-                          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${active ? 'bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 border-indigo-600 dark:border-amber-500 shadow-sm scale-[1.02]' : 'bg-white dark:bg-[#050505] text-slate-500 border-slate-200 dark:border-white/10'}`}
+                          className={`px-3.5 py-2 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all border ${active ? 'bg-[#D4AF37] text-[#1C1917] border-[#D4AF37] shadow-[0_5px_10px_rgba(212,175,55,0.2)] scale-[1.02]' : 'bg-[#1C1917] text-slate-400 border-white/10'}`}
                         >
                           #{tag}
                         </button>
@@ -3926,13 +4036,13 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
               )}
             </div>
 
-            <div className="p-6 border-t border-slate-100 dark:border-white/10 bg-white dark:bg-[#0a0a0a] flex gap-3 shrink-0">
-              <button onClick={() => setAutoAssignModal(false)} className="px-6 py-4 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 font-bold text-xs uppercase tracking-widest">
+            <div className="p-6 border-t border-white/10 bg-[#141210] flex gap-3 shrink-0">
+              <button onClick={() => setAutoAssignModal(false)} className="px-6 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 font-bold text-xs uppercase tracking-widest transition-colors">
                 Cancelar
               </button>
               <button 
                 onClick={() => iniciarProcesoAutoAcomodo(assignMode, selectedAffinityTags)} 
-                className="flex-1 py-4 rounded-xl bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 font-black text-xs uppercase tracking-widest shadow-lg hover:bg-indigo-700 dark:hover:bg-amber-400 transition-all flex items-center justify-center gap-2"
+                className="flex-1 py-4 rounded-xl bg-[#D4AF37] text-[#1C1917] font-black text-xs uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-all flex items-center justify-center gap-2"
               >
                 <Wand2 size={16}/> Comenzar Auto-Acomodo
               </button>
@@ -3943,43 +4053,43 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
       {/* MODAL INTELIGENTE: SEPARAR FAMILIA O MOVER GRUPO */}
       {guestSplitPrompt && (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white dark:bg-[#111] rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl animate-in zoom-in-95 border border-slate-200 dark:border-white/10">
-            <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-4"><Users size={32} /></div>
-            <h3 className="font-bold text-xl text-slate-800 dark:text-white mb-2">Acomodar Grupo</h3>
+        <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-sm overflow-hidden p-8 text-center shadow-[0_25px_70px_rgba(0,0,0,0.9)] animate-in zoom-in-95 border border-[#D4AF37]/30 text-white">
+            <div className="w-20 h-20 bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><Users size={32} /></div>
+            <h3 className="font-editorial font-black text-2xl text-white mb-2">Acomodar Grupo</h3>
             
             {guestSplitPrompt.isForced ? (
-                <p className="text-rose-500 mb-4 text-[13px] font-medium leading-relaxed">
-                   Esta mesa es para <b>{guestSplitPrompt.table.capacity} personas</b> y solo quedan <b>{guestSplitPrompt.availableChairs} sillas disponibles</b>. El grupo de <b>{guestSplitPrompt.guest.name}</b> ({guestSplitPrompt.guest.passes} pases) supera la capacidad.<br/><br/>¿Cuántos deseas acomodar en esta mesa?
+                <p className="text-rose-400 mb-6 text-sm leading-relaxed">
+                   Esta mesa es para <b className="text-white">{guestSplitPrompt.table.capacity} personas</b> y solo quedan <b className="text-white">{guestSplitPrompt.availableChairs} sillas libres</b>. El grupo de <b className="text-white">{guestSplitPrompt.guest.name}</b> ({guestSplitPrompt.guest.passes} pases) supera la capacidad.<br/><br/>¿Cuántos deseas acomodar en esta mesa?
                 </p>
             ) : (
-                <p className="text-slate-500 dark:text-slate-400 mb-4 text-[13px] leading-relaxed">
-                   <b>{guestSplitPrompt.guest.name}</b> tiene {guestSplitPrompt.guest.passes} pases y hay {guestSplitPrompt.availableChairs} sillas libres en esta mesa.<br/><br/>¿Cuántos deseas acomodar aquí?
+                <p className="text-slate-400 mb-6 text-sm leading-relaxed">
+                   <b className="text-white">{guestSplitPrompt.guest.name}</b> tiene {guestSplitPrompt.guest.passes} pases y hay {guestSplitPrompt.availableChairs} sillas libres aquí.<br/><br/>¿Cuántos deseas acomodar en esta mesa?
                 </p>
             )}
 
-            <div className="flex items-center justify-center gap-4 mb-6 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-transparent">
+            <div className="flex items-center justify-center gap-4 mb-6 bg-[#141210] p-4 rounded-2xl border border-white/10">
                 <button 
                    onClick={() => setSepararCantidad(Math.max(guestSplitPrompt.minPlaceable, separarCantidad - 1))}
                    disabled={separarCantidad <= guestSplitPrompt.minPlaceable}
-                   className="w-10 h-10 rounded-full bg-white dark:bg-[#222] border border-slate-200 dark:border-white/10 flex items-center justify-center font-black text-slate-800 dark:text-white shadow-sm disabled:opacity-30"
+                   className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-black text-white disabled:opacity-30 transition-colors hover:bg-white/10"
                 >-</button>
-                <div className="text-3xl font-black text-indigo-600 dark:text-amber-500 w-12 text-center">{separarCantidad}</div>
+                <div className="text-4xl font-black text-[#D4AF37] w-14 text-center">{separarCantidad}</div>
                 <button 
                    onClick={() => setSepararCantidad(Math.min(guestSplitPrompt.maxPlaceable, separarCantidad + 1))}
                    disabled={separarCantidad >= guestSplitPrompt.maxPlaceable}
-                   className="w-10 h-10 rounded-full bg-white dark:bg-[#222] border border-slate-200 dark:border-white/10 flex items-center justify-center font-black text-slate-800 dark:text-white shadow-sm disabled:opacity-30"
+                   className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-black text-white disabled:opacity-30 transition-colors hover:bg-white/10"
                 >+</button>
             </div>
 
-            <div className="flex flex-col space-y-2">
-              <button onClick={() => handleSplitChoice('split')} className="w-full p-3 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-md transition-transform active:scale-95">Mover {separarCantidad} pase(s)</button>
+            <div className="flex flex-col space-y-3">
+              <button onClick={() => handleSplitChoice('split')} className="w-full p-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black uppercase tracking-widest text-[10px] shadow-[0_5px_15px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-colors">Mover {separarCantidad} pase(s)</button>
               
               {!guestSplitPrompt.isForced && (
-                 <button onClick={() => handleSplitChoice('all')} className="w-full p-3 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 transition-colors">Mover familia completa ({guestSplitPrompt.guest.passes})</button>
+                 <button onClick={() => handleSplitChoice('all')} className="w-full p-4 bg-white/5 border border-white/10 text-slate-300 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-white/10 transition-colors">Mover familia ({guestSplitPrompt.guest.passes})</button>
               )}
               
-              <button onClick={() => handleSplitChoice('cancel')} className="w-full p-3 text-slate-400 font-bold hover:text-slate-600 dark:hover:text-slate-200 mt-2 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
+              <button onClick={() => handleSplitChoice('cancel')} className="w-full p-3 text-slate-500 font-bold hover:text-slate-300 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
             </div>
           </div>
         </div>
@@ -3987,68 +4097,67 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
       {/* MODAL: ASISTENTE INTELIGENTE AUTO-ACOMODAR (CUANDO FALTAN MESAS) */}
       {smartAssign && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10">
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-amber-600 dark:to-yellow-500 p-8 text-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
-              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md border-2 border-white/30 relative z-10 shadow-lg">
-                <Wand2 size={36} className="text-white"/>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 transition-colors">
+          <div className="bg-[#1C1917] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 text-white">
+            <div className="bg-[#141210] p-8 text-center relative overflow-hidden border-b border-[#D4AF37]/20">
+              <div className="w-20 h-20 bg-[#D4AF37]/15 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#D4AF37]/30 relative z-10 shadow-inner">
+                <Wand2 size={36} className="text-[#D4AF37]"/>
               </div>
-              <h3 className="text-2xl font-editorial font-bold text-white mb-2 relative z-10">Asistente Inteligente</h3>
-              <p className="text-indigo-100 dark:text-amber-100 text-sm font-medium relative z-10">Faltan mesas para acomodar a todos.</p>
+              <h3 className="text-2xl font-editorial font-black text-white mb-2 relative z-10">Asistente Inteligente</h3>
+              <p className="text-slate-400 text-sm font-medium relative z-10">Faltan mesas para acomodar a todos.</p>
             </div>
             
             <div className="p-8">
-              <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-2xl p-5 mb-6 text-center transition-colors">
-                <p className="text-sm font-bold text-rose-800 dark:text-rose-400">Tienes {smartAssign.faltantes} invitados sin asiento disponible.</p>
-                <p className="text-xs text-rose-600 dark:text-rose-500/70 mt-2 font-medium">¿Qué tipo de mesas deseas generar en automático?</p>
+              <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-5 mb-6 text-center transition-colors">
+                <p className="text-sm font-bold text-rose-400">Tienes {smartAssign.faltantes} invitados sin asiento disponible.</p>
+                <p className="text-xs text-rose-300/70 mt-2 font-medium">¿Qué tipo de mesas deseas generar en automático?</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button onClick={() => generarYAsignarMagico('redondas')} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
-                  <Circle size={28} className="text-rose-500 dark:text-rose-400 mb-3"/>
-                  <p className="font-bold text-slate-800 dark:text-white text-sm">Redondas</p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">10 Sillas c/u</p>
-                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">+{Math.ceil(smartAssign.faltantes/10)} mesas</span>
+                <button onClick={() => generarYAsignarMagico('redondas')} className="w-full p-4 bg-[#141210] border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-[#D4AF37]/50 transition-all group shadow-sm">
+                  <Circle size={28} className="text-white group-hover:text-[#D4AF37] mb-3 transition-colors"/>
+                  <p className="font-bold text-white text-sm">Redondas</p>
+                  <p className="text-[10px] text-slate-500 mb-3 font-medium">10 Sillas c/u</p>
+                  <span className="bg-white/5 text-slate-300 border border-white/10 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-[#D4AF37]/15 group-hover:text-[#D4AF37] group-hover:border-[#D4AF37]/30 transition-colors">+{Math.ceil(smartAssign.faltantes/10)} mesas</span>
                 </button>
 
-                <button onClick={() => generarYAsignarMagico('tablones')} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
-                  <RectangleHorizontal size={28} className="text-amber-500 dark:text-amber-400 mb-3"/>
-                  <p className="font-bold text-slate-800 dark:text-white text-sm">Tablones</p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">12 Sillas c/u</p>
-                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">+{Math.ceil(smartAssign.faltantes/12)} mesas</span>
+                <button onClick={() => generarYAsignarMagico('tablones')} className="w-full p-4 bg-[#141210] border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-[#D4AF37]/50 transition-all group shadow-sm">
+                  <RectangleHorizontal size={28} className="text-white group-hover:text-[#D4AF37] mb-3 transition-colors"/>
+                  <p className="font-bold text-white text-sm">Tablones</p>
+                  <p className="text-[10px] text-slate-500 mb-3 font-medium">12 Sillas c/u</p>
+                  <span className="bg-white/5 text-slate-300 border border-white/10 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-[#D4AF37]/15 group-hover:text-[#D4AF37] group-hover:border-[#D4AF37]/30 transition-colors">+{Math.ceil(smartAssign.faltantes/12)} mesas</span>
                 </button>
 
-                <button onClick={() => generarYAsignarMagico('cuadradas')} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
-                  <Square size={28} className="text-sky-500 dark:text-sky-400 mb-3"/>
-                  <p className="font-bold text-slate-800 dark:text-white text-sm">Cuadradas</p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">12 Sillas c/u</p>
-                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">+{Math.ceil(smartAssign.faltantes/12)} mesas</span>
+                <button onClick={() => generarYAsignarMagico('cuadradas')} className="w-full p-4 bg-[#141210] border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-[#D4AF37]/50 transition-all group shadow-sm">
+                  <Square size={28} className="text-white group-hover:text-[#D4AF37] mb-3 transition-colors"/>
+                  <p className="font-bold text-white text-sm">Cuadradas</p>
+                  <p className="text-[10px] text-slate-500 mb-3 font-medium">12 Sillas c/u</p>
+                  <span className="bg-white/5 text-slate-300 border border-white/10 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-[#D4AF37]/15 group-hover:text-[#D4AF37] group-hover:border-[#D4AF37]/30 transition-colors">+{Math.ceil(smartAssign.faltantes/12)} mesas</span>
                 </button>
 
-                <button onClick={() => generarYAsignarMagico('ovaladas')} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
-                  <div className="w-10 h-5 rounded-[50%] border-4 border-indigo-500 dark:border-indigo-400 mb-3"></div>
-                  <p className="font-bold text-slate-800 dark:text-white text-sm">Ovaladas</p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">14 Sillas c/u</p>
-                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">+{Math.ceil(smartAssign.faltantes/14)} mesas</span>
+                <button onClick={() => generarYAsignarMagico('ovaladas')} className="w-full p-4 bg-[#141210] border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-[#D4AF37]/50 transition-all group shadow-sm">
+                  <div className="w-10 h-5 rounded-[50%] border-4 border-white group-hover:border-[#D4AF37] transition-colors mb-3"></div>
+                  <p className="font-bold text-white text-sm">Ovaladas</p>
+                  <p className="text-[10px] text-slate-500 mb-3 font-medium">14 Sillas c/u</p>
+                  <span className="bg-white/5 text-slate-300 border border-white/10 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-[#D4AF37]/15 group-hover:text-[#D4AF37] group-hover:border-[#D4AF37]/30 transition-colors">+{Math.ceil(smartAssign.faltantes/14)} mesas</span>
                 </button>
 
-                <button onClick={() => generarYAsignarMagico('serpentinas')} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
-                  <Spline size={28} className="text-teal-500 dark:text-teal-400 mb-3"/>
-                  <p className="font-bold text-slate-800 dark:text-white text-sm">Serpentinas</p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">9 Sillas c/u</p>
-                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">+{Math.ceil(smartAssign.faltantes/9)} mesas</span>
+                <button onClick={() => generarYAsignarMagico('serpentinas')} className="w-full p-4 bg-[#141210] border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-[#D4AF37]/50 transition-all group shadow-sm">
+                  <Spline size={28} className="text-white group-hover:text-[#D4AF37] mb-3 transition-colors"/>
+                  <p className="font-bold text-white text-sm">Serpentinas</p>
+                  <p className="text-[10px] text-slate-500 mb-3 font-medium">9 Sillas c/u</p>
+                  <span className="bg-white/5 text-slate-300 border border-white/10 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-[#D4AF37]/15 group-hover:text-[#D4AF37] group-hover:border-[#D4AF37]/30 transition-colors">+{Math.ceil(smartAssign.faltantes/9)} mesas</span>
                 </button>
 
-                <button onClick={() => { setSmartAssign(null); setCurrentConfig({...configActual, tipo: 'libre'}); setCreationMode('iguales'); setIsAddModalOpen(true); }} className="w-full p-4 bg-slate-50 dark:bg-[#111] border-2 border-slate-200 dark:border-white/5 rounded-2xl flex flex-col items-center text-center hover:border-indigo-500 dark:hover:border-amber-500 hover:bg-white dark:hover:bg-[#1a1a1a] transition-all group shadow-sm">
-                  <Settings2 size={28} className="text-slate-500 dark:text-slate-400 mb-3"/>
-                  <p className="font-bold text-slate-800 dark:text-white text-sm">Diseño Libre</p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">A tu medida</p>
-                  <span className="bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-indigo-100 dark:group-hover:bg-amber-500/20 group-hover:text-indigo-700 dark:group-hover:text-amber-400 transition-colors">Configurar</span>
+                <button onClick={() => { setSmartAssign(null); setCurrentConfig({...configActual, tipo: 'libre'}); setCreationMode('iguales'); setIsAddModalOpen(true); }} className="w-full p-4 bg-[#141210] border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-[#D4AF37]/50 transition-all group shadow-sm">
+                  <Settings2 size={28} className="text-white group-hover:text-[#D4AF37] mb-3 transition-colors"/>
+                  <p className="font-bold text-white text-sm">Diseño Libre</p>
+                  <p className="text-[10px] text-slate-500 mb-3 font-medium">A tu medida</p>
+                  <span className="bg-white/5 text-slate-300 border border-white/10 text-[10px] font-black px-2.5 py-1 rounded-md group-hover:bg-[#D4AF37]/15 group-hover:text-[#D4AF37] group-hover:border-[#D4AF37]/30 transition-colors">Configurar</span>
                 </button>
               </div>
 
-              <button onClick={() => setSmartAssign(null)} className="w-full py-4 mt-6 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">Cancelar y hacer manual</button>
+              <button onClick={() => setSmartAssign(null)} className="w-full py-4 mt-6 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors">Cancelar y hacer manual</button>
             </div>
           </div>
         </div>
@@ -4056,12 +4165,12 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
 
       {/* MODAL CONFIGURAR / EDITAR MESAS CON IMÁN DE ETIQUETAS */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 duration-200 transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-transparent dark:border-white/10 flex flex-col max-h-[90vh] transition-colors">
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in zoom-in-95 duration-200 transition-colors">
+          <div className="bg-[#1C1917] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 flex flex-col max-h-[90vh] transition-colors text-white">
             
-            <div className="px-8 py-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5 shrink-0 transition-colors">
-              <h3 className="font-bold text-xl text-slate-800 dark:text-white flex items-center tracking-wide"><LayoutGrid size={22} className="mr-2.5 text-indigo-600 dark:text-amber-500"/> {creationMode === 'edit' ? `Editar ${tableToEdit?.name}` : 'Configurar Mesas'}</h3>
-              <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={24}/></button>
+            <div className="px-8 py-6 border-b border-[#D4AF37]/20 flex justify-between items-center bg-[#141210] shrink-0 transition-colors">
+              <h3 className="font-editorial font-black text-2xl text-[#D4AF37] flex items-center tracking-wide"><LayoutGrid size={22} className="mr-2.5"/> {creationMode === 'edit' ? `Editar ${tableToEdit?.name}` : 'Configurar Mesas'}</h3>
+              <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={24}/></button>
             </div>
 
             <div className="p-8 overflow-y-auto flex-1 custom-scrollbar">
@@ -4169,13 +4278,13 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
               )}
             </div>
 
-            <div className="p-6 border-t border-slate-100 dark:border-white/10 bg-white dark:bg-[#0a0a0a] shrink-0 transition-colors">
+            <div className="p-6 border-t border-white/10 bg-[#141210] shrink-0 transition-colors">
               {creationMode === 'iguales' || creationMode === 'edit' ? (
-                <button onClick={generarMesas} className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black uppercase tracking-widest text-xs shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors active:scale-95">
+                <button onClick={generarMesas} className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black uppercase tracking-widest text-xs shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-colors active:scale-95">
                   {creationMode === 'edit' ? 'Guardar Cambios' : `Generar ${cantidadIguales} Mesa${cantidadIguales > 1 ? 's' : ''}`}
                 </button>
               ) : (
-                <button onClick={generarMesas} disabled={mezclaVariedad.length === 0} className={`w-full py-4 rounded-xl font-black uppercase tracking-widest text-xs shadow-md transition-all active:scale-95 ${mezclaVariedad.length > 0 ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-slate-200 dark:bg-white/5 text-slate-400 dark:text-slate-600 cursor-not-allowed'}`}>
+                <button onClick={generarMesas} disabled={mezclaVariedad.length === 0} className={`w-full py-4 rounded-xl font-black uppercase tracking-widest text-xs shadow-md transition-all active:scale-95 ${mezclaVariedad.length > 0 ? 'bg-[#D4AF37] text-[#1C1917] shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028]' : 'bg-white/5 text-slate-500 border border-white/10 cursor-not-allowed'}`}>
                   Generar Mezcla Completa
                 </button>
               )}
@@ -4790,12 +4899,12 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
 
   const getTextureStyle = (texture) => {
     switch(texture) {
-      case 'grass': return { backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M2 2c0 1-1 2-2 2v-1c.5 0 1-.5 1-1h1zm16 0c0 1 1 2 2 2v-1c-.5 0-1-.5-1-1h-1zM9 9c0 1-1 2-2 2v-1c.5 0 1-.5 1-1h1zm8 8c0 1-1 2-2 2v-1c.5 0 1-.5 1-1h1z\' fill=\'%2316a34a\' fill-opacity=\'0.25\' fill-rule=\'evenodd\'/%3E")', backgroundColor: '#bbf7d0' };
-      case 'water': return { backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 10 Q 5 15 10 10 T 20 10\' stroke=\'%230891b2\' stroke-width=\'1.5\' fill=\'none\' opacity=\'0.4\'/%3E%3C/svg%3E")', backgroundSize: '100% 20px', backgroundColor: '#a5f3fc' };
-      case 'wood': return { backgroundImage: 'repeating-linear-gradient(to right, #78350f, #78350f 2px, #92400e 2px, #92400e 20px)', backgroundColor: '#78350f' };
-      case 'marble': return { backgroundImage: 'linear-gradient(45deg, #18181b 25%, #27272a 25%, #27272a 50%, #18181b 50%, #18181b 75%, #27272a 75%, #27272a 100%)', backgroundSize: '20px 20px' };
-      case 'dance': return { backgroundImage: 'linear-gradient(45deg, #fdf4ff 25%, #fae8ff 25%, #fae8ff 50%, #fdf4ff 50%, #fdf4ff 75%, #fae8ff 75%, #fae8ff 100%)', backgroundSize: '40px 40px', backgroundColor: '#fdf4ff' };
-      default: return { backgroundColor: '#f8fafc' };
+      case 'grass': return { backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M2 2c0 1-1 2-2 2v-1c.5 0 1-.5 1-1h1zm16 0c0 1 1 2 2 2v-1c-.5 0-1-.5-1-1h-1zM9 9c0 1-1 2-2 2v-1c.5 0 1-.5 1-1h1zm8 8c0 1-1 2-2 2v-1c.5 0 1-.5 1-1h1z\' fill=\'%2310b981\' fill-opacity=\'0.15\' fill-rule=\'evenodd\'/%3E")', backgroundColor: '#064e3b', color: '#34d399', borderColor: '#059669' };
+      case 'water': return { backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 10 Q 5 15 10 10 T 20 10\' stroke=\'%2338bdf8\' stroke-width=\'1.5\' fill=\'none\' opacity=\'0.3\'/%3E%3C/svg%3E")', backgroundSize: '100% 20px', backgroundColor: '#082f49', color: '#7dd3fc', borderColor: '#0284c7' };
+      case 'wood': return { backgroundImage: 'repeating-linear-gradient(to right, #451a03, #451a03 2px, #78350f 2px, #78350f 20px)', backgroundColor: '#451a03', color: '#fbbf24', borderColor: '#92400e' };
+      case 'marble': return { backgroundImage: 'linear-gradient(45deg, #1C1917 25%, #27272a 25%, #27272a 50%, #1C1917 50%, #1C1917 75%, #27272a 75%, #27272a 100%)', backgroundSize: '20px 20px', color: '#e2e8f0', borderColor: '#3f3f46' };
+      case 'dance': return { backgroundImage: 'linear-gradient(45deg, #141210 25%, #1C1917 25%, #1C1917 50%, #141210 50%, #141210 75%, #1C1917 75%, #1C1917 100%)', backgroundSize: '40px 40px', backgroundColor: '#141210', color: '#c084fc', borderColor: '#9333ea' };
+      default: return { backgroundColor: '#141210', color: '#94a3b8', borderColor: '#334155' };
     }
   };
 
@@ -4810,19 +4919,19 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
        });
 
        return (
-         <div className="p-4 bg-white border-b border-slate-200 shrink-0 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] relative z-10">
+         <div className="p-5 bg-[#1C1917] border-b border-[#D4AF37]/20 shrink-0 shadow-[0_10px_20px_rgba(0,0,0,0.5)] relative z-10 text-white">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-black uppercase tracking-widest text-indigo-900 flex items-center"><Layers size={14} className="mr-1.5"/> {selectedIds.length} Seleccionados</span>
-              <button onClick={() => setSelectedIds([])} className="text-slate-400 hover:text-rose-500 bg-slate-50 p-1.5 rounded-md transition-colors"><X size={14}/></button>
+              <span className="text-[11px] font-black uppercase tracking-widest text-[#D4AF37] flex items-center"><Layers size={14} className="mr-1.5"/> {selectedIds.length} Seleccionados</span>
+              <button onClick={() => setSelectedIds([])} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={16}/></button>
             </div>
             <div className="flex gap-2">
-              <button onClick={toggleGroupSelection} className="flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition-colors flex items-center justify-center border border-indigo-200">
-                <Link size={14} className="mr-1.5"/> {allHaveSameGroup ? 'Desagrupar Elementos' : 'Agrupar Elementos'}
+              <button onClick={toggleGroupSelection} className="flex-1 py-2 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] rounded-lg text-xs font-bold transition-colors flex items-center justify-center border border-[#D4AF37]/30">
+                <Link size={14} className="mr-1.5"/> {allHaveSameGroup ? 'Desagrupar' : 'Agrupar'}
               </button>
-              <button onClick={removeFromMapSelected} className="flex-1 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold transition-colors flex items-center justify-center border border-slate-200" title="Quitar del plano (Guarda en inventario)">
+              <button onClick={removeFromMapSelected} className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-slate-300 rounded-lg text-xs font-bold transition-colors flex items-center justify-center border border-white/10" title="Quitar del plano">
                 <Move size={14} className="mr-1.5"/> Quitar
               </button>
-              <button onClick={permanentlyDeleteSelected} className="flex-1 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold transition-colors flex items-center justify-center border border-rose-200" title="Eliminar permanentemente de la Base de Datos">
+              <button onClick={permanentlyDeleteSelected} className="flex-1 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg text-xs font-bold transition-colors flex items-center justify-center border border-rose-500/20" title="Eliminar de la BD">
                 <Trash2 size={14} className="mr-1.5"/> Eliminar
               </button>
             </div>
@@ -4848,26 +4957,26 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     const config = el.configDetalle || {};
 
     return (
-      <div className="p-4 bg-white border-b border-slate-200 shrink-0 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] relative z-10">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-5 bg-[#1C1917] border-b border-[#D4AF37]/20 shrink-0 shadow-[0_10px_20px_rgba(0,0,0,0.5)] relative z-10 text-white">
+        <div className="flex items-center justify-between mb-5">
           <div className="flex items-center">
-            <span className="text-[11px] font-black uppercase tracking-widest text-indigo-900 flex items-center truncate max-w-[150px]"><Settings2 size={14} className="mr-1.5 text-indigo-500"/> {el.name || el.customLabel || 'Propiedades'}</span>
+            <span className="text-[11px] font-black uppercase tracking-widest text-[#D4AF37] flex items-center truncate max-w-[150px]"><Settings2 size={16} className="mr-2 text-[#D4AF37]"/> {el.name || el.customLabel || 'Propiedades'}</span>
           </div>
-          <button onClick={() => setSelectedIds([])} className="text-slate-400 hover:text-rose-500 bg-slate-50 p-1.5 rounded-md transition-colors"><X size={14}/></button>
+          <button onClick={() => setSelectedIds([])} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={16}/></button>
         </div>
 
         {el.isRoomArea && (
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            <div className="bg-slate-50 p-2 rounded-lg flex items-center justify-between border border-slate-200 shadow-inner">
-              <span className="text-[9px] text-slate-500 font-bold uppercase">Ancho (m)</span>
-              <input type="number" step="0.5" value={el.width} onChange={e => updateElementData(el.id, {width: Math.max(0.5, parseFloat(e.target.value) || 0.5)})} className="w-12 text-right bg-transparent text-xs font-black text-indigo-600 outline-none" />
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="bg-[#141210] p-3 rounded-xl flex items-center justify-between border border-white/10 shadow-inner">
+              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Ancho (m)</span>
+              <input type="number" step="0.5" value={el.width} onChange={e => updateElementData(el.id, {width: Math.max(0.5, parseFloat(e.target.value) || 0.5)})} className="w-14 text-right bg-transparent text-sm font-black text-[#D4AF37] outline-none" />
             </div>
-            <div className="bg-slate-50 p-2 rounded-lg flex items-center justify-between border border-slate-200 shadow-inner">
-              <span className="text-[9px] text-slate-500 font-bold uppercase">Largo (m)</span>
-              <input type="number" step="0.5" value={el.height} onChange={e => updateElementData(el.id, {height: Math.max(0.5, parseFloat(e.target.value) || 0.5)})} className="w-12 text-right bg-transparent text-xs font-black text-indigo-600 outline-none" />
+            <div className="bg-[#141210] p-3 rounded-xl flex items-center justify-between border border-white/10 shadow-inner">
+              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Largo (m)</span>
+              <input type="number" step="0.5" value={el.height} onChange={e => updateElementData(el.id, {height: Math.max(0.5, parseFloat(e.target.value) || 0.5)})} className="w-14 text-right bg-transparent text-sm font-black text-[#D4AF37] outline-none" />
             </div>
             {el.mode !== 'overlay' && (
-              <button onClick={() => updateElementData(el.id, {mode: isSub ? 'add' : 'subtract'})} className={`col-span-2 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm border ${isSub ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-200' : 'bg-slate-800 text-white hover:bg-slate-900 border-slate-900'}`}>
+              <button onClick={() => updateElementData(el.id, {mode: isSub ? 'add' : 'subtract'})} className={`col-span-2 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm border ${isSub ? 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border-rose-500/20' : 'bg-white/5 text-slate-300 hover:bg-white/10 border-white/10'}`}>
                  {isSub ? 'Convertir a Piso Fijo' : 'Convertir a Hueco / Patio'}
               </button>
             )}
@@ -4877,42 +4986,42 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
         {isTable && (
           <div className="mb-4 space-y-3">
             
-            <div className="bg-indigo-50 border border-indigo-100 p-2.5 rounded-lg mb-4 flex items-center shadow-inner">
-               <Users size={16} className="text-indigo-600 mr-2 shrink-0"/>
-               <span className="text-[10px] font-black text-indigo-800 uppercase tracking-widest leading-tight">Configurar sillas por lado</span>
+            <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/20 p-3 rounded-xl mb-4 flex items-center shadow-inner">
+               <Users size={16} className="text-[#D4AF37] mr-2 shrink-0"/>
+               <span className="text-[10px] font-black text-[#D4AF37] uppercase tracking-widest leading-tight">Configurar sillas</span>
             </div>
 
             {normType === 'redonda' && (
-              <div className="bg-slate-50 p-2 rounded-lg flex items-center justify-between border border-slate-200 shadow-inner">
-                <span className="text-[9px] text-slate-500 font-bold uppercase">Sillas Totales</span>
-                <input type="number" min="1" max="14" value={config.capacidadRedonda || el.capacity} onChange={e => handleTableConfig(el.id, el, 'capacidadRedonda', null, e.target.value, 14)} className="w-12 text-right bg-transparent text-xs font-black text-indigo-600 outline-none" />
+              <div className="bg-[#141210] p-3 rounded-xl flex items-center justify-between border border-white/10 shadow-inner">
+                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Sillas Totales</span>
+                <input type="number" min="1" max="14" value={config.capacidadRedonda || el.capacity} onChange={e => handleTableConfig(el.id, el, 'capacidadRedonda', null, e.target.value, 14)} className="w-12 text-right bg-transparent text-sm font-black text-[#D4AF37] outline-none" />
               </div>
             )}
             
             {normType === 'tablon' && (
-              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-inner grid grid-cols-2 gap-2">
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Largo 1</span><input type="number" min="0" value={config.ladosTablon?.top ?? 5} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'top', e.target.value, 5)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Largo 2</span><input type="number" min="0" value={config.ladosTablon?.bottom ?? 5} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'bottom', e.target.value, 5)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Cabecera 1</span><input type="number" min="0" value={config.ladosTablon?.left ?? 1} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'left', e.target.value, 1)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Cabecera 2</span><input type="number" min="0" value={config.ladosTablon?.right ?? 1} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'right', e.target.value, 1)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+              <div className="bg-[#141210] p-3 rounded-xl border border-white/10 shadow-inner grid grid-cols-2 gap-3">
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Largo 1</span><input type="number" min="0" value={config.ladosTablon?.top ?? 5} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'top', e.target.value, 5)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Largo 2</span><input type="number" min="0" value={config.ladosTablon?.bottom ?? 5} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'bottom', e.target.value, 5)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Cabecera 1</span><input type="number" min="0" value={config.ladosTablon?.left ?? 1} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'left', e.target.value, 1)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Cabecera 2</span><input type="number" min="0" value={config.ladosTablon?.right ?? 1} onChange={e=>handleTableConfig(el.id, el, 'ladosTablon', 'right', e.target.value, 1)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
               </div>
             )}
 
             {normType === 'cuadrada' && (
-              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-inner grid grid-cols-2 gap-2">
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Lado Arriba</span><input type="number" min="0" value={config.ladosCuadrada?.top ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'top', e.target.value, 3)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Lado Abajo</span><input type="number" min="0" value={config.ladosCuadrada?.bottom ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'bottom', e.target.value, 3)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Lado Izq.</span><input type="number" min="0" value={config.ladosCuadrada?.left ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'left', e.target.value, 3)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Lado Der.</span><input type="number" min="0" value={config.ladosCuadrada?.right ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'right', e.target.value, 3)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+              <div className="bg-[#141210] p-3 rounded-xl border border-white/10 shadow-inner grid grid-cols-2 gap-3">
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Lado Arriba</span><input type="number" min="0" value={config.ladosCuadrada?.top ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'top', e.target.value, 3)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Lado Abajo</span><input type="number" min="0" value={config.ladosCuadrada?.bottom ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'bottom', e.target.value, 3)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Lado Izq.</span><input type="number" min="0" value={config.ladosCuadrada?.left ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'left', e.target.value, 3)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Lado Der.</span><input type="number" min="0" value={config.ladosCuadrada?.right ?? 3} onChange={e=>handleTableConfig(el.id, el, 'ladosCuadrada', 'right', e.target.value, 3)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
               </div>
             )}
 
             {normType === 'ovalada' && (
-              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-inner grid grid-cols-2 gap-2">
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Recto Arriba</span><input type="number" min="0" value={config.ladosOvalada?.top ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'top', e.target.value, 4)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Recto Abajo</span><input type="number" min="0" value={config.ladosOvalada?.bottom ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'bottom', e.target.value, 4)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Curva Izq.</span><input type="number" min="0" value={config.ladosOvalada?.left ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'left', e.target.value, 3)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Curva Der.</span><input type="number" min="0" value={config.ladosOvalada?.right ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'right', e.target.value, 3)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+              <div className="bg-[#141210] p-3 rounded-xl border border-white/10 shadow-inner grid grid-cols-2 gap-3">
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Recto Arriba</span><input type="number" min="0" value={config.ladosOvalada?.top ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'top', e.target.value, 4)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Recto Abajo</span><input type="number" min="0" value={config.ladosOvalada?.bottom ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'bottom', e.target.value, 4)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Curva Izq.</span><input type="number" min="0" value={config.ladosOvalada?.left ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'left', e.target.value, 3)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Curva Der.</span><input type="number" min="0" value={config.ladosOvalada?.right ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosOvalada', 'right', e.target.value, 3)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
               </div>
             )}
 
@@ -4920,47 +5029,47 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
               const mod = config.modeloSerpentina || 'mod4';
               const sMax = mod === 'mod1' ? {e:3,i:1,s:1} : mod === 'mod2' ? {e:4,i:1,s:1} : mod === 'mod3' ? {e:4,i:1,s:1} : {e:5,i:2,s:1};
               return (
-                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-inner grid grid-cols-2 gap-2">
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Arco Exterior</span><input type="number" min="0" value={config.ladosSerpentina?.ext ?? sMax.e} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'ext', e.target.value, sMax.e)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Arco Interior</span><input type="number" min="0" value={config.ladosSerpentina?.int ?? sMax.i} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'int', e.target.value, sMax.i)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Ancho Izq.</span><input type="number" min="0" value={config.ladosSerpentina?.izq ?? sMax.s} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'izq', e.target.value, sMax.s)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Ancho Der.</span><input type="number" min="0" value={config.ladosSerpentina?.der ?? sMax.s} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'der', e.target.value, sMax.s)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                <div className="bg-[#141210] p-3 rounded-xl border border-white/10 shadow-inner grid grid-cols-2 gap-3">
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Arco Exterior</span><input type="number" min="0" value={config.ladosSerpentina?.ext ?? sMax.e} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'ext', e.target.value, sMax.e)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Arco Interior</span><input type="number" min="0" value={config.ladosSerpentina?.int ?? sMax.i} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'int', e.target.value, sMax.i)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Ancho Izq.</span><input type="number" min="0" value={config.ladosSerpentina?.izq ?? sMax.s} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'izq', e.target.value, sMax.s)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Ancho Der.</span><input type="number" min="0" value={config.ladosSerpentina?.der ?? sMax.s} onChange={e=>handleTableConfig(el.id, el, 'ladosSerpentina', 'der', e.target.value, sMax.s)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
                 </div>
               );
             })()}
 
             {normType === 'libre' && (
-              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 shadow-inner">
-                <div className="text-[9px] font-black text-indigo-800 uppercase tracking-wider mb-2">Medidas (Metros)</div>
-                <div className="grid grid-cols-2 gap-2 mb-3">
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Largo</span><input type="number" step="0.5" min="0.5" value={config.libreMedidas?.largo ?? 2} onChange={e=>handleTableConfig(el.id, el, 'libreMedidas', 'largo', e.target.value)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Ancho</span><input type="number" step="0.5" min="0.5" value={config.libreMedidas?.ancho ?? 1} onChange={e=>handleTableConfig(el.id, el, 'libreMedidas', 'ancho', e.target.value)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+              <div className="bg-[#141210] p-4 rounded-xl border border-white/10 shadow-inner">
+                <div className="text-[9px] font-black text-[#D4AF37] uppercase tracking-wider mb-3">Medidas (Metros)</div>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Largo</span><input type="number" step="0.5" min="0.5" value={config.libreMedidas?.largo ?? 2} onChange={e=>handleTableConfig(el.id, el, 'libreMedidas', 'largo', e.target.value)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Ancho</span><input type="number" step="0.5" min="0.5" value={config.libreMedidas?.ancho ?? 1} onChange={e=>handleTableConfig(el.id, el, 'libreMedidas', 'ancho', e.target.value)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
                 </div>
-                <div className="text-[9px] font-black text-indigo-800 uppercase tracking-wider mb-2">Distribución (Sillas)</div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Arriba</span><input type="number" min="0" value={config.ladosLibre?.top ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'top', e.target.value)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Abajo</span><input type="number" min="0" value={config.ladosLibre?.bottom ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'bottom', e.target.value)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Izquierda</span><input type="number" min="0" value={config.ladosLibre?.left ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'left', e.target.value)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
-                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1 uppercase">Derecha</span><input type="number" min="0" value={config.ladosLibre?.right ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'right', e.target.value)} className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white outline-none text-center font-bold text-indigo-600 shadow-sm" /></div>
+                <div className="text-[9px] font-black text-[#D4AF37] uppercase tracking-wider mb-3">Distribución (Sillas)</div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Arriba</span><input type="number" min="0" value={config.ladosLibre?.top ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'top', e.target.value)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Abajo</span><input type="number" min="0" value={config.ladosLibre?.bottom ?? 4} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'bottom', e.target.value)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Izquierda</span><input type="number" min="0" value={config.ladosLibre?.left ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'left', e.target.value)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
+                  <div className="flex flex-col"><span className="text-[8px] text-slate-400 font-bold mb-1.5 uppercase">Derecha</span><input type="number" min="0" value={config.ladosLibre?.right ?? 2} onChange={e=>handleTableConfig(el.id, el, 'ladosLibre', 'right', e.target.value)} className="w-full text-xs p-2 border border-white/10 rounded-lg bg-[#1C1917] outline-none text-center font-bold text-white focus:border-[#D4AF37]" /></div>
                 </div>
               </div>
             )}
           </div>
         )}
 
-        <div className="flex items-center gap-2 pt-3 mt-2 border-t border-slate-200">
+        <div className="flex items-center gap-2 pt-4 mt-3 border-t border-white/10">
           {isTable ? (
             <>
-              <button onClick={removeFromMapSelected} className="flex-1 py-2.5 bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm" title="Quita la mesa del plano pero la guarda en tu lista">
-                <Move size={12} className="mr-1.5"/> Quitar
+              <button onClick={removeFromMapSelected} className="flex-1 py-3 bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl text-[9px] font-bold uppercase tracking-widest flex items-center justify-center transition-colors" title="Quita la mesa del plano pero la guarda en tu lista">
+                <Move size={14} className="mr-1.5"/> Quitar
               </button>
-              <button onClick={permanentlyDeleteSelected} className="flex-1 py-2.5 bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm" title="Elimina la mesa permanentemente de la base de datos">
-                <Trash2 size={12} className="mr-1.5"/> Eliminar
+              <button onClick={permanentlyDeleteSelected} className="flex-1 py-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 rounded-xl text-[9px] font-bold uppercase tracking-widest flex items-center justify-center transition-colors" title="Elimina la mesa permanentemente">
+                <Trash2 size={14} className="mr-1.5"/> Eliminar
               </button>
             </>
           ) : (
-            <button onClick={permanentlyDeleteSelected} className="flex-1 py-2.5 bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 rounded-lg text-[10px] font-bold uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm">
-              <Trash2 size={12} className="mr-1.5"/> Borrar Área
+            <button onClick={permanentlyDeleteSelected} className="flex-1 py-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center transition-colors">
+              <Trash2 size={14} className="mr-1.5"/> Borrar Área
             </button>
           )}
         </div>
@@ -4970,7 +5079,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
 
   // 🟢 COMPONENTE REUTILIZABLE: LIENZO DEL MAPA
   const canvasContent = (
-    <div ref={containerRef} className="flex-1 relative overflow-hidden bg-slate-100 z-10" onDrop={handleDropOnCanvas} onDragOver={(e) => e.preventDefault()}>
+    <div ref={containerRef} className="flex-1 relative overflow-hidden bg-[#050505] z-10" onDrop={handleDropOnCanvas} onDragOver={(e) => e.preventDefault()}>
              
       {isEditMode && activeTool === 'measure' && (
           <div className="absolute z-[9999] pointer-events-none transform -translate-x-1/2 -translate-y-[150%]" style={{ left: mousePos.x * scale + offsetX, top: mousePos.y * scale + offsetY }}>
@@ -5040,12 +5149,12 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
            </defs>
 
            <g transform={`translate(${offsetX}, ${offsetY})`}>
-             <rect x="-5000" y="-5000" width="10000" height="10000" fill="#ffffff" mask="url(#roomMask)" />
+             <rect x="-5000" y="-5000" width="10000" height="10000" fill="#1C1917" mask="url(#roomMask)" />
              <g mask="url(#outerWallMask)">
-               {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+               {addAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#D4AF37', strokeWidth: scale * 0.08, strokeLinejoin: 'round', fill: 'none' }))}
              </g>
              <g mask="url(#subWallMask)">
-               {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#1e293b', strokeWidth: scale * 0.10, strokeLinejoin: 'round', fill: 'none' }))}
+               {subAreas.map(el => renderSVGShape(el, scale, 0, 0, { stroke: '#D4AF37', strokeWidth: scale * 0.08, strokeLinejoin: 'round', fill: 'none' }))}
              </g>
            </g>
 
@@ -5199,11 +5308,11 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
     return (
       <div className="h-full flex flex-col space-y-4 pb-6 relative" onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onMouseLeave={handlePointerUp}>
         <div className="absolute top-6 right-6 z-[600] pointer-events-auto animate-in zoom-in duration-300">
-          <button onClick={() => setIsEditMode(true)} className="px-6 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-bold hover:bg-indigo-700 transition-all shadow-xl flex items-center hover:scale-105 border border-indigo-500">
-            <Edit2 size={18} className="mr-2"/> Editar Plano
+          <button onClick={() => setIsEditMode(true)} className="px-6 py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl text-xs uppercase tracking-widest font-black shadow-[0_10px_25px_rgba(212,175,55,0.25)] flex items-center hover:bg-[#c5a028] transition-all hover:scale-105 border border-[#D4AF37]">
+            <Edit2 size={16} className="mr-2"/> Editar Plano
           </button>
         </div>
-        <div className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col overflow-hidden relative">
+        <div className="flex-1 bg-[#141210] rounded-3xl border border-[#D4AF37]/25 shadow-xl flex flex-col overflow-hidden relative transition-colors">
           {canvasContent}
         </div>
       </div>
@@ -5213,17 +5322,16 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
   // 🟢 VISTA DE EDICIÓN EN PANTALLA COMPLETA (PORTAL)
   return createPortal(
     <div 
-      className="fixed inset-0 z-[99999] bg-slate-900/80 backdrop-blur-md flex flex-col p-2 md:p-6 animate-in zoom-in-95 duration-200" 
+      className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex flex-col p-2 md:p-6 animate-in zoom-in-95 duration-200 text-white" 
       onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onMouseLeave={handlePointerUp}
     >
-      <div className="flex-1 bg-white rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden relative border border-slate-200">
+      <div className="flex-1 bg-[#1C1917] rounded-3xl shadow-[0_25px_70px_rgba(0,0,0,0.9)] flex flex-col overflow-hidden relative border border-[#D4AF37]/30 transition-colors">
 
         {/* 1. BARRA SUPERIOR (TOP BAR) - Acciones Globales */}
-        <div className="bg-white border-b border-slate-200 px-4 py-3 flex flex-wrap justify-between items-center z-30 shadow-sm shrink-0 gap-3">
+        <div className="bg-[#141210] border-b border-[#D4AF37]/20 px-4 py-4 flex flex-wrap justify-between items-center z-30 shrink-0 gap-3">
            <div className="flex items-center gap-2">
-              <button onClick={handleUndo} disabled={history.length === 0} className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center transition-colors border ${history.length > 0 ? 'bg-white text-slate-700 hover:bg-slate-50 border-slate-300 shadow-sm' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}><RotateCw size={14} className="mr-1.5" style={{ transform: 'scaleX(-1)' }}/> Deshacer</button>
+              <button onClick={handleUndo} disabled={history.length === 0} className={`px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest font-black flex items-center transition-colors border ${history.length > 0 ? 'bg-white/5 text-white hover:bg-white/10 border-white/10' : 'bg-transparent text-slate-600 border-white/5 cursor-not-allowed'}`}><RotateCw size={14} className="mr-1.5" style={{ transform: 'scaleX(-1)' }}/> Deshacer</button>
               
-              {/* 🟢 BOTÓN LIMPIAR CON MODAL PERSONALIZADO */}
               <button onClick={() => { 
                  setConfirmDialog({
                    title: 'Limpiar Plano',
@@ -5239,51 +5347,50 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                      setConfirmDialog(null);
                    }
                  });
-               }} className="px-3 py-1.5 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-bold flex items-center transition-colors shadow-sm"><Trash2 size={14} className="mr-1.5"/> Limpiar</button>
+               }} className="px-4 py-2 bg-rose-500/10 border border-rose-500/20 text-rose-500 hover:bg-rose-500/20 rounded-xl text-[10px] uppercase tracking-widest font-black flex items-center transition-colors"><Trash2 size={14} className="mr-1.5"/> Limpiar</button>
               
-              <div className="hidden md:block w-px h-5 bg-slate-200 mx-1"></div>
-              <button onClick={() => { setRoomGrouped(!roomGrouped); setSelectedIds([]); }} className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center transition-colors border shadow-sm ${roomGrouped ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}>
+              <div className="hidden md:block w-px h-5 bg-white/10 mx-1"></div>
+              <button onClick={() => { setRoomGrouped(!roomGrouped); setSelectedIds([]); }} className={`px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest font-black flex items-center transition-colors border ${roomGrouped ? 'bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#D4AF37]' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'}`}>
                 {roomGrouped ? <Lock size={14} className="mr-1.5"/> : <Unlock size={14} className="mr-1.5"/>} 
                 {roomGrouped ? 'Desbloquear Áreas' : 'Bloquear Áreas'}
               </button>
            </div>
 
            <div className="flex items-center gap-3">
-              <div className="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-inner">
-                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mr-3">Modo Separador</span>
-                 <button onClick={() => setModoSeparador(!modoSeparador)} className={`relative w-8 h-4 rounded-full transition-colors ${modoSeparador ? 'bg-indigo-500' : 'bg-slate-300'}`}>
+              <div className="flex items-center bg-[#1C1917] px-4 py-2 rounded-xl border border-white/10">
+                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mr-3">Modo Separador</span>
+                 <button onClick={() => setModoSeparador(!modoSeparador)} className={`relative w-8 h-4 rounded-full transition-colors ${modoSeparador ? 'bg-[#D4AF37]' : 'bg-slate-600'}`}>
                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${modoSeparador ? 'translate-x-4' : 'translate-x-0'}`}></div>
                  </button>
               </div>
-              <div className="hidden md:block w-px h-5 bg-slate-200 mx-1"></div>
-              <button onClick={() => setShowExportModal(true)} className="px-3 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center"><FileDown size={14} className="mr-1.5"/> PDF</button>
+              <div className="hidden md:block w-px h-5 bg-white/10 mx-1"></div>
+              <button onClick={() => setShowExportModal(true)} className="px-4 py-2 bg-white/5 border border-white/10 text-white rounded-xl text-[10px] uppercase tracking-widest font-black hover:bg-white/10 transition-colors flex items-center"><FileDown size={14} className="mr-1.5"/> PDF</button>
               
-              {/* 🟢 BOTÓN GUARDAR Y CERRAR RENOMBRADO */}
-              <button onClick={() => { setIsEditMode(false); setSelectedIds([]); centerAndFitMap(); }} className="px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold hover:bg-emerald-600 transition-colors shadow-md flex items-center"><CheckCircle size={16} className="mr-1.5"/> Guardar y Cerrar</button>
+              <button onClick={() => { setIsEditMode(false); setSelectedIds([]); centerAndFitMap(); }} className="px-6 py-2.5 bg-[#D4AF37] text-[#1C1917] rounded-xl text-[10px] uppercase tracking-widest font-black hover:bg-[#c5a028] transition-colors shadow-[0_5px_15px_rgba(212,175,55,0.25)] flex items-center"><CheckCircle size={16} className="mr-1.5"/> Guardar y Cerrar</button>
            </div>
         </div>
 
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
 
            {/* 2. BARRA LATERAL IZQUIERDA (TOOLS) */}
-           <div className="w-full md:w-16 bg-white md:border-r border-b md:border-b-0 border-slate-200 flex md:flex-col items-center justify-center md:justify-start py-2 md:py-4 gap-2 z-20 shrink-0 shadow-[4px_0_15px_-3px_rgba(0,0,0,0.05)] overflow-x-auto">
-              <button onClick={() => {setActiveTool('select'); setMeasureLine(null);}} className={`p-3 md:p-3.5 rounded-xl transition-all ${activeTool === 'select' ? 'bg-indigo-600 text-white shadow-md md:scale-110' : 'text-slate-500 hover:bg-slate-100 hover:text-indigo-600'}`} title="Seleccionar Libre">
+           <div className="w-full md:w-20 bg-[#141210] md:border-r border-b md:border-b-0 border-[#D4AF37]/20 flex md:flex-col items-center justify-center md:justify-start py-2 md:py-6 gap-3 z-20 shrink-0 shadow-[4px_0_15px_-3px_rgba(0,0,0,0.5)] overflow-x-auto">
+              <button onClick={() => {setActiveTool('select'); setMeasureLine(null);}} className={`p-4 rounded-xl transition-all ${activeTool === 'select' ? 'bg-[#D4AF37] text-[#1C1917] shadow-[0_5px_15px_rgba(212,175,55,0.3)] md:scale-110' : 'text-slate-500 hover:bg-white/5 hover:text-white'}`} title="Seleccionar Libre">
                 <NavigationIcon size={20} className="-rotate-90" />
               </button>
-              <button onClick={() => {setActiveTool('pan'); setSelectedIds([]); setMeasureLine(null);}} className={`p-3 md:p-3.5 rounded-xl transition-all ${activeTool === 'pan' ? 'bg-indigo-600 text-white shadow-md md:scale-110' : 'text-slate-500 hover:bg-slate-100 hover:text-indigo-600'}`} title="Mover Lienzo">
+              <button onClick={() => {setActiveTool('pan'); setSelectedIds([]); setMeasureLine(null);}} className={`p-4 rounded-xl transition-all ${activeTool === 'pan' ? 'bg-[#D4AF37] text-[#1C1917] shadow-[0_5px_15px_rgba(212,175,55,0.3)] md:scale-110' : 'text-slate-500 hover:bg-white/5 hover:text-white'}`} title="Mover Lienzo">
                 <Hand size={20} />
               </button>
-              <button onClick={() => { if(selectedIds.length>1) toggleGroupSelection(); else setActiveTool('select'); }} className={`p-3 md:p-3.5 rounded-xl transition-all ${selectedIds.length > 1 ? 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100 ring-2 ring-indigo-200 animate-pulse' : 'text-slate-300 cursor-not-allowed'}`} title="Agrupar Selección">
+              <button onClick={() => { if(selectedIds.length>1) toggleGroupSelection(); else setActiveTool('select'); }} className={`p-4 rounded-xl transition-all ${selectedIds.length > 1 ? 'text-[#D4AF37] bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 ring-2 ring-[#D4AF37]/30 animate-pulse' : 'text-slate-600 cursor-not-allowed'}`} title="Agrupar Selección">
                 <Link size={20} />
               </button>
-              <div className="hidden md:block w-8 h-px bg-slate-200 my-1"></div>
-              <div className="md:hidden h-8 w-px bg-slate-200 mx-1"></div>
-              <button onClick={() => {setActiveTool('measure'); setSelectedIds([]);}} className={`p-3 md:p-3.5 rounded-xl transition-all ${activeTool === 'measure' ? 'bg-sky-500 text-white shadow-md md:scale-110' : 'text-slate-500 hover:bg-sky-50 hover:text-sky-600'}`} title="Cinta Métrica">
+              <div className="hidden md:block w-8 h-px bg-white/10 my-2"></div>
+              <div className="md:hidden h-8 w-px bg-white/10 mx-2"></div>
+              <button onClick={() => {setActiveTool('measure'); setSelectedIds([]);}} className={`p-4 rounded-xl transition-all ${activeTool === 'measure' ? 'bg-sky-500 text-white shadow-[0_5px_15px_rgba(14,165,233,0.3)] md:scale-110' : 'text-slate-500 hover:bg-white/5 hover:text-white'}`} title="Cinta Métrica">
                 <Spline size={20} />
               </button>
-              <div className="hidden md:block w-8 h-px bg-slate-200 my-1"></div>
-              <div className="md:hidden h-8 w-px bg-slate-200 mx-1"></div>
-              <button onClick={() => setActiveTool('rotate')} className={`p-3 md:p-3.5 rounded-xl transition-all ${activeTool === 'rotate' ? 'bg-amber-500 text-white shadow-md md:scale-110' : 'text-slate-500 hover:bg-amber-50 hover:text-amber-600'}`} title="Girar Selección">
+              <div className="hidden md:block w-8 h-px bg-white/10 my-2"></div>
+              <div className="md:hidden h-8 w-px bg-white/10 mx-2"></div>
+              <button onClick={() => setActiveTool('rotate')} className={`p-4 rounded-xl transition-all ${activeTool === 'rotate' ? 'bg-[#D4AF37] text-[#1C1917] shadow-[0_5px_15px_rgba(212,175,55,0.3)] md:scale-110' : 'text-slate-500 hover:bg-white/5 hover:text-white'}`} title="Girar Selección">
                 <RotateCw size={20} />
               </button>
            </div>
@@ -5292,7 +5399,7 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
            {canvasContent}
 
            {/* 4. PANEL LATERAL DERECHO (INSPECTOR Y LIBRERÍA) */}
-           <div className="w-full md:w-[320px] border-l border-slate-200 bg-slate-50 flex flex-col z-20 shrink-0 shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.05)]">
+           <div className="w-full md:w-[320px] border-l border-[#D4AF37]/20 bg-[#141210] flex flex-col z-20 shrink-0 shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.5)]">
               
               {/* Inspector Contextual */}
               <div className="shrink-0 empty:hidden">
@@ -5302,17 +5409,17 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
               {/* Catálogo / Librería */}
               <div className="p-4 overflow-y-auto flex-1 custom-scrollbar">
                 
-                <h3 className="font-bold text-slate-700 mb-3 text-[10px] uppercase tracking-wider flex items-center">
-                  <Spline size={14} className="mr-2 text-slate-400"/> 1. Áreas y Exteriores
+                <h3 className="font-bold text-white mb-3 text-[10px] uppercase tracking-wider flex items-center">
+                  <Spline size={14} className="mr-2 text-slate-500"/> 1. Áreas y Exteriores
                 </h3>
                 <div className="grid grid-cols-3 gap-2 mb-6">
                   {ROOM_AREAS_CATALOG.map((tmpl, idx) => {
                     if (tmpl.shapeType === 'polygon') return null; 
                     return (
-                      <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'room_area')} className="bg-white p-2 rounded-xl border border-slate-200 text-center cursor-grab active:cursor-grabbing hover:bg-indigo-50 hover:border-indigo-300 transition-colors shadow-sm">
-                         <div className="h-6 flex items-center justify-center mb-1 text-slate-500">
+                      <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'room_area')} className="bg-[#1C1917] p-2 rounded-xl border border-white/10 text-center cursor-grab active:cursor-grabbing hover:bg-white/5 hover:border-white/30 transition-colors shadow-sm">
+                         <div className="h-6 flex items-center justify-center mb-1 text-slate-400">
                             <div 
-                              className="border border-current bg-slate-100" 
+                              className="border border-slate-500 bg-[#141210]" 
                               style={{ 
                                 width: '20px', height: '20px',
                                 borderRadius: tmpl.shapeType === 'ellipse' && tmpl.name === 'Área Circular' ? '50%' : tmpl.shapeType === 'ellipse' ? '50%' : '3px',
@@ -5321,14 +5428,14 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                               }}
                             ></div>
                          </div>
-                         <p className="text-[9px] font-bold text-slate-600 leading-tight">{tmpl.name}</p>
+                         <p className="text-[9px] font-bold text-slate-400 leading-tight">{tmpl.name}</p>
                       </div>
                     );
                   })}
                 </div>
 
-                <h3 className="font-bold text-indigo-700 mb-3 text-[10px] uppercase tracking-wider flex items-center pt-4 border-t border-slate-200">
-                  <Users size={14} className="mr-2 text-indigo-400"/> 2. Mesas Reales ({availableTables.length})
+                <h3 className="font-bold text-[#D4AF37] mb-3 text-[10px] uppercase tracking-wider flex items-center pt-4 border-t border-white/10">
+                  <Users size={14} className="mr-2 text-[#D4AF37]/50"/> 2. Mesas Reales ({availableTables.length})
                 </h3>
                 <div className="space-y-2 mb-6">
                   {availableTables.map((table) => {
@@ -5341,54 +5448,54 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
                     else if (tType === 'personalizada' || tType === 'libre') { tW = table.configDetalle?.libreMedidas?.largo || 2; tH = table.configDetalle?.libreMedidas?.ancho || 1; }
 
                     return (
-                      <div key={table.id} draggable onDragStart={(e) => handleDragStart(e, {id: table.id, width: tW, height: tH}, 'existing_table')} className="bg-white p-2 rounded-xl border border-indigo-100 shadow-sm cursor-grab active:cursor-grabbing hover:border-indigo-400 hover:shadow-md transition-all flex items-center">
-                        <div className="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center mr-3 text-indigo-500 flex-shrink-0">
+                      <div key={table.id} draggable onDragStart={(e) => handleDragStart(e, {id: table.id, width: tW, height: tH}, 'existing_table')} className="bg-[#1C1917] p-2 rounded-xl border border-white/10 shadow-sm cursor-grab active:cursor-grabbing hover:border-[#D4AF37]/50 transition-all flex items-center">
+                        <div className="w-8 h-8 bg-[#141210] rounded-lg flex items-center justify-center mr-3 text-[#D4AF37] flex-shrink-0">
                           {table.tipo === 'round_table' || table.tipo === 'redonda' ? <div className="w-3.5 h-3.5 rounded-full border-2 border-current"></div> : <div className="w-3.5 h-3.5 rounded-sm border-2 border-current"></div>}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-slate-800 truncate">{table.name}</p>
+                          <p className="text-sm font-bold text-white truncate">{table.name}</p>
                           <p className="text-[9px] text-slate-500 uppercase font-bold tracking-widest mt-0.5">{occupancy}/{table.capacity} Sillas</p>
                         </div>
                       </div>
                     );
                   })}
-                  {availableTables.length === 0 && <p className="text-[10px] text-slate-400 italic text-center py-4 bg-white rounded-xl border border-dashed border-slate-200">Todas ubicadas en el plano.</p>}
+                  {availableTables.length === 0 && <p className="text-[10px] text-slate-500 italic text-center py-4 bg-[#1C1917] rounded-xl border border-dashed border-white/10">Todas ubicadas en el plano.</p>}
                 </div>
 
-                <h3 className="font-bold text-emerald-700 mb-3 text-[10px] uppercase tracking-wider flex items-center pt-4 border-t border-slate-200">
-                  <Plus size={14} className="mr-2 text-emerald-400"/> 3. Mesas Extra
+                <h3 className="font-bold text-emerald-400 mb-3 text-[10px] uppercase tracking-wider flex items-center pt-4 border-t border-white/10">
+                  <Plus size={14} className="mr-2 text-emerald-500/50"/> 3. Mesas Extra
                 </h3>
                 <div className="grid grid-cols-4 gap-2 mb-6">
                   {TABLE_TEMPLATES.map((tmpl, idx) => {
                     let iconEl;
-                    if (tmpl.type === 'round_table') iconEl = <div className="mx-auto mb-1 border-2 border-emerald-500 rounded-full w-5 h-5"></div>;
-                    else if (tmpl.type === 'square_table') iconEl = <div className="mx-auto mb-1 border-2 border-emerald-500 rounded-sm w-5 h-5"></div>;
-                    else if (tmpl.type === 'rect_table') iconEl = <div className="mx-auto mb-1 border-2 border-emerald-500 rounded-sm w-6 h-3 mt-1"></div>;
-                    else if (tmpl.type === 'ovalada') iconEl = <div className="mx-auto mb-1 border-2 border-emerald-500 rounded-[10px] w-6 h-3 mt-1"></div>;
+                    if (tmpl.type === 'round_table') iconEl = <div className="mx-auto mb-1 border-2 border-emerald-400 rounded-full w-5 h-5"></div>;
+                    else if (tmpl.type === 'square_table') iconEl = <div className="mx-auto mb-1 border-2 border-emerald-400 rounded-sm w-5 h-5"></div>;
+                    else if (tmpl.type === 'rect_table') iconEl = <div className="mx-auto mb-1 border-2 border-emerald-400 rounded-sm w-6 h-3 mt-1"></div>;
+                    else if (tmpl.type === 'ovalada') iconEl = <div className="mx-auto mb-1 border-2 border-emerald-400 rounded-[10px] w-6 h-3 mt-1"></div>;
                     else if (tmpl.type === 'serpentina') iconEl = (
                       <svg className="mx-auto mb-1" width="20" height="20" viewBox="0 0 20 20">
-                        <path d="M 2 18 A 16 16 0 0 1 18 2 L 18 7 A 11 11 0 0 0 7 18 Z" fill="none" stroke="#10b981" strokeWidth="2" />
+                        <path d="M 2 18 A 16 16 0 0 1 18 2 L 18 7 A 11 11 0 0 0 7 18 Z" fill="none" stroke="#34d399" strokeWidth="2" />
                       </svg>
                     );
 
                     return (
-                      <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'new_table')} className="bg-white p-2 rounded-xl border border-emerald-100 text-center cursor-grab active:cursor-grabbing hover:bg-emerald-50 transition-colors shadow-sm">
+                      <div key={idx} draggable onDragStart={(e) => handleDragStart(e, tmpl, 'new_table')} className="bg-[#1C1917] p-2 rounded-xl border border-white/10 text-center cursor-grab active:cursor-grabbing hover:border-emerald-500/50 transition-colors shadow-sm">
                          {iconEl}
-                         <p className="text-[9px] font-bold text-slate-600 leading-tight mt-1">{tmpl.name}</p>
+                         <p className="text-[9px] font-bold text-slate-400 leading-tight mt-1">{tmpl.name}</p>
                       </div>
                     );
                   })}
                 </div>
 
-                <h3 className="font-bold text-slate-700 mb-3 text-[10px] uppercase tracking-wider flex items-center pt-4 border-t border-slate-200">
-                  <Move size={14} className="mr-2 text-slate-400"/> 4. Físico
+                <h3 className="font-bold text-slate-400 mb-3 text-[10px] uppercase tracking-wider flex items-center pt-4 border-t border-white/10">
+                  <Move size={14} className="mr-2 text-slate-600"/> 4. Físico
                 </h3>
                 <div className="space-y-2">
                   {STRUCTURAL_CATALOG.map((item, idx) => (
-                    <div key={idx} draggable onDragStart={(e) => handleDragStart(e, item, 'structure')} className="bg-white p-2 rounded-xl border border-slate-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-slate-300 hover:shadow-md transition-all flex items-center">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-3 border border-slate-200 flex-shrink-0 shadow-inner" style={getTextureStyle(item.texture)}></div>
+                    <div key={idx} draggable onDragStart={(e) => handleDragStart(e, item, 'structure')} className="bg-[#1C1917] p-2 rounded-xl border border-white/10 shadow-sm cursor-grab active:cursor-grabbing hover:border-white/30 transition-all flex items-center">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-3 border border-white/10 flex-shrink-0 shadow-inner" style={getTextureStyle(item.texture)}></div>
                       <div>
-                        <p className="text-sm font-bold text-slate-800 leading-tight">{item.name}</p>
+                        <p className="text-sm font-bold text-white leading-tight">{item.name}</p>
                         <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mt-0.5">{item.desc}</p>
                       </div>
                     </div>
@@ -5405,22 +5512,66 @@ const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch
       
       {/* Modal de Confirmación */}
       {confirmDialog && (
-        <div className="fixed inset-0 z-[100000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in pointer-events-auto">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center shadow-2xl animate-in zoom-in-95 border border-slate-200">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${confirmDialog.isDestructive ? 'bg-rose-100 text-rose-600' : 'bg-indigo-100 text-indigo-600'}`}>
-              {confirmDialog.isDestructive ? <Trash2 size={32} /> : <AlertTriangle size={32} />}
+        <div className="fixed inset-0 z-[100000] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in pointer-events-auto">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-sm overflow-hidden p-8 text-center shadow-[0_25px_70px_rgba(0,0,0,0.9)] animate-in zoom-in-95 border border-[#D4AF37]/30 text-white">
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border ${confirmDialog.isDestructive ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/20'}`}>
+              {confirmDialog.isDestructive ? <Trash2 size={36} /> : <AlertTriangle size={36} />}
             </div>
-            <h3 className="font-bold text-xl text-slate-800 mb-2">{confirmDialog.title}</h3>
-            <p className="text-slate-500 mb-6 text-[13px] leading-relaxed">
+            <h3 className="font-editorial font-black text-2xl text-white mb-3">{confirmDialog.title}</h3>
+            <p className="text-slate-400 mb-8 text-sm leading-relaxed">
               {confirmDialog.message}
             </p>
             <div className="flex gap-3">
-              <button onClick={() => setConfirmDialog(null)} className="flex-1 p-3 bg-slate-100 text-slate-700 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 transition-colors">
+              <button onClick={() => setConfirmDialog(null)} className="flex-1 p-4 bg-white/5 text-slate-300 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-white/10 transition-colors border border-white/10">
                 Cancelar
               </button>
-              <button onClick={confirmDialog.onConfirm} className={`flex-1 p-3 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-md transition-transform active:scale-95 ${confirmDialog.isDestructive ? 'bg-rose-600 hover:bg-rose-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}>
+              <button onClick={confirmDialog.onConfirm} className={`flex-1 p-4 text-[#1C1917] rounded-xl font-black uppercase tracking-widest text-[10px] shadow-[0_10px_25px_rgba(0,0,0,0.5)] transition-transform active:scale-95 ${confirmDialog.isDestructive ? 'bg-rose-500 text-white hover:bg-rose-600' : 'bg-[#D4AF37] hover:bg-[#c5a028]'}`}>
                 Confirmar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Inteligente de Separación de Invitados */}
+      {guestSplitPrompt && (
+        <div className="fixed inset-0 z-[100000] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in pointer-events-auto">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-sm overflow-hidden p-8 text-center shadow-[0_25px_70px_rgba(0,0,0,0.9)] animate-in zoom-in-95 border border-[#D4AF37]/30 text-white">
+            <div className="w-20 h-20 bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><Users size={32} /></div>
+            <h3 className="font-editorial font-black text-2xl text-white mb-2">Acomodar Grupo</h3>
+            
+            {guestSplitPrompt.isForced ? (
+                <p className="text-rose-400 mb-6 text-sm leading-relaxed">
+                   Esta mesa es para <b className="text-white">{guestSplitPrompt.table.capacity} personas</b> y solo quedan <b className="text-white">{guestSplitPrompt.availableChairs} sillas libres</b>. La familia <b className="text-white">{guestSplitPrompt.guest.name}</b> ({guestSplitPrompt.guest.passes} pases) supera la capacidad.<br/><br/>¿Cuántos deseas acomodar en esta mesa?
+                </p>
+            ) : (
+                <p className="text-slate-400 mb-6 text-sm leading-relaxed">
+                   <b className="text-white">{guestSplitPrompt.guest.name}</b> tiene {guestSplitPrompt.guest.passes} pases y hay {guestSplitPrompt.availableChairs} sillas libres en esta mesa.<br/><br/>¿Cuántos deseas acomodar aquí?
+                </p>
+            )}
+
+            <div className="flex items-center justify-center gap-4 mb-6 bg-[#141210] p-4 rounded-2xl border border-white/10">
+                <button 
+                   onClick={() => setSepararCantidad(Math.max(guestSplitPrompt.minPlaceable, separarCantidad - 1))}
+                   disabled={separarCantidad <= guestSplitPrompt.minPlaceable}
+                   className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-black text-white disabled:opacity-30 transition-colors hover:bg-white/10"
+                >-</button>
+                <div className="text-4xl font-black text-[#D4AF37] w-14 text-center">{separarCantidad}</div>
+                <button 
+                   onClick={() => setSepararCantidad(Math.min(guestSplitPrompt.maxPlaceable, separarCantidad + 1))}
+                   disabled={separarCantidad >= guestSplitPrompt.maxPlaceable}
+                   className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-black text-white disabled:opacity-30 transition-colors hover:bg-white/10"
+                >+</button>
+            </div>
+
+            <div className="flex flex-col space-y-3">
+              <button onClick={() => handleSplitChoice('split')} className="w-full p-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black uppercase tracking-widest text-[10px] shadow-[0_5px_15px_rgba(212,175,55,0.25)] transition-colors hover:bg-[#c5a028] active:scale-95">Mover {separarCantidad} pase(s)</button>
+              
+              {!guestSplitPrompt.isForced && (
+                 <button onClick={() => handleSplitChoice('all')} className="w-full p-4 bg-white/5 border border-white/10 text-slate-300 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-white/10 transition-colors">Mover familia ({guestSplitPrompt.guest.passes})</button>
+              )}
+              
+              <button onClick={() => setGuestSplitPrompt(null)} className="w-full p-3 text-slate-500 font-bold hover:text-slate-300 mt-2 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
             </div>
           </div>
         </div>
@@ -5817,7 +5968,7 @@ const TableWithChairs = ({ tableData, occupancy, scale, tableGuests = [], search
     const totalRotation = angleDeg + (tableData.rotation || 0); 
     const isMatched = searchQuery && guestName && guestName.toLowerCase().includes(searchQuery.toLowerCase());
     const isTableMatched = searchQuery && tableData.name && tableData.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const activeSearchClasses = (isMatched || (isTableMatched && isOccupied)) ? 'ring-4 ring-amber-400 ring-offset-2 bg-amber-300 border-amber-600 scale-110 z-50' : (isOccupied ? 'bg-emerald-400 border-emerald-600' : 'bg-slate-100 border-slate-300');
+    const activeSearchClasses = (isMatched || (isTableMatched && isOccupied)) ? 'ring-4 ring-rose-500 ring-offset-2 bg-white border-white scale-110 z-50' : (isOccupied ? 'bg-[#D4AF37] border-[#D4AF37]' : 'bg-[#141210] border-[#D4AF37]/40');
 
     chairs.push(
       <div key={i} 
@@ -5830,9 +5981,9 @@ const TableWithChairs = ({ tableData, occupancy, scale, tableGuests = [], search
            }}
            className={`group absolute flex items-center justify-center rounded-full border-[1.5px] shadow-sm transition-all duration-300 hover:z-50 ${chairGuestId ? 'cursor-grab pointer-events-auto' : 'pointer-events-none'} ${activeSearchClasses} z-0`} 
            style={{ left: cx, top: cy, width: chairSize, height: chairSize, transform: `rotate(${angleDeg}deg)` }}>
-         <div className={`absolute w-[45%] h-[115%] right-[-12%] rounded-full shadow-sm transition-colors duration-300 ${isMatched || (isTableMatched && isOccupied) ? 'bg-amber-600' : (isOccupied ? 'bg-emerald-600' : 'bg-slate-300')}`}></div>
+         <div className={`absolute w-[45%] h-[115%] right-[-12%] rounded-full shadow-sm transition-colors duration-300 ${isMatched || (isTableMatched && isOccupied) ? 'bg-rose-500' : (isOccupied ? 'bg-[#c5a028]' : 'bg-white/10')}`}></div>
          {isOccupied && guestName && (
-           <div className="absolute hidden group-hover:flex items-center justify-center bg-slate-800/95 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-2xl whitespace-nowrap z-[100] -top-8 pointer-events-none border border-slate-600 animate-in fade-in zoom-in-95 duration-200" style={{ transform: `rotate(-${totalRotation}deg)` }}>
+           <div className="absolute hidden group-hover:flex items-center justify-center bg-[#141210]/95 backdrop-blur-md text-[#D4AF37] text-[10px] font-bold px-3 py-2 rounded-xl shadow-[0_10px_25px_rgba(212,175,55,0.2)] whitespace-nowrap z-[100] -top-10 pointer-events-none border border-[#D4AF37]/30 animate-in fade-in zoom-in-95 duration-200" style={{ transform: `rotate(-${totalRotation}deg)` }}>
              {guestName}
            </div>
          )}
@@ -5848,18 +5999,18 @@ const TableWithChairs = ({ tableData, occupancy, scale, tableGuests = [], search
   }
 
   let innerContent = null;
-  let shapeClass = 'rounded-sm shadow-lg';
-  let borderClass = 'border-[3px]';
-  let baseColor = 'bg-white border-slate-400 text-slate-800'; 
+  let shapeClass = 'rounded-sm shadow-xl';
+  let borderClass = 'border-2';
+  let baseColor = 'bg-[#141210] border-[#D4AF37] text-white'; 
 
-  if (tipo === 'round_table' || tipo === 'redonda' || tipo === 'ovalada') { shapeClass = 'rounded-[999px] shadow-lg'; } 
+  if (tipo === 'round_table' || tipo === 'redonda' || tipo === 'ovalada') { shapeClass = 'rounded-[999px] shadow-xl'; } 
   else if (tipo === 'serpentina') {
-    shapeClass = 'rounded-none'; borderClass = 'border-0'; baseColor = 'bg-transparent text-slate-800'; 
+    shapeClass = 'rounded-none'; borderClass = 'border-0'; baseColor = 'bg-transparent text-white'; 
     const widthT = widthT_meters * scale;
     const innerR = tableW - widthT;
     innerContent = (
       <svg className="absolute inset-0 overflow-visible drop-shadow-md" style={{ zIndex: -1, width: tableW, height: tableW }}>
-         <path d={`M 0 0 A ${tableW} ${tableW} 0 0 1 ${tableW} ${tableW} L ${tableW - widthT} ${tableW} A ${innerR} ${innerR} 0 0 0 0 ${widthT} Z`} fill="#ffffff" stroke="#94a3b8" strokeWidth="3" />
+         <path d={`M 0 0 A ${tableW} ${tableW} 0 0 1 ${tableW} ${tableW} L ${tableW - widthT} ${tableW} A ${innerR} ${innerR} 0 0 0 0 ${widthT} Z`} fill="#141210" stroke="#D4AF37" strokeWidth="2" />
       </svg>
     );
   }
@@ -5870,17 +6021,17 @@ const TableWithChairs = ({ tableData, occupancy, scale, tableGuests = [], search
       <div className={`absolute inset-0 flex flex-col items-center justify-center z-10 ${shapeClass} ${borderClass} ${baseColor}`}>
         {innerContent}
         <div className="z-20 flex items-center justify-center pointer-events-none" style={{ transform: `rotate(-${tableData.rotation || 0}deg)` }}>
-          <span className="font-black text-slate-400/70 select-none drop-shadow-sm" style={{ fontSize: `${Math.max(0.8, tableW * 0.02)}rem` }}>
+          <span className="font-black text-[#D4AF37]/70 select-none drop-shadow-sm uppercase tracking-widest" style={{ fontSize: `${Math.max(0.6, tableW * 0.018)}rem` }}>
             {tableData.name ? tableData.name.replace(/Mesa\s+/i, '').trim() : ''}
           </span>
         </div>
         {matchedNames.length > 0 && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[300]" style={{ transform: `rotate(-${tableData.rotation || 0}deg)` }}>
             <div className="absolute -top-12 flex flex-col items-center animate-in slide-in-from-bottom-2 duration-300">
-              <div className="bg-slate-900/95 backdrop-blur-md text-amber-400 text-xs font-bold px-4 py-2 rounded-xl shadow-2xl border border-amber-500/40 text-center whitespace-nowrap flex flex-col gap-0.5">
+              <div className="bg-[#1C1917]/95 backdrop-blur-md text-white text-[10px] font-bold px-4 py-2.5 rounded-xl shadow-[0_10px_25px_rgba(212,175,55,0.3)] border border-[#D4AF37]/50 text-center whitespace-nowrap flex flex-col gap-0.5">
                 {matchedNames.map((n, idx) => <span key={idx}>{n}</span>)}
               </div>
-              <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-slate-900/95 mt-[-1px]"></div>
+              <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-[#D4AF37]/50 mt-[-1px]"></div>
             </div>
           </div>
         )}
@@ -7126,43 +7277,42 @@ const ChecklistView = ({ tareas, addNotification }) => {
     const overdue = isOverdue(tarea.fechaLimite) && tarea.estado !== 'listo';
     
     return (
-      <div key={tarea.id} className={`bg-white dark:bg-[#0a0a0a] p-3 sm:p-4 rounded-2xl border shadow-sm mb-3 transition-all hover:shadow-md hover:scale-[1.01] group ${overdue ? 'border-rose-300 dark:border-rose-500/50' : 'border-slate-200 dark:border-white/10'}`}>
+      <div key={tarea.id} className={`bg-[#141210] p-4 rounded-2xl border shadow-sm mb-3 transition-all hover:shadow-md hover:scale-[1.01] group hover:border-[#D4AF37]/50 ${overdue ? 'border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/10'}`}>
         <div className="flex justify-between items-start mb-2">
-          <span className="px-2 py-1 sm:px-2.5 sm:py-1 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-transparent dark:border-white/5 rounded-md text-[8px] sm:text-[9px] font-black uppercase tracking-widest">{tarea.categoria}</span>
-          <button onClick={() => eliminarTarea(tarea.id)} className="text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-500 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity p-1"><X size={14}/></button>
+          <span className="px-2 py-1 bg-white/5 text-slate-400 border border-white/5 rounded-md text-[8px] font-black uppercase tracking-widest">{tarea.categoria}</span>
+          <button onClick={() => eliminarTarea(tarea.id)} className="text-slate-600 hover:text-rose-500 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity p-1"><X size={14}/></button>
         </div>
         
-        <h4 className={`font-bold text-sm mb-3 leading-snug ${tarea.estado === 'listo' ? 'text-slate-400 dark:text-slate-600 line-through' : 'text-slate-800 dark:text-white'}`}>
+        <h4 className={`font-bold text-sm mb-3 leading-snug ${tarea.estado === 'listo' ? 'text-slate-500 line-through' : 'text-white'}`}>
           {tarea.titulo}
         </h4>
         
-        <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100 dark:border-white/5 gap-2">
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/5 gap-2">
           <div className="flex items-center shrink-0">
             {tarea.fechaLimite ? (
-              <span className={`text-[8px] sm:text-[9px] font-black uppercase tracking-widest flex items-center px-1.5 py-1 sm:px-2 sm:py-1 rounded-md border ${overdue ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20' : 'text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'}`}>
-                {overdue ? <AlertCircle size={10} className="mr-1 sm:mr-1.5"/> : <Calendar size={10} className="mr-1 sm:mr-1.5"/>}
-                <span className="hidden sm:inline">{tarea.fechaLimite}</span>
-                <span className="sm:hidden">{tarea.fechaLimite.slice(5)}</span>
+              <span className={`text-[8px] font-black uppercase tracking-widest flex items-center px-1.5 py-1 rounded-md border ${overdue ? 'text-rose-400 bg-rose-500/10 border-rose-500/20' : 'text-slate-400 bg-white/5 border-white/10'}`}>
+                {overdue ? <AlertCircle size={10} className="mr-1.5"/> : <Calendar size={10} className="mr-1.5"/>}
+                <span>{tarea.fechaLimite}</span>
               </span>
-            ) : <span className="text-[8px] sm:text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest flex items-center"><Calendar size={10} className="mr-1"/> <span className="hidden sm:inline">Sin fecha</span><span className="sm:hidden">S/F</span></span>}
+            ) : <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest flex items-center"><Calendar size={10} className="mr-1"/> <span>Sin fecha</span></span>}
           </div>
           
           <div className="flex flex-wrap gap-1.5 justify-end">
             {tarea.estado === 'pendiente' && (
-              <button onClick={() => moverTarea(tarea.id, 'proceso')} className="px-2 py-1.5 sm:px-3 sm:py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 text-[8px] sm:text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center">
-                <Clock size={10} className="mr-1 sm:mr-1.5 sm:w-3 sm:h-3"/> Iniciar
+              <button onClick={() => moverTarea(tarea.id, 'proceso')} className="px-2 py-1.5 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-[#D4AF37]/20 transition-colors flex items-center">
+                <Clock size={10} className="mr-1.5 w-3 h-3"/> Iniciar
               </button>
             )}
             {tarea.estado === 'proceso' && (
               <>
-                <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-2 py-1.5 sm:px-3 sm:py-1.5 text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] font-black uppercase tracking-widest hover:text-slate-700 dark:hover:text-white transition-colors">Pausar</button>
-                <button onClick={() => moverTarea(tarea.id, 'listo')} className="px-2 py-1.5 sm:px-3 sm:py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[8px] sm:text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors flex items-center">
-                  <CheckCircle2 size={10} className="mr-1 sm:mr-1.5 sm:w-3 sm:h-3"/> Listo
+                <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-2 py-1.5 text-slate-400 text-[8px] font-black uppercase tracking-widest hover:text-white transition-colors">Pausar</button>
+                <button onClick={() => moverTarea(tarea.id, 'listo')} className="px-2 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-500/20 transition-colors flex items-center">
+                  <CheckCircle2 size={10} className="mr-1.5 w-3 h-3"/> Listo
                 </button>
               </>
             )}
             {tarea.estado === 'listo' && (
-              <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-2 py-1.5 sm:px-3 sm:py-1.5 text-slate-400 dark:text-slate-500 text-[8px] sm:text-[9px] font-black uppercase tracking-widest hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Reabrir</button>
+              <button onClick={() => moverTarea(tarea.id, 'pendiente')} className="px-2 py-1.5 text-slate-500 text-[8px] font-black uppercase tracking-widest hover:text-[#D4AF37] transition-colors">Reabrir</button>
             )}
           </div>
         </div>
@@ -7171,19 +7321,25 @@ const ChecklistView = ({ tareas, addNotification }) => {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500 z-10">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Tablero de Actividades</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Organiza tu progreso moviendo las tareas entre las columnas.</p>
+    <div className="h-full flex flex-col space-y-6 pb-6 relative text-white bg-[#141210] min-h-[100vh] p-4 rounded-3xl transition-colors duration-500 z-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#1C1917] p-5 sm:p-6 rounded-3xl border border-[#D4AF37]/25 shadow-xl">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
+            <ListTodo size={20} />
+          </div>
+          <div>
+            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block mb-0.5">Organiza tu progreso logístico.</span>
+            <h2 className="text-2xl sm:text-3xl font-editorial text-white tracking-wide leading-none">Tablero de Actividades</h2>
+          </div>
         </div>
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
-          <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className="px-3.5 py-2.5 border border-slate-200 dark:border-white/10 rounded-xl bg-white dark:bg-[#0a0a0a] text-xs font-bold text-slate-700 dark:text-white outline-none focus:border-indigo-500 dark:focus:border-amber-500 shadow-sm transition-colors flex-1 sm:flex-none cursor-pointer">
+        
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-start md:justify-end">
+          <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className="px-3.5 py-2 h-9 bg-[#141210] border border-white/10 rounded-lg text-[10px] font-bold text-white outline-none focus:border-[#D4AF37] shadow-sm transition-colors flex-1 sm:flex-none cursor-pointer uppercase tracking-widest appearance-none">
             <option value="Todas">Todas las Categorías</option>
             {categorias.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          <button onClick={() => setIsFormOpen(true)} className="flex items-center justify-center px-5 py-2.5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors flex-1 sm:flex-none uppercase tracking-widest text-[10px] sm:text-xs whitespace-nowrap shrink-0">
-            <Plus size={15} className="mr-1.5 shrink-0" /> Nueva Tarea
+          <button onClick={() => setIsFormOpen(true)} className="flex-1 md:flex-none flex items-center justify-center px-5 h-9 bg-[#D4AF37] text-[#1C1917] rounded-lg text-[10px] font-black hover:bg-[#c5a028] transition-colors shadow-[0_10px_25px_rgba(212,175,55,0.25)] uppercase tracking-widest shrink-0">
+            <Plus size={14} className="mr-1.5 shrink-0" /> Nueva Tarea
           </button>
         </div>
       </div>
@@ -7192,67 +7348,67 @@ const ChecklistView = ({ tareas, addNotification }) => {
       <div className="flex-1 flex md:flex-row gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory custom-scrollbar pb-4 md:pb-0">
         
         {/* COLUMNA 1: POR HACER */}
-        <div className="w-[80vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-slate-50/80 dark:bg-white/[0.02] backdrop-blur-sm rounded-[2rem] border border-slate-200/50 dark:border-white/5 p-3 sm:p-4 transition-colors shadow-inner">
-          <div className="flex items-center justify-between mb-4 sm:mb-5 px-2 sm:px-3 pt-2">
-            <h3 className="font-black text-slate-700 dark:text-slate-300 flex items-center text-xs uppercase tracking-widest"><Circle size={14} className="mr-2 text-slate-400 dark:text-slate-500"/> Por Hacer</h3>
-            <span className="bg-white dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400 text-[10px] font-black px-2.5 py-1 rounded-md border border-slate-200 dark:border-white/10 shadow-sm">{pendientes.length}</span>
+        <div className="w-[80vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-[#1C1917] rounded-3xl border border-white/5 p-4 transition-colors shadow-xl">
+          <div className="flex items-center justify-between mb-5 px-2 pt-2">
+            <h3 className="font-black text-slate-300 flex items-center text-xs uppercase tracking-widest"><Circle size={14} className="mr-2 text-slate-500"/> Por Hacer</h3>
+            <span className="bg-[#141210] text-slate-400 text-[10px] font-black px-2.5 py-1 rounded-md border border-white/5 shadow-sm">{pendientes.length}</span>
           </div>
           <div className="flex-1 overflow-y-auto px-1 pb-4 custom-scrollbar">
             {pendientes.map(renderTarea)}
-            {pendientes.length === 0 && <div className="text-center py-12 text-slate-400 dark:text-slate-600 text-sm border-2 border-dashed border-slate-200 dark:border-white/5 rounded-2xl font-medium">No hay tareas pendientes.</div>}
+            {pendientes.length === 0 && <div className="text-center py-12 text-slate-500 text-xs border border-dashed border-white/10 bg-white/5 rounded-2xl font-medium">No hay tareas pendientes.</div>}
           </div>
         </div>
 
         {/* COLUMNA 2: EN PROCESO */}
-        <div className="w-[80vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-indigo-50/50 dark:bg-indigo-500/5 backdrop-blur-sm rounded-[2rem] border border-indigo-100/50 dark:border-indigo-500/10 p-3 sm:p-4 transition-colors shadow-inner">
-          <div className="flex items-center justify-between mb-4 sm:mb-5 px-2 sm:px-3 pt-2">
-            <h3 className="font-black text-indigo-800 dark:text-indigo-400 flex items-center text-xs uppercase tracking-widest"><Clock size={14} className="mr-2 text-indigo-500 dark:text-indigo-500"/> En Proceso</h3>
-            <span className="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{enProceso.length}</span>
+        <div className="w-[80vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-[#1C1917] rounded-3xl border border-[#D4AF37]/20 p-4 transition-colors shadow-[0_0_20px_rgba(212,175,55,0.05)]">
+          <div className="flex items-center justify-between mb-5 px-2 pt-2">
+            <h3 className="font-black text-[#D4AF37] flex items-center text-xs uppercase tracking-widest"><Clock size={14} className="mr-2 text-[#D4AF37]"/> En Proceso</h3>
+            <span className="bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{enProceso.length}</span>
           </div>
           <div className="flex-1 overflow-y-auto px-1 pb-4 custom-scrollbar">
             {enProceso.map(renderTarea)}
-            {enProceso.length === 0 && <div className="text-center py-12 text-indigo-300 dark:text-indigo-900 text-sm border-2 border-dashed border-indigo-200 dark:border-indigo-900/50 rounded-2xl font-medium">Arrastra o inicia una tarea.</div>}
+            {enProceso.length === 0 && <div className="text-center py-12 text-[#D4AF37]/50 text-xs border border-dashed border-[#D4AF37]/20 bg-[#D4AF37]/5 rounded-2xl font-medium">Inicia una tarea.</div>}
           </div>
         </div>
 
         {/* COLUMNA 3: COMPLETADO */}
-        <div className="w-[80vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-emerald-50/50 dark:bg-emerald-500/5 backdrop-blur-sm rounded-[2rem] border border-emerald-100/50 dark:border-emerald-500/10 p-3 sm:p-4 transition-colors shadow-inner">
-          <div className="flex items-center justify-between mb-4 sm:mb-5 px-2 sm:px-3 pt-2">
-            <h3 className="font-black text-emerald-800 dark:text-emerald-400 flex items-center text-xs uppercase tracking-widest"><CheckCircle2 size={14} className="mr-2 text-emerald-500 dark:text-emerald-500"/> Completado</h3>
-            <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{completadas.length}</span>
+        <div className="w-[80vw] md:w-auto md:flex-1 shrink-0 snap-center flex flex-col bg-[#1C1917] rounded-3xl border border-emerald-500/10 p-4 transition-colors shadow-xl">
+          <div className="flex items-center justify-between mb-5 px-2 pt-2">
+            <h3 className="font-black text-emerald-400 flex items-center text-xs uppercase tracking-widest"><CheckCircle2 size={14} className="mr-2 text-emerald-500"/> Completado</h3>
+            <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm">{completadas.length}</span>
           </div>
           <div className="flex-1 overflow-y-auto px-1 pb-4 custom-scrollbar">
             {completadas.map(renderTarea)}
-            {completadas.length === 0 && <div className="text-center py-12 text-emerald-300 dark:text-emerald-900/50 text-sm border-2 border-dashed border-emerald-200 dark:border-emerald-900/30 rounded-2xl font-medium">Aún no hay tareas terminadas.</div>}
+            {completadas.length === 0 && <div className="text-center py-12 text-emerald-500/50 text-xs border border-dashed border-emerald-500/20 bg-emerald-500/5 rounded-2xl font-medium">Aún no hay tareas terminadas.</div>}
           </div>
         </div>
       </div>
 
-      {/* MODAL FORMULARIO (Se mantiene igual) */}
+      {/* MODAL FORMULARIO */}
       {isFormOpen && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 duration-200 transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-transparent dark:border-white/10 transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors">
-              <h3 className="font-bold text-lg text-slate-800 dark:text-white flex items-center tracking-wide"><ListTodo size={20} className="mr-2 text-indigo-600 dark:text-amber-500"/> Agregar Tarea</h3>
-              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in zoom-in-95 duration-200 transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-sm overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 transition-colors text-white">
+            <div className="px-6 py-5 border-b border-[#D4AF37]/20 bg-[#141210] flex justify-between items-center transition-colors">
+              <h3 className="font-editorial font-black text-xl text-[#D4AF37] flex items-center tracking-wide"><ListTodo size={20} className="mr-2.5"/> Agregar Tarea</h3>
+              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button>
             </div>
             <form onSubmit={handleSaveTarea} className="p-6 space-y-5">
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">¿Qué necesitas hacer?</label>
-                <input type="text" required value={formData.titulo} onChange={e=>setFormData({...formData, titulo: e.target.value})} placeholder="Ej. Contratar al fotógrafo" className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-amber-500 outline-none text-slate-800 dark:text-white font-bold transition-colors" autoFocus/>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">¿Qué necesitas hacer?</label>
+                <input type="text" required value={formData.titulo} onChange={e=>setFormData({...formData, titulo: e.target.value})} placeholder="Ej. Contratar al fotógrafo" className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none text-white font-bold transition-colors" autoFocus/>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Categoría</label>
-                <select value={formData.categoria} onChange={e=>setFormData({...formData, categoria: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-amber-500 outline-none text-slate-800 dark:text-white font-bold transition-colors cursor-pointer">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Categoría</label>
+                <select value={formData.categoria} onChange={e=>setFormData({...formData, categoria: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none text-white font-bold transition-colors cursor-pointer appearance-none">
                   {categorias.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Fecha Límite (Opcional)</label>
-                <input type="date" value={formData.fechaLimite} onChange={e=>setFormData({...formData, fechaLimite: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-amber-500 outline-none text-slate-600 dark:text-slate-300 [color-scheme:light] dark:[color-scheme:dark] transition-colors" />
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Fecha Límite (Opcional)</label>
+                <input type="date" value={formData.fechaLimite} onChange={e=>setFormData({...formData, fechaLimite: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none text-white [color-scheme:dark] transition-colors font-bold" />
               </div>
               
-              <button type="submit" className="w-full p-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-4 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors active:scale-95">
+              <button type="submit" className="w-full p-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest mt-6 shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-colors active:scale-95">
                 Crear Tarea
               </button>
             </form>
@@ -7401,47 +7557,52 @@ const TimingView = ({ timing, setTiming, addNotification }) => {
   }
 
   return (
-    <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500 z-10">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
-          <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">El Minuto a Minuto</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Sincroniza al staff y proveedores con el guion perfecto.</p>
+    <div className="h-full flex flex-col space-y-6 pb-6 relative text-white bg-[#141210] min-h-[100vh] p-4 rounded-3xl transition-colors duration-500 z-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#1C1917] p-5 sm:p-6 rounded-3xl border border-[#D4AF37]/25 shadow-xl">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
+            <Clock size={20} />
+          </div>
+          <div>
+            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block mb-0.5">Sincroniza staff y proveedores.</span>
+            <h2 className="text-2xl sm:text-3xl font-editorial text-white tracking-wide leading-none">El Minuto a Minuto</h2>
+          </div>
         </div>
-        <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
-          <button onClick={() => setExportViewOpen(true)} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors">
-            <FileDown size={14} className="mr-2 text-indigo-600 dark:text-amber-500"/> Reporte PDF
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-start md:justify-end">
+          <button onClick={() => setExportViewOpen(true)} className="flex-1 md:flex-none flex items-center justify-center px-4 h-9 bg-transparent border border-white/10 text-slate-300 rounded-lg text-[10px] uppercase tracking-widest font-bold hover:bg-white/5 hover:text-white shadow-sm transition-colors shrink-0">
+            <FileDown size={14} className="mr-1.5 text-[#D4AF37]"/> Reporte PDF
           </button>
-          <button onClick={() => { setFormData({ hora: '', actividad: '', responsable: '', lugar: '', notas: '' }); setModalOpen(true); }} className="flex-1 md:flex-none flex items-center justify-center px-5 py-2.5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-all">
-            <Plus size={16} className="mr-1.5" /> Momento
+          <button onClick={() => { setFormData({ hora: '', actividad: '', responsable: '', lugar: '', notas: '' }); setModalOpen(true); }} className="flex-1 md:flex-none flex items-center justify-center px-5 h-9 bg-[#D4AF37] text-[#1C1917] rounded-lg font-black text-[10px] uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-all shrink-0">
+            <Plus size={14} className="mr-1.5" /> Momento
           </button>
         </div>
       </div>
 
-      <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl p-6 overflow-y-auto custom-scrollbar transition-colors">
+      <div className="flex-1 bg-[#1C1917] rounded-3xl border border-[#D4AF37]/25 shadow-xl p-6 overflow-y-auto custom-scrollbar transition-colors">
         {timingOrdenado.length === 0 ? (
-          <div className="text-center py-24 text-slate-400 dark:text-slate-500 flex flex-col items-center justify-center h-full">
-            <Clock size={56} className="mx-auto mb-4 opacity-20"/>
-            <h3 className="text-xl font-bold text-slate-700 dark:text-white mb-2 font-editorial">Cronograma Vacío</h3>
-            <p className="text-sm font-medium">Empieza a planear el orden de tu gran día.</p>
+          <div className="text-center py-24 text-slate-500 flex flex-col items-center justify-center h-full">
+            <Clock size={56} className="mx-auto mb-4 text-[#D4AF37] opacity-50"/>
+            <h3 className="text-2xl font-editorial font-black text-white mb-2">Cronograma Vacío</h3>
+            <p className="text-sm font-medium">Empieza a planear el orden de tu evento.</p>
           </div>
         ) : (
-          <div className="relative border-l-[3px] border-indigo-100 dark:border-white/5 ml-4 md:ml-10 space-y-8 py-4 transition-colors">
+          <div className="relative border-l-[3px] border-[#D4AF37]/20 ml-4 md:ml-10 space-y-8 py-4 transition-colors">
             {timingOrdenado.map((evento) => (
               <div key={evento.id} className="relative pl-8 md:pl-12 group">
-                <div className="absolute w-5 h-5 bg-white dark:bg-[#0a0a0a] border-4 border-indigo-500 dark:border-amber-500 rounded-full -left-[11px] top-1.5 shadow-sm group-hover:scale-125 transition-transform z-10"></div>
-                <div className="bg-slate-50 dark:bg-[#111] border border-slate-100 dark:border-white/5 p-5 rounded-2xl shadow-sm hover:shadow-md dark:shadow-none hover:border-indigo-200 dark:hover:border-amber-500/50 transition-all flex flex-col md:flex-row gap-4">
+                <div className="absolute w-5 h-5 bg-[#141210] border-4 border-[#D4AF37] rounded-full -left-[11px] top-1.5 shadow-[0_0_10px_rgba(212,175,55,0.3)] group-hover:scale-125 transition-transform z-10"></div>
+                <div className="bg-[#141210] border border-white/10 p-5 rounded-2xl hover:border-[#D4AF37]/50 transition-all flex flex-col md:flex-row gap-4 shadow-sm">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <span className="text-2xl font-black text-indigo-600 dark:text-amber-500 tracking-tight">{evento.hora}</span>
-                      <span className="px-2.5 py-1 bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 rounded-md text-[9px] font-black uppercase tracking-widest border border-transparent dark:border-white/5">{evento.responsable}</span>
+                      <span className="text-2xl font-black text-[#D4AF37] tracking-tight">{evento.hora}</span>
+                      <span className="px-2.5 py-1 bg-white/5 text-slate-300 rounded-md text-[9px] font-black uppercase tracking-widest border border-white/10">{evento.responsable}</span>
                     </div>
-                    <h4 className="text-xl font-bold text-slate-800 dark:text-white mb-2 leading-tight font-editorial">{evento.actividad}</h4>
-                    {evento.lugar && <p className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center mb-1.5"><MapPin size={12} className="mr-1.5 text-rose-500 dark:text-rose-400"/> {evento.lugar}</p>}
-                    {evento.notas && <p className="text-xs text-slate-500 dark:text-slate-500 flex items-start mt-2 bg-white dark:bg-black/20 p-2.5 rounded-xl border border-slate-100 dark:border-white/5"><AlignLeft size={12} className="mr-2 mt-0.5 opacity-50 shrink-0"/> <span className="italic leading-relaxed">{evento.notas}</span></p>}
+                    <h4 className="text-xl font-editorial font-bold text-white mb-2 leading-tight">{evento.actividad}</h4>
+                    {evento.lugar && <p className="text-xs font-bold text-slate-400 flex items-center mb-1.5"><MapPin size={12} className="mr-1.5 text-rose-500"/> {evento.lugar}</p>}
+                    {evento.notas && <p className="text-xs text-slate-400 flex items-start mt-3 bg-[#1C1917] p-3 rounded-xl border border-white/5"><AlignLeft size={12} className="mr-2 mt-0.5 opacity-50 shrink-0 text-[#D4AF37]"/> <span className="italic leading-relaxed">{evento.notas}</span></p>}
                   </div>
-                  <div className="flex md:flex-col justify-end md:justify-start gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-slate-200 dark:border-white/10 mt-2 md:mt-0 transition-colors">
-                    <button onClick={() => setEditModal({ open: true, evento: { ...evento } })} className="p-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-transparent text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-white hover:bg-indigo-50 dark:hover:bg-white/10 rounded-xl transition-colors shadow-sm dark:shadow-none"><Edit2 size={16} /></button>
-                    <button onClick={() => setDeleteModal(evento)} className="p-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-transparent text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-white/10 rounded-xl transition-colors shadow-sm dark:shadow-none"><Trash2 size={16} /></button>
+                  <div className="flex md:flex-col justify-end md:justify-start gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-white/10 mt-2 md:mt-0 transition-colors">
+                    <button onClick={() => setEditModal({ open: true, evento: { ...evento } })} className="p-2.5 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors"><Edit2 size={16} /></button>
+                    <button onClick={() => setDeleteModal(evento)} className="p-2.5 bg-rose-500/10 text-rose-500 hover:text-rose-400 hover:bg-rose-500/20 rounded-xl transition-colors"><Trash2 size={16} /></button>
                   </div>
                 </div>
               </div>
@@ -7452,50 +7613,50 @@ const TimingView = ({ timing, setTiming, addNotification }) => {
 
       {/* MODALES CON ESTILO DARK/PREMIUM */}
       {modalOpen && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors"><h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center"><Clock size={20} className="mr-2 text-indigo-600 dark:text-amber-500"/> Agregar Momento</h3><button onClick={() => setModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button></div>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 animate-in zoom-in-95 duration-200 transition-colors text-white">
+            <div className="px-6 py-5 border-b border-[#D4AF37]/20 bg-[#141210] flex justify-between items-center transition-colors"><h3 className="font-editorial font-black text-2xl text-[#D4AF37] flex items-center"><Clock size={20} className="mr-2.5"/> Agregar Momento</h3><button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button></div>
             <form onSubmit={handleSave} className="p-6 space-y-5">
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Hora</label><input type="time" required value={formData.hora} onChange={e=>setFormData({...formData, hora: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white font-bold [color-scheme:light] dark:[color-scheme:dark] transition-colors" /></div>
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Responsable</label><input type="text" value={formData.responsable} onChange={e=>setFormData({...formData, responsable: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white font-bold transition-colors" placeholder="Ej. DJ, Hostess" /></div>
+                <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Hora</label><input type="time" required value={formData.hora} onChange={e=>setFormData({...formData, hora: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-white font-bold [color-scheme:dark] transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Responsable</label><input type="text" value={formData.responsable} onChange={e=>setFormData({...formData, responsable: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-white font-bold transition-colors" placeholder="Ej. DJ, Hostess" /></div>
               </div>
-              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Actividad / Momento</label><input type="text" required value={formData.actividad} onChange={e=>setFormData({...formData, actividad: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white font-bold transition-colors" placeholder="Ej. Entrada de Novios" /></div>
-              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Lugar (Opcional)</label><input type="text" value={formData.lugar} onChange={e=>setFormData({...formData, lugar: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white text-sm transition-colors" placeholder="Ej. Pista de Baile" /></div>
-              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Notas Extra (Opcional)</label><textarea value={formData.notas} onChange={e=>setFormData({...formData, notas: e.target.value})} className="w-full p-4 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white text-sm resize-none h-20 transition-colors" placeholder="Canción específica, detalles..." /></div>
-              <button type="submit" className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-4 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors active:scale-95">Guardar Momento</button>
+              <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Actividad / Momento</label><input type="text" required value={formData.actividad} onChange={e=>setFormData({...formData, actividad: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-white font-bold transition-colors" placeholder="Ej. Entrada de Novios" /></div>
+              <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Lugar (Opcional)</label><input type="text" value={formData.lugar} onChange={e=>setFormData({...formData, lugar: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-white text-sm transition-colors" placeholder="Ej. Pista de Baile" /></div>
+              <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Notas Extra (Opcional)</label><textarea value={formData.notas} onChange={e=>setFormData({...formData, notas: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-white text-sm resize-none h-20 transition-colors" placeholder="Canción específica, detalles..." /></div>
+              <button type="submit" className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest mt-6 shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-colors active:scale-95">Guardar Momento</button>
             </form>
           </div>
         </div>
       )}
 
       {editModal.open && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors"><h3 className="font-bold text-lg text-slate-900 dark:text-white">Editar Momento</h3><button onClick={() => setEditModal({open: false, evento: null})} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button></div>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 animate-in zoom-in-95 duration-200 transition-colors text-white">
+            <div className="px-6 py-5 border-b border-[#D4AF37]/20 bg-[#141210] flex justify-between items-center transition-colors"><h3 className="font-editorial font-black text-2xl text-[#D4AF37]">Editar Momento</h3><button onClick={() => setEditModal({open: false, evento: null})} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button></div>
             <form onSubmit={handleUpdate} className="p-6 space-y-5">
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Hora</label><input type="time" required value={editModal.evento.hora} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, hora: e.target.value}})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white font-bold [color-scheme:light] dark:[color-scheme:dark] transition-colors" /></div>
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Responsable</label><input type="text" value={editModal.evento.responsable} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, responsable: e.target.value}})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white font-bold transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Hora</label><input type="time" required value={editModal.evento.hora} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, hora: e.target.value}})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-white font-bold [color-scheme:dark] transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Responsable</label><input type="text" value={editModal.evento.responsable} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, responsable: e.target.value}})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-white font-bold transition-colors" /></div>
               </div>
-              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Actividad / Momento</label><input type="text" required value={editModal.evento.actividad} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, actividad: e.target.value}})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white font-bold transition-colors" /></div>
-              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Lugar (Opcional)</label><input type="text" value={editModal.evento.lugar || ''} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, lugar: e.target.value}})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white text-sm transition-colors" /></div>
-              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Notas Extra</label><textarea value={editModal.evento.notas || ''} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, notas: e.target.value}})} className="w-full p-4 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 text-slate-900 dark:text-white text-sm resize-none h-20 transition-colors" /></div>
-              <button type="submit" className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-4 shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors active:scale-95">Guardar Cambios</button>
+              <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Actividad / Momento</label><input type="text" required value={editModal.evento.actividad} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, actividad: e.target.value}})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-white font-bold transition-colors" /></div>
+              <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Lugar (Opcional)</label><input type="text" value={editModal.evento.lugar || ''} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, lugar: e.target.value}})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-white text-sm transition-colors" /></div>
+              <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Notas Extra</label><textarea value={editModal.evento.notas || ''} onChange={e=>setEditModal({...editModal, evento: {...editModal.evento, notas: e.target.value}})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] text-white text-sm resize-none h-20 transition-colors" /></div>
+              <button type="submit" className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest mt-6 shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-colors active:scale-95">Guardar Cambios</button>
             </form>
           </div>
         </div>
       )}
 
       {deleteModal && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm p-8 text-center shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors">
-             <div className="w-20 h-20 bg-rose-100 dark:bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner dark:border dark:border-rose-500/20"><Trash2 size={36} /></div>
-             <h3 className="font-editorial font-black text-2xl text-slate-900 dark:text-white mb-2 transition-colors">¿Eliminar actividad?</h3>
-             <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 leading-relaxed">Borrarás "<b>{deleteModal.actividad}</b>" a las {deleteModal.hora}. Esta acción es definitiva.</p>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-sm p-8 text-center shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-rose-500/20 animate-in zoom-in-95 duration-200 transition-colors text-white">
+             <div className="w-20 h-20 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-rose-500/20"><Trash2 size={36} /></div>
+             <h3 className="font-editorial font-black text-2xl text-white mb-2 transition-colors">¿Eliminar actividad?</h3>
+             <p className="text-slate-400 text-sm mb-8 leading-relaxed">Borrarás "<b className="text-white">{deleteModal.actividad}</b>" a las {deleteModal.hora}. Esta acción es definitiva.</p>
              <div className="flex space-x-3">
-               <button onClick={()=>setDeleteModal(null)} className="flex-1 py-4 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
-               <button onClick={executeDelete} className="flex-1 py-4 bg-rose-500 text-white rounded-xl font-black hover:bg-rose-600 transition-colors shadow-md dark:shadow-[0_0_15px_rgba(244,63,94,0.3)] uppercase tracking-widest text-[10px]">Sí, Eliminar</button>
+               <button onClick={()=>setDeleteModal(null)} className="flex-1 py-4 bg-white/5 border border-white/10 text-slate-300 rounded-xl font-bold hover:bg-white/10 hover:text-white transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
+               <button onClick={executeDelete} className="flex-1 py-4 bg-rose-500 text-white rounded-xl font-black hover:bg-rose-600 transition-colors shadow-[0_5px_15px_rgba(244,63,94,0.3)] uppercase tracking-widest text-[10px]">Sí, Eliminar</button>
              </div>
           </div>
         </div>
@@ -7781,127 +7942,133 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
 
   return (
     <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500 z-10">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
-          <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide transition-colors">Control Financiero</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light transition-colors">Gestión de capital, abonos y reportes de tu bóveda.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-xl border border-slate-200 dark:border-white/10 p-1 hidden sm:flex shadow-sm transition-colors">
-            <button onClick={()=>setViewMode('table')} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center transition-colors ${viewMode === 'table' ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><LayoutGrid size={14} className="mr-2"/> Tabla</button>
-            <button onClick={()=>setViewMode('calendar')} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center transition-colors ${viewMode === 'calendar' ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}><CalendarDays size={14} className="mr-2"/> Fechas</button>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#1C1917] p-5 sm:p-6 rounded-3xl border border-[#D4AF37]/25 shadow-xl">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
+            <Wallet size={20} />
           </div>
-          <button onClick={triggerPdfDownload} disabled={isPreparingPrint} className="flex-1 md:flex-none flex items-center justify-center px-4 py-2.5 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white rounded-xl text-[10px] sm:text-xs uppercase tracking-widest font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors disabled:opacity-50">
-            {isPreparingPrint ? <RefreshCw size={14} className="mr-1.5 sm:mr-2 animate-spin"/> : <FileDown size={14} className="mr-1.5 sm:mr-2 text-amber-500"/>} 
+          <div>
+            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block mb-0.5">Gestión de capital y abonos.</span>
+            <h2 className="text-2xl sm:text-3xl font-editorial text-white tracking-wide leading-none">Control Financiero</h2>
+          </div>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-start md:justify-end">
+          <div className="bg-[#141210] rounded-xl border border-white/10 p-1 hidden sm:flex shadow-sm transition-colors">
+            <button onClick={()=>setViewMode('table')} className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest flex items-center transition-colors ${viewMode === 'table' ? 'bg-[#1C1917] text-[#D4AF37] shadow-sm border border-[#D4AF37]/30' : 'text-slate-500 hover:text-white'}`}><LayoutGrid size={14} className="mr-2"/> Tabla</button>
+            <button onClick={()=>setViewMode('calendar')} className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest flex items-center transition-colors ${viewMode === 'calendar' ? 'bg-[#1C1917] text-[#D4AF37] shadow-sm border border-[#D4AF37]/30' : 'text-slate-500 hover:text-white'}`}><CalendarDays size={14} className="mr-2"/> Fechas</button>
+          </div>
+          <button onClick={triggerPdfDownload} disabled={isPreparingPrint} className="flex-1 md:flex-none flex items-center justify-center px-4 h-9 bg-transparent border border-white/10 text-slate-300 rounded-lg text-[10px] uppercase tracking-widest font-bold hover:bg-white/5 hover:text-white transition-colors disabled:opacity-50 shrink-0">
+            {isPreparingPrint ? <RefreshCw size={14} className="mr-1.5 animate-spin"/> : <FileDown size={14} className="mr-1.5 text-[#D4AF37]"/>} 
             PDF
           </button>
-          <button onClick={exportData} className="hidden sm:flex items-center justify-center px-4 py-2.5 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors">
-            <Download size={14} className="mr-2 text-indigo-500 dark:text-indigo-400"/> Excel
+          <button onClick={exportData} className="hidden sm:flex items-center justify-center px-4 h-9 bg-transparent border border-white/10 text-slate-300 rounded-lg text-[10px] uppercase tracking-widest font-bold hover:bg-white/5 hover:text-white transition-colors shrink-0">
+            <Download size={14} className="mr-1.5 text-[#D4AF37]"/> Excel
           </button>
-          <button onClick={() => { setFormData({ concepto: '', categoria: 'Lugar', estimado: '', fechaLimite: '' }); setIsFormOpen(true); }} className="flex-1 md:flex-none flex items-center justify-center px-5 py-2.5 bg-amber-500 text-slate-900 rounded-xl font-black text-[10px] sm:text-sm uppercase tracking-widest shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all">
-            <Plus size={16} className="mr-1.5" /> Gasto
+          <button onClick={() => { setFormData({ concepto: '', categoria: 'Lugar', estimado: '', fechaLimite: '' }); setIsFormOpen(true); }} className="flex-1 md:flex-none flex items-center justify-center px-5 h-9 bg-[#D4AF37] text-[#1C1917] rounded-lg font-black text-[10px] uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-colors shrink-0">
+            <Plus size={14} className="mr-1.5" /> Gasto
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mt-4">
-        <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest mb-2 flex justify-between items-center z-10 relative transition-colors">
-            <span className="flex items-center"><Wallet size={12} className="mr-1.5 text-indigo-500 dark:text-indigo-400"/> Presupuesto</span>
+        <div className="bg-[#141210] p-4 sm:p-6 rounded-2xl border border-[#D4AF37]/30 shadow-[0_4px_15px_rgba(0,0,0,0.5)] flex flex-col relative overflow-hidden group transition-all hover:border-[#D4AF37]/60">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="text-slate-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.2em] mb-3 flex justify-between items-center z-10 relative">
+            <span className="flex items-center"><Wallet size={12} className="mr-1.5 text-[#D4AF37]"/> Presupuesto</span>
             {!isEditingBudget && (
-              <button onClick={() => setIsEditingBudget(true)} className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-white transition-colors p-1.5 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10" title="Editar Presupuesto"><Edit2 size={10}/></button>
+              <button onClick={() => setIsEditingBudget(true)} className="text-slate-400 hover:text-[#D4AF37] transition-colors p-1.5 bg-white/5 rounded-lg border border-white/10" title="Editar Presupuesto"><Edit2 size={10}/></button>
             )}
           </div>
           {isEditingBudget ? (
-             <div className="flex mt-auto bg-slate-50 dark:bg-[#111] rounded-xl overflow-hidden border border-indigo-300 dark:border-indigo-500/50 focus-within:border-amber-500 transition-colors z-10 relative">
-               <span className="pl-2 py-1 text-slate-500 font-bold text-xs">$</span>
-               <input type="number" autoFocus value={tempBudget} onChange={(e)=>setTempBudget(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') guardarPresupuestoNube(); }} className="w-full py-1 px-1 bg-transparent font-bold outline-none text-slate-900 dark:text-white text-xs transition-colors" />
-               <button onClick={guardarPresupuestoNube} className="bg-amber-500 text-slate-900 px-3 font-black text-[9px]">OK</button>
+             <div className="flex mt-auto bg-[#1C1917] rounded-xl overflow-hidden border border-[#D4AF37]/50 focus-within:border-[#D4AF37] transition-colors z-10 relative">
+               <span className="pl-3 py-2 text-[#D4AF37] font-bold text-xs">$</span>
+               <input type="number" autoFocus value={tempBudget} onChange={(e)=>setTempBudget(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') guardarPresupuestoNube(); }} className="w-full py-2 px-1 bg-transparent font-bold outline-none text-white text-xs transition-colors" />
+               <button onClick={guardarPresupuestoNube} className="bg-[#D4AF37] text-[#1C1917] px-4 font-black text-[9px] uppercase tracking-widest">OK</button>
              </div>
           ) : (
-             <h3 className="text-xl sm:text-3xl lg:text-4xl font-editorial text-slate-900 dark:text-white mt-auto z-10 relative tracking-wide transition-colors truncate">{formatMoney(presupuestoTotal)}</h3>
+             <h3 className="text-2xl sm:text-3xl lg:text-4xl font-editorial text-white mt-auto z-10 relative tracking-wide truncate">{formatMoney(presupuestoTotal)}</h3>
           )}
         </div>
 
-        <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
-          <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest mb-2 flex items-center z-10 relative transition-colors"><PieChart size={12} className="mr-1.5 text-sky-500 dark:text-sky-400"/> Estimado</div>
-          <h3 className="text-xl sm:text-3xl lg:text-4xl font-editorial text-slate-900 dark:text-white mt-auto z-10 relative tracking-wide transition-colors truncate">{formatMoney(totalEstimado)}</h3>
+        <div className="bg-[#141210] p-4 sm:p-6 rounded-2xl border border-white/10 shadow-[0_4px_15px_rgba(0,0,0,0.5)] flex flex-col relative overflow-hidden group transition-all hover:border-white/30">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="text-slate-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.2em] mb-3 flex items-center z-10 relative"><PieChart size={12} className="mr-1.5 text-white"/> Estimado</div>
+          <h3 className="text-2xl sm:text-3xl lg:text-4xl font-editorial text-white mt-auto z-10 relative tracking-wide truncate">{formatMoney(totalEstimado)}</h3>
         </div>
 
-        <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
+        <div className="bg-[#141210] p-4 sm:p-6 rounded-2xl border border-white/10 shadow-[0_4px_15px_rgba(0,0,0,0.5)] flex flex-col relative overflow-hidden group transition-all hover:border-emerald-500/40">
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest mb-2 flex items-center z-10 relative transition-colors"><DollarSign size={12} className="mr-1.5 text-emerald-500 dark:text-emerald-400"/> Pagado</div>
-          <h3 className="text-xl sm:text-3xl lg:text-4xl font-editorial text-emerald-600 dark:text-emerald-400 mt-auto z-10 relative tracking-wide transition-colors truncate">{formatMoney(totalPagado)}</h3>
+          <div className="text-emerald-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.2em] mb-3 flex items-center z-10 relative"><DollarSign size={12} className="mr-1.5"/> Pagado</div>
+          <h3 className="text-2xl sm:text-3xl lg:text-4xl font-editorial text-emerald-400 mt-auto z-10 relative tracking-wide truncate">{formatMoney(totalPagado)}</h3>
         </div>
 
-        <div className="bg-white dark:bg-[#0a0a0a] p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden group transition-colors">
+        <div className="bg-[#141210] p-4 sm:p-6 rounded-2xl border border-white/10 shadow-[0_4px_15px_rgba(0,0,0,0.5)] flex flex-col relative overflow-hidden group transition-all hover:border-amber-500/40">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="text-slate-500 dark:text-slate-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest mb-2 flex items-center z-10 relative transition-colors"><TrendingDown size={12} className="mr-1.5 text-amber-500"/> Deuda Restante</div>
-          <h3 className="text-xl sm:text-3xl lg:text-4xl font-editorial text-amber-600 dark:text-amber-500 mt-auto z-10 relative tracking-wide transition-colors truncate">{formatMoney(totalDeuda)}</h3>
+          <div className="text-amber-500 font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.2em] mb-3 flex items-center z-10 relative"><TrendingDown size={12} className="mr-1.5"/> Deuda Restante</div>
+          <h3 className="text-2xl sm:text-3xl lg:text-4xl font-editorial text-amber-500 mt-auto z-10 relative tracking-wide truncate">{formatMoney(totalDeuda)}</h3>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#0a0a0a] p-5 sm:p-8 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl print:hidden transition-colors mt-6">
-        <h3 className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 flex items-center transition-colors"><PieChart size={14} className="mr-2 text-indigo-500 dark:text-indigo-400"/> Distribución del Capital (Estimado)</h3>
-        <div className="w-full h-3 rounded-full overflow-hidden flex bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 transition-colors">
+      <div className="bg-[#1C1917] p-5 sm:p-8 rounded-2xl border border-[#D4AF37]/20 shadow-xl print:hidden transition-colors mt-6">
+        <h3 className="text-[10px] font-black text-[#D4AF37] uppercase tracking-widest mb-4 flex items-center"><PieChart size={14} className="mr-2"/> Distribución del Capital (Estimado)</h3>
+        <div className="w-full h-3 rounded-full overflow-hidden flex bg-white/5 border border-white/10 transition-colors">
           {Object.entries(gastosPorCategoria).map(([cat, amount], idx) => {
             const pct = (amount / totalEstimado) * 100;
-            return <div key={idx} className={`${coloresCategoria[cat] || 'bg-indigo-400'} h-full transition-all`} style={{width: `${pct}%`}} title={`${cat}: ${formatMoney(amount)}`}></div>
+            return <div key={idx} className={`${coloresCategoria[cat] || 'bg-slate-400'} h-full transition-all`} style={{width: `${pct}%`}} title={`${cat}: ${formatMoney(amount)}`}></div>
           })}
         </div>
         <div className="flex flex-wrap gap-5 mt-4">
           {Object.entries(gastosPorCategoria).map(([cat, amount], idx) => (
-            <div key={idx} className="flex items-center text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider transition-colors"><span className={`w-2.5 h-2.5 rounded-full mr-2 shadow-sm ${coloresCategoria[cat] || 'bg-indigo-400'}`}></span>{cat} <span className="opacity-50 ml-1">({(amount/totalEstimado*100).toFixed(0)}%)</span></div>
+            <div key={idx} className="flex items-center text-[10px] font-bold text-slate-300 uppercase tracking-wider"><span className={`w-2.5 h-2.5 rounded-full mr-2 shadow-sm ${coloresCategoria[cat] || 'bg-slate-400'}`}></span>{cat} <span className="opacity-50 ml-1">({(amount/totalEstimado*100).toFixed(0)}%)</span></div>
           ))}
         </div>
       </div>
 
       {viewMode === 'table' ? (
-        <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl overflow-hidden flex flex-col print:hidden transition-colors">
+        <div className="flex-1 bg-[#1C1917] rounded-3xl border border-white/10 shadow-xl overflow-hidden flex flex-col print:hidden transition-colors">
           
           <div className="hidden md:block overflow-y-auto custom-scrollbar">
             <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-400 uppercase tracking-widest text-[10px] transition-colors">
+              <thead className="bg-[#141210] border-b border-white/10 text-[#D4AF37] uppercase tracking-widest text-[10px] transition-colors">
                 <tr>
-                  <th className="px-6 py-4 font-bold">Servicio Contratado</th>
-                  <th className="px-6 py-4 font-bold">Límite</th>
-                  <th className="px-6 py-4 font-bold text-right">Costo Total</th>
-                  <th className="px-6 py-4 font-bold text-right">Abonado</th>
-                  <th className="px-6 py-4 font-bold text-right">Falta Pagar</th>
-                  <th className="px-6 py-4 font-bold text-center">Acciones</th>
+                  <th className="px-6 py-5 font-black">Servicio Contratado</th>
+                  <th className="px-6 py-5 font-black">Límite</th>
+                  <th className="px-6 py-5 font-black text-right">Costo Total</th>
+                  <th className="px-6 py-5 font-black text-right">Abonado</th>
+                  <th className="px-6 py-5 font-black text-right">Falta Pagar</th>
+                  <th className="px-6 py-5 font-black text-center">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+              <tbody className="divide-y divide-white/5">
                 {safeGastos.map((gasto) => {
                   const deuda = gasto.estimado - gasto.pagado;
                   const overdue = isOverdue(gasto.fechaLimite, deuda);
                   return (
-                    <tr key={gasto.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                    <tr key={gasto.id} className="hover:bg-white/5 transition-colors">
                       <td className="px-6 py-5">
-                        <p className="font-bold text-slate-900 dark:text-white text-base transition-colors">{gasto.concepto}</p>
-                        {gasto.proveedorId && <p className="text-[9px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-widest flex items-center mt-1.5 transition-colors"><Building size={10} className="mr-1"/> Proveedor Vinculado</p>}
+                        <p className="font-bold text-white text-base transition-colors">{gasto.concepto}</p>
+                        {gasto.proveedorId && <p className="text-[9px] text-[#D4AF37] font-bold uppercase tracking-widest flex items-center mt-1.5 transition-colors"><Building size={10} className="mr-1"/> Proveedor Vinculado</p>}
                       </td>
                       <td className="px-6 py-5">
                         {gasto.fechaLimite ? (
-                           <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest flex items-center w-max border transition-colors ${overdue ? 'bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 border-rose-200 dark:border-rose-500/20' : (deuda===0 ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10')}`}>
+                           <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest flex items-center w-max border transition-colors ${overdue ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : (deuda===0 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-slate-400 border-white/10')}`}>
                              {overdue ? <AlertCircle size={12} className="mr-1.5"/> : <Calendar size={12} className="mr-1.5"/>}
                              {gasto.fechaLimite}
                            </span>
-                        ) : <span className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-600 tracking-widest transition-colors">Sin Plazo</span>}
+                        ) : <span className="text-[10px] font-bold uppercase text-slate-500 tracking-widest transition-colors">Sin Plazo</span>}
                       </td>
-                      <td className="px-6 py-5 text-right font-medium text-slate-600 dark:text-slate-300 transition-colors">{formatMoney(gasto.estimado)}</td>
+                      <td className="px-6 py-5 text-right font-medium text-slate-300 transition-colors">{formatMoney(gasto.estimado)}</td>
                       <td className="px-6 py-5 text-right">
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400 block text-base transition-colors">{formatMoney(gasto.pagado)}</span>
-                        {gasto.historial?.length > 0 && <button onClick={()=>setHistoryModal(gasto)} className="text-[9px] text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-bold uppercase tracking-widest flex items-center justify-end w-full mt-1 transition-colors"><History size={10} className="mr-1"/> Ver pagos ({gasto.historial.length})</button>}
+                        <span className="font-bold text-emerald-400 block text-base transition-colors">{formatMoney(gasto.pagado)}</span>
+                        {gasto.historial?.length > 0 && <button onClick={()=>setHistoryModal(gasto)} className="text-[9px] text-[#D4AF37] hover:underline font-bold uppercase tracking-widest flex items-center justify-end w-full mt-1 transition-colors"><History size={10} className="mr-1"/> Pagos ({gasto.historial.length})</button>}
                       </td>
-                      <td className="px-6 py-5 text-right font-black text-amber-600 dark:text-amber-500 text-base transition-colors">{deuda > 0 ? formatMoney(deuda) : <span className="text-emerald-700 dark:text-emerald-500 text-[10px] uppercase tracking-widest border border-emerald-200 dark:border-emerald-500/20 bg-emerald-100 dark:bg-emerald-500/10 px-2 py-1 rounded-md transition-colors">Liquidado</span>}</td>
+                      <td className="px-6 py-5 text-right font-black text-amber-500 text-base transition-colors">{deuda > 0 ? formatMoney(deuda) : <span className="text-emerald-400 text-[10px] uppercase tracking-widest border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 rounded-md transition-colors">Liquidado</span>}</td>
                       <td className="px-6 py-5 text-center">
                         <div className="flex justify-center items-center space-x-2">
-                          {deuda > 0 && <button onClick={() => setPaymentProcess({ item: gasto, monto: '', fecha: new Date().toISOString().split('T')[0], metodo: 'Transferencia', cuenta: '', comprobante: null })} className="px-4 py-1.5 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-[10px] rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20 transition-colors">Abonar</button>}
-                          <button onClick={() => setEditGastoModal(gasto)} className="p-2 text-slate-400 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors"><Edit2 size={14} /></button>
-                          <button onClick={() => initiateDelete(gasto)} className="p-2 text-slate-400 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-500 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg transition-colors"><Trash2 size={14} /></button>
+                          {deuda > 0 && <button onClick={() => setPaymentProcess({ item: gasto, monto: '', fecha: new Date().toISOString().split('T')[0], metodo: 'Transferencia', cuenta: '', comprobante: null })} className="px-4 py-1.5 bg-emerald-500/10 text-emerald-400 font-bold uppercase tracking-widest text-[10px] rounded-lg hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors">Abonar</button>}
+                          <button onClick={() => setEditGastoModal(gasto)} className="p-2 text-slate-400 hover:text-white bg-white/5 border border-white/10 rounded-lg transition-colors"><Edit2 size={14} /></button>
+                          <button onClick={() => initiateDelete(gasto)} className="p-2 text-slate-400 hover:text-rose-400 bg-white/5 border border-white/10 rounded-lg transition-colors"><Trash2 size={14} /></button>
                         </div>
                       </td>
                     </tr>
@@ -7911,56 +8078,56 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
             </table>
           </div>
 
-          <div className="md:hidden flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 custom-scrollbar bg-slate-50/50 dark:bg-transparent mt-4 pb-24">
+          <div className="md:hidden flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 custom-scrollbar bg-transparent mt-4 pb-24">
             {safeGastos.map((gasto) => {
               const deuda = gasto.estimado - gasto.pagado;
               const overdue = isOverdue(gasto.fechaLimite, deuda);
               return (
-                <div key={gasto.id} className={`bg-white dark:bg-[#111] p-4 rounded-2xl border shadow-sm transition-colors ${overdue ? 'border-rose-300 dark:border-rose-500/50' : 'border-slate-200 dark:border-white/10'}`}>
+                <div key={gasto.id} className={`bg-[#141210] p-4 rounded-2xl border shadow-sm transition-colors ${overdue ? 'border-rose-500/50' : 'border-white/10'}`}>
                    
                    <div className="flex justify-between items-start mb-3">
                       <div className="pr-2">
-                         <p className="font-bold text-slate-900 dark:text-white text-base leading-tight">{gasto.concepto}</p>
+                         <p className="font-bold text-white text-base leading-tight">{gasto.concepto}</p>
                          <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">{gasto.categoria}</p>
                       </div>
-                      <span className={`px-2 py-1 rounded text-[9px] font-bold uppercase tracking-widest border shrink-0 ${overdue ? 'bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-500' : (deuda===0 ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-white/5 dark:text-slate-400')}`}>
+                      <span className={`px-2 py-1 rounded text-[9px] font-bold uppercase tracking-widest border shrink-0 ${overdue ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : (deuda===0 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-slate-400 border-white/10')}`}>
                         {gasto.fechaLimite || 'Sin plazo'}
                       </span>
                    </div>
 
-                   {gasto.proveedorId && <p className="text-[9px] text-indigo-600 dark:text-amber-500 font-bold uppercase tracking-widest flex items-center mb-4 bg-indigo-50 dark:bg-amber-500/10 w-max px-2 py-1 rounded"><Building size={10} className="mr-1"/> Prov. Vinculado</p>}
+                   {gasto.proveedorId && <p className="text-[9px] text-[#D4AF37] font-bold uppercase tracking-widest flex items-center mb-4 bg-[#D4AF37]/10 w-max px-2 py-1 rounded"><Building size={10} className="mr-1"/> Prov. Vinculado</p>}
 
-                   <div className="flex justify-between items-end mb-4 bg-slate-50 dark:bg-black/20 p-3 rounded-xl border border-slate-100 dark:border-white/5">
+                   <div className="flex justify-between items-end mb-4 bg-[#1C1917] p-3 rounded-xl border border-white/5">
                       <div>
                         <p className="text-[9px] text-slate-500 uppercase tracking-widest mb-0.5">Costo Total</p>
-                        <p className="font-medium text-slate-700 dark:text-slate-300 text-sm">{formatMoney(gasto.estimado)}</p>
+                        <p className="font-medium text-slate-300 text-sm">{formatMoney(gasto.estimado)}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-[9px] text-slate-500 uppercase tracking-widest mb-0.5">Resta por pagar</p>
-                        <p className={`font-black text-lg ${deuda > 0 ? 'text-amber-600 dark:text-amber-500' : 'text-emerald-600 dark:text-emerald-400'}`}>{deuda > 0 ? formatMoney(deuda) : 'Liquidado'}</p>
+                        <p className={`font-black text-lg ${deuda > 0 ? 'text-amber-500' : 'text-emerald-400'}`}>{deuda > 0 ? formatMoney(deuda) : 'Liquidado'}</p>
                       </div>
                    </div>
 
-                   <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex justify-between gap-2">
+                   <div className="pt-3 border-t border-white/10 flex justify-between gap-2">
                       <div className="flex gap-2">
-                        <button onClick={() => setEditGastoModal(gasto)} className="p-2.5 bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-indigo-600 rounded-xl transition-colors"><Edit2 size={16}/></button>
-                        <button onClick={() => initiateDelete(gasto)} className="p-2.5 bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-rose-600 rounded-xl transition-colors"><Trash2 size={16}/></button>
+                        <button onClick={() => setEditGastoModal(gasto)} className="p-2.5 bg-white/5 text-slate-400 hover:text-white rounded-xl transition-colors"><Edit2 size={16}/></button>
+                        <button onClick={() => initiateDelete(gasto)} className="p-2.5 bg-white/5 text-slate-400 hover:text-rose-400 rounded-xl transition-colors"><Trash2 size={16}/></button>
                       </div>
                       <div className="flex gap-2 flex-1 justify-end">
-                        {gasto.historial?.length > 0 && <button onClick={()=>setHistoryModal(gasto)} className="px-3 py-2 bg-slate-100 dark:bg-white/5 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center"><History size={14} className="mr-1 sm:mr-0"/></button>}
-                        {deuda > 0 && <button onClick={() => setPaymentProcess({ item: gasto, monto: '', fecha: new Date().toISOString().split('T')[0], metodo: 'Transferencia', cuenta: '', comprobante: null })} className="px-5 py-2 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-emerald-600 transition-colors flex items-center justify-center">Abonar</button>}
+                        {gasto.historial?.length > 0 && <button onClick={()=>setHistoryModal(gasto)} className="px-3 py-2 bg-white/5 text-[#D4AF37] rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center"><History size={14} className="mr-1 sm:mr-0"/></button>}
+                        {deuda > 0 && <button onClick={() => setPaymentProcess({ item: gasto, monto: '', fecha: new Date().toISOString().split('T')[0], metodo: 'Transferencia', cuenta: '', comprobante: null })} className="px-5 py-2 bg-emerald-500/20 text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors flex items-center justify-center">Abonar</button>}
                       </div>
                    </div>
                 </div>
               )
             })}
-            {safeGastos.length === 0 && <div className="text-center py-10 text-slate-400 text-sm">No hay gastos registrados.</div>}
+            {safeGastos.length === 0 && <div className="text-center py-10 text-slate-500 text-sm border border-dashed border-white/10 rounded-2xl">No hay gastos registrados.</div>}
           </div>
 
         </div>
       ) : (
-        <div className="flex-1 bg-white dark:bg-[#0a0a0a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl overflow-hidden p-8 print:hidden transition-colors">
-          <h3 className="font-bold text-slate-900 dark:text-white text-lg mb-8 flex items-center transition-colors"><CalendarDays size={20} className="mr-2 text-amber-500"/> Próximos Pagos Pendientes</h3>
+        <div className="flex-1 bg-[#1C1917] rounded-3xl border border-white/10 shadow-xl overflow-hidden p-8 print:hidden transition-colors">
+          <h3 className="font-editorial font-bold text-white text-2xl mb-8 flex items-center transition-colors"><CalendarDays size={24} className="mr-3 text-amber-500"/> Próximos Pagos Pendientes</h3>
           {gastosConFecha.length === 0 ? (
             <div className="text-center py-16 text-slate-500"><Calendar size={48} className="mx-auto mb-4 opacity-20"/> No hay pagos pendientes con fecha límite asignada.</div>
           ) : (
@@ -7969,18 +8136,18 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
                 const deuda = g.estimado - g.pagado;
                 const overdue = isOverdue(g.fechaLimite, deuda);
                 return (
-                  <div key={g.id} className={`p-6 rounded-2xl border-l-4 shadow-md dark:shadow-xl flex flex-col bg-slate-50 dark:bg-[#111] border-y border-r border-slate-200 dark:border-white/5 transition-colors ${overdue ? 'border-l-rose-500' : 'border-l-amber-500'}`}>
+                  <div key={g.id} className={`p-6 rounded-2xl border-l-4 shadow-md flex flex-col bg-[#141210] border-y border-r border-white/5 transition-colors ${overdue ? 'border-l-rose-500' : 'border-l-amber-500'}`}>
                     <div className="flex justify-between items-start mb-4">
-                      <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border transition-colors ${overdue ? 'bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500 border-rose-200 dark:border-rose-500/20' : 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-500 border-amber-200 dark:border-amber-500/20'}`}>{g.fechaLimite}</span>
-                      {overdue && <AlertCircle size={16} className="text-rose-600 dark:text-rose-500 animate-pulse"/>}
+                      <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border transition-colors ${overdue ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}`}>{g.fechaLimite}</span>
+                      {overdue && <AlertCircle size={16} className="text-rose-500 animate-pulse"/>}
                     </div>
-                    <h4 className="font-bold text-slate-900 dark:text-white text-lg truncate mb-1 transition-colors">{g.concepto}</h4>
+                    <h4 className="font-bold text-white text-lg truncate mb-1 transition-colors">{g.concepto}</h4>
                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 transition-colors">{g.categoria}</p>
-                    <div className="mt-auto pt-4 border-t border-slate-200 dark:border-white/5 flex justify-between items-center transition-colors">
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest transition-colors">Deuda:</span>
-                      <span className={`font-black text-xl transition-colors ${overdue ? 'text-rose-600 dark:text-rose-500' : 'text-amber-600 dark:text-amber-500'}`}>{formatMoney(deuda)}</span>
+                    <div className="mt-auto pt-4 border-t border-white/5 flex justify-between items-center transition-colors">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Deuda:</span>
+                      <span className={`font-black text-xl transition-colors ${overdue ? 'text-rose-500' : 'text-amber-500'}`}>{formatMoney(deuda)}</span>
                     </div>
-                    <button onClick={() => setPaymentProcess({ item: g, monto: '', fecha: new Date().toISOString().split('T')[0], metodo: 'Transferencia', cuenta: '', comprobante: null })} className="w-full mt-5 py-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-800 dark:text-white uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all shadow-sm dark:shadow-none">Registrar Abono</button>
+                    <button onClick={() => setPaymentProcess({ item: g, monto: '', fecha: new Date().toISOString().split('T')[0], metodo: 'Transferencia', cuenta: '', comprobante: null })} className="w-full mt-5 py-3 bg-[#1C1917] border border-white/10 rounded-xl text-xs font-bold text-[#D4AF37] uppercase tracking-widest hover:bg-white/5 transition-all">Registrar Abono</button>
                   </div>
                 )
               })}
@@ -8047,60 +8214,60 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
       </div>
 
       {isFormOpen && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex justify-between transition-colors">
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white">Nuevo Gasto</h3>
-              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] border border-[#D4AF37]/30 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] animate-in zoom-in-95 duration-200 transition-colors text-white">
+            <div className="px-6 py-5 border-b border-[#D4AF37]/20 bg-[#141210] flex justify-between transition-colors">
+              <h3 className="font-editorial font-black text-xl text-[#D4AF37]">Nuevo Gasto</h3>
+              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button>
             </div>
             <div className="p-6 space-y-5">
-              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Concepto</label><input type="text" value={formData.concepto} onChange={e=>setFormData({...formData, concepto: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors" placeholder="Ej. Fotografía"/></div>
-              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Categoría</label><select value={formData.categoria} onChange={e=>setFormData({...formData, categoria: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors">{categorias.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Concepto</label><input type="text" value={formData.concepto} onChange={e=>setFormData({...formData, concepto: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none text-white font-bold transition-colors" placeholder="Ej. Fotografía"/></div>
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Categoría</label><select value={formData.categoria} onChange={e=>setFormData({...formData, categoria: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none text-white font-bold transition-colors appearance-none">{categorias.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Estimado ($)</label><input type="number" value={formData.estimado} onChange={e=>setFormData({...formData, estimado: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold transition-colors" /></div>
-                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500">Fecha Límite</label><input type="date" value={formData.fechaLimite} onChange={e=>setFormData({...formData, fechaLimite: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-600 dark:text-slate-300 text-sm [color-scheme:light] dark:[color-scheme:dark] transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Estimado ($)</label><input type="number" value={formData.estimado} onChange={e=>setFormData({...formData, estimado: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none text-white font-bold transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Fecha Límite</label><input type="date" value={formData.fechaLimite} onChange={e=>setFormData({...formData, fechaLimite: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none text-white [color-scheme:dark] transition-colors font-bold" /></div>
               </div>
-              <button type="button" onClick={handleSaveGasto} disabled={!formData.concepto || !formData.estimado} className="w-full p-4 bg-amber-500 text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-6 hover:bg-amber-400 transition-colors shadow-md disabled:opacity-50">Guardar Gasto</button>
+              <button type="button" onClick={handleSaveGasto} disabled={!formData.concepto || !formData.estimado} className="w-full p-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest mt-6 hover:bg-[#c5a028] transition-colors shadow-[0_10px_25px_rgba(212,175,55,0.25)] disabled:opacity-50">Guardar Gasto</button>
             </div>
           </div>
         </div>
       )}
 
       {editGastoModal && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex justify-between transition-colors"><h3 className="font-bold text-lg text-slate-900 dark:text-white">Editar Gasto</h3><button onClick={() => setEditGastoModal(null)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button></div>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] border border-[#D4AF37]/30 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] animate-in zoom-in-95 duration-200 transition-colors text-white">
+            <div className="px-6 py-5 border-b border-[#D4AF37]/20 bg-[#141210] flex justify-between transition-colors"><h3 className="font-editorial font-black text-xl text-[#D4AF37]">Editar Gasto</h3><button onClick={() => setEditGastoModal(null)} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button></div>
             <div className="p-6 space-y-5">
-              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Concepto</label><input type="text" value={editGastoModal.concepto} onChange={e=>setEditGastoModal({...editGastoModal, concepto: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors" /></div>
-              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Categoría</label><select value={editGastoModal.categoria} onChange={e=>setEditGastoModal({...editGastoModal, categoria: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm transition-colors">{categorias.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400 transition-colors">Concepto</label><input type="text" value={editGastoModal.concepto} onChange={e=>setEditGastoModal({...editGastoModal, concepto: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none text-white font-bold transition-colors" /></div>
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400 transition-colors">Categoría</label><select value={editGastoModal.categoria} onChange={e=>setEditGastoModal({...editGastoModal, categoria: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none text-white font-bold transition-colors appearance-none">{categorias.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Costo Estimado ($)</label><input type="number" value={editGastoModal.estimado} onChange={e=>setEditGastoModal({...editGastoModal, estimado: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-900 dark:text-white text-sm font-bold transition-colors" /></div>
-                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Fecha Límite</label><input type="date" value={editGastoModal.fechaLimite || ''} onChange={e=>setEditGastoModal({...editGastoModal, fechaLimite: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl focus:border-amber-500 outline-none text-slate-600 dark:text-slate-300 text-sm [color-scheme:light] dark:[color-scheme:dark] transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400 transition-colors">Costo Estimado ($)</label><input type="number" value={editGastoModal.estimado} onChange={e=>setEditGastoModal({...editGastoModal, estimado: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none text-white font-bold transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400 transition-colors">Fecha Límite</label><input type="date" value={editGastoModal.fechaLimite || ''} onChange={e=>setEditGastoModal({...editGastoModal, fechaLimite: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none text-white [color-scheme:dark] transition-colors font-bold" /></div>
               </div>
-              <button type="button" onClick={handleUpdateGasto} className="w-full p-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest mt-6 hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)]">Guardar Cambios</button>
+              <button type="button" onClick={handleUpdateGasto} className="w-full p-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest mt-6 hover:bg-[#c5a028] transition-colors shadow-[0_10px_25px_rgba(212,175,55,0.25)]">Guardar Cambios</button>
             </div>
           </div>
         </div>
       )}
 
       {historyModal && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/10 bg-indigo-50 dark:bg-indigo-950/30 flex justify-between items-center transition-colors">
-              <h3 className="font-bold text-sm text-indigo-700 dark:text-indigo-400 flex items-center uppercase tracking-widest"><History size={16} className="mr-2"/> Historial de Pagos</h3>
-              <button onClick={() => setHistoryModal(null)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] border border-[#D4AF37]/30 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] animate-in zoom-in-95 duration-200 transition-colors text-white">
+            <div className="px-6 py-5 border-b border-[#D4AF37]/20 bg-[#141210] flex justify-between items-center transition-colors">
+              <h3 className="font-bold text-sm text-[#D4AF37] flex items-center uppercase tracking-widest"><History size={16} className="mr-2"/> Historial de Pagos</h3>
+              <button onClick={() => setHistoryModal(null)} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button>
             </div>
-            <div className="p-6 max-h-96 overflow-y-auto space-y-4 custom-scrollbar bg-slate-50 dark:bg-[#050505] transition-colors">
-              <p className="text-slate-900 dark:text-white font-bold mb-4 transition-colors">{historyModal.concepto}</p>
+            <div className="p-6 max-h-96 overflow-y-auto space-y-4 custom-scrollbar bg-[#1C1917] transition-colors">
+              <p className="text-white font-bold mb-4 transition-colors">{historyModal.concepto}</p>
               {historyModal.historial.map((abono, i) => (
-                <div key={abono.id} className="p-4 border border-slate-200 dark:border-white/10 rounded-2xl relative flex justify-between items-center bg-white dark:bg-[#111] shadow-sm hover:border-indigo-300 dark:hover:border-white/20 transition-colors">
-                  <div className="absolute -left-2 -top-2 w-6 h-6 bg-slate-800 border border-slate-200 dark:border-white/10 rounded-full flex items-center justify-center text-[10px] font-black text-white">{i+1}</div>
+                <div key={abono.id} className="p-4 border border-white/10 rounded-2xl relative flex justify-between items-center bg-[#141210] shadow-sm hover:border-[#D4AF37]/50 transition-colors">
+                  <div className="absolute -left-2 -top-2 w-6 h-6 bg-[#1C1917] border border-[#D4AF37]/50 rounded-full flex items-center justify-center text-[10px] font-black text-[#D4AF37]">{i+1}</div>
                   <div>
-                    <p className="font-black text-emerald-600 dark:text-emerald-400 text-xl transition-colors">{formatMoney(abono.monto)}</p>
+                    <p className="font-black text-emerald-400 text-xl transition-colors">{formatMoney(abono.monto)}</p>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center mt-1"><Calendar size={10} className="mr-1"/> {abono.fecha}</p>
                   </div>
                   <div className="text-right flex flex-col items-end">
-                    <p className="text-[9px] font-black text-indigo-700 dark:text-indigo-400 uppercase bg-indigo-100 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 px-2 py-1 rounded-md inline-block transition-colors">{abono.metodo}</p>
+                    <p className="text-[9px] font-black text-[#D4AF37] uppercase bg-[#D4AF37]/10 border border-[#D4AF37]/20 px-2 py-1 rounded-md inline-block transition-colors">{abono.metodo}</p>
                     {abono.cuenta && <p className="text-[10px] text-slate-500 mt-2 font-mono">Ref: {abono.cuenta}</p>}
                   </div>
                 </div>
@@ -8111,24 +8278,24 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
       )}
 
       {paymentProcess && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] border border-emerald-200 dark:border-emerald-500/20 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl dark:shadow-[0_0_50px_rgba(16,185,129,0.15)] animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-emerald-50 dark:bg-emerald-950/30 flex justify-between items-center transition-colors">
-              <h3 className="font-bold text-sm text-emerald-700 dark:text-emerald-400 flex items-center uppercase tracking-widest"><DollarSign size={16} className="mr-2"/> Registrar Pago</h3>
-              <button onClick={() => setPaymentProcess(null)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] border border-emerald-500/30 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] animate-in zoom-in-95 duration-200 transition-colors text-white">
+            <div className="px-6 py-5 border-b border-white/10 bg-emerald-500/10 flex justify-between items-center transition-colors">
+              <h3 className="font-bold text-sm text-emerald-400 flex items-center uppercase tracking-widest"><DollarSign size={16} className="mr-2"/> Registrar Pago</h3>
+              <button onClick={() => setPaymentProcess(null)} className="text-slate-400 hover:text-white transition-colors"><X size={20}/></button>
             </div>
             <div className="p-6 space-y-5">
-              <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-200 dark:border-white/5 text-xs text-slate-500 dark:text-slate-400 mb-2 transition-colors">Destino: <b className="text-sm text-slate-800 dark:text-white ml-1 transition-colors">{paymentProcess.item.concepto}</b></div>
+              <div className="bg-[#141210] p-4 rounded-xl border border-white/5 text-xs text-slate-400 mb-2 transition-colors">Destino: <b className="text-sm text-white ml-1 transition-colors">{paymentProcess.item.concepto}</b></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Monto ($)</label><input type="number" required max={paymentProcess.item.estimado - paymentProcess.item.pagado} value={paymentProcess.monto} onChange={e=>setPaymentProcess({...paymentProcess, monto: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl font-black text-xl text-emerald-600 dark:text-emerald-400 focus:border-emerald-500 outline-none bg-slate-50 dark:bg-[#111] transition-colors" placeholder="0.00" /></div>
-                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Fecha</label><input type="date" required value={paymentProcess.fecha} onChange={e=>setPaymentProcess({...paymentProcess, fecha: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl focus:border-emerald-500 outline-none bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white text-sm [color-scheme:light] dark:[color-scheme:dark] transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400 transition-colors">Monto ($)</label><input type="number" required max={paymentProcess.item.estimado - paymentProcess.item.pagado} value={paymentProcess.monto} onChange={e=>setPaymentProcess({...paymentProcess, monto: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl font-black text-xl text-emerald-400 focus:border-emerald-500 outline-none bg-[#141210] transition-colors" placeholder="0.00" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400 transition-colors">Fecha</label><input type="date" required value={paymentProcess.fecha} onChange={e=>setPaymentProcess({...paymentProcess, fecha: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl focus:border-emerald-500 outline-none bg-[#141210] text-white text-sm [color-scheme:dark] transition-colors font-bold" /></div>
               </div>
-              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Forma de Pago</label><select value={paymentProcess.metodo} onChange={e=>setPaymentProcess({...paymentProcess, metodo: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl focus:border-emerald-500 outline-none bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white text-sm transition-colors cursor-pointer"><option value="Transferencia">Transferencia</option><option value="Efectivo">Efectivo</option><option value="Tarjeta">Tarjeta</option><option value="Depósito">Depósito</option></select></div>
-              {(paymentProcess.metodo === 'Transferencia' || paymentProcess.metodo === 'Depósito') && (<div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400 transition-colors">Cuenta / Referencia</label><input type="text" placeholder="Ej. 01234567890" value={paymentProcess.cuenta} onChange={e=>setPaymentProcess({...paymentProcess, cuenta: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl focus:border-emerald-500 outline-none bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white text-sm font-mono transition-colors" /></div>)}
+              <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400 transition-colors">Forma de Pago</label><select value={paymentProcess.metodo} onChange={e=>setPaymentProcess({...paymentProcess, metodo: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl focus:border-emerald-500 outline-none bg-[#141210] text-white text-sm transition-colors cursor-pointer appearance-none font-bold"><option value="Transferencia">Transferencia</option><option value="Efectivo">Efectivo</option><option value="Tarjeta">Tarjeta</option><option value="Depósito">Depósito</option></select></div>
+              {(paymentProcess.metodo === 'Transferencia' || paymentProcess.metodo === 'Depósito') && (<div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400 transition-colors">Cuenta / Referencia</label><input type="text" placeholder="Ej. 01234567890" value={paymentProcess.cuenta} onChange={e=>setPaymentProcess({...paymentProcess, cuenta: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl focus:border-emerald-500 outline-none bg-[#141210] text-white text-sm font-mono transition-colors font-bold" /></div>)}
               
-              <div className="flex space-x-3 pt-6 border-t border-slate-100 dark:border-white/5 transition-colors">
-                <button type="button" onClick={() => setPaymentProcess(null)} className="flex-1 p-4 bg-slate-100 dark:bg-white/5 font-bold rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
-                <button type="button" onClick={handleAddPayment} disabled={!paymentProcess.monto} className="flex-1 p-4 bg-emerald-500 text-white dark:text-slate-900 font-black rounded-xl shadow-md dark:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-colors uppercase tracking-widest text-[10px] disabled:opacity-50">Guardar Pago</button>
+              <div className="flex space-x-3 pt-6 border-t border-white/10 transition-colors">
+                <button type="button" onClick={() => setPaymentProcess(null)} className="flex-1 p-4 bg-white/5 font-bold rounded-xl text-slate-400 hover:text-white transition-colors uppercase tracking-widest text-[10px] border border-white/5">Cancelar</button>
+                <button type="button" onClick={handleAddPayment} disabled={!paymentProcess.monto} className="flex-1 p-4 bg-emerald-500 text-[#1C1917] font-black rounded-xl shadow-[0_5px_15px_rgba(16,185,129,0.3)] hover:bg-emerald-600 transition-colors uppercase tracking-widest text-[10px] disabled:opacity-50">Guardar Pago</button>
               </div>
             </div>
           </div>
@@ -8136,25 +8303,25 @@ const PresupuestoView = ({ eventId, authData, gastos, setGastos, proveedores, se
       )}
 
       {deleteProcess && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] border border-rose-200 dark:border-rose-500/20 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-rose-50 dark:bg-rose-950/30 flex justify-between items-center transition-colors">
-              <h3 className="font-bold text-sm text-rose-700 dark:text-rose-400 flex items-center uppercase tracking-widest"><AlertTriangle size={16} className="mr-2"/> Cancelar Servicio</h3>
-              <button onClick={() => setDeleteProcess(null)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] border border-rose-500/30 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] animate-in zoom-in-95 duration-200 transition-colors text-white">
+            <div className="px-6 py-5 border-b border-white/10 bg-rose-500/10 flex justify-between items-center transition-colors">
+              <h3 className="font-bold text-sm text-rose-400 flex items-center uppercase tracking-widest"><AlertTriangle size={16} className="mr-2"/> Cancelar Servicio</h3>
+              <button onClick={() => setDeleteProcess(null)} className="text-slate-400 hover:text-white transition-colors"><X size={20}/></button>
             </div>
             <div className="p-6 space-y-4">
-              <p className="text-sm text-slate-600 dark:text-slate-300 transition-colors">Este gasto ya tiene <b>{formatMoney(deleteProcess.item.pagado)}</b> abonados. ¿Cuánto dinero te regresó el proveedor?</p>
+              <p className="text-sm text-slate-300 transition-colors">Este gasto ya tiene <b className="text-rose-400">{formatMoney(deleteProcess.item.pagado)}</b> abonados. ¿Cuánto dinero te regresó el proveedor?</p>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 transition-colors">Monto Reembolsado ($)</label>
-                <input type="number" max={deleteProcess.item.pagado} value={deleteProcess.refundAmount} onChange={e=>setDeleteProcess({...deleteProcess, refundAmount: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl text-rose-600 font-bold focus:border-rose-500 outline-none bg-slate-50 dark:bg-[#111] transition-colors" placeholder="0.00"/>
+                <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400 transition-colors">Monto Reembolsado ($)</label>
+                <input type="number" max={deleteProcess.item.pagado} value={deleteProcess.refundAmount} onChange={e=>setDeleteProcess({...deleteProcess, refundAmount: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl text-rose-400 font-bold focus:border-rose-500 outline-none bg-[#141210] transition-colors" placeholder="0.00"/>
               </div>
-              <div className="flex items-center gap-2 mt-4">
-                 <input type="checkbox" id="keepRemaining" checked={deleteProcess.keepRemaining} onChange={e=>setDeleteProcess({...deleteProcess, keepRemaining: e.target.checked})} className="w-4 h-4 accent-rose-500"/>
-                 <label htmlFor="keepRemaining" className="text-xs text-slate-600 dark:text-slate-400 cursor-pointer transition-colors">Mantener el dinero perdido como gasto en el presupuesto</label>
+              <div className="flex items-center gap-3 mt-4">
+                 <input type="checkbox" id="keepRemaining" checked={deleteProcess.keepRemaining} onChange={e=>setDeleteProcess({...deleteProcess, keepRemaining: e.target.checked})} className="w-5 h-5 accent-rose-500"/>
+                 <label htmlFor="keepRemaining" className="text-xs text-slate-400 cursor-pointer transition-colors">Mantener el dinero perdido como gasto en el presupuesto</label>
               </div>
-              <div className="flex space-x-3 pt-4 border-t border-slate-100 dark:border-white/5 transition-colors">
-                <button type="button" onClick={() => setDeleteProcess(null)} className="flex-1 p-4 bg-slate-100 dark:bg-white/5 font-bold rounded-xl text-slate-500 uppercase tracking-widest text-[10px] transition-colors">Cancelar</button>
-                <button type="button" onClick={() => executeDelete(deleteProcess.item, deleteProcess.refundAmount, deleteProcess.keepRemaining)} className="flex-1 p-4 bg-rose-500 text-white font-black rounded-xl shadow-md hover:bg-rose-600 uppercase tracking-widest text-[10px] transition-colors">Confirmar</button>
+              <div className="flex space-x-3 pt-6 border-t border-white/10 transition-colors">
+                <button type="button" onClick={() => setDeleteProcess(null)} className="flex-1 p-4 bg-white/5 border border-white/10 font-bold rounded-xl text-slate-400 uppercase tracking-widest text-[10px] transition-colors hover:text-white">Cancelar</button>
+                <button type="button" onClick={() => executeDelete(deleteProcess.item, deleteProcess.refundAmount, deleteProcess.keepRemaining)} className="flex-1 p-4 bg-rose-500 text-white font-black rounded-xl shadow-[0_5px_15px_rgba(244,63,94,0.3)] hover:bg-rose-600 uppercase tracking-widest text-[10px] transition-colors">Confirmar</button>
               </div>
             </div>
           </div>
@@ -8194,10 +8361,10 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
 
   const categorias = ['Lugar', 'Música', 'Decoración', 'Recuerdos', 'Comida/Bebida', 'Ropa/Maquillaje', 'Papelería', 'Otros'];
   const statusColors = { 
-    'Cotizado':'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300 border-slate-200 dark:border-white/20', 
-    'Negociando':'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border-amber-200 dark:border-amber-500/20', 
-    'Contratado':'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-500 dark:border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)]', 
-    'Descartado':'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border-rose-200 dark:border-rose-500/20 opacity-70' 
+    'Cotizado':'bg-white/5 text-slate-400 border-white/10', 
+    'Negociando':'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/30', 
+    'Contratado':'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]', 
+    'Descartado':'bg-rose-500/10 text-rose-400 border-rose-500/20 opacity-70' 
   };
   const safeProveedores = proveedores || [];
 
@@ -8435,40 +8602,49 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
   }
 
   return (
-    <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-900 dark:text-slate-200 transition-colors duration-500">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
-          <h2 className="text-3xl font-editorial text-slate-900 dark:text-white tracking-wide">Directorio VIP de Proveedores</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-light">Busca talento top o gestiona tus contactos, evaluaciones y contratos.</p>
+    <div className="h-full flex flex-col space-y-6 pb-6 relative text-white bg-[#141210] min-h-[100vh] p-4 rounded-3xl transition-colors duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#1C1917] p-5 sm:p-6 rounded-3xl border border-[#D4AF37]/25 shadow-xl">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
+            <Store size={20} />
+          </div>
+          <div>
+            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block mb-0.5">Contactos, evaluaciones y contratos.</span>
+            <h2 className="text-2xl sm:text-3xl font-editorial text-white tracking-wide leading-none">Directorio VIP</h2>
+          </div>
         </div>
-        <button onClick={() => openNewProviderForm('')} className="flex items-center px-5 py-3 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-indigo-700 dark:hover:bg-amber-400 transition-all w-full md:w-auto justify-center"><Plus size={18} className="mr-2" /> Nuevo Proveedor</button>
+        <div className="flex w-full md:w-auto">
+          <button onClick={() => openNewProviderForm('')} className="flex-1 md:flex-none flex items-center justify-center px-5 h-9 bg-[#D4AF37] text-[#1C1917] rounded-lg text-[10px] font-black hover:bg-[#c5a028] transition-colors shadow-[0_10px_25px_rgba(212,175,55,0.25)] uppercase tracking-widest shrink-0">
+            <Plus size={14} className="mr-1.5" /> Nuevo Proveedor
+          </button>
+        </div>
       </div>
 
       {/* BUSCADOR INTEGRADO LUMINOSO */}
-      <div className="relative z-10">
-        <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-          <SearchIcon size={22} className="text-slate-400 dark:text-slate-500" />
+      <div className="relative z-10 px-2">
+        <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+          <SearchIcon size={20} className="text-[#D4AF37]/70" />
         </div>
         <input 
           type="text" 
           placeholder="Buscar proveedor en la comunidad..." 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-14 pr-4 py-5 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[1.5rem] shadow-sm dark:shadow-2xl text-lg outline-none focus:border-indigo-400 dark:focus:border-amber-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-amber-500/20 text-slate-800 dark:text-white font-medium transition-all"
+          className="w-full pl-14 pr-4 py-4 bg-[#1C1917] border border-[#D4AF37]/30 rounded-2xl shadow-xl text-base outline-none focus:border-[#D4AF37] text-white font-medium transition-all placeholder-slate-500"
         />
       </div>
 
       {searchTerm.length > 0 ? (
-        <div className="flex-1 overflow-y-auto pb-10 custom-scrollbar">
-          <h3 className="font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center text-sm uppercase tracking-widest"><SearchIcon size={16} className="mr-2 text-indigo-500 dark:text-amber-500"/> Resultados Globales</h3>
+        <div className="flex-1 overflow-y-auto pb-10 custom-scrollbar px-2">
+          <h3 className="font-bold text-slate-300 mb-4 flex items-center text-sm uppercase tracking-widest"><SearchIcon size={16} className="mr-2 text-[#D4AF37]"/> Resultados Globales</h3>
           
           {searchedProviders.length === 0 ? (
-            <div className="text-center py-16 bg-white dark:bg-[#0a0a0a] rounded-3xl border border-dashed border-slate-300 dark:border-white/10 transition-colors">
-               <Store size={56} className="mx-auto mb-4 text-slate-300 dark:text-slate-600"/>
-               <h3 className="text-xl font-editorial font-bold text-slate-800 dark:text-white">Aún no dan de alta a este proveedor con nosotros</h3>
-               <p className="text-slate-500 dark:text-slate-400 mt-2 mb-6 text-sm">¡Sé el primero en agregarlo a la Bóveda Privada!</p>
-               <button onClick={() => openNewProviderForm(searchTerm)} className="px-6 py-3 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 font-black rounded-xl shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform inline-flex items-center">
-                 <Plus size={18} className="mr-2"/> Agregar "{searchTerm}"
+            <div className="text-center py-16 bg-[#1C1917] rounded-3xl border border-dashed border-white/10 transition-colors">
+               <Store size={56} className="mx-auto mb-4 text-[#D4AF37]/50"/>
+               <h3 className="text-xl font-editorial font-black text-white">Aún no dan de alta a este proveedor con nosotros</h3>
+               <p className="text-slate-400 mt-2 mb-6 text-sm">¡Sé el primero en agregarlo a la Bóveda Privada!</p>
+               <button onClick={() => openNewProviderForm(searchTerm)} className="px-6 py-3.5 bg-[#D4AF37] text-[#1C1917] font-black rounded-xl shadow-[0_5px_15px_rgba(212,175,55,0.2)] hover:scale-105 transition-transform inline-flex items-center text-xs uppercase tracking-widest">
+                 <Plus size={16} className="mr-2"/> Agregar "{searchTerm}"
                </button>
             </div>
           ) : (
@@ -8476,27 +8652,27 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
               {searchedProviders.map(prov => {
                 const distancia = userLocation ? getDistanceFromLatLonInKm(userLocation.lat, userLocation.lng, prov.lat, prov.lng).toFixed(1) : null;
                 return (
-                  <div key={prov.id} className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-2xl flex flex-col p-6 hover:border-indigo-400 dark:hover:border-amber-500 transition-colors duration-300">
+                  <div key={prov.id} className="bg-[#1C1917] rounded-3xl border border-[#D4AF37]/30 shadow-xl flex flex-col p-6 hover:border-[#D4AF37] transition-colors duration-300">
                     <div className="flex justify-between items-start mb-4">
-                      <span className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 rounded-md border border-transparent dark:border-indigo-500/20 text-[10px] font-black uppercase tracking-widest">{prov.categoria}</span>
-                      {distancia && <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 px-2 py-1 rounded-full"><MapPin size={10} className="mr-1 text-rose-500"/> A {distancia} km</span>}
+                      <span className="px-2.5 py-1 bg-white/5 text-[#D4AF37] rounded-md border border-white/5 text-[10px] font-black uppercase tracking-widest">{prov.categoria}</span>
+                      {distancia && <span className="text-[10px] font-bold text-slate-400 flex items-center bg-white/5 border border-white/10 px-2.5 py-1 rounded-full"><MapPin size={10} className="mr-1 text-rose-500"/> A {distancia} km</span>}
                     </div>
-                    <h3 className="font-editorial font-bold text-2xl text-slate-800 dark:text-white mb-1 leading-tight">{prov.nombre}</h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm mb-5 line-clamp-2">{prov.servicio}</p>
+                    <h3 className="font-editorial font-black text-2xl text-white mb-1 leading-tight">{prov.nombre}</h3>
+                    <p className="text-slate-400 text-sm mb-5 line-clamp-2">{prov.servicio}</p>
                     
-                    <div className="flex items-center justify-between mb-5 bg-slate-50 dark:bg-[#111] p-3 rounded-xl border border-slate-100 dark:border-white/5 transition-colors">
+                    <div className="flex items-center justify-between mb-5 bg-[#141210] p-3 rounded-xl border border-white/5 transition-colors">
                       <div className="flex items-center">
-                        <Star size={16} className="text-amber-500 fill-amber-500 mr-1.5"/>
-                        <span className="font-black text-slate-700 dark:text-white text-base">{prov.ratingPromedio}</span>
+                        <Star size={16} className="text-[#D4AF37] fill-[#D4AF37] mr-1.5"/>
+                        <span className="font-black text-white text-base">{prov.ratingPromedio}</span>
                       </div>
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Aprox: <span className="text-sm text-slate-900 dark:text-white">{formatMoney(prov.costoPromedio)}</span></span>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Aprox: <span className="text-sm text-white">{formatMoney(prov.costoPromedio)}</span></span>
                     </div>
 
                     <div className="mt-auto pt-4 flex gap-2">
-                      <button onClick={() => { if(prov.telefono) window.open(`https://wa.me/${prov.telefono.replace(/\D/g,'')}?text=Hola,%20te%20encontré%20en%20EventMaster`, '_blank'); }} className="p-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-transparent dark:border-emerald-500/20 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors" title="Contactar por WhatsApp">
+                      <button onClick={() => { if(prov.telefono) window.open(`https://wa.me/${prov.telefono.replace(/\D/g,'')}?text=Hola,%20te%20encontré%20en%20EventMaster`, '_blank'); }} className="p-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl hover:bg-emerald-500/20 transition-colors" title="Contactar por WhatsApp">
                         <MessageCircle size={20} />
                       </button>
-                      <button onClick={() => selectGlobalProvider(prov)} className="flex-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-slate-200 shadow-md flex items-center justify-center transition-colors">
+                      <button onClick={() => selectGlobalProvider(prov)} className="flex-1 bg-[#D4AF37] text-[#1C1917] px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#c5a028] shadow-[0_5px_15px_rgba(212,175,55,0.2)] flex items-center justify-center transition-colors">
                         Cotizar
                       </button>
                     </div>
@@ -8509,134 +8685,134 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
       ) : (
         <>
           <div className="flex gap-2">
-            <select value={categoriaFiltro} onChange={e=>setCategoriaFiltro(e.target.value)} className="px-4 py-2 border border-slate-200 dark:border-white/10 rounded-xl bg-white dark:bg-[#0a0a0a] text-sm font-bold text-slate-700 dark:text-white outline-none shadow-sm transition-colors"><option value="Todas">Todas las áreas</option>{categorias.map(c => <option key={c} value={c}>Giro: {c}</option>)}</select>
-            <button onClick={() => { if(proveedoresFiltrados.length === 0) { if(addNotification) addNotification('Directorio Vacío', 'No hay proveedores para exportar.', 'warning'); return; } setExportViewOpen(true); }} className="flex items-center px-4 py-2 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm transition-colors">
-              <FileDown size={14} className="mr-2 text-indigo-600 dark:text-amber-500"/> {categoriaFiltro === 'Todas' ? 'Directorio PDF' : 'Comparativa PDF'}
+            <select value={categoriaFiltro} onChange={e=>setCategoriaFiltro(e.target.value)} className="px-4 py-2 border border-white/10 rounded-xl bg-[#1C1917] text-xs uppercase tracking-widest font-bold text-white outline-none shadow-sm transition-colors appearance-none"><option value="Todas">Todas las áreas</option>{categorias.map(c => <option key={c} value={c}>Giro: {c}</option>)}</select>
+            <button onClick={() => { if(proveedoresFiltrados.length === 0) { if(addNotification) addNotification('Directorio Vacío', 'No hay proveedores para exportar.', 'warning'); return; } setExportViewOpen(true); }} className="flex items-center px-4 py-2 bg-transparent border border-white/10 text-slate-300 rounded-xl text-[10px] uppercase tracking-widest font-bold hover:bg-white/5 hover:text-white shadow-sm transition-colors">
+              <FileDown size={14} className="mr-2 text-[#D4AF37]"/> {categoriaFiltro === 'Todas' ? 'Directorio PDF' : 'Comparativa PDF'}
             </button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pb-10 custom-scrollbar">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pb-10 custom-scrollbar px-2">
             {proveedoresFiltrados.map(prov => (
-              <div key={prov.id} className={`group bg-white dark:bg-[#0a0a0a] p-6 rounded-3xl border shadow-sm dark:shadow-2xl flex flex-col relative overflow-hidden transition-all duration-500 ${prov.status === 'Descartado' ? 'opacity-60 bg-slate-50 dark:bg-[#111] border-slate-200 dark:border-white/5' : 'border-slate-200 dark:border-white/10 hover:border-indigo-400 dark:hover:border-amber-500'}`}>
+              <div key={prov.id} className={`group bg-[#1C1917] p-6 rounded-3xl border shadow-xl flex flex-col relative overflow-hidden transition-all duration-500 ${prov.status === 'Descartado' ? 'opacity-50 bg-[#141210] border-white/5' : 'border-[#D4AF37]/30 hover:border-[#D4AF37]'}`}>
                 
                 <div className="absolute top-4 right-4 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                   <button onClick={(e) => { e.stopPropagation(); openEditProvider(prov); }} className="p-2 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-400 hover:text-indigo-600 dark:hover:text-white rounded-lg shadow-sm transition-colors" title="Editar Proveedor"><Edit2 size={14}/></button>
-                   <button onClick={(e) => { e.stopPropagation(); setDeleteProvConfirm(prov); }} className="p-2 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 text-slate-400 hover:text-rose-600 dark:hover:text-rose-500 rounded-lg shadow-sm transition-colors" title="Eliminar Proveedor"><Trash2 size={14}/></button>
+                   <button onClick={(e) => { e.stopPropagation(); openEditProvider(prov); }} className="p-2 bg-[#141210] border border-white/10 text-slate-400 hover:text-white rounded-lg shadow-sm transition-colors" title="Editar Proveedor"><Edit2 size={14}/></button>
+                   <button onClick={(e) => { e.stopPropagation(); setDeleteProvConfirm(prov); }} className="p-2 bg-[#141210] border border-white/10 text-slate-400 hover:text-rose-400 rounded-lg shadow-sm transition-colors" title="Eliminar Proveedor"><Trash2 size={14}/></button>
                 </div>
 
                 <div className="flex justify-between items-start mb-3 pr-20">
-                  <span className="px-2.5 py-1 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-transparent dark:border-white/10 rounded-md text-[9px] font-black uppercase tracking-widest">{prov.categoria}</span>
+                  <span className="px-2.5 py-1 bg-white/5 text-slate-400 border border-white/10 rounded-md text-[9px] font-black uppercase tracking-widest">{prov.categoria}</span>
                   <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${statusColors[prov.status]}`}>{prov.status}</span>
                 </div>
                 
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-editorial font-bold text-2xl text-slate-800 dark:text-white leading-tight pr-2 transition-colors">{prov.nombre}</h3>
+                  <h3 className="font-editorial font-black text-2xl text-white leading-tight pr-2 transition-colors">{prov.nombre}</h3>
                   <div className="flex space-x-0.5 mt-1.5 shrink-0">
                     {[1,2,3,4,5].map(star => (
-                      <button key={star} onClick={()=>setRating(prov.id, star)} className={`transition-colors ${prov.rating >= star ? 'text-amber-500' : 'text-slate-200 dark:text-slate-700 hover:text-amber-200 dark:hover:text-amber-700'}`}>
+                      <button key={star} onClick={()=>setRating(prov.id, star)} className={`transition-colors ${prov.rating >= star ? 'text-[#D4AF37]' : 'text-slate-600 hover:text-[#D4AF37]/50'}`}>
                         <Star size={14} fill={prov.rating >= star ? 'currentColor' : 'none'} />
                       </button>
                     ))}
                   </div>
                 </div>
                 
-                <p className="text-slate-600 dark:text-slate-400 text-sm mb-5 font-medium transition-colors">{prov.servicio}</p>
+                <p className="text-slate-400 text-sm mb-5 font-medium transition-colors line-clamp-2">{prov.servicio}</p>
                 
                 <div className="flex space-x-2 mb-5">
                   {prov.telefono && (
                     <>
-                      <a href={`tel:${prov.telefono}`} className="p-2.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"><Phone size={16} /></a>
-                      <a href={`https://wa.me/${prov.telefono.replace(/\D/g,'')}`} target="_blank" rel="noreferrer" className="p-2.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"><MessageCircle size={16} /></a>
+                      <a href={`tel:${prov.telefono}`} className="p-2.5 bg-[#141210] border border-white/5 text-slate-400 rounded-xl hover:bg-white/10 hover:text-white transition-colors"><Phone size={16} /></a>
+                      <a href={`https://wa.me/${prov.telefono.replace(/\D/g,'')}`} target="_blank" rel="noreferrer" className="p-2.5 bg-[#141210] border border-white/5 text-slate-400 rounded-xl hover:bg-emerald-500/10 hover:text-emerald-400 transition-colors"><MessageCircle size={16} /></a>
                     </>
                   )}
-                  {prov.email && <a href={`mailto:${prov.email}`} className="p-2.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"><Mail size={16} /></a>}
-                  <button onClick={() => setViewGallery(prov)} className="p-2.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-sky-50 dark:hover:bg-sky-500/10 hover:text-sky-600 dark:hover:text-sky-400 transition-colors relative">
+                  {prov.email && <a href={`mailto:${prov.email}`} className="p-2.5 bg-[#141210] border border-white/5 text-slate-400 rounded-xl hover:bg-white/10 hover:text-white transition-colors"><Mail size={16} /></a>}
+                  <button onClick={() => setViewGallery(prov)} className="p-2.5 bg-[#141210] border border-white/5 text-slate-400 rounded-xl hover:bg-white/10 hover:text-white transition-colors relative">
                     <ImageIcon size={16} />
-                    {prov.galeria > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-sky-500 text-white rounded-full text-[8px] font-bold flex items-center justify-center border-2 border-white dark:border-[#0a0a0a]">{prov.galeria}</span>}
+                    {prov.galeria > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-sky-500 text-white rounded-full text-[8px] font-bold flex items-center justify-center border-2 border-[#1C1917]">{prov.galeria}</span>}
                   </button>
                 </div>
 
                 {(prov.banco || prov.clabe) && (
-                  <div className="mb-4 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/5 p-3 rounded-xl text-[10px] text-slate-600 dark:text-slate-400 flex flex-col space-y-1.5 transition-colors">
-                    <div className="flex items-center font-bold text-slate-800 dark:text-white mb-1 uppercase tracking-widest"><Building size={12} className="mr-1.5 text-indigo-500 dark:text-amber-500"/> Datos Bancarios</div>
-                    {prov.titular && <div><span className="opacity-60 w-16 inline-block">Titular:</span> <span className="text-slate-900 dark:text-slate-200 font-bold">{prov.titular}</span></div>}
-                    {prov.banco && <div><span className="opacity-60 w-16 inline-block">Banco:</span> <span className="text-slate-900 dark:text-slate-200 font-bold">{prov.banco}</span></div>}
-                    {prov.clabe && <div><span className="opacity-60 w-16 inline-block">Cuenta:</span> <span className="font-mono bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white px-1.5 py-0.5 rounded font-bold">{prov.clabe}</span></div>}
+                  <div className="mb-4 bg-[#141210] border border-white/5 p-3 rounded-xl text-[10px] text-slate-400 flex flex-col space-y-1.5 transition-colors">
+                    <div className="flex items-center font-bold text-slate-300 mb-1 uppercase tracking-widest"><Building size={12} className="mr-1.5 text-[#D4AF37]"/> Datos Bancarios</div>
+                    {prov.titular && <div><span className="opacity-60 w-16 inline-block">Titular:</span> <span className="text-white font-bold">{prov.titular}</span></div>}
+                    {prov.banco && <div><span className="opacity-60 w-16 inline-block">Banco:</span> <span className="text-white font-bold">{prov.banco}</span></div>}
+                    {prov.clabe && <div><span className="opacity-60 w-16 inline-block">Cuenta:</span> <span className="font-mono bg-white/5 text-white px-1.5 py-0.5 rounded font-bold border border-white/10">{prov.clabe}</span></div>}
                   </div>
                 )}
 
-                {prov.notas && <div className="mb-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-3 rounded-xl text-xs text-amber-800 dark:text-amber-400 italic flex items-start shadow-sm transition-colors"><MessageSquare size={14} className="mr-2 mt-0.5 flex-shrink-0"/> {prov.notas}</div>}
+                {prov.notas && <div className="mb-4 bg-[#D4AF37]/5 border border-[#D4AF37]/20 p-3 rounded-xl text-xs text-[#D4AF37] italic flex items-start shadow-sm transition-colors"><MessageSquare size={14} className="mr-2 mt-0.5 flex-shrink-0"/> {prov.notas}</div>}
 
                 {prov.contrato && (
-                  <div className="mb-4 flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 p-2.5 rounded-xl text-xs text-indigo-700 dark:text-indigo-400 font-bold shadow-sm transition-colors">
-                    <span className="flex items-center truncate mr-2"><FileSignature size={14} className="mr-2 flex-shrink-0"/> {prov.contrato}</span>
-                    <button onClick={() => setViewContract(prov.contrato)} className="p-1.5 bg-white dark:bg-[#111] text-indigo-600 dark:text-indigo-300 rounded border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex-shrink-0"><Eye size={14}/></button>
+                  <div className="mb-4 flex items-center justify-between bg-[#141210] border border-white/5 p-2.5 rounded-xl text-xs text-slate-300 font-bold shadow-sm transition-colors">
+                    <span className="flex items-center truncate mr-2"><FileSignature size={14} className="mr-2 flex-shrink-0 text-[#D4AF37]"/> {prov.contrato}</span>
+                    <button onClick={() => setViewContract(prov.contrato)} className="p-1.5 bg-white/5 text-slate-400 rounded border border-white/10 hover:bg-white/10 hover:text-white transition-colors flex-shrink-0"><Eye size={14}/></button>
                   </div>
                 )}
 
-                <div className="mt-auto pt-5 border-t border-slate-100 dark:border-white/5 flex justify-between items-center transition-colors">
-                  <span className="font-editorial font-black text-2xl text-slate-900 dark:text-white">{formatMoney(prov.costo)}</span>
+                <div className="mt-auto pt-5 border-t border-white/10 flex justify-between items-center transition-colors">
+                  <span className="font-editorial font-black text-2xl text-white">{formatMoney(prov.costo)}</span>
                   {prov.status === 'Contratado' ? (
-                    <button onClick={() => setCancelProvModal(prov)} className="text-[10px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 hover:bg-rose-100 dark:hover:bg-rose-500/20 px-3 py-2 rounded-lg transition-colors">Cancelar</button>
+                    <button onClick={() => setCancelProvModal(prov)} className="text-[10px] font-black uppercase tracking-widest text-rose-400 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 px-3 py-2 rounded-lg transition-colors">Cancelar</button>
                   ) : prov.status !== 'Descartado' ? (
-                    <button onClick={() => setHireProcess({ prov, abono: '', file: null, fechaLimite: '' })} className="text-[10px] font-black uppercase tracking-widest text-white dark:text-slate-900 bg-indigo-600 dark:bg-amber-500 hover:bg-indigo-700 dark:hover:bg-amber-400 px-4 py-2.5 rounded-lg shadow-md transition-colors">Firmar / Contratar</button>
+                    <button onClick={() => setHireProcess({ prov, abono: '', file: null, fechaLimite: '' })} className="text-[10px] font-black uppercase tracking-widest text-[#1C1917] bg-[#D4AF37] hover:bg-[#c5a028] px-4 py-2.5 rounded-lg shadow-[0_5px_15px_rgba(212,175,55,0.2)] transition-colors">Firmar / Contratar</button>
                   ) : null}
                 </div>
               </div>
             ))}
-            {proveedoresFiltrados.length === 0 && <div className="col-span-full text-center py-16 text-slate-400 dark:text-slate-500 font-medium">No hay cotizaciones registradas en esta categoría.</div>}
+            {proveedoresFiltrados.length === 0 && <div className="col-span-full text-center py-16 text-slate-500 font-medium">No hay cotizaciones registradas en esta categoría.</div>}
           </div>
         </>
       )}
       
       {/* MODAL: ALTA Y EDICIÓN DE PROVEEDOR */}
       {isFormOpen && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center shrink-0 transition-colors">
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center tracking-wide">
-                 <Store size={20} className="mr-2 text-indigo-600 dark:text-amber-500"/> 
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-2xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] transition-colors text-white">
+            <div className="px-6 py-5 border-b border-[#D4AF37]/20 bg-[#141210] flex justify-between items-center shrink-0 transition-colors">
+              <h3 className="font-editorial font-black text-2xl text-[#D4AF37] flex items-center tracking-wide">
+                 <Store size={24} className="mr-2.5"/> 
                  {editingProvId ? 'Editar Proveedor' : 'Alta de Proveedor'}
               </h3>
-              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button>
+              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button>
             </div>
             <form onSubmit={handleSaveProveedor} className="p-6 overflow-y-auto shrink custom-scrollbar">
               
-              <div className="mb-6 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 p-4 rounded-2xl flex items-start text-indigo-800 dark:text-indigo-300 text-xs font-medium shadow-sm transition-colors">
-                <Info size={16} className="mr-3 mt-0.5 flex-shrink-0 text-indigo-500 dark:text-indigo-400"/>
+              <div className="mb-6 bg-[#D4AF37]/10 border border-[#D4AF37]/20 p-4 rounded-2xl flex items-start text-[#D4AF37] text-xs font-medium shadow-sm transition-colors">
+                <Info size={16} className="mr-3 mt-0.5 flex-shrink-0"/>
                 <p><b>Tip Experto:</b> Si agregas las redes sociales o página web de tu proveedor, nos ayudas a crear una comunidad más segura y te habilitará la opción de calificar su servicio al finalizar tu evento.</p>
               </div>
 
               <div className="grid grid-cols-2 gap-5 mb-6">
                 <div className="col-span-2">
-                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Enlace / Redes Sociales (Opcional)</label>
-                  <input type="text" readOnly={isFromGlobal} placeholder="Ej. instagram.com/djparty o www.su-pagina.com" value={formData.facebook} onChange={e=>setFormData({...formData, facebook: e.target.value})} className={`w-full p-3.5 border rounded-xl outline-none shadow-sm transition-colors text-sm ${isFromGlobal ? 'bg-slate-100 dark:bg-[#111] border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-600' : 'bg-white dark:bg-[#050505] border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:border-indigo-500 dark:focus:border-amber-500'}`} />
-                  {isFromGlobal && <p className="text-[10px] text-indigo-500 dark:text-amber-500 font-bold uppercase tracking-widest mt-2 flex items-center"><Lock size={10} className="mr-1"/> Bloqueado. Este dato proviene de la Bóveda Global.</p>}
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Enlace / Redes Sociales (Opcional)</label>
+                  <input type="text" readOnly={isFromGlobal} placeholder="Ej. instagram.com/djparty o www.su-pagina.com" value={formData.facebook} onChange={e=>setFormData({...formData, facebook: e.target.value})} className={`w-full p-4 rounded-xl outline-none shadow-sm transition-colors text-sm font-bold ${isFromGlobal ? 'bg-[#1C1917] border border-white/5 text-slate-500' : 'bg-[#141210] border border-white/10 text-white focus:border-[#D4AF37]'}`} />
+                  {isFromGlobal && <p className="text-[10px] text-[#D4AF37] font-bold uppercase tracking-widest mt-2 flex items-center"><Lock size={10} className="mr-1"/> Bloqueado. Este dato proviene de la Bóveda Global.</p>}
                 </div>
-                <div className="col-span-2 md:col-span-1"><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Empresa / Nombre</label><input type="text" required value={formData.nombre} onChange={e=>setFormData({...formData, nombre: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white text-sm font-bold transition-colors" /></div>
-                <div className="col-span-2 md:col-span-1"><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Servicio Ofrecido</label><input type="text" required value={formData.servicio} onChange={e=>setFormData({...formData, servicio: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white text-sm transition-colors" placeholder="Ej. Banquete 100 pax"/></div>
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Categoría</label><select value={formData.categoria} onChange={e=>setFormData({...formData, categoria: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white text-sm font-bold transition-colors">{categorias.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Costo Estimado ($)</label><input type="number" required value={formData.costo} onChange={e=>setFormData({...formData, costo: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-slate-50 dark:bg-[#111] text-indigo-700 dark:text-amber-500 font-black text-sm transition-colors" /></div>
+                <div className="col-span-2 md:col-span-1"><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Empresa / Nombre</label><input type="text" required value={formData.nombre} onChange={e=>setFormData({...formData, nombre: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#141210] text-white text-sm font-bold transition-colors" /></div>
+                <div className="col-span-2 md:col-span-1"><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Servicio Ofrecido</label><input type="text" required value={formData.servicio} onChange={e=>setFormData({...formData, servicio: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#141210] text-white text-sm font-bold transition-colors" placeholder="Ej. Banquete 100 pax"/></div>
+                <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Categoría</label><select value={formData.categoria} onChange={e=>setFormData({...formData, categoria: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#141210] text-white text-sm font-bold transition-colors appearance-none">{categorias.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+                <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Costo Estimado ($)</label><input type="number" required value={formData.costo} onChange={e=>setFormData({...formData, costo: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#141210] text-[#D4AF37] font-black text-lg transition-colors" /></div>
               </div>
 
-              <h4 className="text-[10px] font-black text-slate-800 dark:text-white uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/10 pb-2 transition-colors">2. Medios de Contacto</h4>
+              <h4 className="text-[10px] font-black text-[#D4AF37] uppercase tracking-widest mb-4 border-b border-white/10 pb-2 transition-colors">2. Medios de Contacto</h4>
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Teléfono / WhatsApp</label><input type="text" value={formData.telefono} onChange={e=>setFormData({...formData, telefono: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white text-sm transition-colors" placeholder="10 dígitos"/></div>
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Correo Electrónico</label><input type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white text-sm transition-colors" placeholder="@"/></div>
+                <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Teléfono / WhatsApp</label><input type="text" value={formData.telefono} onChange={e=>setFormData({...formData, telefono: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#141210] text-white font-bold text-sm transition-colors" placeholder="10 dígitos"/></div>
+                <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Correo Electrónico</label><input type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#141210] text-white font-bold text-sm transition-colors" placeholder="@"/></div>
               </div>
 
-              <h4 className="text-[10px] font-black text-slate-800 dark:text-white uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/10 pb-2 transition-colors">3. Datos Bancarios (Opcional)</h4>
+              <h4 className="text-[10px] font-black text-[#D4AF37] uppercase tracking-widest mb-4 border-b border-white/10 pb-2 transition-colors">3. Datos Bancarios (Opcional)</h4>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Banco</label><input type="text" value={formData.banco} onChange={e=>setFormData({...formData, banco: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white text-sm transition-colors" placeholder="Ej. BBVA"/></div>
-                <div className="col-span-2 md:col-span-1"><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Cuenta / CLABE</label><input type="text" value={formData.clabe} onChange={e=>setFormData({...formData, clabe: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white font-mono text-sm transition-colors" placeholder="18 dígitos"/></div>
-                <div className="col-span-2 md:col-span-1"><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Titular</label><input type="text" value={formData.titular} onChange={e=>setFormData({...formData, titular: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white text-sm transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Banco</label><input type="text" value={formData.banco} onChange={e=>setFormData({...formData, banco: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#141210] text-white font-bold text-sm transition-colors" placeholder="Ej. BBVA"/></div>
+                <div className="col-span-2 md:col-span-1"><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Cuenta / CLABE</label><input type="text" value={formData.clabe} onChange={e=>setFormData({...formData, clabe: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#141210] text-white font-mono text-sm transition-colors" placeholder="18 dígitos"/></div>
+                <div className="col-span-2 md:col-span-1"><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Titular</label><input type="text" value={formData.titular} onChange={e=>setFormData({...formData, titular: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#141210] text-white font-bold text-sm transition-colors" /></div>
               </div>
 
-              <div><label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Notas Internas</label><textarea value={formData.notas} onChange={e=>setFormData({...formData, notas: e.target.value})} className="w-full p-4 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 bg-slate-50 dark:bg-[#111] text-slate-900 dark:text-white text-sm resize-none h-20 transition-colors" placeholder="Detalles extra a recordar..."></textarea></div>
+              <div><label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Notas Internas</label><textarea value={formData.notas} onChange={e=>setFormData({...formData, notas: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] bg-[#141210] text-white font-bold text-sm resize-none h-20 transition-colors" placeholder="Detalles extra a recordar..."></textarea></div>
 
-              <div className="mt-8 pt-6 border-t border-slate-100 dark:border-white/10 flex justify-end gap-3 transition-colors">
-                <button type="button" onClick={() => setIsFormOpen(false)} className="px-6 py-3.5 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
-                <button type="submit" className="px-6 py-3.5 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors shadow-md dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] uppercase tracking-widest text-[10px]">
+              <div className="mt-8 pt-6 border-t border-white/10 flex justify-end gap-3 transition-colors">
+                <button type="button" onClick={() => setIsFormOpen(false)} className="px-6 py-4 bg-white/5 text-slate-300 rounded-xl font-bold hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
+                <button type="submit" className="px-6 py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black hover:bg-[#c5a028] transition-colors shadow-[0_10px_25px_rgba(212,175,55,0.25)] uppercase tracking-widest text-[10px]">
                    {editingProvId ? 'Guardar Cambios' : 'Guardar Proveedor'}
                 </button>
               </div>
@@ -8646,14 +8822,14 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
       )}
 
       {deleteProvConfirm && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden p-8 text-center shadow-2xl border border-transparent dark:border-white/10 animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="w-20 h-20 bg-rose-100 dark:bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner dark:border border-rose-500/20"><Trash2 size={36} /></div>
-            <h3 className="font-editorial font-black text-2xl text-slate-900 dark:text-white mb-2 transition-colors">¿Eliminar Proveedor?</h3>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 leading-relaxed">Estás a punto de borrar a <b>{deleteProvConfirm.nombre}</b>. Esta acción no se puede deshacer.</p>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-sm overflow-hidden p-8 text-center shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-rose-500/20 animate-in zoom-in-95 duration-200 transition-colors text-white">
+            <div className="w-20 h-20 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-rose-500/20"><Trash2 size={36} /></div>
+            <h3 className="font-editorial font-black text-2xl text-white mb-2 transition-colors">¿Eliminar Proveedor?</h3>
+            <p className="text-slate-400 text-sm mb-8 leading-relaxed">Estás a punto de borrar a <b className="text-white">{deleteProvConfirm.nombre}</b>. Esta acción no se puede deshacer.</p>
             <div className="flex space-x-3">
-              <button onClick={() => setDeleteProvConfirm(null)} className="flex-1 p-4 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
-              <button onClick={executeDeleteProvider} className="flex-1 p-4 bg-rose-500 text-white rounded-xl font-black hover:bg-rose-600 transition-colors shadow-md dark:shadow-[0_0_15px_rgba(244,63,94,0.3)] uppercase tracking-widest text-[10px]">Sí, Eliminar</button>
+              <button onClick={() => setDeleteProvConfirm(null)} className="flex-1 p-4 bg-white/5 text-slate-300 border border-white/10 rounded-xl font-bold hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Cancelar</button>
+              <button onClick={executeDeleteProvider} className="flex-1 p-4 bg-rose-500 text-white rounded-xl font-black hover:bg-rose-600 transition-colors shadow-[0_5px_15px_rgba(244,63,94,0.3)] uppercase tracking-widest text-[10px]">Sí, Eliminar</button>
             </div>
           </div>
         </div>
@@ -8661,90 +8837,90 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
 
       {/* MODALES ADICIONALES (Contrato, Galería, Cancelación, Contratación) */}
       {viewContract && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] border border-transparent dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors">
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center truncate">
-                <FileText size={20} className="mr-2 text-indigo-600 dark:text-amber-500 shrink-0"/> <span className="truncate">{viewContract}</span>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] border border-[#D4AF37]/30 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] animate-in zoom-in-95 duration-200 transition-colors text-white">
+            <div className="px-6 py-5 border-b border-[#D4AF37]/20 bg-[#141210] flex justify-between items-center transition-colors">
+              <h3 className="font-bold text-lg text-white flex items-center truncate">
+                <FileText size={20} className="mr-2 text-[#D4AF37] shrink-0"/> <span className="truncate">{viewContract}</span>
               </h3>
-              <button onClick={() => setViewContract(null)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors shrink-0 ml-2"><X size={20}/></button>
+              <button onClick={() => setViewContract(null)} className="text-slate-400 hover:text-[#D4AF37] transition-colors shrink-0 ml-2"><X size={20}/></button>
             </div>
             <div className="p-8 text-center">
-              <div className="w-20 h-20 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                 <FileSignature size={32} className="text-indigo-400 dark:text-amber-500/50"/>
+              <div className="w-20 h-20 bg-[#141210] border border-white/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                 <FileSignature size={32} className="text-[#D4AF37]"/>
               </div>
-              <p className="text-slate-600 dark:text-slate-400 font-bold text-lg mb-8">Visor de Documentos Seguro</p>
-              <button onClick={() => setViewContract(null)} className="w-full py-4 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-md hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors">Cerrar Previsualización</button>
+              <p className="text-slate-300 font-bold text-lg mb-8">Visor de Documentos Seguro</p>
+              <button onClick={() => setViewContract(null)} className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-[10px] uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-colors">Cerrar Previsualización</button>
             </div>
           </div>
         </div>
       )}
 
       {viewGallery && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] border border-transparent dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors">
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center truncate">
-                <ImageIcon size={20} className="mr-2 text-indigo-500 dark:text-amber-500 shrink-0"/> <span className="truncate">Referencias</span>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 print:hidden animate-in fade-in transition-colors">
+          <div className="bg-[#1C1917] border border-[#D4AF37]/30 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] animate-in zoom-in-95 duration-200 transition-colors text-white">
+            <div className="px-6 py-5 border-b border-[#D4AF37]/20 bg-[#141210] flex justify-between items-center transition-colors">
+              <h3 className="font-bold text-lg text-white flex items-center truncate">
+                <ImageIcon size={20} className="mr-2 text-[#D4AF37] shrink-0"/> <span className="truncate">Referencias</span>
               </h3>
-              <button onClick={() => setViewGallery(null)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors shrink-0 ml-2"><X size={20}/></button>
+              <button onClick={() => setViewGallery(null)} className="text-slate-400 hover:text-[#D4AF37] transition-colors shrink-0 ml-2"><X size={20}/></button>
             </div>
             <div className="p-6 text-center">
-              <div className="w-full bg-slate-50 dark:bg-[#111] border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl p-8 flex flex-col items-center justify-center transition-colors mb-4">
-                 <UploadCloud size={48} className="text-indigo-300 dark:text-amber-500/30 mb-4"/>
-                 <h4 className="text-lg font-bold text-slate-700 dark:text-white mb-2">{viewGallery.nombre}</h4>
-                 <p className="text-xs text-slate-500 mb-6">Sube fotos de inspiración para este proveedor.</p>
-                 <button className="px-6 py-3 bg-indigo-600 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold shadow-md hover:bg-indigo-700 dark:hover:bg-amber-400 transition-colors flex items-center text-xs uppercase tracking-widest"><Camera size={16} className="mr-2"/> Seleccionar Archivos</button>
+              <div className="w-full bg-[#141210] border border-dashed border-white/20 rounded-2xl p-8 flex flex-col items-center justify-center transition-colors mb-4">
+                 <UploadCloud size={48} className="text-[#D4AF37] mb-4 opacity-50"/>
+                 <h4 className="text-lg font-bold text-white mb-2">{viewGallery.nombre}</h4>
+                 <p className="text-xs text-slate-400 mb-6">Sube fotos de inspiración para este proveedor.</p>
+                 <button className="px-6 py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black shadow-[0_5px_15px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-colors flex items-center text-[10px] uppercase tracking-widest"><Camera size={16} className="mr-2"/> Seleccionar Archivos</button>
               </div>
-              <button onClick={() => setViewGallery(null)} className="w-full py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Cerrar Ventana</button>
+              <button onClick={() => setViewGallery(null)} className="w-full py-4 bg-white/5 border border-white/10 text-slate-300 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors">Cerrar Ventana</button>
             </div>
           </div>
         </div>
       )}
 
       {cancelProvModal && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] border border-transparent dark:border-white/10 rounded-3xl w-full max-w-sm overflow-hidden p-8 text-center shadow-2xl animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="w-16 h-16 bg-rose-100 dark:bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 border dark:border-rose-500/20"><AlertTriangle size={32} /></div>
-            <h3 className="font-editorial font-black text-2xl text-slate-900 dark:text-white mb-2 transition-colors">¿Cancelar contrato?</h3>
-            <p className="text-slate-500 dark:text-slate-400 mb-8 text-sm leading-relaxed">Pasarás a <b>{cancelProvModal.nombre}</b> a descartado. Si había un pago vinculado, recuerda borrarlo desde Presupuesto.</p>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 transition-colors">
+          <div className="bg-[#1C1917] border border-rose-500/20 rounded-3xl w-full max-w-sm overflow-hidden p-8 text-center shadow-[0_25px_70px_rgba(0,0,0,0.9)] animate-in zoom-in-95 duration-200 transition-colors text-white">
+            <div className="w-16 h-16 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-rose-500/20"><AlertTriangle size={32} /></div>
+            <h3 className="font-editorial font-black text-2xl text-white mb-2 transition-colors">¿Cancelar contrato?</h3>
+            <p className="text-slate-400 mb-8 text-sm leading-relaxed">Pasarás a <b className="text-white">{cancelProvModal.nombre}</b> a descartado. Si había un pago vinculado, recuerda borrarlo desde Presupuesto.</p>
             <div className="flex space-x-3">
-              <button onClick={() => setCancelProvModal(null)} className="flex-1 p-4 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Atrás</button>
-              <button onClick={confirmCancel} className="flex-1 p-4 bg-rose-500 text-white rounded-xl font-black hover:bg-rose-600 transition-colors shadow-md dark:shadow-[0_0_15px_rgba(244,63,94,0.3)] uppercase tracking-widest text-[10px]">Sí, Cancelar</button>
+              <button onClick={() => setCancelProvModal(null)} className="flex-1 p-4 bg-white/5 border border-white/10 text-slate-300 rounded-xl font-bold hover:bg-white/10 transition-colors uppercase tracking-widest text-[10px]">Atrás</button>
+              <button onClick={confirmCancel} className="flex-1 p-4 bg-rose-500 text-white rounded-xl font-black hover:bg-rose-600 transition-colors shadow-[0_5px_15px_rgba(244,63,94,0.3)] uppercase tracking-widest text-[10px]">Sí, Cancelar</button>
             </div>
           </div>
         </div>
       )}
 
       {hireProcess && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/70 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 transition-colors">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl dark:shadow-[0_0_50px_rgba(99,102,241,0.15)] border border-transparent dark:border-indigo-500/20 animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="p-8 bg-indigo-600 dark:bg-indigo-950/30 border-b dark:border-indigo-500/20 text-white text-center relative transition-colors">
-              <Building size={36} className="mx-auto mb-3 opacity-80 text-white dark:text-indigo-400"/>
-              <h3 className="font-editorial font-black text-2xl text-white dark:text-indigo-400 tracking-wide mb-1">Contratar Proveedor</h3>
-              <p className="text-indigo-200 dark:text-indigo-300/70 text-xs uppercase tracking-widest font-bold">{hireProcess.prov.nombre}</p>
-              <button onClick={() => setHireProcess(null)} className="absolute top-4 right-4 text-white/50 hover:text-white"><X size={20}/></button>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 transition-colors">
+          <div className="bg-[#1C1917] rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-[#D4AF37]/30 animate-in zoom-in-95 duration-200 transition-colors text-white">
+            <div className="p-8 bg-[#141210] border-b border-[#D4AF37]/20 text-center relative transition-colors">
+              <Building size={36} className="mx-auto mb-4 text-[#D4AF37]"/>
+              <h3 className="font-editorial font-black text-2xl text-[#D4AF37] tracking-wide mb-2">Contratar Proveedor</h3>
+              <p className="text-slate-400 text-[10px] uppercase tracking-widest font-bold">{hireProcess.prov.nombre}</p>
+              <button onClick={() => setHireProcess(null)} className="absolute top-4 right-4 text-slate-500 hover:text-[#D4AF37]"><X size={20}/></button>
             </div>
             <form onSubmit={handleHireSubmit} className="p-8 space-y-5">
-              <div className="bg-slate-50 dark:bg-[#111] p-4 rounded-xl border border-slate-100 dark:border-white/5 text-xs text-slate-500 dark:text-slate-400 mb-2 transition-colors flex items-center justify-between">
+              <div className="bg-white/5 p-4 rounded-xl border border-white/10 text-xs text-slate-400 mb-2 transition-colors flex items-center justify-between">
                 <span className="uppercase tracking-widest font-bold">Costo acordado:</span> 
-                <b className="text-lg font-black text-slate-900 dark:text-white ml-2">{formatMoney(hireProcess.prov.costo)}</b>
+                <b className="text-lg font-black text-[#D4AF37] ml-2">{formatMoney(hireProcess.prov.costo)}</b>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400">Anticipo Hoy ($)</label><input type="number" max={hireProcess.prov.costo} value={hireProcess.abono} onChange={e=>setHireProcess({...hireProcess, abono: e.target.value})} placeholder="0.00" className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-indigo-400 outline-none font-black text-lg text-emerald-600 dark:text-emerald-400 bg-slate-50 dark:bg-[#111] transition-colors" /></div>
-                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400">Fecha Límite Pago</label><input type="date" required value={hireProcess.fechaLimite} onChange={e=>setHireProcess({...hireProcess, fechaLimite: e.target.value})} className="w-full p-3.5 border border-slate-200 dark:border-white/10 rounded-xl focus:border-indigo-500 dark:focus:border-indigo-400 outline-none bg-slate-50 dark:bg-[#111] text-slate-800 dark:text-white text-sm [color-scheme:light] dark:[color-scheme:dark] transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Anticipo Hoy ($)</label><input type="number" max={hireProcess.prov.costo} value={hireProcess.abono} onChange={e=>setHireProcess({...hireProcess, abono: e.target.value})} placeholder="0.00" className="w-full p-4 border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none font-black text-lg text-emerald-400 bg-[#141210] transition-colors" /></div>
+                <div><label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Fecha Límite Pago</label><input type="date" required value={hireProcess.fechaLimite} onChange={e=>setHireProcess({...hireProcess, fechaLimite: e.target.value})} className="w-full p-4 border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none bg-[#141210] text-white text-sm font-bold [color-scheme:dark] transition-colors" /></div>
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-500 dark:text-slate-400">Respaldar Contrato (Archivo)</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Respaldar Contrato (Archivo)</label>
                 <div className="flex gap-2">
-                  <label className="flex-1 flex flex-col items-center justify-center p-5 border border-dashed border-slate-300 dark:border-white/20 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 hover:border-indigo-300 dark:hover:border-indigo-400 transition-colors bg-white dark:bg-[#111]">
-                    <UploadCloud size={20} className="text-indigo-400 dark:text-indigo-500 mb-2"/>
-                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Subir PDF</span>
+                  <label className="flex-1 flex flex-col items-center justify-center p-5 border border-dashed border-white/20 rounded-xl cursor-pointer hover:bg-white/5 hover:border-[#D4AF37] transition-colors bg-[#141210]">
+                    <UploadCloud size={24} className="text-[#D4AF37] mb-3 opacity-50"/>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Subir PDF</span>
                     <input type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={e => setHireProcess({...hireProcess, file: e.target.files[0]})} />
                   </label>
                 </div>
               </div>
-              <button type="submit" className="w-full p-4 bg-indigo-600 dark:bg-indigo-500 text-white dark:text-white rounded-xl font-black mt-6 shadow-md dark:shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:bg-indigo-700 dark:hover:bg-indigo-400 transition-colors uppercase tracking-widest text-[10px]">Confirmar Contratación</button>
+              <button type="submit" className="w-full p-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black mt-6 shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-colors uppercase tracking-widest text-[10px]">Confirmar Contratación</button>
             </form>
           </div>
         </div>
@@ -17897,7 +18073,41 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const toggleStatus = (lic) => {
     const nuevoEstatus = lic.status === 'suspendido' ? 'activo' : 'suspendido';
     const accionText = nuevoEstatus === 'suspendido' ? 'SUSPENDER' : 'ACTIVAR';
-    setDialog({ isOpen: true, type: 'confirm', title: `${accionText === 'SUSPENDER' ? 'Suspender' : 'Activar'} Licencia`, message: `¿Estás seguro que deseas ${accionText} la plataforma de ${lic.nombres}?`, onConfirm: async () => { setDialog({ ...dialog, isOpen: false }); await updateDoc(doc(db, "usuarios", lic.id), { status: nuevoEstatus }); } });
+    
+    setDialog({ 
+      isOpen: true, 
+      type: 'confirm', 
+      title: `${accionText === 'SUSPENDER' ? 'Suspender' : 'Activar'} Licencia`, 
+      message: `¿Estás seguro que deseas ${accionText.toLowerCase()} la plataforma de ${lic.nombres}?`, 
+      onConfirm: async () => { 
+        // 1. Cerramos el diálogo usando una función previa segura para evitar bugs de React
+        setDialog(prev => ({ ...prev, isOpen: false })); 
+        
+        try {
+          // 2. Actualizamos la colección de usuarios
+          await updateDoc(doc(db, "usuarios", lic.id), { status: nuevoEstatus });
+          
+          // 3. 🔴 PARCHE: Forzamos la actualización en la colección de eventos para que la bóveda del cliente se entere del desbloqueo
+          await updateDoc(doc(db, "eventos", lic.eventId), { status: nuevoEstatus }).catch(() => {});
+          
+          // 4. Lanzamos una alerta de confirmación en pantalla
+          setTimeout(() => {
+            setDialog({ 
+              isOpen: true, 
+              type: 'alert', 
+              title: nuevoEstatus === 'activo' ? 'Bóveda Reactivada' : 'Bóveda Suspendida', 
+              message: `El estatus de ${lic.nombres} ahora es: ${nuevoEstatus.toUpperCase()}.` 
+            });
+          }, 400);
+
+        } catch (error) {
+          console.error("Error al cambiar estatus:", error);
+          setTimeout(() => {
+            setDialog({ isOpen: true, type: 'alert', title: 'Error', message: 'No se pudo actualizar el estatus en la base de datos.' });
+          }, 400);
+        }
+      } 
+    });
   };
 
   const handleDelete = (lic) => {
@@ -17963,16 +18173,16 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       <div className="max-w-7xl mx-auto space-y-6 pb-10 animate-in fade-in relative print:hidden">
         
         {dialog.isOpen && (
-          <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-colors">
-            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center border border-transparent dark:border-white/20 transition-colors">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ${dialog.type === 'alert' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-500'}`}>
-                {dialog.type === 'alert' ? <AlertTriangle size={32} /> : <AlertCircle size={32} />}
+          <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 transition-colors">
+            <div className="bg-[#1C1917] rounded-3xl w-full max-w-sm overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] p-8 text-center border border-[#D4AF37]/30 transition-colors text-white">
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border ${dialog.type === 'alert' ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/20' : 'bg-rose-500/10 text-rose-500 border-rose-500/20'}`}>
+                {dialog.type === 'alert' ? <AlertTriangle size={36} /> : <AlertCircle size={36} />}
               </div>
-              <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">{dialog.title}</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">{dialog.message}</p>
-              <div className="flex space-x-3">
-                {dialog.type === 'confirm' && <button onClick={() => setDialog({ ...dialog, isOpen: false })} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Cancelar</button>}
-                <button onClick={() => { if(dialog.onConfirm) dialog.onConfirm(); else setDialog({ ...dialog, isOpen: false }); }} className={`flex-1 py-3.5 text-white rounded-xl font-bold shadow-lg transition-transform active:scale-95 ${dialog.type === 'alert' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/30'}`}>
+              <h3 className="text-2xl font-editorial font-black text-white mb-3">{dialog.title}</h3>
+              <p className="text-sm text-slate-400 mb-8 leading-relaxed">{dialog.message}</p>
+              <div className="flex gap-3">
+                {dialog.type === 'confirm' && <button onClick={() => setDialog({ ...dialog, isOpen: false })} className="flex-1 py-4 bg-white/5 text-slate-300 border border-white/10 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-white/10 transition-colors">Cancelar</button>}
+                <button onClick={() => { if(dialog.onConfirm) dialog.onConfirm(); else setDialog({ ...dialog, isOpen: false }); }} className={`flex-1 py-4 text-[#1C1917] rounded-xl font-black uppercase tracking-widest text-[10px] shadow-[0_10px_25px_rgba(0,0,0,0.5)] transition-transform active:scale-95 ${dialog.type === 'alert' ? 'bg-[#D4AF37] hover:bg-[#c5a028]' : 'bg-rose-500 text-white hover:bg-rose-600'}`}>
                   {dialog.type === 'confirm' ? 'Sí, proceder' : 'Entendido'}
                 </button>
               </div>
@@ -17980,52 +18190,44 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           </div>
         )}
 
-        <div className={`bg-gradient-to-r ${isSuperAdmin ? 'from-amber-500 to-orange-600' : 'from-indigo-600 to-blue-700'} rounded-3xl p-8 shadow-xl text-white flex items-center justify-between`}>
-          <div>
-            <span className="bg-black/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">
-              {isSuperAdmin ? 'Nivel 3: Acceso Maestro' : 'Nivel 2: Workspace Staff'}
-            </span>
-            <h2 className="text-3xl font-black flex items-center mb-2"><Building className="mr-3" size={36}/> {isSuperAdmin ? 'Centro de Operaciones' : 'Panel Operativo'}</h2>
-            <p className="text-white/80 max-w-lg text-sm">Administra tus clientes o revisa el estado de cuenta y auditoría financiera inmutable.</p>
+        <div className="bg-[#1C1917] rounded-3xl p-5 shadow-xl text-white flex flex-col md:flex-row items-start md:items-center justify-between border border-[#D4AF37]/25 relative overflow-hidden group gap-4">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/10 to-transparent pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity duration-1000"></div>
+          <div className="relative z-10 flex items-center gap-4">
+            <div className="w-12 h-12 bg-[#141210] rounded-2xl flex items-center justify-center border border-[#D4AF37]/30 shadow-inner shrink-0">
+              {isSuperAdmin ? <Lock size={20} className="text-[#D4AF37]" /> : <Users size={20} className="text-[#D4AF37]" />}
+            </div>
+            <div>
+              <span className="text-[#D4AF37] text-[9px] font-black uppercase tracking-[0.25em] block mb-0.5">
+                {isSuperAdmin ? 'God Mode: Acceso Maestro' : 'Workspace Staff'}
+              </span>
+              <h2 className="text-2xl font-editorial font-black flex items-center leading-none">{isSuperAdmin ? 'Centro de Operaciones' : 'Panel Operativo'}</h2>
+            </div>
           </div>
-          <div className="hidden md:flex w-24 h-24 bg-white/10 rounded-full items-center justify-center border-4 border-white/20 shadow-inner">
-            {isSuperAdmin ? <Lock size={40} className="text-white" /> : <Users size={40} className="text-white" />}
-          </div>
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="flex gap-4 bg-white dark:bg-[#0a0a0a] p-2 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm w-full md:w-max overflow-x-auto transition-colors">
-            <button onClick={() => setAdminTab('licencias')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'licencias' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
-              <Building size={16}/> Clientes
+          
+          <div className="relative z-10 flex gap-2 bg-[#141210] p-1.5 rounded-xl border border-white/10 shadow-sm w-full md:w-auto overflow-x-auto custom-scrollbar shrink-0">
+            <button onClick={() => setAdminTab('licencias')} className={`px-4 py-2 rounded-lg font-bold text-[10px] tracking-widest uppercase transition-colors flex items-center gap-1.5 ${adminTab === 'licencias' ? 'bg-[#D4AF37] text-[#1C1917] shadow-[0_2px_10px_rgba(212,175,55,0.2)]' : 'text-slate-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
+              <Building size={14}/> Clientes
             </button>
-            
             {isSuperAdmin && (
-              <button onClick={() => setAdminTab('taller')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'taller' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
-                <Factory size={16}/> Taller 
-                {pedidosNuevos > 0 && <span className="bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-1">{pedidosNuevos}</span>}
+              <button onClick={() => setAdminTab('taller')} className={`px-4 py-2 rounded-lg font-bold text-[10px] tracking-widest uppercase transition-colors flex items-center gap-1.5 ${adminTab === 'taller' ? 'bg-[#D4AF37] text-[#1C1917] shadow-[0_2px_10px_rgba(212,175,55,0.2)]' : 'text-slate-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
+                <Factory size={14}/> Taller 
+                {pedidosNuevos > 0 && <span className="bg-rose-500 text-white text-[9px] px-1.5 py-0.5 rounded ml-1">{pedidosNuevos}</span>}
               </button>
             )}
-
             {isSuperAdmin && (
               <>
-                <button onClick={() => setAdminTab('finanzas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'finanzas' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
-                  <PieChart size={16}/> Finanzas
+                <button onClick={() => setAdminTab('finanzas')} className={`px-4 py-2 rounded-lg font-bold text-[10px] tracking-widest uppercase transition-colors flex items-center gap-1.5 ${adminTab === 'finanzas' ? 'bg-[#D4AF37] text-[#1C1917] shadow-[0_2px_10px_rgba(212,175,55,0.2)]' : 'text-slate-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
+                  <PieChart size={14}/> Finanzas
                 </button>
-                <button onClick={() => setAdminTab('resenas')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'resenas' ? 'bg-amber-500 text-slate-900' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
-                  <Star size={16}/> Reseñas
+                <button onClick={() => setAdminTab('resenas')} className={`px-4 py-2 rounded-lg font-bold text-[10px] tracking-widest uppercase transition-colors flex items-center gap-1.5 ${adminTab === 'resenas' ? 'bg-[#D4AF37] text-[#1C1917] shadow-[0_2px_10px_rgba(212,175,55,0.2)]' : 'text-slate-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
+                  <Star size={14}/> Reseñas
                 </button>
-                <button onClick={() => setAdminTab('precios')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${adminTab === 'precios' ? 'bg-rose-500 text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
-                  <DollarSign size={16}/> Precios
+                <button onClick={() => setAdminTab('precios')} className={`px-4 py-2 rounded-lg font-bold text-[10px] tracking-widest uppercase transition-colors flex items-center gap-1.5 ${adminTab === 'precios' ? 'bg-[#D4AF37] text-[#1C1917] shadow-[0_2px_10px_rgba(212,175,55,0.2)]' : 'text-slate-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
+                  <DollarSign size={14}/> Precios
                 </button>
               </>
             )}
           </div>
-          {adminTab === 'licencias' && (
-            <div className="relative w-full md:w-96">
-              <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-              <input type="text" placeholder="Buscar cliente por correo o nombre..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-12 pr-4 py-3 bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-2xl text-sm text-slate-900 dark:text-white outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-sm transition-colors" />
-            </div>
-          )}
         </div>
 
         {/* 🔴 VISTA DEL TALLER DE PRODUCCIÓN (PULSERAS BLACK LABEL + TARJETAS SOCIAL WALL) */}
@@ -18265,69 +18467,68 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           </div>
         )}
 
-        {/* 🔴 TABLA DE CLIENTES */}
+        {/* 🔴 TABLA DE CLIENTES COMPACTA */}
         {adminTab === 'licencias' && (
-          <div className="space-y-6">
-            {/* CARDS */}
-            <div className="flex flex-col xl:flex-row gap-3 mb-6 w-full overflow-x-auto pb-2 custom-scrollbar">
-              <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: modoPrueba ? 'MODO PRUEBA' : '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true, hasSocialWall: false, hasBlackLabel: false }); }} className="shrink-0 px-6 py-3 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-2xl font-black shadow-xl dark:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform flex items-center justify-center min-w-[200px]">
-                  <Plus size={18} className="mr-2 text-amber-500 dark:text-slate-900"/> Nueva Bóveda
-              </button>
-
-              <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-                <div><p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Básico</p><p className="text-xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.basico}</p></div>
-                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500"><Users size={14}/></div>
-              </div>
-              
-              <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-slate-300 dark:border-slate-600 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-                <div><p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Plata</p><p className="text-xl font-black text-slate-800 dark:text-white">{totalesPorLicencia.plata}</p></div>
-                <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300"><Wallet size={14}/></div>
-              </div>
-              
-              <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-amber-200 dark:border-amber-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-                <div><p className="text-[9px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">Oro</p><p className="text-xl font-black text-amber-700 dark:text-amber-400">{totalesPorLicencia.oro}</p></div>
-                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500"><ShieldCheck size={14}/></div>
-              </div>
-              
-              <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-                <div><p className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Diamante</p><p className="text-xl font-black text-indigo-700 dark:text-indigo-400">{totalesPorLicencia.diamante}</p></div>
-                <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400"><LayoutDashboard size={14}/></div>
-              </div>
-              
-              <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-3 rounded-2xl border border-pink-200 dark:border-pink-500/20 shadow-sm flex items-center justify-between min-w-[130px] transition-colors">
-                <div><p className="text-[9px] font-bold text-pink-600 dark:text-pink-400 uppercase tracking-widest">Social Wall</p><p className="text-xl font-black text-pink-700 dark:text-pink-400">{totalesPorLicencia.social_wall}</p></div>
-                <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-500/10 flex items-center justify-center text-pink-600 dark:text-pink-400"><Camera size={14}/></div>
+          <div className="flex flex-col space-y-4">
+            
+            {/* CONTROLES SUPERIORES Y MÉTRICAS COMPACTAS */}
+            <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between w-full">
+              <div className="flex gap-2 w-full xl:w-auto shrink-0">
+                <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: modoPrueba ? 'MODO PRUEBA' : '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true, hasSocialWall: false, hasBlackLabel: false }); }} className="px-5 py-2.5 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black shadow-[0_5px_15px_rgba(212,175,55,0.25)] hover:scale-[1.02] hover:bg-[#c5a028] transition-all flex items-center justify-center uppercase tracking-widest text-[10px]">
+                    <Plus size={14} className="mr-1.5"/> Nueva Bóveda
+                </button>
+                <div className="relative flex-1 xl:w-[280px]">
+                  <SearchIcon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input type="text" placeholder="Buscar cliente..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-10 pr-4 py-2.5 bg-[#141210] border border-white/10 rounded-xl text-xs text-white outline-none focus:border-[#D4AF37] shadow-sm transition-colors font-bold placeholder-slate-500" />
+                </div>
               </div>
 
-              <div className="flex-1 bg-gradient-to-br from-slate-900 to-black p-3 rounded-2xl border border-amber-500/30 shadow-lg flex items-center justify-between min-w-[130px] transition-colors">
-                <div><p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-widest">Black Label</p><p className="text-xl font-black text-amber-500">{totalesPorLicencia.security_kit}</p></div>
-                <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500"><ShieldCheck size={14}/></div>
+              {/* MINI CARDS (Pills) SCROLLABLES */}
+              <div className="flex gap-2 overflow-x-auto w-full xl:w-auto pb-1 custom-scrollbar">
+                <div className="bg-[#1C1917] px-3 py-2.5 rounded-lg border border-white/10 flex items-center shrink-0">
+                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mr-3">Básico</p><p className="text-xs font-black text-white">{totalesPorLicencia.basico}</p>
+                </div>
+                <div className="bg-[#1C1917] px-3 py-2.5 rounded-lg border border-slate-600 flex items-center shrink-0">
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mr-3">Plata</p><p className="text-xs font-black text-white">{totalesPorLicencia.plata}</p>
+                </div>
+                <div className="bg-[#1C1917] px-3 py-2.5 rounded-lg border border-[#D4AF37]/50 flex items-center shrink-0">
+                  <p className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-widest mr-3">Oro</p><p className="text-xs font-black text-[#D4AF37]">{totalesPorLicencia.oro}</p>
+                </div>
+                <div className="bg-[#1C1917] px-3 py-2.5 rounded-lg border border-indigo-500/50 flex items-center shrink-0">
+                  <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mr-3">Diamante</p><p className="text-xs font-black text-indigo-400">{totalesPorLicencia.diamante}</p>
+                </div>
+                <div className="bg-[#1C1917] px-3 py-2.5 rounded-lg border border-pink-500/50 flex items-center shrink-0">
+                  <p className="text-[9px] font-bold text-pink-400 uppercase tracking-widest mr-3">Social Wall</p><p className="text-xs font-black text-pink-400">{totalesPorLicencia.social_wall}</p>
+                </div>
+                <div className="bg-[#141210] px-3 py-2.5 rounded-lg border border-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.1)] flex items-center shrink-0">
+                  <p className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-widest mr-3">Black Label</p><p className="text-xs font-black text-[#D4AF37]">{totalesPorLicencia.security_kit}</p>
+                </div>
               </div>
             </div>
 
             {/* TABLA: Traducción visual */}
             <div className="animate-in fade-in">
-              <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
-                <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
-                  <h3 className="font-bold text-slate-800 dark:text-white text-sm">Directorio de Clientes Activos ({filteredLicencias.length})</h3>
+              <div className="bg-[#1C1917] rounded-2xl border border-white/10 shadow-xl overflow-hidden transition-colors">
+                <div className="p-4 border-b border-white/5 bg-[#141210] flex justify-between items-center transition-colors">
+                  <h3 className="font-bold text-white text-xs uppercase tracking-widest">Directorio de Clientes Activos ({filteredLicencias.length})</h3>
                 </div>
                 
-                <div className="overflow-x-auto pb-24">
+                <div className="overflow-x-auto pb-6 custom-scrollbar">
                   <table className="w-full text-left whitespace-nowrap min-w-[1000px]">
-                    <thead className="bg-slate-50 dark:bg-[#111] border-b border-slate-200 dark:border-white/5 text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest transition-colors">
+                    <thead className="bg-[#141210] border-b border-white/10 text-slate-400 text-[10px] uppercase tracking-widest transition-colors">
                       <tr>
-                        <th className="px-5 py-3 font-bold">Cliente / ID</th>
-                        <th className="px-5 py-3 font-bold">Acceso (Correo)</th>
-                        <th className="px-5 py-3 font-bold text-center">Tipo</th>
-                        <th className="px-5 py-3 font-bold text-center">Plan</th>
-                        <th className="px-5 py-3 font-bold">Link Invitación</th>
-                        <th className="px-5 py-3 font-bold text-center">Estatus</th>
-                        <th className="px-5 py-3 font-bold text-right">Controles</th>
+                        <th className="px-5 py-4 font-bold">Cliente / ID</th>
+                        <th className="px-5 py-4 font-bold">Acceso (Correo)</th>
+                        <th className="px-5 py-4 font-bold text-center">Tipo</th>
+                        <th className="px-5 py-4 font-bold text-center">Plan</th>
+                        <th className="px-5 py-4 font-bold">Link Invitación</th>
+                        <th className="px-5 py-4 font-bold text-center">Estatus</th>
+                        <th className="px-5 py-4 font-bold text-right">Controles</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
+                    <tbody className="divide-y divide-white/5 text-xs">
                       {filteredLicencias.length === 0 ? (
-                        <tr><td colSpan="7" className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">No se encontraron clientes.</td></tr>
+                        <tr><td colSpan="7" className="px-5 py-16 text-center text-slate-500 font-medium text-sm">No se encontraron clientes.</td></tr>
                       ) : (
                         filteredLicencias.map((lic) => {
                           const estaSuspendido = lic.status === 'suspendido';
@@ -18337,66 +18538,67 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                           const isBlackLabel = lic.plan === 'baulia_black_label' || lic.plan === 'security_kit';
                           
                           return (
-                            <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-50/40 dark:bg-rose-500/10' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
+                            <tr key={lic.id} className={`transition-colors ${estaSuspendido ? 'bg-rose-500/10' : 'hover:bg-white/5'}`}>
                               <td className="px-5 py-4">
-                                <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-800 dark:text-rose-500' : 'text-slate-800 dark:text-white'}`}>
+                                <p className={`font-black text-sm ${estaSuspendido ? 'text-rose-500' : 'text-white'}`}>
                                   {lic.nombres || 'Sin Nombre'} 
-                                  {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
+                                  {lic.role === 'planner' && <span className="ml-2 text-[8px] bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest">Planner</span>}
                                 </p>
-                                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{lic.eventId}</p>
+                                <p className="text-[10px] text-slate-500 font-mono mt-0.5">{lic.eventId}</p>
                               </td>
                               <td className="px-5 py-4">
-                                <div className="flex items-center text-slate-600 dark:text-slate-300 bg-slate-100/70 dark:bg-white/5 px-2 py-1.5 rounded-lg w-max border border-slate-200/50 dark:border-white/10 transition-colors">
+                                <div className="flex items-center text-slate-300 bg-[#141210] px-3 py-2 rounded-lg w-max border border-white/5 transition-colors">
                                   <span className="mr-3 font-mono text-[11px]">{correoVisible ? lic.email : '••••••••••••@••••.com'}</span>
-                                  <button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-amber-500 transition-colors">
+                                  <button onClick={() => toggleVerCorreo(lic.id)} className="text-slate-500 hover:text-[#D4AF37] transition-colors">
                                     {correoVisible ? <EyeOff size={14} /> : <Eye size={14} />}
                                   </button>
                                 </div>
                               </td>
                               <td className="px-5 py-4 text-center">
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lic.tipoEvento || 'Boda'}</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{lic.tipoEvento || 'Boda'}</span>
                               </td>
                               <td className="px-5 py-4 text-center">
                                 <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border shadow-sm
-                                  ${lic.plan === 'diamante' ? 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20' : 
-                                    lic.plan === 'oro' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' : 
-                                    lic.plan === 'plata' ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600' :
-                                    lic.plan === 'social_wall' ? 'bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20' :
-                                    isBlackLabel ? 'bg-[#0a0a0a] text-amber-500 border-amber-500/30' :
-                                    'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-white/10'}`}>
+                                  ${lic.plan === 'diamante' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 
+                                    lic.plan === 'oro' ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/30' : 
+                                    lic.plan === 'plata' ? 'bg-slate-700 text-slate-300 border-slate-600' :
+                                    lic.plan === 'social_wall' ? 'bg-pink-500/10 text-pink-400 border-pink-500/20' :
+                                    isBlackLabel ? 'bg-[#141210] text-[#D4AF37] border-[#D4AF37]/50 shadow-[0_0_10px_rgba(212,175,55,0.2)]' :
+                                    'bg-white/5 text-slate-400 border-white/10'}`}>
                                   {isBlackLabel ? 'BLACK LABEL' : lic.plan.replace(/_/g, ' ')}
                                 </span>
                               </td>
                               <td className="px-5 py-4 max-w-[200px] truncate">
                                 {lic.urlInvitacion ? (
-                                  <a href={lic.urlInvitacion} target="_blank" rel="noreferrer" className="text-sky-500 dark:text-sky-400 hover:underline text-[10px] font-bold truncate block" title={lic.urlInvitacion}>
+                                  <a href={lic.urlInvitacion} target="_blank" rel="noreferrer" className="text-sky-400 hover:text-white hover:underline text-[10px] font-bold truncate block transition-colors" title={lic.urlInvitacion}>
                                     {lic.urlInvitacion}
                                   </a>
                                 ) : (
-                                  <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">Pendiente de subir</span>
+                                  <span className="text-[10px] text-slate-500 italic">Pendiente de subir</span>
                                 )}
                               </td>
                               <td className="px-5 py-4 text-center">
-                                <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border shadow-sm ${lic.status === 'nuevo' ? 'bg-rose-500 text-white border-rose-600 animate-pulse' : lic.status === 'en_proceso' ? 'bg-amber-400 text-amber-900 border-amber-500' : lic.status === 'activo' ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-slate-200 text-slate-600 border-slate-300'}`}>
+                                <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border shadow-sm ${lic.status === 'nuevo' ? 'bg-[#D4AF37] text-[#141210] border-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.3)] animate-pulse' : lic.status === 'en_proceso' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' : lic.status === 'activo' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-white/10 text-slate-400 border-white/20'}`}>
                                   {lic.status === 'nuevo' ? '¡NUEVO!' : lic.status ? lic.status.replace('_', ' ') : 'Pendiente'}
                                 </span>
                               </td>
                               <td className="px-5 py-4 text-right">
                                   <div className="flex items-center justify-end space-x-2">
-                                    <button onClick={() => contactarCliente(lic)} title="Contactar por WhatsApp" className="p-2 rounded-lg text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-transparent dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors">
+                                    <button onClick={() => contactarCliente(lic)} title="Contactar por WhatsApp" className="p-2.5 rounded-lg text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors">
                                       <MessageCircle size={16} />
                                     </button>
                                     <button onClick={() => { 
                                         setEditingLic({...lic, originalPlan: lic.plan, isQrEnabled: lic.isQrEnabled !== false, isPassCountEnabled: lic.isPassCountEnabled !== false}); 
                                         setIsEditModalOpen(true); 
                                       }} 
-                                      title="Editar URL o Plan" className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"><Edit3 size={16} />
+                                      title="Editar URL o Plan" className="p-2.5 rounded-lg text-slate-400 hover:text-white bg-[#141210] border border-white/5 hover:border-white/20 transition-colors"><Edit3 size={16} />
                                     </button>
                                     
-                                    {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan, tipoEvento: lic.tipoEvento || 'general', urlInvitacion: lic.urlInvitacion || '' })} title="Entrar al Panel (Soporte)" className="p-2 rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-transparent dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"><ExternalLink size={16} /></button>}
-                                    <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2 rounded-lg transition-colors border border-transparent ${estaSuspendido ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 hover:bg-emerald-200 dark:hover:bg-emerald-500/20 dark:border-emerald-500/20' : 'text-amber-600 dark:text-amber-500 bg-amber-100 dark:bg-amber-500/10 hover:bg-amber-200 dark:hover:bg-amber-500/20 dark:border-amber-500/20'}`}><Power size={16} /></button>
+                                    {!noTienePanel && <button onClick={() => onImpersonate({ id: lic.eventId, nombre: lic.nombres, role: lic.role, plan: lic.plan, tipoEvento: lic.tipoEvento || 'general', urlInvitacion: lic.urlInvitacion || '' })} title="Entrar al Panel (Modo Soporte)" className="p-2.5 rounded-lg text-[#D4AF37] bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 transition-colors"><ExternalLink size={16} /></button>}
+                                    
+                                    <button onClick={() => toggleStatus(lic)} title={estaSuspendido ? "Reactivar Cuenta" : "Suspender Cuenta"} className={`p-2.5 rounded-lg transition-colors ${estaSuspendido ? 'text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20' : 'text-amber-500 bg-amber-500/10 hover:bg-amber-500/20'}`}><Power size={16} /></button>
                                     {isSuperAdmin && (
-                                      <button onClick={() => handleDelete(lic)} title="Eliminar Bóveda (Se conserva Finanzas)" className="p-2 rounded-lg text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-transparent dark:border-rose-500/20 hover:text-white hover:bg-rose-500 dark:hover:bg-rose-500 dark:hover:text-white transition-colors"><Trash2 size={16} /></button>
+                                      <button onClick={() => handleDelete(lic)} title="Eliminar Bóveda Permanentemente" className="p-2.5 rounded-lg text-rose-500 bg-rose-500/10 hover:bg-rose-500 hover:text-white transition-colors"><Trash2 size={16} /></button>
                                     )}
                                   </div>
                               </td>
@@ -18540,20 +18742,20 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         )}
         {/* MODAL CREAR LICENCIA */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar border border-transparent dark:border-white/10 transition-colors">
+          <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+            <div className="bg-[#1C1917] rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar border border-[#D4AF37]/30 transition-colors text-white">
               {!successData ? (
                 <form onSubmit={handleCreateLicense} className="p-8">
                   <div className="text-center mb-6">
-                    <div className="w-14 h-14 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-transparent dark:border-amber-500/30"><Key size={24} /></div>
-                    <h3 className="text-xl font-black text-slate-800 dark:text-white transition-colors">Registrar Venta Directa</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 transition-colors">El vendedor y el monto quedarán registrados permanentemente en el libro mayor.</p>
+                    <div className="w-14 h-14 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full flex items-center justify-center mx-auto mb-4"><Key size={24} /></div>
+                    <h3 className="text-2xl font-editorial font-black text-white transition-colors">Registrar Venta Directa</h3>
+                    <p className="text-[10px] text-slate-400 mt-2 uppercase tracking-widest transition-colors">El vendedor y el monto se registrarán en el libro mayor.</p>
                   </div>
                   
                   <div className="space-y-4 mb-6">
-                    <div className={`${modoPrueba ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20' : 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20'} border p-4 rounded-xl transition-colors`}>
-                      <label className={`block text-[10px] font-bold ${modoPrueba ? 'text-amber-700 dark:text-amber-400' : 'text-emerald-700 dark:text-emerald-400'} uppercase tracking-widest mb-1.5 flex items-center transition-colors`}>
-                        <Wallet size={12} className="mr-1"/> {modoPrueba ? 'Referencia de Pago (Modo Prueba Activo)' : 'Referencia de Pago (Obligatorio)'}
+                    <div className={`${modoPrueba ? 'bg-amber-500/10 border-amber-500/20' : 'bg-[#141210] border-white/10'} border p-4 rounded-xl transition-colors`}>
+                      <label className={`block text-[10px] font-bold ${modoPrueba ? 'text-amber-400' : 'text-slate-400'} uppercase tracking-widest mb-2 flex items-center transition-colors`}>
+                        <Wallet size={12} className="mr-1"/> {modoPrueba ? 'Referencia (Modo Prueba Activo)' : 'Referencia de Pago (Obligatorio)'}
                       </label>
                       <input 
                         type="text" 
@@ -18561,20 +18763,20 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                         value={modoPrueba && !formData.referenciaPago ? 'MODO PRUEBA' : formData.referenciaPago} 
                         onChange={e => setFormData({...formData, referenciaPago: e.target.value})} 
                         placeholder="Ej: Pago en Efectivo, Transf BBVA..." 
-                        className="w-full p-3 bg-white dark:bg-[#111] border border-emerald-200 dark:border-emerald-500/30 rounded-xl outline-none focus:border-emerald-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" 
+                        className="w-full p-4 bg-[#1C1917] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-sm transition-colors" 
                       />
                     </div>
 
                     <div className="flex gap-4">
                       <div className="flex-1">
-                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Tipo de Evento</label>
-                        <select value={formData.tipoEvento} onChange={e => setFormData({...formData, tipoEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 dark:text-white text-xs cursor-pointer transition-colors">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 transition-colors">Tipo de Evento</label>
+                        <select value={formData.tipoEvento} onChange={e => setFormData({...formData, tipoEvento: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-sm cursor-pointer transition-colors appearance-none">
                           {tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
                         </select>
                       </div>
                       <div className="flex-1">
-                        <label className="block text-[10px] font-bold text-indigo-600 dark:text-amber-500 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Users size={12} className="mr-1"/> Rol</label>
-                        <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full p-3 bg-indigo-50 dark:bg-amber-500/10 border border-indigo-200 dark:border-amber-500/20 text-indigo-900 dark:text-amber-400 rounded-xl outline-none focus:border-indigo-500 dark:focus:border-amber-500 font-black text-xs cursor-pointer transition-colors">
+                        <label className="block text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest mb-2 flex items-center transition-colors"><Users size={12} className="mr-1"/> Rol</label>
+                        <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full p-4 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-xl outline-none focus:border-[#D4AF37] font-black text-sm cursor-pointer transition-colors appearance-none">
                           <option value="cliente">Cliente Final</option>
                           <option value="planner">Agencia Planner</option>
                         </select>
@@ -18582,21 +18784,21 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 transition-colors">{formData.role === 'planner' ? 'Nombre de la Agencia' : eventoSeleccionado.labelNombre}</label>
-                      <input type="text" autoFocus required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} placeholder={formData.role === 'planner' ? 'Ej. Elite Planners' : eventoSeleccionado.placeholder} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 transition-colors">{formData.role === 'planner' ? 'Nombre de la Agencia' : eventoSeleccionado.labelNombre}</label>
+                      <input type="text" autoFocus required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} placeholder={formData.role === 'planner' ? 'Ej. Elite Planners' : eventoSeleccionado.placeholder} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-sm transition-colors" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Mail size={12} className="mr-1.5" /> Correo de Acceso</label>
-                      <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-800 dark:text-white text-sm transition-colors" />
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center transition-colors"><Mail size={12} className="mr-1.5" /> Correo de Acceso</label>
+                      <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ejemplo@gmail.com" className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-sm transition-colors" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Phone size={12} className="mr-1.5" /> Teléfono (WhatsApp)</label>
-                      <input type="tel" required value={formData.telefono} onChange={e => setFormData({...formData, telefono: e.target.value})} placeholder="10 dígitos del cliente..." className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-800 dark:text-white text-sm transition-colors" />
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center transition-colors"><Phone size={12} className="mr-1.5" /> Teléfono (WhatsApp)</label>
+                      <input type="tel" required value={formData.telefono} onChange={e => setFormData({...formData, telefono: e.target.value})} placeholder="10 dígitos del cliente..." className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-sm transition-colors" />
                     </div>
                     
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Paquete Vendido</label>
-                      <select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-700 dark:text-white text-sm cursor-pointer transition-colors mb-3">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 transition-colors">Paquete Vendido</label>
+                      <select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-sm cursor-pointer transition-colors mb-3 appearance-none">
                         <option value="basico">Plan Básico ($990)</option>
                         <option value="plata">Plan Plata ($1,490)</option>
                         <option value="oro">Plan Oro ($1,990)</option>
@@ -18608,15 +18810,15 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       {/* 🔴 NUEVO: ADD-ONS HÍBRIDOS PARA NUEVA LICENCIA */}
                       {['basico', 'plata', 'oro'].includes(formData.plan) && (
                         <div className="mt-3 space-y-2 mb-3">
-                          <div className="flex items-center justify-between bg-pink-50/50 dark:bg-pink-900/10 p-2 rounded-lg border border-pink-100 dark:border-pink-800/20">
-                            <span className="text-[9px] font-bold text-pink-700 dark:text-pink-400 uppercase tracking-widest">+ Social Wall (Extra)</span>
-                            <button type="button" onClick={() => setFormData({...formData, hasSocialWall: !formData.hasSocialWall})} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${formData.hasSocialWall ? 'bg-pink-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                          <div className="flex items-center justify-between bg-pink-500/10 p-3 rounded-lg border border-pink-500/20">
+                            <span className="text-[9px] font-bold text-pink-400 uppercase tracking-widest">+ Social Wall (Extra)</span>
+                            <button type="button" onClick={() => setFormData({...formData, hasSocialWall: !formData.hasSocialWall})} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${formData.hasSocialWall ? 'bg-pink-500' : 'bg-slate-600'}`}>
                               <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${formData.hasSocialWall ? 'translate-x-4' : 'translate-x-0'}`}></div>
                             </button>
                           </div>
-                          <div className="flex items-center justify-between bg-slate-900/5 p-2 rounded-lg border border-slate-200 dark:border-white/10">
-                            <span className="text-[9px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">+ Black Label (Extra)</span>
-                            <button type="button" onClick={() => setFormData({...formData, hasBlackLabel: !formData.hasBlackLabel})} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${formData.hasBlackLabel ? 'bg-slate-800' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                          <div className="flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/10">
+                            <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">+ Black Label (Extra)</span>
+                            <button type="button" onClick={() => setFormData({...formData, hasBlackLabel: !formData.hasBlackLabel})} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${formData.hasBlackLabel ? 'bg-slate-400' : 'bg-slate-600'}`}>
                               <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${formData.hasBlackLabel ? 'translate-x-4' : 'translate-x-0'}`}></div>
                             </button>
                           </div>
@@ -18625,33 +18827,33 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
                       <div className="grid grid-cols-2 gap-4 mb-3">
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
-                          <input type="date" required={formData.plan === 'security_kit'} value={formData.fechaEvento} onChange={e => setFormData({...formData, fechaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
+                          <input type="date" required={formData.plan === 'security_kit'} value={formData.fechaEvento} onChange={e => setFormData({...formData, fechaEvento: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-xs transition-colors [color-scheme:dark]" />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1"/> Hora de Inicio</label>
-                          <input type="time" value={formData.horaEvento} onChange={e => setFormData({...formData, horaEvento: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-xs transition-colors" />
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center transition-colors"><Clock size={12} className="mr-1"/> Hora de Inicio</label>
+                          <input type="time" value={formData.horaEvento} onChange={e => setFormData({...formData, horaEvento: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-xs transition-colors [color-scheme:dark]" />
                         </div>
                       </div>
 
                       {['oro', 'diamante', 'security_kit'].includes(formData.plan) && (
                         <>
-                          <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
+                          <div className="flex items-center justify-between bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20 mb-2">
                             <div>
-                              <p className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
-                              <p className="text-[9px] text-indigo-500 dark:text-indigo-300/70 mt-0.5">Apágalo si el cliente quiere invitación simple.</p>
+                              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> QRs Únicos</p>
+                              <p className="text-[9px] text-indigo-300/70 mt-1">Apágalo para invitación simple.</p>
                             </div>
-                            <button type="button" onClick={() => setFormData({...formData, isQrEnabled: !formData.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                            <button type="button" onClick={() => setFormData({...formData, isQrEnabled: !formData.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-600'}`}>
                                <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${formData.isQrEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
                             </button>
                           </div>
 
-                          <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
+                          <div className="flex items-center justify-between bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
                             <div>
-                              <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
-                              <p className="text-[9px] text-emerald-500 dark:text-emerald-300/70 mt-0.5">Apágalo para una confirmación general sin números.</p>
+                              <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
+                              <p className="text-[9px] text-emerald-300/70 mt-1">Para confirmación general.</p>
                             </div>
-                            <button type="button" onClick={() => setFormData({...formData, isPassCountEnabled: !formData.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                            <button type="button" onClick={() => setFormData({...formData, isPassCountEnabled: !formData.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-600'}`}>
                                <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${formData.isPassCountEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
                             </button>
                           </div>
@@ -18660,29 +18862,29 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> Link Invitación URL (Opcional)</label>
-                      <input type="url" value={formData.urlInvitacion} onChange={e => setFormData({...formData, urlInvitacion: e.target.value})} placeholder="https://baulia.com/..." className="w-full p-3 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-medium text-sky-600 dark:text-sky-400 text-xs transition-colors" />
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> Link Invitación URL (Opcional)</label>
+                      <input type="url" value={formData.urlInvitacion} onChange={e => setFormData({...formData, urlInvitacion: e.target.value})} placeholder="https://baulia.com/..." className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-medium text-sky-400 text-sm transition-colors" />
                     </div>
                   </div>
 
-                  <div className="flex space-x-3">
-                    <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 bg-slate-100 dark:bg-[#111] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-xl font-bold text-xs hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Cancelar</button>
-                    <button type="submit" disabled={isCreating} className="flex-1 py-3.5 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-xs shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 disabled:opacity-50 transition-colors">
+                  <div className="flex space-x-3 mt-8">
+                    <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-white/5 border border-white/10 text-slate-300 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors">Cancelar</button>
+                    <button type="submit" disabled={isCreating} className="flex-1 py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-[10px] uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] disabled:opacity-50 transition-colors">
                       {isCreating ? 'Procesando...' : 'Crear Licencia y Registrar Venta'}
                     </button>
                   </div>
                 </form>
               ) : (
-                <div className="p-8 text-center bg-slate-50 dark:bg-transparent transition-colors">
-                  <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-transparent dark:border-emerald-500/30"><CheckCircle2 size={40} /></div>
-                  <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2 transition-colors">¡Accesos Creados!</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 transition-colors">La venta se registró en el Libro Mayor por <b>{authData.email.split('@')[0]}</b>.</p>
-                  <div className="bg-white dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 text-left text-sm mb-6 shadow-sm transition-colors">
-                    <p className="mb-3"><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Usuario:</span> <b className="text-slate-800 dark:text-white transition-colors">{successData.email}</b></p>
-                    <p><span className="text-slate-400 dark:text-slate-500 font-bold w-20 inline-block transition-colors">Contraseña:</span> <b className="text-slate-800 dark:text-white font-mono text-base transition-colors">{successData.password}</b></p>
+                <div className="p-8 text-center transition-colors">
+                  <div className="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30"><CheckCircle2 size={40} /></div>
+                  <h3 className="text-2xl font-editorial font-black text-white mb-2 transition-colors">¡Accesos Creados!</h3>
+                  <p className="text-sm text-slate-400 mb-6 transition-colors">La venta se registró en el Libro Mayor por <b className="text-white">{authData.email.split('@')[0]}</b>.</p>
+                  <div className="bg-[#141210] p-5 rounded-2xl border border-white/10 text-left text-sm mb-8 shadow-sm transition-colors">
+                    <p className="mb-3"><span className="text-slate-500 font-bold w-24 inline-block transition-colors">Usuario:</span> <b className="text-white transition-colors">{successData.email}</b></p>
+                    <p><span className="text-slate-500 font-bold w-24 inline-block transition-colors">Contraseña:</span> <b className="text-[#D4AF37] font-mono text-lg transition-colors">{successData.password}</b></p>
                   </div>
                   
-                  <button onClick={() => setIsModalOpen(false)} className="w-full py-4 text-slate-500 dark:text-slate-400 font-bold hover:text-slate-800 dark:hover:text-white transition-colors">Cerrar Ventana</button>
+                  <button onClick={() => setIsModalOpen(false)} className="w-full py-4 bg-white/5 border border-white/10 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-white/10 transition-colors">Cerrar Ventana</button>
                 </div>
               )}
             </div>
@@ -18691,29 +18893,29 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
         {/* 🔴 MODAL PARA EDITAR LICENCIA */}
         {isEditModalOpen && editingLic && (
-          <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
-            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto border border-transparent dark:border-white/10 transition-colors">
-               <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center transition-colors"><h3 className="font-bold text-lg text-slate-800 dark:text-white">Editar Licencia</h3><button onClick={() => {setIsEditModalOpen(false); setEditingLic(null);}} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"><X size={20}/></button></div>
+          <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in transition-colors">
+            <div className="bg-[#1C1917] rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)] animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar border border-[#D4AF37]/30 transition-colors text-white">
+               <div className="px-6 py-5 border-b border-[#D4AF37]/20 bg-[#141210] flex justify-between items-center transition-colors"><h3 className="font-editorial font-black text-2xl text-[#D4AF37] tracking-wide">Editar Licencia</h3><button onClick={() => {setIsEditModalOpen(false); setEditingLic(null);}} className="text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button></div>
                <form onSubmit={handleUpdateLicense} className="p-6 space-y-5">
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Nombre del Cliente / Evento</label>
-                    <input type="text" required value={editingLic.nombres || ''} onChange={e => setEditingLic({...editingLic, nombres: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 transition-colors">Nombre del Cliente / Evento</label>
+                    <input type="text" required value={editingLic.nombres || ''} onChange={e => setEditingLic({...editingLic, nombres: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-sm transition-colors" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> URL de su Invitación Pública</label>
-                    <input type="url" value={editingLic.urlInvitacion || ''} onChange={e => setEditingLic({...editingLic, urlInvitacion: e.target.value})} placeholder="https://baulia.com/bodas/su-boda" className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-medium text-sky-600 dark:text-sky-400 text-sm transition-colors" />
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> URL de su Invitación Pública</label>
+                    <input type="url" value={editingLic.urlInvitacion || ''} onChange={e => setEditingLic({...editingLic, urlInvitacion: e.target.value})} placeholder="https://baulia.com/bodas/su-boda" className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-medium text-sky-400 text-sm transition-colors" />
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Tipo de Evento</label>
-                      <select value={editingLic.tipoEvento || 'general'} onChange={e => setEditingLic({...editingLic, tipoEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 transition-colors">Tipo de Evento</label>
+                      <select value={editingLic.tipoEvento || 'general'} onChange={e => setEditingLic({...editingLic, tipoEvento: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-sm transition-colors cursor-pointer appearance-none">
                         {tiposDeEvento.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors">Plan</label>
-                      <select value={editingLic.plan === 'security_kit' ? 'security_kit' : editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900 dark:text-white text-sm transition-colors cursor-pointer">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 transition-colors">Plan</label>
+                      <select value={editingLic.plan === 'security_kit' ? 'security_kit' : editingLic.plan} onChange={e => setEditingLic({...editingLic, plan: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-sm transition-colors cursor-pointer appearance-none">
                         <option value="basico">Básico</option>
                         <option value="plata">Plata</option>
                         <option value="oro">Oro</option>
@@ -18727,15 +18929,15 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                   {/* 🔴 NUEVO: ADD-ONS HÍBRIDOS PARA EDITAR LICENCIA */}
                   {['basico', 'plata', 'oro'].includes(editingLic.plan) && (
                     <div className="space-y-2 mt-[-10px] mb-2">
-                      <div className="flex items-center justify-between bg-pink-50/50 dark:bg-pink-900/10 p-2 rounded-lg border border-pink-100 dark:border-pink-800/20">
-                        <span className="text-[9px] font-bold text-pink-700 dark:text-pink-400 uppercase tracking-widest">+ Social Wall (Extra)</span>
-                        <button type="button" onClick={() => setEditingLic({...editingLic, hasSocialWall: !editingLic.hasSocialWall})} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${editingLic.hasSocialWall ? 'bg-pink-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                      <div className="flex items-center justify-between bg-pink-900/10 p-3 rounded-lg border border-pink-800/20">
+                        <span className="text-[9px] font-bold text-pink-400 uppercase tracking-widest">+ Social Wall (Extra)</span>
+                        <button type="button" onClick={() => setEditingLic({...editingLic, hasSocialWall: !editingLic.hasSocialWall})} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${editingLic.hasSocialWall ? 'bg-pink-500' : 'bg-slate-600'}`}>
                           <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.hasSocialWall ? 'translate-x-4' : 'translate-x-0'}`}></div>
                         </button>
                       </div>
-                      <div className="flex items-center justify-between bg-slate-900/5 p-2 rounded-lg border border-slate-200 dark:border-white/10">
-                        <span className="text-[9px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">+ Black Label (Extra)</span>
-                        <button type="button" onClick={() => setEditingLic({...editingLic, hasBlackLabel: !editingLic.hasBlackLabel})} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${editingLic.hasBlackLabel ? 'bg-slate-800' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                      <div className="flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/10">
+                        <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">+ Black Label (Extra)</span>
+                        <button type="button" onClick={() => setEditingLic({...editingLic, hasBlackLabel: !editingLic.hasBlackLabel})} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${editingLic.hasBlackLabel ? 'bg-slate-400' : 'bg-slate-600'}`}>
                           <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.hasBlackLabel ? 'translate-x-4' : 'translate-x-0'}`}></div>
                         </button>
                       </div>
@@ -18744,46 +18946,49 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
-                      <input type="date" value={editingLic.fechaEvento || ''} onChange={e => setEditingLic({...editingLic, fechaEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center transition-colors"><Calendar size={12} className="mr-1"/> Fecha del Evento</label>
+                      <input type="date" value={editingLic.fechaEvento || ''} onChange={e => setEditingLic({...editingLic, fechaEvento: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-xs transition-colors [color-scheme:dark]" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 flex items-center transition-colors"><Clock size={12} className="mr-1"/> Hora de Inicio</label>
-                      <input type="time" value={editingLic.horaEvento || ''} onChange={e => setEditingLic({...editingLic, horaEvento: e.target.value})} className="w-full p-3.5 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:border-indigo-500 font-bold text-slate-900 dark:text-white text-sm transition-colors" />
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center transition-colors"><Clock size={12} className="mr-1"/> Hora de Inicio</label>
+                      <input type="time" value={editingLic.horaEvento || ''} onChange={e => setEditingLic({...editingLic, horaEvento: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-xs transition-colors [color-scheme:dark]" />
                     </div>
                   </div>
 
                   {['oro', 'diamante', 'security_kit'].includes(editingLic.plan) && (
                     <>
-                      <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-2">
+                      <div className="flex items-center justify-between bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20 mb-2">
                         <div>
-                          <p className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
-                          <p className="text-[9px] text-indigo-500 dark:text-indigo-300/70 mt-0.5">Apágalo si el cliente quiere invitación simple.</p>
+                          <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest flex items-center"><QrCode size={12} className="mr-1"/> Generar QRs Únicos</p>
+                          <p className="text-[9px] text-indigo-300/70 mt-1">Apágalo si el cliente quiere invitación simple.</p>
                         </div>
-                        <button type="button" onClick={() => setEditingLic({...editingLic, isQrEnabled: !editingLic.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                        <button type="button" onClick={() => setEditingLic({...editingLic, isQrEnabled: !editingLic.isQrEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isQrEnabled ? 'bg-indigo-500' : 'bg-slate-600'}`}>
                            <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.isQrEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
                         </button>
                       </div>
 
-                      <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
+                      <div className="flex items-center justify-between bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
                         <div>
-                          <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
-                          <p className="text-[9px] text-emerald-500 dark:text-emerald-300/70 mt-0.5">Apágalo para una confirmación general sin números.</p>
+                          <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center"><Users size={12} className="mr-1"/> Contar Pases (RSVP)</p>
+                          <p className="text-[9px] text-emerald-300/70 mt-1">Apágalo para una confirmación general sin números.</p>
                         </div>
-                        <button type="button" onClick={() => setEditingLic({...editingLic, isPassCountEnabled: !editingLic.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                        <button type="button" onClick={() => setEditingLic({...editingLic, isPassCountEnabled: !editingLic.isPassCountEnabled})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${editingLic.isPassCountEnabled ? 'bg-emerald-500' : 'bg-slate-600'}`}>
                            <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${editingLic.isPassCountEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
                         </button>
                       </div>
                     </>
                   )}
 
-                  <div className="bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 p-3 rounded-lg text-xs font-bold border border-sky-200 dark:border-sky-500/20 flex items-start transition-colors">
+                  <div className="bg-sky-500/10 text-sky-400 p-4 rounded-xl text-xs font-bold border border-sky-500/20 flex items-start transition-colors leading-relaxed">
                     <AlertCircle size={16} className="mr-2 flex-shrink-0 mt-0.5" />
                     Nota: Puedes subir (Upgrade) el plan del cliente. El sistema actualizará el estado financiero automáticamente. No se permiten reducciones de plan.
                   </div>
-                  <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-900 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-slate-800 dark:hover:bg-amber-400 transition-colors mt-4">
-                    Guardar Cambios
-                  </button>
+                  <div className="flex space-x-3 mt-8">
+                    <button type="button" onClick={() => {setIsEditModalOpen(false); setEditingLic(null);}} className="flex-1 py-4 bg-white/5 border border-white/10 text-slate-300 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-white/10 transition-colors">Cancelar</button>
+                    <button type="submit" className="flex-1 py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-[10px] uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] transition-colors">
+                      Guardar Cambios
+                    </button>
+                  </div>
                </form>
             </div>
           </div>
@@ -19497,39 +19702,39 @@ const LoginScreen = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
+    <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden text-white">
       {/* Luces de fondo estilo Champagne */}
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-amber-500/10  hidden md:block  hidden md:block blur-[120px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-indigo-500/10  hidden md:block  hidden md:block blur-[150px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-[#D4AF37]/10 hidden md:block blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-white/5 hidden md:block blur-[150px] rounded-full pointer-events-none"></div>
       
-      <div className="bg-slate-900/80 backdrop-blur-xl p-10 rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.6)] w-full max-w-md relative z-10 border border-slate-800">
+      <div className="bg-[#1C1917]/95 backdrop-blur-xl p-10 rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.9)] w-full max-w-md relative z-10 border border-[#D4AF37]/30">
         <div className="flex flex-col items-center mb-8">
-           <div className="mb-2 drop-shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform cursor-default">
+           <div className="mb-2 drop-shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:scale-105 transition-transform cursor-default">
               <BauliaLogo className="h-16 w-auto" forceWhite={true} />
            </div>
-           <p className="text-amber-500 text-xs font-bold tracking-[0.2em] mt-2">Bóveda Premium</p>
+           <p className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.25em] mt-3">Bóveda Premium</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Correo Electrónico</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all font-bold text-white shadow-inner" placeholder="tu@correo.com" />
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none transition-colors font-bold text-white shadow-inner" placeholder="tu@correo.com" />
           </div>
           <div>
             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Contraseña Segura</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all font-bold text-white shadow-inner" placeholder="••••••••" />
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl focus:border-[#D4AF37] outline-none transition-colors font-bold text-white shadow-inner" placeholder="••••••••" />
           </div>
           
-          {error && <div className="bg-rose-500/10 text-rose-400 p-3 rounded-lg text-xs font-bold text-center border border-rose-500/20 animate-in shake">{error}</div>}
-          {mensajeOk && <div className="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg text-xs font-bold text-center border border-emerald-500/20">{mensajeOk}</div>}
+          {error && <div className="bg-rose-500/10 text-rose-400 p-4 rounded-xl text-[10px] font-bold uppercase tracking-widest text-center border border-rose-500/20 animate-in shake">{error}</div>}
+          {mensajeOk && <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-xl text-[10px] font-bold uppercase tracking-widest text-center border border-emerald-500/20">{mensajeOk}</div>}
           
-          <button type="submit" disabled={isLoading} className="w-full py-4 bg-amber-500 text-slate-900 rounded-xl font-black text-lg shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:bg-amber-400 hover:scale-[1.02] transition-all mt-4 disabled:opacity-50 disabled:hover:scale-100">
+          <button type="submit" disabled={isLoading} className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-sm uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.25)] hover:bg-[#c5a028] hover:scale-[1.02] transition-all mt-6 disabled:opacity-50 disabled:hover:scale-100">
             {isLoading ? 'Autenticando...' : 'Acceder al Panel'}
           </button>
         </form>
         
-        <div className="mt-8 text-center border-t border-slate-800 pt-6">
-          <button onClick={handleResetPassword} type="button" className="text-xs font-bold text-slate-500 hover:text-amber-400 transition-colors">
+        <div className="mt-8 text-center border-t border-white/10 pt-6">
+          <button onClick={handleResetPassword} type="button" className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-[#D4AF37] transition-colors">
             ¿Olvidaste tu contraseña? Recuperar aquí
           </button>
         </div>
@@ -19767,14 +19972,14 @@ const HostessStandaloneView = ({ eventId }) => {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center text-emerald-400 font-bold">
-        <RefreshCw size={40} className="animate-spin mb-4" /> Conectando a la Puerta...
+      <div className="h-screen w-screen bg-[#050505] flex flex-col items-center justify-center text-[#D4AF37] font-black uppercase tracking-widest text-xs transition-colors">
+        <RefreshCw size={40} className="animate-spin mb-4 opacity-80" /> Conectando a la Puerta...
       </div>
     );
   }
 
   return (
-    <div className="h-screen w-screen bg-slate-50 p-2 sm:p-4 overflow-y-auto">
+    <div className="h-screen w-screen bg-[#050505] p-2 sm:p-4 overflow-y-auto transition-colors duration-500">
        <EscanerView guests={guests} setGuests={setGuests} tables={tables} isSharedMode={true} addNotification={addNotification} />
     </div>
   );
