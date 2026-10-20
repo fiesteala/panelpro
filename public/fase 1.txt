@@ -1,0 +1,49 @@
+
+FASE 1: La Base, El Estilo y La Portada Actúa como un Diseñador UI/UX y Desarrollador Frontend Experto de Alta Costura. Necesito crear una invitación digital interactiva de lujo en un solo archivo HTML usando Tailwind CSS y React (vía Babel/CDN).
+DATOS DEL EVENTO Y ESTILO:
+* Festejada: [NOMBRE_DEL_FESTEJADO]
+* ID del Evento en BD: [ID_EXACTO_EN_FIREBASE]
+* URL de Portada (Para WhatsApp): [LINK_DE_FOTO_PORTADA.jpg]
+* Estilo visual: [DESCRIPCIÓN DEL ESTILO]
+INSTRUCCIONES PARA ESTA FASE 1: Crea la estructura base del documento y diseña SOLO la primera pantalla (Hero/Portada). Debe incluir:
+1. Open Graph (WhatsApp Preview): En la cabecera <head>, inyecta exactamente estos metadatos. REGLA ESTRICTA: El og:image DEBE ser un enlace absoluto y público que empiece con https:// (ej. https://dominio.com/foto.jpg), de lo contrario WhatsApp no lo leerá:
+HTML
+
+<meta property="og:title" content="Pase VIP - [NOMBRE_DEL_FESTEJADO]" />
+<meta property="og:description" content="Abre tu invitación y confirma tu asistencia." />
+<meta property="og:image" content="[LINK_DE_FOTO_PORTADA.jpg]" />
+<meta property="og:url" content="https://baulia.com" />
+<meta property="og:type" content="website" />
+1. Un Traductor simulado: Un botón muy pequeño y minimalista en la esquina superior para cambiar idioma.
+2. Extracción Inteligente VIP: Agrega un useEffect que extraiga el parámetro "u" de la URL. Si existe, haz un fetch a https://firestore.googleapis.com/v1/projects/panel-de-control-intelig-db278/databases/(default)/documents/eventos/[ID_DEL_EVENTO_EN_BD]/invitados/${guestUid}?t=${Date.now()} y extrae data.fields.name.stringValue para guardarlo en un estado guestName.
+3. Saludo VIP: En la portada, justo encima o debajo del título, si guestName existe, muestra un bloque elegante que diga "Pase Especial Para:" seguido del nombre del invitado en cursiva.
+4. Portada: Un diseño espectacular que ocupe toda la pantalla con una foto principal de fondo y un Monograma Personalizado. Frase del Evento: Una cita o frase emotiva, con tipografía cursiva (serif) muy fina.
+5. Reproductor de Música (Anti-Bloqueo de Navegador): Agrega la etiqueta <audio ref={audioRef} src="cancion.mp3" loop preload="auto"></audio>. REGLA ESTRICTA DE AUTOPLAY: Para evitar que el navegador bloquee el sonido, la función que se ejecuta al presionar el botón de "Entrar" de la portada debe ejecutar INMEDIATAMENTE audioRef.current.play() antes de cualquier transición, animación o setTimeout. Además, incluye un botón fijo, flotante y sutil (tipo ecualizador) para pausar/reproducir.
+6. Prohibido el Splash Screen bloqueante: Si agregas una pantalla de carga, debe ser puramente visual con CSS en el index.html (que desaparezca cuando React monte). NO uses estados de React que causen pantallas negras infinitas.
+Entrégame el código inicial muy limpio. Haz que se vea de $10,000 dólares.
+
+
+// sin pantalla inicial
+
+FASE 1: La Base, El Estilo y La Portada Sin pantalla inicial
+Actúa como un Diseñador UI/UX y Desarrollador Frontend Experto de Alta Costura. Necesito crear una invitación digital interactiva de lujo en un solo archivo HTML usando Tailwind CSS y React (vía Babel/CDN).
+DATOS DEL EVENTO Y ESTILO:
+* Festejada: [NOMBRE_DEL_FESTEJADO]
+* ID del Evento en BD: [ID_EXACTO_EN_FIREBASE]
+* URL de Portada (Para WhatsApp): [LINK_DE_FOTO_PORTADA.jpg]
+* URL de Imagen de Fondo (Fondo de Portada): [LINK_DE_FOTO_FONDO.jpg]
+* Estilo visual: [DESCRIPCIÓN DEL ESTILO]
+INSTRUCCIONES PARA ESTA FASE 1: Crea la estructura base del documento y diseña la pantalla principal (Hero/Portada) que se mostrará directamente al cargar. Debe incluir:
+1. Open Graph (WhatsApp Preview): En la cabecera <head>, inyecta exactamente estos metadatos. REGLA ESTRICTA: El og:image DEBE ser un enlace absoluto y público que empiece con https://, de lo contrario WhatsApp no lo leerá:
+<meta property="og:title" content="Pase VIP - [NOMBRE_DEL_FESTEJADO]" />
+<meta property="og:description" content="Abre tu invitación y confirma tu asistencia." />
+<meta property="og:image" content="[LINK_DE_FOTO_PORTADA.jpg]" />
+<meta property="og:url" content="[https://baulia.com](https://baulia.com)" />
+<meta property="og:type" content="website" />
+1. Traductor simulado: Un botón muy pequeño y minimalista en la esquina superior para cambiar el idioma (simulado en el estado de React).
+2. Extracción Inteligente VIP: Agrega un useEffect que extraiga el parámetro "u" de la URL. Si existe, haz un fetch a https://firestore.googleapis.com/v1/projects/panel-de-control-intelig-db278/databases/(default)/documents/eventos/[ID_DEL_EVENTO_EN_BD]/invitados/${guestUid} y extrae data.fields.name.stringValue para guardarlo en un estado guestName.
+3. Portada Directa y Espectacular: El Hero debe ocupar toda la pantalla (h-screen). Debe tener la [LINK_DE_FOTO_FONDO.jpg] como imagen principal de fondo, que sea claramente visible y elegante (con un overlay sutil solo si es necesario para leer el texto). Incluye un Monograma Personalizado y una cita o frase emotiva con tipografía cursiva (serif) muy fina.
+4. Saludo VIP: En esta misma portada, si guestName existe, muestra un bloque elegante flotante o tipo "Glassmorphism" que diga "Pase Especial Para:" seguido del nombre del invitado.
+5. Reproductor de Música Minimalista: Agrega la etiqueta <audio ref={audioRef} src="cancion.mp3" loop preload="auto"></audio>. Para el control, coloca ÚNICAMENTE un botón fijo, flotante y sutil (tipo ecualizador animado) en la esquina inferior. NO crees pantallas de inicio, ni botones de "Entrar", ni bloqueos. El usuario interactuará con la invitación directamente y encenderá la música en este botón flotante si lo desea.
+6. Prohibido el Splash Screen bloqueante en React: Si agregas un pre-loader para evitar parpadeos, hazlo puramente visual con CSS en el <head> del HTML (que desaparezca automáticamente en 1 segundo). NO uses estados de React que causen pantallas negras.
+Entrégame el código inicial muy limpio. Haz que se vea visualmente de $10,000 dólares, enfocado en el lujo.

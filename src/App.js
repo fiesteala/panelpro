@@ -12277,13 +12277,68 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [fecha, setFecha] = useState('');
-  const [pais, setPais] = useState('MX'); // 🔴 TU IDEA: EL PAÍS
+  const [pais, setPais] = useState('MX');
   const [lada, setLada] = useState('+52');
   const [telefono, setTelefono] = useState('');
+
+  // 🟢 ESTADOS DE CUPONES Y ANTICIPOS
+  const [configPublica, setConfigPublica] = useState({ anticipos: { activo: false, porcentaje: 10 }, cupones: [] });
+  const [codigoInput, setCodigoInput] = useState('');
+  const [cuponAplicado, setCuponAplicado] = useState(null);
+  const [mensajeCupon, setMensajeCupon] = useState(null);
+  const [modalidadPago, setModalidadPago] = useState('completo'); // 'completo' | 'anticipo'
 
   const [clientSecret, setClientSecret] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorTexto, setErrorTexto] = useState(null);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "ajustes_baulia", "precios_publicos"), (snap) => {
+      if (snap.exists()) {
+        const d = snap.data();
+        setConfigPublica({
+          anticipos: d.anticipos || { activo: false, porcentaje: 10 },
+          cupones: d.cupones || []
+        });
+        if (!d.anticipos?.activo) setModalidadPago('completo');
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  const precioOriginal = Number(planSeleccionado.precio) || 0;
+
+  // 1. Calculamos precio tras aplicar cupón
+  const precioConDescuento = React.useMemo(() => {
+    if (!cuponAplicado) return precioOriginal;
+    if (cuponAplicado.tipo === 'porcentaje') {
+      return Math.max(10, Math.round(precioOriginal * (1 - cuponAplicado.valor / 100)));
+    }
+    return Math.max(10, precioOriginal - cuponAplicado.valor);
+  }, [precioOriginal, cuponAplicado]);
+
+  // 2. Calculamos cuánto paga hoy y cuánto queda de deuda
+  const porcentajeReserva = configPublica.anticipos?.porcentaje || 10;
+  const esAnticipoActivo = configPublica.anticipos?.activo && modalidadPago === 'anticipo';
+  const montoACobrarHoy = esAnticipoActivo
+    ? Math.max(10, Math.round(precioConDescuento * (porcentajeReserva / 100)))
+    : precioConDescuento;
+  const deudaRestante = esAnticipoActivo ? Math.max(0, precioConDescuento - montoACobrarHoy) : 0;
+
+  const validarCupon = () => {
+    const limpio = codigoInput.trim().toUpperCase();
+    if (!limpio) return;
+    const encontrado = (configPublica.cupones || []).find(
+      c => c.activo && c.codigo.toUpperCase() === limpio && (c.usados || 0) < c.limite
+    );
+    if (encontrado) {
+      setCuponAplicado(encontrado);
+      setMensajeCupon({ tipo: 'ok', texto: `¡Cupón ${encontrado.codigo} aplicado con éxito!` });
+    } else {
+      setCuponAplicado(null);
+      setMensajeCupon({ tipo: 'error', texto: 'Código inválido, pausado o agotado.' });
+    }
+  };
 
   const generarOrden = async (e) => {
     e.preventDefault();
@@ -12296,7 +12351,10 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
           plan: planSeleccionado.plan === 'Black Label' ? 'security_kit' : 
                 planSeleccionado.plan === 'Social Wall' ? 'social_wall' : 
                 planSeleccionado.plan.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
-          precio: planSeleccionado.precio,
+          precio: montoACobrarHoy,
+          deudaPlataforma: deudaRestante,
+          cuponAplicado: cuponAplicado ? cuponAplicado.codigo : '',
+          esAnticipo: esAnticipoActivo,
           moneda: planSeleccionado.moneda || 'MXN', 
           nombre, email, fecha, telefono: telCompleto, pais
         })
@@ -12308,6 +12366,40 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
     setLoading(false);
   };
 
+  // 🟢 Al terminar el pago en Stripe, sellamos la deuda y descontamos 1 uso al cupón en Firebase
+  const handleSuccessConCandado = async (resData) => {
+    try {
+      if (cuponAplicado) {
+        const nuevosCupones = (configPublica.cupones || []).map(c =>
+          c.id === cuponAplicado.id ? { ...c, usados: (c.usados || 0) + 1 } : c
+        );
+        await updateDoc(doc(db, "ajustes_baulia", "precios_publicos"), { cupones: nuevosCupones }).catch(() => {});
+      }
+      if (deudaRestante > 0 || cuponAplicado) {
+        setTimeout(async () => {
+          try {
+            const snapUsers = await getDocs(collection(db, "usuarios"));
+            const clienteDoc = snapUsers.docs.find(d => (d.data().email || '').toLowerCase() === email.trim().toLowerCase());
+            if (clienteDoc) {
+              const targetEventId = clienteDoc.data().eventId || clienteDoc.id;
+              await updateDoc(doc(db, "usuarios", clienteDoc.id), {
+                deudaPlataforma: deudaRestante,
+                montoPagado: montoACobrarHoy,
+                cuponAplicado: cuponAplicado ? cuponAplicado.codigo : '',
+                bloqueadoPorPago: false
+              });
+              await updateDoc(doc(db, "eventos", targetEventId), {
+                deudaPlataforma: deudaRestante,
+                bloqueadoPorPago: false
+              });
+            }
+          } catch (e) { console.error("Sync post-pago:", e); }
+        }, 1500);
+      }
+    } catch (err) { console.error(err); }
+    if (onSuccess) onSuccess(resData);
+  };
+
   const nombrePlanLimpio = planSeleccionado.plan === 'social_wall' ? 'Social Wall' : planSeleccionado.plan;
 
   return (
@@ -12317,16 +12409,87 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
            <div className="min-w-0">
              <p className="text-amber-600 dark:text-amber-500 text-[10px] font-black uppercase tracking-widest mb-1">Suscripción Premium</p>
              <p className="text-slate-900 dark:text-white font-editorial text-2xl md:text-3xl leading-none truncate">{nombrePlanLimpio}</p>
+             {cuponAplicado && (
+               <span className="inline-block mt-2 text-[9px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">
+                 Cupón {cuponAplicado.codigo} Aplicado
+               </span>
+             )}
            </div>
            <div className="text-right shrink-0">
-             <p className="text-slate-900 dark:text-white font-black text-2xl md:text-3xl">${String(planSeleccionado.precio).split('.')[0]}</p>
-             <p className="text-slate-500 dark:text-slate-400 text-[9px] uppercase tracking-widest font-bold mt-1">{planSeleccionado.moneda || 'MXN'} / Pago Único</p>
+             {cuponAplicado && (
+               <p className="text-xs text-slate-400 line-through font-bold">${precioOriginal}</p>
+             )}
+             <p className="text-slate-900 dark:text-white font-black text-2xl md:text-3xl">${String(montoACobrarHoy).split('.')[0]}</p>
+             <p className="text-slate-500 dark:text-slate-400 text-[9px] uppercase tracking-widest font-bold mt-1">
+               {planSeleccionado.moneda || 'MXN'} / {esAnticipoActivo ? `Reserva (${porcentajeReserva}%)` : 'Pago Único'}
+             </p>
            </div>
          </div>
+         {esAnticipoActivo && (
+           <div className="mt-3 pt-3 border-t border-amber-500/20 flex justify-between items-center text-[10px] font-bold text-amber-700 dark:text-amber-400">
+             <span>Saldo restante (a liquidar 24h después de recibir tu invitación):</span>
+             <span className="font-black">${deudaRestante} {planSeleccionado.moneda || 'MXN'}</span>
+           </div>
+         )}
       </div>
 
       {!clientSecret ? (
         <form onSubmit={generarOrden} className="space-y-4 shrink-0 animate-in fade-in w-full max-w-full overflow-x-hidden">
+          
+          {/* 🟢 SELECTOR DE PAGO COMPLETO VS ANTICIPO (SI ESTÁ HABILITADO EN GOD MODE) */}
+          {configPublica.anticipos?.activo && (
+            <div className="space-y-2">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 ml-1">Modalidad de Pago</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setModalidadPago('completo')}
+                  className={`p-3.5 rounded-xl border text-left transition-all ${modalidadPago === 'completo' ? 'bg-amber-500/15 border-amber-500 text-slate-900 dark:text-white shadow-md' : 'bg-slate-50 dark:bg-[#111] border-slate-200 dark:border-white/10 text-slate-500'}`}
+                >
+                  <p className="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">Liquidar 100%</p>
+                  <p className="text-lg font-black mt-0.5">${precioConDescuento} <span className="text-[9px] font-normal">{planSeleccionado.moneda || 'MXN'}</span></p>
+                  <p className="text-[9px] opacity-75 mt-0.5">Acceso total sin adeudos</p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setModalidadPago('anticipo')}
+                  className={`p-3.5 rounded-xl border text-left transition-all ${modalidadPago === 'anticipo' ? 'bg-amber-500/15 border-amber-500 text-slate-900 dark:text-white shadow-md' : 'bg-slate-50 dark:bg-[#111] border-slate-200 dark:border-white/10 text-slate-500'}`}
+                >
+                  <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Reservar con {porcentajeReserva}%</p>
+                  <p className="text-lg font-black mt-0.5">${Math.max(10, Math.round(precioConDescuento * (porcentajeReserva / 100)))} <span className="text-[9px] font-normal">{planSeleccionado.moneda || 'MXN'}</span></p>
+                  <p className="text-[9px] opacity-75 mt-0.5">Liquida al recibir tu invitación</p>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 🟢 CAMPO DE CUPÓN PROMOCIONAL */}
+          <div className="w-full min-w-0">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">¿Tienes un código de descuento?</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={codigoInput}
+                onChange={(e) => setCodigoInput(e.target.value.toUpperCase())}
+                placeholder="Ej. BODA2026"
+                className="flex-1 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white focus:border-amber-500 outline-none"
+              />
+              <button
+                type="button"
+                onClick={validarCupon}
+                className="px-5 py-3 bg-slate-900 dark:bg-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-500 hover:text-black transition-colors shrink-0"
+              >
+                Aplicar
+              </button>
+            </div>
+            {mensajeCupon && (
+              <p className={`text-[10px] font-bold mt-1.5 ml-1 ${mensajeCupon.tipo === 'ok' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                {mensajeCupon.texto}
+              </p>
+            )}
+          </div>
+
           <div className="w-full min-w-0">
             <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 ml-1">Nombre de los Festejados</label>
             <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Carlos & María" className="w-full max-w-full box-border bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all shadow-sm font-medium" />
@@ -12371,13 +12534,12 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
           </div>
 
           <button type="submit" disabled={loading} className="w-full mt-8 py-4 sm:py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-xl text-xs sm:text-sm uppercase tracking-widest shadow-xl hover:scale-[1.02] transition-all flex justify-center items-center">
-            {loading ? <><RefreshCw size={18} className="animate-spin mr-2"/> Conectando al Banco...</> : "Continuar al Pago Seguro"}
+            {loading ? <><RefreshCw size={18} className="animate-spin mr-2"/> Conectando al Banco...</> : `Pagar $${montoACobrarHoy} ${planSeleccionado.moneda || 'MXN'} Ahora`}
           </button>
           {errorTexto && <p className="text-rose-500 text-xs mt-3 text-center font-bold">{errorTexto}</p>}
         </form>
       ) : (
         <div className="mt-2 flex-1">
-          {/* 1. Detectamos el modo oscuro dinámicamente */}
           {(() => {
             const esModoOscuro = document.documentElement.classList.contains('dark') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
             
@@ -12385,13 +12547,10 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
               <Elements stripe={stripePromise} options={{ 
                 clientSecret, 
                 appearance: { 
-                  // Cambiamos entre 'night' y 'stripe' (el tema claro oficial)
                   theme: esModoOscuro ? 'night' : 'stripe', 
                   variables: { 
                     colorPrimary: '#fbbf24', 
-                    // Alternamos el color de fondo
                     colorBackground: esModoOscuro ? '#050505' : '#ffffff', 
-                    // Alternamos el color del texto
                     colorText: esModoOscuro ? '#ffffff' : '#0f172a', 
                     colorDanger: '#f87171', 
                     fontFamily: '"Montserrat", sans-serif' 
@@ -12403,9 +12562,9 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
                 } 
               }}>
                 <StripeCaja 
-                  planSeleccionado={planSeleccionado} 
-                  datosCliente={{ nombre, email, telefono: `${lada} ${telefono}`, pais }} 
-                  onSuccess={onSuccess} 
+                  planSeleccionado={{ ...planSeleccionado, precio: montoACobrarHoy, deudaPlataforma: deudaRestante, cuponAplicado: cuponAplicado?.codigo || '' }} 
+                  datosCliente={{ nombre, email, telefono: `${lada} ${telefono}`, pais, deudaPlataforma: deudaRestante, cuponAplicado: cuponAplicado?.codigo || '' }} 
+                  onSuccess={handleSuccessConCandado} 
                   onVolver={() => setClientSecret(null)} 
                 />
               </Elements>
@@ -17201,8 +17360,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  const [formData, setFormData] = useState({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true, hasSocialWall: false, hasBlackLabel: false });
+  const [formData, setFormData] = useState({ nombres: '', email: '', telefono: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true, hasSocialWall: false, hasBlackLabel: false, codigoCupon: '', esAnticipo: false });
   const [editingLic, setEditingLic] = useState(null);
+  const [configPrecios, setConfigPrecios] = useState({ anticipos: { activo: false, porcentaje: 10 }, cupones: [] });
 
   const [isCreating, setIsCreating] = useState(false);
   const [successData, setSuccessData] = useState(null);
@@ -17257,6 +17417,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         const d = docSnap.data();
         setModoPrueba(d.modoPrueba === true);
         setModoPruebaDesde(d.modoPruebaDesde || 0);
+        setConfigPrecios({
+          anticipos: d.anticipos || { activo: false, porcentaje: 10 },
+          cupones: d.cupones || []
+        });
       }
     });
 
@@ -17918,9 +18082,28 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         }
       }
 
+      // 🟢 CÁLCULO DE CUPÓN Y ANTICIPO EN VENTA MANUAL
+      let precioBasePlan = PRECIOS[formData.plan] || 0;
+      const codigoLimpio = (formData.codigoCupon || '').trim().toUpperCase();
+      const cuponEncontrado = (configPrecios.cupones || []).find(c => c.activo && c.codigo.toUpperCase() === codigoLimpio && (c.usados || 0) < c.limite);
+
+      if (cuponEncontrado) {
+        if (cuponEncontrado.tipo === 'porcentaje') {
+          precioBasePlan = Math.max(0, Math.round(precioBasePlan * (1 - cuponEncontrado.valor / 100)));
+        } else {
+          precioBasePlan = Math.max(0, precioBasePlan - cuponEncontrado.valor);
+        }
+      }
+
+      const porcentajeAnticipo = configPrecios.anticipos?.porcentaje || 10;
+      const montoPagadoHoy = formData.esAnticipo ? Math.round(precioBasePlan * (porcentajeAnticipo / 100)) : precioBasePlan;
+      const deudaCalculada = formData.esAnticipo ? Math.max(0, precioBasePlan - montoPagadoHoy) : 0;
+      const tieneUrlInicial = (formData.urlInvitacion || '').trim() !== '';
+      const timestampEntrega = tieneUrlInicial ? Date.now() : null;
+
       await setDoc(doc(db, "usuarios", newEventId), { 
         email: newEmail, role: formData.role, plan: formData.plan, tipoEvento: formData.tipoEvento, eventId: newEventId, 
-        nombres: formData.nombres, status: 'nuevo', urlInvitacion: formData.urlInvitacion, creadoPor: authData.email, 
+        nombres: formData.nombres, status: tieneUrlInicial ? 'activo' : 'nuevo', urlInvitacion: formData.urlInvitacion, creadoPor: authData.email, 
         referenciaPago: modoPrueba ? (formData.referenciaPago || 'MODO PRUEBA') : formData.referenciaPago, createdAt: serverTimestamp(),
         isQrEnabled: formData.isQrEnabled, 
         isPassCountEnabled: formData.isPassCountEnabled,
@@ -17929,7 +18112,12 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         telefono: formData.telefono,
         hasSocialWall: formData.hasSocialWall === true,
         hasBlackLabel: formData.hasBlackLabel === true,
-        esPrueba: modoPrueba === true
+        esPrueba: modoPrueba === true,
+        deudaPlataforma: deudaCalculada,
+        montoPagado: montoPagadoHoy,
+        cuponAplicado: cuponEncontrado ? cuponEncontrado.codigo : '',
+        fechaEntrega: timestampEntrega,
+        bloqueadoPorPago: false
       });
 
       await setDoc(doc(db, "eventos", newEventId), { 
@@ -17943,8 +18131,17 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           horaEvento: formData.horaEvento,
           hasSocialWall: formData.hasSocialWall === true,
           hasBlackLabel: formData.hasBlackLabel === true,
-          esPrueba: modoPrueba === true
+          esPrueba: modoPrueba === true,
+          deudaPlataforma: deudaCalculada,
+          fechaEntrega: timestampEntrega,
+          bloqueadoPorPago: false
       });
+
+      // 🟢 Si usó un cupón válido, sumamos +1 al contador de usos
+      if (cuponEncontrado && !modoPrueba) {
+        const nuevosCupones = configPrecios.cupones.map(c => c.id === cuponEncontrado.id ? { ...c, usados: (c.usados || 0) + 1 } : c);
+        await updateDoc(doc(db, "ajustes_baulia", "precios_publicos"), { cupones: nuevosCupones }).catch(() => {});
+      }
 
       // 🟢 Si Modo Prueba está activo, NO suma la venta en Finanzas
       if (!modoPrueba) {
@@ -17952,7 +18149,9 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         await setDoc(doc(db, "ventas", newEventId), {
           fecha: serverTimestamp(),
           mesAnio: mesAnioAct,
-          monto: PRECIOS[formData.plan] || 0,
+          monto: montoPagadoHoy,
+          deudaPendiente: deudaCalculada,
+          cupon: cuponEncontrado ? cuponEncontrado.codigo : '',
           plan: formData.plan,
           vendedor: authData.email,
           referencia: formData.referenciaPago,
@@ -17996,6 +18195,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       const safeTipo = editingLic.tipoEvento || "general";
       const isQrChecked = editingLic.isQrEnabled !== false; 
       const isPassChecked = editingLic.isPassCountEnabled !== false;
+      const deudaActualizada = Number(editingLic.deudaPlataforma) || 0;
+      const desbloquearPorLiquidacion = deudaActualizada === 0 ? false : (editingLic.bloqueadoPorPago || false);
 
       let updateData = { 
         urlInvitacion: safeUrl, 
@@ -18006,12 +18207,18 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         isPassCountEnabled: isPassChecked,
         fechaEvento: editingLic.fechaEvento || '',
         horaEvento: editingLic.horaEvento || '18:00',
-        hasSocialWall: editingLic.hasSocialWall === true, // 🟢 BLINDADO ESTRICTO
-        hasBlackLabel: editingLic.hasBlackLabel === true  // 🟢 BLINDADO ESTRICTO
+        hasSocialWall: editingLic.hasSocialWall === true,
+        hasBlackLabel: editingLic.hasBlackLabel === true,
+        deudaPlataforma: deudaActualizada,
+        bloqueadoPorPago: desbloquearPorLiquidacion
       };
 
-      if (safeUrl !== "" && (editingLic.status === 'en_proceso' || editingLic.status === 'nuevo')) {
+      // 🟢 DISPARADOR DE 24 HORAS: Si se asigna link por primera vez, arranca el reloj
+      let nuevaFechaEntrega = editingLic.fechaEntrega || null;
+      if (safeUrl !== "" && (editingLic.status === 'en_proceso' || editingLic.status === 'nuevo' || !editingLic.fechaEntrega)) {
           updateData.status = 'activo';
+          nuevaFechaEntrega = editingLic.fechaEntrega || Date.now();
+          updateData.fechaEntrega = nuevaFechaEntrega;
       }
 
       await updateDoc(doc(db, "usuarios", editingLic.id), updateData);
@@ -18025,8 +18232,11 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
            isPassCountEnabled: isPassChecked,
            fecha: editingLic.fechaEvento || '',
            horaEvento: editingLic.horaEvento || '18:00',
-           hasSocialWall: editingLic.hasSocialWall === true, // 🟢 BLINDADO ESTRICTO
-           hasBlackLabel: editingLic.hasBlackLabel === true  // 🟢 BLINDADO ESTRICTO
+           hasSocialWall: editingLic.hasSocialWall === true,
+           hasBlackLabel: editingLic.hasBlackLabel === true,
+           deudaPlataforma: deudaActualizada,
+           fechaEntrega: nuevaFechaEntrega,
+           bloqueadoPorPago: desbloquearPorLiquidacion
         });
       } catch(err) { console.log("Doc evento no listo", err); }
 
@@ -18243,53 +18453,52 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         {/* 🔴 VISTA DEL TALLER DE PRODUCCIÓN (PULSERAS BLACK LABEL + TARJETAS SOCIAL WALL) */}
         {adminTab === 'taller' && isSuperAdmin && (
           <div className="animate-in fade-in space-y-6">
-            <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col md:flex-row">
+            <div className="bg-[#1C1917] rounded-3xl border border-white/10 shadow-xl overflow-hidden flex flex-col md:flex-row transition-colors">
               
-              <div className="w-full md:w-1/2 lg:w-2/5 border-r border-slate-200 dark:border-white/10 flex flex-col">
-                <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111]">
-                  <h3 className="font-bold text-slate-800 dark:text-white text-sm mb-3">Bandeja de Pedidos ({pedidosTaller.length})</h3>
+              <div className="w-full md:w-1/2 lg:w-2/5 border-r border-white/10 flex flex-col">
+                <div className="p-5 border-b border-white/5 bg-[#141210]">
+                  <h3 className="font-bold text-white text-sm mb-3">Bandeja de Pedidos ({pedidosTaller.length})</h3>
                   <div className="relative">
-                    <SearchIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input type="text" placeholder="Buscar por ID o nombre..." value={tallerSearchQuery} onChange={e => setTallerSearchQuery(e.target.value)} className="w-full pl-9 pr-3 py-2.5 bg-white dark:bg-[#050505] border border-slate-200 dark:border-white/10 rounded-xl text-xs outline-none focus:border-indigo-500 transition-colors" />
+                    <SearchIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input type="text" placeholder="Buscar por ID o nombre..." value={tallerSearchQuery} onChange={e => setTallerSearchQuery(e.target.value)} className="w-full pl-9 pr-3 py-2.5 bg-[#1C1917] border border-white/10 rounded-xl text-xs text-white outline-none focus:border-[#D4AF37] transition-colors placeholder-slate-500" />
                   </div>
                 </div>
                 <div className="overflow-y-auto h-[600px] custom-scrollbar">
                     {pedidosFiltrados.length === 0 ? (
-                        <div className="p-10 text-center text-slate-400 flex flex-col items-center">
+                        <div className="p-10 text-center text-slate-500 flex flex-col items-center">
                           <Factory size={40} className="mb-3 opacity-20" />
                           <p className="text-sm font-bold">No hay pedidos que coincidan.</p>
                         </div>
                     ) : (
-                        <ul className="divide-y divide-slate-100 dark:divide-white/5">
+                        <ul className="divide-y divide-white/5">
                           {pedidosFiltrados.map(p => {
                             const isNuevo = p.orderStatus === 'enviado';
                             const isSocialWallOrder = p.orderType === 'social_wall';
                             return (
-                                <li key={p.orderUniqueKey} onClick={() => procesarOrdenTaller(p)} className={`p-4 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 transition-colors ${ordenActiva?.orderUniqueKey === p.orderUniqueKey ? 'bg-indigo-50 dark:bg-indigo-500/20 border-l-4 border-indigo-500' : 'border-l-4 border-transparent'}`}>
+                                <li key={p.orderUniqueKey} onClick={() => procesarOrdenTaller(p)} className={`p-4 cursor-pointer hover:bg-white/5 transition-colors ${ordenActiva?.orderUniqueKey === p.orderUniqueKey ? 'bg-white/5 border-l-4 border-[#D4AF37]' : 'border-l-4 border-transparent'}`}>
                                   <div className="flex justify-between items-start gap-2 mb-1.5">
-                                      <span className="font-black text-slate-800 dark:text-white text-sm truncate">{p.nombres}</span>
+                                      <span className="font-black text-white text-sm truncate">{p.nombres}</span>
                                       <div className="flex items-center gap-1.5 shrink-0">
-                                        {/* 🟢 ETIQUETA CLARA QUE DISTINGUE PULSERAS VS SOCIAL WALL */}
                                         <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${
                                           isSocialWallOrder
-                                            ? 'bg-pink-500/15 text-pink-500 border-pink-500/30'
-                                            : 'bg-amber-500/15 text-amber-500 border-amber-500/30'
+                                            ? 'bg-pink-500/10 text-pink-400 border-pink-500/20'
+                                            : 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/20'
                                         }`}>
                                           {isSocialWallOrder ? 'TARJETAS • SOCIAL WALL' : 'PULSERAS • BLACK LABEL'}
                                         </span>
                                         {isNuevo ? (
-                                            <span className="bg-rose-500 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded">Nuevo</span>
+                                            <span className="bg-rose-500/20 text-rose-400 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-rose-500/30">Nuevo</span>
                                         ) : (
-                                            <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded">Impreso</span>
+                                            <span className="bg-emerald-500/20 text-emerald-400 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-emerald-500/30">Impreso</span>
                                         )}
                                       </div>
                                   </div>
-                                  <div className="flex justify-between items-end mt-2 text-xs text-slate-500">
+                                  <div className="flex justify-between items-end mt-2 text-xs text-slate-400">
                                       <div>
-                                        <p className="font-mono text-[9px] text-indigo-400 mb-0.5">ID: {p.id}</p>
+                                        <p className="font-mono text-[9px] text-[#D4AF37] mb-0.5">ID: {p.id}</p>
                                         <p className="flex items-center"><Calendar size={10} className="mr-1"/> {p.orderDate ? new Date(p.orderDate).toLocaleDateString() : 'Desconocida'}</p>
                                       </div>
-                                      <span>{(p.plan === 'security_kit' ? 'baulia_black_label' : p.plan)?.replace(/_/g, ' ').toUpperCase()}</span>
+                                      <span className="uppercase">{p.plan === 'security_kit' ? 'BLACK LABEL' : p.plan?.replace(/_/g, ' ')}</span>
                                   </div>
                                 </li>
                             )
@@ -18299,21 +18508,20 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                 </div>
               </div>
 
-              <div className="w-full md:w-1/2 lg:w-3/5 bg-slate-50/50 dark:bg-[#050505]">
+              <div className="w-full md:w-1/2 lg:w-3/5 bg-[#141210]">
                 {!ordenActiva ? (
-                    <div className="h-full flex flex-col items-center justify-center text-slate-400 p-10 text-center min-h-[500px]">
+                    <div className="h-full flex flex-col items-center justify-center text-slate-500 p-10 text-center min-h-[500px]">
                         <Printer size={60} className="mb-4 opacity-20" />
-                        <p className="text-lg font-black text-slate-600 dark:text-slate-300">Selecciona un pedido</p>
+                        <p className="text-lg font-black text-slate-300">Selecciona un pedido</p>
                         <p className="text-xs mt-2 max-w-sm">Haz clic en una orden de la izquierda para extraer el diseño y generar los archivos de impresión PDF.</p>
                     </div>
                 ) : isFetchingOrden ? (
-                    <div className="h-full flex items-center justify-center text-indigo-500 font-bold animate-pulse min-h-[500px]">Extrayendo datos de la bóveda...</div>
+                    <div className="h-full flex items-center justify-center text-[#D4AF37] font-bold animate-pulse min-h-[500px]">Extrayendo datos de la bóveda...</div>
                 ) : ordenActiva.orderType === 'social_wall' ? (
-                    /* 🟢 VENTANA INTERNA DE PRODUCCIÓN PARA TARJETAS DE MESA SOCIAL WALL */
                     <div className="p-6 space-y-6 animate-in fade-in">
-                      <div className="bg-white dark:bg-[#111] p-5 rounded-2xl border border-pink-500/30 shadow-sm flex items-center gap-5">
+                      <div className="bg-[#1C1917] p-5 rounded-2xl border border-white/5 shadow-sm flex items-center gap-5">
                         {ordenActiva.cardConfig.logoUrl ? (
-                          <div className="w-20 h-20 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center p-2 shrink-0 border border-slate-200 dark:border-white/5">
+                          <div className="w-20 h-20 bg-white/5 rounded-xl flex items-center justify-center p-2 shrink-0 border border-white/10">
                             <img src={ordenActiva.cardConfig.logoUrl} alt="Logo" className="max-h-full max-w-full object-contain" />
                           </div>
                         ) : (
@@ -18322,150 +18530,149 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <span className="inline-block text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-pink-500/15 text-pink-400 border border-pink-500/30 mb-1.5">
-                            ORDEN DE IMPRESIÓN • TARJETAS DE MESA SOCIAL WALL
+                          <span className="inline-block text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-pink-500/10 text-pink-400 border border-pink-500/20 mb-2">
+                            ORDEN DE IMPRESIÓN • TARJETAS SOCIAL WALL
                           </span>
-                          <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Tipo de Evento:</span> {ordenActiva.cardConfig.preTitle}</p>
-                          <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Nombre Principal:</span> {ordenActiva.cardConfig.eventName}</p>
-                          <p className="text-xs text-slate-400 truncate"><span className="font-bold text-slate-600 dark:text-slate-300">Hashtag / Fondo:</span> {ordenActiva.hashtag} • {ordenActiva.cardConfig.bgImageUrl ? 'Con Foto de Fondo' : 'Fondo Limpio'}</p>
+                          <p className="text-xs text-slate-400"><span className="font-bold text-white">Tipo de Evento:</span> {ordenActiva.cardConfig.preTitle}</p>
+                          <p className="text-xs text-slate-400"><span className="font-bold text-white">Nombre Principal:</span> {ordenActiva.cardConfig.eventName}</p>
+                          <p className="text-xs text-slate-400 truncate"><span className="font-bold text-white">Hashtag / Fondo:</span> {ordenActiva.hashtag} • {ordenActiva.cardConfig.bgImageUrl ? 'Con Foto de Fondo' : 'Fondo Limpio'}</p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-pink-600 text-white rounded-2xl p-5 shadow-lg flex flex-col items-center justify-center text-center">
+                        <div className="bg-pink-600 text-white rounded-2xl p-5 shadow-[0_5px_15px_rgba(219,39,119,0.2)] flex flex-col items-center justify-center text-center">
                           <p className="text-[10px] uppercase font-black tracking-widest opacity-80 mb-1">Total a Producir</p>
                           <p className="text-4xl font-editorial font-black">{ordenActiva.cardConfig.cantidadTarjetas}</p>
-                          <p className="text-[10px] opacity-80 mt-1">Caballetes Plegables de Mesa</p>
+                          <p className="text-[10px] opacity-80 mt-1">Caballetes de Mesa</p>
                         </div>
-                        <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm flex flex-col justify-center space-y-2">
+                        <div className="bg-[#1C1917] border border-white/5 rounded-2xl p-5 shadow-sm flex flex-col justify-center space-y-3">
                           <div className="flex justify-between items-center text-sm">
-                            <span className="text-slate-500 font-bold">Hojas Carta</span>
-                            <span className="font-black text-slate-800 dark:text-white">{Math.ceil(ordenActiva.cardConfig.cantidadTarjetas / 2)} hojas</span>
+                            <span className="text-slate-400 font-bold">Hojas Carta</span>
+                            <span className="font-black text-white">{Math.ceil(ordenActiva.cardConfig.cantidadTarjetas / 2)} hojas</span>
                           </div>
                           <div className="flex justify-between items-center text-sm">
-                            <span className="text-pink-500 font-bold">Formato</span>
-                            <span className="font-black text-pink-500 text-xs">2 por Hoja (Triángulo)</span>
+                            <span className="text-pink-400 font-bold">Formato</span>
+                            <span className="font-black text-pink-400 text-xs">2 por Hoja (Triángulo)</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
+                      <div className="space-y-4 pt-4 border-t border-white/10">
                         {ordenActiva.direccionEnvioTaller ? (
-                          <div className="bg-slate-50 dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 mb-4 flex items-center justify-between">
+                          <div className="bg-[#1C1917] p-5 rounded-2xl border border-white/5 mb-4 flex items-center justify-between">
                             <div>
-                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-1 flex items-center"><MapPin size={14} className="mr-1.5 text-pink-500"/> Datos de Envío Listos</h4>
-                              <p className="text-sm font-bold text-slate-900 dark:text-white">{ordenActiva.direccionEnvioTaller.recipient}</p>
-                              <p className="text-xs text-slate-500">{ordenActiva.direccionEnvioTaller.city}, {ordenActiva.direccionEnvioTaller.country}</p>
+                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 flex items-center"><MapPin size={14} className="mr-1.5 text-pink-400"/> Datos de Envío Listos</h4>
+                              <p className="text-sm font-bold text-white">{ordenActiva.direccionEnvioTaller.recipient}</p>
+                              <p className="text-xs text-slate-400 mt-0.5">{ordenActiva.direccionEnvioTaller.city}, {ordenActiva.direccionEnvioTaller.country}</p>
                             </div>
                             <button 
                               onClick={() => handlePrintShippingLabel(ordenActiva.direccionEnvioTaller, ordenActiva.nombres)}
-                              className="px-4 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:scale-105 transition-transform flex items-center">
-                              <Printer size={16} className="mr-2"/> Imprimir Etiqueta
+                              className="px-4 py-3 bg-white/5 text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-colors flex items-center">
+                              <Printer size={16} className="mr-2"/> Etiqueta
                             </button>
                           </div>
                         ) : (
-                          <div className="bg-rose-50 dark:bg-rose-500/10 p-4 rounded-xl mb-4 text-xs font-medium text-rose-700 dark:text-rose-400 flex items-center">
+                          <div className="bg-rose-500/10 p-4 rounded-xl mb-4 text-xs font-medium text-rose-400 border border-rose-500/20 flex items-center">
                             <AlertTriangle size={16} className="mr-2 shrink-0"/> Sin dirección de envío registrada.
                           </div>
                         )}
 
-                        <div className="bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/30 p-3 rounded-xl flex items-start gap-2 mb-3">
-                          <Info size={16} className="text-sky-600 dark:text-sky-400 mt-0.5 shrink-0" />
-                          <p className="text-xs text-sky-800 dark:text-sky-200">
-                            Imprime en papel Couché o Opalina gruesa tamaño <b>CARTA VERTICAL (100% escala)</b>. Salen <b>2 caballetes por hoja</b> con línea de doblez central y pestaña inferior para pararse en triángulo.
+                        <div className="bg-sky-500/10 border border-sky-500/20 p-4 rounded-xl flex items-start gap-2 mb-3">
+                          <Info size={16} className="text-sky-400 mt-0.5 shrink-0" />
+                          <p className="text-xs text-sky-200">
+                            Imprime en papel Couché o Opalina gruesa tamaño <b>CARTA VERTICAL (100% escala)</b>. Salen <b>2 caballetes por hoja</b>.
                           </p>
                         </div>
 
-                        <button onClick={generarPDFTarjetasSocialWall} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center">
-                          <Printer size={18} className="mr-2" /> Abrir Generador PDF de Tarjetas (2 por Hoja Carta)
+                        <button onClick={generarPDFTarjetasSocialWall} className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest shadow-[0_5px_15px_rgba(212,175,55,0.2)] hover:bg-[#c5a028] transition-colors flex items-center justify-center">
+                          <Printer size={18} className="mr-2" /> Generador PDF de Tarjetas
                         </button>
 
                         {ordenActiva.status !== 'impreso' && (
                           <div className="flex gap-3 mt-4">
-                            <button onClick={desbloquearOrden} className="flex-1 py-4 bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-sm hover:bg-rose-100 transition-colors flex items-center justify-center">
+                            <button onClick={desbloquearOrden} className="flex-1 py-4 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-rose-500/20 transition-colors flex items-center justify-center">
                               <Edit3 size={16} className="mr-2" /> Revertir a Edición
                             </button>
-                            <button onClick={marcarComoImpreso} className="flex-[2] py-4 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-sm hover:bg-emerald-100 transition-colors flex items-center justify-center">
-                              <CheckCircle2 size={16} className="mr-2" /> Marcar como Producido y Despachado
+                            <button onClick={marcarComoImpreso} className="flex-[2] py-4 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-500/20 transition-colors flex items-center justify-center">
+                              <CheckCircle2 size={16} className="mr-2" /> Marcar Impreso
                             </button>
                           </div>
                         )}
                       </div>
                     </div>
                 ) : (
-                    /* 🟢 VENTANA INTERNA DE PRODUCCIÓN PARA PULSERAS BLACK LABEL (INTACTA) */
                     <div className="p-6 space-y-6 animate-in fade-in">
-                        <div className="bg-white dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-5">
+                        <div className="bg-[#1C1917] p-5 rounded-2xl border border-white/5 shadow-sm flex items-center gap-5">
                             {ordenActiva.config.logoBase64 ? (
-                                <div className="w-20 h-20 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center p-2 shrink-0 border border-slate-200 dark:border-white/5">
+                                <div className="w-20 h-20 bg-white/5 rounded-xl flex items-center justify-center p-2 shrink-0 border border-white/10">
                                   <img src={ordenActiva.config.logoBase64} alt="Logo" className="max-h-full max-w-full object-contain" />
                                 </div>
                             ) : (
-                                <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20">
-                                  <Palette size={30} className="text-indigo-400" />
+                                <div className="w-20 h-20 bg-[#D4AF37]/10 rounded-xl flex items-center justify-center shrink-0 border border-[#D4AF37]/20">
+                                  <Palette size={30} className="text-[#D4AF37]" />
                                 </div>
                             )}
                             <div className="flex-1">
-                              <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Datos Impresos en Pulsera</p>
-                              <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Pre-título:</span> {ordenActiva.config.preTitle || '(Vacío)'}</p>
-                              <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Nombre Principal:</span> {ordenActiva.config.eventName || 'No asignado'}</p>
-                              <p className="text-xs text-slate-400"><span className="font-bold text-slate-600 dark:text-slate-300">Fecha del Evento:</span> {ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : 'No asignada'}</p>
+                              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-2">Datos en Pulsera</p>
+                              <p className="text-xs text-slate-400 mb-1"><span className="font-bold text-white">Pre-título:</span> {ordenActiva.config.preTitle || '(Vacío)'}</p>
+                              <p className="text-xs text-slate-400 mb-1"><span className="font-bold text-white">Nombre Principal:</span> {ordenActiva.config.eventName || 'No asignado'}</p>
+                              <p className="text-xs text-slate-400"><span className="font-bold text-white">Fecha del Evento:</span> {ordenActiva.fechaEvento ? new Date(ordenActiva.fechaEvento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : 'No asignada'}</p>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-indigo-600 text-white rounded-2xl p-5 shadow-lg flex flex-col items-center justify-center text-center">
-                                <p className="text-[10px] uppercase font-black tracking-widest opacity-80 mb-1">Total a Producir</p>
+                            <div className="bg-[#D4AF37] text-[#1C1917] rounded-2xl p-5 shadow-[0_5px_15px_rgba(212,175,55,0.2)] flex flex-col items-center justify-center text-center">
+                                <p className="text-[10px] uppercase font-black tracking-widest mb-1">Total a Producir</p>
                                 <p className="text-4xl font-editorial font-black">{ordenActiva.listaImpresion.length}</p>
                                 <p className="text-[10px] opacity-80 mt-1">Brazaletes Físicos</p>
                             </div>
-                            <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm flex flex-col justify-center space-y-2">
+                            <div className="bg-[#1C1917] border border-white/5 rounded-2xl p-5 shadow-sm flex flex-col justify-center space-y-3">
                                 <div className="flex justify-between items-center text-sm">
-                                    <span className="text-slate-500 font-bold">Adultos</span>
-                                    <span className="font-black text-slate-800 dark:text-white">{ordenActiva.listaImpresion.filter(i=>!i.esNino).length}</span>
+                                    <span className="text-slate-400 font-bold">Adultos</span>
+                                    <span className="font-black text-white">{ordenActiva.listaImpresion.filter(i=>!i.esNino).length}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                    <span className="text-sky-500 font-bold">Niños</span>
-                                    <span className="font-black text-sky-600 dark:text-sky-400">{ordenActiva.listaImpresion.filter(i=>i.esNino).length}</span>
+                                    <span className="text-sky-400 font-bold">Niños</span>
+                                    <span className="font-black text-sky-400">{ordenActiva.listaImpresion.filter(i=>i.esNino).length}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
+                        <div className="space-y-4 pt-4 border-t border-white/10">
                             {ordenActiva.direccionEnvioTaller ? (
-                              <div className="bg-slate-50 dark:bg-[#111] p-5 rounded-2xl border border-slate-200 dark:border-white/10 mb-4 flex items-center justify-between">
+                              <div className="bg-[#1C1917] p-5 rounded-2xl border border-white/5 mb-4 flex items-center justify-between">
                                 <div>
-                                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-1 flex items-center"><MapPin size={14} className="mr-1.5 text-indigo-500"/> Datos de Envío Listos</h4>
-                                   <p className="text-sm font-bold text-slate-900 dark:text-white">{ordenActiva.direccionEnvioTaller.recipient}</p>
-                                   <p className="text-xs text-slate-500">{ordenActiva.direccionEnvioTaller.city}, {ordenActiva.direccionEnvioTaller.country}</p>
+                                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 flex items-center"><MapPin size={14} className="mr-1.5 text-[#D4AF37]"/> Datos de Envío Listos</h4>
+                                   <p className="text-sm font-bold text-white">{ordenActiva.direccionEnvioTaller.recipient}</p>
+                                   <p className="text-xs text-slate-400 mt-0.5">{ordenActiva.direccionEnvioTaller.city}, {ordenActiva.direccionEnvioTaller.country}</p>
                                 </div>
                                 <button 
                                   onClick={() => handlePrintShippingLabel(ordenActiva.direccionEnvioTaller, ordenActiva.nombres)}
-                                  className="px-4 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:scale-105 transition-transform flex items-center">
-                                  <Printer size={16} className="mr-2"/> Imprimir Etiqueta
+                                  className="px-4 py-3 bg-white/5 text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-colors flex items-center">
+                                  <Printer size={16} className="mr-2"/> Etiqueta
                                 </button>
                               </div>
                             ) : (
-                              <div className="bg-rose-50 dark:bg-rose-500/10 p-4 rounded-xl mb-4 text-xs font-medium text-rose-700 dark:text-rose-400 flex items-center">
-                                 <AlertTriangle size={16} className="mr-2 shrink-0"/> El cliente no proporcionó datos de envío estructurados (orden antigua).
+                              <div className="bg-rose-500/10 p-4 rounded-xl mb-4 text-xs font-medium text-rose-400 border border-rose-500/20 flex items-center">
+                                 <AlertTriangle size={16} className="mr-2 shrink-0"/> Sin dirección de envío registrada.
                               </div>
                             )}
 
-                            <div className="bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/30 p-3 rounded-xl flex items-start gap-2 mb-3">
-                                <Info size={16} className="text-sky-600 dark:text-sky-400 mt-0.5 shrink-0" />
-                                <p className="text-xs text-sky-800 dark:text-sky-200">Al abrir el PDF, asegúrate de configurar tu impresora en tamaño <b>CARTA</b>, orientación <b>HORIZONTAL</b>, y escala <b>100%</b> o "Tamaño Real".</p>
+                            <div className="bg-sky-500/10 border border-sky-500/20 p-4 rounded-xl flex items-start gap-2 mb-3">
+                                <Info size={16} className="text-sky-400 mt-0.5 shrink-0" />
+                                <p className="text-xs text-sky-200">Al abrir el PDF, asegúrate de configurar tu impresora en tamaño <b>CARTA</b>, orientación <b>HORIZONTAL</b>, y escala <b>100%</b> o "Tamaño Real".</p>
                             </div>
-                            <button onClick={generarPDFNativo} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center">
-                                <Printer size={18} className="mr-2" /> Abrir Generador PDF (Vectorial)
+                            <button onClick={generarPDFNativo} className="w-full py-4 bg-white/5 text-white border border-white/10 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-colors flex items-center justify-center">
+                                <Printer size={18} className="mr-2" /> Generador PDF (Vectorial)
                             </button>
 
                             {ordenActiva.status !== 'impreso' && (
                                 <div className="flex gap-3 mt-4">
-                                    <button onClick={desbloquearOrden} className="flex-1 py-4 bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-sm hover:bg-rose-100 transition-colors flex items-center justify-center">
+                                    <button onClick={desbloquearOrden} className="flex-1 py-4 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-rose-500/20 transition-colors flex items-center justify-center">
                                         <Edit3 size={16} className="mr-2" /> Revertir a Edición
                                     </button>
-                                    <button onClick={marcarComoImpreso} className="flex-[2] py-4 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-sm hover:bg-emerald-100 transition-colors flex items-center justify-center">
-                                        <CheckCircle2 size={16} className="mr-2" /> Marcar como Producido y Despachado
+                                    <button onClick={marcarComoImpreso} className="flex-[2] py-4 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-500/20 transition-colors flex items-center justify-center">
+                                        <CheckCircle2 size={16} className="mr-2" /> Marcar Impreso
                                     </button>
                                 </div>
                             )}
@@ -18484,7 +18691,7 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
             {/* CONTROLES SUPERIORES Y MÉTRICAS COMPACTAS */}
             <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between w-full">
               <div className="flex gap-2 w-full xl:w-auto shrink-0">
-                <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: modoPrueba ? 'MODO PRUEBA' : '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true, hasSocialWall: false, hasBlackLabel: false }); }} className="px-5 py-2.5 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black shadow-[0_5px_15px_rgba(212,175,55,0.25)] hover:scale-[1.02] hover:bg-[#c5a028] transition-all flex items-center justify-center uppercase tracking-widest text-[10px]">
+                <button onClick={() => { setIsModalOpen(true); setSuccessData(null); setFormData({ nombres: '', email: '', telefono: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: modoPrueba ? 'MODO PRUEBA' : '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true, hasSocialWall: false, hasBlackLabel: false, codigoCupon: '', esAnticipo: false }); }} className="px-5 py-2.5 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black shadow-[0_5px_15px_rgba(212,175,55,0.25)] hover:scale-[1.02] hover:bg-[#c5a028] transition-all flex items-center justify-center uppercase tracking-widest text-[10px]">
                     <Plus size={14} className="mr-1.5"/> Nueva Bóveda
                 </button>
                 <div className="relative flex-1 xl:w-[280px]">
@@ -18588,9 +18795,16 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                                 )}
                               </td>
                               <td className="px-5 py-4 text-center">
-                                <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border shadow-sm ${lic.status === 'nuevo' ? 'bg-[#D4AF37] text-[#141210] border-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.3)] animate-pulse' : lic.status === 'en_proceso' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' : lic.status === 'activo' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-white/10 text-slate-400 border-white/20'}`}>
-                                  {lic.status === 'nuevo' ? '¡NUEVO!' : lic.status ? lic.status.replace('_', ' ') : 'Pendiente'}
-                                </span>
+                                <div className="flex flex-col items-center gap-1">
+                                  <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border shadow-sm ${lic.bloqueadoPorPago ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 animate-pulse' : lic.status === 'nuevo' ? 'bg-[#D4AF37] text-[#141210] border-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.3)] animate-pulse' : lic.status === 'en_proceso' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' : lic.status === 'activo' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-white/10 text-slate-400 border-white/20'}`}>
+                                    {lic.bloqueadoPorPago ? '🔒 BLOQUEADO (IMPAGO)' : lic.status === 'nuevo' ? '¡NUEVO!' : lic.status ? lic.status.replace('_', ' ') : 'Pendiente'}
+                                  </span>
+                                  {Number(lic.deudaPlataforma) > 0 && (
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                                      Debe: {formatMoney(lic.deudaPlataforma)}
+                                    </span>
+                                  )}
+                                </div>
                               </td>
                               <td className="px-5 py-4 text-right">
                                   <div className="flex items-center justify-end space-x-2">
@@ -18627,16 +18841,16 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         {/* FINANZAS (EXCLUSIVO SUPERADMIN NIVEL 3) */}
         {adminTab === 'finanzas' && isSuperAdmin && (
           <div className="animate-in fade-in space-y-6">
-             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white dark:bg-[#0a0a0a] p-5 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mr-4 border border-transparent dark:border-emerald-500/30 shrink-0"><Wallet size={24}/></div>
+             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-[#1C1917] p-5 rounded-3xl border border-white/10 shadow-xl transition-colors">
+                <div className="flex items-center bg-[#141210] pr-4 rounded-2xl border border-[#D4AF37]/30">
+                  <div className="w-14 h-14 bg-[#D4AF37]/10 text-[#D4AF37] rounded-xl flex items-center justify-center mr-4 border-r border-[#D4AF37]/20 shrink-0"><Wallet size={24}/></div>
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Periodo a evaluar</p>
-                    <select value={mesSeleccionado} onChange={(e) => setMesSeleccionado(e.target.value)} className="text-xl font-black text-slate-800 dark:text-white bg-transparent outline-none cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Periodo a evaluar</p>
+                    <select value={mesSeleccionado} onChange={(e) => setMesSeleccionado(e.target.value)} className="text-lg font-black text-white bg-transparent outline-none cursor-pointer hover:text-[#D4AF37] transition-colors appearance-none">
                       {mesesDisponibles.map(m => {
                         const date = new Date(m + '-02'); 
                         const mesNombre = date.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
-                        return <option key={m} value={m} className="bg-white dark:bg-[#111]">{mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1)} {m === currentMonthYear ? '(Mes Actual)' : ''}</option>
+                        return <option key={m} value={m} className="bg-[#1C1917]">{mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1)} {m === currentMonthYear ? '(Mes Actual)' : ''}</option>
                       })}
                     </select>
                   </div>
@@ -18645,19 +18859,19 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                 {/* 🟢 CONTROLES EXCLUSIVOS SUPERADMIN DENTRO DE FINANZAS */}
                 <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
                   {/* SWITCH MODO PRUEBA */}
-                  <div className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border transition-all flex-1 sm:flex-none ${modoPrueba ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/40' : 'bg-slate-50 dark:bg-[#111] border-slate-200 dark:border-white/10'}`}>
+                  <div className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border transition-all flex-1 sm:flex-none ${modoPrueba ? 'bg-amber-500/10 border-amber-500/40' : 'bg-white/5 border-white/10'}`}>
                     <div className="flex flex-col">
-                      <span className={`text-[10px] font-black uppercase tracking-widest ${modoPrueba ? 'text-amber-700 dark:text-amber-400' : 'text-slate-600 dark:text-slate-300'}`}>
-                        {modoPrueba ? '🧪 Modo Prueba Activo' : 'Modo Prueba'}
+                      <span className={`text-[9px] font-black uppercase tracking-widest ${modoPrueba ? 'text-amber-500' : 'text-slate-400'}`}>
+                        {modoPrueba ? '🧪 MODO PRUEBA ACTIVO' : 'Modo Prueba'}
                       </span>
-                      <span className="text-[9px] text-slate-400 dark:text-slate-500 leading-none mt-0.5">
+                      <span className="text-[8px] text-slate-500 uppercase tracking-widest mt-1">
                         {modoPrueba ? 'Compras no suman' : 'Contabilidad en vivo'}
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={toggleModoPrueba}
-                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${modoPrueba ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${modoPrueba ? 'bg-amber-500' : 'bg-slate-600'}`}
                     >
                       <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${modoPrueba ? 'translate-x-5' : 'translate-x-0'}`}></div>
                     </button>
@@ -18668,43 +18882,43 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     type="button"
                     onClick={handleReiniciarFinanzas} 
                     disabled={isResettingFinanzas || ventas.length === 0}
-                    className="px-4 py-3 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-colors flex items-center justify-center disabled:opacity-40 flex-1 sm:flex-none"
+                    className="px-5 py-3.5 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-500/20 transition-colors flex items-center justify-center disabled:opacity-40 flex-1 sm:flex-none"
                   >
                     <Trash2 size={16} className="mr-1.5 shrink-0"/> {isResettingFinanzas ? 'Reiniciando...' : 'Reiniciar a $0'}
                   </button>
 
                   {/* BOTÓN DESCARGAR EXCEL */}
-                  <button onClick={exportarCorteContador} className="px-5 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-xs sm:text-sm font-bold shadow-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center justify-center flex-1 sm:flex-none">
-                    <FileSpreadsheet size={18} className="mr-2 text-emerald-400 dark:text-emerald-600 shrink-0"/> Descargar Excel
+                  <button onClick={exportarCorteContador} className="px-5 py-3.5 bg-white border border-white/10 text-[#1C1917] rounded-xl text-[10px] font-black uppercase tracking-widest shadow-[0_5px_15px_rgba(255,255,255,0.1)] hover:bg-slate-200 transition-colors flex items-center justify-center flex-1 sm:flex-none">
+                    <FileSpreadsheet size={16} className="mr-2 text-emerald-600 shrink-0"/> Descargar Excel
                   </button>
                 </div>
              </div>
              
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl p-6 border border-slate-200 dark:border-white/10 shadow-sm">
-                  <h3 className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-2">Ingreso Bruto del Mes</h3>
-                  <p className="text-4xl font-black text-emerald-600 dark:text-emerald-400 mb-6">{formatMoney(ingresoMensualTotal)}</p>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Básico ({Math.floor(desglosePlanes.basico / PRECIOS.basico) || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.basico)}</span></div>
-                    <div className="flex justify-between items-center text-sm"><span className="text-slate-600 dark:text-slate-300 font-medium">Plan Plata ({Math.floor(desglosePlanes.plata / PRECIOS.plata) || 0})</span><span className="font-bold">{formatMoney(desglosePlanes.plata)}</span></div>
-                    <div className="flex justify-between items-center text-sm"><span className="text-amber-600 dark:text-amber-500 font-medium">Plan Oro ({Math.floor(desglosePlanes.oro / PRECIOS.oro) || 0})</span><span className="font-bold text-amber-600 dark:text-amber-500">{formatMoney(desglosePlanes.oro)}</span></div>
-                    <div className="flex justify-between items-center text-sm"><span className="text-indigo-600 dark:text-indigo-400 font-medium">Plan Diamante ({Math.floor(desglosePlanes.diamante / PRECIOS.diamante) || 0})</span><span className="font-bold text-indigo-600 dark:text-indigo-400">{formatMoney(desglosePlanes.diamante)}</span></div>
-                    <div className="flex justify-between items-center text-sm"><span className="text-pink-600 dark:text-pink-400 font-medium">Social Wall ({Math.floor(desglosePlanes.social_wall / PRECIOS.social_wall) || 0})</span><span className="font-bold text-pink-600 dark:text-pink-400">{formatMoney(desglosePlanes.social_wall)}</span></div>
-                    <div className="flex justify-between items-center text-sm"><span className="text-slate-800 dark:text-white font-medium">Black Label ({Math.floor(desglosePlanes.security_kit / PRECIOS.security_kit) || 0})</span><span className="font-bold text-slate-800 dark:text-white">{formatMoney(desglosePlanes.security_kit)}</span></div>
+                <div className="bg-[#1C1917] rounded-3xl p-8 border border-white/10 shadow-xl">
+                  <h3 className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-2">Ingreso Bruto del Mes</h3>
+                  <p className="text-5xl font-editorial font-black text-emerald-400 mb-8">{formatMoney(ingresoMensualTotal)}</p>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center text-sm"><span className="text-slate-400 font-medium">Plan Básico ({Math.floor(desglosePlanes.basico / PRECIOS.basico) || 0})</span><span className="font-bold text-white/50">{formatMoney(desglosePlanes.basico)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-slate-400 font-medium">Plan Plata ({Math.floor(desglosePlanes.plata / PRECIOS.plata) || 0})</span><span className="font-bold text-white/50">{formatMoney(desglosePlanes.plata)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-[#D4AF37] font-medium">Plan Oro ({Math.floor(desglosePlanes.oro / PRECIOS.oro) || 0})</span><span className="font-bold text-[#D4AF37]">{formatMoney(desglosePlanes.oro)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-indigo-400 font-medium">Plan Diamante ({Math.floor(desglosePlanes.diamante / PRECIOS.diamante) || 0})</span><span className="font-bold text-indigo-400">{formatMoney(desglosePlanes.diamante)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-pink-400 font-medium">Social Wall ({Math.floor(desglosePlanes.social_wall / PRECIOS.social_wall) || 0})</span><span className="font-bold text-pink-400">{formatMoney(desglosePlanes.social_wall)}</span></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-white font-medium">Black Label ({Math.floor(desglosePlanes.security_kit / PRECIOS.security_kit) || 0})</span><span className="font-bold text-white">{formatMoney(desglosePlanes.security_kit)}</span></div>
                   </div>
                 </div>
-                <div className="bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
-                  <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111]"><h3 className="font-bold text-sm text-slate-800 dark:text-white">Últimas Transacciones ({ventasDelMes.length})</h3></div>
-                  <div className="max-h-64 overflow-y-auto custom-scrollbar p-2">
-                    {ventasDelMes.length === 0 ? <p className="text-center text-slate-400 p-8 text-sm">No hay ventas registradas en este mes.</p> : ventasDelMes.map((v, i) => (
-                      <div key={i} className="p-3 border-b border-slate-100 dark:border-white/5 last:border-0 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-white/5 transition-colors rounded-lg">
+                <div className="bg-[#1C1917] rounded-3xl border border-white/10 shadow-xl overflow-hidden flex flex-col">
+                  <div className="p-6 border-b border-white/5 bg-[#141210] shrink-0"><h3 className="font-bold text-sm text-white">Últimas Transacciones ({ventasDelMes.length})</h3></div>
+                  <div className="overflow-y-auto flex-1 custom-scrollbar p-2">
+                    {ventasDelMes.length === 0 ? <p className="text-center text-slate-500 p-10 text-sm">No hay ventas registradas en este mes.</p> : ventasDelMes.map((v, i) => (
+                      <div key={i} className="p-4 border-b border-white/5 last:border-0 flex justify-between items-center hover:bg-white/5 transition-colors rounded-xl">
                         <div>
-                          <p className="font-bold text-slate-800 dark:text-white text-sm leading-none mb-1">{v.cliente}</p>
+                          <p className="font-bold text-white text-sm leading-none mb-2">{v.cliente}</p>
                           <p className="text-[10px] text-slate-500 uppercase tracking-widest">{v.plan === 'security_kit' ? 'BLACK LABEL' : v.plan.replace(/_/g, ' ')} • Ref: {v.referencia}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-black text-emerald-600 dark:text-emerald-400">{formatMoney(v.monto)}</p>
-                          <p className="text-[9px] text-slate-400">{v.fecha?.toDate ? v.fecha.toDate().toLocaleDateString('es-MX') : ''}</p>
+                          <p className="font-black text-emerald-400 text-lg mb-1">{formatMoney(v.monto)}</p>
+                          <p className="text-[9px] text-slate-500">{v.fecha?.toDate ? v.fecha.toDate().toLocaleDateString('es-MX') : ''}</p>
                         </div>
                       </div>
                     ))}
@@ -18716,30 +18930,30 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
         {/* RESEÑAS */}
         {adminTab === 'resenas' && isSuperAdmin && (
-          <div className="animate-in fade-in bg-white dark:bg-[#0a0a0a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-colors">
-            <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#111] flex justify-between items-center transition-colors">
-               <h3 className="font-bold text-slate-800 dark:text-white text-sm">Auditoría de Calidad ({resenasList.length})</h3>
-               <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Solo las "Aprobadas" se ven en la Landing Page</p>
+          <div className="animate-in fade-in bg-[#1C1917] rounded-3xl border border-white/10 shadow-xl overflow-hidden transition-colors">
+            <div className="p-5 border-b border-white/5 bg-[#141210] flex justify-between items-center transition-colors">
+               <h3 className="font-bold text-white text-sm">Auditoría de Calidad ({resenasList.length})</h3>
+               <p className="text-[9px] text-slate-500 uppercase tracking-widest font-black">Solo las "Aprobadas" se ven en la Landing Page</p>
             </div>
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                {resenasList.map(r => (
-                 <div key={r.id} className={`p-5 rounded-2xl border transition-colors relative ${r.status === 'aprobada' ? 'bg-amber-50/30 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20' : 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10'}`}>
-                   <div className="absolute top-4 right-4">
-                     <button onClick={() => updateDoc(doc(db, "resenas", r.id), { status: r.status === 'aprobada' ? 'pendiente' : 'aprobada' })} className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded shadow-sm transition-colors ${r.status === 'aprobada' ? 'bg-amber-500 text-white' : 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400'}`}>
+                 <div key={r.id} className={`p-6 rounded-3xl border transition-colors relative shadow-sm ${r.status === 'aprobada' ? 'bg-[#D4AF37]/5 border-[#D4AF37]/30' : 'bg-[#141210] border-white/10'}`}>
+                   <div className="absolute top-5 right-5">
+                     <button onClick={() => updateDoc(doc(db, "resenas", r.id), { status: r.status === 'aprobada' ? 'pendiente' : 'aprobada' })} className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-sm transition-colors border ${r.status === 'aprobada' ? 'bg-[#D4AF37] text-[#1C1917] border-[#D4AF37]' : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:border-white/30'}`}>
                        {r.status === 'aprobada' ? 'Pública' : 'Aprobar'}
                      </button>
                    </div>
-                   <div className="flex gap-1 mb-3">
-                     {[1,2,3,4,5].map(star => <Star key={star} size={14} className={r.rating >= star ? 'fill-amber-500 text-amber-500' : 'text-slate-300 dark:text-slate-700'} />)}
+                   <div className="flex gap-1 mb-4">
+                     {[1,2,3,4,5].map(star => <Star key={star} size={16} className={r.rating >= star ? 'fill-[#D4AF37] text-[#D4AF37]' : 'text-slate-600'} />)}
                    </div>
-                   <p className="text-sm text-slate-700 dark:text-slate-300 italic mb-4 font-light leading-relaxed">"{r.comment}"</p>
-                   <div className="border-t border-slate-100 dark:border-white/10 pt-3">
-                     <input type="text" value={r.authorName} onChange={(e) => updateDoc(doc(db, "resenas", r.id), { authorName: e.target.value })} className="font-bold text-sm bg-transparent outline-none border-b border-transparent focus:border-amber-500 w-full text-slate-900 dark:text-white transition-colors" />
-                     <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">{r.authorType}</p>
+                   <p className="text-sm text-slate-300 italic mb-6 font-light leading-relaxed">"{r.comment}"</p>
+                   <div className="border-t border-white/10 pt-4">
+                     <input type="text" value={r.authorName} onChange={(e) => updateDoc(doc(db, "resenas", r.id), { authorName: e.target.value })} className="font-bold text-sm bg-transparent outline-none border-b border-transparent focus:border-[#D4AF37] w-full text-white transition-colors pb-1" />
+                     <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-2 font-bold">{r.authorType}</p>
                    </div>
                  </div>
                ))}
-               {resenasList.length === 0 && <div className="col-span-full text-center py-10 text-slate-400">Aún no hay reseñas registradas.</div>}
+               {resenasList.length === 0 && <div className="col-span-full text-center py-16 text-slate-500 font-bold">Aún no hay reseñas registradas.</div>}
             </div>
           </div>
         )}
@@ -18871,6 +19085,24 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       )}
                     </div>
 
+                    {/* 🟢 NUEVO: CUPÓN DE DESCUENTO Y ANTICIPO EN BÓVEDA MANUAL */}
+                    <div className="bg-[#141210] p-4 rounded-xl border border-[#D4AF37]/20 space-y-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest mb-1.5">Código de Descuento (Opcional)</label>
+                        <input type="text" value={formData.codigoCupon || ''} onChange={e => setFormData({...formData, codigoCupon: e.target.value.toUpperCase()})} placeholder="Ej. BODA2026" className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-black text-white text-xs uppercase tracking-widest" />
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                        <div>
+                          <p className="text-[10px] font-black text-white uppercase tracking-widest">¿Entró con Anticipo ({configPrecios.anticipos?.porcentaje || 10}%)?</p>
+                          <p className="text-[9px] text-slate-400 mt-0.5">Activa el candado de cobro a las 24 hrs de entregar link.</p>
+                        </div>
+                        <button type="button" onClick={() => setFormData({...formData, esAnticipo: !formData.esAnticipo})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.esAnticipo ? 'bg-[#D4AF37]' : 'bg-slate-600'}`}>
+                          <div className={`absolute top-1 left-1 w-3 h-3 bg-[#1C1917] rounded-full transition-transform ${formData.esAnticipo ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                        </button>
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> Link Invitación URL (Opcional)</label>
                       <input type="url" value={formData.urlInvitacion} onChange={e => setFormData({...formData, urlInvitacion: e.target.value})} placeholder="https://baulia.com/..." className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-medium text-sky-400 text-sm transition-colors" />
@@ -18989,9 +19221,22 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </>
                   )}
 
+                  {/* 🟢 CONTROL DE DEUDA Y KILL SWITCH EN EDICIÓN */}
+                  {Number(editingLic.deudaPlataforma) > 0 && (
+                    <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl flex items-center justify-between">
+                      <div>
+                        <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Saldo Pendiente: {formatMoney(editingLic.deudaPlataforma)}</p>
+                        <p className="text-[9px] text-slate-400 mt-0.5">Si ya liquidó por fuera, marca como pagado para liberar su bóveda e invitación.</p>
+                      </div>
+                      <button type="button" onClick={() => setEditingLic({...editingLic, deudaPlataforma: 0, bloqueadoPorPago: false})} className="px-3 py-2 bg-emerald-500 text-[#1C1917] rounded-lg font-black text-[9px] uppercase tracking-widest shrink-0 hover:bg-emerald-400 transition-colors">
+                        Liquidar $0
+                      </button>
+                    </div>
+                  )}
+
                   <div className="bg-sky-500/10 text-sky-400 p-4 rounded-xl text-xs font-bold border border-sky-500/20 flex items-start transition-colors leading-relaxed">
                     <AlertCircle size={16} className="mr-2 flex-shrink-0 mt-0.5" />
-                    Nota: Puedes subir (Upgrade) el plan del cliente. El sistema actualizará el estado financiero automáticamente. No se permiten reducciones de plan.
+                    Nota: Al pegar la URL de la invitación, el estatus pasa a ACTIVO y arranca el reloj de 24 hrs si el cliente tiene saldo pendiente.
                   </div>
                   <div className="flex space-x-3 mt-8">
                     <button type="button" onClick={() => {setIsEditModalOpen(false); setEditingLic(null);}} className="flex-1 py-4 bg-white/5 border border-white/10 text-slate-300 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-white/10 transition-colors">Cancelar</button>
@@ -19833,16 +20078,26 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   }, [addNotification]);
   
   const prevGuestsRef = useRef([]);
+  const [estadoCuenta, setEstadoCuenta] = useState({ deuda: 0, fechaEntrega: null, bloqueado: false });
+  const [horasRestantesGracia, setHorasRestantesGracia] = useState(null);
 
   useEffect(() => {
     if (userRole === 'superadmin' && !impersonating) return;
     if (typeof setGlobalEventId !== 'undefined') setGlobalEventId(eventId);
 
     const unsubConfigMain = onSnapshot(doc(db, "eventos", eventId), (docSnap) => {
-      if (docSnap.exists() && docSnap.data().presupuestoTotal !== undefined) {
-        const remoteBudget = Number(docSnap.data().presupuestoTotal);
-        setPresupuestoTotal(remoteBudget);
-        localStorage.setItem('eventmaster_presupuesto', remoteBudget);
+      if (docSnap.exists()) {
+        const d = docSnap.data();
+        if (d.presupuestoTotal !== undefined) {
+          const remoteBudget = Number(d.presupuestoTotal);
+          setPresupuestoTotal(remoteBudget);
+          localStorage.setItem('eventmaster_presupuesto', remoteBudget);
+        }
+        setEstadoCuenta({
+          deuda: Number(d.deudaPlataforma) || 0,
+          fechaEntrega: d.fechaEntrega || null,
+          bloqueado: d.bloqueadoPorPago === true
+        });
       }
     });
 
@@ -19867,6 +20122,37 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
 
     return () => { unsubConfigMain(); unsubWhiteLabel(); unsubGuests(); unsubGastos(); unsubProv(); unsubMesas(); unsubTareas(); unsubTiming(); unsubMapa(); unsubDeco(); unsubFotos(); };
   }, [eventId, userRole, impersonating, addNotification]);
+
+  // 🟢 CRONÓMETRO VIGILANTE DE 24 HORAS Y DISPARADOR DE KILL SWITCH
+  useEffect(() => {
+    if (isSuperAdminMode) return;
+    if (estadoCuenta.deuda <= 0 || !estadoCuenta.fechaEntrega) {
+      setHorasRestantesGracia(null);
+      return;
+    }
+
+    const LIMITE_24H = 24 * 60 * 60 * 1000;
+    const verificarPlazo = () => {
+      const transcurrido = Date.now() - Number(estadoCuenta.fechaEntrega);
+      const restante = LIMITE_24H - transcurrido;
+
+      if (restante <= 0) {
+        setHorasRestantesGracia(0);
+        if (!estadoCuenta.bloqueado && eventId) {
+          updateDoc(doc(db, "eventos", eventId), { bloqueadoPorPago: true }).catch(() => {});
+          updateDoc(doc(db, "usuarios", eventId), { bloqueadoPorPago: true }).catch(() => {});
+        }
+      } else {
+        const hrs = Math.floor(restante / (1000 * 60 * 60));
+        const mins = Math.floor((restante % (1000 * 60 * 60)) / (1000 * 60));
+        setHorasRestantesGracia(`${hrs}h ${mins}m`);
+      }
+    };
+
+    verificarPlazo();
+    const timer = setInterval(verificarPlazo, 30000);
+    return () => clearInterval(timer);
+  }, [estadoCuenta, eventId, isSuperAdminMode]);
 
   const renderContent = () => {
     if (userPlan === 'social_wall') {
@@ -19943,9 +20229,54 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
           <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} authData={authData} switchEvent={switchEvent} isSuperAdminMode={isSuperAdminMode} eventName={currentEventName} eventPlan={currentEventPlan} urlInvitacion={activeEventData?.urlInvitacion} />
         </div>
         
+        {/* 🟢 BARRA DE PERIODO DE GRACIA (PRIMERAS 24 HORAS CON DEUDA) */}
+        {!isSuperAdminMode && estadoCuenta.deuda > 0 && !estadoCuenta.bloqueado && horasRestantesGracia && (
+          <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs z-20">
+            <div className="flex items-center text-amber-300 font-bold text-center sm:text-left">
+              <Clock size={15} className="mr-2 text-[#D4AF37] shrink-0" />
+              <span>Tu invitación web ya fue entregada. Tienes <b className="text-white underline">{horasRestantesGracia}</b> para liquidar tu saldo pendiente de <b className="text-[#D4AF37]">${estadoCuenta.deuda} MXN</b> antes de la pausa automática.</span>
+            </div>
+            <a
+              href={`https://wa.me/5219221593696?text=${encodeURIComponent(`Hola equipo Baulia, deseo liquidar el saldo restante de $${estadoCuenta.deuda} MXN de mi evento (${currentEventName} - ID:${eventId}).`)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="px-4 py-1.5 bg-[#D4AF37] text-[#1C1917] rounded-lg font-black text-[10px] uppercase tracking-widest shrink-0 hover:bg-[#c5a028] transition-colors"
+            >
+              Liquidar Saldo Ahora
+            </a>
+          </div>
+        )}
+
         <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-5 lg:p-6 print:p-0 print:overflow-visible custom-scrollbar relative z-10">
           <div className="h-full max-w-7xl mx-auto print:max-w-none print:w-full">
-            {renderContent()}
+            {!isSuperAdminMode && estadoCuenta.bloqueado && estadoCuenta.deuda > 0 ? (
+              <div className="h-full min-h-[75vh] flex items-center justify-center p-4 animate-in fade-in">
+                <div className="bg-[#1C1917] border border-[#D4AF37]/40 rounded-3xl max-w-lg w-full p-8 sm:p-10 text-center shadow-[0_25px_80px_rgba(0,0,0,0.95)] relative overflow-hidden">
+                  <div className="w-20 h-20 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center mx-auto mb-6 text-[#D4AF37]">
+                    <Lock size={36} />
+                  </div>
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-rose-400 block mb-2">Plazo de Reserva Vencido (24 hrs)</span>
+                  <h2 className="text-2xl sm:text-3xl font-editorial font-black text-white mb-4">Bóveda e Invitación en Pausa</h2>
+                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
+                    Tu invitación digital fue entregada y activada con éxito. Para reactivar la visualización pública de tu invitación y el acceso a tus herramientas de gestión, liquida el saldo pendiente de tu paquete.
+                  </p>
+                  <div className="bg-[#141210] border border-white/10 rounded-2xl p-5 mb-8">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Saldo Pendiente a Liquidar</p>
+                    <p className="text-4xl font-editorial font-black text-[#D4AF37]">${estadoCuenta.deuda} <span className="text-xs font-sans text-slate-400">MXN</span></p>
+                  </div>
+                  <a
+                    href={`https://wa.me/5219221593696?text=${encodeURIComponent(`Hola Baulia, quiero liquidar mi saldo pendiente de $${estadoCuenta.deuda} MXN para reactivar de inmediato mi invitación y bóveda (${currentEventName} - ID:${eventId}).`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.3)] hover:bg-[#c5a028] transition-all flex items-center justify-center"
+                  >
+                    Liquidar Saldo y Reactivar al Instante
+                  </a>
+                </div>
+              </div>
+            ) : (
+              renderContent()
+            )}
           </div>
         </main>
       </div>
