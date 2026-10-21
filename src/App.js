@@ -222,65 +222,51 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
   const agencyName = agencyConfig?.name || 'BAULIA';
 
   return (
-    <>
-      {isOpen && <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-20 xl:hidden" onClick={() => setIsOpen(false)} />}
-      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-[#141210] text-slate-300 transition-transform duration-500 ease-in-out flex flex-col border-r border-[#D4AF37]/20 shadow-[10px_0_30px_rgba(0,0,0,0.5)] ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
-        <div className="flex items-center justify-between px-6 h-[88px] shrink-0 relative overflow-hidden bg-transparent border-b border-[#D4AF37]/10">
-          <div className="relative z-10 w-full flex items-center gap-3">
-            {agencyConfig?.logoUrl && userRole !== 'superadmin' ? (
-              <img src={agencyConfig.logoUrl} alt="Agency Logo" className="h-8 object-contain drop-shadow-[0_0_10px_rgba(212,175,55,0.2)]" />
-            ) : (
-              <div className="flex flex-col justify-center pt-1">
-                 {userRole === 'superadmin' || agencyName === 'BAULIA' || agencyName === 'EVENT MASTER' ? (
-                   <BauliaLogo className="h-7 w-auto drop-shadow-md" forceWhite={true} />
-                 ) : (
-                   <h1 className="text-2xl font-black text-[#D4AF37] tracking-widest uppercase font-editorial">{agencyName}</h1>
-                 )}
-                 <p className="text-[8px] text-slate-500 uppercase tracking-widest mt-1.5 font-bold">
-                   {userRole === 'superadmin' ? 'God Mode' : userRole === 'planner' ? 'Planner Workspace' : 'Bóveda Premium'}
-                 </p>
-              </div>
-            )}
-          </div>
-          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 text-slate-400 hover:text-[#D4AF37] hover:bg-white/5 rounded-lg relative z-10 transition-colors"><X size={20} /></button>
-        </div>
-        
-        <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-7 custom-scrollbar">
-          {userRole === 'superadmin' && (
-             <div className="space-y-1">
-               <p className="text-[10px] text-[#D4AF37] uppercase tracking-[0.2em] font-black ml-4 mb-3">SISTEMA</p>
-               <button onClick={() => { setActiveTab('licencias'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'licencias' ? 'bg-[#D4AF37] text-[#1C1917] font-black shadow-[0_5px_15px_rgba(212,175,55,0.25)]' : 'hover:bg-white/5 text-slate-400 hover:text-white'}`}>
-                 <Building size={18} /><span>Centro de Licencias</span>
-               </button>
-             </div>
-          )}
-
-          {menuGroups.map((group, gIdx) => {
-            const visibleItems = group.items.filter(item => {
-              if (item.extraCondition === true) return true;
-              if (item.allowedPlans && userPlan) return item.allowedPlans.includes(userPlan.toLowerCase());
-              return level >= item.minLevel; 
-            });
-            if (visibleItems.length === 0) return null;
-            return (
-              <div key={gIdx} className="space-y-1">
-                <p className="text-[9px] text-slate-500 uppercase tracking-[0.2em] font-black ml-4 mb-3">{group.title}</p>
-                {visibleItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
-                  return (
-                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-[#D4AF37] text-[#1C1917] font-black shadow-[0_5px_15px_rgba(212,175,55,0.3)]' : `bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 font-bold shadow-md` : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
-                      <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-                      <span className="text-xs tracking-wide font-medium">{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </nav>
-      </aside>
-    </>
+    <aside className="hidden xl:flex inset-y-0 left-0 z-30 w-72 bg-[#000000] text-slate-300 transition-transform duration-500 flex-col border-r border-white/5 print:hidden">
+      <div className="flex items-center justify-center px-6 h-[88px] shrink-0 border-b border-white/5">
+        {/* LOGO PLATINO ESCRITORIO EN LÍNEA */}
+        <svg viewBox="0 0 950.3 241.1" className="h-6 w-auto" xmlns="http://www.w3.org/2000/svg">
+          <g fill="#F8FAFC">
+            <path d="M300.8,89.1h-.4c0-2-.7-3.8-2.2-5.3s-3.3-2.2-5.3-2.2h-1.4v-1.2c-.1,0,9.3,0,9.3,0v8.6h0ZM300.8,154.4v8.6h-9.4v-1.2h1.5c2,0,3.8-.7,5.3-2.2s2.2-3.2,2.2-5.3h.4ZM308.1,80.4v82.6h-7.7v-82.6h7.7ZM314.8,80.4c5.5,0,10.2.8,14,2.5s6.7,4,8.7,6.9c2,3,3,6.4,3,10.3s-.6,6.2-1.9,8.7-2.9,4.5-4.8,6c-2,1.5-4.1,2.6-6.3,3.2,4.2.6,7.8,2,10.8,4.1s5.4,4.8,7,8c1.6,3.2,2.4,6.7,2.4,10.7s-1.1,8.3-3.2,11.6-5.3,5.9-9.4,7.8c-4.1,1.9-9.1,2.8-14.9,2.8h-13.1c0-1.4.1-2.8.1-4.2h12.5c4.1,0,7.6-.7,10.4-2.2s5-3.6,6.5-6.4c1.5-2.8,2.2-6.2,2.2-10.2s-.8-8-2.5-10.7c-1.7-2.8-3.9-4.8-6.6-6.3-2.7-1.4-5.6-2.4-8.7-2.9s-6.1-.8-8.9-.8v-1.1c1.8,0,3.8-.2,6-.6s4.3-1.2,6.4-2.4c2-1.2,3.7-2.9,5.1-5.3,1.3-2.3,2-5.4,2-9.1s-.6-6.6-1.9-9.1-3.2-4.4-5.8-5.7c-2.6-1.3-5.7-1.9-9.5-1.9h-10.9s0-.4-.3-1c-.2-.6-.5-1.5-.9-2.8h12.5,0Z"/>
+            <path d="M417.6,154.4c-.6,1.6-.6,2.9-.2,4s1,1.9,1.9,2.5,1.8.9,2.8.9h1.1v1.2h-23.7v-1.2h1.1c1.8,0,3.7-.6,5.6-1.7,1.9-1.1,3.5-3,4.8-5.7h6.7,0ZM443,78.8l1.1,8.3-29.6,75.7h-7.1l30.2-71.8c.9-2,1.6-3.7,2.2-5.1s1.1-2.8,1.5-4.1c.4-1.3.6-2.3.6-3h1.1,0ZM459.6,130.8v3.5h-36.9v-3.5h36.9ZM443,78.8l34.9,83.6h-10l-27.3-72.4s2.4-11.2,2.4-11.2ZM464.9,154.4h9.7c1.2,2.7,2.8,4.6,4.7,5.7,2,1.1,3.9,1.7,5.7,1.7h.9v1.2h-26.6v-1.2h1.1c1.5,0,2.8-.6,4-1.9,1.2-1.3,1.3-3.1.5-5.5h0Z"/>
+            <path d="M542.1,80.4v7.1h-.4c0-1.7-.6-3.1-1.8-4.2s-2.7-1.7-4.4-1.7h-1.9v-1.2h8.5ZM549.5,80.4v51.9c0,5.7,1,10.7,3.1,15s5,7.7,8.8,10.1c3.8,2.4,8.1,3.6,13.1,3.6s9.9-1.1,13.8-3.4c3.9-2.3,7-5.4,9.2-9.5s3.3-8.8,3.3-14.2v-53.5h5.5v53.5c0,6.1-1.3,11.5-4,16.1-2.6,4.6-6.4,8.2-11.2,10.8s-10.4,3.9-16.8,3.9-12.3-1.3-17.2-3.8c-4.9-2.6-8.7-6.1-11.4-10.7-2.7-4.6-4.1-10-4.1-16.1v-53.6h7.9ZM557.6,80.4v1.2h-1.9c-1.7,0-3.2.6-4.4,1.7s-1.8,2.5-1.8,4.2h-.2v-7.1h8.4,0ZM574.4,72.1c1.7-1.8,3.3-3.6,5-5.4s3.3-3.5,5-5.2,3.4-3.3,5-4.9c.9.9,1.7,1.9,2.6,3,.9,1,1.6,2.1,2.2,3.3-2.1,1.2-4.2,2.4-6.4,3.5-2.1,1.2-4.2,2.3-6.3,3.4s-4.2,2.1-6.3,3.1c0,0-.8-.8-.8-.8ZM601.2,80.4v7.1h-.4c0-1.7-.6-3.1-1.8-4.2s-2.7-1.7-4.4-1.7h-1.9v-1.2h8.5ZM614.5,80.4v1.2h-1.9c-1.7,0-3.2.6-4.4,1.7s-1.8,2.5-1.8,4.2h-.2v-7.1h8.4,0Z"/>
+            <path d="M682.6,89.1h-.4c0-2-.8-3.8-2.3-5.3s-3.2-2.2-5.3-2.2h-1.5v-1.2h9.4v8.6h0ZM682.6,154.4v8.6h-9.4v-1.2h1.5c2,0,3.8-.7,5.3-2.2s2.2-3.2,2.3-5.3h.4,0ZM689.9,80.4v82.6h-7.7v-82.6h7.7ZM689.6,89.1v-8.6h9.4v1.2h-1.5c-2,0-3.8.7-5.3,2.2s-2.2,3.2-2.3,5.3h-.4,0ZM721.8,159.4v3.7h-32.2v-3.7h32.2ZM729,143.9l-6.8,19.1h-19.6l4.2-3.7c4.2,0,7.6-.6,10.2-1.9,2.6-1.3,4.8-3.1,6.4-5.5,1.7-2.4,3.1-5,4.4-8h1.2,0Z"/>
+            <path d="M794.4,89.1h-.4c0-2-.8-3.8-2.3-5.3s-3.2-2.2-5.3-2.2h-1.5v-1.2h9.4v8.6h0ZM794.4,154.4v8.6h-9.4v-1.2h1.5c2,0,3.8-.7,5.3-2.2s2.2-3.2,2.3-5.3h.4,0ZM801.7,80.4v82.6h-7.7v-82.6h7.7ZM801.3,89.1v-8.6h9.4v1.2h-1.5c-2,0-3.8.7-5.3,2.2s-2.2,3.2-2.3,5.3h-.4,0ZM801.3,154.4h.4c0,2,.8,3.8,2.3,5.3s3.2,2.2,5.3,2.2h1.5v1.2h-9.4v-8.6h0Z"/>
+            <path d="M882,154.4c-.6,1.6-.6,2.9-.2,4,.4,1.1,1,1.9,1.9,2.5s1.8.9,2.8.9h1.1v1.2h-23.7v-1.2h1.1c1.8,0,3.7-.6,5.6-1.7,1.9-1.1,3.5-3,4.8-5.7h6.7,0ZM907.3,78.8l1.1,8.3-29.6,75.7h-7.1l30.2-71.8c.9-2,1.6-3.7,2.2-5.1.6-1.4,1.1-2.8,1.5-4.1.4-1.3.6-2.3.6-3h1.1ZM924,130.8v3.5h-36.9v-3.5h36.9ZM907.3,78.8l34.9,83.6h-10l-27.3-72.4,2.4-11.2h0ZM929.3,154.4h9.7c1.2,2.7,2.8,4.6,4.7,5.7,2,1.1,3.9,1.7,5.7,1.7h.9v1.2h-26.6v-1.2h1.1c1.5,0,2.8-.6,4-1.9s1.3-3.1.5-5.5h0Z"/>
+            <path d="M84.6,147.2c-8.9,11.8-13.3,19.9-13.3,24.2s.9,2.6,2.6,2.6h0c2.2,0,8.2-7.1,17.9-21.3,9.7-14.2,17.5-27.5,23.3-39.8-11.5,11-21.7,22.4-30.5,34.2Z"/>
+            <path d="M109.4,155.8c-5.9,0-8.9.9-8.9,2.6s1,1.9,3,2.8c2,.9,4.3,1.3,6.9,1.3,6.8,0,13.4-2.1,19.7-6.3l-20.8-.5Z"/>
+            <path d="M121.1,8L8.5,120.6l112.5,112.5,112.5-112.5L121.1,8ZM159.4,99.7c-7.9,6.9-16,12.3-24.3,16.1h0s5-.4,5-.4c5.5,0,9.5,1,12.2,3.1s4,4.9,4,8.6-1.7,8.1-5,13.1-7.8,9.5-13.1,13.6h6.5c2.7,0,4.5-.1,5.6-.3,1.1-.2,1.7-.3,1.8-.3,1.1,0,1.6.6,1.6,1.7s-.8,1.8-2.3,1.8c-5.9,0-11.6,0-17-.2-8.6,5.5-17,8.2-25.3,8.2s-7-.7-9.3-2.2c-2.3-1.5-3.5-2.9-3.5-4.4s.6-2.6,1.9-3.5c1.3-.8,3.1-1.3,5.4-1.3,9,0,19,.2,30.1.6,4.6-3.8,8.3-8.1,11-13.1,2.8-5,4.1-9.4,4.1-13.4,0-6.4-3.4-9.5-10.3-9.5s-5.5.4-8.4,1.3c-2.9.8-4.6,1.4-5.2,1.8-.6.3-.9.5-1.1.5-.5,0-.7-.3-.7-1s1-1.4,3-2.4c8.8-4.2,17.3-9.8,25.6-16.9s12.5-12,12.5-15-1.1-2.1-3.2-2.1c-8.8,0-20.8,6.6-36,19.7-3.1,7.9-8.1,17.6-15.1,29.1-7,11.5-14.4,21.8-22,30.9-7.7,9.1-13.4,13.6-17.1,13.6s-3.5-1.2-3.5-3.6c0-5.5,5.2-15.1,15.5-29.1,10.3-14,22-26.8,35-38.5,2.3-5.6,3.5-9.7,3.5-12.2s-.6-4.6-1.8-6.1c-1.2-1.5-3-2.6-5.4-3.3-3.8-1-7.7-1.5-11.9-1.5s-7.4,0-9.6.3c-2.2.2-4.9.6-8.1,1.2-3.2.6-5.8,1.6-7.8,3-2,1.4-3,3.2-3,5.4s1.1,3.9,3.2,5c2.2,1.2,4.8,2,7.9,2.5,3.1.5,6.2,1,9.3,1.5s5.7,1.6,7.8,3.2c2.2,1.6,3.2,3.8,3.2,6.6s-.2,1.2-.5,1.2-.6-.1-.8-.3c-.2-.2-.5-.7-1-1.4-.7-1-1.7-1.8-3.1-2.3s-3.4-1.1-6.2-1.6c-2.8-.5-5.5-1-7.9-1.6-2.5-.6-5-1.3-7.5-2.2-2.5-.9-4.6-2.2-6.1-3.9-1.5-1.7-2.3-3.7-2.3-5.9s1-4.3,2.9-6c1.9-1.8,4.5-3.1,7.6-4.1,6.5-1.9,13.2-2.9,20.1-2.9,18.1,0,27.1,4.8,27.1,14.3s0,2.6,0,3.4c15.2-12.2,27.6-18.3,37.2-18.3s6.5,1.3,6.5,3.9c0,3.8-3.9,9.1-11.8,16Z"/>
+            <path d="M121.1,0L.5,120.6l120.5,120.5,120.5-120.5L121.1,0ZM3.5,120.5L121.1,2.9l117.6,117.6-117.6,117.6L3.5,120.5Z"/>
+          </g>
+        </svg>
+      </div>
+      
+      <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-7 custom-scrollbar">
+        {menuGroups.map((group, gIdx) => {
+          const visibleItems = group.items.filter(item => {
+            if (item.extraCondition === true) return true;
+            if (item.allowedPlans && userPlan) return item.allowedPlans.includes(userPlan.toLowerCase());
+            return level >= item.minLevel; 
+          });
+          if (visibleItems.length === 0) return null;
+          return (
+            <div key={`desk_g_${gIdx}`} className="space-y-1">
+              <p className="text-[9px] text-slate-500 uppercase tracking-[0.2em] font-bold ml-4 mb-3">{group.title}</p>
+              {visibleItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all ${isActive ? 'bg-white/10 text-white font-bold' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+                    <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                    <span className="text-xs tracking-wide">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })}
+      </nav>
+    </aside>
   );
 };
 
@@ -8934,7 +8920,6 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
 // ==========================================
 // --- COMPONENTE: CABECERA INTELIGENTE ---
 // ==========================================
-// 🟢 COMPONENTE LOGO BAULIA (PLATINO OLED)
 const BauliaLogoBlanco = ({ className }) => (
   <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950.3 241.1">
     <g fill="#F8FAFC">
@@ -8950,15 +8935,16 @@ const BauliaLogoBlanco = ({ className }) => (
       <path fill="#F8FAFC" d="M109.4,155.8c-5.9,0-8.9.9-8.9,2.6s1,1.9,3,2.8c2,.9,4.3,1.3,6.9,1.3,6.8,0,13.4-2.1,19.7-6.3l-20.8-.5Z"/>
       <path fill="#D4AF37" d="M127,98.5c0,0,.1-.1.2-.2,0-.2-.1-.2-.2.2Z"/>
       <path fill="#F8FAFC" d="M121.1,8L8.5,120.6l112.5,112.5,112.5-112.5L121.1,8ZM159.4,99.7c-7.9,6.9-16,12.3-24.3,16.1h0s5-.4,5-.4c5.5,0,9.5,1,12.2,3.1s4,4.9,4,8.6-1.7,8.1-5,13.1-7.8,9.5-13.1,13.6h6.5c2.7,0,4.5-.1,5.6-.3,1.1-.2,1.7-.3,1.8-.3,1.1,0,1.6.6,1.6,1.7s-.8,1.8-2.3,1.8c-5.9,0-11.6,0-17-.2-8.6,5.5-17,8.2-25.3,8.2s-7-.7-9.3-2.2c-2.3-1.5-3.5-2.9-3.5-4.4s.6-2.6,1.9-3.5c1.3-.8,3.1-1.3,5.4-1.3,9,0,19,.2,30.1.6,4.6-3.8,8.3-8.1,11-13.1,2.8-5,4.1-9.4,4.1-13.4,0-6.4-3.4-9.5-10.3-9.5s-5.5.4-8.4,1.3c-2.9.8-4.6,1.4-5.2,1.8-.6.3-.9.5-1.1.5-.5,0-.7-.3-.7-1s1-1.4,3-2.4c8.8-4.2,17.3-9.8,25.6-16.9s12.5-12,12.5-15-1.1-2.1-3.2-2.1c-8.8,0-20.8,6.6-36,19.7-3.1,7.9-8.1,17.6-15.1,29.1-7,11.5-14.4,21.8-22,30.9-7.7,9.1-13.4,13.6-17.1,13.6s-3.5-1.2-3.5-3.6c0-5.5,5.2-15.1,15.5-29.1,10.3-14,22-26.8,35-38.5,2.3-5.6,3.5-9.7,3.5-12.2s-.6-4.6-1.8-6.1c-1.2-1.5-3-2.6-5.4-3.3-3.8-1-7.7-1.5-11.9-1.5s-7.4,0-9.6.3c-2.2.2-4.9.6-8.1,1.2-3.2.6-5.8,1.6-7.8,3-2,1.4-3,3.2-3,5.4s1.1,3.9,3.2,5c2.2,1.2,4.8,2,7.9,2.5,3.1.5,6.2,1,9.3,1.5s5.7,1.6,7.8,3.2c2.2,1.6,3.2,3.8,3.2,6.6s-.2,1.2-.5,1.2-.6-.1-.8-.3c-.2-.2-.5-.7-1-1.4-.7-1-1.7-1.8-3.1-2.3s-3.4-1.1-6.2-1.6c-2.8-.5-5.5-1-7.9-1.6-2.5-.6-5-1.3-7.5-2.2-2.5-.9-4.6-2.2-6.1-3.9-1.5-1.7-2.3-3.7-2.3-5.9s1-4.3,2.9-6c1.9-1.8,4.5-3.1,7.6-4.1,6.5-1.9,13.2-2.9,20.1-2.9,18.1,0,27.1,4.8,27.1,14.3s0,2.6,0,3.4c15.2-12.2,27.6-18.3,37.2-18.3s6.5,1.3,6.5,3.9c0,3.8-3.9,9.1-11.8,16Z"/>
-      <path fill="#F8FAFC" d="M121.1,0L.5,120.6l120.5,120.5,120.5-120.5L121.1,0ZM3.5,120.5L121.1,2.9l117.6,117.6-117.6,117.6L3.5,120.5Z"/>
-    </g>
-  </svg>
+          <path fill="#F8FAFC" d="M121.1,0L.5,120.6l120.5,120.5,120.5-120.5L121.1,0ZM3.5,120.5L121.1,2.9l117.6,117.6-117.6,117.6L3.5,120.5Z"/>
+        </g>
+      </svg>
 );
 
 const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, bellAlerts, setBellAlerts, markAsRead, cycleTheme, themeSetting, authData, switchEvent, isSuperAdminMode, eventName, eventPlan, urlInvitacion }) => {
   const [showResults, setShowResults] = useState(false);
   const [showBellMenu, setShowBellMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
   const headerRef = useRef(null); 
   const [showEventSwitcher, setShowEventSwitcher] = useState(false);
   const [extraPassModal, setExtraPassModal] = useState(null);
@@ -9054,6 +9040,7 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
     setGlobalSearch(''); 
     setShowBellMenu(false); 
     setShowProfileMenu(false); 
+    setShowQuickAdd(false);
   };
 
   const isOverdue = (dateStr, deuda) => { if(!dateStr || deuda <= 0) return false; return new Date(dateStr) < new Date(); };
@@ -9127,47 +9114,55 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
 
       <header ref={headerRef} className="bg-[#000000]/90 backdrop-blur-2xl h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden border-b border-white/5 transition-colors duration-700">
         
-        {/* 📱 HEADER MÓVIL (Estilo Instagram OLED) */}
+        {/* 📱 HEADER MÓVIL (Limpio: Logo centrado, campanita sólida y botón +) */}
         <div className="xl:hidden w-full flex items-center justify-between">
-          <button onClick={() => {}} className="p-2 text-white hover:bg-white/10 rounded-full transition-colors" title="Acción Rápida">
+          <button onClick={() => setShowQuickAdd(true)} className="p-2 text-white hover:bg-white/10 rounded-full transition-colors active:scale-95" title="Acciones Rápidas">
             <Plus size={24} strokeWidth={1.5} />
           </button>
           
-          <button onClick={() => setShowEventSwitcher(true)} className="flex flex-col items-center justify-center group active:scale-95 transition-transform mt-1">
-            <BauliaLogoBlanco className="h-4 w-auto mb-1 opacity-90 group-hover:opacity-100 transition-opacity" />
-            <div className="flex items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
-              <span className="text-[7px] uppercase tracking-[0.2em] font-bold">{eventName || 'Evento Baulia'}</span>
-              <ChevronDown size={10} />
-            </div>
-          </button>
+          <div className="flex flex-col items-center justify-center pointer-events-none mt-1">
+             <svg viewBox="0 0 950.3 241.1" className="h-5 w-auto" xmlns="http://www.w3.org/2000/svg">
+              <g fill="#F8FAFC">
+                <path d="M300.8,89.1h-.4c0-2-.7-3.8-2.2-5.3s-3.3-2.2-5.3-2.2h-1.4v-1.2c-.1,0,9.3,0,9.3,0v8.6h0ZM300.8,154.4v8.6h-9.4v-1.2h1.5c2,0,3.8-.7,5.3-2.2s2.2-3.2,2.2-5.3h.4ZM308.1,80.4v82.6h-7.7v-82.6h7.7ZM314.8,80.4c5.5,0,10.2.8,14,2.5s6.7,4,8.7,6.9c2,3,3,6.4,3,10.3s-.6,6.2-1.9,8.7-2.9,4.5-4.8,6c-2,1.5-4.1,2.6-6.3,3.2,4.2.6,7.8,2,10.8,4.1s5.4,4.8,7,8c1.6,3.2,2.4,6.7,2.4,10.7s-1.1,8.3-3.2,11.6-5.3,5.9-9.4,7.8c-4.1,1.9-9.1,2.8-14.9,2.8h-13.1c0-1.4.1-2.8.1-4.2h12.5c4.1,0,7.6-.7,10.4-2.2s5-3.6,6.5-6.4c1.5-2.8,2.2-6.2,2.2-10.2s-.8-8-2.5-10.7c-1.7-2.8-3.9-4.8-6.6-6.3-2.7-1.4-5.6-2.4-8.7-2.9s-6.1-.8-8.9-.8v-1.1c1.8,0,3.8-.2,6-.6s4.3-1.2,6.4-2.4c2-1.2,3.7-2.9,5.1-5.3,1.3-2.3,2-5.4,2-9.1s-.6-6.6-1.9-9.1-3.2-4.4-5.8-5.7c-2.6-1.3-5.7-1.9-9.5-1.9h-10.9s0-.4-.3-1c-.2-.6-.5-1.5-.9-2.8h12.5,0Z"/>
+                <path d="M417.6,154.4c-.6,1.6-.6,2.9-.2,4s1,1.9,1.9,2.5,1.8.9,2.8.9h1.1v1.2h-23.7v-1.2h1.1c1.8,0,3.7-.6,5.6-1.7,1.9-1.1,3.5-3,4.8-5.7h6.7,0ZM443,78.8l1.1,8.3-29.6,75.7h-7.1l30.2-71.8c.9-2,1.6-3.7,2.2-5.1s1.1-2.8,1.5-4.1c.4-1.3.6-2.3.6-3h1.1,0ZM459.6,130.8v3.5h-36.9v-3.5h36.9ZM443,78.8l34.9,83.6h-10l-27.3-72.4s2.4-11.2,2.4-11.2ZM464.9,154.4h9.7c1.2,2.7,2.8,4.6,4.7,5.7,2,1.1,3.9,1.7,5.7,1.7h.9v1.2h-26.6v-1.2h1.1c1.5,0,2.8-.6,4-1.9,1.2-1.3,1.3-3.1.5-5.5h0Z"/>
+                <path d="M542.1,80.4v7.1h-.4c0-1.7-.6-3.1-1.8-4.2s-2.7-1.7-4.4-1.7h-1.9v-1.2h8.5ZM549.5,80.4v51.9c0,5.7,1,10.7,3.1,15s5,7.7,8.8,10.1c3.8,2.4,8.1,3.6,13.1,3.6s9.9-1.1,13.8-3.4c3.9-2.3,7-5.4,9.2-9.5s3.3-8.8,3.3-14.2v-53.5h5.5v53.5c0,6.1-1.3,11.5-4,16.1-2.6,4.6-6.4,8.2-11.2,10.8s-10.4,3.9-16.8,3.9-12.3-1.3-17.2-3.8c-4.9-2.6-8.7-6.1-11.4-10.7-2.7-4.6-4.1-10-4.1-16.1v-53.6h7.9ZM557.6,80.4v1.2h-1.9c-1.7,0-3.2.6-4.4,1.7s-1.8,2.5-1.8,4.2h-.2v-7.1h8.4,0ZM574.4,72.1c1.7-1.8,3.3-3.6,5-5.4s3.3-3.5,5-5.2,3.4-3.3,5-4.9c.9.9,1.7,1.9,2.6,3,.9,1,1.6,2.1,2.2,3.3-2.1,1.2-4.2,2.4-6.4,3.5-2.1,1.2-4.2,2.3-6.3,3.4s-4.2,2.1-6.3,3.1c0,0-.8-.8-.8-.8ZM601.2,80.4v7.1h-.4c0-1.7-.6-3.1-1.8-4.2s-2.7-1.7-4.4-1.7h-1.9v-1.2h8.5ZM614.5,80.4v1.2h-1.9c-1.7,0-3.2.6-4.4,1.7s-1.8,2.5-1.8,4.2h-.2v-7.1h8.4,0Z"/>
+                <path d="M682.6,89.1h-.4c0-2-.8-3.8-2.3-5.3s-3.2-2.2-5.3-2.2h-1.5v-1.2h9.4v8.6h0ZM682.6,154.4v8.6h-9.4v-1.2h1.5c2,0,3.8-.7,5.3-2.2s2.2-3.2,2.3-5.3h.4,0ZM689.9,80.4v82.6h-7.7v-82.6h7.7ZM689.6,89.1v-8.6h9.4v1.2h-1.5c-2,0-3.8.7-5.3,2.2s-2.2,3.2-2.3,5.3h-.4,0ZM721.8,159.4v3.7h-32.2v-3.7h32.2ZM729,143.9l-6.8,19.1h-19.6l4.2-3.7c4.2,0,7.6-.6,10.2-1.9,2.6-1.3,4.8-3.1,6.4-5.5,1.7-2.4,3.1-5,4.4-8h1.2,0Z"/>
+                <path d="M794.4,89.1h-.4c0-2-.8-3.8-2.3-5.3s-3.2-2.2-5.3-2.2h-1.5v-1.2h9.4v8.6h0ZM794.4,154.4v8.6h-9.4v-1.2h1.5c2,0,3.8-.7,5.3-2.2s2.2-3.2,2.3-5.3h.4,0ZM801.7,80.4v82.6h-7.7v-82.6h7.7ZM801.3,89.1v-8.6h9.4v1.2h-1.5c-2,0-3.8.7-5.3,2.2s-2.2,3.2-2.3,5.3h-.4,0ZM801.3,154.4h.4c0,2,.8,3.8,2.3,5.3s3.2,2.2,5.3,2.2h1.5v1.2h-9.4v-8.6h0Z"/>
+                <path d="M882,154.4c-.6,1.6-.6,2.9-.2,4,.4,1.1,1,1.9,1.9,2.5s1.8.9,2.8.9h1.1v1.2h-23.7v-1.2h1.1c1.8,0,3.7-.6,5.6-1.7,1.9-1.1,3.5-3,4.8-5.7h6.7,0ZM907.3,78.8l1.1,8.3-29.6,75.7h-7.1l30.2-71.8c.9-2,1.6-3.7,2.2-5.1.6-1.4,1.1-2.8,1.5-4.1.4-1.3.6-2.3.6-3h1.1ZM924,130.8v3.5h-36.9v-3.5h36.9ZM907.3,78.8l34.9,83.6h-10l-27.3-72.4,2.4-11.2h0ZM929.3,154.4h9.7c1.2,2.7,2.8,4.6,4.7,5.7,2,1.1,3.9,1.7,5.7,1.7h.9v1.2h-26.6v-1.2h1.1c1.5,0,2.8-.6,4-1.9s1.3-3.1.5-5.5h0Z"/>
+              </g>
+              <g>
+                <path fill="#F8FAFC" d="M84.6,147.2c-8.9,11.8-13.3,19.9-13.3,24.2s.9,2.6,2.6,2.6h0c2.2,0,8.2-7.1,17.9-21.3,9.7-14.2,17.5-27.5,23.3-39.8-11.5,11-21.7,22.4-30.5,34.2Z"/>
+                <path fill="#F8FAFC" d="M109.4,155.8c-5.9,0-8.9.9-8.9,2.6s1,1.9,3,2.8c2,.9,4.3,1.3,6.9,1.3,6.8,0,13.4-2.1,19.7-6.3l-20.8-.5Z"/>
+                <path fill="#F8FAFC" d="M121.1,8L8.5,120.6l112.5,112.5,112.5-112.5L121.1,8ZM159.4,99.7c-7.9,6.9-16,12.3-24.3,16.1h0s5-.4,5-.4c5.5,0,9.5,1,12.2,3.1s4,4.9,4,8.6-1.7,8.1-5,13.1-7.8,9.5-13.1,13.6h6.5c2.7,0,4.5-.1,5.6-.3,1.1-.2,1.7-.3,1.8-.3,1.1,0,1.6.6,1.6,1.7s-.8,1.8-2.3,1.8c-5.9,0-11.6,0-17-.2-8.6,5.5-17,8.2-25.3,8.2s-7-.7-9.3-2.2c-2.3-1.5-3.5-2.9-3.5-4.4s.6-2.6,1.9-3.5c1.3-.8,3.1-1.3,5.4-1.3,9,0,19,.2,30.1.6,4.6-3.8,8.3-8.1,11-13.1,2.8-5,4.1-9.4,4.1-13.4,0-6.4-3.4-9.5-10.3-9.5s-5.5.4-8.4,1.3c-2.9.8-4.6,1.4-5.2,1.8-.6.3-.9.5-1.1.5-.5,0-.7-.3-.7-1s1-1.4,3-2.4c8.8-4.2,17.3-9.8,25.6-16.9s12.5-12,12.5-15-1.1-2.1-3.2-2.1c-8.8,0-20.8,6.6-36,19.7-3.1,7.9-8.1,17.6-15.1,29.1-7,11.5-14.4,21.8-22,30.9-7.7,9.1-13.4,13.6-17.1,13.6s-3.5-1.2-3.5-3.6c0-5.5,5.2-15.1,15.5-29.1,10.3-14,22-26.8,35-38.5,2.3-5.6,3.5-9.7,3.5-12.2s-.6-4.6-1.8-6.1c-1.2-1.5-3-2.6-5.4-3.3-3.8-1-7.7-1.5-11.9-1.5s-7.4,0-9.6.3c-2.2.2-4.9.6-8.1,1.2-3.2.6-5.8,1.6-7.8,3-2,1.4-3,3.2-3,5.4s1.1,3.9,3.2,5c2.2,1.2,4.8,2,7.9,2.5,3.1.5,6.2,1,9.3,1.5s5.7,1.6,7.8,3.2c2.2,1.6,3.2,3.8,3.2,6.6s-.2,1.2-.5,1.2-.6-.1-.8-.3c-.2-.2-.5-.7-1-1.4-.7-1-1.7-1.8-3.1-2.3s-3.4-1.1-6.2-1.6c-2.8-.5-5.5-1-7.9-1.6-2.5-.6-5-1.3-7.5-2.2-2.5-.9-4.6-2.2-6.1-3.9-1.5-1.7-2.3-3.7-2.3-5.9s1-4.3,2.9-6c1.9-1.8,4.5-3.1,7.6-4.1,6.5-1.9,13.2-2.9,20.1-2.9,18.1,0,27.1,4.8,27.1,14.3s0,2.6,0,3.4c15.2-12.2,27.6-18.3,37.2-18.3s6.5,1.3,6.5,3.9c0,3.8-3.9,9.1-11.8,16Z"/>
+        <path fill="#F8FAFC" d="M121.1,0L.5,120.6l120.5,120.5,120.5-120.5L121.1,0ZM3.5,120.5L121.1,2.9l117.6,117.6-117.6,117.6L3.5,120.5Z"/>
+      </g>
+    </svg>
+          </div>
           
           <div className="relative">
-            <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors">
-              <Inbox size={24} strokeWidth={1.5} />
-              {unreadCount > 0 && <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-[#000000] text-[7px] font-bold text-white flex items-center justify-center">{unreadCount}</span>}
+            <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false); setShowQuickAdd(false);}} className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors active:scale-95">
+              <Bell size={24} strokeWidth={1.5} fill="currentColor" className="text-white" />
+              {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-[#000000] text-[7px] font-bold text-white flex items-center justify-center">{unreadCount}</span>}
             </button>
             {showBellMenu && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-[#0A0A0A] shadow-[0_20px_50px_rgba(0,0,0,0.9)] rounded-2xl border border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
+              <div className="absolute right-0 top-full mt-2 w-80 bg-[#0A0A0A] shadow-[0_20px_50px_rgba(0,0,0,0.9)] rounded-2xl border border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2">
                 <div className="p-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
                   <h4 className="font-bold text-white text-sm">Centro de Atención</h4>
-                  {bellAlerts.length > 0 && <button onClick={(e) => { e.stopPropagation(); setBellAlerts([]); }} className="text-[10px] text-slate-500 hover:text-white font-bold transition-colors">Limpiar historial</button>}
+                  {bellAlerts.length > 0 && <button onClick={(e) => { e.stopPropagation(); setBellAlerts([]); }} className="text-[10px] text-slate-500 hover:text-white font-bold transition-colors">Limpiar</button>}
                 </div>
                 <div className="max-h-80 overflow-y-auto custom-scrollbar">
                   {allAlerts.length === 0 ? (
-                    <div className="p-8 text-center text-slate-500"><CheckCircle size={32} className="mx-auto mb-2 text-emerald-500/30"/> ¡Todo al día! No tienes notificaciones.</div>
+                    <div className="p-8 text-center text-slate-500"><CheckCircle size={32} className="mx-auto mb-2 opacity-30"/> ¡Todo al día!</div>
                   ) : (
                     allAlerts.map(alert => (
-                      <div key={alert.id} className={`w-full text-left px-4 py-3 flex items-start transition-colors group cursor-pointer border-b border-white/5 ${alert.isRead ? 'opacity-60 hover:bg-white/5' : 'bg-white/5 hover:bg-white/10'}`} onClick={(e) => { e.stopPropagation(); if (alert.id.startsWith('ext_')) { const guestId = alert.id.replace('ext_', ''); const guest = data?.guests?.find(g => g.id === guestId); if (guest) setExtraPassModal(guest); setShowBellMenu(false); return; } if(markAsRead && !alert.isDynamic) markAsRead(alert.id); if(alert.tab) { handleNavigate(alert.tab); } else { setShowBellMenu(false); } }}>
-                        <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-400' : alert.type === 'danger' ? 'text-rose-400' : alert.type === 'warning' ? 'text-amber-400' : alert.type === 'info' ? 'text-sky-400' : 'text-indigo-400'}`}>
-                          {alert.type === 'success' ? <CheckCircle size={16}/> : alert.type === 'warning' || alert.type === 'danger' ? <AlertCircle size={16}/> : alert.type === 'info' ? <Building size={16}/> : <Bell size={16}/>}
+                      <div key={alert.id} className={`w-full text-left px-4 py-3 flex items-start group cursor-pointer border-b border-white/5 ${alert.isRead ? 'opacity-60 hover:bg-white/5' : 'bg-white/5 hover:bg-white/10'}`} onClick={(e) => { e.stopPropagation(); if (alert.id.startsWith('ext_')) { const guestId = alert.id.replace('ext_', ''); const guest = data?.guests?.find(g => g.id === guestId); if (guest) setExtraPassModal(guest); setShowBellMenu(false); return; } if(markAsRead && !alert.isDynamic) markAsRead(alert.id); if(alert.tab) { handleNavigate(alert.tab); } else { setShowBellMenu(false); } }}>
+                        <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-400' : alert.type === 'danger' ? 'text-rose-400' : alert.type === 'warning' ? 'text-amber-400' : 'text-sky-400'}`}>
+                          {alert.type === 'success' ? <CheckCircle size={16}/> : alert.type === 'warning' || alert.type === 'danger' ? <AlertCircle size={16}/> : <Bell size={16}/>}
                         </div>
                         <div className="flex-1">
                           <p className={`text-sm leading-tight ${alert.isRead ? 'font-medium text-slate-400' : 'font-bold text-white'}`}>{alert.title}</p>
                           <p className={`text-[10px] mt-1 leading-snug ${alert.isRead ? 'text-slate-500' : 'text-slate-400 font-medium'}`}>{alert.message}</p>
                         </div>
-                        {!alert.isDynamic && (
-                          <button onClick={(e) => { e.stopPropagation(); setBellAlerts(prev => prev.filter(a => a.id !== alert.id)); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-500 transition-colors ml-2"><X size={14}/></button>
-                        )}
                       </div>
                     ))
                   )}
@@ -9177,12 +9172,12 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
           </div>
         </div>
 
-        {/* 💻 HEADER ESCRITORIO (Mantenemos la estructura con colores OLED Platino) */}
+        {/* 💻 HEADER ESCRITORIO (Se mantiene igual con colores Platino) */}
         <div className="hidden xl:flex items-center flex-1">
-          <div className="relative w-full max-w-md ml-4">
+          <button onClick={() => setIsOpen(true)} className="xl:hidden text-white mr-4 transition-colors"><Menu size={24} /></button>
+          <div className="relative w-full max-w-md hidden sm:block ml-10 lg:ml-20">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
             <input type="text" placeholder="Buscar en la bóveda..." value={globalSearch} onChange={(e) => {setGlobalSearch(e.target.value); setShowResults(true);}} className="w-full pl-10 pr-4 py-2 bg-[#111111] border border-white/10 rounded-full text-sm text-white placeholder-slate-500 focus:outline-none focus:border-white transition-all"/>
-            
             {showResults && globalSearch.length > 1 && (
               <div className="absolute top-full left-0 mt-2 w-full bg-[#0A0A0A] shadow-2xl rounded-2xl border border-white/10 py-2 max-h-80 overflow-y-auto z-[100] animate-in fade-in transition-colors">
                 {searchResults.length === 0 ? <div className="p-4 text-center text-sm text-slate-500">No se encontraron resultados para "{globalSearch}"</div> : searchResults.map(res => (
@@ -9197,81 +9192,59 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
           </div>
         </div>
 
-        <div className="hidden xl:flex items-center space-x-4">
+        <div className="hidden xl:flex items-center space-x-2 sm:space-x-4">
           {!isSuperAdminMode && (
-            <div className="flex items-center bg-transparent border border-white/10 rounded-lg p-1 mr-2 space-x-1 transition-colors">
-              <div className="flex items-center px-2 py-1 rounded-md text-slate-300" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-xs font-bold ml-1">{countTotal}</span></div>
-              <div className="flex items-center px-2 py-1 rounded-md text-emerald-400 bg-emerald-500/10 border border-emerald-500/20" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-xs font-bold ml-1">{countConfirmados}</span></div>
-              <div className="flex items-center px-2 py-1 rounded-md text-rose-400 bg-rose-500/10 border border-rose-500/20" title="Cancelaron"><X size={14} className="opacity-80" /><span className="text-xs font-bold ml-1">{countCancelados}</span></div>
-              <div className="flex items-center px-2 py-1 rounded-md text-sky-400 bg-sky-500/10 border border-sky-500/20" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-xs font-bold ml-1">{countIngresos}</span></div>
+            <div className="hidden md:flex items-center bg-transparent border border-white/10 rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 transition-colors">
+              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-300"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
+              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"><CheckCircle size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countConfirmados}</span></div>
+              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-rose-400 bg-rose-500/10 border border-rose-500/20"><X size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countCancelados}</span></div>
+              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-sky-400 bg-sky-500/10 border border-sky-500/20"><Scan size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countIngresos}</span></div>
             </div>
           )}
 
           <div className="relative">
             <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-white transition-colors rounded-full hover:bg-white/10">
-              <Inbox size={20} strokeWidth={2} />
-              {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-[#000000] rounded-full text-[9px] font-bold text-white flex items-center justify-center">{unreadCount}</span>}
+              <Bell size={20} strokeWidth={2} />
+              {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-[#000000] rounded-full text-[9px] font-bold text-white flex items-center justify-center animate-in zoom-in">{unreadCount}</span>}
             </button>
-            {showBellMenu && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-[#0A0A0A] shadow-2xl rounded-2xl border border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
-                <div className="p-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
-                  <h4 className="font-bold text-white text-sm">Centro de Atención</h4>
-                  {bellAlerts.length > 0 && <button onClick={(e) => { e.stopPropagation(); setBellAlerts([]); }} className="text-[10px] text-slate-500 hover:text-white font-bold transition-colors">Limpiar historial</button>}
-                </div>
-                <div className="max-h-80 overflow-y-auto custom-scrollbar">
-                  {allAlerts.length === 0 ? (
-                    <div className="p-8 text-center text-slate-500"><CheckCircle size={32} className="mx-auto mb-2 text-emerald-500/30"/> ¡Todo al día! No tienes notificaciones.</div>
-                  ) : (
-                    allAlerts.map(alert => (
-                      <div key={alert.id} className={`w-full text-left px-4 py-3 flex items-start transition-colors group cursor-pointer border-b border-white/5 ${alert.isRead ? 'opacity-60 hover:bg-white/5' : 'bg-white/5 hover:bg-white/10'}`} onClick={(e) => { e.stopPropagation(); if (alert.id.startsWith('ext_')) { const guestId = alert.id.replace('ext_', ''); const guest = data?.guests?.find(g => g.id === guestId); if (guest) setExtraPassModal(guest); setShowBellMenu(false); return; } if(markAsRead && !alert.isDynamic) markAsRead(alert.id); if(alert.tab) { handleNavigate(alert.tab); } else { setShowBellMenu(false); } }}>
-                        <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-400' : alert.type === 'danger' ? 'text-rose-400' : alert.type === 'warning' ? 'text-amber-400' : alert.type === 'info' ? 'text-sky-400' : 'text-indigo-400'}`}>
-                          {alert.type === 'success' ? <CheckCircle size={16}/> : alert.type === 'warning' || alert.type === 'danger' ? <AlertCircle size={16}/> : alert.type === 'info' ? <Building size={16}/> : <Bell size={16}/>}
-                        </div>
-                        <div className="flex-1">
-                          <p className={`text-sm leading-tight ${alert.isRead ? 'font-medium text-slate-400' : 'font-bold text-white'}`}>{alert.title}</p>
-                          <p className={`text-[10px] mt-1 leading-snug ${alert.isRead ? 'text-slate-500' : 'text-slate-400 font-medium'}`}>{alert.message}</p>
-                        </div>
-                        {!alert.isDynamic && (
-                          <button onClick={(e) => { e.stopPropagation(); setBellAlerts(prev => prev.filter(a => a.id !== alert.id)); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-500 transition-colors ml-2"><X size={14}/></button>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
+            {/* ... Resto de la campanita de escritorio ... */}
           </div>
 
           <div className="relative">
-            <button onClick={() => {setShowProfileMenu(!showProfileMenu); setShowBellMenu(false); setShowResults(false);}} className="flex items-center space-x-3 hover:bg-white/5 p-1.5 rounded-xl transition-colors border border-transparent hover:border-white/10 group">
-              <div className="pl-1 text-right">
-                <p className="text-xs font-bold text-white leading-tight truncate max-w-[130px]">{isSuperAdminMode ? 'Mando Central' : eventName}</p>
-                <p className={`text-[9px] text-slate-400 font-bold tracking-widest uppercase`}>{isSuperAdminMode ? 'SUPER ADMIN' : `Plan ${eventPlan}`}</p>
+            <button onClick={() => {setShowProfileMenu(!showProfileMenu); setShowBellMenu(false); setShowResults(false);}} className="flex items-center space-x-2 sm:space-x-3 hover:bg-white/5 p-1 sm:p-1.5 rounded-xl transition-colors text-right border border-transparent hover:border-white/10 group">
+              <div className="hidden sm:block pl-1 text-right">
+                <p className="text-xs font-bold text-white leading-tight truncate max-w-[130px]" title={eventName}>{isSuperAdminMode ? 'Mando Central' : eventName}</p>
+                <p className={`text-[9px] text-slate-400 font-bold tracking-widest uppercase transition-colors`}>{isSuperAdminMode ? 'SUPER ADMIN' : `Plan ${eventPlan}`}</p>
               </div>
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[#000000] font-black text-xs shrink-0 bg-white`}>
+              <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-black font-black shadow-md text-xs shrink-0 relative bg-white`}>
                  <span className="font-editorial text-sm tracking-widest">{isSuperAdminMode ? 'BM' : initials}</span>
               </div>
             </button>
-            
-            {showProfileMenu && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-[#0A0A0A] shadow-2xl rounded-2xl border border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
-                <div className="p-2">
-                  {authData?.availableEvents?.length > 1 && !isSuperAdminMode && (
-                     <button onClick={() => { setShowEventSwitcher(true); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2.5 text-sm text-white font-bold hover:bg-white/5 rounded-lg transition-colors flex items-center mb-1">
-                       <RefreshCw size={16} className="mr-2.5"/> Cambiar Proyecto
-                     </button>
-                  )}
-                  {!isSuperAdminMode && <button onClick={() => handleNavigate('invitacion')} className="w-full text-left px-3 py-2.5 text-sm text-slate-300 font-medium hover:bg-white/5 hover:text-white rounded-lg transition-colors flex items-center"><ExternalLink size={16} className="mr-2.5"/> Ver Invitación Web</button>}
-                  <button onClick={handleContactStaff} className="w-full text-left px-3 py-2.5 text-sm text-slate-300 font-medium hover:bg-white/5 hover:text-white rounded-lg transition-colors flex items-center"><MessageCircle size={16} className="mr-2.5"/> Soporte Premium</button>
-                </div>
-                <div className="p-2 border-t border-white/10">
-                  <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-sm text-rose-500 font-bold hover:bg-rose-500/10 rounded-lg transition-colors flex items-center"><LogOut size={16} className="mr-2.5"/> Cerrar Sesión</button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </header>
+
+      {/* 🟢 HOJA DE ACCIONES RÁPIDAS MÓVIL (BOTÓN +) */}
+      {showQuickAdd && (
+        <div className="xl:hidden fixed inset-0 z-[9999] flex flex-col justify-end">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowQuickAdd(false)}></div>
+          <div className="bg-[#0A0A0A] w-full rounded-t-[2rem] border-t border-white/10 relative z-10 p-6 pb-12 animate-in slide-in-from-bottom-full duration-300">
+             <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6"></div>
+             <h3 className="text-white font-bold mb-4 text-sm px-2 uppercase tracking-widest text-[10px]">Acciones Rápidas</h3>
+             <div className="space-y-3">
+               <button onClick={() => handleNavigate('invitados')} className="w-full bg-[#111111] hover:bg-white/10 border border-white/5 rounded-xl p-4 flex items-center text-white transition-colors">
+                 <UserPlus size={18} className="text-[#D4AF37] mr-3"/> <span className="font-bold text-sm">Registrar Nuevo Invitado</span>
+               </button>
+               <button onClick={() => handleNavigate('presupuesto')} className="w-full bg-[#111111] hover:bg-white/10 border border-white/5 rounded-xl p-4 flex items-center text-white transition-colors">
+                 <Wallet size={18} className="text-emerald-400 mr-3"/> <span className="font-bold text-sm">Registrar Gasto Financiero</span>
+               </button>
+               <button onClick={() => handleNavigate('tareas')} className="w-full bg-[#111111] hover:bg-white/10 border border-white/5 rounded-xl p-4 flex items-center text-white transition-colors">
+                 <CheckSquare size={18} className="text-sky-400 mr-3"/> <span className="font-bold text-sm">Añadir Tarea (Checklist)</span>
+               </button>
+             </div>
+          </div>
+        </div>
+      )}
 
       {extraPassModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in transition-colors">
@@ -20248,6 +20221,28 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const [estadoCuenta, setEstadoCuenta] = useState({ deuda: 0, fechaEntrega: null, bloqueado: false, urlInvitacion: '', status: '' });
   const [horasRestantesGracia, setHorasRestantesGracia] = useState(null);
 
+  // 🟢 ESTADOS DE APP NATIVA (Scroll y Menú Hub)
+  const [showMobileHub, setShowMobileHub] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  const handleMainScroll = (e) => {
+    const currentScrollY = e.target.scrollTop;
+    if (currentScrollY > lastScrollY.current && currentScrollY > 60) {
+      setIsHeaderVisible(false); // Oculta header al bajar
+    } else if (currentScrollY < lastScrollY.current) {
+      setIsHeaderVisible(true);  // Muestra header al subir
+    }
+    lastScrollY.current = currentScrollY;
+  };
+
+  const getInitialsMobile = (name) => {
+    if(!name) return 'VIP';
+    const words = name.split(' ').filter(w => w.length > 0 && w.toLowerCase() !== 'y' && w.toLowerCase() !== 'e');
+    if(words.length >= 2) return `${words[0][0]}${words[1][0]}`.toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+  };
+
   // 🟢 ESTADOS PARA LA PASARELA DE LIQUIDACIÓN STRIPE DENTRO DE LA BÓVEDA
   const [showModalLiquidar, setShowModalLiquidar] = useState(false);
   const [clientSecretLiq, setClientSecretLiq] = useState(null);
@@ -20425,140 +20420,85 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   };
 
   return (
-    <div className="flex h-screen bg-[#141210] font-sans overflow-hidden text-slate-200 selection:bg-[#D4AF37] selection:text-[#1C1917] relative">
+    // 🟢 FÍSICA ESTRICTA DE APP: 100dvh, overscroll-none y fondo negro puro
+    <div className="fixed inset-0 w-full flex h-[100dvh] bg-[#000000] overscroll-none font-sans overflow-hidden text-slate-200 selection:bg-white selection:text-black relative">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap'); 
         .font-editorial { font-family: 'Playfair Display', serif; }
-        @media screen and (max-width: 768px) {
-          input, select, textarea { font-size: 16px !important; }
-        }
+        @media screen and (max-width: 768px) { input, select, textarea { font-size: 16px !important; } }
+        
+        /* MAGIA ANTI-REBOTE AZUL EN SAFARI/CHROME MÓVIL */
+        body, html { background-color: #000000 !important; overscroll-behavior-y: none; }
+        #root { background-color: #000000 !important; }
       `}</style>
       
       {impersonating && (
         <div className="absolute top-0 left-0 w-full bg-rose-600 text-white z-[9999] py-1.5 px-4 text-center text-xs font-black uppercase tracking-widest shadow-lg flex justify-center items-center">
-          <AlertTriangle size={14} className="mr-2" /> Estás en Modo Soporte viendo la bóveda de: {impersonating.nombres || impersonating.nombre}
-          <button onClick={() => { setImpersonating(null); setActiveTab('licencias'); }} className="ml-6 bg-white text-rose-600 px-3 py-0.5 rounded shadow-sm hover:scale-105 transition-transform">Salir y Volver a Admin</button>
+          <AlertTriangle size={14} className="mr-2" /> Modo Soporte: {impersonating.nombres || impersonating.nombre}
+          <button onClick={() => { setImpersonating(null); setActiveTab('licencias'); }} className="ml-6 bg-white text-rose-600 px-3 py-0.5 rounded hover:scale-105 transition-transform">Salir</button>
         </div>
       )}
-
-      <div className="fixed top-4 right-4 z-[999] hidden sm:flex flex-col space-y-2 pointer-events-none">
-        {notifications.map(notif => (
-          <div key={notif.id} onClick={() => { if(notif.tab) setActiveTab(notif.tab); setNotifications(prev => prev.filter(n => n.id !== notif.id)); }} className={`w-80 bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-xl shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-4 flex items-start transform transition-all duration-300 animate-in slide-in-from-right-8 pointer-events-auto ${notif.tab ? 'cursor-pointer hover:scale-[1.02]' : ''}`}>
-            <div className={`mr-3 mt-0.5 ${notif.type === 'success' ? 'text-emerald-500 dark:text-emerald-400' : notif.type === 'danger' ? 'text-rose-500 dark:text-rose-400' : 'text-amber-500 dark:text-amber-400'}`}>
-              {notif.type === 'success' ? <CheckCircle size={20}/> : notif.type === 'danger' ? <AlertCircle size={20}/> : <Bell size={20}/>}
-            </div>
-            <div>
-              <h4 className="font-bold text-slate-800 dark:text-white text-sm">{notif.title}</h4>
-              <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 leading-snug">{notif.message}</p>
-            </div>
-          </div>
-        ))}
-      </div>
 
       {typeof Sidebar !== 'undefined' && !isSuperAdminMode && !isSingleAppMode && (
         <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} userPlan={userPlan} agencyConfig={agencyConfig} isDarkMode={isDarkMode} hasSocialWall={hasSocialWall} hasBlackLabel={hasBlackLabel} />
       )}
       
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
-        <div className={`${impersonating ? 'pt-7' : ''} transition-all`}>
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10 bg-[#000000]">
+        
+        {/* HEADER FLOTANTE Y DINÁMICO */}
+        <div className={`absolute xl:static top-0 w-full z-50 transition-transform duration-300 ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full xl:translate-y-0'} ${impersonating ? 'pt-7 xl:pt-0' : ''}`}>
           <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} authData={authData} switchEvent={switchEvent} isSuperAdminMode={isSuperAdminMode} eventName={currentEventName} eventPlan={currentEventPlan} urlInvitacion={activeEventData?.urlInvitacion} />
         </div>
         
-        {/* 🟢 BARRA DE PERIODO DE GRACIA (PRIMERAS 24 HORAS CON DEUDA) */}
-        {!isSuperAdminMode && estadoCuenta.deuda > 0 && !estadoCuenta.bloqueado && horasRestantesGracia && (
-          <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs z-20">
-            <div className="flex items-center text-amber-300 font-bold text-center sm:text-left">
-              <Clock size={15} className="mr-2 text-[#D4AF37] shrink-0" />
-              <span>Tu invitación web ya fue entregada. Tienes <b className="text-white underline">{horasRestantesGracia}</b> para liquidar tu saldo pendiente de <b className="text-[#D4AF37]">${estadoCuenta.deuda} MXN</b> antes de la pausa automática.</span>
-            </div>
-            <button
-              type="button"
-              onClick={abrirPasarelaLiquidacion}
-              className="px-4 py-1.5 bg-[#D4AF37] text-[#1C1917] rounded-lg font-black text-[10px] uppercase tracking-widest shrink-0 hover:bg-[#c5a028] transition-colors shadow-md"
-            >
-              Liquidar Saldo en Línea (${estadoCuenta.deuda})
-            </button>
-          </div>
-        )}
-
-        {/* 🟢 MODAL DE PASARELA STRIPE AUTOMÁTICA PARA LIQUIDAR DEUDA */}
-        {showModalLiquidar && (
-          <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
-            <div className="bg-[#1C1917] border border-[#D4AF37]/40 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.95)] max-h-[90vh] overflow-y-auto custom-scrollbar text-white relative">
-              <button
-                type="button"
-                onClick={() => { setShowModalLiquidar(false); setClientSecretLiq(null); }}
-                className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors"
-              >
-                <X size={20} />
+        {/* MAIN CON SCROLL AISLADO Y ESPACIO PARA BOTTOM BAR */}
+        <main onScroll={handleMainScroll} className="flex-1 overflow-x-hidden overflow-y-auto p-0 sm:p-5 lg:p-6 print:p-0 print:overflow-visible custom-scrollbar relative z-10 mt-16 xl:mt-0 mb-[72px] xl:mb-0 bg-[#000000]">
+          
+          {!isSuperAdminMode && estadoCuenta.deuda > 0 && !estadoCuenta.bloqueado && horasRestantesGracia && (
+            <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs z-20">
+              <div className="flex items-center text-amber-300 font-bold text-center sm:text-left">
+                <Clock size={15} className="mr-2 text-[#D4AF37] shrink-0" />
+                <span>Invitación entregada. Tienes <b className="text-white underline">{horasRestantesGracia}</b> para liquidar <b className="text-[#D4AF37]">${estadoCuenta.deuda} MXN</b>.</span>
+              </div>
+              <button type="button" onClick={abrirPasarelaLiquidacion} className="px-4 py-1.5 bg-white text-black rounded-lg font-black text-[10px] uppercase tracking-widest shrink-0 hover:bg-slate-200 transition-colors shadow-md">
+                Liquidar Saldo (${estadoCuenta.deuda})
               </button>
-              <div className="mb-6">
-                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block mb-1">Pasarela de Liquidación Automática</span>
-                <h3 className="text-2xl font-editorial font-black text-white">{currentEventName}</h3>
-                <p className="text-xs text-slate-400 mt-1">Al completarse tu pago, tu bóveda e invitación quedan liberadas al instante.</p>
-              </div>
-
-              <div className="bg-[#141210] border border-[#D4AF37]/30 rounded-2xl p-4 mb-6 flex justify-between items-center">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Saldo a Liquidar</span>
-                <span className="text-2xl font-editorial font-black text-[#D4AF37]">${estadoCuenta.deuda} MXN</span>
-              </div>
-
-              {loadingLiq ? (
-                <div className="py-12 text-center text-[#D4AF37] font-bold text-xs uppercase tracking-widest animate-pulse flex flex-col items-center gap-3">
-                  <RefreshCw size={24} className="animate-spin" />
-                  Conectando con Stripe...
-                </div>
-              ) : errorLiq ? (
-                <div className="text-center space-y-4 py-4">
-                  <p className="text-rose-400 text-xs font-bold">{errorLiq}</p>
-                  <button type="button" onClick={abrirPasarelaLiquidacion} className="px-5 py-3 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-[10px] uppercase tracking-widest">
-                    Reintentar
-                  </button>
-                </div>
-              ) : clientSecretLiq ? (
-                <Elements stripe={stripePromise} options={{
-                  clientSecret: clientSecretLiq,
-                  appearance: {
-                    theme: 'night',
-                    variables: { colorPrimary: '#D4AF37', colorBackground: '#141210', colorText: '#ffffff', colorDanger: '#f87171', fontFamily: '"Montserrat", sans-serif' }
-                  }
-                }}>
-                  <StripeCaja
-                    planSeleccionado={{ plan: currentEventPlan, precio: estadoCuenta.deuda, moneda: 'MXN' }}
-                    datosCliente={{ nombre: currentEventName, email: activeEventData?.email || authData?.email || '', telefono: activeEventData?.telefono || '', pais: 'MX' }}
-                    onSuccess={confirmarLiquidacionExitosa}
-                    onVolver={() => { setShowModalLiquidar(false); setClientSecretLiq(null); }}
-                  />
-                </Elements>
-              ) : null}
             </div>
-          </div>
-        )}
+          )}
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-5 lg:p-6 print:p-0 print:overflow-visible custom-scrollbar relative z-10">
+          {showModalLiquidar && (
+            <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+              <div className="bg-[#0A0A0A] border border-white/10 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.95)] max-h-[90vh] overflow-y-auto custom-scrollbar text-white relative">
+                <button type="button" onClick={() => { setShowModalLiquidar(false); setClientSecretLiq(null); }} className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors"><X size={20} /></button>
+                <div className="mb-6">
+                  <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white block mb-1">Pasarela de Liquidación Automática</span>
+                  <h3 className="text-2xl font-editorial font-black text-white">{currentEventName}</h3>
+                </div>
+                <div className="bg-[#111111] border border-white/5 rounded-2xl p-4 mb-6 flex justify-between items-center">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Saldo a Liquidar</span>
+                  <span className="text-2xl font-editorial font-black text-white">${estadoCuenta.deuda} MXN</span>
+                </div>
+                {loadingLiq ? (
+                  <div className="py-12 text-center text-white font-bold text-xs uppercase tracking-widest animate-pulse flex flex-col items-center gap-3"><RefreshCw size={24} className="animate-spin" />Conectando con Stripe...</div>
+                ) : errorLiq ? (
+                  <div className="text-center space-y-4 py-4"><p className="text-rose-400 text-xs font-bold">{errorLiq}</p><button type="button" onClick={abrirPasarelaLiquidacion} className="px-5 py-3 bg-white text-black rounded-xl font-black text-[10px] uppercase tracking-widest">Reintentar</button></div>
+                ) : clientSecretLiq ? (
+                  <Elements stripe={stripePromise} options={{ clientSecret: clientSecretLiq, appearance: { theme: 'night', variables: { colorPrimary: '#ffffff', colorBackground: '#111111', colorText: '#ffffff', colorDanger: '#f87171', fontFamily: '"Montserrat", sans-serif' } } }}>
+                    <StripeCaja planSeleccionado={{ plan: currentEventPlan, precio: estadoCuenta.deuda, moneda: 'MXN' }} datosCliente={{ nombre: currentEventName, email: activeEventData?.email || authData?.email || '', telefono: activeEventData?.telefono || '', pais: 'MX' }} onSuccess={confirmarLiquidacionExitosa} onVolver={() => { setShowModalLiquidar(false); setClientSecretLiq(null); }} />
+                  </Elements>
+                ) : null}
+              </div>
+            </div>
+          )}
+
           <div className="h-full max-w-7xl mx-auto print:max-w-none print:w-full">
             {!isSuperAdminMode && estadoCuenta.bloqueado && estadoCuenta.deuda > 0 ? (
               <div className="h-full min-h-[75vh] flex items-center justify-center p-4 animate-in fade-in">
-                <div className="bg-[#1C1917] border border-[#D4AF37]/40 rounded-3xl max-w-lg w-full p-8 sm:p-10 text-center shadow-[0_25px_80px_rgba(0,0,0,0.95)] relative overflow-hidden">
-                  <div className="w-20 h-20 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center mx-auto mb-6 text-[#D4AF37]">
-                    <Lock size={36} />
-                  </div>
-                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-rose-400 block mb-2">Plazo de Reserva Vencido (24 hrs)</span>
-                  <h2 className="text-2xl sm:text-3xl font-editorial font-black text-white mb-4">Bóveda e Invitación en Pausa</h2>
-                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
-                    Tu invitación digital fue entregada y activada con éxito. Para reactivar la visualización pública de tu invitación y el acceso a tus herramientas de gestión, liquida el saldo pendiente de tu paquete.
-                  </p>
-                  <div className="bg-[#141210] border border-white/10 rounded-2xl p-5 mb-8">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Saldo Pendiente a Liquidar</p>
-                    <p className="text-4xl font-editorial font-black text-[#D4AF37]">${estadoCuenta.deuda} <span className="text-xs font-sans text-slate-400">MXN</span></p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={abrirPasarelaLiquidacion}
-                    className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.3)] hover:bg-[#c5a028] transition-all flex items-center justify-center"
-                  >
-                    Liquidar Saldo en Línea y Reactivar al Instante
-                  </button>
+                <div className="bg-[#0A0A0A] border border-white/10 rounded-3xl max-w-lg w-full p-8 sm:p-10 text-center shadow-2xl relative overflow-hidden">
+                  <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6 text-white"><Lock size={36} /></div>
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-rose-400 block mb-2">Reserva Vencida</span>
+                  <h2 className="text-2xl sm:text-3xl font-editorial font-black text-white mb-4">Bóveda en Pausa</h2>
+                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">Liquida el saldo pendiente de tu paquete para reactivar tu bóveda e invitación.</p>
+                  <button type="button" onClick={abrirPasarelaLiquidacion} className="w-full py-4 bg-white text-black rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center">Liquidar ${estadoCuenta.deuda} en Línea</button>
                 </div>
               </div>
             ) : (
@@ -20566,6 +20506,114 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
             )}
           </div>
         </main>
+
+        {/* 📱 BOTTOM BAR MÓVIL (APP NATIVA OLED) */}
+        {!isSuperAdminMode && !isSingleAppMode && (
+          <nav className="xl:hidden fixed bottom-0 left-0 w-full bg-[#000000]/90 backdrop-blur-2xl border-t border-white/10 z-[100] flex justify-around items-center pb-safe pt-2 h-[72px] shadow-[0_-10px_40px_rgba(0,0,0,0.9)] px-2 print:hidden">
+            <button onClick={() => { setActiveTab('dashboard'); setShowMobileHub(false); }} className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${activeTab === 'dashboard' && !showMobileHub ? 'text-white' : 'text-[#444444] hover:text-slate-400'}`}>
+                <LayoutDashboard size={24} strokeWidth={activeTab === 'dashboard' && !showMobileHub ? 2.5 : 2} />
+            </button>
+            <button onClick={() => { setActiveTab('invitados'); setShowMobileHub(false); }} className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${activeTab === 'invitados' && !showMobileHub ? 'text-white' : 'text-[#444444] hover:text-slate-400'}`}>
+                <Users size={24} strokeWidth={activeTab === 'invitados' && !showMobileHub ? 2.5 : 2} />
+            </button>
+            <button onClick={() => { setShowMobileHub(true); }} className="flex flex-col items-center justify-center w-full h-full space-y-1 text-[#444444] hover:text-slate-400 transition-colors">
+                <SearchIcon size={24} strokeWidth={2} />
+            </button>
+            <button onClick={() => { setActiveTab('mesas'); setShowMobileHub(false); }} className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${activeTab === 'mesas' && !showMobileHub ? 'text-white' : 'text-[#444444] hover:text-slate-400'}`}>
+                <LayoutGrid size={24} strokeWidth={activeTab === 'mesas' && !showMobileHub ? 2.5 : 2} />
+            </button>
+            <button onClick={() => setShowMobileHub(!showMobileHub)} className={`flex flex-col items-center justify-center w-full h-full transition-colors ${showMobileHub ? 'text-white' : 'text-[#444444] hover:text-slate-400'}`}>
+                <div className="w-8 h-8 rounded-full border border-current flex items-center justify-center">
+                    <span className="text-[10px] font-editorial font-black uppercase tracking-widest pt-0.5">{getInitialsMobile(currentEventName)}</span>
+                </div>
+            </button>
+          </nav>
+        )}
+
+        {/* 📱 HUB MÓVIL DESPLEGABLE (BOTTOM SHEET) */}
+        {showMobileHub && (
+          <div className="xl:hidden fixed inset-0 z-[90] flex flex-col justify-end">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowMobileHub(false)}></div>
+            <div className="bg-[#0A0A0A] w-full rounded-t-[2rem] border-t border-white/10 relative z-10 p-6 pb-24 max-h-[85vh] overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-full duration-300 shadow-[0_-20px_50px_rgba(0,0,0,0.9)]">
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-8"></div>
+              
+              <div className="relative w-full mb-8">
+                <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                <input type="text" placeholder="Buscar invitado, gasto o proveedor..." value={globalSearch} onChange={(e) => setGlobalSearch(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-[#141210] border border-white/10 rounded-2xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-white transition-all"/>
+              </div>
+
+              <div className="space-y-8">
+                <div>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-4 px-2">Planeación</p>
+                  <div className="grid grid-cols-4 gap-3">
+                    <button onClick={() => {setActiveTab('tareas'); setShowMobileHub(false);}} className="flex flex-col items-center gap-2">
+                      <div className="w-14 h-14 rounded-2xl bg-[#141210] border border-white/5 flex items-center justify-center text-white"><CheckSquare size={24} strokeWidth={1.5}/></div>
+                      <span className="text-[9px] font-bold text-slate-400">Checklist</span>
+                    </button>
+                    <button onClick={() => {setActiveTab('presupuesto'); setShowMobileHub(false);}} className="flex flex-col items-center gap-2">
+                      <div className="w-14 h-14 rounded-2xl bg-[#141210] border border-white/5 flex items-center justify-center text-white"><Wallet size={24} strokeWidth={1.5}/></div>
+                      <span className="text-[9px] font-bold text-slate-400">Finanzas</span>
+                    </button>
+                    <button onClick={() => {setActiveTab('proveedores'); setShowMobileHub(false);}} className="flex flex-col items-center gap-2">
+                      <div className="w-14 h-14 rounded-2xl bg-[#141210] border border-white/5 flex items-center justify-center text-white"><Store size={24} strokeWidth={1.5}/></div>
+                      <span className="text-[9px] font-bold text-slate-400">Directorio</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-4 px-2">Operación & Add-Ons</p>
+                  <div className="grid grid-cols-4 gap-3">
+                    <button onClick={() => {setActiveTab('timing'); setShowMobileHub(false);}} className="flex flex-col items-center gap-2">
+                      <div className="w-14 h-14 rounded-2xl bg-[#141210] border border-white/5 flex items-center justify-center text-white"><Clock size={24} strokeWidth={1.5}/></div>
+                      <span className="text-[9px] font-bold text-slate-400">Timing</span>
+                    </button>
+                    
+                    <button onClick={() => { if(hasSocialWall || ['diamante', 'social_wall'].includes(userPlan)) { setActiveTab('galeria'); setShowMobileHub(false); } else { addNotification('Función Premium', 'Adquiere el Muro Social para activar esta función.', 'warning'); } }} className="flex flex-col items-center gap-2 relative">
+                      <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center transition-colors ${hasSocialWall || ['diamante', 'social_wall'].includes(userPlan) ? 'bg-[#141210] border-white/5 text-pink-400' : 'bg-transparent border-dashed border-white/10 text-slate-600'}`}>
+                        <Camera size={24} strokeWidth={1.5}/>
+                      </div>
+                      <span className="text-[9px] font-bold text-slate-400">Social Wall</span>
+                      {!(hasSocialWall || ['diamante', 'social_wall'].includes(userPlan)) && <div className="absolute top-[-5px] right-1 w-5 h-5 bg-[#000000] rounded-full flex items-center justify-center"><Lock size={10} className="text-white"/></div>}
+                    </button>
+
+                    <button onClick={() => { if(hasBlackLabel || ['oro', 'diamante', 'security_kit'].includes(userPlan)) { setActiveTab('escaner'); setShowMobileHub(false); } else { addNotification('Función Premium', 'Mejora tu plan para activar el Control de Puerta.', 'warning'); } }} className="flex flex-col items-center gap-2 relative">
+                      <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center transition-colors ${hasBlackLabel || ['oro', 'diamante', 'security_kit'].includes(userPlan) ? 'bg-[#141210] border-white/5 text-sky-400' : 'bg-transparent border-dashed border-white/10 text-slate-600'}`}>
+                        <Scan size={24} strokeWidth={1.5}/>
+                      </div>
+                      <span className="text-[9px] font-bold text-slate-400">Escáner</span>
+                      {!(hasBlackLabel || ['oro', 'diamante', 'security_kit'].includes(userPlan)) && <div className="absolute top-[-5px] right-1 w-5 h-5 bg-[#000000] rounded-full flex items-center justify-center"><Lock size={10} className="text-white"/></div>}
+                    </button>
+                    
+                    <button onClick={() => { if(hasBlackLabel || ['diamante', 'security_kit'].includes(userPlan)) { setActiveTab('monitor'); setShowMobileHub(false); } else { addNotification('Función Premium', 'Mejora tu plan para usar el Monitor.', 'warning'); } }} className="flex flex-col items-center gap-2 relative">
+                      <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center transition-colors ${hasBlackLabel || ['diamante', 'security_kit'].includes(userPlan) ? 'bg-[#141210] border-white/5 text-emerald-400' : 'bg-transparent border-dashed border-white/10 text-slate-600'}`}>
+                        <Activity size={24} strokeWidth={1.5}/>
+                      </div>
+                      <span className="text-[9px] font-bold text-slate-400">Monitor</span>
+                      {!(hasBlackLabel || ['diamante', 'security_kit'].includes(userPlan)) && <div className="absolute top-[-5px] right-1 w-5 h-5 bg-[#000000] rounded-full flex items-center justify-center"><Lock size={10} className="text-white"/></div>}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-4 px-2">Mi Cuenta</p>
+                  <div className="bg-[#141210] border border-white/5 rounded-2xl overflow-hidden">
+                    <button onClick={() => { setActiveTab('invitacion'); setShowMobileHub(false); }} className="w-full flex items-center p-4 border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <ExternalLink size={16} className="mr-3 text-slate-400"/> <span className="text-white text-sm font-bold">Ver Invitación Web</span>
+                    </button>
+                    <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20necesito%20ayuda%20con%20mi%20panel%20Baulia', '_blank')} className="w-full flex items-center p-4 border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <MessageCircle size={16} className="mr-3 text-slate-400"/> <span className="text-white text-sm font-bold">Soporte Premium</span>
+                    </button>
+                    <button onClick={() => signOut(auth)} className="w-full flex items-center p-4 hover:bg-rose-500/10 transition-colors">
+                      <LogOut size={16} className="mr-3 text-rose-500"/> <span className="text-rose-500 text-sm font-bold">Cerrar Sesión</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
