@@ -20213,18 +20213,57 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const [estadoCuenta, setEstadoCuenta] = useState({ deuda: 0, fechaEntrega: null, bloqueado: false, urlInvitacion: '', status: '' });
   const [horasRestantesGracia, setHorasRestantesGracia] = useState(null);
 
-  // 🟢 ESTADOS DE APP NATIVA (Scroll y Menú Hub)
+  // 🟢 ESTADOS DE APP NATIVA (Scroll con amortiguador Instagram, Buscador separado y Menú Hub)
   const [showMobileHub, setShowMobileHub] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const scrollUpAccum = useRef(0);
+  const scrollDownAccum = useRef(0);
+
+  // Elimina automáticamente el botón flotante de "Calificar Experiencia" que estorba
+  useEffect(() => {
+    const quitarBotonCalificar = () => {
+      document.querySelectorAll('button').forEach(btn => {
+        if (btn.textContent && btn.textContent.toLowerCase().includes('calificar experiencia')) {
+          btn.style.display = 'none';
+        }
+      });
+    };
+    quitarBotonCalificar();
+    const t = setTimeout(quitarBotonCalificar, 500);
+    return () => clearTimeout(t);
+  }, [activeTab]);
 
   const handleMainScroll = (e) => {
     const currentScrollY = e.target.scrollTop;
-    if (currentScrollY > lastScrollY.current && currentScrollY > 60) {
-      setIsHeaderVisible(false); // Oculta header al bajar
-    } else if (currentScrollY < lastScrollY.current) {
-      setIsHeaderVisible(true);  // Muestra header al subir
+    const diff = currentScrollY - lastScrollY.current;
+
+    // Si llega hasta arriba, siempre muestra la barra superior
+    if (currentScrollY <= 25) {
+      setIsHeaderVisible(true);
+      scrollUpAccum.current = 0;
+      scrollDownAccum.current = 0;
+      lastScrollY.current = currentScrollY;
+      return;
     }
+
+    if (diff > 0) {
+      // Bajando por la página
+      scrollDownAccum.current += diff;
+      scrollUpAccum.current = 0;
+      if (scrollDownAccum.current > 25 && currentScrollY > 65) {
+        setIsHeaderVisible(false);
+      }
+    } else if (diff < 0) {
+      // Subiendo: requiere deslizar al menos 50px continuos hacia arriba (estilo Instagram)
+      scrollUpAccum.current += Math.abs(diff);
+      scrollDownAccum.current = 0;
+      if (scrollUpAccum.current > 50) {
+        setIsHeaderVisible(true);
+      }
+    }
+
     lastScrollY.current = currentScrollY;
   };
 
@@ -20499,25 +20538,33 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
           </div>
         </main>
 
-        {/* 📱 BOTTOM BAR MÓVIL (ESTILO INSTAGRAM OLED) */}
+        {/* 📱 BOTTOM BAR MÓVIL (COMPACTA CON CASITA HOME Y BUSCADOR INDEPENDIENTE) */}
         {!isSuperAdminMode && !isSingleAppMode && (
-          <nav className="xl:hidden fixed bottom-0 left-0 w-full bg-[#000000]/95 backdrop-blur-2xl border-t border-white/10 z-[100] flex justify-around items-center pb-safe h-[64px] shadow-[0_-10px_40px_rgba(0,0,0,0.95)] px-2 print:hidden">
-            <button onClick={() => { setActiveTab('dashboard'); setShowMobileHub(false); }} className={`flex flex-col items-center justify-center w-full h-full relative transition-colors ${activeTab === 'dashboard' && !showMobileHub ? 'text-white' : 'text-white/45 hover:text-white/80'}`}>
-              <LayoutDashboard size={23} strokeWidth={activeTab === 'dashboard' && !showMobileHub ? 2.4 : 1.7} />
-              {activeTab === 'dashboard' && !showMobileHub && <span className="w-1 h-1 rounded-full bg-white mt-1"></span>}
+          <nav className="xl:hidden fixed bottom-0 left-0 w-full bg-[#000000]/95 backdrop-blur-2xl border-t border-white/10 z-[100] flex justify-around items-center h-[52px] shadow-[0_-10px_40px_rgba(0,0,0,0.95)] px-2 print:hidden">
+            {/* 1. CASITA (RESUMEN / DASHBOARD) */}
+            <button onClick={() => { setActiveTab('dashboard'); setShowMobileHub(false); setShowMobileSearch(false); }} className={`flex flex-col items-center justify-center w-full h-full relative transition-colors ${activeTab === 'dashboard' && !showMobileHub && !showMobileSearch ? 'text-white' : 'text-white/45 hover:text-white/80'}`}>
+              <svg width="23" height="23" viewBox="0 0 24 24" fill={activeTab === 'dashboard' && !showMobileHub && !showMobileSearch ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={activeTab === 'dashboard' && !showMobileHub && !showMobileSearch ? '2.2' : '1.8'} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1V9.5z" />
+              </svg>
             </button>
-            <button onClick={() => { setActiveTab('invitados'); setShowMobileHub(false); }} className={`flex flex-col items-center justify-center w-full h-full relative transition-colors ${activeTab === 'invitados' && !showMobileHub ? 'text-white' : 'text-white/45 hover:text-white/80'}`}>
-              <Users size={23} strokeWidth={activeTab === 'invitados' && !showMobileHub ? 2.4 : 1.7} />
-              {activeTab === 'invitados' && !showMobileHub && <span className="w-1 h-1 rounded-full bg-white mt-1"></span>}
+
+            {/* 2. INVITADOS */}
+            <button onClick={() => { setActiveTab('invitados'); setShowMobileHub(false); setShowMobileSearch(false); }} className={`flex flex-col items-center justify-center w-full h-full relative transition-colors ${activeTab === 'invitados' && !showMobileHub && !showMobileSearch ? 'text-white' : 'text-white/45 hover:text-white/80'}`}>
+              <Users size={23} strokeWidth={activeTab === 'invitados' && !showMobileHub && !showMobileSearch ? 2.4 : 1.7} />
             </button>
-            <button onClick={() => { setShowMobileHub(true); }} className={`flex flex-col items-center justify-center w-full h-full relative transition-colors ${showMobileHub ? 'text-white' : 'text-white/45 hover:text-white/80'}`}>
-              <SearchIcon size={23} strokeWidth={showMobileHub ? 2.4 : 1.7} />
+
+            {/* 3. LUPA (SOLO BUSCADOR) */}
+            <button onClick={() => { setShowMobileSearch(!showMobileSearch); setShowMobileHub(false); }} className={`flex flex-col items-center justify-center w-full h-full relative transition-colors ${showMobileSearch ? 'text-white' : 'text-white/45 hover:text-white/80'}`}>
+              <SearchIcon size={23} strokeWidth={showMobileSearch ? 2.5 : 1.7} />
             </button>
-            <button onClick={() => { if(['oro', 'diamante'].includes(userPlan)) { setActiveTab('mesas'); setShowMobileHub(false); } else { addNotification('Función Premium', 'La gestión de mesas está disponible en planes Oro y Diamante.', 'warning'); } }} className={`flex flex-col items-center justify-center w-full h-full relative transition-colors ${activeTab === 'mesas' && !showMobileHub ? 'text-white' : 'text-white/45 hover:text-white/80'}`}>
-              <LayoutGrid size={23} strokeWidth={activeTab === 'mesas' && !showMobileHub ? 2.4 : 1.7} />
-              {activeTab === 'mesas' && !showMobileHub && <span className="w-1 h-1 rounded-full bg-white mt-1"></span>}
+
+            {/* 4. MESAS */}
+            <button onClick={() => { if(['oro', 'diamante'].includes(userPlan)) { setActiveTab('mesas'); setShowMobileHub(false); setShowMobileSearch(false); } else { addNotification('Función Premium', 'La gestión de mesas está disponible en planes Oro y Diamante.', 'warning'); } }} className={`flex flex-col items-center justify-center w-full h-full relative transition-colors ${activeTab === 'mesas' && !showMobileHub && !showMobileSearch ? 'text-white' : 'text-white/45 hover:text-white/80'}`}>
+              <LayoutGrid size={22} strokeWidth={activeTab === 'mesas' && !showMobileHub && !showMobileSearch ? 2.4 : 1.7} />
             </button>
-            <button onClick={() => setShowMobileHub(!showMobileHub)} className={`flex flex-col items-center justify-center w-full h-full transition-colors ${showMobileHub ? 'text-white' : 'text-white/60 hover:text-white'}`}>
+
+            {/* 5. MONOGRAMA (SOLO MENÚ HUB) */}
+            <button onClick={() => { setShowMobileHub(!showMobileHub); setShowMobileSearch(false); }} className={`flex flex-col items-center justify-center w-full h-full transition-colors ${showMobileHub ? 'text-white' : 'text-white/60 hover:text-white'}`}>
               <div className={`w-7 h-7 rounded-full border flex items-center justify-center transition-all ${showMobileHub ? 'border-white bg-white text-black' : 'border-white/50 text-white'}`}>
                 <span className="text-[9px] font-editorial font-black uppercase tracking-wider">{getInitialsMobile(currentEventName)}</span>
               </div>
@@ -20525,44 +20572,64 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
           </nav>
         )}
 
-        {/* 📱 HUB MÓVIL DESPLEGABLE (BOTTOM SHEET CON BUSCADOR EN VIVO) */}
-        {showMobileHub && (
+        {/* 🔍 MODAL EXCLUSIVO DE LUPA (SOLO BUSCADOR) */}
+        {showMobileSearch && (
           <div className="xl:hidden fixed inset-0 z-[90] flex flex-col justify-end">
-            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setShowMobileHub(false)}></div>
-            <div className="bg-[#0A0A0A] w-full rounded-t-[2rem] border-t border-white/10 relative z-10 p-6 pb-24 max-h-[85vh] overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-full duration-300 shadow-[0_-20px_50px_rgba(0,0,0,0.95)]">
-              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6"></div>
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMobileSearch(false)}></div>
+            <div className="bg-[#0A0A0A] w-full rounded-t-[2rem] border-t border-white/10 relative z-10 p-6 pb-20 max-h-[80vh] overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-full duration-300 shadow-[0_-20px_50px_rgba(0,0,0,0.95)]">
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-5"></div>
+              <div className="flex items-center justify-between mb-4 px-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Buscador Global</span>
+                <button onClick={() => setShowMobileSearch(false)} className="text-slate-500 hover:text-white"><X size={16}/></button>
+              </div>
               
-              {/* Buscador Universal con Resultados en Vivo */}
-              <div className="relative w-full mb-6">
+              <div className="relative w-full mb-4">
                 <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input type="text" placeholder="Buscar invitado, gasto o proveedor..." value={globalSearch} onChange={(e) => setGlobalSearch(e.target.value)} className="w-full pl-11 pr-9 py-3.5 bg-[#111111] border border-white/10 rounded-2xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-white transition-all"/>
+                <input autoFocus type="text" placeholder="Escribe nombre de invitado, proveedor o gasto..." value={globalSearch} onChange={(e) => setGlobalSearch(e.target.value)} className="w-full pl-11 pr-9 py-3.5 bg-[#111111] border border-white/15 rounded-2xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-white transition-all"/>
                 {globalSearch && (
                   <button onClick={() => setGlobalSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"><X size={16}/></button>
                 )}
               </div>
 
-              {globalSearch.trim().length > 1 && (
-                <div className="mb-6 bg-[#111111] border border-white/10 rounded-2xl overflow-hidden divide-y divide-white/5 max-h-52 overflow-y-auto">
-                  {guests.filter(g => (g.name || '').toLowerCase().includes(globalSearch.toLowerCase())).slice(0, 4).map(g => (
-                    <button key={`sr_g_${g.id}`} onClick={() => { setActiveTab('invitados'); setShowMobileHub(false); }} className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-white/5">
+              {globalSearch.trim().length > 0 ? (
+                <div className="bg-[#111111] border border-white/10 rounded-2xl overflow-hidden divide-y divide-white/5 max-h-64 overflow-y-auto">
+                  {guests.filter(g => (g.name || '').toLowerCase().includes(globalSearch.toLowerCase())).slice(0, 6).map(g => (
+                    <button key={`sr_g_${g.id}`} onClick={() => { setActiveTab('invitados'); setShowMobileSearch(false); }} className="w-full px-4 py-3.5 text-left flex items-center justify-between hover:bg-white/5">
                       <span className="text-xs font-bold text-white truncate">{g.name}</span>
                       <span className="text-[9px] uppercase tracking-widest text-slate-400">Invitado</span>
                     </button>
                   ))}
-                  {proveedores.filter(p => (p.nombre || '').toLowerCase().includes(globalSearch.toLowerCase())).slice(0, 3).map(p => (
-                    <button key={`sr_p_${p.id}`} onClick={() => { setActiveTab('proveedores'); setShowMobileHub(false); }} className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-white/5">
+                  {proveedores.filter(p => (p.nombre || '').toLowerCase().includes(globalSearch.toLowerCase())).slice(0, 4).map(p => (
+                    <button key={`sr_p_${p.id}`} onClick={() => { setActiveTab('proveedores'); setShowMobileSearch(false); }} className="w-full px-4 py-3.5 text-left flex items-center justify-between hover:bg-white/5">
                       <span className="text-xs font-bold text-white truncate">{p.nombre}</span>
                       <span className="text-[9px] uppercase tracking-widest text-amber-400">Proveedor</span>
                     </button>
                   ))}
-                  {gastos.filter(g => (g.concepto || '').toLowerCase().includes(globalSearch.toLowerCase())).slice(0, 3).map(g => (
-                    <button key={`sr_e_${g.id}`} onClick={() => { setActiveTab('presupuesto'); setShowMobileHub(false); }} className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-white/5">
+                  {gastos.filter(g => (g.concepto || '').toLowerCase().includes(globalSearch.toLowerCase())).slice(0, 4).map(g => (
+                    <button key={`sr_e_${g.id}`} onClick={() => { setActiveTab('presupuesto'); setShowMobileSearch(false); }} className="w-full px-4 py-3.5 text-left flex items-center justify-between hover:bg-white/5">
                       <span className="text-xs font-bold text-white truncate">{g.concepto}</span>
                       <span className="text-[9px] uppercase tracking-widest text-emerald-400">Finanzas</span>
                     </button>
                   ))}
+                  {guests.filter(g => (g.name || '').toLowerCase().includes(globalSearch.toLowerCase())).length === 0 &&
+                   proveedores.filter(p => (p.nombre || '').toLowerCase().includes(globalSearch.toLowerCase())).length === 0 &&
+                   gastos.filter(g => (g.concepto || '').toLowerCase().includes(globalSearch.toLowerCase())).length === 0 && (
+                    <div className="p-6 text-center text-xs text-slate-500">Sin coincidencias para "{globalSearch}"</div>
+                  )}
                 </div>
+              ) : (
+                <p className="text-center text-[11px] text-slate-500 py-6">Encuentra al instante cualquier invitado, proveedor o gasto de tu evento.</p>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* 📱 HUB MÓVIL DESPLEGABLE (EXCLUSIVO DEL MONOGRAMA: SOLO MENÚ Y CUENTA) */}
+        {showMobileHub && (
+          <div className="xl:hidden fixed inset-0 z-[90] flex flex-col justify-end">
+            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setShowMobileHub(false)}></div>
+            <div className="bg-[#0A0A0A] w-full rounded-t-[2rem] border-t border-white/10 relative z-10 p-6 pb-20 max-h-[85vh] overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-full duration-300 shadow-[0_-20px_50px_rgba(0,0,0,0.95)]">
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6"></div>
 
               <div className="space-y-7">
                 <div>
