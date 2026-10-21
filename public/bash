@@ -1,5 +1,5 @@
 git add .
-git commit -m "descuentos y anticipos, pasarela y autobloqueo invi"
+git commit -m "automaticacion de pagos y reservas"
 git push origin main
 
 maquina del tiempo

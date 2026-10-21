@@ -12344,6 +12344,23 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
     e.preventDefault();
     setLoading(true); setErrorTexto(null);
     try {
+      const emailKey = email.trim().toLowerCase();
+      // Guardamos preventa en Firebase antes de pagar para que el panel sepa cuánto debe aunque el webhook tarde
+      if (deudaRestante > 0 || cuponAplicado) {
+        await setDoc(doc(db, "ajustes_baulia", "precios_publicos"), {
+          preventasPendientes: {
+            ...(configPublica.preventasPendientes || {}),
+            [emailKey]: {
+              email: emailKey,
+              montoPagado: montoACobrarHoy,
+              deudaPlataforma: deudaRestante,
+              cuponAplicado: cuponAplicado ? cuponAplicado.codigo : '',
+              timestamp: Date.now()
+            }
+          }
+        }, { merge: true }).catch(() => {});
+      }
+
       const telCompleto = `${lada} ${telefono}`;
       const respuesta = await fetch("https://us-central1-panel-de-control-intelig-db278.cloudfunctions.net/crearIntentoAsincrono", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -12366,7 +12383,7 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
     setLoading(false);
   };
 
-  // 🟢 Al terminar el pago en Stripe, sellamos la deuda y descontamos 1 uso al cupón en Firebase
+  // 🟢 Al terminar el pago en Stripe, sellamos la deuda en la bóveda más reciente del cliente
   const handleSuccessConCandado = async (resData) => {
     try {
       if (cuponAplicado) {
@@ -12376,25 +12393,31 @@ const CheckoutForm = ({ planSeleccionado, onSuccess, onCancel }) => {
         await updateDoc(doc(db, "ajustes_baulia", "precios_publicos"), { cupones: nuevosCupones }).catch(() => {});
       }
       if (deudaRestante > 0 || cuponAplicado) {
-        setTimeout(async () => {
+        const sellarDeuda = async () => {
           try {
             const snapUsers = await getDocs(collection(db, "usuarios"));
-            const clienteDoc = snapUsers.docs.find(d => (d.data().email || '').toLowerCase() === email.trim().toLowerCase());
+            const coincidencias = snapUsers.docs
+              .map(d => ({ id: d.id, ...d.data() }))
+              .filter(u => (u.email || '').toLowerCase() === email.trim().toLowerCase());
+            coincidencias.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+            const clienteDoc = coincidencias[0];
             if (clienteDoc) {
-              const targetEventId = clienteDoc.data().eventId || clienteDoc.id;
-              await updateDoc(doc(db, "usuarios", clienteDoc.id), {
+              const targetEventId = clienteDoc.eventId || clienteDoc.id;
+              await setDoc(doc(db, "usuarios", clienteDoc.id), {
                 deudaPlataforma: deudaRestante,
                 montoPagado: montoACobrarHoy,
                 cuponAplicado: cuponAplicado ? cuponAplicado.codigo : '',
                 bloqueadoPorPago: false
-              });
-              await updateDoc(doc(db, "eventos", targetEventId), {
+              }, { merge: true });
+              await setDoc(doc(db, "eventos", targetEventId), {
                 deudaPlataforma: deudaRestante,
                 bloqueadoPorPago: false
-              });
+              }, { merge: true });
             }
           } catch (e) { console.error("Sync post-pago:", e); }
-        }, 1500);
+        };
+        setTimeout(sellarDeuda, 1500);
+        setTimeout(sellarDeuda, 4000);
       }
     } catch (err) { console.error(err); }
     if (onSuccess) onSuccess(resData);
@@ -17362,7 +17385,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
   
   const [formData, setFormData] = useState({ nombres: '', email: '', telefono: '', plan: 'diamante', tipoEvento: 'boda', role: 'cliente', urlInvitacion: '', referenciaPago: '', fechaEvento: '', horaEvento: '18:00', isQrEnabled: true, isPassCountEnabled: true, hasSocialWall: false, hasBlackLabel: false, codigoCupon: '', esAnticipo: false });
   const [editingLic, setEditingLic] = useState(null);
-  const [configPrecios, setConfigPrecios] = useState({ anticipos: { activo: false, porcentaje: 10 }, cupones: [] });
+  const [configPrecios, setConfigPrecios] = useState({
+    promocion: { activa: false, porcentaje: 50, productos: { basico: true, plata: true, oro: true, diamante: true, social_wall: false, black_label: true } },
+    preciosBase: { basico: { MXN: 990 }, plata: { MXN: 1490 }, oro: { MXN: 1990 }, diamante: { MXN: 2990 }, social_wall: { MXN: 1490 }, black_label: { MXN: 1490 } },
+    anticipos: { activo: false, porcentaje: 10 },
+    cupones: [],
+    preventasPendientes: {}
+  });
 
   const [isCreating, setIsCreating] = useState(false);
   const [successData, setSuccessData] = useState(null);
@@ -17392,7 +17421,23 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
 
   const isSuperAdmin = authData?.role === 'superadmin';
 
-  const PRECIOS = { basico: 990, plata: 1490, oro: 1990, diamante: 2990, social_wall: 1490, security_kit: 1490 };
+  // 🟢 PRECIOS DINÁMICOS CONECTADOS A TU GESTOR DE PRECIOS Y PROMOCIONES EN VIVO
+  const PRECIOS = React.useMemo(() => {
+    const calcular = (keyConfig, fallback) => {
+      const base = Number(configPrecios.preciosBase?.[keyConfig]?.MXN) || fallback;
+      const promoActiva = configPrecios.promocion?.activa && configPrecios.promocion?.productos?.[keyConfig];
+      const pct = Number(configPrecios.promocion?.porcentaje) || 0;
+      return promoActiva ? Math.round(base * (1 - pct / 100)) : base;
+    };
+    return {
+      basico: calcular('basico', 990),
+      plata: calcular('plata', 1490),
+      oro: calcular('oro', 1990),
+      diamante: calcular('diamante', 2990),
+      social_wall: calcular('social_wall', 1490),
+      security_kit: calcular('black_label', 1490)
+    };
+  }, [configPrecios]);
 
   const tiposDeEvento = [
     { id: 'boda', label: 'Boda', placeholder: 'Ej. Carlos y Sofia', labelNombre: 'Nombre de los Novios' },
@@ -17417,10 +17462,13 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         const d = docSnap.data();
         setModoPrueba(d.modoPrueba === true);
         setModoPruebaDesde(d.modoPruebaDesde || 0);
-        setConfigPrecios({
+        setConfigPrecios(prev => ({
+          ...prev,
+          ...d,
           anticipos: d.anticipos || { activo: false, porcentaje: 10 },
-          cupones: d.cupones || []
-        });
+          cupones: d.cupones || [],
+          preventasPendientes: d.preventasPendientes || {}
+        }));
       }
     });
 
@@ -17484,6 +17532,57 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
       }
     });
   }, [ventas, modoPrueba, modoPruebaDesde, isSuperAdmin]);
+
+  // 🟢 SINCRONIZADOR AUTOMÁTICO DE ANTICIPOS Y LIQUIDACIONES DE STRIPE
+  useEffect(() => {
+    if (!licencias.length) return;
+    licencias.forEach(async (lic) => {
+      const targetEventId = lic.eventId || lic.id;
+
+      // 1. Si es un pago de LIQUIDACIÓN hecho desde la bóveda del cliente por Stripe:
+      if (lic.nombres && String(lic.nombres).startsWith('LIQUIDACION_')) {
+        const originalEventId = String(lic.nombres).replace('LIQUIDACION_', '').trim();
+        if (originalEventId) {
+          await setDoc(doc(db, "usuarios", originalEventId), { deudaPlataforma: 0, bloqueadoPorPago: false }, { merge: true }).catch(() => {});
+          await setDoc(doc(db, "eventos", originalEventId), { deudaPlataforma: 0, bloqueadoPorPago: false }, { merge: true }).catch(() => {});
+          await deleteDoc(doc(db, "usuarios", lic.id)).catch(() => {});
+          await deleteDoc(doc(db, "eventos", lic.id)).catch(() => {});
+        }
+        return;
+      }
+
+      // 2. Si es una compra nueva de Stripe que aún no tiene sellada su deudaPlataforma:
+      if (lic.deudaPlataforma === undefined) {
+        const emailKey = (lic.email || '').trim().toLowerCase();
+        const preventa = configPrecios.preventasPendientes?.[emailKey];
+        const ventaDoc = ventas.find(v => v.id === lic.id || v.id === targetEventId);
+        const montoPagadoStripe = ventaDoc ? Number(ventaDoc.monto) : 0;
+        const precioEsperadoPlan = PRECIOS[lic.plan] || 0;
+        const pctAnticipo = Number(configPrecios.anticipos?.porcentaje) || 10;
+
+        let deudaDetectada = 0;
+        if (preventa && Number(preventa.deudaPlataforma) > 0 && (Date.now() - (preventa.timestamp || 0) < 86400000)) {
+          deudaDetectada = Number(preventa.deudaPlataforma);
+        } else if (montoPagadoStripe > 0 && precioEsperadoPlan > 0 && montoPagadoStripe <= precioEsperadoPlan * 0.65) {
+          // Cálculo matemático exacto: si pagó el % de anticipo (ej. $150), reconstruimos el total y el 90% restante
+          const totalConDescuento = Math.round(montoPagadoStripe / (pctAnticipo / 100));
+          deudaDetectada = Math.max(0, totalConDescuento - montoPagadoStripe);
+        }
+
+        await setDoc(doc(db, "usuarios", lic.id), {
+          deudaPlataforma: deudaDetectada,
+          bloqueadoPorPago: false
+        }, { merge: true }).catch(() => {});
+
+        await setDoc(doc(db, "eventos", targetEventId), {
+          nombres: lic.nombres || 'Evento Baulia',
+          plan: lic.plan || 'diamante',
+          deudaPlataforma: deudaDetectada,
+          bloqueadoPorPago: false
+        }, { merge: true }).catch(() => {});
+      }
+    });
+  }, [licencias, ventas, configPrecios, PRECIOS]);
 
   const toggleModoPrueba = async () => {
     if (!isSuperAdmin) return;
@@ -18221,10 +18320,10 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
           updateData.fechaEntrega = nuevaFechaEntrega;
       }
 
-      await updateDoc(doc(db, "usuarios", editingLic.id), updateData);
+      await setDoc(doc(db, "usuarios", editingLic.id), updateData, { merge: true });
 
       try {
-        await updateDoc(doc(db, "eventos", editingLic.eventId), {
+        await setDoc(doc(db, "eventos", editingLic.eventId || editingLic.id), {
            nombres: safeNombre,
            plan: editingLic.plan,
            tipoEvento: safeTipo,
@@ -18237,8 +18336,8 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
            deudaPlataforma: deudaActualizada,
            fechaEntrega: nuevaFechaEntrega,
            bloqueadoPorPago: desbloquearPorLiquidacion
-        });
-      } catch(err) { console.log("Doc evento no listo", err); }
+        }, { merge: true });
+      } catch(err) { console.log("Error al sincronizar evento:", err); }
 
       if (newPrice > oldPrice && !modoPrueba && !editingLic.esPrueba) {
          try {
@@ -19021,14 +19120,14 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                     </div>
                     
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 transition-colors">Paquete Vendido</label>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 transition-colors">Paquete Vendido (Precio Actualizado)</label>
                       <select value={formData.plan} onChange={e => setFormData({...formData, plan: e.target.value})} className="w-full p-4 bg-[#141210] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-bold text-white text-sm cursor-pointer transition-colors mb-3 appearance-none">
-                        <option value="basico">Plan Básico ($990)</option>
-                        <option value="plata">Plan Plata ($1,490)</option>
-                        <option value="oro">Plan Oro ($1,990)</option>
-                        <option value="diamante">Plan Diamante ($2,990)</option>
-                        <option value="social_wall">Social Wall ($1,490)</option>
-                        <option value="security_kit">Black Label ($1,490)</option>
+                        <option value="basico">Plan Básico ({formatMoney(PRECIOS.basico)})</option>
+                        <option value="plata">Plan Plata ({formatMoney(PRECIOS.plata)})</option>
+                        <option value="oro">Plan Oro ({formatMoney(PRECIOS.oro)})</option>
+                        <option value="diamante">Plan Diamante ({formatMoney(PRECIOS.diamante)})</option>
+                        <option value="social_wall">Social Wall ({formatMoney(PRECIOS.social_wall)})</option>
+                        <option value="security_kit">Black Label ({formatMoney(PRECIOS.security_kit)})</option>
                       </select>
 
                       {/* 🔴 NUEVO: ADD-ONS HÍBRIDOS PARA NUEVA LICENCIA */}
@@ -19085,23 +19184,52 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
                       )}
                     </div>
 
-                    {/* 🟢 NUEVO: CUPÓN DE DESCUENTO Y ANTICIPO EN BÓVEDA MANUAL */}
-                    <div className="bg-[#141210] p-4 rounded-xl border border-[#D4AF37]/20 space-y-3">
-                      <div>
-                        <label className="block text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest mb-1.5">Código de Descuento (Opcional)</label>
-                        <input type="text" value={formData.codigoCupon || ''} onChange={e => setFormData({...formData, codigoCupon: e.target.value.toUpperCase()})} placeholder="Ej. BODA2026" className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-black text-white text-xs uppercase tracking-widest" />
-                      </div>
+                    {/* 🟢 CUPÓN DE DESCUENTO, ANTICIPO DINÁMICO Y DESGLOSE EN VIVO */}
+                    {(() => {
+                      let precioPlanActual = PRECIOS[formData.plan] || 0;
+                      const cod = (formData.codigoCupon || '').trim().toUpperCase();
+                      const cup = (configPrecios.cupones || []).find(c => c.activo && c.codigo.toUpperCase() === cod && (c.usados || 0) < c.limite);
+                      if (cup) {
+                        precioPlanActual = cup.tipo === 'porcentaje'
+                          ? Math.max(0, Math.round(precioPlanActual * (1 - cup.valor / 100)))
+                          : Math.max(0, precioPlanActual - cup.valor);
+                      }
+                      const pctAnt = Number(configPrecios.anticipos?.porcentaje) || 10;
+                      const cobraHoy = formData.esAnticipo ? Math.round(precioPlanActual * (pctAnt / 100)) : precioPlanActual;
+                      const deudaQueda = formData.esAnticipo ? Math.max(0, precioPlanActual - cobraHoy) : 0;
 
-                      <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                        <div>
-                          <p className="text-[10px] font-black text-white uppercase tracking-widest">¿Entró con Anticipo ({configPrecios.anticipos?.porcentaje || 10}%)?</p>
-                          <p className="text-[9px] text-slate-400 mt-0.5">Activa el candado de cobro a las 24 hrs de entregar link.</p>
+                      return (
+                        <div className="bg-[#141210] p-4 rounded-xl border border-[#D4AF37]/20 space-y-3">
+                          <div>
+                            <label className="block text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest mb-1.5">Código de Descuento (Opcional)</label>
+                            <input type="text" value={formData.codigoCupon || ''} onChange={e => setFormData({...formData, codigoCupon: e.target.value.toUpperCase()})} placeholder="Ej. PRUEBA50" className="w-full p-3 bg-[#1C1917] border border-white/10 rounded-xl outline-none focus:border-[#D4AF37] font-black text-white text-xs uppercase tracking-widest" />
+                            {cod && (
+                              <p className={`text-[9px] font-bold mt-1 ${cup ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                {cup ? `✓ Cupón aplicado (-${cup.tipo === 'porcentaje' ? `${cup.valor}%` : `$${cup.valor}`})` : '✕ Cupón no encontrado o inactivo'}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                            <div>
+                              <p className="text-[10px] font-black text-white uppercase tracking-widest">¿Entró con Anticipo ({pctAnt}%)?</p>
+                              <p className="text-[9px] text-slate-400 mt-0.5">Activa el candado de cobro a las 24 hrs de entregar link.</p>
+                            </div>
+                            <button type="button" onClick={() => setFormData({...formData, esAnticipo: !formData.esAnticipo})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.esAnticipo ? 'bg-[#D4AF37]' : 'bg-slate-600'}`}>
+                              <div className={`absolute top-1 left-1 w-3 h-3 bg-[#1C1917] rounded-full transition-transform ${formData.esAnticipo ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                            </button>
+                          </div>
+
+                          <div className="bg-[#1C1917] p-3 rounded-lg border border-white/5 text-[10px] space-y-1">
+                            <div className="flex justify-between text-slate-400"><span>Valor del Paquete:</span><span className="font-bold text-white">{formatMoney(precioPlanActual)}</span></div>
+                            <div className="flex justify-between text-emerald-400"><span>Se registra en Finanzas hoy ({formData.esAnticipo ? `${pctAnt}%` : '100%'}):</span><span className="font-black">{formatMoney(cobraHoy)}</span></div>
+                            {formData.esAnticipo && (
+                              <div className="flex justify-between text-amber-400 pt-1 border-t border-white/5"><span>Deuda a cobrar en 24h:</span><span className="font-black">{formatMoney(deudaQueda)}</span></div>
+                            )}
+                          </div>
                         </div>
-                        <button type="button" onClick={() => setFormData({...formData, esAnticipo: !formData.esAnticipo})} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${formData.esAnticipo ? 'bg-[#D4AF37]' : 'bg-slate-600'}`}>
-                          <div className={`absolute top-1 left-1 w-3 h-3 bg-[#1C1917] rounded-full transition-transform ${formData.esAnticipo ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                        </button>
-                      </div>
-                    </div>
+                      );
+                    })()}
 
                     <div>
                       <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center transition-colors"><Link size={12} className="mr-1.5"/> Link Invitación URL (Opcional)</label>
@@ -20081,9 +20209,68 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   const [estadoCuenta, setEstadoCuenta] = useState({ deuda: 0, fechaEntrega: null, bloqueado: false });
   const [horasRestantesGracia, setHorasRestantesGracia] = useState(null);
 
+  // 🟢 ESTADOS PARA LA PASARELA DE LIQUIDACIÓN STRIPE DENTRO DE LA BÓVEDA
+  const [showModalLiquidar, setShowModalLiquidar] = useState(false);
+  const [clientSecretLiq, setClientSecretLiq] = useState(null);
+  const [loadingLiq, setLoadingLiq] = useState(false);
+  const [errorLiq, setErrorLiq] = useState(null);
+
+  const abrirPasarelaLiquidacion = async () => {
+    setShowModalLiquidar(true);
+    setLoadingLiq(true);
+    setErrorLiq(null);
+    try {
+      const respuesta = await fetch("https://us-central1-panel-de-control-intelig-db278.cloudfunctions.net/crearIntentoAsincrono", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan: currentEventPlan,
+          precio: estadoCuenta.deuda,
+          moneda: 'MXN',
+          nombre: `LIQUIDACION_${eventId}`,
+          email: activeEventData?.email || authData?.email || 'liquidacion@baulia.com',
+          fecha: activeEventData?.fechaEvento || activeEventData?.fecha || '',
+          telefono: activeEventData?.telefono || '+52 0000000000',
+          pais: 'MX'
+        })
+      });
+      const data = await respuesta.json();
+      if (data.clientSecret) setClientSecretLiq(data.clientSecret);
+      else setErrorLiq(data.error || "No se pudo iniciar la sesión con el banco.");
+    } catch (e) {
+      setErrorLiq("Error de conexión con la pasarela bancaria.");
+    }
+    setLoadingLiq(false);
+  };
+
+  const confirmarLiquidacionExitosa = async () => {
+    try {
+      await setDoc(doc(db, "usuarios", eventId), { deudaPlataforma: 0, bloqueadoPorPago: false }, { merge: true });
+      await setDoc(doc(db, "eventos", eventId), { deudaPlataforma: 0, bloqueadoPorPago: false }, { merge: true });
+      setEstadoCuenta(prev => ({ ...prev, deuda: 0, bloqueado: false }));
+      setShowModalLiquidar(false);
+      setClientSecretLiq(null);
+      addNotification('¡Saldo Liquidado!', 'Tu bóveda e invitación digital han sido liberadas al 100%.', 'success');
+    } catch (e) {
+      console.error("Error al liberar bóveda:", e);
+    }
+  };
+
   useEffect(() => {
     if (userRole === 'superadmin' && !impersonating) return;
     if (typeof setGlobalEventId !== 'undefined') setGlobalEventId(eventId);
+
+    // Escuchamos tanto usuarios como eventos para que los clientes de Stripe siempre tengan su deuda y reloj sincronizados
+    const unsubUserDoc = onSnapshot(doc(db, "usuarios", eventId), (docSnap) => {
+      if (docSnap.exists()) {
+        const u = docSnap.data();
+        setEstadoCuenta(prev => ({
+          deuda: u.deudaPlataforma !== undefined ? Number(u.deudaPlataforma) : prev.deuda,
+          fechaEntrega: u.fechaEntrega || prev.fechaEntrega,
+          bloqueado: u.bloqueadoPorPago === true ? true : prev.bloqueado
+        }));
+      }
+    });
 
     const unsubConfigMain = onSnapshot(doc(db, "eventos", eventId), (docSnap) => {
       if (docSnap.exists()) {
@@ -20093,11 +20280,11 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
           setPresupuestoTotal(remoteBudget);
           localStorage.setItem('eventmaster_presupuesto', remoteBudget);
         }
-        setEstadoCuenta({
-          deuda: Number(d.deudaPlataforma) || 0,
-          fechaEntrega: d.fechaEntrega || null,
-          bloqueado: d.bloqueadoPorPago === true
-        });
+        setEstadoCuenta(prev => ({
+          deuda: d.deudaPlataforma !== undefined ? Number(d.deudaPlataforma) : prev.deuda,
+          fechaEntrega: d.fechaEntrega || prev.fechaEntrega,
+          bloqueado: d.bloqueadoPorPago === true ? true : prev.bloqueado
+        }));
       }
     });
 
@@ -20120,7 +20307,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
     const unsubDeco = onSnapshot(collection(db, "eventos", eventId, "decoracion"), (snap) => setDecoElements(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
     const unsubFotos = onSnapshot(collection(db, "eventos", eventId, "fotos"), (snap) => setPhotos(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
 
-    return () => { unsubConfigMain(); unsubWhiteLabel(); unsubGuests(); unsubGastos(); unsubProv(); unsubMesas(); unsubTareas(); unsubTiming(); unsubMapa(); unsubDeco(); unsubFotos(); };
+    return () => { unsubUserDoc(); unsubConfigMain(); unsubWhiteLabel(); unsubGuests(); unsubGastos(); unsubProv(); unsubMesas(); unsubTareas(); unsubTiming(); unsubMapa(); unsubDeco(); unsubFotos(); };
   }, [eventId, userRole, impersonating, addNotification]);
 
   // 🟢 CRONÓMETRO VIGILANTE DE 24 HORAS Y DISPARADOR DE KILL SWITCH
@@ -20236,14 +20423,67 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
               <Clock size={15} className="mr-2 text-[#D4AF37] shrink-0" />
               <span>Tu invitación web ya fue entregada. Tienes <b className="text-white underline">{horasRestantesGracia}</b> para liquidar tu saldo pendiente de <b className="text-[#D4AF37]">${estadoCuenta.deuda} MXN</b> antes de la pausa automática.</span>
             </div>
-            <a
-              href={`https://wa.me/5219221593696?text=${encodeURIComponent(`Hola equipo Baulia, deseo liquidar el saldo restante de $${estadoCuenta.deuda} MXN de mi evento (${currentEventName} - ID:${eventId}).`)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="px-4 py-1.5 bg-[#D4AF37] text-[#1C1917] rounded-lg font-black text-[10px] uppercase tracking-widest shrink-0 hover:bg-[#c5a028] transition-colors"
+            <button
+              type="button"
+              onClick={abrirPasarelaLiquidacion}
+              className="px-4 py-1.5 bg-[#D4AF37] text-[#1C1917] rounded-lg font-black text-[10px] uppercase tracking-widest shrink-0 hover:bg-[#c5a028] transition-colors shadow-md"
             >
-              Liquidar Saldo Ahora
-            </a>
+              Liquidar Saldo en Línea (${estadoCuenta.deuda})
+            </button>
+          </div>
+        )}
+
+        {/* 🟢 MODAL DE PASARELA STRIPE AUTOMÁTICA PARA LIQUIDAR DEUDA */}
+        {showModalLiquidar && (
+          <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+            <div className="bg-[#1C1917] border border-[#D4AF37]/40 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.95)] max-h-[90vh] overflow-y-auto custom-scrollbar text-white relative">
+              <button
+                type="button"
+                onClick={() => { setShowModalLiquidar(false); setClientSecretLiq(null); }}
+                className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+              <div className="mb-6">
+                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block mb-1">Pasarela de Liquidación Automática</span>
+                <h3 className="text-2xl font-editorial font-black text-white">{currentEventName}</h3>
+                <p className="text-xs text-slate-400 mt-1">Al completarse tu pago, tu bóveda e invitación quedan liberadas al instante.</p>
+              </div>
+
+              <div className="bg-[#141210] border border-[#D4AF37]/30 rounded-2xl p-4 mb-6 flex justify-between items-center">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Saldo a Liquidar</span>
+                <span className="text-2xl font-editorial font-black text-[#D4AF37]">${estadoCuenta.deuda} MXN</span>
+              </div>
+
+              {loadingLiq ? (
+                <div className="py-12 text-center text-[#D4AF37] font-bold text-xs uppercase tracking-widest animate-pulse flex flex-col items-center gap-3">
+                  <RefreshCw size={24} className="animate-spin" />
+                  Conectando con Stripe...
+                </div>
+              ) : errorLiq ? (
+                <div className="text-center space-y-4 py-4">
+                  <p className="text-rose-400 text-xs font-bold">{errorLiq}</p>
+                  <button type="button" onClick={abrirPasarelaLiquidacion} className="px-5 py-3 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-[10px] uppercase tracking-widest">
+                    Reintentar
+                  </button>
+                </div>
+              ) : clientSecretLiq ? (
+                <Elements stripe={stripePromise} options={{
+                  clientSecret: clientSecretLiq,
+                  appearance: {
+                    theme: 'night',
+                    variables: { colorPrimary: '#D4AF37', colorBackground: '#141210', colorText: '#ffffff', colorDanger: '#f87171', fontFamily: '"Montserrat", sans-serif' }
+                  }
+                }}>
+                  <StripeCaja
+                    planSeleccionado={{ plan: currentEventPlan, precio: estadoCuenta.deuda, moneda: 'MXN' }}
+                    datosCliente={{ nombre: currentEventName, email: activeEventData?.email || authData?.email || '', telefono: activeEventData?.telefono || '', pais: 'MX' }}
+                    onSuccess={confirmarLiquidacionExitosa}
+                    onVolver={() => { setShowModalLiquidar(false); setClientSecretLiq(null); }}
+                  />
+                </Elements>
+              ) : null}
+            </div>
           </div>
         )}
 
@@ -20264,14 +20504,13 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Saldo Pendiente a Liquidar</p>
                     <p className="text-4xl font-editorial font-black text-[#D4AF37]">${estadoCuenta.deuda} <span className="text-xs font-sans text-slate-400">MXN</span></p>
                   </div>
-                  <a
-                    href={`https://wa.me/5219221593696?text=${encodeURIComponent(`Hola Baulia, quiero liquidar mi saldo pendiente de $${estadoCuenta.deuda} MXN para reactivar de inmediato mi invitación y bóveda (${currentEventName} - ID:${eventId}).`)}`}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    onClick={abrirPasarelaLiquidacion}
                     className="w-full py-4 bg-[#D4AF37] text-[#1C1917] rounded-xl font-black text-xs uppercase tracking-widest shadow-[0_10px_25px_rgba(212,175,55,0.3)] hover:bg-[#c5a028] transition-all flex items-center justify-center"
                   >
-                    Liquidar Saldo y Reactivar al Instante
-                  </a>
+                    Liquidar Saldo en Línea y Reactivar al Instante
+                  </button>
                 </div>
               </div>
             ) : (
