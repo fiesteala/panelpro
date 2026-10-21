@@ -222,39 +222,8 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
 
   return (
     <>
-      {/* 🟢 BARRA INFERIOR MÓVIL (BOTTOM BAR APP) */}
-      <nav className="xl:hidden fixed bottom-0 left-0 w-full bg-[#141210]/95 backdrop-blur-2xl border-t border-[#D4AF37]/20 z-[100] flex justify-around items-center pb-safe pt-2 h-[72px] sm:h-20 shadow-[0_-10px_40px_rgba(0,0,0,0.9)] px-2 print:hidden">
-        {userRole === 'superadmin' ? (
-          <button onClick={() => setActiveTab('licencias')} className="flex flex-col items-center justify-center w-full h-full space-y-1 relative group">
-             <div className={`relative p-2 rounded-xl transition-all duration-300 ${activeTab === 'licencias' ? 'bg-[#D4AF37]/20 text-[#D4AF37]' : 'text-slate-500 group-hover:text-[#D4AF37]/70'}`}>
-               <Building size={activeTab === 'licencias' ? 24 : 22} strokeWidth={activeTab === 'licencias' ? 2.5 : 2} />
-               {activeTab === 'licencias' && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#D4AF37] rounded-full shadow-[0_0_5px_#D4AF37]"></div>}
-             </div>
-             <span className={`text-[9px] font-bold tracking-widest uppercase transition-colors ${activeTab === 'licencias' ? 'text-[#D4AF37]' : 'text-slate-500'}`}>Bóvedas</span>
-          </button>
-        ) : (
-          menuGroups.flatMap(g => g.items).filter(item => {
-              if (item.extraCondition === true) return true;
-              if (item.allowedPlans && userPlan) return item.allowedPlans.includes(userPlan.toLowerCase());
-              return level >= item.minLevel; 
-          }).slice(0, 5).map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button key={`bottom_${item.id}`} onClick={() => setActiveTab(item.id)} className="flex flex-col items-center justify-center w-full h-full space-y-1 relative group">
-                  <div className={`relative p-1.5 rounded-xl transition-all duration-300 ${isActive ? 'bg-[#D4AF37]/20 text-[#D4AF37]' : 'text-slate-500 group-hover:text-[#D4AF37]/70'}`}>
-                    <Icon size={isActive ? 22 : 20} strokeWidth={isActive ? 2.5 : 2} />
-                    {isActive && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#D4AF37] rounded-full shadow-[0_0_5px_#D4AF37]"></div>}
-                  </div>
-                  <span className={`text-[8px] sm:text-[9px] font-bold tracking-widest uppercase transition-colors ${isActive ? 'text-[#D4AF37]' : 'text-slate-500'}`}>{item.label.split(' ')[0]}</span>
-                </button>
-              );
-          })
-        )}
-      </nav>
-
-      {/* 🟢 SIDEBAR ESCRITORIO (OCULTO EN MÓVIL) */}
-      <aside className="hidden xl:flex inset-y-0 left-0 z-30 w-72 bg-[#141210] text-slate-300 transition-transform duration-500 flex-col border-r border-[#D4AF37]/20 shadow-[10px_0_30px_rgba(0,0,0,0.5)] print:hidden">
+      {isOpen && <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-20 xl:hidden" onClick={() => setIsOpen(false)} />}
+      <aside className={`fixed xl:static inset-y-0 left-0 z-30 w-72 bg-[#141210] text-slate-300 transition-transform duration-500 ease-in-out flex flex-col border-r border-[#D4AF37]/20 shadow-[10px_0_30px_rgba(0,0,0,0.5)] ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}`}>
         <div className="flex items-center justify-between px-6 h-[88px] shrink-0 relative overflow-hidden bg-transparent border-b border-[#D4AF37]/10">
           <div className="relative z-10 w-full flex items-center gap-3">
             {agencyConfig?.logoUrl && userRole !== 'superadmin' ? (
@@ -262,10 +231,7 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
             ) : (
               <div className="flex flex-col justify-center pt-1">
                  {userRole === 'superadmin' || agencyName === 'BAULIA' || agencyName === 'EVENT MASTER' ? (
-                   <div className="flex items-center gap-2">
-                     <div className="w-8 h-8 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-xl flex items-center justify-center text-[#D4AF37]"><span className="font-editorial font-black text-lg">B</span></div>
-                     <h1 className="text-xl font-black text-white tracking-widest uppercase font-editorial">BAULIA</h1>
-                   </div>
+                   <BauliaLogo className="h-7 w-auto drop-shadow-md" forceWhite={true} />
                  ) : (
                    <h1 className="text-2xl font-black text-[#D4AF37] tracking-widest uppercase font-editorial">{agencyName}</h1>
                  )}
@@ -275,13 +241,14 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
               </div>
             )}
           </div>
+          <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 text-slate-400 hover:text-[#D4AF37] hover:bg-white/5 rounded-lg relative z-10 transition-colors"><X size={20} /></button>
         </div>
         
         <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-7 custom-scrollbar">
           {userRole === 'superadmin' && (
              <div className="space-y-1">
                <p className="text-[10px] text-[#D4AF37] uppercase tracking-[0.2em] font-black ml-4 mb-3">SISTEMA</p>
-               <button onClick={() => setActiveTab('licencias')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'licencias' ? 'bg-[#D4AF37] text-[#1C1917] font-black shadow-[0_5px_15px_rgba(212,175,55,0.25)]' : 'hover:bg-white/5 text-slate-400 hover:text-white'}`}>
+               <button onClick={() => { setActiveTab('licencias'); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'licencias' ? 'bg-[#D4AF37] text-[#1C1917] font-black shadow-[0_5px_15px_rgba(212,175,55,0.25)]' : 'hover:bg-white/5 text-slate-400 hover:text-white'}`}>
                  <Building size={18} /><span>Centro de Licencias</span>
                </button>
              </div>
@@ -295,13 +262,13 @@ const Sidebar = ({ isOpen, setIsOpen, activeTab, setActiveTab, userRole, userPla
             });
             if (visibleItems.length === 0) return null;
             return (
-              <div key={`desktop_g_${gIdx}`} className="space-y-1">
+              <div key={gIdx} className="space-y-1">
                 <p className="text-[9px] text-slate-500 uppercase tracking-[0.2em] font-black ml-4 mb-3">{group.title}</p>
                 {visibleItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
                   return (
-                    <button key={`desktop_item_${item.id}`} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-[#D4AF37] text-[#1C1917] font-black shadow-[0_5px_15px_rgba(212,175,55,0.3)]' : `bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 font-bold shadow-md` : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+                    <button key={item.id} onClick={() => { setActiveTab(item.id); setIsOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all ${isActive ? item.id === 'escaner' ? 'bg-[#D4AF37] text-[#1C1917] font-black shadow-[0_5px_15px_rgba(212,175,55,0.3)]' : `bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 font-bold shadow-md` : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
                       <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
                       <span className="text-xs tracking-wide font-medium">{item.label}</span>
                     </button>
@@ -1972,108 +1939,120 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           );
       })()}
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#1C1917] p-5 sm:p-6 rounded-3xl border border-[#D4AF37]/25 shadow-xl">
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
-            <Users size={20} />
+      {/* 🟢 HEADER COMPACTO MÓVIL Y ESCRITORIO */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4 bg-[#1C1917] p-4 md:p-6 rounded-2xl md:rounded-3xl border border-[#D4AF37]/25 shadow-xl shrink-0">
+        <div className="flex items-center justify-between w-full md:w-auto">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 md:w-11 md:h-11 rounded-xl md:rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
+              <Users size={18} />
+            </div>
+            <div>
+              <h2 className="text-xl md:text-3xl font-editorial font-black text-white tracking-wide leading-none">Invitados</h2>
+            </div>
           </div>
-          <div>
-            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block mb-0.5">Control de asistencia, pases y credenciales.</span>
-            <h2 className="text-2xl sm:text-3xl font-editorial text-white tracking-wide leading-none">Gestión de Invitados</h2>
+          {/* Switch Boda en Móvil (Derecha del título para ahorrar espacio) */}
+          <div className="flex md:hidden items-center bg-[#141210] px-2.5 h-8 rounded-lg border border-[#D4AF37]/30 shadow-inner">
+            <span className="text-[9px] font-bold text-[#D4AF37] uppercase mr-2">Boda</span>
+            <button onClick={async () => {
+              const newVal = !isWeddingMode; setIsWeddingMode(newVal);
+              try { await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' }); } catch(e) {}
+            }} className={`relative w-7 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-[#D4AF37]' : 'bg-white/10'}`}>
+              <div className={`absolute top-[2px] left-[2px] w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-3' : 'translate-x-0'}`}></div>
+            </button>
           </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto mt-4 md:mt-0 justify-start md:justify-end">
+        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto hide-scrollbar pb-1 md:pb-0">
           {isPremium && (
-            <button onClick={() => setIsTagManagerOpen(true)} className="flex items-center justify-center px-4 h-9 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-[10px] font-bold hover:bg-[#D4AF37]/10 transition-colors uppercase tracking-widest shrink-0">
+            <button onClick={() => setIsTagManagerOpen(true)} className="flex items-center justify-center px-4 h-9 bg-[#141210] md:bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-[9px] md:text-[10px] font-bold uppercase tracking-widest whitespace-nowrap shrink-0 shadow-sm md:shadow-none hover:bg-[#D4AF37]/10 transition-colors">
               <Layers size={14} className="mr-1.5"/> Etiquetas ({globalTags.length})
             </button>
           )}
-          <button onClick={() => setExportViewOpen(true)} className="flex items-center justify-center px-4 h-9 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-[10px] font-bold hover:bg-[#D4AF37]/10 transition-colors uppercase tracking-widest shrink-0">
+          <button onClick={() => setExportViewOpen(true)} className="flex items-center justify-center px-4 h-9 bg-[#141210] md:bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-[9px] md:text-[10px] font-bold uppercase tracking-widest whitespace-nowrap shrink-0 shadow-sm md:shadow-none hover:bg-[#D4AF37]/10 transition-colors">
             <FileSpreadsheet size={14} className="mr-1.5"/> Exportar
           </button>
           
-          <div className="flex items-center bg-transparent px-3 h-9 rounded-lg border border-[#D4AF37]/30 transition-colors shrink-0">
+          <div className="hidden md:flex items-center bg-transparent px-3 h-9 rounded-lg border border-[#D4AF37]/30 transition-colors shrink-0">
             <span className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-wider mr-2">Boda</span>
             <button onClick={async () => {
-              const newVal = !isWeddingMode;
-              setIsWeddingMode(newVal);
+              const newVal = !isWeddingMode; setIsWeddingMode(newVal);
               try { await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' }); } catch(e) {}
             }} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-[#D4AF37]' : 'bg-white/10'}`}>
               <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
             </button>
           </div>
-
-          {isWeddingMode ? (
-            <div className="flex gap-2 shrink-0">
-              <button onClick={() => handleOpenAdd('novia')} className="flex items-center justify-center px-4 h-9 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-lg text-[10px] font-bold hover:bg-rose-500/20 transition-colors uppercase tracking-widest">
-                <UserPlus size={14} className="mr-1.5"/> Novia
-              </button>
-              <button onClick={() => handleOpenAdd('novio')} className="flex items-center justify-center px-4 h-9 bg-sky-500/10 border border-sky-500/30 text-sky-400 rounded-lg text-[10px] font-bold hover:bg-sky-500/20 transition-colors uppercase tracking-widest">
-                <UserPlus size={14} className="mr-1.5"/> Novio
-              </button>
-            </div>
-          ) : (
-            <button onClick={() => handleOpenAdd('general')} className="flex items-center justify-center px-5 h-9 bg-[#D4AF37] text-[#1C1917] rounded-lg text-[10px] font-black hover:bg-[#c5a028] transition-colors uppercase tracking-widest shrink-0">
-              <UserPlus size={14} className="mr-1.5"/> Nuevo Invitado
-            </button>
-          )}
         </div>
+        
+        {/* Botones Agregar en Móvil ocupan todo el ancho y son delgados */}
+        {isWeddingMode ? (
+          <div className="flex gap-2 w-full md:w-auto md:hidden mt-1">
+            <button onClick={() => handleOpenAdd('novia')} className="flex-1 items-center justify-center h-10 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-xl text-[10px] font-bold uppercase tracking-widest flex shadow-sm">
+              <UserPlus size={14} className="mr-1.5"/> Novia
+            </button>
+            <button onClick={() => handleOpenAdd('novio')} className="flex-1 items-center justify-center h-10 bg-sky-500/10 border border-sky-500/30 text-sky-400 rounded-xl text-[10px] font-bold uppercase tracking-widest flex shadow-sm">
+              <UserPlus size={14} className="mr-1.5"/> Novio
+            </button>
+          </div>
+        ) : (
+          <button onClick={() => handleOpenAdd('general')} className="md:hidden w-full items-center justify-center px-5 h-10 bg-[#D4AF37] text-[#1C1917] rounded-xl text-[10px] font-black hover:bg-[#c5a028] transition-colors uppercase tracking-widest shadow-md flex mt-1">
+            <UserPlus size={14} className="mr-1.5"/> Nuevo Invitado
+          </button>
+        )}
       </div>
 
-      <div className={`grid grid-cols-2 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-2 sm:gap-3`}>
-        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-[#D4AF37]/30 flex items-center justify-between transition-all hover:border-[#D4AF37]/60 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
-          <div className="text-[#D4AF37] font-black text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
-          <h3 className="text-sm font-black text-white">{passCountEnabled ? totalPases : safeGuests.length}</h3>
+      {/* 🟢 MÉTRICAS DESLIZABLES EN MÓVIL (TIPO CARRUSEL) */}
+      <div className="flex overflow-x-auto md:grid md:grid-cols-2 xl:grid-cols-6 gap-2 sm:gap-3 hide-scrollbar pb-2 md:pb-0 shrink-0">
+        <div className="bg-[#141210] px-4 py-2.5 md:py-3 rounded-xl border border-[#D4AF37]/30 flex flex-col md:flex-row md:items-center justify-between min-w-[100px] shrink-0 shadow-md">
+          <div className="text-[#D4AF37] font-black text-[8px] md:text-[9px] uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 md:mb-0"><Users className="w-3.5 h-3.5 inline mr-1 shrink-0"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
+          <h3 className="text-sm font-black text-white md:text-right">{passCountEnabled ? totalPases : safeGuests.length}</h3>
         </div>
         
         {isPremium && passCountEnabled && (
-        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-white/10 flex items-center justify-between transition-all hover:border-sky-500/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
-          <div className="text-sky-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Niños</div>
-          <h3 className="text-sm font-black text-sky-400">{totalNinos}</h3>
+        <div className="bg-[#141210] px-4 py-2.5 md:py-3 rounded-xl border border-white/10 flex flex-col md:flex-row md:items-center justify-between min-w-[90px] shrink-0 shadow-md">
+          <div className="text-sky-400 font-bold text-[8px] md:text-[9px] uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 md:mb-0"><Users className="w-3.5 h-3.5 inline mr-1 shrink-0"/> Niños</div>
+          <h3 className="text-sm font-black text-sky-400 md:text-right">{totalNinos}</h3>
         </div>
         )}
         
-        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-[#D4AF37]/15 flex items-center justify-between transition-all hover:border-[#D4AF37]/50 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
-          <div className="text-[#D4AF37] font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><CheckCircle className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Confirmados</div>
-          <h3 className="text-sm font-black text-white">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3>
+        <div className="bg-[#141210] px-4 py-2.5 md:py-3 rounded-xl border border-[#D4AF37]/15 flex flex-col md:flex-row md:items-center justify-between min-w-[110px] shrink-0 shadow-md">
+          <div className="text-[#D4AF37] font-bold text-[8px] md:text-[9px] uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 md:mb-0"><CheckCircle className="w-3.5 h-3.5 inline mr-1 shrink-0"/> Confirman</div>
+          <h3 className="text-sm font-black text-white md:text-right">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3>
         </div>
         
-        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-white/10 flex items-center justify-between transition-all hover:border-white/30 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
-          <div className="text-slate-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Clock className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Pendientes</div>
-          <h3 className="text-sm font-black text-slate-300">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
+        <div className="bg-[#141210] px-4 py-2.5 md:py-3 rounded-xl border border-white/10 flex flex-col md:flex-row md:items-center justify-between min-w-[110px] shrink-0 shadow-md">
+          <div className="text-slate-400 font-bold text-[8px] md:text-[9px] uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 md:mb-0"><Clock className="w-3.5 h-3.5 inline mr-1 shrink-0"/> Pendientes</div>
+          <h3 className="text-sm font-black text-slate-300 md:text-right">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
         </div>
         
-        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-white/10 flex items-center justify-between transition-all hover:border-rose-500/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
-          <div className="text-rose-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><X className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Cancelados</div>
-          <h3 className="text-sm font-black text-rose-400">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
+        <div className="bg-[#141210] px-4 py-2.5 md:py-3 rounded-xl border border-white/10 flex flex-col md:flex-row md:items-center justify-between min-w-[100px] shrink-0 shadow-md">
+          <div className="text-rose-400 font-bold text-[8px] md:text-[9px] uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 md:mb-0"><X className="w-3.5 h-3.5 inline mr-1 shrink-0"/> Cancelan</div>
+          <h3 className="text-sm font-black text-rose-400 md:text-right">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
         </div>
         
         {isPremium && qrEnabled && (
-        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-[#D4AF37]/15 flex items-center justify-between transition-all hover:border-emerald-500/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
-          <div className="text-emerald-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Scan className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Ingresaron</div>
-          <h3 className="text-sm font-black text-emerald-400">{totalIngresos}</h3>
+        <div className="bg-[#141210] px-4 py-2.5 md:py-3 rounded-xl border border-[#D4AF37]/15 flex flex-col md:flex-row md:items-center justify-between min-w-[100px] shrink-0 shadow-md">
+          <div className="text-emerald-400 font-bold text-[8px] md:text-[9px] uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 md:mb-0"><Scan className="w-3.5 h-3.5 inline mr-1 shrink-0"/> Ingresos</div>
+          <h3 className="text-sm font-black text-emerald-400 md:text-right">{totalIngresos}</h3>
         </div>
+        )}
+
+        {isWeddingMode && passCountEnabled && (
+          <div className="bg-[#141210] md:bg-[#1C1917] px-4 py-2.5 md:py-3 rounded-xl border border-[#D4AF37]/20 flex flex-col md:flex-row items-center md:justify-around gap-1 shrink-0 shadow-md min-w-[120px]">
+            <div className="w-full flex items-center justify-between"><span className="text-[8px] font-bold text-rose-400 uppercase tracking-widest">Novia</span><span className="text-xs font-black text-rose-400">{pasesNovia}</span></div>
+            <div className="w-full flex items-center justify-between border-t md:border-t-0 md:border-l border-white/10 md:pl-2 pt-1 md:pt-0 mt-1 md:mt-0"><span className="text-[8px] font-bold text-sky-400 uppercase tracking-widest">Novio</span><span className="text-xs font-black text-sky-400">{pasesNovio}</span></div>
+          </div>
         )}
       </div>
 
-      {isWeddingMode && passCountEnabled && (
-        <div className="bg-[#1C1917] py-2.5 px-6 rounded-xl border border-[#D4AF37]/20 flex items-center justify-around transition-colors shadow-sm">
-          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest">Pases Novia</p><p className="text-sm font-black text-rose-400">{pasesNovia}</p></div>
-          <div className="h-4 w-px bg-white/10"></div>
-          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-sky-400 uppercase tracking-widest">Pases Novio</p><p className="text-sm font-black text-sky-400">{pasesNovio}</p></div>
-        </div>
-      )}
+      {/* 🟢 BUSCADOR SUELTO Y LISTA LIBRE */}
+      <div className="relative shrink-0">
+        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#D4AF37]" size={16} />
+        <input type="text" placeholder="Buscar por nombre, estatus o mesa..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-11 pr-4 py-3 md:py-3.5 border border-[#D4AF37]/30 rounded-xl text-sm md:text-base outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white placeholder-slate-400 font-bold shadow-md transition-colors" />
+      </div>
 
-      <div className="flex-1 bg-[#1C1917] rounded-3xl border border-[#D4AF37]/30 shadow-2xl overflow-hidden flex flex-col transition-colors duration-500 z-10 relative">
-        <div className="p-3 border-b border-[#D4AF37]/20 bg-[#141210] flex transition-colors shrink-0">
-          <div className="relative flex-1">
-            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-            <input type="text" placeholder="Buscar por nombre, estatus o mesa..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white placeholder-slate-500 transition-colors" />
-          </div>
-        </div>
-
-        <div className="overflow-y-auto custom-scrollbar flex-1 relative">
+      {/* 🟢 LA LISTA EN SÍ MISMA (Sin atrapar en móvil, atrapada en desktop) */}
+      <div className="flex-1 md:bg-[#1C1917] md:rounded-3xl md:border border-[#D4AF37]/30 md:shadow-2xl flex flex-col z-10 relative md:overflow-hidden -mx-2 md:mx-0 px-2 md:px-0">
+        <div className="md:overflow-y-auto custom-scrollbar flex-1 relative h-full">
           
           <div className="hidden md:block">
             <table className="w-full text-left text-xs whitespace-nowrap">
@@ -2196,13 +2175,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
             </table>
           </div>
 
-          {/* 🟢 TARJETAS MÓVILES BLACK LABEL */}
-          <div className="block md:hidden space-y-3 pb-32 pt-2 relative">
+          <div className="block md:hidden p-2 space-y-2 pb-24">
             {flattenedList.length === 0 ? (
-              <div className="text-center p-10 bg-[#1C1917] border border-white/10 rounded-3xl mt-4 flex flex-col items-center">
-                <Users size={36} className="text-slate-500 opacity-50 mb-3"/>
-                <span className="text-sm font-bold text-slate-400">No se encontraron invitados.</span>
-              </div>
+              <div className="text-center p-8 text-slate-400 dark:text-slate-500 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl mt-4">No se encontraron invitados.</div>
             ) : (
               flattenedList.map((row) => {
                 const isExpanded = expandedMobileRow === row._rowId;
@@ -2212,58 +2187,50 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 if (row.isMissing) tableNameDisplay = '-';
 
                 return (
-                  <div key={`mobile_${row._rowId}`} className={`rounded-2xl transition-all duration-300 overflow-hidden border shadow-lg ${row.isMain ? 'bg-[#1C1917] border-[#D4AF37]/30 mt-4' : 'bg-[#141210] border-l-4 border-l-[#D4AF37]/50 border-y-transparent border-r-transparent ml-4 rounded-l-none'} ${isCancelado ? 'opacity-50 grayscale' : ''}`}>
-                    <div onClick={() => toggleMobileRow(row._rowId)} className="p-4 flex justify-between items-center cursor-pointer select-none">
-                      <div className="flex-1 min-w-0 pr-3">
-                        <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
-                          <span className={`font-black truncate text-[13px] ${row.isMain ? 'text-white' : 'text-slate-300'} ${row.isMissing ? 'italic text-[#D4AF37]' : ''}`}>
+                  <div key={`mobile_${row._rowId}`} className={`rounded-xl transition-all duration-300 overflow-hidden border ${row.isMain ? 'bg-white dark:bg-[#111] border-slate-200 dark:border-white/10 shadow-sm mt-3' : 'bg-slate-50/60 dark:bg-white/[0.03] border-l-[3px] border-l-indigo-200 dark:border-l-amber-500/40 border-y-transparent border-r-transparent ml-3 rounded-l-none'} ${isCancelado ? 'opacity-60' : ''}`}>
+                    <div onClick={() => toggleMobileRow(row._rowId)} className="p-3 flex justify-between items-center cursor-pointer select-none">
+                      <div className="flex-1 min-w-0 pr-2">
+                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                          <span className={`font-bold truncate text-sm ${row.isMain ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                             {row.displayName}
                           </span>
                           {row.isChild && (
-                            <span className="px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-widest border bg-sky-500/10 text-sky-400 border-sky-500/30">Niño</span>
+                            <span className="px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-widest border bg-sky-50 text-sky-600 border-sky-200 dark:bg-sky-500/10 dark:text-sky-400">Niño</span>
                           )}
                           {row.rowTags && row.rowTags.map(t => (
-                            <span key={t} className="px-1.5 py-0.5 rounded text-[7px] font-bold uppercase tracking-wider border bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/20">
+                            <span key={t} className="px-1.5 py-0.5 rounded text-[7px] font-bold uppercase tracking-wider border bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">
                               {t}
                             </span>
                           ))}
                         </div>
-                        <div className="flex items-center gap-2 text-[10px]">
-                          {passCountEnabled && row.isMain && (
-                             <span className="font-black text-[#D4AF37] flex items-center bg-[#D4AF37]/10 px-1.5 py-0.5 rounded"><Ticket size={10} className="mr-1"/> {row.parentGuest.displayPasses || row.passes}</span>
-                          )}
-                          <span className="font-bold text-slate-400 flex items-center truncate max-w-[120px]"><MapPin size={10} className="mr-1 shrink-0 text-[#D4AF37]"/> <span className="truncate">{tableNameDisplay}</span></span>
+                        <div className="flex items-center gap-1.5 text-[10px]">
+                          <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center truncate max-w-[120px]"><MapPin size={10} className="mr-1 shrink-0 text-indigo-400 dark:text-amber-500"/> <span className="truncate">{tableNameDisplay}</span></span>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-2 shrink-0">
                         {row.isMissing ? null : row.entered && !row.isMain && qrEnabled ? (
-                           <span className="px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest border bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                           <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
                              EN EVENTO
                            </span>
                         ) : (
-                           <span className={`px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'nuevo' ? 'bg-[#D4AF37] text-[#141210] border-[#D4AF37] animate-pulse shadow-[0_0_10px_rgba(212,175,55,0.4)]' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : row.parentGuest.status === 'ingreso' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : row.parentGuest.status === 'confirmado' ? 'bg-[#D4AF37]/15 text-[#D4AF37] border-[#D4AF37]/40 shadow-[0_0_10px_rgba(212,175,55,0.1)]' : row.parentGuest.status === 'cancelado' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : row.parentGuest.status === 'por_invitar' ? 'bg-white/5 text-slate-400 border-white/10' : 'bg-transparent text-slate-500 border-white/5'}`}>
+                           <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'nuevo' ? 'bg-rose-500 text-white border-rose-600 animate-pulse shadow-md' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-400 text-amber-900 border-amber-500 shadow-md' : row.parentGuest.status === 'ingreso' ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : row.parentGuest.status === 'confirmado' ? 'bg-emerald-500 text-white border-emerald-600 dark:bg-emerald-600 dark:border-emerald-700' : row.parentGuest.status === 'cancelado' ? 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : row.parentGuest.status === 'por_invitar' ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-white/10 dark:text-slate-300 dark:border-white/20' : 'bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'}`}>
                              {row.parentGuest.status === 'ingreso' ? `EN EVENTO` : row.parentGuest.status === 'nuevo' ? '¡NUEVO!' : row.parentGuest.status.replace('_', ' ')}
                            </span>
                         )}
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-[#D4AF37] transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-slate-400 dark:text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-indigo-500 dark:text-amber-500' : ''}`}><polyline points="6 9 12 15 18 9"></polyline></svg>
                       </div>
                     </div>
                     {isExpanded && (
-                      <div className="px-4 pb-4 pt-1 border-t border-white/5 animate-in slide-in-from-top-2 fade-in duration-300 bg-[#141210]/50">
-                        <div className="flex justify-between gap-2 mt-2">
-                          <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-[1.5] py-2.5 ${row.parentGuest.sent ? 'bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/40' : 'bg-transparent text-white border-white/20 hover:bg-white/10'} rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center border transition-colors shadow-sm`}>
-                            <MessageCircle size={14} className="mr-1.5"/> Enviar
+                      <div className="px-3 pb-3 pt-1 border-t border-slate-100 dark:border-white/5 animate-in slide-in-from-top-2 fade-in duration-300">
+                        <div className="flex justify-between gap-1.5 mt-2">
+                          <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-[1.5] py-2 ${row.parentGuest.sent ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/30' : 'bg-transparent text-slate-300 border-white/10'} rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center border transition-colors shadow-sm`}>
+                            <MessageCircle size={14} className="mr-1"/> Enviar
                           </button>
-                          <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-1 py-2.5 bg-transparent text-white hover:bg-white/10 border border-white/20 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm">
+                          <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-1 py-2 bg-transparent text-slate-300 hover:text-white hover:bg-white/5 border border-white/10 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm">
                             <Edit2 size={14}/>
                           </button>
-                          {isPremium && qrEnabled && row.pin && row.parentGuest.status !== 'cancelado' && (
-                            <button onClick={(e) => { e.stopPropagation(); setQrModal(row); }} className="flex-1 py-2.5 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 hover:bg-[#D4AF37]/20 rounded-xl flex items-center justify-center transition-colors shadow-sm">
-                              <QrCode size={14}/>
-                            </button>
-                          )}
                           {row.isMain && (
-                            <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="flex-1 py-2.5 bg-transparent text-rose-500 hover:bg-rose-500/10 border border-rose-500/30 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm">
+                            <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="flex-1 py-2 bg-transparent text-rose-400 hover:text-rose-500 hover:bg-rose-500/10 border border-white/10 hover:border-rose-500/20 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm">
                               <Trash2 size={14}/>
                             </button>
                           )}
@@ -2274,14 +2241,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 );
               })
             )}
-
-            {/* 🟢 BOTÓN FLOTANTE (FAB) PARA AGREGAR INVITADO */}
-            <button 
-              onClick={() => handleOpenAdd('general')} 
-              className="fixed bottom-[88px] right-5 w-14 h-14 bg-[#D4AF37] text-[#1C1917] rounded-full shadow-[0_10px_30px_rgba(212,175,55,0.4)] flex items-center justify-center z-40 hover:scale-105 active:scale-95 transition-transform border-2 border-[#1C1917]"
-            >
-              <UserPlus size={24} />
-            </button>
           </div>
         </div>
       </div>
@@ -9158,14 +9117,9 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
 
       <header ref={headerRef} className="bg-[#141210]/80 backdrop-blur-2xl h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden transition-colors duration-700">
         <div className="flex items-center flex-1">
-          {/* Logo compacto móvil (solo visible en celular) */}
-          <div className="xl:hidden flex items-center mr-4">
-            <div className="w-9 h-9 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-xl flex items-center justify-center text-[#D4AF37] shadow-sm">
-              <span className="font-editorial font-black text-lg">B</span>
-            </div>
-          </div>
+          <button onClick={() => setIsOpen(true)} className="xl:hidden text-[#D4AF37] mr-4 transition-colors"><Menu size={24} /></button>
           
-          <div className="relative w-full max-w-md hidden sm:block ml-2 lg:ml-10">
+          <div className="relative w-full max-w-md hidden sm:block ml-10 lg:ml-20">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
             <input type="text" placeholder="Buscar en la bóveda..." value={globalSearch} onChange={(e) => {setGlobalSearch(e.target.value); setShowResults(true);}} className="w-full pl-10 pr-4 py-2 bg-[#1C1917] border border-white/10 rounded-full text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#D4AF37] transition-all"/>
             
