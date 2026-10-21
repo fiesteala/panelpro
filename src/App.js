@@ -16,7 +16,7 @@ import {
   FileSignature, AlertCircle, Star, Image as ImageIcon, CalendarDays, FileDown, 
   ListTodo, CheckCircle2, Circle, PlayCircle, AlignLeft, MapPin, ShieldCheck, Printer, Scan, Camera, Navigation as NavigationIcon, Navigation, MoreVertical,
   Square, RectangleHorizontal, Settings2, GripVertical, Wand2, Moon, Heart, Send, Lock, Unlock, WifiOff, Globe, Key, Power, Quote, Check, Factory,
-  Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser, Activity, Gem, UserCheck, BarChart3, Binary, MonitorPlay
+  Sparkles, BookOpenText, ListTree, Shirt, Hotel, CloudSun, Languages, Ticket, Gift, Hash, SquareUser, Activity, Gem, UserCheck, BarChart3, Binary, MonitorPlay, Inbox, ChevronDown
 } from 'lucide-react';
 
 // 🔴 AQUÍ CONECTAMOS TU NUEVO MÓDULO EXCLUSIVO:
