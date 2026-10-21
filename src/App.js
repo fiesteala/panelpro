@@ -17551,20 +17551,21 @@ const SuperAdminView = ({ onImpersonate, authData }) => {
         return;
       }
 
-      // 2. Si es una compra nueva de Stripe que aún no tiene sellada su deudaPlataforma:
+      // 2. Si es una compra anterior que aún no tiene sellada su deudaPlataforma, solo la calculamos cuando su venta ya cargó:
       if (lic.deudaPlataforma === undefined) {
         const emailKey = (lic.email || '').trim().toLowerCase();
         const preventa = configPrecios.preventasPendientes?.[emailKey];
         const ventaDoc = ventas.find(v => v.id === lic.id || v.id === targetEventId);
+        if (!ventaDoc && !preventa) return; // Esperamos a que cargue la venta para no pisar con $0
+
         const montoPagadoStripe = ventaDoc ? Number(ventaDoc.monto) : 0;
         const precioEsperadoPlan = PRECIOS[lic.plan] || 0;
         const pctAnticipo = Number(configPrecios.anticipos?.porcentaje) || 10;
 
-        let deudaDetectada = 0;
-        if (preventa && Number(preventa.deudaPlataforma) > 0 && (Date.now() - (preventa.timestamp || 0) < 86400000)) {
+        let deudaDetectada = Number(ventaDoc?.deudaPendiente) || 0;
+        if (!deudaDetectada && preventa && Number(preventa.deudaPlataforma) > 0 && (Date.now() - (preventa.timestamp || 0) < 86400000)) {
           deudaDetectada = Number(preventa.deudaPlataforma);
-        } else if (montoPagadoStripe > 0 && precioEsperadoPlan > 0 && montoPagadoStripe <= precioEsperadoPlan * 0.65) {
-          // Cálculo matemático exacto: si pagó el % de anticipo (ej. $150), reconstruimos el total y el 90% restante
+        } else if (!deudaDetectada && montoPagadoStripe > 0 && precioEsperadoPlan > 0 && montoPagadoStripe <= precioEsperadoPlan * 0.65) {
           const totalConDescuento = Math.round(montoPagadoStripe / (pctAnticipo / 100));
           deudaDetectada = Math.max(0, totalConDescuento - montoPagadoStripe);
         }
@@ -20206,7 +20207,7 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   }, [addNotification]);
   
   const prevGuestsRef = useRef([]);
-  const [estadoCuenta, setEstadoCuenta] = useState({ deuda: 0, fechaEntrega: null, bloqueado: false });
+  const [estadoCuenta, setEstadoCuenta] = useState({ deuda: 0, fechaEntrega: null, bloqueado: false, urlInvitacion: '', status: '' });
   const [horasRestantesGracia, setHorasRestantesGracia] = useState(null);
 
   // 🟢 ESTADOS PARA LA PASARELA DE LIQUIDACIÓN STRIPE DENTRO DE LA BÓVEDA
@@ -20267,7 +20268,9 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
         setEstadoCuenta(prev => ({
           deuda: u.deudaPlataforma !== undefined ? Number(u.deudaPlataforma) : prev.deuda,
           fechaEntrega: u.fechaEntrega || prev.fechaEntrega,
-          bloqueado: u.bloqueadoPorPago === true ? true : prev.bloqueado
+          bloqueado: u.bloqueadoPorPago === true,
+          urlInvitacion: u.urlInvitacion || prev.urlInvitacion || '',
+          status: u.status || prev.status || ''
         }));
       }
     });
@@ -20283,7 +20286,9 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
         setEstadoCuenta(prev => ({
           deuda: d.deudaPlataforma !== undefined ? Number(d.deudaPlataforma) : prev.deuda,
           fechaEntrega: d.fechaEntrega || prev.fechaEntrega,
-          bloqueado: d.bloqueadoPorPago === true ? true : prev.bloqueado
+          bloqueado: d.bloqueadoPorPago === true,
+          urlInvitacion: d.urlInvitacion || prev.urlInvitacion || '',
+          status: d.status || prev.status || ''
         }));
       }
     });
@@ -20313,7 +20318,12 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
   // 🟢 CRONÓMETRO VIGILANTE DE 24 HORAS Y DISPARADOR DE KILL SWITCH
   useEffect(() => {
     if (isSuperAdminMode) return;
-    if (estadoCuenta.deuda <= 0 || !estadoCuenta.fechaEntrega) {
+    
+    const tieneLink = (estadoCuenta.urlInvitacion || '').trim() !== '';
+    const estaActivo = estadoCuenta.status === 'activo';
+
+    // BLINDAJE: Solo arranca si el cliente tiene deuda, fecha de entrega, status ACTIVO y un LINK real.
+    if (estadoCuenta.deuda <= 0 || !estadoCuenta.fechaEntrega || !tieneLink || !estaActivo) {
       setHorasRestantesGracia(null);
       return;
     }

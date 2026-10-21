@@ -33,9 +33,10 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
     try {
       const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
-      const { paymentMethodId, plan, precio, nombre, email, fecha, telefono } = req.body;
+      const { paymentMethodId, plan, precio, nombre, email, fecha, telefono, deudaPlataforma, cuponAplicado } = req.body;
       const cleanEmail = email.trim().toLowerCase();
       const precioLimpio = parseInt(precio.toString().replace(/,/g, ''));
+      const deudaNum = Number(deudaPlataforma) || 0;
       
       const paymentIntent = await stripe.paymentIntents.create({
         amount: precioLimpio * 100, 
@@ -44,6 +45,22 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
         confirm: true,
         automatic_payment_methods: { enabled: true, allow_redirects: 'never' }
       });
+
+      // 🟢 FILTRO ANTI-CLONES: Si es una liquidación de saldo, liberamos la bóveda original y NO enviamos Telegram
+      if (nombre && String(nombre).startsWith('LIQUIDACION_')) {
+        const originalEventId = String(nombre).replace('LIQUIDACION_', '').trim();
+        if (originalEventId) {
+          await admin.firestore().collection("usuarios").doc(originalEventId).set({ deudaPlataforma: 0, bloqueadoPorPago: false }, { merge: true });
+          await admin.firestore().collection("eventos").doc(originalEventId).set({ deudaPlataforma: 0, bloqueadoPorPago: false }, { merge: true });
+          const ventaRef = admin.firestore().collection("ventas").doc(originalEventId);
+          const ventaSnap = await ventaRef.get();
+          if (ventaSnap.exists) {
+            const montoPrevio = Number(ventaSnap.data().monto) || 0;
+            await ventaRef.set({ monto: montoPrevio + precioLimpio, deudaPendiente: 0 }, { merge: true });
+          }
+        }
+        return res.status(200).send({ success: true, eventId: originalEventId, mensaje: "Liquidación exitosa" });
+      }
 
       const slug = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
       const eventId = slug + '-' + Math.random().toString(36).slice(-4);
@@ -56,7 +73,6 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
       } catch (authError) {
         if (authError.code === 'auth/email-already-exists' || authError.code === 'auth/email-already-in-use') {
           esRecurrente = true;
-          // 🟢 TEXTO CORREGIDO PARA CLIENTES RECURRENTES
           passwordTemporal = "Detectamos que ya eres cliente VIP. Inicia sesión con tu cuenta actual. Si no la recuerdas, haz clic en 'Olvidé mi contraseña' en la pantalla principal.";
         } else {
           throw authError;
@@ -77,18 +93,25 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
         eventId: eventId, nombres: nombre, fechaEvento: fecha || '', telefono: telefono || '',
         status: 'nuevo', creadoPor: 'Stripe (Web Automático)', referenciaPago: `Stripe: ${paymentIntent.id}`,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        isQrEnabled: planLimpio !== 'social_wall', isPassCountEnabled: planLimpio !== 'social_wall'
+        isQrEnabled: planLimpio !== 'social_wall', isPassCountEnabled: planLimpio !== 'social_wall',
+        deudaPlataforma: deudaNum,
+        montoPagado: precioLimpio,
+        cuponAplicado: cuponAplicado || '',
+        bloqueadoPorPago: false
       });
 
       await admin.firestore().collection("eventos").doc(eventId).set({
         presupuestoTotal: 150000, nombres: nombre, fecha: fecha || '', plan: planLimpio, tipoEvento: 'boda',
-        isQrEnabled: planLimpio !== 'social_wall', isPassCountEnabled: planLimpio !== 'social_wall'
+        isQrEnabled: planLimpio !== 'social_wall', isPassCountEnabled: planLimpio !== 'social_wall',
+        deudaPlataforma: deudaNum,
+        bloqueadoPorPago: false
       });
 
       const mesAnioActual = new Date().toISOString().slice(0, 7);
       await admin.firestore().collection("ventas").doc(eventId).set({
         fecha: admin.firestore.FieldValue.serverTimestamp(), mesAnio: mesAnioActual,
-        monto: precioLimpio, plan: planLimpio, vendedor: 'Stripe (Web Automático)',
+        monto: precioLimpio, deudaPendiente: deudaNum, cupon: cuponAplicado || '',
+        plan: planLimpio, vendedor: 'Stripe (Web Automático)',
         referencia: `Stripe: ${paymentIntent.id}`, cliente: nombre
       });
 
@@ -121,7 +144,8 @@ exports.crearBovedaVIP = functions.https.onRequest((req, res) => {
         });
       } catch (emailError) { console.error("Error crítico de Resend en Stripe:", emailError); }
 
-      const msgVenta = `🎉 <b>¡NUEVA VENTA CERRADA (TARJETA)!</b>\n\n👤 <b>Cliente:</b> ${nombre}\n💎 <b>Plan:</b> ${planLimpio.toUpperCase()}\n📅 <b>Fecha del Evento:</b> ${fecha || 'Pendiente'}\n📱 <b>WhatsApp:</b> ${telefono || 'Pendiente'}\n\n<i>¿Quién del equipo toma esta bóveda? 👩‍🎨👨‍🎨</i>`;
+      const detallePago = deudaNum > 0 ? `Reserva ($${precioLimpio} pagados • Resta $${deudaNum})` : `Pago Completo ($${precioLimpio})`;
+      const msgVenta = `🎉 <b>¡NUEVA VENTA / BÓVEDA!</b>\n\n🆔 <b>ID de Bóveda:</b> <code>${eventId}</code>\n👤 <b>Cliente:</b> ${nombre}\n💎 <b>Plan:</b> ${planLimpio.toUpperCase()}\n💳 <b>Modalidad:</b> ${detallePago}\n📅 <b>Fecha del Evento:</b> ${fecha || 'Pendiente'}\n📱 <b>WhatsApp:</b> ${telefono || 'Pendiente'}\n\n<i>¿Quién del equipo toma esta bóveda? 👩‍🎨👨‍🎨</i>`;
       await notificarTelegram(msgVenta);
 
       res.status(200).send({ success: true, eventId: eventId, mensaje: "Cobro exitoso" });
@@ -250,13 +274,41 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
     // Solo procesamos si el pago trae datos de Baulia
     if (metadatos && metadatos.email && metadatos.nombre) {
       
-      // 🔴 1. Quitamos 'precio' de esta lista porque no viene en la metadata
-      const { plan, nombre, email, fecha, telefono } = metadatos; 
+      const { plan, nombre, email, fecha, telefono, deudaPlataforma, cuponAplicado } = metadatos; 
       const cleanEmail = email.trim().toLowerCase();
-      
-      // 🔴 2. SOLUCIÓN: Tomamos el precio exacto directamente del cobro real de Stripe
       const precioLimpio = paymentIntent.amount / 100;
+      const deudaNum = Number(deudaPlataforma) || 0;
+
+      // 🟢 1. INTERCEPTOR DE LIQUIDACIÓN: Si el pago viene del botón "Liquidar Saldo" de una bóveda,
+      // liberamos la bóveda original, sumamos el ingreso a su venta y NO creamos clones ni enviamos mensaje a Telegram.
+      if (nombre && String(nombre).startsWith('LIQUIDACION_')) {
+        const originalEventId = String(nombre).replace('LIQUIDACION_', '').trim();
+        if (originalEventId) {
+          await admin.firestore().collection("usuarios").doc(originalEventId).set({
+            deudaPlataforma: 0,
+            bloqueadoPorPago: false
+          }, { merge: true });
+
+          await admin.firestore().collection("eventos").doc(originalEventId).set({
+            deudaPlataforma: 0,
+            bloqueadoPorPago: false
+          }, { merge: true });
+
+          const ventaRef = admin.firestore().collection("ventas").doc(originalEventId);
+          const ventaSnap = await ventaRef.get();
+          if (ventaSnap.exists) {
+            const montoAnterior = Number(ventaSnap.data().monto) || 0;
+            await ventaRef.set({
+              monto: montoAnterior + precioLimpio,
+              deudaPendiente: 0,
+              referenciaLiquidacion: `Webhook: ${paymentIntent.id}`
+            }, { merge: true });
+          }
+        }
+        return res.status(200).send({ received: true, liquidacion: true });
+      }
       
+      // 🟢 2. FLUJO DE NUEVA VENTA O RESERVA (ANTICIPO)
       const slug = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
       const eventId = slug + '-' + Math.random().toString(36).slice(-4);
 
@@ -284,20 +336,27 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
       await admin.firestore().collection("usuarios").doc(eventId).set({
         email: cleanEmail, role: roleAsignado, plan: planLimpio, tipoEvento: 'boda', 
         eventId: eventId, nombres: nombre, fechaEvento: fecha || '', telefono: telefono || '',
-        status: 'nuevo', creadoPor: 'Stripe (OXXO/SPEI Automático)', referenciaPago: `Webhook: ${paymentIntent.id}`,
+        status: 'nuevo', creadoPor: 'Stripe (Web Automático)', referenciaPago: `Webhook: ${paymentIntent.id}`,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        isQrEnabled: planLimpio !== 'social_wall', isPassCountEnabled: planLimpio !== 'social_wall'
+        isQrEnabled: planLimpio !== 'social_wall', isPassCountEnabled: planLimpio !== 'social_wall',
+        deudaPlataforma: deudaNum,
+        montoPagado: precioLimpio,
+        cuponAplicado: cuponAplicado || '',
+        bloqueadoPorPago: false
       });
 
       await admin.firestore().collection("eventos").doc(eventId).set({
         presupuestoTotal: 150000, nombres: nombre, fecha: fecha || '', plan: planLimpio, tipoEvento: 'boda',
-        isQrEnabled: planLimpio !== 'social_wall', isPassCountEnabled: planLimpio !== 'social_wall'
+        isQrEnabled: planLimpio !== 'social_wall', isPassCountEnabled: planLimpio !== 'social_wall',
+        deudaPlataforma: deudaNum,
+        bloqueadoPorPago: false
       });
 
       const mesAnioActual = new Date().toISOString().slice(0, 7);
       await admin.firestore().collection("ventas").doc(eventId).set({
         fecha: admin.firestore.FieldValue.serverTimestamp(), mesAnio: mesAnioActual,
-        monto: precioLimpio, plan: planLimpio, vendedor: 'Stripe (OXXO/SPEI Automático)',
+        monto: precioLimpio, deudaPendiente: deudaNum, cupon: cuponAplicado || '',
+        plan: planLimpio, vendedor: 'Stripe (Web Automático)',
         referencia: `Webhook: ${paymentIntent.id}`, cliente: nombre
       });
 
@@ -330,7 +389,8 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
         });
       } catch (e) { console.error("Error email Webhook:", e); }
 
-      const msgVenta = `🎉 <b>¡NUEVO PAGO ASÍNCRONO ACREDITADO (OXXO/SPEI)!</b>\n\n👤 <b>Cliente:</b> ${nombre}\n💎 <b>Plan:</b> ${planLimpio.toUpperCase()}\n📅 <b>Fecha del Evento:</b> ${fecha || 'Pendiente'}\n📱 <b>WhatsApp:</b> ${telefono || 'Pendiente'}\n\n<i>¿Quién del equipo toma esta bóveda? 👩‍🎨👨‍🎨</i>`;
+      const detallePago = deudaNum > 0 ? `Reserva ($${precioLimpio} pagados • Resta $${deudaNum})` : `Pago Completo ($${precioLimpio})`;
+      const msgVenta = `🎉 <b>¡NUEVA VENTA / BÓVEDA!</b>\n\n🆔 <b>ID de Bóveda:</b> <code>${eventId}</code>\n👤 <b>Cliente:</b> ${nombre}\n💎 <b>Plan:</b> ${planLimpio.toUpperCase()}\n💳 <b>Modalidad:</b> ${detallePago}\n📅 <b>Fecha del Evento:</b> ${fecha || 'Pendiente'}\n📱 <b>WhatsApp:</b> ${telefono || 'Pendiente'}\n\n<i>¿Quién del equipo toma esta bóveda? 👩‍🎨👨‍🎨</i>`;
       await notificarTelegram(msgVenta);
     }
   }
@@ -351,8 +411,8 @@ exports.crearIntentoAsincrono = functions.https.onRequest(async (req, res) => {
 
   try {
     const stripe = require("stripe")(process.env.STRIPE_SECRET);
-    // 🔴 1. Ahora el servidor recibe la variable 'moneda' desde tu página web
-    const { precio, plan, moneda, nombre, email, fecha, telefono, pais } = req.body;
+    // 🔴 1. Ahora el servidor recibe la moneda, la deuda restante y el cupón desde tu página web
+    const { precio, plan, moneda, nombre, email, fecha, telefono, pais, deudaPlataforma, cuponAplicado, esAnticipo } = req.body;
     const precioLimpio = parseInt(precio.toString().replace(/,/g, ''));
 
     // 🔴 2. Convertimos a minúsculas (Stripe exige 'usd' o 'mxn')
@@ -388,7 +448,17 @@ exports.crearIntentoAsincrono = functions.https.onRequest(async (req, res) => {
           }
         }
       }),
-      metadata: { plan, nombre, email, fecha, telefono, pais }
+      metadata: {
+        plan: String(plan || ''),
+        nombre: String(nombre || ''),
+        email: String(email || ''),
+        fecha: String(fecha || ''),
+        telefono: String(telefono || ''),
+        pais: String(pais || 'MX'),
+        deudaPlataforma: String(Number(deudaPlataforma) || 0),
+        cuponAplicado: String(cuponAplicado || ''),
+        esAnticipo: esAnticipo ? 'true' : 'false'
+      }
     });
 
     res.status(200).send({ clientSecret: paymentIntent.client_secret });
