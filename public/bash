@@ -1,5 +1,5 @@
 git add .
-git commit -m "Mejora version movil bottom bar"
+git commit -m "Mejora version movil insta version"
 git push origin main
 
 maquina del tiempo

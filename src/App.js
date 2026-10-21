@@ -1939,120 +1939,108 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
           );
       })()}
 
-      {/* 🟢 HEADER COMPACTO MÓVIL Y ESCRITORIO */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4 bg-[#1C1917] p-4 md:p-6 rounded-2xl md:rounded-3xl border border-[#D4AF37]/25 shadow-xl shrink-0">
-        <div className="flex items-center justify-between w-full md:w-auto">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 md:w-11 md:h-11 rounded-xl md:rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
-              <Users size={18} />
-            </div>
-            <div>
-              <h2 className="text-xl md:text-3xl font-editorial font-black text-white tracking-wide leading-none">Invitados</h2>
-            </div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#1C1917] p-5 sm:p-6 rounded-3xl border border-[#D4AF37]/25 shadow-xl">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
+            <Users size={20} />
           </div>
-          {/* Switch Boda en Móvil (Derecha del título para ahorrar espacio) */}
-          <div className="flex md:hidden items-center bg-[#141210] px-2.5 h-8 rounded-lg border border-[#D4AF37]/30 shadow-inner">
-            <span className="text-[9px] font-bold text-[#D4AF37] uppercase mr-2">Boda</span>
-            <button onClick={async () => {
-              const newVal = !isWeddingMode; setIsWeddingMode(newVal);
-              try { await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' }); } catch(e) {}
-            }} className={`relative w-7 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-[#D4AF37]' : 'bg-white/10'}`}>
-              <div className={`absolute top-[2px] left-[2px] w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-3' : 'translate-x-0'}`}></div>
-            </button>
+          <div>
+            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block mb-0.5">Control de asistencia, pases y credenciales.</span>
+            <h2 className="text-2xl sm:text-3xl font-editorial text-white tracking-wide leading-none">Gestión de Invitados</h2>
           </div>
         </div>
         
-        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto hide-scrollbar pb-1 md:pb-0">
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto mt-4 md:mt-0 justify-start md:justify-end">
           {isPremium && (
-            <button onClick={() => setIsTagManagerOpen(true)} className="flex items-center justify-center px-4 h-9 bg-[#141210] md:bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-[9px] md:text-[10px] font-bold uppercase tracking-widest whitespace-nowrap shrink-0 shadow-sm md:shadow-none hover:bg-[#D4AF37]/10 transition-colors">
+            <button onClick={() => setIsTagManagerOpen(true)} className="flex items-center justify-center px-4 h-9 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-[10px] font-bold hover:bg-[#D4AF37]/10 transition-colors uppercase tracking-widest shrink-0">
               <Layers size={14} className="mr-1.5"/> Etiquetas ({globalTags.length})
             </button>
           )}
-          <button onClick={() => setExportViewOpen(true)} className="flex items-center justify-center px-4 h-9 bg-[#141210] md:bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-[9px] md:text-[10px] font-bold uppercase tracking-widest whitespace-nowrap shrink-0 shadow-sm md:shadow-none hover:bg-[#D4AF37]/10 transition-colors">
+          <button onClick={() => setExportViewOpen(true)} className="flex items-center justify-center px-4 h-9 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-[10px] font-bold hover:bg-[#D4AF37]/10 transition-colors uppercase tracking-widest shrink-0">
             <FileSpreadsheet size={14} className="mr-1.5"/> Exportar
           </button>
           
-          <div className="hidden md:flex items-center bg-transparent px-3 h-9 rounded-lg border border-[#D4AF37]/30 transition-colors shrink-0">
+          <div className="flex items-center bg-transparent px-3 h-9 rounded-lg border border-[#D4AF37]/30 transition-colors shrink-0">
             <span className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-wider mr-2">Boda</span>
             <button onClick={async () => {
-              const newVal = !isWeddingMode; setIsWeddingMode(newVal);
+              const newVal = !isWeddingMode;
+              setIsWeddingMode(newVal);
               try { await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' }); } catch(e) {}
             }} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-[#D4AF37]' : 'bg-white/10'}`}>
               <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
             </button>
           </div>
+
+          {isWeddingMode ? (
+            <div className="flex gap-2 shrink-0">
+              <button onClick={() => handleOpenAdd('novia')} className="flex items-center justify-center px-4 h-9 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-lg text-[10px] font-bold hover:bg-rose-500/20 transition-colors uppercase tracking-widest">
+                <UserPlus size={14} className="mr-1.5"/> Novia
+              </button>
+              <button onClick={() => handleOpenAdd('novio')} className="flex items-center justify-center px-4 h-9 bg-sky-500/10 border border-sky-500/30 text-sky-400 rounded-lg text-[10px] font-bold hover:bg-sky-500/20 transition-colors uppercase tracking-widest">
+                <UserPlus size={14} className="mr-1.5"/> Novio
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => handleOpenAdd('general')} className="flex items-center justify-center px-5 h-9 bg-[#D4AF37] text-[#1C1917] rounded-lg text-[10px] font-black hover:bg-[#c5a028] transition-colors uppercase tracking-widest shrink-0">
+              <UserPlus size={14} className="mr-1.5"/> Nuevo Invitado
+            </button>
+          )}
         </div>
-        
-        {/* Botones Agregar en Móvil ocupan todo el ancho y son delgados */}
-        {isWeddingMode ? (
-          <div className="flex gap-2 w-full md:w-auto md:hidden mt-1">
-            <button onClick={() => handleOpenAdd('novia')} className="flex-1 items-center justify-center h-10 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-xl text-[10px] font-bold uppercase tracking-widest flex shadow-sm">
-              <UserPlus size={14} className="mr-1.5"/> Novia
-            </button>
-            <button onClick={() => handleOpenAdd('novio')} className="flex-1 items-center justify-center h-10 bg-sky-500/10 border border-sky-500/30 text-sky-400 rounded-xl text-[10px] font-bold uppercase tracking-widest flex shadow-sm">
-              <UserPlus size={14} className="mr-1.5"/> Novio
-            </button>
-          </div>
-        ) : (
-          <button onClick={() => handleOpenAdd('general')} className="md:hidden w-full items-center justify-center px-5 h-10 bg-[#D4AF37] text-[#1C1917] rounded-xl text-[10px] font-black hover:bg-[#c5a028] transition-colors uppercase tracking-widest shadow-md flex mt-1">
-            <UserPlus size={14} className="mr-1.5"/> Nuevo Invitado
-          </button>
-        )}
       </div>
 
-      {/* 🟢 MÉTRICAS DESLIZABLES EN MÓVIL (TIPO CARRUSEL) */}
-      <div className="flex overflow-x-auto md:grid md:grid-cols-2 xl:grid-cols-6 gap-2 sm:gap-3 hide-scrollbar pb-2 md:pb-0 shrink-0">
-        <div className="bg-[#141210] px-4 py-2.5 md:py-3 rounded-xl border border-[#D4AF37]/30 flex flex-col md:flex-row md:items-center justify-between min-w-[100px] shrink-0 shadow-md">
-          <div className="text-[#D4AF37] font-black text-[8px] md:text-[9px] uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 md:mb-0"><Users className="w-3.5 h-3.5 inline mr-1 shrink-0"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
-          <h3 className="text-sm font-black text-white md:text-right">{passCountEnabled ? totalPases : safeGuests.length}</h3>
+      <div className={`grid grid-cols-2 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-2 sm:gap-3`}>
+        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-[#D4AF37]/30 flex items-center justify-between transition-all hover:border-[#D4AF37]/60 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+          <div className="text-[#D4AF37] font-black text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
+          <h3 className="text-sm font-black text-white">{passCountEnabled ? totalPases : safeGuests.length}</h3>
         </div>
         
         {isPremium && passCountEnabled && (
-        <div className="bg-[#141210] px-4 py-2.5 md:py-3 rounded-xl border border-white/10 flex flex-col md:flex-row md:items-center justify-between min-w-[90px] shrink-0 shadow-md">
-          <div className="text-sky-400 font-bold text-[8px] md:text-[9px] uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 md:mb-0"><Users className="w-3.5 h-3.5 inline mr-1 shrink-0"/> Niños</div>
-          <h3 className="text-sm font-black text-sky-400 md:text-right">{totalNinos}</h3>
+        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-white/10 flex items-center justify-between transition-all hover:border-sky-500/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+          <div className="text-sky-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Niños</div>
+          <h3 className="text-sm font-black text-sky-400">{totalNinos}</h3>
         </div>
         )}
         
-        <div className="bg-[#141210] px-4 py-2.5 md:py-3 rounded-xl border border-[#D4AF37]/15 flex flex-col md:flex-row md:items-center justify-between min-w-[110px] shrink-0 shadow-md">
-          <div className="text-[#D4AF37] font-bold text-[8px] md:text-[9px] uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 md:mb-0"><CheckCircle className="w-3.5 h-3.5 inline mr-1 shrink-0"/> Confirman</div>
-          <h3 className="text-sm font-black text-white md:text-right">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3>
+        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-[#D4AF37]/15 flex items-center justify-between transition-all hover:border-[#D4AF37]/50 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+          <div className="text-[#D4AF37] font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><CheckCircle className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Confirmados</div>
+          <h3 className="text-sm font-black text-white">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3>
         </div>
         
-        <div className="bg-[#141210] px-4 py-2.5 md:py-3 rounded-xl border border-white/10 flex flex-col md:flex-row md:items-center justify-between min-w-[110px] shrink-0 shadow-md">
-          <div className="text-slate-400 font-bold text-[8px] md:text-[9px] uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 md:mb-0"><Clock className="w-3.5 h-3.5 inline mr-1 shrink-0"/> Pendientes</div>
-          <h3 className="text-sm font-black text-slate-300 md:text-right">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
+        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-white/10 flex items-center justify-between transition-all hover:border-white/30 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+          <div className="text-slate-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Clock className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Pendientes</div>
+          <h3 className="text-sm font-black text-slate-300">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
         </div>
         
-        <div className="bg-[#141210] px-4 py-2.5 md:py-3 rounded-xl border border-white/10 flex flex-col md:flex-row md:items-center justify-between min-w-[100px] shrink-0 shadow-md">
-          <div className="text-rose-400 font-bold text-[8px] md:text-[9px] uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 md:mb-0"><X className="w-3.5 h-3.5 inline mr-1 shrink-0"/> Cancelan</div>
-          <h3 className="text-sm font-black text-rose-400 md:text-right">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
+        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-white/10 flex items-center justify-between transition-all hover:border-rose-500/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+          <div className="text-rose-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><X className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Cancelados</div>
+          <h3 className="text-sm font-black text-rose-400">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
         </div>
         
         {isPremium && qrEnabled && (
-        <div className="bg-[#141210] px-4 py-2.5 md:py-3 rounded-xl border border-[#D4AF37]/15 flex flex-col md:flex-row md:items-center justify-between min-w-[100px] shrink-0 shadow-md">
-          <div className="text-emerald-400 font-bold text-[8px] md:text-[9px] uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 md:mb-0"><Scan className="w-3.5 h-3.5 inline mr-1 shrink-0"/> Ingresos</div>
-          <h3 className="text-sm font-black text-emerald-400 md:text-right">{totalIngresos}</h3>
+        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-[#D4AF37]/15 flex items-center justify-between transition-all hover:border-emerald-500/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+          <div className="text-emerald-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Scan className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Ingresaron</div>
+          <h3 className="text-sm font-black text-emerald-400">{totalIngresos}</h3>
         </div>
         )}
+      </div>
 
-        {isWeddingMode && passCountEnabled && (
-          <div className="bg-[#141210] md:bg-[#1C1917] px-4 py-2.5 md:py-3 rounded-xl border border-[#D4AF37]/20 flex flex-col md:flex-row items-center md:justify-around gap-1 shrink-0 shadow-md min-w-[120px]">
-            <div className="w-full flex items-center justify-between"><span className="text-[8px] font-bold text-rose-400 uppercase tracking-widest">Novia</span><span className="text-xs font-black text-rose-400">{pasesNovia}</span></div>
-            <div className="w-full flex items-center justify-between border-t md:border-t-0 md:border-l border-white/10 md:pl-2 pt-1 md:pt-0 mt-1 md:mt-0"><span className="text-[8px] font-bold text-sky-400 uppercase tracking-widest">Novio</span><span className="text-xs font-black text-sky-400">{pasesNovio}</span></div>
+      {isWeddingMode && passCountEnabled && (
+        <div className="bg-[#1C1917] py-2.5 px-6 rounded-xl border border-[#D4AF37]/20 flex items-center justify-around transition-colors shadow-sm">
+          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest">Pases Novia</p><p className="text-sm font-black text-rose-400">{pasesNovia}</p></div>
+          <div className="h-4 w-px bg-white/10"></div>
+          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-sky-400 uppercase tracking-widest">Pases Novio</p><p className="text-sm font-black text-sky-400">{pasesNovio}</p></div>
+        </div>
+      )}
+
+      <div className="flex-1 bg-[#1C1917] rounded-3xl border border-[#D4AF37]/30 shadow-2xl overflow-hidden flex flex-col transition-colors duration-500 z-10 relative">
+        <div className="p-3 border-b border-[#D4AF37]/20 bg-[#141210] flex transition-colors shrink-0">
+          <div className="relative flex-1">
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+            <input type="text" placeholder="Buscar por nombre, estatus o mesa..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white placeholder-slate-500 transition-colors" />
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* 🟢 BUSCADOR SUELTO Y LISTA LIBRE */}
-      <div className="relative shrink-0">
-        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#D4AF37]" size={16} />
-        <input type="text" placeholder="Buscar por nombre, estatus o mesa..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-11 pr-4 py-3 md:py-3.5 border border-[#D4AF37]/30 rounded-xl text-sm md:text-base outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white placeholder-slate-400 font-bold shadow-md transition-colors" />
-      </div>
-
-      {/* 🟢 LA LISTA EN SÍ MISMA (Sin atrapar en móvil, atrapada en desktop) */}
-      <div className="flex-1 md:bg-[#1C1917] md:rounded-3xl md:border border-[#D4AF37]/30 md:shadow-2xl flex flex-col z-10 relative md:overflow-hidden -mx-2 md:mx-0 px-2 md:px-0">
-        <div className="md:overflow-y-auto custom-scrollbar flex-1 relative h-full">
+        <div className="overflow-y-auto custom-scrollbar flex-1 relative">
           
           <div className="hidden md:block">
             <table className="w-full text-left text-xs whitespace-nowrap">
@@ -8945,6 +8933,27 @@ const ProveedoresView = ({ proveedores, setProveedores, gastos, setGastos, addNo
 // ==========================================
 // --- COMPONENTE: CABECERA INTELIGENTE ---
 // ==========================================
+// 🟢 COMPONENTE LOGO BAULIA (PLATINO OLED)
+const BauliaLogoBlanco = ({ className }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950.3 241.1">
+    <g fill="#F8FAFC">
+      <path d="M300.8,89.1h-.4c0-2-.7-3.8-2.2-5.3s-3.3-2.2-5.3-2.2h-1.4v-1.2c-.1,0,9.3,0,9.3,0v8.6h0ZM300.8,154.4v8.6h-9.4v-1.2h1.5c2,0,3.8-.7,5.3-2.2s2.2-3.2,2.2-5.3h.4ZM308.1,80.4v82.6h-7.7v-82.6h7.7ZM314.8,80.4c5.5,0,10.2.8,14,2.5s6.7,4,8.7,6.9c2,3,3,6.4,3,10.3s-.6,6.2-1.9,8.7-2.9,4.5-4.8,6c-2,1.5-4.1,2.6-6.3,3.2,4.2.6,7.8,2,10.8,4.1s5.4,4.8,7,8c1.6,3.2,2.4,6.7,2.4,10.7s-1.1,8.3-3.2,11.6-5.3,5.9-9.4,7.8c-4.1,1.9-9.1,2.8-14.9,2.8h-13.1c0-1.4.1-2.8.1-4.2h12.5c4.1,0,7.6-.7,10.4-2.2s5-3.6,6.5-6.4c1.5-2.8,2.2-6.2,2.2-10.2s-.8-8-2.5-10.7c-1.7-2.8-3.9-4.8-6.6-6.3-2.7-1.4-5.6-2.4-8.7-2.9s-6.1-.8-8.9-.8v-1.1c1.8,0,3.8-.2,6-.6s4.3-1.2,6.4-2.4c2-1.2,3.7-2.9,5.1-5.3,1.3-2.3,2-5.4,2-9.1s-.6-6.6-1.9-9.1-3.2-4.4-5.8-5.7c-2.6-1.3-5.7-1.9-9.5-1.9h-10.9s0-.4-.3-1c-.2-.6-.5-1.5-.9-2.8h12.5,0Z"/>
+      <path d="M417.6,154.4c-.6,1.6-.6,2.9-.2,4s1,1.9,1.9,2.5,1.8.9,2.8.9h1.1v1.2h-23.7v-1.2h1.1c1.8,0,3.7-.6,5.6-1.7,1.9-1.1,3.5-3,4.8-5.7h6.7,0ZM443,78.8l1.1,8.3-29.6,75.7h-7.1l30.2-71.8c.9-2,1.6-3.7,2.2-5.1s1.1-2.8,1.5-4.1c.4-1.3.6-2.3.6-3h1.1,0ZM459.6,130.8v3.5h-36.9v-3.5h36.9ZM443,78.8l34.9,83.6h-10l-27.3-72.4s2.4-11.2,2.4-11.2ZM464.9,154.4h9.7c1.2,2.7,2.8,4.6,4.7,5.7,2,1.1,3.9,1.7,5.7,1.7h.9v1.2h-26.6v-1.2h1.1c1.5,0,2.8-.6,4-1.9,1.2-1.3,1.3-3.1.5-5.5h0Z"/>
+      <path d="M542.1,80.4v7.1h-.4c0-1.7-.6-3.1-1.8-4.2s-2.7-1.7-4.4-1.7h-1.9v-1.2h8.5ZM549.5,80.4v51.9c0,5.7,1,10.7,3.1,15s5,7.7,8.8,10.1c3.8,2.4,8.1,3.6,13.1,3.6s9.9-1.1,13.8-3.4c3.9-2.3,7-5.4,9.2-9.5s3.3-8.8,3.3-14.2v-53.5h5.5v53.5c0,6.1-1.3,11.5-4,16.1-2.6,4.6-6.4,8.2-11.2,10.8s-10.4,3.9-16.8,3.9-12.3-1.3-17.2-3.8c-4.9-2.6-8.7-6.1-11.4-10.7-2.7-4.6-4.1-10-4.1-16.1v-53.6h7.9ZM557.6,80.4v1.2h-1.9c-1.7,0-3.2.6-4.4,1.7s-1.8,2.5-1.8,4.2h-.2v-7.1h8.4,0ZM574.4,72.1c1.7-1.8,3.3-3.6,5-5.4s3.3-3.5,5-5.2,3.4-3.3,5-4.9c.9.9,1.7,1.9,2.6,3,.9,1,1.6,2.1,2.2,3.3-2.1,1.2-4.2,2.4-6.4,3.5-2.1,1.2-4.2,2.3-6.3,3.4s-4.2,2.1-6.3,3.1c0,0-.8-.8-.8-.8ZM601.2,80.4v7.1h-.4c0-1.7-.6-3.1-1.8-4.2s-2.7-1.7-4.4-1.7h-1.9v-1.2h8.5ZM614.5,80.4v1.2h-1.9c-1.7,0-3.2.6-4.4,1.7s-1.8,2.5-1.8,4.2h-.2v-7.1h8.4,0Z"/>
+      <path d="M682.6,89.1h-.4c0-2-.8-3.8-2.3-5.3s-3.2-2.2-5.3-2.2h-1.5v-1.2h9.4v8.6h0ZM682.6,154.4v8.6h-9.4v-1.2h1.5c2,0,3.8-.7,5.3-2.2s2.2-3.2,2.3-5.3h.4,0ZM689.9,80.4v82.6h-7.7v-82.6h7.7ZM689.6,89.1v-8.6h9.4v1.2h-1.5c-2,0-3.8.7-5.3,2.2s-2.2,3.2-2.3,5.3h-.4,0ZM721.8,159.4v3.7h-32.2v-3.7h32.2ZM729,143.9l-6.8,19.1h-19.6l4.2-3.7c4.2,0,7.6-.6,10.2-1.9,2.6-1.3,4.8-3.1,6.4-5.5,1.7-2.4,3.1-5,4.4-8h1.2,0Z"/>
+      <path d="M794.4,89.1h-.4c0-2-.8-3.8-2.3-5.3s-3.2-2.2-5.3-2.2h-1.5v-1.2h9.4v8.6h0ZM794.4,154.4v8.6h-9.4v-1.2h1.5c2,0,3.8-.7,5.3-2.2s2.2-3.2,2.3-5.3h.4,0ZM801.7,80.4v82.6h-7.7v-82.6h7.7ZM801.3,89.1v-8.6h9.4v1.2h-1.5c-2,0-3.8.7-5.3,2.2s-2.2,3.2-2.3,5.3h-.4,0ZM801.3,154.4h.4c0,2,.8,3.8,2.3,5.3s3.2,2.2,5.3,2.2h1.5v1.2h-9.4v-8.6h0Z"/>
+      <path d="M882,154.4c-.6,1.6-.6,2.9-.2,4,.4,1.1,1,1.9,1.9,2.5s1.8.9,2.8.9h1.1v1.2h-23.7v-1.2h1.1c1.8,0,3.7-.6,5.6-1.7,1.9-1.1,3.5-3,4.8-5.7h6.7,0ZM907.3,78.8l1.1,8.3-29.6,75.7h-7.1l30.2-71.8c.9-2,1.6-3.7,2.2-5.1.6-1.4,1.1-2.8,1.5-4.1.4-1.3.6-2.3.6-3h1.1ZM924,130.8v3.5h-36.9v-3.5h36.9ZM907.3,78.8l34.9,83.6h-10l-27.3-72.4,2.4-11.2h0ZM929.3,154.4h9.7c1.2,2.7,2.8,4.6,4.7,5.7,2,1.1,3.9,1.7,5.7,1.7h.9v1.2h-26.6v-1.2h1.1c1.5,0,2.8-.6,4-1.9s1.3-3.1.5-5.5h0Z"/>
+    </g>
+    <g>
+      <path fill="#F8FAFC" d="M84.6,147.2c-8.9,11.8-13.3,19.9-13.3,24.2s.9,2.6,2.6,2.6h0c2.2,0,8.2-7.1,17.9-21.3,9.7-14.2,17.5-27.5,23.3-39.8-11.5,11-21.7,22.4-30.5,34.2Z"/>
+      <path fill="#F8FAFC" d="M109.4,155.8c-5.9,0-8.9.9-8.9,2.6s1,1.9,3,2.8c2,.9,4.3,1.3,6.9,1.3,6.8,0,13.4-2.1,19.7-6.3l-20.8-.5Z"/>
+      <path fill="#D4AF37" d="M127,98.5c0,0,.1-.1.2-.2,0-.2-.1-.2-.2.2Z"/>
+      <path fill="#F8FAFC" d="M121.1,8L8.5,120.6l112.5,112.5,112.5-112.5L121.1,8ZM159.4,99.7c-7.9,6.9-16,12.3-24.3,16.1h0s5-.4,5-.4c5.5,0,9.5,1,12.2,3.1s4,4.9,4,8.6-1.7,8.1-5,13.1-7.8,9.5-13.1,13.6h6.5c2.7,0,4.5-.1,5.6-.3,1.1-.2,1.7-.3,1.8-.3,1.1,0,1.6.6,1.6,1.7s-.8,1.8-2.3,1.8c-5.9,0-11.6,0-17-.2-8.6,5.5-17,8.2-25.3,8.2s-7-.7-9.3-2.2c-2.3-1.5-3.5-2.9-3.5-4.4s.6-2.6,1.9-3.5c1.3-.8,3.1-1.3,5.4-1.3,9,0,19,.2,30.1.6,4.6-3.8,8.3-8.1,11-13.1,2.8-5,4.1-9.4,4.1-13.4,0-6.4-3.4-9.5-10.3-9.5s-5.5.4-8.4,1.3c-2.9.8-4.6,1.4-5.2,1.8-.6.3-.9.5-1.1.5-.5,0-.7-.3-.7-1s1-1.4,3-2.4c8.8-4.2,17.3-9.8,25.6-16.9s12.5-12,12.5-15-1.1-2.1-3.2-2.1c-8.8,0-20.8,6.6-36,19.7-3.1,7.9-8.1,17.6-15.1,29.1-7,11.5-14.4,21.8-22,30.9-7.7,9.1-13.4,13.6-17.1,13.6s-3.5-1.2-3.5-3.6c0-5.5,5.2-15.1,15.5-29.1,10.3-14,22-26.8,35-38.5,2.3-5.6,3.5-9.7,3.5-12.2s-.6-4.6-1.8-6.1c-1.2-1.5-3-2.6-5.4-3.3-3.8-1-7.7-1.5-11.9-1.5s-7.4,0-9.6.3c-2.2.2-4.9.6-8.1,1.2-3.2.6-5.8,1.6-7.8,3-2,1.4-3,3.2-3,5.4s1.1,3.9,3.2,5c2.2,1.2,4.8,2,7.9,2.5,3.1.5,6.2,1,9.3,1.5s5.7,1.6,7.8,3.2c2.2,1.6,3.2,3.8,3.2,6.6s-.2,1.2-.5,1.2-.6-.1-.8-.3c-.2-.2-.5-.7-1-1.4-.7-1-1.7-1.8-3.1-2.3s-3.4-1.1-6.2-1.6c-2.8-.5-5.5-1-7.9-1.6-2.5-.6-5-1.3-7.5-2.2-2.5-.9-4.6-2.2-6.1-3.9-1.5-1.7-2.3-3.7-2.3-5.9s1-4.3,2.9-6c1.9-1.8,4.5-3.1,7.6-4.1,6.5-1.9,13.2-2.9,20.1-2.9,18.1,0,27.1,4.8,27.1,14.3s0,2.6,0,3.4c15.2-12.2,27.6-18.3,37.2-18.3s6.5,1.3,6.5,3.9c0,3.8-3.9,9.1-11.8,16Z"/>
+      <path fill="#F8FAFC" d="M121.1,0L.5,120.6l120.5,120.5,120.5-120.5L121.1,0ZM3.5,120.5L121.1,2.9l117.6,117.6-117.6,117.6L3.5,120.5Z"/>
+    </g>
+  </svg>
+);
+
 const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, bellAlerts, setBellAlerts, markAsRead, cycleTheme, themeSetting, authData, switchEvent, isSuperAdminMode, eventName, eventPlan, urlInvitacion }) => {
   const [showResults, setShowResults] = useState(false);
   const [showBellMenu, setShowBellMenu] = useState(false);
@@ -9115,20 +9124,70 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
         .animate-spin-slow { animation: spin-slow 4s linear infinite; }
       `}</style>
 
-      <header ref={headerRef} className="bg-[#141210]/80 backdrop-blur-2xl h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden transition-colors duration-700">
-        <div className="flex items-center flex-1">
-          <button onClick={() => setIsOpen(true)} className="xl:hidden text-[#D4AF37] mr-4 transition-colors"><Menu size={24} /></button>
+      <header ref={headerRef} className="bg-[#000000]/90 backdrop-blur-2xl h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden border-b border-white/5 transition-colors duration-700">
+        
+        {/* 📱 HEADER MÓVIL (Estilo Instagram OLED) */}
+        <div className="xl:hidden w-full flex items-center justify-between">
+          <button onClick={() => {}} className="p-2 text-white hover:bg-white/10 rounded-full transition-colors" title="Acción Rápida">
+            <Plus size={24} strokeWidth={1.5} />
+          </button>
           
-          <div className="relative w-full max-w-md hidden sm:block ml-10 lg:ml-20">
+          <button onClick={() => setShowEventSwitcher(true)} className="flex flex-col items-center justify-center group active:scale-95 transition-transform mt-1">
+            <BauliaLogoBlanco className="h-4 w-auto mb-1 opacity-90 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+              <span className="text-[7px] uppercase tracking-[0.2em] font-bold">{eventName || 'Evento Baulia'}</span>
+              <ChevronDown size={10} />
+            </div>
+          </button>
+          
+          <div className="relative">
+            <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors">
+              <Inbox size={24} strokeWidth={1.5} />
+              {unreadCount > 0 && <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-[#000000] text-[7px] font-bold text-white flex items-center justify-center">{unreadCount}</span>}
+            </button>
+            {showBellMenu && (
+              <div className="absolute right-0 top-full mt-2 w-80 bg-[#0A0A0A] shadow-[0_20px_50px_rgba(0,0,0,0.9)] rounded-2xl border border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
+                <div className="p-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                  <h4 className="font-bold text-white text-sm">Centro de Atención</h4>
+                  {bellAlerts.length > 0 && <button onClick={(e) => { e.stopPropagation(); setBellAlerts([]); }} className="text-[10px] text-slate-500 hover:text-white font-bold transition-colors">Limpiar historial</button>}
+                </div>
+                <div className="max-h-80 overflow-y-auto custom-scrollbar">
+                  {allAlerts.length === 0 ? (
+                    <div className="p-8 text-center text-slate-500"><CheckCircle size={32} className="mx-auto mb-2 text-emerald-500/30"/> ¡Todo al día! No tienes notificaciones.</div>
+                  ) : (
+                    allAlerts.map(alert => (
+                      <div key={alert.id} className={`w-full text-left px-4 py-3 flex items-start transition-colors group cursor-pointer border-b border-white/5 ${alert.isRead ? 'opacity-60 hover:bg-white/5' : 'bg-white/5 hover:bg-white/10'}`} onClick={(e) => { e.stopPropagation(); if (alert.id.startsWith('ext_')) { const guestId = alert.id.replace('ext_', ''); const guest = data?.guests?.find(g => g.id === guestId); if (guest) setExtraPassModal(guest); setShowBellMenu(false); return; } if(markAsRead && !alert.isDynamic) markAsRead(alert.id); if(alert.tab) { handleNavigate(alert.tab); } else { setShowBellMenu(false); } }}>
+                        <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-400' : alert.type === 'danger' ? 'text-rose-400' : alert.type === 'warning' ? 'text-amber-400' : alert.type === 'info' ? 'text-sky-400' : 'text-indigo-400'}`}>
+                          {alert.type === 'success' ? <CheckCircle size={16}/> : alert.type === 'warning' || alert.type === 'danger' ? <AlertCircle size={16}/> : alert.type === 'info' ? <Building size={16}/> : <Bell size={16}/>}
+                        </div>
+                        <div className="flex-1">
+                          <p className={`text-sm leading-tight ${alert.isRead ? 'font-medium text-slate-400' : 'font-bold text-white'}`}>{alert.title}</p>
+                          <p className={`text-[10px] mt-1 leading-snug ${alert.isRead ? 'text-slate-500' : 'text-slate-400 font-medium'}`}>{alert.message}</p>
+                        </div>
+                        {!alert.isDynamic && (
+                          <button onClick={(e) => { e.stopPropagation(); setBellAlerts(prev => prev.filter(a => a.id !== alert.id)); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-500 transition-colors ml-2"><X size={14}/></button>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 💻 HEADER ESCRITORIO (Mantenemos la estructura con colores OLED Platino) */}
+        <div className="hidden xl:flex items-center flex-1">
+          <div className="relative w-full max-w-md ml-4">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-            <input type="text" placeholder="Buscar en la bóveda..." value={globalSearch} onChange={(e) => {setGlobalSearch(e.target.value); setShowResults(true);}} className="w-full pl-10 pr-4 py-2 bg-[#1C1917] border border-white/10 rounded-full text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#D4AF37] transition-all"/>
+            <input type="text" placeholder="Buscar en la bóveda..." value={globalSearch} onChange={(e) => {setGlobalSearch(e.target.value); setShowResults(true);}} className="w-full pl-10 pr-4 py-2 bg-[#111111] border border-white/10 rounded-full text-sm text-white placeholder-slate-500 focus:outline-none focus:border-white transition-all"/>
             
             {showResults && globalSearch.length > 1 && (
-              <div className="absolute top-full left-0 mt-2 w-full bg-white dark:bg-[#0a0a0a] shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 py-2 max-h-80 overflow-y-auto z-[100] animate-in fade-in transition-colors">
+              <div className="absolute top-full left-0 mt-2 w-full bg-[#0A0A0A] shadow-2xl rounded-2xl border border-white/10 py-2 max-h-80 overflow-y-auto z-[100] animate-in fade-in transition-colors">
                 {searchResults.length === 0 ? <div className="p-4 text-center text-sm text-slate-500">No se encontraron resultados para "{globalSearch}"</div> : searchResults.map(res => (
-                    <button key={`${res.type}_${res.id}`} onClick={() => handleNavigate(res.tab)} className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-white/5 flex items-center border-b border-slate-100 dark:border-white/5 last:border-0 transition-colors">
-                      <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-white/5 text-amber-600 dark:text-amber-500 flex items-center justify-center mr-3 border border-transparent dark:border-white/10">{res.icon}</div>
-                      <div><p className="font-bold text-slate-800 dark:text-white text-sm">{res.text}</p><p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5">{res.type}</p></div>
+                    <button key={`${res.type}_${res.id}`} onClick={() => handleNavigate(res.tab)} className="w-full text-left px-4 py-3 hover:bg-white/5 flex items-center border-b border-white/5 last:border-0 transition-colors">
+                      <div className="w-8 h-8 rounded-full bg-white/5 text-white flex items-center justify-center mr-3 border border-white/10">{res.icon}</div>
+                      <div><p className="font-bold text-white text-sm">{res.text}</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">{res.type}</p></div>
                     </button>
                   ))
                 }
@@ -9137,64 +9196,42 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          
-          {/* 🔴 OCULTAMOS LOS CONTADORES SI ERES EL SUPERADMIN */}
+        <div className="hidden xl:flex items-center space-x-4">
           {!isSuperAdminMode && (
-            <div className="hidden md:flex items-center bg-transparent border border-[#D4AF37]/30 rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2 space-x-0.5 sm:space-x-1 transition-colors">
-              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-slate-300" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countTotal}</span></div>
-              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-amber-500 bg-amber-500/10 border border-amber-500/20" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countConfirmados}</span></div>
-              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-rose-500 bg-rose-500/10 border border-rose-500/20" title="Cancelaron"><X size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countCancelados}</span></div>
-              <div className="flex items-center px-1.5 sm:px-2 py-1 rounded-md text-emerald-400 bg-emerald-500/10 border border-emerald-500/20" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-[10px] sm:text-xs font-bold ml-1">{countIngresos}</span></div>
+            <div className="flex items-center bg-transparent border border-white/10 rounded-lg p-1 mr-2 space-x-1 transition-colors">
+              <div className="flex items-center px-2 py-1 rounded-md text-slate-300" title="Total Pases"><Users size={14} className="opacity-70" /><span className="text-xs font-bold ml-1">{countTotal}</span></div>
+              <div className="flex items-center px-2 py-1 rounded-md text-emerald-400 bg-emerald-500/10 border border-emerald-500/20" title="Confirmaron"><CheckCircle size={14} className="opacity-80" /><span className="text-xs font-bold ml-1">{countConfirmados}</span></div>
+              <div className="flex items-center px-2 py-1 rounded-md text-rose-400 bg-rose-500/10 border border-rose-500/20" title="Cancelaron"><X size={14} className="opacity-80" /><span className="text-xs font-bold ml-1">{countCancelados}</span></div>
+              <div className="flex items-center px-2 py-1 rounded-md text-sky-400 bg-sky-500/10 border border-sky-500/20" title="Ya Ingresaron"><Scan size={14} className="opacity-80" /><span className="text-xs font-bold ml-1">{countIngresos}</span></div>
             </div>
           )}
 
           <div className="relative">
-            <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-[#D4AF37] transition-colors rounded-full hover:bg-white/5">
-              <Bell size={20} />
-              {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-[#141210] rounded-full text-[9px] font-bold text-white flex items-center justify-center animate-in zoom-in">{unreadCount}</span>}
+            <button onClick={() => {setShowBellMenu(!showBellMenu); setShowProfileMenu(false); setShowResults(false);}} className="relative p-2 text-white transition-colors rounded-full hover:bg-white/10">
+              <Inbox size={20} strokeWidth={2} />
+              {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-[#000000] rounded-full text-[9px] font-bold text-white flex items-center justify-center">{unreadCount}</span>}
             </button>
-            
             {showBellMenu && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-[#0a0a0a] shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
-                <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex justify-between items-center">
-                  <h4 className="font-bold text-slate-800 dark:text-white">Centro de Atención</h4>
-                  {bellAlerts.length > 0 && <button onClick={(e) => { e.stopPropagation(); setBellAlerts([]); }} className="text-[10px] text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 font-bold">Limpiar historial</button>}
+              <div className="absolute right-0 top-full mt-2 w-80 bg-[#0A0A0A] shadow-2xl rounded-2xl border border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
+                <div className="p-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                  <h4 className="font-bold text-white text-sm">Centro de Atención</h4>
+                  {bellAlerts.length > 0 && <button onClick={(e) => { e.stopPropagation(); setBellAlerts([]); }} className="text-[10px] text-slate-500 hover:text-white font-bold transition-colors">Limpiar historial</button>}
                 </div>
                 <div className="max-h-80 overflow-y-auto custom-scrollbar">
                   {allAlerts.length === 0 ? (
-                    <div className="p-8 text-center text-slate-500"><CheckCircle size={32} className="mx-auto mb-2 text-emerald-500/50"/> ¡Todo al día! No tienes notificaciones.</div>
+                    <div className="p-8 text-center text-slate-500"><CheckCircle size={32} className="mx-auto mb-2 text-emerald-500/30"/> ¡Todo al día! No tienes notificaciones.</div>
                   ) : (
                     allAlerts.map(alert => (
-                      <div 
-                        key={alert.id} 
-                        className={`w-full text-left px-4 py-3 flex items-start transition-colors group cursor-pointer border-b border-slate-50 dark:border-white/5
-                          ${alert.isRead ? 'bg-white dark:bg-transparent opacity-60 hover:bg-slate-50 dark:hover:bg-white/5' : 'bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10'} 
-                        `} 
-                        onClick={(e) => { 
-                          e.stopPropagation();
-                          if (alert.id.startsWith('ext_')) {
-                              const guestId = alert.id.replace('ext_', '');
-                              const guest = data?.guests?.find(g => g.id === guestId);
-                              if (guest) setExtraPassModal(guest);
-                              setShowBellMenu(false);
-                              return;
-                          }
-                          if(markAsRead && !alert.isDynamic) markAsRead(alert.id); 
-                          if(alert.tab) { handleNavigate(alert.tab); } else { setShowBellMenu(false); }
-                        }}
-                      >
-                        <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-500 dark:text-emerald-400' : alert.type === 'danger' ? 'text-rose-500 dark:text-rose-400' : alert.type === 'warning' ? 'text-amber-500 dark:text-amber-400' : alert.type === 'info' ? 'text-sky-500 dark:text-sky-400' : 'text-indigo-500 dark:text-indigo-400'}`}>
+                      <div key={alert.id} className={`w-full text-left px-4 py-3 flex items-start transition-colors group cursor-pointer border-b border-white/5 ${alert.isRead ? 'opacity-60 hover:bg-white/5' : 'bg-white/5 hover:bg-white/10'}`} onClick={(e) => { e.stopPropagation(); if (alert.id.startsWith('ext_')) { const guestId = alert.id.replace('ext_', ''); const guest = data?.guests?.find(g => g.id === guestId); if (guest) setExtraPassModal(guest); setShowBellMenu(false); return; } if(markAsRead && !alert.isDynamic) markAsRead(alert.id); if(alert.tab) { handleNavigate(alert.tab); } else { setShowBellMenu(false); } }}>
+                        <div className={`mt-0.5 mr-3 ${alert.type === 'success' ? 'text-emerald-400' : alert.type === 'danger' ? 'text-rose-400' : alert.type === 'warning' ? 'text-amber-400' : alert.type === 'info' ? 'text-sky-400' : 'text-indigo-400'}`}>
                           {alert.type === 'success' ? <CheckCircle size={16}/> : alert.type === 'warning' || alert.type === 'danger' ? <AlertCircle size={16}/> : alert.type === 'info' ? <Building size={16}/> : <Bell size={16}/>}
                         </div>
                         <div className="flex-1">
-                          <p className={`text-sm leading-tight ${alert.isRead ? 'font-medium text-slate-500 dark:text-slate-400' : 'font-bold text-slate-800 dark:text-white'}`}>{alert.title}</p>
-                          <p className={`text-[10px] mt-1 leading-snug ${alert.isRead ? 'text-slate-400 dark:text-slate-500' : 'text-slate-500 dark:text-slate-400 font-medium'}`}>{alert.message}</p>
+                          <p className={`text-sm leading-tight ${alert.isRead ? 'font-medium text-slate-400' : 'font-bold text-white'}`}>{alert.title}</p>
+                          <p className={`text-[10px] mt-1 leading-snug ${alert.isRead ? 'text-slate-500' : 'text-slate-400 font-medium'}`}>{alert.message}</p>
                         </div>
                         {!alert.isDynamic && (
-                          <button onClick={(e) => { e.stopPropagation(); setBellAlerts(prev => prev.filter(a => a.id !== alert.id)); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 transition-opacity ml-2">
-                            <X size={14}/>
-                          </button>
+                          <button onClick={(e) => { e.stopPropagation(); setBellAlerts(prev => prev.filter(a => a.id !== alert.id)); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-500 transition-colors ml-2"><X size={14}/></button>
                         )}
                       </div>
                     ))
@@ -9205,45 +9242,33 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
           </div>
 
           <div className="relative">
-            <button 
-              onClick={() => {setShowProfileMenu(!showProfileMenu); setShowBellMenu(false); setShowResults(false);}} 
-              className="flex items-center space-x-2 sm:space-x-3 hover:bg-slate-200/50 dark:hover:bg-white/5 p-1 sm:p-1.5 rounded-xl transition-colors text-right border border-transparent hover:border-slate-200 dark:hover:border-white/10 group"
-            >
-              <div className="hidden sm:block pl-1 text-right">
-                <p className="text-xs font-bold text-slate-800 dark:text-white leading-tight truncate max-w-[130px]" title={eventName}>{isSuperAdminMode ? 'Mando Central' : eventName}</p>
-                <p className={`text-[9px] ${isSuperAdminMode ? 'text-amber-500' : pColors.text} font-bold tracking-widest uppercase transition-colors`}>{isSuperAdminMode ? 'SUPER ADMIN' : `Plan ${eventPlan}`}</p>
+            <button onClick={() => {setShowProfileMenu(!showProfileMenu); setShowBellMenu(false); setShowResults(false);}} className="flex items-center space-x-3 hover:bg-white/5 p-1.5 rounded-xl transition-colors border border-transparent hover:border-white/10 group">
+              <div className="pl-1 text-right">
+                <p className="text-xs font-bold text-white leading-tight truncate max-w-[130px]">{isSuperAdminMode ? 'Mando Central' : eventName}</p>
+                <p className={`text-[9px] text-slate-400 font-bold tracking-widest uppercase`}>{isSuperAdminMode ? 'SUPER ADMIN' : `Plan ${eventPlan}`}</p>
               </div>
-              
-              <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-white font-black shadow-md text-xs shrink-0 relative`}>
-                <div className={`absolute inset-[-2px] rounded-full bg-gradient-to-tr ${isSuperAdminMode ? 'from-amber-400 to-orange-500' : pColors.gradient} animate-spin-slow opacity-70 group-hover:opacity-100 transition-opacity`}></div>
-                <div className="absolute inset-[2px] rounded-full bg-slate-900 dark:bg-black flex items-center justify-center z-10">
-                   <span className={`bg-clip-text text-transparent bg-gradient-to-tr ${isSuperAdminMode ? 'from-amber-400 to-orange-500' : pColors.gradient} font-editorial text-sm tracking-widest`}>{isSuperAdminMode ? 'BM' : initials}</span>
-                </div>
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[#000000] font-black text-xs shrink-0 bg-white`}>
+                 <span className="font-editorial text-sm tracking-widest">{isSuperAdminMode ? 'BM' : initials}</span>
               </div>
             </button>
             
             {showProfileMenu && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#0a0a0a] shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
-                <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 sm:hidden">
-                  <p className="font-bold text-slate-800 dark:text-white text-sm truncate">{isSuperAdminMode ? 'Mando Central' : eventName}</p>
-                  <p className={`text-[10px] ${isSuperAdminMode ? 'text-amber-500' : pColors.text} uppercase font-bold`}>{isSuperAdminMode ? 'SUPER ADMIN' : `Plan ${eventPlan}`}</p>
-                </div>
+              <div className="absolute right-0 top-full mt-2 w-56 bg-[#0A0A0A] shadow-2xl rounded-2xl border border-white/10 overflow-hidden z-[100] animate-in slide-in-from-top-2 transition-colors">
                 <div className="p-2">
                   {authData?.availableEvents?.length > 1 && !isSuperAdminMode && (
-                     <button onClick={() => { setShowEventSwitcher(true); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2.5 text-sm text-indigo-600 dark:text-amber-500 font-bold hover:bg-indigo-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors flex items-center mb-1">
+                     <button onClick={() => { setShowEventSwitcher(true); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2.5 text-sm text-white font-bold hover:bg-white/5 rounded-lg transition-colors flex items-center mb-1">
                        <RefreshCw size={16} className="mr-2.5"/> Cambiar Proyecto
                      </button>
                   )}
-                  {!isSuperAdminMode && <button onClick={() => handleNavigate('invitacion')} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg transition-colors flex items-center"><ExternalLink size={16} className="mr-2.5"/> Ver Invitación App</button>}
-                  <button onClick={handleContactStaff} className="w-full text-left px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/5 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg transition-colors flex items-center"><MessageCircle size={16} className="mr-2.5"/> Soporte Premium</button>
+                  {!isSuperAdminMode && <button onClick={() => handleNavigate('invitacion')} className="w-full text-left px-3 py-2.5 text-sm text-slate-300 font-medium hover:bg-white/5 hover:text-white rounded-lg transition-colors flex items-center"><ExternalLink size={16} className="mr-2.5"/> Ver Invitación Web</button>}
+                  <button onClick={handleContactStaff} className="w-full text-left px-3 py-2.5 text-sm text-slate-300 font-medium hover:bg-white/5 hover:text-white rounded-lg transition-colors flex items-center"><MessageCircle size={16} className="mr-2.5"/> Soporte Premium</button>
                 </div>
-                <div className="p-2 border-t border-slate-100 dark:border-white/5">
-                  <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-sm text-rose-500 font-bold hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors flex items-center"><LogOut size={16} className="mr-2.5"/> Cerrar Sesión</button>
+                <div className="p-2 border-t border-white/10">
+                  <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-sm text-rose-500 font-bold hover:bg-rose-500/10 rounded-lg transition-colors flex items-center"><LogOut size={16} className="mr-2.5"/> Cerrar Sesión</button>
                 </div>
               </div>
             )}
           </div>
-
         </div>
       </header>
 
