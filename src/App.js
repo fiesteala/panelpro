@@ -9114,29 +9114,14 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
 
       <header ref={headerRef} className="bg-[#000000]/90 backdrop-blur-2xl h-16 flex items-center justify-between px-4 sm:px-6 relative z-50 print:hidden border-b border-white/5 transition-colors duration-700">
         
-        {/* 📱 HEADER MÓVIL (Limpio: Logo centrado, campanita sólida y botón +) */}
+        {/* 📱 HEADER MÓVIL (Limpio: Logo centrado grande, campanita sólida y botón +) */}
         <div className="xl:hidden w-full flex items-center justify-between">
-          <button onClick={() => setShowQuickAdd(true)} className="p-2 text-white hover:bg-white/10 rounded-full transition-colors active:scale-95" title="Acciones Rápidas">
-            <Plus size={24} strokeWidth={1.5} />
+          <button onClick={() => { setShowQuickAdd(true); setShowBellMenu(false); }} className="p-2 text-white hover:bg-white/10 rounded-full transition-colors active:scale-95" title="Acciones Rápidas">
+            <Plus size={26} strokeWidth={1.8} />
           </button>
           
-          <div className="flex flex-col items-center justify-center pointer-events-none mt-1">
-             <svg viewBox="0 0 950.3 241.1" className="h-5 w-auto" xmlns="http://www.w3.org/2000/svg">
-              <g fill="#F8FAFC">
-                <path d="M300.8,89.1h-.4c0-2-.7-3.8-2.2-5.3s-3.3-2.2-5.3-2.2h-1.4v-1.2c-.1,0,9.3,0,9.3,0v8.6h0ZM300.8,154.4v8.6h-9.4v-1.2h1.5c2,0,3.8-.7,5.3-2.2s2.2-3.2,2.2-5.3h.4ZM308.1,80.4v82.6h-7.7v-82.6h7.7ZM314.8,80.4c5.5,0,10.2.8,14,2.5s6.7,4,8.7,6.9c2,3,3,6.4,3,10.3s-.6,6.2-1.9,8.7-2.9,4.5-4.8,6c-2,1.5-4.1,2.6-6.3,3.2,4.2.6,7.8,2,10.8,4.1s5.4,4.8,7,8c1.6,3.2,2.4,6.7,2.4,10.7s-1.1,8.3-3.2,11.6-5.3,5.9-9.4,7.8c-4.1,1.9-9.1,2.8-14.9,2.8h-13.1c0-1.4.1-2.8.1-4.2h12.5c4.1,0,7.6-.7,10.4-2.2s5-3.6,6.5-6.4c1.5-2.8,2.2-6.2,2.2-10.2s-.8-8-2.5-10.7c-1.7-2.8-3.9-4.8-6.6-6.3-2.7-1.4-5.6-2.4-8.7-2.9s-6.1-.8-8.9-.8v-1.1c1.8,0,3.8-.2,6-.6s4.3-1.2,6.4-2.4c2-1.2,3.7-2.9,5.1-5.3,1.3-2.3,2-5.4,2-9.1s-.6-6.6-1.9-9.1-3.2-4.4-5.8-5.7c-2.6-1.3-5.7-1.9-9.5-1.9h-10.9s0-.4-.3-1c-.2-.6-.5-1.5-.9-2.8h12.5,0Z"/>
-                <path d="M417.6,154.4c-.6,1.6-.6,2.9-.2,4s1,1.9,1.9,2.5,1.8.9,2.8.9h1.1v1.2h-23.7v-1.2h1.1c1.8,0,3.7-.6,5.6-1.7,1.9-1.1,3.5-3,4.8-5.7h6.7,0ZM443,78.8l1.1,8.3-29.6,75.7h-7.1l30.2-71.8c.9-2,1.6-3.7,2.2-5.1s1.1-2.8,1.5-4.1c.4-1.3.6-2.3.6-3h1.1,0ZM459.6,130.8v3.5h-36.9v-3.5h36.9ZM443,78.8l34.9,83.6h-10l-27.3-72.4s2.4-11.2,2.4-11.2ZM464.9,154.4h9.7c1.2,2.7,2.8,4.6,4.7,5.7,2,1.1,3.9,1.7,5.7,1.7h.9v1.2h-26.6v-1.2h1.1c1.5,0,2.8-.6,4-1.9,1.2-1.3,1.3-3.1.5-5.5h0Z"/>
-                <path d="M542.1,80.4v7.1h-.4c0-1.7-.6-3.1-1.8-4.2s-2.7-1.7-4.4-1.7h-1.9v-1.2h8.5ZM549.5,80.4v51.9c0,5.7,1,10.7,3.1,15s5,7.7,8.8,10.1c3.8,2.4,8.1,3.6,13.1,3.6s9.9-1.1,13.8-3.4c3.9-2.3,7-5.4,9.2-9.5s3.3-8.8,3.3-14.2v-53.5h5.5v53.5c0,6.1-1.3,11.5-4,16.1-2.6,4.6-6.4,8.2-11.2,10.8s-10.4,3.9-16.8,3.9-12.3-1.3-17.2-3.8c-4.9-2.6-8.7-6.1-11.4-10.7-2.7-4.6-4.1-10-4.1-16.1v-53.6h7.9ZM557.6,80.4v1.2h-1.9c-1.7,0-3.2.6-4.4,1.7s-1.8,2.5-1.8,4.2h-.2v-7.1h8.4,0ZM574.4,72.1c1.7-1.8,3.3-3.6,5-5.4s3.3-3.5,5-5.2,3.4-3.3,5-4.9c.9.9,1.7,1.9,2.6,3,.9,1,1.6,2.1,2.2,3.3-2.1,1.2-4.2,2.4-6.4,3.5-2.1,1.2-4.2,2.3-6.3,3.4s-4.2,2.1-6.3,3.1c0,0-.8-.8-.8-.8ZM601.2,80.4v7.1h-.4c0-1.7-.6-3.1-1.8-4.2s-2.7-1.7-4.4-1.7h-1.9v-1.2h8.5ZM614.5,80.4v1.2h-1.9c-1.7,0-3.2.6-4.4,1.7s-1.8,2.5-1.8,4.2h-.2v-7.1h8.4,0Z"/>
-                <path d="M682.6,89.1h-.4c0-2-.8-3.8-2.3-5.3s-3.2-2.2-5.3-2.2h-1.5v-1.2h9.4v8.6h0ZM682.6,154.4v8.6h-9.4v-1.2h1.5c2,0,3.8-.7,5.3-2.2s2.2-3.2,2.3-5.3h.4,0ZM689.9,80.4v82.6h-7.7v-82.6h7.7ZM689.6,89.1v-8.6h9.4v1.2h-1.5c-2,0-3.8.7-5.3,2.2s-2.2,3.2-2.3,5.3h-.4,0ZM721.8,159.4v3.7h-32.2v-3.7h32.2ZM729,143.9l-6.8,19.1h-19.6l4.2-3.7c4.2,0,7.6-.6,10.2-1.9,2.6-1.3,4.8-3.1,6.4-5.5,1.7-2.4,3.1-5,4.4-8h1.2,0Z"/>
-                <path d="M794.4,89.1h-.4c0-2-.8-3.8-2.3-5.3s-3.2-2.2-5.3-2.2h-1.5v-1.2h9.4v8.6h0ZM794.4,154.4v8.6h-9.4v-1.2h1.5c2,0,3.8-.7,5.3-2.2s2.2-3.2,2.3-5.3h.4,0ZM801.7,80.4v82.6h-7.7v-82.6h7.7ZM801.3,89.1v-8.6h9.4v1.2h-1.5c-2,0-3.8.7-5.3,2.2s-2.2,3.2-2.3,5.3h-.4,0ZM801.3,154.4h.4c0,2,.8,3.8,2.3,5.3s3.2,2.2,5.3,2.2h1.5v1.2h-9.4v-8.6h0Z"/>
-                <path d="M882,154.4c-.6,1.6-.6,2.9-.2,4,.4,1.1,1,1.9,1.9,2.5s1.8.9,2.8.9h1.1v1.2h-23.7v-1.2h1.1c1.8,0,3.7-.6,5.6-1.7,1.9-1.1,3.5-3,4.8-5.7h6.7,0ZM907.3,78.8l1.1,8.3-29.6,75.7h-7.1l30.2-71.8c.9-2,1.6-3.7,2.2-5.1.6-1.4,1.1-2.8,1.5-4.1.4-1.3.6-2.3.6-3h1.1ZM924,130.8v3.5h-36.9v-3.5h36.9ZM907.3,78.8l34.9,83.6h-10l-27.3-72.4,2.4-11.2h0ZM929.3,154.4h9.7c1.2,2.7,2.8,4.6,4.7,5.7,2,1.1,3.9,1.7,5.7,1.7h.9v1.2h-26.6v-1.2h1.1c1.5,0,2.8-.6,4-1.9s1.3-3.1.5-5.5h0Z"/>
-              </g>
-              <g>
-                <path fill="#F8FAFC" d="M84.6,147.2c-8.9,11.8-13.3,19.9-13.3,24.2s.9,2.6,2.6,2.6h0c2.2,0,8.2-7.1,17.9-21.3,9.7-14.2,17.5-27.5,23.3-39.8-11.5,11-21.7,22.4-30.5,34.2Z"/>
-                <path fill="#F8FAFC" d="M109.4,155.8c-5.9,0-8.9.9-8.9,2.6s1,1.9,3,2.8c2,.9,4.3,1.3,6.9,1.3,6.8,0,13.4-2.1,19.7-6.3l-20.8-.5Z"/>
-                <path fill="#F8FAFC" d="M121.1,8L8.5,120.6l112.5,112.5,112.5-112.5L121.1,8ZM159.4,99.7c-7.9,6.9-16,12.3-24.3,16.1h0s5-.4,5-.4c5.5,0,9.5,1,12.2,3.1s4,4.9,4,8.6-1.7,8.1-5,13.1-7.8,9.5-13.1,13.6h6.5c2.7,0,4.5-.1,5.6-.3,1.1-.2,1.7-.3,1.8-.3,1.1,0,1.6.6,1.6,1.7s-.8,1.8-2.3,1.8c-5.9,0-11.6,0-17-.2-8.6,5.5-17,8.2-25.3,8.2s-7-.7-9.3-2.2c-2.3-1.5-3.5-2.9-3.5-4.4s.6-2.6,1.9-3.5c1.3-.8,3.1-1.3,5.4-1.3,9,0,19,.2,30.1.6,4.6-3.8,8.3-8.1,11-13.1,2.8-5,4.1-9.4,4.1-13.4,0-6.4-3.4-9.5-10.3-9.5s-5.5.4-8.4,1.3c-2.9.8-4.6,1.4-5.2,1.8-.6.3-.9.5-1.1.5-.5,0-.7-.3-.7-1s1-1.4,3-2.4c8.8-4.2,17.3-9.8,25.6-16.9s12.5-12,12.5-15-1.1-2.1-3.2-2.1c-8.8,0-20.8,6.6-36,19.7-3.1,7.9-8.1,17.6-15.1,29.1-7,11.5-14.4,21.8-22,30.9-7.7,9.1-13.4,13.6-17.1,13.6s-3.5-1.2-3.5-3.6c0-5.5,5.2-15.1,15.5-29.1,10.3-14,22-26.8,35-38.5,2.3-5.6,3.5-9.7,3.5-12.2s-.6-4.6-1.8-6.1c-1.2-1.5-3-2.6-5.4-3.3-3.8-1-7.7-1.5-11.9-1.5s-7.4,0-9.6.3c-2.2.2-4.9.6-8.1,1.2-3.2.6-5.8,1.6-7.8,3-2,1.4-3,3.2-3,5.4s1.1,3.9,3.2,5c2.2,1.2,4.8,2,7.9,2.5,3.1.5,6.2,1,9.3,1.5s5.7,1.6,7.8,3.2c2.2,1.6,3.2,3.8,3.2,6.6s-.2,1.2-.5,1.2-.6-.1-.8-.3c-.2-.2-.5-.7-1-1.4-.7-1-1.7-1.8-3.1-2.3s-3.4-1.1-6.2-1.6c-2.8-.5-5.5-1-7.9-1.6-2.5-.6-5-1.3-7.5-2.2-2.5-.9-4.6-2.2-6.1-3.9-1.5-1.7-2.3-3.7-2.3-5.9s1-4.3,2.9-6c1.9-1.8,4.5-3.1,7.6-4.1,6.5-1.9,13.2-2.9,20.1-2.9,18.1,0,27.1,4.8,27.1,14.3s0,2.6,0,3.4c15.2-12.2,27.6-18.3,37.2-18.3s6.5,1.3,6.5,3.9c0,3.8-3.9,9.1-11.8,16Z"/>
-        <path fill="#F8FAFC" d="M121.1,0L.5,120.6l120.5,120.5,120.5-120.5L121.1,0ZM3.5,120.5L121.1,2.9l117.6,117.6-117.6,117.6L3.5,120.5Z"/>
-      </g>
-    </svg>
+          <div className="flex items-center justify-center pointer-events-none">
+            <BauliaLogoBlanco className="h-7 sm:h-8 w-auto" />
           </div>
           
           <div className="relative">
@@ -9224,26 +9209,33 @@ const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, 
         </div>
       </header>
 
-      {/* 🟢 HOJA DE ACCIONES RÁPIDAS MÓVIL (BOTÓN +) */}
-      {showQuickAdd && (
-        <div className="xl:hidden fixed inset-0 z-[9999] flex flex-col justify-end">
+      {/* 🟢 HOJA DE ACCIONES RÁPIDAS MÓVIL (BOTÓN + LIBERADO CON PORTAL) */}
+      {showQuickAdd && createPortal(
+        <div className="xl:hidden fixed inset-0 z-[99999] flex flex-col justify-end font-sans">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowQuickAdd(false)}></div>
-          <div className="bg-[#0A0A0A] w-full rounded-t-[2rem] border-t border-white/10 relative z-10 p-6 pb-12 animate-in slide-in-from-bottom-full duration-300">
+          <div className="bg-[#0A0A0A] w-full rounded-t-[2rem] border-t border-white/10 relative z-10 p-6 pb-12 animate-in slide-in-from-bottom-full duration-300 shadow-[0_-20px_50px_rgba(0,0,0,0.9)]">
              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6"></div>
-             <h3 className="text-white font-bold mb-4 text-sm px-2 uppercase tracking-widest text-[10px]">Acciones Rápidas</h3>
+             <div className="flex items-center justify-between mb-4 px-2">
+               <h3 className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Acciones Rápidas</h3>
+               <button onClick={() => setShowQuickAdd(false)} className="text-slate-500 hover:text-white"><X size={16}/></button>
+             </div>
              <div className="space-y-3">
-               <button onClick={() => handleNavigate('invitados')} className="w-full bg-[#111111] hover:bg-white/10 border border-white/5 rounded-xl p-4 flex items-center text-white transition-colors">
-                 <UserPlus size={18} className="text-[#D4AF37] mr-3"/> <span className="font-bold text-sm">Registrar Nuevo Invitado</span>
+               <button onClick={() => handleNavigate('invitados')} className="w-full bg-[#111111] hover:bg-white/10 border border-white/10 rounded-2xl p-4 flex items-center text-white transition-colors active:scale-[0.99]">
+                 <UserPlus size={18} className="text-white mr-3.5"/> <span className="font-bold text-sm">Ir a Lista de Invitados</span>
                </button>
-               <button onClick={() => handleNavigate('presupuesto')} className="w-full bg-[#111111] hover:bg-white/10 border border-white/5 rounded-xl p-4 flex items-center text-white transition-colors">
-                 <Wallet size={18} className="text-emerald-400 mr-3"/> <span className="font-bold text-sm">Registrar Gasto Financiero</span>
+               <button onClick={() => handleNavigate('presupuesto')} className="w-full bg-[#111111] hover:bg-white/10 border border-white/10 rounded-2xl p-4 flex items-center text-white transition-colors active:scale-[0.99]">
+                 <Wallet size={18} className="text-emerald-400 mr-3.5"/> <span className="font-bold text-sm">Ir a Control Financiero</span>
                </button>
-               <button onClick={() => handleNavigate('tareas')} className="w-full bg-[#111111] hover:bg-white/10 border border-white/5 rounded-xl p-4 flex items-center text-white transition-colors">
-                 <CheckSquare size={18} className="text-sky-400 mr-3"/> <span className="font-bold text-sm">Añadir Tarea (Checklist)</span>
+               <button onClick={() => handleNavigate('tareas')} className="w-full bg-[#111111] hover:bg-white/10 border border-white/10 rounded-2xl p-4 flex items-center text-white transition-colors active:scale-[0.99]">
+                 <CheckSquare size={18} className="text-sky-400 mr-3.5"/> <span className="font-bold text-sm">Ir a Checklist de Tareas</span>
+               </button>
+               <button onClick={() => handleNavigate('proveedores')} className="w-full bg-[#111111] hover:bg-white/10 border border-white/10 rounded-2xl p-4 flex items-center text-white transition-colors active:scale-[0.99]">
+                 <Store size={18} className="text-amber-400 mr-3.5"/> <span className="font-bold text-sm">Ir a Directorio de Proveedores</span>
                </button>
              </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {extraPassModal && (
@@ -20446,12 +20438,12 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10 bg-[#000000]">
         
         {/* HEADER FLOTANTE Y DINÁMICO */}
-        <div className={`absolute xl:static top-0 w-full z-50 transition-transform duration-300 ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full xl:translate-y-0'} ${impersonating ? 'pt-7 xl:pt-0' : ''}`}>
+        <div className={`fixed xl:static top-0 left-0 right-0 z-50 transition-transform duration-300 ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full xl:translate-y-0'} ${impersonating ? 'pt-7 xl:pt-0' : ''}`}>
           <Header setIsOpen={setSidebarOpen} setActiveTab={setActiveTab} data={{ guests, proveedores, gastos }} globalSearch={globalSearch} setGlobalSearch={setGlobalSearch} bellAlerts={bellAlerts} setBellAlerts={setBellAlerts} markAsRead={markAsRead} cycleTheme={cycleTheme} themeSetting={themeSetting} authData={authData} switchEvent={switchEvent} isSuperAdminMode={isSuperAdminMode} eventName={currentEventName} eventPlan={currentEventPlan} urlInvitacion={activeEventData?.urlInvitacion} />
         </div>
         
-        {/* MAIN CON SCROLL AISLADO Y ESPACIO PARA BOTTOM BAR */}
-        <main onScroll={handleMainScroll} className="flex-1 overflow-x-hidden overflow-y-auto p-0 sm:p-5 lg:p-6 print:p-0 print:overflow-visible custom-scrollbar relative z-10 mt-16 xl:mt-0 mb-[72px] xl:mb-0 bg-[#000000]">
+        {/* 🟢 MAIN SIN FRANJA NEGRA: Usamos pt-16 en lugar de mt-16 para que al ocultarse el Header el contenido suba hasta el tope */}
+        <main onScroll={handleMainScroll} className={`flex-1 overflow-x-hidden overflow-y-auto px-0 pb-24 ${impersonating ? 'pt-24' : 'pt-16'} xl:pt-6 sm:px-5 lg:px-6 print:p-0 print:overflow-visible custom-scrollbar relative z-10 bg-[#000000]`}>
           
           {!isSuperAdminMode && estadoCuenta.deuda > 0 && !estadoCuenta.bloqueado && horasRestantesGracia && (
             <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs z-20">
@@ -20507,105 +20499,140 @@ const AdminDashboard = ({ authData, cycleTheme, themeSetting, isDarkMode }) => {
           </div>
         </main>
 
-        {/* 📱 BOTTOM BAR MÓVIL (APP NATIVA OLED) */}
+        {/* 📱 BOTTOM BAR MÓVIL (ESTILO INSTAGRAM OLED) */}
         {!isSuperAdminMode && !isSingleAppMode && (
-          <nav className="xl:hidden fixed bottom-0 left-0 w-full bg-[#000000]/90 backdrop-blur-2xl border-t border-white/10 z-[100] flex justify-around items-center pb-safe pt-2 h-[72px] shadow-[0_-10px_40px_rgba(0,0,0,0.9)] px-2 print:hidden">
-            <button onClick={() => { setActiveTab('dashboard'); setShowMobileHub(false); }} className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${activeTab === 'dashboard' && !showMobileHub ? 'text-white' : 'text-[#444444] hover:text-slate-400'}`}>
-                <LayoutDashboard size={24} strokeWidth={activeTab === 'dashboard' && !showMobileHub ? 2.5 : 2} />
+          <nav className="xl:hidden fixed bottom-0 left-0 w-full bg-[#000000]/95 backdrop-blur-2xl border-t border-white/10 z-[100] flex justify-around items-center pb-safe h-[64px] shadow-[0_-10px_40px_rgba(0,0,0,0.95)] px-2 print:hidden">
+            <button onClick={() => { setActiveTab('dashboard'); setShowMobileHub(false); }} className={`flex flex-col items-center justify-center w-full h-full relative transition-colors ${activeTab === 'dashboard' && !showMobileHub ? 'text-white' : 'text-white/45 hover:text-white/80'}`}>
+              <LayoutDashboard size={23} strokeWidth={activeTab === 'dashboard' && !showMobileHub ? 2.4 : 1.7} />
+              {activeTab === 'dashboard' && !showMobileHub && <span className="w-1 h-1 rounded-full bg-white mt-1"></span>}
             </button>
-            <button onClick={() => { setActiveTab('invitados'); setShowMobileHub(false); }} className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${activeTab === 'invitados' && !showMobileHub ? 'text-white' : 'text-[#444444] hover:text-slate-400'}`}>
-                <Users size={24} strokeWidth={activeTab === 'invitados' && !showMobileHub ? 2.5 : 2} />
+            <button onClick={() => { setActiveTab('invitados'); setShowMobileHub(false); }} className={`flex flex-col items-center justify-center w-full h-full relative transition-colors ${activeTab === 'invitados' && !showMobileHub ? 'text-white' : 'text-white/45 hover:text-white/80'}`}>
+              <Users size={23} strokeWidth={activeTab === 'invitados' && !showMobileHub ? 2.4 : 1.7} />
+              {activeTab === 'invitados' && !showMobileHub && <span className="w-1 h-1 rounded-full bg-white mt-1"></span>}
             </button>
-            <button onClick={() => { setShowMobileHub(true); }} className="flex flex-col items-center justify-center w-full h-full space-y-1 text-[#444444] hover:text-slate-400 transition-colors">
-                <SearchIcon size={24} strokeWidth={2} />
+            <button onClick={() => { setShowMobileHub(true); }} className={`flex flex-col items-center justify-center w-full h-full relative transition-colors ${showMobileHub ? 'text-white' : 'text-white/45 hover:text-white/80'}`}>
+              <SearchIcon size={23} strokeWidth={showMobileHub ? 2.4 : 1.7} />
             </button>
-            <button onClick={() => { setActiveTab('mesas'); setShowMobileHub(false); }} className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${activeTab === 'mesas' && !showMobileHub ? 'text-white' : 'text-[#444444] hover:text-slate-400'}`}>
-                <LayoutGrid size={24} strokeWidth={activeTab === 'mesas' && !showMobileHub ? 2.5 : 2} />
+            <button onClick={() => { if(['oro', 'diamante'].includes(userPlan)) { setActiveTab('mesas'); setShowMobileHub(false); } else { addNotification('Función Premium', 'La gestión de mesas está disponible en planes Oro y Diamante.', 'warning'); } }} className={`flex flex-col items-center justify-center w-full h-full relative transition-colors ${activeTab === 'mesas' && !showMobileHub ? 'text-white' : 'text-white/45 hover:text-white/80'}`}>
+              <LayoutGrid size={23} strokeWidth={activeTab === 'mesas' && !showMobileHub ? 2.4 : 1.7} />
+              {activeTab === 'mesas' && !showMobileHub && <span className="w-1 h-1 rounded-full bg-white mt-1"></span>}
             </button>
-            <button onClick={() => setShowMobileHub(!showMobileHub)} className={`flex flex-col items-center justify-center w-full h-full transition-colors ${showMobileHub ? 'text-white' : 'text-[#444444] hover:text-slate-400'}`}>
-                <div className="w-8 h-8 rounded-full border border-current flex items-center justify-center">
-                    <span className="text-[10px] font-editorial font-black uppercase tracking-widest pt-0.5">{getInitialsMobile(currentEventName)}</span>
-                </div>
+            <button onClick={() => setShowMobileHub(!showMobileHub)} className={`flex flex-col items-center justify-center w-full h-full transition-colors ${showMobileHub ? 'text-white' : 'text-white/60 hover:text-white'}`}>
+              <div className={`w-7 h-7 rounded-full border flex items-center justify-center transition-all ${showMobileHub ? 'border-white bg-white text-black' : 'border-white/50 text-white'}`}>
+                <span className="text-[9px] font-editorial font-black uppercase tracking-wider">{getInitialsMobile(currentEventName)}</span>
+              </div>
             </button>
           </nav>
         )}
 
-        {/* 📱 HUB MÓVIL DESPLEGABLE (BOTTOM SHEET) */}
+        {/* 📱 HUB MÓVIL DESPLEGABLE (BOTTOM SHEET CON BUSCADOR EN VIVO) */}
         {showMobileHub && (
           <div className="xl:hidden fixed inset-0 z-[90] flex flex-col justify-end">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowMobileHub(false)}></div>
-            <div className="bg-[#0A0A0A] w-full rounded-t-[2rem] border-t border-white/10 relative z-10 p-6 pb-24 max-h-[85vh] overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-full duration-300 shadow-[0_-20px_50px_rgba(0,0,0,0.9)]">
-              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-8"></div>
+            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setShowMobileHub(false)}></div>
+            <div className="bg-[#0A0A0A] w-full rounded-t-[2rem] border-t border-white/10 relative z-10 p-6 pb-24 max-h-[85vh] overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-full duration-300 shadow-[0_-20px_50px_rgba(0,0,0,0.95)]">
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6"></div>
               
-              <div className="relative w-full mb-8">
-                <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                <input type="text" placeholder="Buscar invitado, gasto o proveedor..." value={globalSearch} onChange={(e) => setGlobalSearch(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-[#141210] border border-white/10 rounded-2xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-white transition-all"/>
+              {/* Buscador Universal con Resultados en Vivo */}
+              <div className="relative w-full mb-6">
+                <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input type="text" placeholder="Buscar invitado, gasto o proveedor..." value={globalSearch} onChange={(e) => setGlobalSearch(e.target.value)} className="w-full pl-11 pr-9 py-3.5 bg-[#111111] border border-white/10 rounded-2xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-white transition-all"/>
+                {globalSearch && (
+                  <button onClick={() => setGlobalSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"><X size={16}/></button>
+                )}
               </div>
 
-              <div className="space-y-8">
+              {globalSearch.trim().length > 1 && (
+                <div className="mb-6 bg-[#111111] border border-white/10 rounded-2xl overflow-hidden divide-y divide-white/5 max-h-52 overflow-y-auto">
+                  {guests.filter(g => (g.name || '').toLowerCase().includes(globalSearch.toLowerCase())).slice(0, 4).map(g => (
+                    <button key={`sr_g_${g.id}`} onClick={() => { setActiveTab('invitados'); setShowMobileHub(false); }} className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-white/5">
+                      <span className="text-xs font-bold text-white truncate">{g.name}</span>
+                      <span className="text-[9px] uppercase tracking-widest text-slate-400">Invitado</span>
+                    </button>
+                  ))}
+                  {proveedores.filter(p => (p.nombre || '').toLowerCase().includes(globalSearch.toLowerCase())).slice(0, 3).map(p => (
+                    <button key={`sr_p_${p.id}`} onClick={() => { setActiveTab('proveedores'); setShowMobileHub(false); }} className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-white/5">
+                      <span className="text-xs font-bold text-white truncate">{p.nombre}</span>
+                      <span className="text-[9px] uppercase tracking-widest text-amber-400">Proveedor</span>
+                    </button>
+                  ))}
+                  {gastos.filter(g => (g.concepto || '').toLowerCase().includes(globalSearch.toLowerCase())).slice(0, 3).map(g => (
+                    <button key={`sr_e_${g.id}`} onClick={() => { setActiveTab('presupuesto'); setShowMobileHub(false); }} className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-white/5">
+                      <span className="text-xs font-bold text-white truncate">{g.concepto}</span>
+                      <span className="text-[9px] uppercase tracking-widest text-emerald-400">Finanzas</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div className="space-y-7">
                 <div>
-                  <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-4 px-2">Planeación</p>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-3.5 px-1">Planeación & Logística</p>
                   <div className="grid grid-cols-4 gap-3">
                     <button onClick={() => {setActiveTab('tareas'); setShowMobileHub(false);}} className="flex flex-col items-center gap-2">
-                      <div className="w-14 h-14 rounded-2xl bg-[#141210] border border-white/5 flex items-center justify-center text-white"><CheckSquare size={24} strokeWidth={1.5}/></div>
-                      <span className="text-[9px] font-bold text-slate-400">Checklist</span>
+                      <div className="w-14 h-14 rounded-2xl bg-[#111111] border border-white/10 flex items-center justify-center text-white"><CheckSquare size={22} strokeWidth={1.6}/></div>
+                      <span className="text-[9px] font-bold text-slate-300">Checklist</span>
                     </button>
                     <button onClick={() => {setActiveTab('presupuesto'); setShowMobileHub(false);}} className="flex flex-col items-center gap-2">
-                      <div className="w-14 h-14 rounded-2xl bg-[#141210] border border-white/5 flex items-center justify-center text-white"><Wallet size={24} strokeWidth={1.5}/></div>
-                      <span className="text-[9px] font-bold text-slate-400">Finanzas</span>
+                      <div className="w-14 h-14 rounded-2xl bg-[#111111] border border-white/10 flex items-center justify-center text-white"><Wallet size={22} strokeWidth={1.6}/></div>
+                      <span className="text-[9px] font-bold text-slate-300">Finanzas</span>
                     </button>
                     <button onClick={() => {setActiveTab('proveedores'); setShowMobileHub(false);}} className="flex flex-col items-center gap-2">
-                      <div className="w-14 h-14 rounded-2xl bg-[#141210] border border-white/5 flex items-center justify-center text-white"><Store size={24} strokeWidth={1.5}/></div>
-                      <span className="text-[9px] font-bold text-slate-400">Directorio</span>
+                      <div className="w-14 h-14 rounded-2xl bg-[#111111] border border-white/10 flex items-center justify-center text-white"><Store size={22} strokeWidth={1.6}/></div>
+                      <span className="text-[9px] font-bold text-slate-300">Directorio</span>
+                    </button>
+                    <button onClick={() => { if(userPlan === 'diamante') { setActiveTab('mapa'); setShowMobileHub(false); } else { addNotification('Función Premium', 'El Croquis del Salón está disponible en el Plan Diamante.', 'warning'); } }} className="flex flex-col items-center gap-2 relative">
+                      <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center ${userPlan === 'diamante' ? 'bg-[#111111] border-white/10 text-white' : 'bg-transparent border-dashed border-white/15 text-slate-600'}`}><MapIcon size={22} strokeWidth={1.6}/></div>
+                      <span className="text-[9px] font-bold text-slate-300">Croquis</span>
+                      {userPlan !== 'diamante' && <div className="absolute top-[-4px] right-1 w-5 h-5 bg-[#000000] rounded-full flex items-center justify-center border border-white/10"><Lock size={10} className="text-white"/></div>}
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-4 px-2">Operación & Add-Ons</p>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-3.5 px-1">Operación & Add-Ons</p>
                   <div className="grid grid-cols-4 gap-3">
                     <button onClick={() => {setActiveTab('timing'); setShowMobileHub(false);}} className="flex flex-col items-center gap-2">
-                      <div className="w-14 h-14 rounded-2xl bg-[#141210] border border-white/5 flex items-center justify-center text-white"><Clock size={24} strokeWidth={1.5}/></div>
-                      <span className="text-[9px] font-bold text-slate-400">Timing</span>
+                      <div className="w-14 h-14 rounded-2xl bg-[#111111] border border-white/10 flex items-center justify-center text-white"><Clock size={22} strokeWidth={1.6}/></div>
+                      <span className="text-[9px] font-bold text-slate-300">Timing</span>
                     </button>
                     
                     <button onClick={() => { if(hasSocialWall || ['diamante', 'social_wall'].includes(userPlan)) { setActiveTab('galeria'); setShowMobileHub(false); } else { addNotification('Función Premium', 'Adquiere el Muro Social para activar esta función.', 'warning'); } }} className="flex flex-col items-center gap-2 relative">
-                      <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center transition-colors ${hasSocialWall || ['diamante', 'social_wall'].includes(userPlan) ? 'bg-[#141210] border-white/5 text-pink-400' : 'bg-transparent border-dashed border-white/10 text-slate-600'}`}>
-                        <Camera size={24} strokeWidth={1.5}/>
+                      <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center transition-colors ${hasSocialWall || ['diamante', 'social_wall'].includes(userPlan) ? 'bg-[#111111] border-white/10 text-pink-400' : 'bg-transparent border-dashed border-white/15 text-slate-600'}`}>
+                        <Camera size={22} strokeWidth={1.6}/>
                       </div>
-                      <span className="text-[9px] font-bold text-slate-400">Social Wall</span>
-                      {!(hasSocialWall || ['diamante', 'social_wall'].includes(userPlan)) && <div className="absolute top-[-5px] right-1 w-5 h-5 bg-[#000000] rounded-full flex items-center justify-center"><Lock size={10} className="text-white"/></div>}
+                      <span className="text-[9px] font-bold text-slate-300">Social Wall</span>
+                      {!(hasSocialWall || ['diamante', 'social_wall'].includes(userPlan)) && <div className="absolute top-[-4px] right-1 w-5 h-5 bg-[#000000] rounded-full flex items-center justify-center border border-white/10"><Lock size={10} className="text-white"/></div>}
                     </button>
 
                     <button onClick={() => { if(hasBlackLabel || ['oro', 'diamante', 'security_kit'].includes(userPlan)) { setActiveTab('escaner'); setShowMobileHub(false); } else { addNotification('Función Premium', 'Mejora tu plan para activar el Control de Puerta.', 'warning'); } }} className="flex flex-col items-center gap-2 relative">
-                      <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center transition-colors ${hasBlackLabel || ['oro', 'diamante', 'security_kit'].includes(userPlan) ? 'bg-[#141210] border-white/5 text-sky-400' : 'bg-transparent border-dashed border-white/10 text-slate-600'}`}>
-                        <Scan size={24} strokeWidth={1.5}/>
+                      <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center transition-colors ${hasBlackLabel || ['oro', 'diamante', 'security_kit'].includes(userPlan) ? 'bg-[#111111] border-white/10 text-sky-400' : 'bg-transparent border-dashed border-white/15 text-slate-600'}`}>
+                        <Scan size={22} strokeWidth={1.6}/>
                       </div>
-                      <span className="text-[9px] font-bold text-slate-400">Escáner</span>
-                      {!(hasBlackLabel || ['oro', 'diamante', 'security_kit'].includes(userPlan)) && <div className="absolute top-[-5px] right-1 w-5 h-5 bg-[#000000] rounded-full flex items-center justify-center"><Lock size={10} className="text-white"/></div>}
+                      <span className="text-[9px] font-bold text-slate-300">Escáner</span>
+                      {!(hasBlackLabel || ['oro', 'diamante', 'security_kit'].includes(userPlan)) && <div className="absolute top-[-4px] right-1 w-5 h-5 bg-[#000000] rounded-full flex items-center justify-center border border-white/10"><Lock size={10} className="text-white"/></div>}
                     </button>
                     
-                    <button onClick={() => { if(hasBlackLabel || ['diamante', 'security_kit'].includes(userPlan)) { setActiveTab('monitor'); setShowMobileHub(false); } else { addNotification('Función Premium', 'Mejora tu plan para usar el Monitor.', 'warning'); } }} className="flex flex-col items-center gap-2 relative">
-                      <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center transition-colors ${hasBlackLabel || ['diamante', 'security_kit'].includes(userPlan) ? 'bg-[#141210] border-white/5 text-emerald-400' : 'bg-transparent border-dashed border-white/10 text-slate-600'}`}>
-                        <Activity size={24} strokeWidth={1.5}/>
+                    <button onClick={() => { if(hasBlackLabel || ['diamante', 'security_kit'].includes(userPlan)) { setActiveTab('pulseras'); setShowMobileHub(false); } else { addNotification('Función Premium', 'Adquiere Black Label para diseñar pulseras VIP.', 'warning'); } }} className="flex flex-col items-center gap-2 relative">
+                      <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center transition-colors ${hasBlackLabel || ['diamante', 'security_kit'].includes(userPlan) ? 'bg-[#111111] border-white/10 text-[#D4AF37]' : 'bg-transparent border-dashed border-white/15 text-slate-600'}`}>
+                        <Ticket size={22} strokeWidth={1.6}/>
                       </div>
-                      <span className="text-[9px] font-bold text-slate-400">Monitor</span>
-                      {!(hasBlackLabel || ['diamante', 'security_kit'].includes(userPlan)) && <div className="absolute top-[-5px] right-1 w-5 h-5 bg-[#000000] rounded-full flex items-center justify-center"><Lock size={10} className="text-white"/></div>}
+                      <span className="text-[9px] font-bold text-slate-300">Black Label</span>
+                      {!(hasBlackLabel || ['diamante', 'security_kit'].includes(userPlan)) && <div className="absolute top-[-4px] right-1 w-5 h-5 bg-[#000000] rounded-full flex items-center justify-center border border-white/10"><Lock size={10} className="text-white"/></div>}
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-4 px-2">Mi Cuenta</p>
-                  <div className="bg-[#141210] border border-white/5 rounded-2xl overflow-hidden">
+                  <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-3.5 px-1">Mi Cuenta</p>
+                  <div className="bg-[#111111] border border-white/10 rounded-2xl overflow-hidden">
                     <button onClick={() => { setActiveTab('invitacion'); setShowMobileHub(false); }} className="w-full flex items-center p-4 border-b border-white/5 hover:bg-white/5 transition-colors">
-                      <ExternalLink size={16} className="mr-3 text-slate-400"/> <span className="text-white text-sm font-bold">Ver Invitación Web</span>
+                      <ExternalLink size={16} className="mr-3 text-slate-400"/> <span className="text-white text-xs font-bold">Ver Invitación Web</span>
                     </button>
                     <button onClick={() => window.open('https://wa.me/525512345678?text=Hola,%20necesito%20ayuda%20con%20mi%20panel%20Baulia', '_blank')} className="w-full flex items-center p-4 border-b border-white/5 hover:bg-white/5 transition-colors">
-                      <MessageCircle size={16} className="mr-3 text-slate-400"/> <span className="text-white text-sm font-bold">Soporte Premium</span>
+                      <MessageCircle size={16} className="mr-3 text-slate-400"/> <span className="text-white text-xs font-bold">Soporte Premium</span>
                     </button>
                     <button onClick={() => signOut(auth)} className="w-full flex items-center p-4 hover:bg-rose-500/10 transition-colors">
-                      <LogOut size={16} className="mr-3 text-rose-500"/> <span className="text-rose-500 text-sm font-bold">Cerrar Sesión</span>
+                      <LogOut size={16} className="mr-3 text-rose-500"/> <span className="text-rose-500 text-xs font-bold">Cerrar Sesión</span>
                     </button>
                   </div>
                 </div>
