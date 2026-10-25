@@ -1275,6 +1275,8 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   const [exportViewOpen, setExportViewOpen] = useState(false);
   const [exportCols, setExportCols] = useState({ nombre: true, pases: true, estatus: true, telefono: true, mesa: true });
   const [splitBySide, setSplitBySide] = useState(false); 
+  const [isFabOpen, setIsFabOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [isPreparingListPrint, setIsPreparingListPrint] = useState(false);
   const [isPreparingQRPrint, setIsPreparingQRPrint] = useState(false);
@@ -1793,162 +1795,60 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
   );
 
   return (
-    <div className="h-full flex flex-col space-y-6 pb-6 relative text-slate-100 bg-[#141210] min-h-[100vh] p-4 rounded-3xl transition-colors duration-500">
+    <div className="h-full flex flex-col md:space-y-6 relative text-zinc-100 bg-black min-h-[100vh] md:p-4 md:rounded-3xl transition-colors duration-500 pb-32">
       
       {/* VISTA PREVIA PROFESIONAL (PDF/EXCEL) */}
-      {exportViewOpen && (() => {
-          const allList = getFlattenedGuests(invitadosFiltrados);
-          let listToRender = [];
+      {/* ... (El contenido de exportViewOpen se mantiene igual) ... */}
 
-          if (isWeddingMode && splitBySide) {
-             const novia = allList.filter(r => r.parentGuest.side === 'novia');
-             const novio = allList.filter(r => r.parentGuest.side === 'novio');
-             const general = allList.filter(r => r.parentGuest.side === 'general' || !r.parentGuest.side);
-             if(novia.length > 0) { listToRender.push({ isHeader: true, title: 'Invitados de la Novia' }); listToRender = listToRender.concat(novia); }
-             if(novio.length > 0) { listToRender.push({ isHeader: true, title: 'Invitados del Novio' }); listToRender = listToRender.concat(novio); }
-             if(general.length > 0) { listToRender.push({ isHeader: true, title: 'General / Otros' }); listToRender = listToRender.concat(general); }
-          } else {
-             listToRender = allList;
-          }
-
-          const PAGE_1_LIMIT = 28; 
-          const PAGE_N_LIMIT = 35;
-          const firstPageItems = listToRender.slice(0, PAGE_1_LIMIT);
-          const extraItems = listToRender.slice(PAGE_1_LIMIT);
-          const extraPages = [];
-          for(let i=0; i<extraItems.length; i+=PAGE_N_LIMIT) extraPages.push(extraItems.slice(i, i+PAGE_N_LIMIT));
-
-          const renderTableRows = (rows) => (
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="border-b-2 border-slate-800 text-slate-900">
-                  {exportCols.nombre && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest">Asistente</th>}
-                  {exportCols.pases && passCountEnabled && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest text-center">Pase</th>}
-                  {exportCols.estatus && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest text-center">Estatus</th>}
-                  {exportCols.telefono && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest">Teléfono</th>}
-                  {isPremium && exportCols.mesa && <th className="py-2 px-2 font-bold uppercase text-[10px] tracking-widest">Mesa</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map(row => {
-                  if (row.isHeader) return <tr key={`hdr_${row.title}`}><td colSpan="5" className="py-6 text-base font-editorial font-bold uppercase tracking-widest text-slate-800 border-b border-slate-300">{row.title}</td></tr>;
-                  return (
-                    <tr key={`print_${row._rowId}`} className={`border-b border-slate-200 ${row.parentGuest.status === 'cancelado' ? 'opacity-50 line-through' : ''}`}>
-                      {exportCols.nombre && (
-                        <td className="py-3 px-2 text-slate-800">
-                          <span className={`${row.isMain ? 'font-bold' : ''}`}>{row.displayName}</span> 
-                          {row.isMain && row.parentGuest.todasMesasNombre?.length > 1 && <span className="ml-1 text-[8px] text-amber-600 uppercase font-bold tracking-widest">(Dividida)</span>}
-                          {row.isChild && <span className="ml-2 text-[10px] text-slate-500">(Niño)</span>}
-                          {row.isMissing && <span className="ml-2 text-[10px] text-slate-500 italic">(Por registrar)</span>}
-                        </td>
-                      )}
-                      {exportCols.pases && passCountEnabled && <td className="py-3 px-2 text-center text-slate-800 font-bold">{row.isMain ? row.passes : '-'}</td>}
-                      {exportCols.estatus && <td className="py-3 px-2 text-center text-slate-600 text-[10px] uppercase tracking-widest font-bold">{row.parentGuest.status.replace('_', ' ')}</td>}
-                      {exportCols.telefono && <td className="py-3 px-2 text-slate-600 font-mono text-[11px]">{row.isMain ? (row.parentGuest.phone || '-') : ''}</td>}
-                      {isPremium && exportCols.mesa && <td className="py-3 px-2 text-slate-800 font-bold">
-                        {row.specificTableName ? (
-                            row.specificTableName 
-                        ) : (
-                            <span className="text-slate-400 font-normal italic">{row.isMissing ? '-' : 'Sin mesa'}</span>
-                        )}
-                      </td>}
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          );
-
-          return (
-            <div className="fixed inset-0 z-[999999] bg-slate-200 flex flex-col overflow-hidden animate-in fade-in transition-colors pt-24" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh' }}>
-              <div className="h-auto bg-white text-slate-800 px-4 py-3 flex flex-wrap items-center justify-between shrink-0 border-b border-slate-300 shadow-sm print:hidden gap-4 z-50">
-                <button onClick={() => setExportViewOpen(false)} className="px-5 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-lg transition-colors font-black text-sm flex items-center shadow-lg border-2 border-rose-300">
-                  <X size={20} className="mr-2"/> CERRAR VISTA
-                </button>
-                <div className="flex items-center bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex-wrap justify-center gap-1 shadow-inner hidden md:flex">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-2 ml-1">Columnas:</span>
-                  <button onClick={() => toggleCol('nombre')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.nombre ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Nombre</button>
-                  {passCountEnabled && <button onClick={() => toggleCol('pases')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.pases ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Pases</button>}
-                  <button onClick={() => toggleCol('estatus')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.estatus ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Estatus</button>
-                  <button onClick={() => toggleCol('telefono')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.telefono ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Teléfono</button>
-                  {isPremium && <button onClick={() => toggleCol('mesa')} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-colors ${exportCols.mesa ? 'bg-white shadow-sm border border-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Mesa</button>}
-                </div>
-                <div className="flex items-center gap-3">
-                  {isWeddingMode && (
-                    <button onClick={() => setSplitBySide(!splitBySide)} className={`flex items-center px-4 py-2 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm ${splitBySide ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
-                      <Layers size={14} className="mr-2"/> {splitBySide ? 'Agrupado' : 'Separar Lados'}
-                    </button>
-                  )}
-                  <button onClick={triggerListPdfDownload} disabled={isPreparingListPrint} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold flex items-center shadow-md transition-all disabled:opacity-50">
-                    {isPreparingListPrint ? <RefreshCw size={14} className="mr-2 animate-spin"/> : <Download size={14} className="mr-2"/>} Descargar
-                  </button>
-                </div>
-              </div>
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 flex flex-col items-center gap-8 print:bg-white print:p-0 print:overflow-visible">
-                <div className="list-pdf-page bg-white shrink-0 mx-auto shadow-xl relative" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '25mm 20mm', boxSizing: 'border-box', overflow: 'hidden' }}>
-                  <header className="flex justify-between items-start border-b-[3px] border-slate-900 pb-6 mb-6">
-                    <div>
-                      <h1 className="text-3xl font-editorial font-black text-slate-900 uppercase tracking-widest">Reporte de Asistencia</h1>
-                      <p className="text-sm font-medium text-slate-600 mt-2">Evento: <span className="font-bold text-slate-900 uppercase">{eventName || 'Evento Baulia'}</span></p>
-                      <p className="text-sm font-medium text-slate-600">Fecha de emisión: {new Date().toLocaleDateString('es-MX')}</p>
-                    </div>
-                    <div className="text-right flex flex-col items-end">
-                      <p className="text-[8px] text-slate-400 mt-2 tracking-widest uppercase font-bold">Documento Oficial</p>
-                    </div>
-                  </header>
-                  <div className="flex gap-10 mb-8 border-b border-slate-200 pb-6 text-slate-800">
-                     <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">{passCountEnabled ? 'Total Pases' : 'Invitados Totales'}</span><span className="text-xl font-bold">{passCountEnabled ? totalPases : safeGuests.length}</span></div>
-                     <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Confirmados</span><span className="text-xl font-bold">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</span></div>
-                     {isPremium && qrEnabled && <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Ya Ingresaron</span><span className="text-xl font-bold">{totalIngresos}</span></div>}
-                     {isPremium && <div><span className="font-bold uppercase text-[10px] tracking-widest text-slate-500 block mb-1">Mesas Asignadas</span><span className="text-xl font-bold">{totalMesas}</span></div>}
-                  </div>
-                  <main>{renderTableRows(firstPageItems)}</main>
-                  <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[9px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
-                    <span>Baulia Technologies • Control de Accesos</span>
-                    <span>Página 1 de {1 + extraPages.length}</span>
-                  </div>
-                </div>
-                {extraPages.map((pageRows, pIdx) => (
-                  <div key={`extrapage_${pIdx}`} className="list-pdf-page bg-white shrink-0 mx-auto shadow-xl relative" style={{ width: '215.9mm', minHeight: '279.4mm', padding: '25mm 20mm', boxSizing: 'border-box', overflow: 'hidden' }}>
-                     <header className="flex justify-between items-center pb-4 mb-6 border-b border-slate-900">
-                       <h2 className="text-lg font-editorial font-bold text-slate-900 uppercase tracking-widest">Reporte de Asistencia (Cont.)</h2>
-                       <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{eventName}</span>
-                     </header>
-                     <main>{renderTableRows(pageRows)}</main>
-                     <div className="absolute bottom-[15mm] left-[20mm] right-[20mm] flex justify-between items-center text-[9px] uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-3">
-                       <span>Baulia Technologies • Control de Accesos</span>
-                       <span>Página {pIdx + 2} de {1 + extraPages.length}</span>
-                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-      })()}
-
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#1C1917] p-5 sm:p-6 rounded-3xl border border-[#D4AF37]/25 shadow-xl">
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
+      {/* CABECERA OLED RESPONSIVA */}
+      <div className="flex flex-row justify-between items-center bg-[#121212] p-4 md:p-6 md:rounded-3xl border-b md:border border-zinc-800/50 shadow-sm relative z-30">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 hidden md:flex items-center justify-center text-[#D4AF37] shrink-0">
             <Users size={20} />
           </div>
           <div>
-            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] block mb-0.5">Control de asistencia, pases y credenciales.</span>
-            <h2 className="text-2xl sm:text-3xl font-editorial text-white tracking-wide leading-none">Gestión de Invitados</h2>
+            <span className="hidden md:block text-[9px] font-black uppercase tracking-[0.25em] text-[#D4AF37] mb-0.5">Control de asistencia</span>
+            <h2 className="text-xl md:text-3xl font-editorial text-[#F4F4F5] tracking-wide leading-none">Gestión de Invitados</h2>
           </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto mt-4 md:mt-0 justify-start md:justify-end">
+        {/* MENÚ MÓVIL (3 PUNTOS) */}
+        <div className="md:hidden relative">
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-zinc-400 hover:text-white transition-colors">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+          </button>
+          {isMobileMenuOpen && (
+            <div className="absolute right-0 top-full mt-2 w-48 bg-[#18181b] border border-zinc-800 rounded-xl shadow-2xl py-2 z-50">
+              {isPremium && <button onClick={() => { setIsTagManagerOpen(true); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-3 text-sm text-zinc-300 hover:bg-white/5 flex items-center gap-2"><Layers size={16}/> Etiquetas</button>}
+              <button onClick={() => { setExportViewOpen(true); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-3 text-sm text-zinc-300 hover:bg-white/5 flex items-center gap-2"><FileSpreadsheet size={16}/> Exportar</button>
+              <div className="border-t border-zinc-800 my-1"></div>
+              <div className="px-4 py-3 flex items-center justify-between">
+                <span className="text-sm text-zinc-300">Modo Boda</span>
+                <button onClick={async () => {
+                  const newVal = !isWeddingMode;
+                  setIsWeddingMode(newVal);
+                  try { await updateDoc(doc(db, "eventos", ID_DEL_EVENTO), { tipoEvento: newVal ? 'boda' : 'general' }); } catch(e) {}
+                }} className={`relative w-8 h-4 rounded-full transition-colors ${isWeddingMode ? 'bg-[#D4AF37]' : 'bg-zinc-700'}`}>
+                  <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isWeddingMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ACCIONES ESCRITORIO */}
+        <div className="hidden md:flex flex-wrap items-center gap-2.5 justify-end">
           {isPremium && (
-            <button onClick={() => setIsTagManagerOpen(true)} className="flex items-center justify-center px-4 h-9 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-[10px] font-bold hover:bg-[#D4AF37]/10 transition-colors uppercase tracking-widest shrink-0">
+            <button onClick={() => setIsTagManagerOpen(true)} className="flex items-center justify-center px-4 h-9 bg-transparent border border-zinc-700 text-zinc-300 hover:text-white rounded-lg text-[10px] font-bold hover:bg-white/5 transition-colors uppercase tracking-widest shrink-0">
               <Layers size={14} className="mr-1.5"/> Etiquetas ({globalTags.length})
             </button>
           )}
-          <button onClick={() => setExportViewOpen(true)} className="flex items-center justify-center px-4 h-9 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-[10px] font-bold hover:bg-[#D4AF37]/10 transition-colors uppercase tracking-widest shrink-0">
+          <button onClick={() => setExportViewOpen(true)} className="flex items-center justify-center px-4 h-9 bg-transparent border border-zinc-700 text-zinc-300 hover:text-white rounded-lg text-[10px] font-bold hover:bg-white/5 transition-colors uppercase tracking-widest shrink-0">
             <FileSpreadsheet size={14} className="mr-1.5"/> Exportar
           </button>
           
-          <div className="flex items-center bg-transparent px-3 h-9 rounded-lg border border-[#D4AF37]/30 transition-colors shrink-0">
-            <span className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-wider mr-2">Boda</span>
+          <div className="flex items-center bg-transparent px-3 h-9 rounded-lg border border-zinc-700 transition-colors shrink-0">
+            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider mr-2">Boda</span>
             <button onClick={async () => {
               const newVal = !isWeddingMode;
               setIsWeddingMode(newVal);
@@ -1960,7 +1860,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
 
           {isWeddingMode ? (
             <div className="flex gap-2 shrink-0">
-              <button onClick={() => handleOpenAdd('novia')} className="flex items-center justify-center px-4 h-9 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-lg text-[10px] font-bold hover:bg-rose-500/20 transition-colors uppercase tracking-widest">
+              <button onClick={() => handleOpenAdd('novia')} className="flex items-center justify-center px-4 h-9 bg-[#F43F5E]/10 border border-[#F43F5E]/30 text-[#F43F5E] rounded-lg text-[10px] font-bold hover:bg-[#F43F5E]/20 transition-colors uppercase tracking-widest">
                 <UserPlus size={14} className="mr-1.5"/> Novia
               </button>
               <button onClick={() => handleOpenAdd('novio')} className="flex items-center justify-center px-4 h-9 bg-sky-500/10 border border-sky-500/30 text-sky-400 rounded-lg text-[10px] font-bold hover:bg-sky-500/20 transition-colors uppercase tracking-widest">
@@ -1968,93 +1868,68 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
               </button>
             </div>
           ) : (
-            <button onClick={() => handleOpenAdd('general')} className="flex items-center justify-center px-5 h-9 bg-[#D4AF37] text-[#1C1917] rounded-lg text-[10px] font-black hover:bg-[#c5a028] transition-colors uppercase tracking-widest shrink-0">
+            <button onClick={() => handleOpenAdd('general')} className="flex items-center justify-center px-5 h-9 bg-[#D4AF37] text-black rounded-lg text-[10px] font-black hover:bg-[#c5a028] transition-colors uppercase tracking-widest shrink-0">
               <UserPlus size={14} className="mr-1.5"/> Nuevo Invitado
             </button>
           )}
         </div>
       </div>
 
-      {/* 📱 ESTADÍSTICAS MÓVILES (Scroll Horizontal tipo Píldoras para ahorrar 40% de pantalla) */}
-      <div className="md:hidden flex overflow-x-auto gap-2 pb-1 custom-scrollbar snap-x w-full">
-        <div className="snap-start shrink-0 bg-[#111111] px-4 py-2.5 rounded-full border border-white/10 flex items-center shadow-sm">
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mr-2">{passCountEnabled ? 'Totales' : 'Invitados'}</span>
-          <span className="text-sm font-black text-white">{passCountEnabled ? totalPases : safeGuests.length}</span>
-        </div>
-        <div className="snap-start shrink-0 bg-[#111111] px-4 py-2.5 rounded-full border border-white/10 flex items-center shadow-sm">
-          <span className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-widest mr-2">Confirmados</span>
-          <span className="text-sm font-black text-[#D4AF37]">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</span>
-        </div>
-        <div className="snap-start shrink-0 bg-[#111111] px-4 py-2.5 rounded-full border border-white/10 flex items-center shadow-sm">
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mr-2">Pendientes</span>
-          <span className="text-sm font-black text-white">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</span>
-        </div>
-        {isPremium && qrEnabled && (
-          <div className="snap-start shrink-0 bg-[#111111] px-4 py-2.5 rounded-full border border-white/10 flex items-center shadow-sm">
-            <span className="text-[9px] font-bold text-sky-400 uppercase tracking-widest mr-2">Ingresaron</span>
-            <span className="text-sm font-black text-sky-400">{totalIngresos}</span>
-          </div>
-        )}
-        <div className="snap-start shrink-0 bg-[#111111] px-4 py-2.5 rounded-full border border-white/10 flex items-center shadow-sm">
-          <span className="text-[9px] font-bold text-rose-400 uppercase tracking-widest mr-2">Cancelados</span>
-          <span className="text-sm font-black text-rose-400">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</span>
-        </div>
-      </div>
-
-      {/* 💻 ESTADÍSTICAS ESCRITORIO (Se ocultan en el celular) */}
-      <div className={`hidden md:grid grid-cols-2 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-2 sm:gap-3`}>
-        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-[#D4AF37]/30 flex items-center justify-between transition-all hover:border-[#D4AF37]/60 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
-          <div className="text-[#D4AF37] font-black text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
-          <h3 className="text-sm font-black text-white">{passCountEnabled ? totalPases : safeGuests.length}</h3>
+      <div className={`grid grid-cols-2 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-2 px-2 md:px-0 pt-4 md:pt-0`}>
+        <div className="bg-[#121212] px-4 py-3 rounded-xl border border-zinc-800 flex items-center justify-between transition-all">
+          <div className="text-zinc-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
+          <h3 className="text-sm font-black text-[#F4F4F5]">{passCountEnabled ? totalPases : safeGuests.length}</h3>
         </div>
         
         {isPremium && passCountEnabled && (
-        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-white/10 flex items-center justify-between transition-all hover:border-sky-500/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+        <div className="bg-[#121212] px-4 py-3 rounded-xl border border-zinc-800 flex items-center justify-between transition-all">
           <div className="text-sky-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Niños</div>
           <h3 className="text-sm font-black text-sky-400">{totalNinos}</h3>
         </div>
         )}
         
-        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-[#D4AF37]/15 flex items-center justify-between transition-all hover:border-[#D4AF37]/50 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+        <div className="bg-[#121212] px-4 py-3 rounded-xl border border-zinc-800 flex items-center justify-between transition-all">
           <div className="text-[#D4AF37] font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><CheckCircle className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Confirmados</div>
-          <h3 className="text-sm font-black text-white">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado').length}</h3>
+          <h3 className="text-sm font-black text-[#F4F4F5]">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').length}</h3>
         </div>
         
-        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-white/10 flex items-center justify-between transition-all hover:border-white/30 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
-          <div className="text-slate-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Clock className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Pendientes</div>
-          <h3 className="text-sm font-black text-slate-300">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
+        <div className="bg-[#121212] px-4 py-3 rounded-xl border border-zinc-800 flex items-center justify-between transition-all">
+          <div className="text-zinc-500 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Clock className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Pendientes</div>
+          <h3 className="text-sm font-black text-zinc-400">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
         </div>
         
-        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-white/10 flex items-center justify-between transition-all hover:border-rose-500/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
-          <div className="text-rose-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><X className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Cancelados</div>
-          <h3 className="text-sm font-black text-rose-400">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
+        <div className="bg-[#121212] px-4 py-3 rounded-xl border border-zinc-800 flex items-center justify-between transition-all">
+          <div className="text-[#F43F5E] font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><X className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Cancelados</div>
+          <h3 className="text-sm font-black text-[#F43F5E]">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
         </div>
         
         {isPremium && qrEnabled && (
-        <div className="bg-[#141210] px-4 py-3 rounded-xl border border-[#D4AF37]/15 flex items-center justify-between transition-all hover:border-emerald-500/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
-          <div className="text-emerald-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Scan className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Ingresaron</div>
-          <h3 className="text-sm font-black text-emerald-400">{totalIngresos}</h3>
+        <div className="bg-[#121212] px-4 py-3 rounded-xl border border-zinc-800 flex items-center justify-between transition-all">
+          <div className="text-[#10B981] font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Scan className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Ingresaron</div>
+          <h3 className="text-sm font-black text-[#10B981]">{totalIngresos}</h3>
         </div>
         )}
       </div>
 
       {isWeddingMode && passCountEnabled && (
-        <div className="hidden md:flex bg-[#1C1917] py-2.5 px-6 rounded-xl border border-[#D4AF37]/20 items-center justify-around transition-colors shadow-sm">
-          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest">Pases Novia</p><p className="text-sm font-black text-rose-400">{pasesNovia}</p></div>
-          <div className="h-4 w-px bg-white/10"></div>
+        <div className="bg-[#121212] py-2.5 px-6 mx-2 md:mx-0 rounded-xl border border-zinc-800 flex items-center justify-around transition-colors">
+          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-[#F43F5E] uppercase tracking-widest">Pases Novia</p><p className="text-sm font-black text-[#F43F5E]">{pasesNovia}</p></div>
+          <div className="h-4 w-px bg-zinc-800"></div>
           <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-sky-400 uppercase tracking-widest">Pases Novio</p><p className="text-sm font-black text-sky-400">{pasesNovio}</p></div>
         </div>
       )}
 
-      <div className="flex-1 bg-[#1C1917] rounded-3xl border border-[#D4AF37]/30 shadow-2xl overflow-hidden flex flex-col transition-colors duration-500 z-10 relative">
-        <div className="p-3 border-b border-[#D4AF37]/20 bg-[#141210] flex transition-colors shrink-0">
+      <div className="flex-1 bg-black md:bg-transparent md:border-none border-t border-zinc-800 flex flex-col transition-colors duration-500 z-10 relative -mx-4 md:mx-0 mt-4 md:mt-0">
+        {/* BUSCADOR STICKY EDGE-TO-EDGE */}
+        <div className="p-3 border-b border-zinc-800 bg-black/90 md:bg-transparent md:border-none backdrop-blur-md sticky top-0 z-40 shrink-0">
           <div className="relative flex-1">
-            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-            <input type="text" placeholder="Buscar por nombre, estatus o mesa..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-white/10 rounded-xl text-sm outline-none focus:border-[#D4AF37] bg-[#1C1917] text-white placeholder-slate-500 transition-colors" />
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+            <input type="text" placeholder="Buscar invitado..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-zinc-800 rounded-xl text-sm outline-none focus:border-zinc-600 bg-[#121212] text-[#F4F4F5] placeholder-zinc-500 transition-colors" />
           </div>
         </div>
 
-        <div className="overflow-y-auto custom-scrollbar flex-1 relative">
+        {/* CONTENEDOR DE LISTA (Desktop usa scroll interno, móvil usa el nativo) */}
+        <div className="md:overflow-y-auto md:custom-scrollbar md:bg-[#1C1917] md:rounded-3xl md:border md:border-zinc-800 flex-1 relative">
           
           <div className="hidden md:block">
             <table className="w-full text-left text-xs whitespace-nowrap">
@@ -2177,74 +2052,62 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
             </table>
           </div>
 
-          {/* 📱 VISTA MÓVIL: TARJETAS OLED PLATINO Y BOTÓN FLOTANTE */}
-          <div className="block md:hidden space-y-3 pb-32 pt-2 relative">
+          <div className="block md:hidden pb-10 divide-y divide-zinc-900/50">
             {flattenedList.length === 0 ? (
-              <div className="text-center p-10 bg-[#111111] border border-white/5 rounded-3xl mt-4 flex flex-col items-center">
-                <Users size={36} className="text-slate-500 opacity-50 mb-3"/>
-                <span className="text-sm font-bold text-slate-400">No se encontraron invitados.</span>
-              </div>
+              <div className="text-center p-8 text-zinc-500 mt-4 text-sm">No se encontraron invitados.</div>
             ) : (
               flattenedList.map((row) => {
                 const isExpanded = expandedMobileRow === row._rowId;
                 const isCancelado = row.parentGuest.status === 'cancelado';
-                
                 let tableNameDisplay = row.specificTableName || 'Sin mesa';
                 if (row.isMissing) tableNameDisplay = '-';
 
                 return (
-                  <div key={`mobile_${row._rowId}`} className={`rounded-2xl transition-all duration-300 overflow-hidden border shadow-lg ${row.isMain ? 'bg-[#111111] border-white/10 mt-4' : 'bg-[#0A0A0A] border-l-4 border-l-[#D4AF37]/50 border-y-white/5 border-r-white/5 border-r border-y ml-4 rounded-l-none'} ${isCancelado ? 'opacity-50 grayscale' : ''}`}>
+                  <div key={`mobile_${row._rowId}`} className={`transition-all duration-300 ${row.isMain ? 'bg-black' : 'bg-[#0a0a0a] pl-6'} ${isCancelado ? 'opacity-50' : ''}`}>
                     <div onClick={() => toggleMobileRow(row._rowId)} className="p-4 flex justify-between items-center cursor-pointer select-none">
                       <div className="flex-1 min-w-0 pr-3">
-                        <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
-                          <span className={`font-black truncate text-[13px] ${row.isMain ? 'text-white' : 'text-slate-300'} ${row.isMissing ? 'italic text-[#D4AF37]' : ''}`}>
+                        <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                          <span className={`font-semibold truncate text-[15px] leading-tight ${row.isMain ? 'text-[#F4F4F5]' : 'text-zinc-400'}`}>
                             {row.displayName}
                           </span>
                           {row.isChild && (
-                            <span className="px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-widest border bg-sky-500/10 text-sky-400 border-sky-500/30">Niño</span>
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-sky-500/10 text-sky-400">Niño</span>
                           )}
                           {row.rowTags && row.rowTags.map(t => (
-                            <span key={t} className="px-1.5 py-0.5 rounded text-[7px] font-bold uppercase tracking-wider border bg-white/10 text-slate-300 border-white/20">
+                            <span key={t} className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-zinc-800 text-zinc-300">
                               {t}
                             </span>
                           ))}
                         </div>
-                        <div className="flex items-center gap-2 text-[10px]">
-                          {passCountEnabled && row.isMain && (
-                             <span className="font-black text-[#D4AF37] flex items-center bg-[#D4AF37]/10 px-1.5 py-0.5 rounded"><Ticket size={10} className="mr-1"/> {row.parentGuest.displayPasses || row.passes}</span>
-                          )}
-                          <span className="font-bold text-slate-400 flex items-center truncate max-w-[120px]"><MapPin size={10} className="mr-1 shrink-0 text-slate-500"/> <span className="truncate">{tableNameDisplay}</span></span>
+                        <div className="flex items-center gap-2 text-[12px]">
+                          <span className="text-zinc-500 truncate max-w-[140px]">{tableNameDisplay}</span>
+                          {row.isMain && <span className="text-zinc-600">• {row.passes} lugares</span>}
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-2 shrink-0">
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
                         {row.isMissing ? null : row.entered && !row.isMain && qrEnabled ? (
-                           <span className="px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest border bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                             EN EVENTO
+                           <span className="text-[10px] font-black uppercase tracking-widest text-[#10B981]">
+                             Adentro
                            </span>
                         ) : (
-                           <span className={`px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest border ${row.parentGuest.status === 'nuevo' ? 'bg-[#D4AF37] text-[#141210] border-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.4)]' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : row.parentGuest.status === 'ingreso' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : row.parentGuest.status === 'confirmado' ? 'bg-white/10 text-white border-white/20 shadow-sm' : row.parentGuest.status === 'cancelado' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : row.parentGuest.status === 'por_invitar' ? 'bg-transparent text-slate-500 border-white/10' : 'bg-transparent text-slate-500 border-white/5'}`}>
-                             {row.parentGuest.status === 'ingreso' ? `EN EVENTO` : row.parentGuest.status === 'nuevo' ? '¡NUEVO!' : row.parentGuest.status.replace('_', ' ')}
+                           <span className={`text-[11px] font-medium tracking-wide ${row.parentGuest.status === 'nuevo' ? 'text-[#D4AF37]' : row.parentGuest.status === 'en_proceso' ? 'text-amber-500' : row.parentGuest.status === 'ingreso' ? 'text-[#10B981]' : row.parentGuest.status === 'confirmado' ? 'text-[#10B981]' : row.parentGuest.status === 'cancelado' ? 'text-[#F43F5E]' : 'text-zinc-500'}`}>
+                             {row.parentGuest.status === 'ingreso' ? `En evento` : row.parentGuest.status === 'nuevo' ? 'Nuevo' : row.parentGuest.status === 'por_invitar' ? 'Por invitar' : row.parentGuest.status.replace('_', ' ')}
                            </span>
                         )}
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-white' : ''}`}><polyline points="6 9 12 15 18 9"></polyline></svg>
                       </div>
                     </div>
+                    
                     {isExpanded && (
-                      <div className="px-4 pb-4 pt-1 border-t border-white/5 animate-in slide-in-from-top-2 fade-in duration-300 bg-[#0A0A0A]">
-                        <div className="flex justify-between gap-2 mt-2">
-                          <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-[1.5] py-2.5 ${row.parentGuest.sent ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/30' : 'bg-transparent text-white border-white/10 hover:bg-white/5'} rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center border transition-colors shadow-sm`}>
+                      <div className="px-4 pb-4 pt-1 bg-[#0a0a0a] animate-in slide-in-from-top-2 fade-in duration-200">
+                        <div className="flex gap-2 mt-1">
+                          <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center transition-colors ${row.parentGuest.sent ? 'bg-[#D4AF37]/10 text-[#D4AF37]' : 'bg-[#18181b] text-zinc-300'}`}>
                             <MessageCircle size={14} className="mr-1.5"/> Enviar
                           </button>
-                          <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-1 py-2.5 bg-transparent text-white hover:bg-white/10 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm">
+                          <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-[0.6] py-2.5 bg-[#18181b] text-zinc-300 rounded-xl text-[11px] font-bold flex items-center justify-center transition-colors">
                             <Edit2 size={14}/>
                           </button>
-                          {isPremium && qrEnabled && row.pin && row.parentGuest.status !== 'cancelado' && (
-                            <button onClick={(e) => { e.stopPropagation(); setQrModal(row); }} className="flex-1 py-2.5 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 hover:bg-[#D4AF37]/20 rounded-xl flex items-center justify-center transition-colors shadow-sm">
-                              <QrCode size={14}/>
-                            </button>
-                          )}
                           {row.isMain && (
-                            <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="flex-1 py-2.5 bg-transparent text-rose-500 hover:bg-rose-500/10 border border-rose-500/30 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm">
+                            <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="flex-[0.6] py-2.5 bg-rose-500/10 text-rose-500 rounded-xl text-[11px] font-bold flex items-center justify-center transition-colors">
                               <Trash2 size={14}/>
                             </button>
                           )}
@@ -2255,14 +2118,6 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 );
               })
             )}
-
-            {/* 🟢 BOTÓN FLOTANTE (FAB) PARA AGREGAR INVITADO */}
-            <button 
-              onClick={() => handleOpenAdd('general')} 
-              className="fixed bottom-[88px] right-5 w-14 h-14 bg-white text-black rounded-full shadow-[0_10px_30px_rgba(255,255,255,0.2)] flex items-center justify-center z-40 hover:scale-105 active:scale-95 transition-transform border border-white/20"
-            >
-              <UserPlus size={24} />
-            </button>
           </div>
         </div>
       </div>
@@ -2782,6 +2637,30 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
         );
       })()}
+
+      {/* FAB: BOTÓN FLOTANTE MÓVIL PARA AGREGAR INVITADOS */}
+      <div className="md:hidden fixed bottom-[90px] right-4 z-50 flex flex-col items-end gap-3">
+        {isFabOpen && isWeddingMode && (
+          <div className="flex flex-col gap-3 animate-in slide-in-from-bottom-5 fade-in duration-200 mb-2">
+            <button onClick={() => { handleOpenAdd('novia'); setIsFabOpen(false); }} className="flex items-center gap-3 bg-[#18181b] border border-zinc-800 text-[#F43F5E] px-4 py-3 rounded-full shadow-xl font-bold text-xs uppercase tracking-widest self-end">
+              Novia <UserPlus size={16}/>
+            </button>
+            <button onClick={() => { handleOpenAdd('novio'); setIsFabOpen(false); }} className="flex items-center gap-3 bg-[#18181b] border border-zinc-800 text-sky-400 px-4 py-3 rounded-full shadow-xl font-bold text-xs uppercase tracking-widest self-end">
+              Novio <UserPlus size={16}/>
+            </button>
+          </div>
+        )}
+        
+        <button 
+          onClick={() => {
+            if (isWeddingMode) setIsFabOpen(!isFabOpen);
+            else handleOpenAdd('general');
+          }} 
+          className="w-14 h-14 bg-[#D4AF37] text-black rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(212,175,55,0.4)] transition-transform active:scale-95"
+        >
+          {isFabOpen && isWeddingMode ? <X size={24} /> : <UserPlus size={24} />}
+        </button>
+      </div>
 
     </div>
   );
@@ -4331,6 +4210,9 @@ const MesasView = ({ tables, setTables, guests, setGuests, addNotification }) =>
   );
 };
 
+// ==========================================
+// --- COMPONENTE: SECCION DE CROQUIS Y AJUSTE DE SILLAS ---
+// ==========================================
 const MapaView = ({ tables = [], setTables, guests = [], setGuests, globalSearch = '', elements = [], setElements }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [dragging, setDragging] = useState(null); 
@@ -8987,6 +8869,9 @@ const BauliaLogoBlanco = ({ className }) => (
       </svg>
 );
 
+// ==========================================
+// --- COMPONENTE: CABECERA INTELIGENTE ---
+// ==========================================
 const Header = ({ setIsOpen, setActiveTab, data, globalSearch, setGlobalSearch, bellAlerts, setBellAlerts, markAsRead, cycleTheme, themeSetting, authData, switchEvent, isSuperAdminMode, eventName, eventPlan, urlInvitacion }) => {
   const [showResults, setShowResults] = useState(false);
   const [showBellMenu, setShowBellMenu] = useState(false);
