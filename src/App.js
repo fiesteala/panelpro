@@ -1875,61 +1875,62 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         </div>
       </div>
 
-      <div className={`grid grid-cols-2 ${isPremium ? 'xl:grid-cols-6' : 'xl:grid-cols-4'} gap-2 px-2 md:px-0 pt-4 md:pt-0`}>
-        <div className="bg-[#121212] px-4 py-3 rounded-xl border border-zinc-800 flex items-center justify-between transition-all">
-          <div className="text-zinc-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
-          <h3 className="text-sm font-black text-[#F4F4F5]">{passCountEnabled ? totalPases : safeGuests.length}</h3>
+      {/* ESTADÍSTICAS (Grid en Desktop, Scroll Horizontal tipo Historias en Móvil) */}
+      <div className={`flex overflow-x-auto md:grid md:${isPremium ? 'grid-cols-6' : 'grid-cols-4'} gap-3 px-4 md:px-0 pt-2 md:pt-0 custom-scrollbar snap-x shrink-0 w-full`}>
+        <div className="min-w-[130px] md:min-w-0 bg-[#121212] p-3 rounded-2xl border border-white/5 flex flex-col justify-center snap-center">
+          <div className="text-zinc-500 font-bold text-[9px] uppercase tracking-[0.2em] mb-1 flex items-center"><Users className="w-3 h-3 mr-1.5 text-zinc-400"/> {passCountEnabled ? 'Totales' : 'Invitados'}</div>
+          <h3 className="text-xl font-editorial font-black text-[#F4F4F5]">{passCountEnabled ? totalPases : safeGuests.length}</h3>
         </div>
         
         {isPremium && passCountEnabled && (
-        <div className="bg-[#121212] px-4 py-3 rounded-xl border border-zinc-800 flex items-center justify-between transition-all">
-          <div className="text-sky-400 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Users className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Niños</div>
-          <h3 className="text-sm font-black text-sky-400">{totalNinos}</h3>
+        <div className="min-w-[130px] md:min-w-0 bg-[#121212] p-3 rounded-2xl border border-white/5 flex flex-col justify-center snap-center">
+          <div className="text-sky-500 font-bold text-[9px] uppercase tracking-[0.2em] mb-1 flex items-center"><Users className="w-3 h-3 mr-1.5 text-sky-400"/> Niños</div>
+          <h3 className="text-xl font-editorial font-black text-sky-400">{totalNinos}</h3>
         </div>
         )}
         
-        <div className="bg-[#121212] px-4 py-3 rounded-xl border border-zinc-800 flex items-center justify-between transition-all">
-          <div className="text-[#D4AF37] font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><CheckCircle className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Confirmados</div>
-          <h3 className="text-sm font-black text-[#F4F4F5]">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').length}</h3>
+        <div className="min-w-[130px] md:min-w-0 bg-[#121212] p-3 rounded-2xl border border-[#D4AF37]/20 flex flex-col justify-center snap-center shadow-[0_0_15px_rgba(212,175,55,0.05)]">
+          <div className="text-[#D4AF37] font-bold text-[9px] uppercase tracking-[0.2em] mb-1 flex items-center"><CheckCircle className="w-3 h-3 mr-1.5"/> Confirmados</div>
+          <h3 className="text-xl font-editorial font-black text-[#D4AF37]">{passCountEnabled ? totalConfirmados : safeGuests.filter(g => g.status === 'confirmado' || g.status === 'ingreso').length}</h3>
         </div>
         
-        <div className="bg-[#121212] px-4 py-3 rounded-xl border border-zinc-800 flex items-center justify-between transition-all">
-          <div className="text-zinc-500 font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Clock className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Pendientes</div>
-          <h3 className="text-sm font-black text-zinc-400">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
+        <div className="min-w-[130px] md:min-w-0 bg-[#121212] p-3 rounded-2xl border border-white/5 flex flex-col justify-center snap-center">
+          <div className="text-zinc-500 font-bold text-[9px] uppercase tracking-[0.2em] mb-1 flex items-center"><Clock className="w-3 h-3 mr-1.5 text-zinc-400"/> Pendientes</div>
+          <h3 className="text-xl font-editorial font-black text-zinc-300">{passCountEnabled ? totalPendientes : safeGuests.filter(g => g.status === 'pendiente' || g.status === 'por_invitar').length}</h3>
         </div>
         
-        <div className="bg-[#121212] px-4 py-3 rounded-xl border border-zinc-800 flex items-center justify-between transition-all">
-          <div className="text-[#F43F5E] font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><X className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Cancelados</div>
-          <h3 className="text-sm font-black text-[#F43F5E]">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
+        <div className="min-w-[130px] md:min-w-0 bg-[#121212] p-3 rounded-2xl border border-[#F43F5E]/20 flex flex-col justify-center snap-center">
+          <div className="text-[#F43F5E] font-bold text-[9px] uppercase tracking-[0.2em] mb-1 flex items-center"><X className="w-3 h-3 mr-1.5"/> Cancelados</div>
+          <h3 className="text-xl font-editorial font-black text-[#F43F5E]">{passCountEnabled ? totalCancelados : safeGuests.filter(g => g.status === 'cancelado').length}</h3>
         </div>
         
         {isPremium && qrEnabled && (
-        <div className="bg-[#121212] px-4 py-3 rounded-xl border border-zinc-800 flex items-center justify-between transition-all">
-          <div className="text-[#10B981] font-bold text-[9px] uppercase tracking-[0.2em] flex items-center truncate"><Scan className="w-3.5 h-3.5 inline mr-1.5 shrink-0"/> Ingresaron</div>
-          <h3 className="text-sm font-black text-[#10B981]">{totalIngresos}</h3>
+        <div className="min-w-[130px] md:min-w-0 bg-[#121212] p-3 rounded-2xl border border-[#10B981]/20 flex flex-col justify-center snap-center">
+          <div className="text-[#10B981] font-bold text-[9px] uppercase tracking-[0.2em] mb-1 flex items-center"><Scan className="w-3 h-3 mr-1.5"/> Ingresaron</div>
+          <h3 className="text-xl font-editorial font-black text-[#10B981]">{totalIngresos}</h3>
         </div>
         )}
       </div>
 
       {isWeddingMode && passCountEnabled && (
-        <div className="bg-[#121212] py-2.5 px-6 mx-2 md:mx-0 rounded-xl border border-zinc-800 flex items-center justify-around transition-colors">
-          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-[#F43F5E] uppercase tracking-widest">Pases Novia</p><p className="text-sm font-black text-[#F43F5E]">{pasesNovia}</p></div>
-          <div className="h-4 w-px bg-zinc-800"></div>
-          <div className="text-center flex items-center gap-3"><p className="text-[9px] font-bold text-sky-400 uppercase tracking-widest">Pases Novio</p><p className="text-sm font-black text-sky-400">{pasesNovio}</p></div>
+        <div className="bg-[#121212] py-2 px-6 mx-4 md:mx-0 rounded-2xl border border-white/5 flex items-center justify-around">
+          <div className="text-center flex items-center gap-3"><p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Novia</p><p className="text-sm font-editorial font-black text-[#F43F5E]">{pasesNovia}</p></div>
+          <div className="h-4 w-px bg-white/10"></div>
+          <div className="text-center flex items-center gap-3"><p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Novio</p><p className="text-sm font-editorial font-black text-sky-400">{pasesNovio}</p></div>
         </div>
       )}
 
-      <div className="flex-1 bg-black md:bg-transparent md:border-none border-t border-zinc-800 flex flex-col transition-colors duration-500 z-10 relative -mx-4 md:mx-0 mt-4 md:mt-0">
-        {/* BUSCADOR STICKY EDGE-TO-EDGE */}
-        <div className="p-3 border-b border-zinc-800 bg-black/90 md:bg-transparent md:border-none backdrop-blur-md sticky top-0 z-40 shrink-0">
+      <div className="flex-1 flex flex-col transition-colors duration-500 z-10 relative mt-2 md:mt-0">
+        {/* BUSCADOR STICKY PREMIUM */}
+        <div className="px-4 md:px-0 py-2 bg-black/80 md:bg-transparent backdrop-blur-xl sticky top-0 z-40 shrink-0 mb-2 border-b border-white/5 md:border-none">
           <div className="relative flex-1">
             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
-            <input type="text" placeholder="Buscar invitado..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-zinc-800 rounded-xl text-sm outline-none focus:border-zinc-600 bg-[#121212] text-[#F4F4F5] placeholder-zinc-500 transition-colors" />
+            <input type="text" placeholder="Buscar en la lista..." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-3 border border-white/5 rounded-2xl text-sm outline-none focus:border-[#D4AF37]/50 bg-[#121212] text-[#F4F4F5] placeholder-zinc-600 transition-colors shadow-inner" />
           </div>
         </div>
 
-        {/* CONTENEDOR DE LISTA (Desktop usa scroll interno, móvil usa el nativo) */}
-        <div className="md:overflow-y-auto md:custom-scrollbar md:bg-[#1C1917] md:rounded-3xl md:border md:border-zinc-800 flex-1 relative">
+        {/* CONTENEDOR DE LISTA */}
+        <div className="md:overflow-y-auto md:custom-scrollbar md:bg-[#121212] md:rounded-3xl md:border md:border-white/5 flex-1 relative">
           
           <div className="hidden md:block">
             <table className="w-full text-left text-xs whitespace-nowrap">
@@ -2052,9 +2053,9 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
             </table>
           </div>
 
-          <div className="block md:hidden pb-10 divide-y divide-zinc-900/50">
+          <div className="block md:hidden pb-24 px-4 space-y-3 pt-2">
             {flattenedList.length === 0 ? (
-              <div className="text-center p-8 text-zinc-500 mt-4 text-sm">No se encontraron invitados.</div>
+              <div className="text-center p-8 text-zinc-500 mt-4 text-sm border border-dashed border-white/10 rounded-2xl">No se encontraron invitados.</div>
             ) : (
               flattenedList.map((row) => {
                 const isExpanded = expandedMobileRow === row._rowId;
@@ -2063,34 +2064,34 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                 if (row.isMissing) tableNameDisplay = '-';
 
                 return (
-                  <div key={`mobile_${row._rowId}`} className={`transition-all duration-300 ${row.isMain ? 'bg-black' : 'bg-[#0a0a0a] pl-6'} ${isCancelado ? 'opacity-50' : ''}`}>
+                  <div key={`mobile_${row._rowId}`} className={`transition-all duration-300 rounded-2xl overflow-hidden border ${row.isMain ? 'bg-[#121212] border-white/5 shadow-lg' : 'bg-[#0a0a0a] border-l-[3px] border-l-zinc-800 border-y-transparent border-r-transparent ml-4 rounded-l-none'} ${isCancelado ? 'opacity-50' : ''}`}>
                     <div onClick={() => toggleMobileRow(row._rowId)} className="p-4 flex justify-between items-center cursor-pointer select-none">
                       <div className="flex-1 min-w-0 pr-3">
-                        <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-                          <span className={`font-semibold truncate text-[15px] leading-tight ${row.isMain ? 'text-[#F4F4F5]' : 'text-zinc-400'}`}>
+                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                          <span className={`font-editorial font-bold truncate text-lg leading-tight tracking-wide ${row.isMain ? 'text-[#F4F4F5]' : 'text-zinc-400'}`}>
                             {row.displayName}
                           </span>
                           {row.isChild && (
-                            <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-sky-500/10 text-sky-400">Niño</span>
+                            <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-sky-500/10 text-sky-400 border border-sky-500/20">Niño</span>
                           )}
                           {row.rowTags && row.rowTags.map(t => (
-                            <span key={t} className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-zinc-800 text-zinc-300">
+                            <span key={t} className="px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20">
                               {t}
                             </span>
                           ))}
                         </div>
-                        <div className="flex items-center gap-2 text-[12px]">
-                          <span className="text-zinc-500 truncate max-w-[140px]">{tableNameDisplay}</span>
+                        <div className="flex items-center gap-2 text-[11px] font-medium tracking-wide">
+                          <span className="text-zinc-500 truncate max-w-[140px] flex items-center"><MapPin size={10} className="mr-1 opacity-50"/> {tableNameDisplay}</span>
                           {row.isMain && <span className="text-zinc-600">• {row.passes} lugares</span>}
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1.5 shrink-0">
                         {row.isMissing ? null : row.entered && !row.isMain && qrEnabled ? (
-                           <span className="text-[10px] font-black uppercase tracking-widest text-[#10B981]">
+                           <span className="text-[9px] font-black uppercase tracking-widest text-[#10B981] bg-[#10B981]/10 px-2 py-1 rounded-md">
                              Adentro
                            </span>
                         ) : (
-                           <span className={`text-[11px] font-medium tracking-wide ${row.parentGuest.status === 'nuevo' ? 'text-[#D4AF37]' : row.parentGuest.status === 'en_proceso' ? 'text-amber-500' : row.parentGuest.status === 'ingreso' ? 'text-[#10B981]' : row.parentGuest.status === 'confirmado' ? 'text-[#10B981]' : row.parentGuest.status === 'cancelado' ? 'text-[#F43F5E]' : 'text-zinc-500'}`}>
+                           <span className={`text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded-md ${row.parentGuest.status === 'nuevo' ? 'bg-[#D4AF37]/10 text-[#D4AF37]' : row.parentGuest.status === 'en_proceso' ? 'bg-amber-500/10 text-amber-500' : row.parentGuest.status === 'ingreso' ? 'bg-[#10B981]/10 text-[#10B981]' : row.parentGuest.status === 'confirmado' ? 'bg-[#D4AF37]/10 text-[#D4AF37]' : row.parentGuest.status === 'cancelado' ? 'bg-[#F43F5E]/10 text-[#F43F5E]' : 'bg-white/5 text-zinc-400'}`}>
                              {row.parentGuest.status === 'ingreso' ? `En evento` : row.parentGuest.status === 'nuevo' ? 'Nuevo' : row.parentGuest.status === 'por_invitar' ? 'Por invitar' : row.parentGuest.status.replace('_', ' ')}
                            </span>
                         )}
@@ -2098,16 +2099,16 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
                     </div>
                     
                     {isExpanded && (
-                      <div className="px-4 pb-4 pt-1 bg-[#0a0a0a] animate-in slide-in-from-top-2 fade-in duration-200">
-                        <div className="flex gap-2 mt-1">
-                          <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center transition-colors ${row.parentGuest.sent ? 'bg-[#D4AF37]/10 text-[#D4AF37]' : 'bg-[#18181b] text-zinc-300'}`}>
+                      <div className="px-4 pb-4 pt-0 bg-transparent animate-in slide-in-from-top-2 fade-in duration-200">
+                        <div className="flex gap-2 pt-3 border-t border-white/5 mt-1">
+                          <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(row.parentGuest); }} className={`flex-[1.5] py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-black flex items-center justify-center transition-all ${row.parentGuest.sent ? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30' : 'bg-white/5 text-zinc-300 hover:bg-white/10'}`}>
                             <MessageCircle size={14} className="mr-1.5"/> Enviar
                           </button>
-                          <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-[0.6] py-2.5 bg-[#18181b] text-zinc-300 rounded-xl text-[11px] font-bold flex items-center justify-center transition-colors">
-                            <Edit2 size={14}/>
+                          <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(row.parentGuest); }} className="flex-1 py-2.5 bg-white/5 text-zinc-300 hover:bg-white/10 rounded-xl text-[10px] uppercase tracking-widest font-black flex items-center justify-center transition-all">
+                            <Edit2 size={14} className="mr-1.5"/> Editar
                           </button>
                           {row.isMain && (
-                            <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="flex-[0.6] py-2.5 bg-rose-500/10 text-rose-500 rounded-xl text-[11px] font-bold flex items-center justify-center transition-colors">
+                            <button onClick={(e) => { e.stopPropagation(); setDeleteModal(row.parentGuest); }} className="px-4 py-2.5 bg-rose-500/10 text-rose-500 rounded-xl flex items-center justify-center transition-all hover:bg-rose-500/20">
                               <Trash2 size={14}/>
                             </button>
                           )}
@@ -2638,15 +2639,15 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
         );
       })()}
 
-      {/* FAB: BOTÓN FLOTANTE MÓVIL PARA AGREGAR INVITADOS */}
-      <div className="md:hidden fixed bottom-[90px] right-4 z-50 flex flex-col items-end gap-3">
+      {/* FAB: BOTÓN FLOTANTE MÓVIL (PREMIUM BLANCO APERLADO) */}
+      <div className="md:hidden fixed bottom-[72px] right-4 z-50 flex flex-col items-end gap-3">
         {isFabOpen && isWeddingMode && (
-          <div className="flex flex-col gap-3 animate-in slide-in-from-bottom-5 fade-in duration-200 mb-2">
-            <button onClick={() => { handleOpenAdd('novia'); setIsFabOpen(false); }} className="flex items-center gap-3 bg-[#18181b] border border-zinc-800 text-[#F43F5E] px-4 py-3 rounded-full shadow-xl font-bold text-xs uppercase tracking-widest self-end">
-              Novia <UserPlus size={16}/>
+          <div className="flex flex-col gap-3 animate-in slide-in-from-bottom-5 fade-in duration-200 mb-1">
+            <button onClick={() => { handleOpenAdd('novia'); setIsFabOpen(false); }} className="flex items-center gap-3 bg-[#121212] border border-white/10 text-[#F4F4F5] px-5 py-3.5 rounded-full shadow-2xl font-bold text-[10px] uppercase tracking-widest self-end hover:bg-white/5">
+              Invitado Novia <UserPlus size={16} className="text-[#F43F5E]"/>
             </button>
-            <button onClick={() => { handleOpenAdd('novio'); setIsFabOpen(false); }} className="flex items-center gap-3 bg-[#18181b] border border-zinc-800 text-sky-400 px-4 py-3 rounded-full shadow-xl font-bold text-xs uppercase tracking-widest self-end">
-              Novio <UserPlus size={16}/>
+            <button onClick={() => { handleOpenAdd('novio'); setIsFabOpen(false); }} className="flex items-center gap-3 bg-[#121212] border border-white/10 text-[#F4F4F5] px-5 py-3.5 rounded-full shadow-2xl font-bold text-[10px] uppercase tracking-widest self-end hover:bg-white/5">
+              Invitado Novio <UserPlus size={16} className="text-sky-400"/>
             </button>
           </div>
         )}
@@ -2656,7 +2657,7 @@ const InvitadosView = ({ tables, guests, setGuests, addNotification, tipoEvento,
             if (isWeddingMode) setIsFabOpen(!isFabOpen);
             else handleOpenAdd('general');
           }} 
-          className="w-14 h-14 bg-[#D4AF37] text-black rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(212,175,55,0.4)] transition-transform active:scale-95"
+          className="w-14 h-14 bg-[#F4F4F5] text-black border border-white/20 rounded-full flex items-center justify-center shadow-[0_4px_25px_rgba(255,255,255,0.15)] transition-transform active:scale-95"
         >
           {isFabOpen && isWeddingMode ? <X size={24} /> : <UserPlus size={24} />}
         </button>
